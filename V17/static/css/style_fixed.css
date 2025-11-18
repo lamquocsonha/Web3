@@ -1,0 +1,17 @@
+/* Quick fix: Add z-index to header to ensure it's above other elements */
+
+header {
+    position: relative;
+    z-index: 2000 !important;
+}
+
+.header-tab {
+    position: relative;
+    z-index: 2001 !important;
+    pointer-events: auto !important;
+}
+
+/* Ensure tooltip doesn't cover header */
+.data-tooltip {
+    z-index: 1000;
+}

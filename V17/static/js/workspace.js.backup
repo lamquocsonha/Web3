@@ -1,0 +1,1611 @@
+/**
+ * Workspace - Common functions for Strategy/Backtest/Optimize
+ */
+
+let workspaceChart;
+let workspaceCandlestickSeries;
+let workspaceVolumeSeries;
+let workspaceIndicatorSeries = {}; // Store indicator series for workspace chart
+
+// Initialize workspace chart
+document.addEventListener('DOMContentLoaded', function() {
+    initWorkspaceChart();
+});
+
+function initWorkspaceChart() {
+    const chartContainer = document.getElementById('strategyChart');
+    
+    if (!chartContainer) return;
+    
+    workspaceChart = LightweightCharts.createChart(chartContainer, {
+        width: chartContainer.clientWidth,
+        height: chartContainer.clientHeight,
+        layout: {
+            background: { color: '#131722' },
+            textColor: '#d1d4dc',
+        },
+        grid: {
+            vertLines: { color: '#1e222d' },
+            horzLines: { color: '#1e222d' },
+        },
+        crosshair: {
+            mode: LightweightCharts.CrosshairMode.Normal,
+        },
+        rightPriceScale: {
+            borderColor: '#2a2e39',
+        },
+        leftPriceScale: {
+            visible: true,
+            borderColor: '#2a2e39',
+            mode: 0, // Normal mode
+            alignLabels: false,
+            scaleMargins: {
+                top: 0.8,
+                bottom: 0,
+            },
+        },
+        timeScale: {
+            borderColor: '#2a2e39',
+            timeVisible: true,
+            secondsVisible: false,
+        },
+    });
+    
+    // Create candlestick series
+    workspaceCandlestickSeries = workspaceChart.addCandlestickSeries({
+        upColor: '#26a69a',
+        downColor: '#ef5350',
+        borderUpColor: '#26a69a',
+        borderDownColor: '#ef5350',
+        wickUpColor: '#26a69a',
+        wickDownColor: '#ef5350',
+    });
+    
+    // Create volume series
+    workspaceVolumeSeries = workspaceChart.addHistogramSeries({
+        color: '#26a69a',
+        priceFormat: {
+            type: 'price',
+            precision: 0,
+            minMove: 1,
+        },
+        priceScaleId: 'left',
+        base: 0, // Start from 0 - baseline fixed at bottom
+        priceLineVisible: false,
+        lastValueVisible: false,
+    });
+
+    // Add crosshair event handler to update OHLCV display
+    workspaceChart.subscribeCrosshairMove((param) => {
+        if (!param || !param.time || !param.seriesData) {
+            return;
+        }
+
+        const candleData = param.seriesData.get(workspaceCandlestickSeries);
+
+        if (candleData) {
+            const { open, high, low, close, time } = candleData;
+
+            // Update OHLC elements
+            const openEl = document.getElementById('openPrice');
+            const highEl = document.getElementById('highPrice');
+            const lowEl = document.getElementById('lowPrice');
+            const closeEl = document.getElementById('closePrice');
+            const volumeEl = document.getElementById('volumeDisplay');
+
+            if (openEl && open !== undefined) openEl.textContent = open.toFixed(2);
+            if (highEl && high !== undefined) highEl.textContent = high.toFixed(2);
+            if (lowEl && low !== undefined) lowEl.textContent = low.toFixed(2);
+            if (closeEl && close !== undefined) closeEl.textContent = close.toFixed(2);
+
+            // Volume lookup with multiple methods
+            if (volumeEl) {
+                let volume = 0;
+
+                // Method 1: Direct from candleData.volume
+                if (candleData.volume !== undefined) {
+                    volume = candleData.volume;
+                    console.log('Volume from candleData:', volume);
+                }
+                // Method 2: From volumeSeries in param.seriesData
+                else if (workspaceVolumeSeries) {
+                    const volumeData = param.seriesData.get(workspaceVolumeSeries);
+                    if (volumeData) {
+                        volume = volumeData.value !== undefined ? volumeData.value : volumeData;
+                        console.log('Volume from volumeSeries:', volume);
+                    }
+                }
+
+                // Method 3: Lookup from offlineData (if available globally)
+                if (volume === 0 && typeof offlineData !== 'undefined' && offlineData) {
+                    // Check volumes array
+                    if (offlineData.volumes && Array.isArray(offlineData.volumes)) {
+                        const volumeData = offlineData.volumes.find(v => v.time === time);
+                        if (volumeData && volumeData.value !== undefined) {
+                            volume = volumeData.value;
+                            console.log('Volume from offlineData.volumes:', volume);
+                        }
+                    }
+
+                    // Check candlesticks array
+                    if (volume === 0 && offlineData.candlesticks && Array.isArray(offlineData.candlesticks)) {
+                        const candle = offlineData.candlesticks.find(c => c.time === time);
+                        if (candle && candle.volume !== undefined) {
+                            volume = candle.volume;
+                            console.log('Volume from offlineData.candlesticks:', volume);
+                        }
+                    }
+                }
+
+                // Display volume
+                if (volume > 0) {
+                    volumeEl.textContent = Math.round(volume).toLocaleString();
+                } else {
+                    volumeEl.textContent = '0';
+                    console.warn('No volume found for time:', time);
+                }
+            }
+        }
+    });
+
+    // Load data from IndexedDB or mock data
+    loadWorkspaceData();
+    
+    // Handle resize
+    window.addEventListener('resize', () => {
+        workspaceChart.applyOptions({
+            width: chartContainer.clientWidth,
+            height: chartContainer.clientHeight
+        });
+    });
+    
+    console.log('✅ Workspace chart initialized');
+}
+
+// Generate signals based on strategy conditions
+function generateStrategySignals(candleData) {
+    // Use global strategyConfig if available (check window first)
+    const config = window.currentStrategyConfig 
+        || (typeof window.strategyConfig !== 'undefined' ? window.strategyConfig : null)
+        || (typeof strategyConfig !== 'undefined' ? strategyConfig : null);
+    
+    if (!config || !config.entry_conditions) {
+        console.log('⚠️ No strategy config available');
+        return { buySignals: [], shortSignals: [] };
+    }
+    
+    console.log('📊 Generating signals with config:', config);
+    console.log(`  - Indicators: ${config.indicators.length}`);
+    console.log(`  - Long conditions: ${config.entry_conditions.long.length}`);
+    console.log(`  - Short conditions: ${config.entry_conditions.short.length}`);
+    
+    const buySignals = [];
+    const shortSignals = [];
+    
+    // Process each candle
+    candleData.forEach((candle, index) => {
+        if (index === 0) return; // Skip first candle (need previous for cross detection)
+        
+        const prevCandle = candleData[index - 1];
+        
+        // Check long entry conditions
+        config.entry_conditions.long.forEach(signal => {
+            if (evaluateSignalConditions(signal, candle, prevCandle, candleData, index, config)) {
+                buySignals.push({
+                    time: candle.time,
+                    signalName: signal.name,
+                    price: candle.close
+                });
+                console.log(`✓ Buy signal: ${signal.name} at time ${candle.time}, price ${candle.close}`);
+            }
+        });
+        
+        // Check short entry conditions
+        config.entry_conditions.short.forEach(signal => {
+            if (evaluateSignalConditions(signal, candle, prevCandle, candleData, index, config)) {
+                shortSignals.push({
+                    time: candle.time,
+                    signalName: signal.name,
+                    price: candle.close
+                });
+                console.log(`✓ Short signal: ${signal.name} at time ${candle.time}, price ${candle.close}`);
+            }
+        });
+    });
+    
+    console.log(`📈 Generated ${buySignals.length} buy signals and ${shortSignals.length} short signals`);
+    
+    return { buySignals, shortSignals };
+}
+
+
+// Display signals on chart
+function displayStrategySignals(candleData) {
+    if (!workspaceCandlestickSeries || !candleData || candleData.length === 0) {
+        console.log('⚠️ Cannot display signals: No chart or data');
+        return;
+    }
+    
+    // Clear EMA cache before generating new signals
+    if (window.emaCache) {
+        Object.keys(window.emaCache).forEach(key => delete window.emaCache[key]);
+    }
+    console.log('🗑️ Cleared EMA cache');
+    
+    // Generate signals
+    const { buySignals, shortSignals } = generateStrategySignals(candleData);
+    
+    if (buySignals.length === 0 && shortSignals.length === 0) {
+        console.log('ℹ️ No signals generated from current strategy');
+        workspaceCandlestickSeries.setMarkers([]);
+        // Don't show alert, just log to console
+        return;
+    }
+    
+    // Create markers with different colors for each signal
+    const markers = [];
+    
+    // Color palette for buy signals
+    const buyColors = ['#26a69a', '#00bcd4', '#03a9f4', '#2196f3', '#3f51b5'];
+    
+    // Add buy signals
+    const buySignalGroups = {};
+    buySignals.forEach(sig => {
+        if (!buySignalGroups[sig.signalName]) {
+            buySignalGroups[sig.signalName] = [];
+        }
+        buySignalGroups[sig.signalName].push(sig);
+    });
+    
+    Object.keys(buySignalGroups).forEach((signalName, idx) => {
+        const color = buyColors[idx % buyColors.length];
+        buySignalGroups[signalName].forEach(sig => {
+            // Format time and price for display
+            const date = new Date(sig.time * 1000);
+            const timeStr = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            const priceStr = sig.price.toFixed(2);
+            
+            markers.push({
+                time: sig.time,
+                position: 'belowBar',
+                color: color,
+                shape: 'arrowUp',
+                text: `${signalName} ${priceStr} ${timeStr}`,
+                size: 1
+            });
+        });
+    });
+    
+    // Color palette for short signals
+    const shortColors = ['#ef5350', '#f44336', '#e91e63', '#9c27b0', '#673ab7'];
+    
+    // Add short signals
+    const shortSignalGroups = {};
+    shortSignals.forEach(sig => {
+        if (!shortSignalGroups[sig.signalName]) {
+            shortSignalGroups[sig.signalName] = [];
+        }
+        shortSignalGroups[sig.signalName].push(sig);
+    });
+    
+    Object.keys(shortSignalGroups).forEach((signalName, idx) => {
+        const color = shortColors[idx % shortColors.length];
+        shortSignalGroups[signalName].forEach(sig => {
+            // Format time and price for display
+            const date = new Date(sig.time * 1000);
+            const timeStr = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            const priceStr = sig.price.toFixed(2);
+            
+            markers.push({
+                time: sig.time,
+                position: 'aboveBar',
+                color: color,
+                shape: 'arrowDown',
+                text: `${signalName} ${priceStr} ${timeStr}`,
+                size: 1
+            });
+        });
+    });
+    
+    // Apply markers
+    workspaceCandlestickSeries.setMarkers(markers);
+    console.log(`✅ Displayed ${buySignals.length} buy signals and ${shortSignals.length} short signals`);
+}
+
+// Expose functions globally
+window.displayStrategySignals = displayStrategySignals;
+window.generateStrategySignals = generateStrategySignals;
+
+async function loadWorkspaceData() {
+    try {
+        console.log('🔄 Loading workspace data...');
+        
+        // Use shared loadFromIndexedDB from data-manager.js
+        const savedData = await loadFromIndexedDB();
+        
+        if (savedData && savedData.candlesticks) {
+            console.log(`📦 Found ${savedData.candlesticks.length} candles`);
+            
+            workspaceCandlestickSeries.setData(savedData.candlesticks);
+            workspaceVolumeSeries.setData(savedData.volumes);
+            
+            // Wait a bit for DOM to be fully ready
+            setTimeout(() => {
+                // Update tooltip with data info
+                try {
+                    if (typeof updateDataTooltip === 'function') {
+                        const firstCandle = savedData.candlesticks[0];
+                        const lastCandle = savedData.candlesticks[savedData.candlesticks.length - 1];
+                        const startDate = new Date(firstCandle.time * 1000).toISOString().split('T')[0];
+                        const endDate = new Date(lastCandle.time * 1000).toISOString().split('T')[0];
+                        const sizeInMB = (JSON.stringify(savedData).length / (1024 * 1024)).toFixed(2);
+                        
+                        const dataInfo = {
+                            start_date: startDate,
+                            end_date: endDate,
+                            total_candles: savedData.candlesticks.length,
+                            size: sizeInMB + ' MB'
+                        };
+                        
+                        console.log('📊 Updating tooltip with:', dataInfo);
+                        updateDataTooltip(dataInfo);
+                        console.log('✅ Tooltip updated');
+                    } else {
+                        console.warn('⚠️ updateDataTooltip function not found');
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Error updating tooltip (non-critical):', error.message);
+                    // Continue execution even if tooltip update fails
+                }
+                
+                // Display strategy signals if available
+                workspaceChart.timeScale().fitContent();
+                
+                // Check if strategy config exists (use window.strategyConfig or local reference)
+                const config = window.currentStrategyConfig 
+                    || (typeof window.strategyConfig !== 'undefined' ? window.strategyConfig : null)
+                    || (typeof strategyConfig !== 'undefined' ? strategyConfig : null);
+                    
+                if (config && config.entry_conditions) {
+                    console.log('📈 Strategy config found:');
+                    console.log(`   - Long conditions: ${config.entry_conditions.long?.length || 0}`);
+                    console.log(`   - Short conditions: ${config.entry_conditions.short?.length || 0}`);
+                    
+                    if (config.entry_conditions.long) {
+                        console.log('   - Long condition details:', config.entry_conditions.long);
+                    }
+                    if (config.entry_conditions.short) {
+                        console.log('   - Short condition details:', config.entry_conditions.short);
+                    }
+                } else {
+                    console.warn('⚠️ No strategy config available');
+                }
+                
+                displayStrategySignals(savedData.candlesticks);
+            }, 300);
+            
+            console.log('✅ Loaded data from IndexedDB');
+        } else {
+            console.log('⚠️ No data available. Please upload CSV from main page.');
+        }
+    } catch (error) {
+        console.error('❌ Error loading workspace data:', error);
+    }
+}
+
+function changeTimeframe(tf) {
+    if (!workspaceChart) return;
+    
+    const timeScale = workspaceChart.timeScale();
+    
+    // Just fit content for now
+    timeScale.fitContent();
+    
+    console.log(`Timeframe changed to: ${tf}`);
+}
+
+// Add buy/short signal markers to chart
+function addSignalMarkers(buySignals, shortSignals, candlesticks) {
+    const markers = [];
+    
+    buySignals.forEach((signal, index) => {
+        if (signal) {
+            markers.push({
+                time: candlesticks[index].time,
+                position: 'belowBar',
+                color: '#26a69a',
+                shape: 'arrowUp',
+                text: 'BUY'
+            });
+        }
+    });
+    
+    shortSignals.forEach((signal, index) => {
+        if (signal) {
+            markers.push({
+                time: candlesticks[index].time,
+                position: 'aboveBar',
+                color: '#ef5350',
+                shape: 'arrowDown',
+                text: 'SHORT'
+            });
+        }
+    });
+    
+    workspaceCandlestickSeries.setMarkers(markers);
+    console.log(`✅ Added ${markers.length} signal markers to chart`);
+}
+
+// Clear all markers
+function clearSignalMarkers() {
+    if (workspaceCandlestickSeries) {
+        workspaceCandlestickSeries.setMarkers([]);
+    }
+}
+
+// Display trading signals on workspace chart
+function displayWorkspaceSignals(signals, candlesticks) {
+    if (!workspaceCandlestickSeries || !signals || !candlesticks) {
+        return;
+    }
+    
+    const markers = [];
+    
+    signals.buy.forEach((isBuy, index) => {
+        if (isBuy && candlesticks[index]) {
+            markers.push({
+                time: candlesticks[index].time,
+                position: "belowBar",
+                color: "#26a69a",
+                shape: "arrowUp",
+                text: "BUY"
+            });
+        }
+    });
+    
+    signals.short.forEach((isShort, index) => {
+        if (isShort && candlesticks[index]) {
+            markers.push({
+                time: candlesticks[index].time,
+                position: "aboveBar",
+                color: "#ef5350",
+                shape: "arrowDown",
+                text: "SHORT"
+            });
+        }
+    });
+    
+    workspaceCandlestickSeries.setMarkers(markers);
+    console.log(`✅ Displayed ${markers.length} signals on strategy builder chart`);
+}
+
+// ==================== CHART CONTROLS ====================
+
+function zoomIn() {
+    if (!workspaceChart) return;
+    const timeScale = workspaceChart.timeScale();
+    const logicalRange = timeScale.getVisibleLogicalRange();
+    if (logicalRange) {
+        const center = (logicalRange.from + logicalRange.to) / 2;
+        const newRange = (logicalRange.to - logicalRange.from) * 0.8;
+        timeScale.setVisibleLogicalRange({
+            from: center - newRange / 2,
+            to: center + newRange / 2
+        });
+    }
+}
+
+function zoomOut() {
+    if (!workspaceChart) return;
+    const timeScale = workspaceChart.timeScale();
+    const logicalRange = timeScale.getVisibleLogicalRange();
+    if (logicalRange) {
+        const center = (logicalRange.from + logicalRange.to) / 2;
+        const newRange = (logicalRange.to - logicalRange.from) * 1.25;
+        timeScale.setVisibleLogicalRange({
+            from: center - newRange / 2,
+            to: center + newRange / 2
+        });
+    }
+}
+
+function toggleVolume() {
+    if (!workspaceVolumeSeries) return;
+    const btn = document.getElementById('toggleVolumeBtn');
+    const isVisible = btn.classList.contains('active');
+    
+    workspaceVolumeSeries.applyOptions({
+        visible: !isVisible
+    });
+    
+    btn.classList.toggle('active');
+    console.log(isVisible ? '📊 Volume hidden' : '📊 Volume shown');
+}
+
+function scrollToStart() {
+    if (!workspaceChart) return;
+    workspaceChart.timeScale().scrollToPosition(-100, false);
+}
+
+function scrollLeft() {
+    if (!workspaceChart) return;
+    workspaceChart.timeScale().scrollToPosition(-50, false);
+}
+
+function scrollRight() {
+    if (!workspaceChart) return;
+    workspaceChart.timeScale().scrollToPosition(50, false);
+}
+
+function scrollToEnd() {
+    if (!workspaceChart) return;
+    workspaceChart.timeScale().scrollToRealTime();
+}
+
+function changeTimeframe(tf) {
+    console.log(`⏱️ Changing timeframe to ${tf} (not implemented yet)`);
+    document.getElementById('timeframeBtn').textContent = tf;
+    // TODO: Implement timeframe aggregation
+}
+
+function downloadChartCSV() {
+    loadFromIndexedDB().then(data => {
+        if (!data || !data.candlesticks || data.candlesticks.length === 0) {
+            alert('⚠️ No data to download');
+            return;
+        }
+        
+        // Convert to CSV
+        let csv = 'Date,Time,Open,High,Low,Close,Volume\n';
+        data.candlesticks.forEach(candle => {
+            const date = new Date(candle.time * 1000);
+            const dateStr = date.toLocaleDateString('vi-VN');
+            const timeStr = date.toLocaleTimeString('vi-VN');
+            csv += `${dateStr},${timeStr},${candle.open},${candle.high},${candle.low},${candle.close},${candle.volume || 0}\n`;
+        });
+        
+        // Download
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chart_data_${Date.now()}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        console.log('💾 Downloaded CSV file');
+    });
+}
+
+async function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    console.log(`📁 Uploading file: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
+    
+    try {
+        const text = await file.text();
+        const lines = text.split('\n').filter(line => line.trim());
+        
+        if (lines.length < 2) {
+            alert('❌ File CSV không hợp lệ!');
+            return;
+        }
+        
+        // Parse CSV
+        const candlesticks = [];
+        for (let i = 1; i < lines.length; i++) {
+            const parts = lines[i].split(',');
+            if (parts.length < 6) continue;
+            
+            // Parse datetime
+            const dateTime = new Date(parts[0]);
+            if (isNaN(dateTime)) continue;
+            
+            candlesticks.push({
+                time: Math.floor(dateTime.getTime() / 1000),
+                open: parseFloat(parts[1]),
+                high: parseFloat(parts[2]),
+                low: parseFloat(parts[3]),
+                close: parseFloat(parts[4]),
+                volume: parseFloat(parts[5] || 0)
+            });
+        }
+        
+        if (candlesticks.length === 0) {
+            alert('❌ Không tìm thấy dữ liệu hợp lệ trong file!');
+            return;
+        }
+        
+        // Sort by time
+        candlesticks.sort((a, b) => a.time - b.time);
+        
+        // Save to IndexedDB
+        await saveToIndexedDB({
+            candlesticks: candlesticks,
+            metadata: {
+                filename: file.name,
+                uploadDate: Date.now(),
+                candleCount: candlesticks.length,
+                fromDate: new Date(candlesticks[0].time * 1000).toISOString(),
+                toDate: new Date(candlesticks[candlesticks.length - 1].time * 1000).toISOString()
+            }
+        });
+        
+        // Display on chart
+        workspaceCandlestickSeries.setData(candlesticks);
+        
+        const volumeData = candlesticks.map(c => ({
+            time: c.time,
+            value: c.volume || 0,
+            color: c.close >= c.open ? '#26a69a80' : '#ef535080'
+        }));
+        
+        // DEBUG: Check volume values
+        console.log('📊 Volume data sample:', volumeData.slice(0, 5));
+        console.log('📊 Volume min/max:', Math.min(...volumeData.map(v => v.value)), Math.max(...volumeData.map(v => v.value)));
+        
+        workspaceVolumeSeries.setData(volumeData);
+        
+        // Update tooltip
+        updateDataTooltip(candlesticks.length, file.name, file.size);
+        
+        // Update price display
+        updatePriceDisplay(candlesticks[candlesticks.length - 1]);
+        
+        alert(`✅ Đã tải ${candlesticks.length} nến thành công!`);
+        console.log(`✅ Loaded ${candlesticks.length} candles`);
+        
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('❌ Lỗi khi đọc file: ' + error.message);
+    }
+}
+
+// updateDataTooltip is now in data-manager.js - removed duplicate
+
+function updatePriceDisplay(candle) {
+    if (!candle) return;
+    
+    document.getElementById('currentPrice').textContent = candle.close.toFixed(2);
+    document.getElementById('highPrice').textContent = 'H: ' + candle.high.toFixed(2);
+    document.getElementById('lowPrice').textContent = 'L: ' + candle.low.toFixed(2);
+    document.getElementById('closePrice').textContent = 'C: ' + candle.close.toFixed(2);
+    
+    const change = candle.close - candle.open;
+    const changePct = (change / candle.open * 100).toFixed(2);
+    const changeEl = document.getElementById('priceChange');
+    changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)} (${changePct}%)`;
+    changeEl.style.color = change >= 0 ? '#26a69a' : '#ef5350';
+}
+
+function showUploadedFiles() {
+    loadFromIndexedDB().then(data => {
+        if (!data || !data.metadata) {
+            alert('📂 Chưa có file nào được lưu');
+            return;
+        }
+        
+        const info = `📊 Thông tin file đã lưu:\n\n` +
+            `Tên file: ${data.metadata.filename}\n` +
+            `Số nến: ${data.metadata.candleCount.toLocaleString()}\n` +
+            `Từ: ${new Date(data.metadata.fromDate).toLocaleString('vi-VN')}\n` +
+            `Đến: ${new Date(data.metadata.toDate).toLocaleString('vi-VN')}\n` +
+            `Upload: ${new Date(data.metadata.uploadDate).toLocaleString('vi-VN')}`;
+        
+        alert(info);
+    });
+}
+
+async function clearOfflineData(silent = false) {
+    if (!silent && !confirm('⚠️ Bạn có chắc muốn xóa toàn bộ dữ liệu đã lưu?')) return;
+    
+    try {
+        const request = indexedDB.deleteDatabase('ChartDataDB');
+        request.onsuccess = () => {
+            if (!silent) {
+                alert('✅ Đã xóa dữ liệu thành công!');
+                location.reload();
+            } else {
+                console.log('✅ Old data cleared silently');
+            }
+        };
+        request.onerror = () => {
+            if (!silent) {
+                alert('❌ Lỗi khi xóa dữ liệu');
+            }
+        };
+    } catch (error) {
+        console.error('Error clearing data:', error);
+        if (!silent) {
+            alert('❌ Lỗi: ' + error.message);
+        }
+    }
+}
+
+
+// ==================== CHART CONTROL FUNCTIONS ====================
+
+function changeDataSource() {
+    const select = document.getElementById('dataSourceSelect');
+    if (!select) return;
+    console.log('Data source changed to:', select.value);
+    // Implementation will sync with main page
+}
+
+function scrollToStart() {
+    if (!workspaceChart) return;
+    const timeScale = workspaceChart.timeScale();
+    const logicalRange = timeScale.getVisibleLogicalRange();
+    if (logicalRange) {
+        timeScale.scrollToPosition(-logicalRange.from, false);
+    }
+}
+
+function scrollLeft() {
+    if (!workspaceChart) return;
+    const timeScale = workspaceChart.timeScale();
+    const logicalRange = timeScale.getVisibleLogicalRange();
+    if (logicalRange) {
+        const distance = (logicalRange.to - logicalRange.from) * 0.3;
+        timeScale.scrollToPosition(-distance, true);
+    }
+}
+
+function scrollRight() {
+    if (!workspaceChart) return;
+    const timeScale = workspaceChart.timeScale();
+    const logicalRange = timeScale.getVisibleLogicalRange();
+    if (logicalRange) {
+        const distance = (logicalRange.to - logicalRange.from) * 0.3;
+        timeScale.scrollToPosition(distance, true);
+    }
+}
+
+function scrollToEnd() {
+    if (!workspaceChart) return;
+    const timeScale = workspaceChart.timeScale();
+    timeScale.scrollToRealTime();
+}
+
+function zoomIn() {
+    if (!workspaceChart) return;
+    console.log('Zoom in');
+    // TradingView Lightweight Charts handles zoom via mouse wheel by default
+}
+
+function toggleChartType() {
+    console.log('Toggle chart type - to be implemented');
+}
+
+function showIndicators() {
+    console.log('🔍 showIndicators called (workspace)');
+    
+    const panel = document.getElementById('indicatorsDisplayPanel');
+    console.log('📋 Panel element:', panel ? 'found' : 'NOT FOUND');
+    
+    if (!panel) {
+        console.error('❌ Indicators panel not found in DOM');
+        alert('⚠️ Indicators panel not found. Please refresh the page.');
+        return;
+    }
+    
+    // Directly toggle the panel
+    const isHidden = panel.classList.contains('hidden');
+    console.log('👁️ Panel currently hidden:', isHidden);
+    
+    if (isHidden) {
+        panel.classList.remove('hidden');
+        console.log('✅ Panel shown');
+        
+        // Update content
+        if (typeof updateIndicatorsDisplayPanel === 'function') {
+            updateIndicatorsDisplayPanel();
+        } else {
+            const container = document.getElementById('indicatorsPanelContent');
+            if (container) {
+                if (typeof activeIndicators === 'undefined' || !activeIndicators || activeIndicators.length === 0) {
+                    container.innerHTML = '<p class="empty-state">No indicators added yet.<br><br>Go to Strategy Builder → Indicators tab to add indicators first.</p>';
+                }
+            }
+        }
+    } else {
+        panel.classList.add('hidden');
+        console.log('✅ Panel hidden');
+    }
+}
+
+function fitChartContent() {
+    if (!workspaceChart) return;
+    workspaceChart.timeScale().fitContent();
+}
+
+function showUploadedFiles() {
+    console.log('Show uploaded files');
+    // To be implemented
+}
+
+function clearOfflineData(silent = false) {
+    if (!silent && !confirm('⚠️ Xóa toàn bộ dữ liệu offline?')) {
+        return;
+    }
+    
+    // Clear IndexedDB
+    indexedDB.deleteDatabase('TradingDataDB');
+    if (!silent) {
+        alert('✅ Đã xóa dữ liệu offline');
+        location.reload();
+    } else {
+        console.log('✅ Old data cleared silently');
+    }
+}
+
+function downloadChartCSV() {
+    console.log('Download CSV - to be implemented');
+}
+
+// ==================== INDICATORS DISPLAY PANEL ====================
+
+let indicatorSeries = {}; // Store chart series for indicators
+
+function toggleIndicatorsDisplayPanel() {
+    console.log('🔄 toggleIndicatorsDisplayPanel called (workspace)');
+    
+    const panel = document.getElementById('indicatorsDisplayPanel');
+    if (!panel) {
+        console.error('❌ Indicators panel not found in DOM');
+        return;
+    }
+    
+    const isHidden = panel.classList.contains('hidden');
+    console.log('👁️ Panel state:', isHidden ? 'hidden' : 'visible');
+    
+    if (isHidden) {
+        panel.classList.remove('hidden');
+        console.log('✅ Panel shown');
+        updateIndicatorsDisplayPanel();
+    } else {
+        panel.classList.add('hidden');
+        console.log('✅ Panel hidden');
+    }
+}
+
+function updateIndicatorsDisplayPanel() {
+    console.log('🔄 updateIndicatorsDisplayPanel called (workspace)');
+    
+    const container = document.getElementById('indicatorsPanelContent');
+    if (!container) {
+        console.warn('⚠️ Indicators panel content container not found (may not be on this page)');
+        return;
+    }
+    
+    console.log('📊 activeIndicators:', typeof activeIndicators !== 'undefined' ? activeIndicators : 'undefined');
+    console.log('📊 activeIndicators length:', typeof activeIndicators !== 'undefined' && activeIndicators ? activeIndicators.length : 0);
+    
+    // Get active indicators from strategy (from strategy-builder.js)
+    if (typeof activeIndicators === 'undefined' || !activeIndicators || activeIndicators.length === 0) {
+        container.innerHTML = '<p class="empty-state">No indicators added yet.<br><br>Add indicators in the Indicators tab first.</p>';
+        console.log('ℹ️ No indicators to display');
+        return;
+    }
+    
+    console.log('✅ Rendering', activeIndicators.length, 'indicators');
+    
+    let html = '';
+    activeIndicators.forEach(ind => {
+        const paramStr = Object.entries(ind.params || {})
+            .map(([k, v]) => `${k}:${v}`)
+            .join(', ');
+        
+        // Initialize display settings if not exist
+        if (!ind.display) {
+            ind.display = {
+                show: true,
+                color: getDefaultIndicatorColor(ind.type),
+                lineStyle: 'solid',
+                lineWidth: 2
+            };
+        }
+        
+        html += `
+            <div class="indicator-display-item" data-ind-id="${ind.id}">
+                <div class="indicator-header">
+                    <label class="checkbox-label">
+                        <input type="checkbox" ${ind.display.show ? 'checked' : ''} 
+                               onchange="toggleIndicatorVisibility('${ind.id}', this.checked)">
+                        <strong>${ind.type}</strong> 
+                        <small>(${paramStr})</small>
+                    </label>
+                </div>
+                <div class="indicator-settings">
+                    <div class="setting-row">
+                        <label>Color</label>
+                        <input type="color" value="${ind.display.color}" 
+                               onchange="updateIndicatorColor('${ind.id}', this.value)">
+                    </div>
+                    <div class="setting-row">
+                        <label>Style</label>
+                        <select onchange="updateIndicatorStyle('${ind.id}', this.value)">
+                            <option value="solid" ${ind.display.lineStyle === 'solid' ? 'selected' : ''}>Solid</option>
+                            <option value="dotted" ${ind.display.lineStyle === 'dotted' ? 'selected' : ''}>Dotted</option>
+                            <option value="dashed" ${ind.display.lineStyle === 'dashed' ? 'selected' : ''}>Dashed</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label>Width</label>
+                        <select onchange="updateIndicatorWidth('${ind.id}', parseInt(this.value))">
+                            ${[1,2,3,4,5].map(w => 
+                                `<option value="${w}" ${ind.display.lineWidth === w ? 'selected' : ''}>${w}px</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function getDefaultIndicatorColor(type) {
+    const colors = {
+        'EMA': '#2962FF',
+        'SMA': '#FF6D00',
+        'WMA': '#9C27B0',
+        'RSI': '#9C27B0',
+        'MACD': '#00BCD4',
+        'BB': '#4CAF50',
+        'BollingerBands': '#4CAF50',
+        'SuperTrend': '#FF5252',
+        'ATR': '#FFA726'
+    };
+    return colors[type] || '#2962FF';
+}
+
+function toggleIndicatorVisibility(indId, show) {
+    // Find indicator in activeIndicators
+    const indicator = activeIndicators.find(i => i.id === indId);
+    if (!indicator) return;
+    
+    indicator.display.show = show;
+    
+    // Sync back to strategyConfig (if available)
+    if (typeof strategyConfig !== 'undefined' && strategyConfig && strategyConfig.indicators) {
+        const strategyInd = strategyConfig.indicators.find(i => i.id === indId);
+        if (strategyInd) {
+            if (!strategyInd.display) {
+                strategyInd.display = {};
+            }
+            strategyInd.display.show = show;
+        }
+    }
+    
+    // Update chart series visibility
+    if (indicatorSeries[indId]) {
+        indicatorSeries[indId].applyOptions({ visible: show });
+    }
+    
+    // Handle multi-line indicators (MACD, BB)
+    const multiLineKeys = Object.keys(indicatorSeries).filter(k => k.startsWith(indId + '_'));
+    multiLineKeys.forEach(key => {
+        if (indicatorSeries[key]) {
+            indicatorSeries[key].applyOptions({ visible: show });
+        }
+    });
+    
+    // Trigger auto-save (strategy builder)
+    if (typeof triggerAutoSave === 'function') {
+        triggerAutoSave();
+    }
+    
+    // Trigger auto-save (indicators only - for Bot Trading page)
+    if (typeof triggerIndicatorsAutoSave === 'function') {
+        triggerIndicatorsAutoSave();
+    }
+}
+
+function updateIndicatorColor(indId, color) {
+    const indicator = activeIndicators.find(i => i.id === indId);
+    if (!indicator) return;
+    
+    indicator.display.color = color;
+    
+    // Sync back to strategyConfig (if available)
+    if (typeof strategyConfig !== 'undefined' && strategyConfig && strategyConfig.indicators) {
+        const strategyInd = strategyConfig.indicators.find(i => i.id === indId);
+        if (strategyInd) {
+            if (!strategyInd.display) {
+                strategyInd.display = {};
+            }
+            strategyInd.display.color = color;
+        }
+    }
+    
+    // Update chart series color
+    if (indicatorSeries[indId]) {
+        indicatorSeries[indId].applyOptions({ color: color });
+    }
+    
+    // Trigger auto-save
+    if (typeof triggerAutoSave === 'function') {
+        triggerAutoSave();
+    }
+}
+
+function updateIndicatorStyle(indId, style) {
+    const indicator = activeIndicators.find(i => i.id === indId);
+    if (!indicator) return;
+    
+    indicator.display.lineStyle = style;
+    
+    // Sync back to strategyConfig (if available)
+    if (typeof strategyConfig !== 'undefined' && strategyConfig && strategyConfig.indicators) {
+        const strategyInd = strategyConfig.indicators.find(i => i.id === indId);
+        if (strategyInd) {
+            if (!strategyInd.display) {
+                strategyInd.display = {};
+            }
+            strategyInd.display.lineStyle = style;
+        }
+    }
+    
+    const lineStyleMap = {
+        'solid': LightweightCharts.LineStyle.Solid,
+        'dotted': LightweightCharts.LineStyle.Dotted,
+        'dashed': LightweightCharts.LineStyle.Dashed
+    };
+    
+    if (indicatorSeries[indId]) {
+        indicatorSeries[indId].applyOptions({ 
+            lineStyle: lineStyleMap[style] 
+        });
+    }
+    
+    // Trigger auto-save
+    if (typeof triggerAutoSave === 'function') {
+        triggerAutoSave();
+    }
+}
+
+function updateIndicatorWidth(indId, width) {
+    const indicator = activeIndicators.find(i => i.id === indId);
+    if (!indicator) return;
+    
+    indicator.display.lineWidth = width;
+    
+    // Sync back to strategyConfig (if available)
+    if (typeof strategyConfig !== 'undefined' && strategyConfig && strategyConfig.indicators) {
+        const strategyInd = strategyConfig.indicators.find(i => i.id === indId);
+        if (strategyInd) {
+            if (!strategyInd.display) {
+                strategyInd.display = {};
+            }
+            strategyInd.display.lineWidth = width;
+        }
+    }
+    
+    if (indicatorSeries[indId]) {
+        indicatorSeries[indId].applyOptions({ lineWidth: width });
+    }
+    
+    // Trigger auto-save
+    if (typeof triggerAutoSave === 'function') {
+        triggerAutoSave();
+    }
+}
+
+// ==================== INDICATORS AND SIGNALS PANEL ====================
+
+function toggleIndicatorsPanel() {
+    const panel = document.getElementById('indicatorsPanel');
+    const isVisible = panel.style.display !== 'none';
+
+    // Close signals panel if open
+    const signalsPanel = document.getElementById('signalsPanel');
+    if (signalsPanel) signalsPanel.style.display = 'none';
+
+    panel.style.display = isVisible ? 'none' : 'block';
+
+    if (!isVisible) {
+        updateActiveIndicatorsList();
+    }
+}
+
+function toggleSignalsPanel() {
+    const panel = document.getElementById('signalsPanel');
+    const isVisible = panel.style.display !== 'none';
+
+    // Close indicators panel if open
+    const indicatorsPanel = document.getElementById('indicatorsPanel');
+    if (indicatorsPanel) indicatorsPanel.style.display = 'none';
+
+    panel.style.display = isVisible ? 'none' : 'block';
+}
+
+function updateActiveIndicatorsList() {
+    const list = document.getElementById('activeIndicatorsList');
+    if (!list) return;
+
+    // Get active indicators from activeIndicators or strategyConfig
+    const indicators = (typeof activeIndicators !== 'undefined' && activeIndicators)
+        || (typeof strategyConfig !== 'undefined' && strategyConfig.indicators)
+        || [];
+
+    if (indicators.length === 0) {
+        list.innerHTML = '<p style="color: #787b86; font-size: 12px; text-align: center; padding: 10px;">No indicators</p>';
+        return;
+    }
+
+    // Clear and rebuild list
+    list.innerHTML = '';
+
+    indicators.forEach(ind => {
+        const show = ind.display && ind.display.show !== false;
+        const paramStr = Object.entries(ind.params || {}).map(([k, v]) => `${k}:${v}`).join(', ');
+
+        // Create outer div
+        const outerDiv = document.createElement('div');
+        outerDiv.style.cssText = 'padding: 8px; border-bottom: 1px solid #2a2e39;';
+
+        // Create inner div
+        const innerDiv = document.createElement('div');
+        innerDiv.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+
+        // Checkbox
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = show;
+        checkbox.style.cursor = 'pointer';
+        checkbox.addEventListener('change', function() {
+            toggleIndicatorVisibility(ind.id, this.checked);
+        });
+
+        // Indicator name (clickable to edit)
+        const nameSpan = document.createElement('span');
+        nameSpan.style.cssText = 'color: #d1d4dc; font-size: 12px; flex: 1; cursor: pointer;';
+        nameSpan.title = 'Click để sửa';
+
+        const typeStrong = document.createElement('strong');
+        typeStrong.textContent = ind.type;
+        nameSpan.appendChild(typeStrong);
+
+        if (paramStr) {
+            const paramSpan = document.createElement('span');
+            paramSpan.style.color = '#787b86';
+            paramSpan.textContent = ` (${paramStr})`;
+            nameSpan.appendChild(paramSpan);
+        }
+
+        nameSpan.addEventListener('click', function() {
+            editWorkspaceIndicator(ind.id);
+        });
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = '&times;';
+        deleteBtn.title = 'Xóa indicator';
+        deleteBtn.style.cssText = 'background: transparent; border: none; color: #787b86; font-size: 18px; cursor: pointer; padding: 0 6px; line-height: 1; transition: color 0.2s;';
+        deleteBtn.addEventListener('mouseover', function() { this.style.color = '#ef5350'; });
+        deleteBtn.addEventListener('mouseout', function() { this.style.color = '#787b86'; });
+        deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            removeWorkspaceIndicator(ind.id);
+        });
+
+        // Append all elements
+        innerDiv.appendChild(checkbox);
+        innerDiv.appendChild(nameSpan);
+        innerDiv.appendChild(deleteBtn);
+        outerDiv.appendChild(innerDiv);
+        list.appendChild(outerDiv);
+    });
+}
+
+function removeWorkspaceIndicator(indicatorId) {
+    console.log('🗑️ Removing workspace indicator:', indicatorId);
+
+    // Remove from activeIndicators array
+    if (typeof activeIndicators !== 'undefined' && activeIndicators) {
+        window.activeIndicators = activeIndicators.filter(ind => ind.id !== indicatorId);
+    }
+
+    // Remove from chart
+    if (window.indicatorSeries && window.indicatorSeries[indicatorId]) {
+        if (typeof chart !== 'undefined' && chart) {
+            chart.removeSeries(window.indicatorSeries[indicatorId]);
+        }
+        delete window.indicatorSeries[indicatorId];
+    }
+
+    // Save to localStorage
+    if (typeof saveIndicatorsToLocalStorage === 'function') {
+        saveIndicatorsToLocalStorage();
+    }
+
+    // Update UI
+    updateActiveIndicatorsList();
+
+    console.log('✅ Removed workspace indicator:', indicatorId);
+}
+
+function editWorkspaceIndicator(indicatorId) {
+    console.log('✏️ Editing workspace indicator:', indicatorId);
+
+    // Find the indicator
+    const indicators = (typeof activeIndicators !== 'undefined' && activeIndicators)
+        || (typeof strategyConfig !== 'undefined' && strategyConfig.indicators)
+        || [];
+    const indicator = indicators.find(ind => ind.id === indicatorId);
+
+    if (!indicator) {
+        console.error('Indicator not found:', indicatorId);
+        return;
+    }
+
+    // Open modal
+    const modal = document.getElementById('indicatorSelectionModal');
+    if (!modal) return;
+
+    modal.style.display = 'block';
+
+    // Set indicator type
+    const typeSelect = document.getElementById('indicatorTypeSelect');
+    if (typeSelect) {
+        typeSelect.value = indicator.type;
+
+        // Trigger parameter update
+        setTimeout(() => {
+            updateIndicatorParams();
+
+            // Fill in parameter values
+            if (indicator.params) {
+                Object.entries(indicator.params).forEach(([key, value]) => {
+                    const input = document.getElementById(`param_${key}`);
+                    if (input) {
+                        input.value = value;
+                    }
+                });
+            }
+
+            // Fill in display settings
+            if (indicator.display) {
+                const colorInput = document.getElementById('indicatorColor');
+                const styleSelect = document.getElementById('indicatorLineStyle');
+                const widthSelect = document.getElementById('indicatorLineWidth');
+
+                if (colorInput && indicator.display.color) colorInput.value = indicator.display.color;
+                if (styleSelect && indicator.display.lineStyle) styleSelect.value = indicator.display.lineStyle;
+                if (widthSelect && indicator.display.lineWidth) widthSelect.value = indicator.display.lineWidth;
+            }
+        }, 50);
+    }
+
+    // Store the indicator ID being edited
+    window.editingIndicatorId = indicatorId;
+
+    console.log('📝 Opened edit mode for:', indicatorId);
+}
+
+function hideAllIndicators() {
+    const indicators = (typeof activeIndicators !== 'undefined' && activeIndicators)
+        || (typeof strategyConfig !== 'undefined' && strategyConfig.indicators)
+        || [];
+
+    indicators.forEach(ind => {
+        if (ind.display) ind.display.show = false;
+        if (indicatorSeries[ind.id]) {
+            try {
+                workspaceChart.removeSeries(indicatorSeries[ind.id]);
+                delete indicatorSeries[ind.id];
+            } catch (e) {
+                console.warn('Could not remove series:', e);
+            }
+        }
+    });
+
+    updateActiveIndicatorsList();
+    console.log('🙈 All indicators hidden');
+}
+
+function showAllIndicators() {
+    const indicators = (typeof activeIndicators !== 'undefined' && activeIndicators)
+        || (typeof strategyConfig !== 'undefined' && strategyConfig.indicators)
+        || [];
+
+    indicators.forEach(ind => {
+        if (ind.display) ind.display.show = true;
+    });
+
+    // Re-render all indicators
+    if (typeof calculateAndRenderIndicators === 'function') {
+        calculateAndRenderIndicators();
+    }
+
+    updateActiveIndicatorsList();
+    console.log('👁️ All indicators shown');
+}
+
+function toggleSignalVisibility(signalType, visible) {
+    console.log(`Toggle signal ${signalType}: ${visible}`);
+    // Signal visibility will be implemented when signals are rendered on strategy builder chart
+}
+
+function hideAllSignals() {
+    console.log('🙈 Hide all signals');
+    // Will be implemented when signals are rendered
+}
+
+function showAllSignals() {
+    console.log('👁️ Show all signals');
+    // Will be implemented when signals are rendered
+}
+
+// ==================== INDICATOR SELECTION MODAL ====================
+
+function showIndicatorModal() {
+    const modal = document.getElementById('indicatorSelectionModal');
+    if (modal) {
+        modal.style.display = 'block';
+
+        // Reset form
+        const typeSelect = document.getElementById('indicatorTypeSelect');
+        const paramsSection = document.getElementById('indicatorParamsSection');
+        const displaySection = document.getElementById('indicatorDisplaySection');
+        const paramsContainer = document.getElementById('indicatorParamsContainer');
+
+        if (typeSelect) typeSelect.value = '';
+        if (paramsSection) paramsSection.style.display = 'none';
+        if (displaySection) displaySection.style.display = 'none';
+        if (paramsContainer) paramsContainer.innerHTML = '';
+    }
+}
+
+function closeIndicatorModal() {
+    console.log('🔄 closeIndicatorModal called');
+    const modal = document.getElementById('indicatorSelectionModal');
+    if (modal) {
+        modal.style.display = 'none';
+        console.log('✅ Modal closed');
+    } else {
+        console.error('❌ Modal element not found');
+    }
+}
+
+function updateIndicatorParams() {
+    const type = document.getElementById('indicatorTypeSelect').value;
+    const paramsSection = document.getElementById('indicatorParamsSection');
+    const displaySection = document.getElementById('indicatorDisplaySection');
+    const paramsContainer = document.getElementById('indicatorParamsContainer');
+
+    if (!type) {
+        paramsSection.style.display = 'none';
+        displaySection.style.display = 'none';
+        return;
+    }
+
+    // Show display section
+    displaySection.style.display = 'block';
+
+    // Define parameters for each indicator type
+    const paramConfigs = {
+        'EMA': [{ name: 'period', label: 'Period', default: 20, min: 1, max: 500 }],
+        'SMA': [{ name: 'period', label: 'Period', default: 20, min: 1, max: 500 }],
+        'WMA': [{ name: 'period', label: 'Period', default: 20, min: 1, max: 500 }],
+        'RSI': [{ name: 'period', label: 'Period', default: 14, min: 2, max: 100 }],
+        'MACD': [
+            { name: 'fastPeriod', label: 'Fast Period', default: 12, min: 1, max: 100 },
+            { name: 'slowPeriod', label: 'Slow Period', default: 26, min: 1, max: 100 },
+            { name: 'signalPeriod', label: 'Signal Period', default: 9, min: 1, max: 100 }
+        ],
+        'BollingerBands': [
+            { name: 'period', label: 'Period', default: 20, min: 1, max: 100 },
+            { name: 'deviation', label: 'Std Deviation', default: 2, min: 0.1, max: 5, step: 0.1 }
+        ],
+        'ATR': [{ name: 'period', label: 'Period', default: 14, min: 1, max: 100 }],
+        'Stochastic': [
+            { name: 'kPeriod', label: 'K Period', default: 14, min: 1, max: 100 },
+            { name: 'dPeriod', label: 'D Period', default: 3, min: 1, max: 100 }
+        ],
+        'ADX': [{ name: 'period', label: 'Period', default: 14, min: 1, max: 100 }],
+        'CCI': [{ name: 'period', label: 'Period', default: 20, min: 1, max: 100 }],
+        'ROC': [{ name: 'period', label: 'Period', default: 12, min: 1, max: 100 }],
+        'MFI': [{ name: 'period', label: 'Period', default: 14, min: 1, max: 100 }]
+    };
+
+    const params = paramConfigs[type] || [];
+
+    if (params.length > 0) {
+        paramsSection.style.display = 'block';
+
+        let html = '';
+        params.forEach(param => {
+            const step = param.step || 1;
+            html += `
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">${param.label}</label>
+                    <input
+                        type="number"
+                        id="param_${param.name}"
+                        value="${param.default}"
+                        min="${param.min}"
+                        max="${param.max}"
+                        step="${step}"
+                        style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                </div>
+            `;
+        });
+
+        paramsContainer.innerHTML = html;
+    } else {
+        paramsSection.style.display = 'none';
+        paramsContainer.innerHTML = '';
+    }
+}
+
+function addSelectedIndicator() {
+    const type = document.getElementById('indicatorTypeSelect').value;
+
+    if (!type) {
+        alert('⚠️ Please select an indicator type');
+        return;
+    }
+
+    // Collect parameters
+    const params = {};
+    const paramInputs = document.querySelectorAll('#indicatorParamsContainer input[type="number"]');
+    paramInputs.forEach(input => {
+        const paramName = input.id.replace('param_', '');
+        params[paramName] = parseFloat(input.value);
+    });
+
+    // Collect display settings
+    const display = {
+        show: true,
+        color: document.getElementById('indicatorColor').value,
+        lineStyle: document.getElementById('indicatorLineStyle').value,
+        lineWidth: parseInt(document.getElementById('indicatorLineWidth').value)
+    };
+
+    // Initialize activeIndicators if needed
+    if (typeof window.activeIndicators === 'undefined') {
+        window.activeIndicators = [];
+    }
+
+    // Check if we're editing an existing indicator
+    if (window.editingIndicatorId) {
+        // Find and update existing indicator
+        const index = window.activeIndicators.findIndex(ind => ind.id === window.editingIndicatorId);
+        if (index !== -1) {
+            // Keep the same ID but update everything else
+            window.activeIndicators[index] = {
+                id: window.editingIndicatorId,
+                type: type,
+                params: params,
+                display: display
+            };
+            console.log('✅ Updated indicator:', window.activeIndicators[index]);
+            alert(`✅ Updated ${type} indicator`);
+        }
+
+        // Remove old series from chart
+        if (window.indicatorSeries && window.indicatorSeries[window.editingIndicatorId]) {
+            if (typeof chart !== 'undefined' && chart) {
+                chart.removeSeries(window.indicatorSeries[window.editingIndicatorId]);
+            }
+            delete window.indicatorSeries[window.editingIndicatorId];
+        }
+
+        // Clear edit mode
+        delete window.editingIndicatorId;
+    } else {
+        // Create new indicator
+        const indicator = {
+            id: `${type.toLowerCase()}_${Date.now()}`,
+            type: type,
+            params: params,
+            display: display
+        };
+
+        // Add to activeIndicators
+        window.activeIndicators.push(indicator);
+
+        console.log('✅ Added indicator:', indicator);
+        alert(`✅ Added ${type} indicator`);
+    }
+
+    // Save to localStorage
+    saveIndicatorsToLocalStorage();
+
+    // Render indicator on chart if data is available
+    if (typeof window.offlineData !== 'undefined' && window.offlineData && window.offlineData.candlesticks) {
+        if (typeof calculateAndRenderIndicators === 'function') {
+            setTimeout(() => calculateAndRenderIndicators(), 100);
+        }
+    }
+
+    // Update indicators panel if open
+    updateActiveIndicatorsList();
+
+    // Close modal
+    document.getElementById('indicatorSelectionModal').style.display = 'none';
+}
+
+function saveIndicatorsToLocalStorage() {
+    try {
+        const indicators = window.activeIndicators || [];
+        localStorage.setItem('userSelectedIndicators', JSON.stringify(indicators));
+        console.log('💾 Saved indicators to localStorage:', indicators.length);
+    } catch (error) {
+        console.error('Failed to save indicators:', error);
+    }
+}
+
+function loadIndicatorsFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem('userSelectedIndicators');
+        if (saved) {
+            window.activeIndicators = JSON.parse(saved);
+            console.log('✅ Loaded indicators from localStorage:', window.activeIndicators.length);
+
+            // Render if data available
+            if (typeof window.offlineData !== 'undefined' && window.offlineData && window.offlineData.candlesticks) {
+                if (typeof calculateAndRenderIndicators === 'function') {
+                    setTimeout(() => calculateAndRenderIndicators(), 300);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load indicators:', error);
+    }
+}
+
+// Load indicators on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadIndicatorsFromLocalStorage();
+});
+
+// Close panels when clicking outside
+document.addEventListener('click', function(e) {
+    const indicatorsBtn = document.getElementById('indicatorsBtn');
+    const indicatorsPanel = document.getElementById('indicatorsPanel');
+    const signalsBtn = document.getElementById('signalsBtn');
+    const signalsPanel = document.getElementById('signalsPanel');
+
+    // Close indicators panel
+    if (indicatorsPanel && indicatorsBtn) {
+        if (!indicatorsBtn.contains(e.target) && !indicatorsPanel.contains(e.target)) {
+            indicatorsPanel.style.display = 'none';
+        }
+    }
+
+    // Close signals panel
+    if (signalsPanel && signalsBtn) {
+        if (!signalsBtn.contains(e.target) && !signalsPanel.contains(e.target)) {
+            signalsPanel.style.display = 'none';
+        }
+    }
+});
+
+// Export functions
+window.toggleIndicatorsDisplayPanel = toggleIndicatorsDisplayPanel;
+window.updateIndicatorsDisplayPanel = updateIndicatorsDisplayPanel;
+window.toggleIndicatorVisibility = toggleIndicatorVisibility;
+window.updateIndicatorColor = updateIndicatorColor;
+window.updateIndicatorStyle = updateIndicatorStyle;
+window.updateIndicatorWidth = updateIndicatorWidth;
+window.toggleIndicatorsPanel = toggleIndicatorsPanel;
+window.toggleSignalsPanel = toggleSignalsPanel;
+window.updateActiveIndicatorsList = updateActiveIndicatorsList;
+window.hideAllIndicators = hideAllIndicators;
+window.showAllIndicators = showAllIndicators;
+window.toggleSignalVisibility = toggleSignalVisibility;
+window.hideAllSignals = hideAllSignals;
+window.showAllSignals = showAllSignals;
+window.showIndicatorModal = showIndicatorModal;
+window.closeIndicatorModal = closeIndicatorModal;
+window.updateIndicatorParams = updateIndicatorParams;
+window.addSelectedIndicator = addSelectedIndicator;
+window.editWorkspaceIndicator = editWorkspaceIndicator;
+window.removeWorkspaceIndicator = removeWorkspaceIndicator;
+window.saveIndicatorsToLocalStorage = saveIndicatorsToLocalStorage;
+window.loadIndicatorsFromLocalStorage = loadIndicatorsFromLocalStorage;

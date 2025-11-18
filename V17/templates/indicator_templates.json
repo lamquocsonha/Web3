@@ -1,0 +1,80 @@
+{
+  "AFL_Complete": {
+    "name": "AFL Complete Set",
+    "description": "Full AFL MT5 strategy indicators (MA1-7, RSI, ADX, Pivots, Custom)",
+    "indicators": [
+      {"id": "ma1", "type": "EMA", "params": {"period": 5}},
+      {"id": "ma2", "type": "EMA", "params": {"period": 19}},
+      {"id": "ma3", "type": "EMA", "params": {"period": 44}},
+      {"id": "ma4", "type": "EMA", "params": {"period": 99}},
+      {"id": "ma5", "type": "EMA", "params": {"period": 245}},
+      {"id": "ma6", "type": "EMA", "params": {"period": 492}},
+      {"id": "ma7", "type": "MA7range", "params": {}},
+      {"id": "rsi_14", "type": "RSI", "params": {"period": 14}},
+      {"id": "adx_14", "type": "RSI", "params": {"period": 14}},
+      {"id": "baseprice", "type": "Baseprice", "params": {}},
+      {"id": "avghl", "type": "AvgHL", "params": {}},
+      {"id": "reshl", "type": "resHL", "params": {}},
+      {"id": "hhvsinceopen", "type": "HHVsinceopen", "params": {}},
+      {"id": "llvsinceopen", "type": "LLVsinceopen", "params": {}},
+      {"id": "slopema1", "type": "SlopeMA1", "params": {}},
+      {"id": "gma12", "type": "GMA12", "params": {}},
+      {"id": "gma23", "type": "GMA23", "params": {}},
+      {"id": "gma45", "type": "GMA45", "params": {}},
+      {"id": "mauptrend", "type": "MAuptrend", "params": {}},
+      {"id": "madowntrend", "type": "MAdowntrend", "params": {}},
+      {"id": "alluptrend", "type": "Alluptrend", "params": {}},
+      {"id": "alldowntrend", "type": "Alldowntrend", "params": {}},
+      {"id": "marange", "type": "MArange", "params": {}},
+      {"id": "pp", "type": "PP", "params": {}},
+      {"id": "r1", "type": "R1", "params": {}},
+      {"id": "r2", "type": "R2", "params": {}},
+      {"id": "r3", "type": "R3", "params": {}},
+      {"id": "s1", "type": "S1", "params": {}},
+      {"id": "s2", "type": "S2", "params": {}},
+      {"id": "s3", "type": "S3", "params": {}}
+    ]
+  },
+  "Classic_Trading": {
+    "name": "Classic Trading Set",
+    "description": "Common indicators for swing trading (EMA 20/50/200, RSI, MACD)",
+    "indicators": [
+      {"id": "ema_20", "type": "EMA", "params": {"period": 20}},
+      {"id": "ema_50", "type": "EMA", "params": {"period": 50}},
+      {"id": "ema_200", "type": "EMA", "params": {"period": 200}},
+      {"id": "sma_20", "type": "SMA", "params": {"period": 20}},
+      {"id": "sma_50", "type": "SMA", "params": {"period": 50}},
+      {"id": "rsi_14", "type": "RSI", "params": {"period": 14}},
+      {"id": "bb_20", "type": "BollingerBands", "params": {"period": 20, "deviation": 2}}
+    ]
+  },
+  "Scalping": {
+    "name": "Scalping Setup",
+    "description": "Fast indicators for scalping (EMA 5/13/21, RSI 7)",
+    "indicators": [
+      {"id": "ema_5", "type": "EMA", "params": {"period": 5}},
+      {"id": "ema_13", "type": "EMA", "params": {"period": 13}},
+      {"id": "ema_21", "type": "EMA", "params": {"period": 21}},
+      {"id": "rsi_7", "type": "RSI", "params": {"period": 7}},
+      {"id": "bb_10", "type": "BollingerBands", "params": {"period": 10, "deviation": 2}},
+      {"id": "supertrend_7_3", "type": "SuperTrend", "params": {"period": 7, "multiplier": 3}}
+    ]
+  },
+  "Price_Action": {
+    "name": "Price Action Only",
+    "description": "Candlestick patterns and support/resistance levels",
+    "indicators": [
+      {"id": "green", "type": "Green", "params": {}},
+      {"id": "red", "type": "Red", "params": {}},
+      {"id": "length", "type": "Length", "params": {}},
+      {"id": "hhvsinceopen", "type": "HHVsinceopen", "params": {}},
+      {"id": "llvsinceopen", "type": "LLVsinceopen", "params": {}},
+      {"id": "baseprice", "type": "Baseprice", "params": {}},
+      {"id": "pp", "type": "PP", "params": {}},
+      {"id": "r1", "type": "R1", "params": {}},
+      {"id": "r2", "type": "R2", "params": {}},
+      {"id": "s1", "type": "S1", "params": {}},
+      {"id": "s2", "type": "S2", "params": {}}
+    ]
+  }
+}

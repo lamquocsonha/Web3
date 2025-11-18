@@ -1,0 +1,217 @@
+{
+  "name": "My Strategy 1",
+  "description": "",
+  "indicators": [
+    {
+      "id": "ema_5",
+      "params": {
+        "period": 5
+      },
+      "type": "EMA",
+      "display": {
+        "show": true,
+        "color": "#2962FF",
+        "lineStyle": "solid",
+        "lineWidth": 2
+      }
+    },
+    {
+      "id": "ema_10",
+      "params": {
+        "period": 10
+      },
+      "type": "EMA",
+      "display": {
+        "show": true,
+        "color": "#2962FF",
+        "lineStyle": "solid",
+        "lineWidth": 2
+      }
+    }
+  ],
+  "entry_conditions": {
+    "long": [
+      {
+        "conditions": [
+          {
+            "left": "ema_10",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": "cross_above",
+            "right": "close",
+            "rightOffset": 0
+          },
+          {
+            "left": "ema_5",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": "cross_above",
+            "right": "low",
+            "rightOffset": 0
+          }
+        ],
+        "name": "Buy1"
+      },
+      {
+        "conditions": [
+          {
+            "left": "ema_5",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": ">",
+            "right": "ema_10",
+            "rightOffset": 0
+          },
+          {
+            "left": "ema_10",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": ">",
+            "right": "close",
+            "rightOffset": 0
+          }
+        ],
+        "name": "Buy2"
+      }
+    ],
+    "short": [
+      {
+        "conditions": [
+          {
+            "left": "ema_10",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": ">=",
+            "right": "high",
+            "rightOffset": 0
+          },
+          {
+            "left": "ema_5",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": ">=",
+            "right": "ema_10",
+            "rightOffset": 0
+          }
+        ],
+        "name": "Short1"
+      },
+      {
+        "conditions": [
+          {
+            "left": "ema_10",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": "cross_below",
+            "right": "high",
+            "rightOffset": 0
+          },
+          {
+            "left": "ema_5",
+            "leftOffset": 0,
+            "logic": "AND",
+            "operator": "cross_below",
+            "right": "low",
+            "rightOffset": 0
+          }
+        ],
+        "name": "Short2"
+      }
+    ]
+  },
+  "exit_rules": {
+    "long": {
+      "dynamic_tp_sl": true,
+      "time_exit": "14:30",
+      "tp_sl_table": [
+        {
+          "profit_range": [
+            0,
+            3
+          ],
+          "sl": 9.3,
+          "tp": 5.7,
+          "trailing": 2.8
+        },
+        {
+          "profit_range": [
+            3,
+            6
+          ],
+          "sl": 6.3,
+          "tp": 6.3,
+          "trailing": 5.7
+        },
+        {
+          "profit_range": [
+            6,
+            9
+          ],
+          "sl": 2.9,
+          "tp": 13.5,
+          "trailing": 3.9
+        },
+        {
+          "profit_range": [
+            9,
+            12
+          ],
+          "sl": 3.2,
+          "tp": 10.1,
+          "trailing": 7.4
+        }
+      ]
+    },
+    "short": {
+      "dynamic_tp_sl": true,
+      "time_exit": "14:30",
+      "tp_sl_table": [
+        {
+          "profit_range": [
+            0,
+            3
+          ],
+          "sl": 5.3,
+          "tp": 9.4,
+          "trailing": 2.9
+        },
+        {
+          "profit_range": [
+            3,
+            6
+          ],
+          "sl": 3.8,
+          "tp": 5.2,
+          "trailing": 6.2
+        },
+        {
+          "profit_range": [
+            6,
+            9
+          ],
+          "sl": 8.2,
+          "tp": 10.8,
+          "trailing": 1.7
+        },
+        {
+          "profit_range": [
+            9,
+            12
+          ],
+          "sl": 9.1,
+          "tp": 9.9,
+          "trailing": 1.6
+        }
+      ]
+    }
+  },
+  "risk_management": {
+    "position_size_pct": 10,
+    "max_positions": 1,
+    "max_daily_loss": 50,
+    "trading_hours": {
+      "start": "09:00",
+      "end": "14:30"
+    }
+  }
+}

@@ -1,0 +1,2786 @@
+<!-- Common Header for All Pages -->
+<script>console.log('🔥 HEADER_COMMON.HTML LOADED!');</script>
+<header>
+    <div class="logo">AUTO OPTIMIZE TRADING SYSTEM</div>
+    <div class="header-tabs">
+        <button class="header-tab" onclick="window.location.href='/#trading'" data-page="trading">Manual Trading</button>
+        <button class="header-tab" onclick="window.location.href='/#bot'" data-page="bot">Bot Trading</button>
+        <button class="header-tab" onclick="window.location.href='/strategy-builder'" data-page="strategy">Strategy</button>
+        <button class="header-tab" onclick="window.location.href='/backtest'" data-page="backtest">Backtest</button>
+        <button class="header-tab" onclick="window.location.href='/optimize'" data-page="optimize">Optimize</button>
+        <button class="header-tab" onclick="window.location.href='/hft'" data-page="hft">HFT</button>
+        <button class="header-tab" onclick="window.location.href='/exchange-settings'" data-page="exchange">Exchange</button>
+        <button class="header-tab" onclick="window.location.href='/client-management'" data-page="client-management">Clients</button>
+    </div>
+    <div class="header-right">
+        <!-- Data Source Toggle Switch with Online Tooltip -->
+        <div class="data-source-toggle" style="display: inline-flex; align-items: center; margin-right: 15px; background: #2a2e39; border-radius: 20px; padding: 3px; position: relative;">
+            <button id="offlineDataBtn" class="toggle-btn active" style="
+                padding: 6px 15px;
+                background: #2962ff;
+                color: white;
+                border: none;
+                border-radius: 18px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.3s;
+                font-weight: bold;
+            ">📁 Offline</button>
+            <button id="onlineDataBtn" class="toggle-btn" style="
+                padding: 6px 15px;
+                background: transparent;
+                color: #787b86;
+                border: none;
+                border-radius: 18px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.3s;
+                font-weight: bold;
+            ">🌐 Online</button>
+            
+        </div>
+        
+        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleFileUpload(event)">
+        
+        <!-- Upload Data Button with Tooltip (only show in Offline mode) -->
+        <div class="upload-data-container" id="uploadDataContainer" style="display: inline-block; position: relative; margin-right: 15px;">
+            <button id="uploadDataBtn" class="btn-upload">📁 Upload Data</button>
+            
+            <!-- Tooltip -->
+            <div class="data-tooltip" id="dataTooltip">
+                <div class="tooltip-header">Thông tin dữ liệu:</div>
+                <div class="tooltip-content">
+                    <div class="tooltip-item">
+                        <span>Trạng thái:</span>
+                        <span id="tooltipStatus">Chưa có dữ liệu</span>
+                    </div>
+                    <!-- Offline Data Info -->
+                    <div id="offlineInfo">
+                        <div class="tooltip-item">
+                            <span>Tên file:</span>
+                            <span id="tooltipFileName" class="tooltip-filename" title="">--</span>
+                        </div>
+                        <div class="tooltip-item">
+                            <span>Timeframe:</span>
+                            <span id="tooltipOfflineTimeframe" style="color: #2962ff; font-weight: 600;">--</span>
+                        </div>
+                    </div>
+                    <!-- Online Data Info -->
+                    <div id="onlineInfo" style="display: none;">
+                        <div class="tooltip-item">
+                            <span>Exchange:</span>
+                            <span id="tooltipExchange">--</span>
+                        </div>
+                        <div class="tooltip-item">
+                            <span>Symbol:</span>
+                            <span id="tooltipSymbol">--</span>
+                        </div>
+                        <div class="tooltip-item">
+                            <span>Timeframe:</span>
+                            <span id="tooltipTimeframe">--</span>
+                        </div>
+                    </div>
+                    <!-- Common Info -->
+                    <div class="tooltip-item">
+                        <span>Từ ngày:</span>
+                        <span id="tooltipStartDate">--</span>
+                    </div>
+                    <div class="tooltip-item">
+                        <span>Đến ngày:</span>
+                        <span id="tooltipEndDate">--</span>
+                    </div>
+                    <div class="tooltip-item">
+                        <span>Số nến:</span>
+                        <span id="tooltipCandles">--</span>
+                    </div>
+                    <div class="tooltip-item" id="offlineSizeItem">
+                        <span>Dung lượng:</span>
+                        <span id="tooltipSize">--</span>
+                    </div>
+                </div>
+                <div class="tooltip-footer">
+                    <button class="btn-tooltip-action" onclick="showTimeframeModalFirst()">
+                        📁 Upload
+                    </button>
+                    <button class="btn-tooltip-delete" onclick="clearOfflineData()">🗑️ Xóa</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Connection Button (only show in Online mode) -->
+        <div class="connection-container" id="connectionContainer" style="display: none;">
+            <button id="connectionBtn" class="btn-upload">🌐 Connection</button>
+            
+            <!-- Connection Tooltip -->
+            <div class="online-connection-tooltip" id="onlineConnectionTooltip">
+                <div class="tooltip-header">Kết nối Exchange:</div>
+                <div class="tooltip-content">
+                    <div class="tooltip-item">
+                        <span>Trạng thái:</span>
+                        <span id="onlineStatus">Chưa kết nối</span>
+                    </div>
+                    
+                    <!-- Data Profile Section -->
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.05);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <span style="font-size: 16px;">📊</span>
+                            <span style="font-weight: 600; color: #2962ff;">Data Profile (Chart)</span>
+                        </div>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <select id="dataProfileSelect" class="quick-profile-select" style="flex: 1;">
+                                <option value="">-- Select Data Profile --</option>
+                            </select>
+                            <button id="connectDataBtn" onclick="quickConnectDataProfile(event)" style="
+                                padding: 4px 12px;
+                                background: #2962ff;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-size: 11px;
+                                white-space: nowrap;
+                            " title="Connect data profile">🔌</button>
+                        </div>
+                        <div id="dataProfileStatus" style="font-size: 11px; margin-top: 4px; color: #787b86;"></div>
+                    </div>
+                    
+                    <div id="noProfileMessage" style="display: none; padding: 8px; background: rgba(239, 83, 80, 0.1); border-radius: 4px; margin: 8px 0; font-size: 11px; color: #ef5350;">
+                        ⚠️ Chưa có profile. Vui lòng tạo profile ở <a href="/exchange-settings" style="color: #2962ff; text-decoration: underline;">Exchange Settings</a>
+                    </div>
+                    <div class="tooltip-item">
+                        <span>Symbol:</span>
+                        <select id="quickSymbolSelect" class="quick-profile-select">
+                            <option value="">-- Chọn Symbol --</option>
+                        </select>
+                    </div>
+                    <div class="tooltip-item" id="profileTimeframeItem">
+                        <span>Timeframe:</span>
+                        <span id="profileTimeframe" style="color: #2962ff; font-weight: 600;">--</span>
+                    </div>
+                    <div id="onlineConnectedInfo" style="display: none;">
+                        <div class="tooltip-item">
+                            <span>Exchange:</span>
+                            <span id="connectedExchange">--</span>
+                        </div>
+                        <div class="tooltip-item">
+                            <span>Từ ngày:</span>
+                            <span id="onlineStartDate">--</span>
+                        </div>
+                        <div class="tooltip-item">
+                            <span>Đến ngày:</span>
+                            <span id="onlineEndDate">--</span>
+                        </div>
+                        <div class="tooltip-item">
+                            <span>Số nến:</span>
+                            <span id="connectedCandles">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tooltip-footer">
+                    <button class="btn-tooltip-action" onclick="reloadConnectionProfiles()">
+                        🔄 Reload
+                    </button>
+                    <button class="btn-tooltip-delete" onclick="disconnectAllProfiles()">
+                        🔌 Disconnect All
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn-icon" onclick="openSettingsModal()" title="Settings">⚙️</button>
+        
+        <!-- DEBUG: Test modal button -->
+        <button class="btn-icon" onclick="testModal()" title="Test Modal" style="background: red; margin-left: 10px;">TEST</button>
+    </div>
+</header>
+
+<script>
+// DEBUG: Test modal function
+function testModal() {
+    console.log('🔍 Testing modal...');
+    const modal = document.getElementById('timeframeModal');
+    console.log('📦 Modal element:', modal);
+    if (modal) {
+        console.log('✅ Modal found!');
+        console.log('📊 Modal display:', modal.style.display);
+        modal.style.display = 'flex';
+        console.log('✅ Modal display set to flex');
+    } else {
+        console.error('❌ Modal NOT found in DOM!');
+        console.log('🔍 All elements with "modal" in ID:', 
+            Array.from(document.querySelectorAll('[id*="modal"]')).map(el => el.id)
+        );
+    }
+}
+</script>
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="settings-modal" style="display: none;">
+    <div class="settings-modal-content">
+        <div class="settings-modal-header">
+            <h2>⚙️ Settings</h2>
+            <button class="settings-close" onclick="closeSettingsModal()">✕</button>
+        </div>
+        <div class="settings-modal-body">
+            <div class="settings-section">
+                <h3>🎨 Appearance</h3>
+                <div class="theme-selector">
+                    <label class="theme-option">
+                        <input type="radio" name="theme" value="dark" onclick="switchTheme('dark')" checked>
+                        <div class="theme-preview dark-preview">
+                            <div class="theme-name">Dark Theme</div>
+                            <div class="theme-desc">Default dark interface</div>
+                        </div>
+                    </label>
+                    <label class="theme-option">
+                        <input type="radio" name="theme" value="light" onclick="switchTheme('light')">
+                        <div class="theme-preview light-preview">
+                            <div class="theme-name">Light Theme</div>
+                            <div class="theme-desc">Bright interface</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Online Connection Modal -->
+
+<style>
+/* Settings Modal */
+.settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.settings-modal-content {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.settings-modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.settings-modal-header h2 {
+    color: var(--text-primary);
+    font-size: 20px;
+    margin: 0;
+}
+
+.settings-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.settings-close:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.settings-modal-body {
+    padding: 25px;
+    overflow-y: auto;
+    max-height: calc(80vh - 80px);
+}
+
+.settings-section {
+    margin-bottom: 30px;
+}
+
+.settings-section h3 {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.theme-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.theme-option {
+    cursor: pointer;
+}
+
+.theme-option input[type="radio"] {
+    display: none;
+}
+
+.theme-preview {
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s;
+}
+
+.theme-option input[type="radio"]:checked + .theme-preview {
+    border-color: var(--accent-color);
+    background: var(--bg-tertiary);
+}
+
+.theme-preview:hover {
+    border-color: var(--accent-color);
+}
+
+.dark-preview {
+    background: linear-gradient(135deg, #1e222d 0%, #131722 100%);
+}
+
+.light-preview {
+    background: linear-gradient(135deg, #ffffff 0%, #f5f7fa 100%);
+}
+
+.theme-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.light-preview .theme-name,
+.light-preview .theme-desc {
+    color: #1e222d;
+}
+
+.theme-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.light-preview .theme-desc {
+    color: #6b7280;
+}
+
+/* Light Theme Variables */
+body.light-theme {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f7fa;
+    --bg-tertiary: #e5e7eb;
+    --text-primary: #1e222d;
+    --text-secondary: #6b7280;
+    --border-color: #d1d5db;
+    --accent-color: #2962ff;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+}
+
+body.light-theme {
+    background-color: #f5f7fa;
+    color: #1e222d;
+}
+
+body.light-theme header {
+    background-color: #ffffff;
+    border-bottom-color: #e5e7eb;
+}
+
+body.light-theme .logo {
+    color: #2962ff;
+}
+
+body.light-theme .header-tab {
+    color: #6b7280;
+}
+
+body.light-theme .header-tab:hover {
+    color: #1e222d;
+}
+
+body.light-theme .header-tab.active {
+    color: #2962ff;
+    border-bottom-color: #2962ff;
+}
+
+body.light-theme .chart-section,
+body.light-theme .sidebar-panel {
+    background-color: #ffffff;
+}
+
+body.light-theme .chart-controls {
+    background-color: #f5f7fa;
+    border-bottom-color: #e5e7eb;
+}
+
+body.light-theme .symbol-info {
+    color: #1e222d;
+}
+
+body.light-theme .symbol {
+    color: #1e222d;
+}
+
+body.light-theme .price {
+    color: #10b981;
+}
+
+body.light-theme .btn-icon,
+body.light-theme .btn-upload {
+    background: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .btn-icon:hover,
+body.light-theme .btn-upload:hover {
+    background: #d1d5db;
+}
+
+body.light-theme .btn-icon.active {
+    background: #2962ff;
+    color: #ffffff;
+}
+
+body.light-theme .sidebar-title {
+    color: #1e222d;
+    border-bottom-color: #e5e7eb;
+}
+
+body.light-theme .form-input,
+body.light-theme .form-select,
+body.light-theme .form-control {
+    background: #ffffff;
+    border-color: #d1d5db;
+    color: #1e222d;
+}
+
+body.light-theme .form-input:focus,
+body.light-theme .form-select:focus,
+body.light-theme .form-control:focus {
+    border-color: #2962ff;
+}
+
+body.light-theme .settings-modal-content {
+    background: #ffffff;
+}
+
+body.light-theme .settings-modal-header {
+    border-bottom-color: #e5e7eb;
+}
+
+body.light-theme .timeframe-selector {
+    background: #f5f7fa;
+    border-top-color: #e5e7eb;
+}
+
+body.light-theme .tf-btn {
+    background: transparent;
+    color: #6b7280;
+}
+
+body.light-theme .tf-btn:hover {
+    background: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .tf-btn.active {
+    background: #2962ff;
+    color: #ffffff;
+}
+
+body.light-theme .btn-nav {
+    background: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .btn-nav:hover {
+    background: #d1d5db;
+}
+
+/* Sidebar panels */
+body.light-theme .sidebar-content {
+    background: #ffffff;
+}
+
+body.light-theme .sidebar-content h2,
+body.light-theme .sidebar-content h3 {
+    color: #1e222d;
+}
+
+body.light-theme .order-book,
+body.light-theme .positions-table {
+    background: #f5f7fa;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .order-item,
+body.light-theme .position-item {
+    border-bottom-color: #e5e7eb;
+}
+
+/* Buttons */
+body.light-theme .btn-buy {
+    background: #10b981;
+}
+
+body.light-theme .btn-sell {
+    background: #ef4444;
+}
+
+body.light-theme .btn-primary {
+    background: #2962ff;
+}
+
+body.light-theme .btn-secondary {
+    background: #6b7280;
+}
+
+/* Bot Trading */
+body.light-theme .bot-status {
+    background: #f5f7fa;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .bot-stats,
+body.light-theme .bot-logs {
+    background: #f5f7fa;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .stat-row {
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .log-entry {
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+/* Strategy Builder */
+body.light-theme .condition-item {
+    background: #f5f7fa;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .condition-text {
+    color: #1e222d;
+}
+
+body.light-theme .btn-add-condition {
+    background: #2962ff;
+}
+
+/* Workspace */
+body.light-theme .workspace-container {
+    background: #f5f7fa;
+}
+
+body.light-theme .control-panel,
+body.light-theme .panel-section {
+    background: #ffffff;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .panel-section h3 {
+    color: #1e222d;
+    border-bottom-color: #e5e7eb;
+}
+
+/* Exchange Settings */
+body.light-theme .exchange-container {
+    background: #f5f7fa;
+}
+
+body.light-theme .exchange-sidebar,
+body.light-theme .exchange-main {
+    background: #ffffff;
+}
+
+body.light-theme .panel-header {
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .profile-item {
+    background: #f5f7fa;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .profile-item:hover {
+    border-color: #2962ff;
+    background: #ffffff;
+}
+
+body.light-theme .profile-name {
+    color: #1e222d;
+}
+
+body.light-theme .profile-meta {
+    color: #6b7280;
+}
+
+body.light-theme .form-section h3 {
+    color: #6b7280;
+}
+
+body.light-theme .alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-left-color: #10b981;
+}
+
+body.light-theme .alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-left-color: #ef4444;
+}
+
+body.light-theme .account-info {
+    background: #f5f7fa;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .info-item {
+    background: #ffffff;
+}
+
+body.light-theme .info-label {
+    color: #6b7280;
+}
+
+body.light-theme .info-value {
+    color: #1e222d;
+}
+
+/* HFT */
+body.light-theme .hft-container {
+    background: #f5f7fa;
+}
+
+body.light-theme .hft-panel {
+    background: #ffffff;
+    border-color: #e5e7eb;
+}
+
+/* Tooltips */
+body.light-theme .data-tooltip {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .tooltip-header {
+    background: #f5f7fa;
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .tooltip-item {
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .tooltip-footer {
+    border-top-color: #e5e7eb;
+}
+
+body.light-theme .btn-tooltip-action {
+    background: #2962ff;
+}
+
+body.light-theme .btn-tooltip-delete {
+    background: #ef4444;
+}
+
+/* Scrollbar Light Theme */
+body.light-theme ::-webkit-scrollbar-track {
+    background: #f5f7fa;
+}
+
+body.light-theme ::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+}
+
+body.light-theme ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Backtest/Optimize Pages */
+body.light-theme .backtest-main,
+body.light-theme .optimize-main {
+    background: #f5f7fa;
+}
+
+body.light-theme .backtest-sidebar,
+body.light-theme .optimize-sidebar,
+body.light-theme .backtest-content {
+    background: #ffffff;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .backtest-sidebar h3,
+body.light-theme .optimize-sidebar h3 {
+    color: #1e222d;
+}
+
+/* Stats Cards */
+body.light-theme .stat-card {
+    background: #ffffff;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .stat-label {
+    color: #6b7280;
+}
+
+body.light-theme .stat-value {
+    color: #1e222d;
+}
+
+body.light-theme .stat-value.positive {
+    color: #10b981;
+}
+
+body.light-theme .stat-value.negative {
+    color: #ef4444;
+}
+
+body.light-theme .stats-grid-fullwidth {
+    background: transparent;
+}
+
+/* Tabs */
+body.light-theme .backtest-tabs,
+body.light-theme .tabs {
+    background: #f5f7fa;
+}
+
+body.light-theme .backtest-tab,
+body.light-theme .tab-btn {
+    color: #6b7280;
+    background: transparent;
+}
+
+body.light-theme .backtest-tab:hover,
+body.light-theme .tab-btn:hover {
+    background: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .backtest-tab.active,
+body.light-theme .tab-btn.active {
+    background: #2962ff;
+    color: #ffffff;
+}
+
+body.light-theme .tab-content {
+    background: #ffffff;
+}
+
+/* Tables */
+body.light-theme .data-table {
+    background: #ffffff;
+}
+
+body.light-theme .data-table thead {
+    background: #f5f7fa;
+    color: #1e222d;
+}
+
+body.light-theme .data-table th {
+    border-bottom-color: #e5e7eb;
+    color: #6b7280;
+}
+
+body.light-theme .data-table td {
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .data-table tbody tr:hover {
+    background: #f5f7fa;
+}
+
+body.light-theme .performance-table,
+body.light-theme .detailed-stats-table {
+    background: #ffffff;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .performance-table th,
+body.light-theme .detailed-stats-table th {
+    background: #f5f7fa;
+    color: #6b7280;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .performance-table td,
+body.light-theme .detailed-stats-table td {
+    color: #1e222d;
+    border-color: #e5e7eb;
+}
+
+/* Bottom Section */
+body.light-theme .bottom-section {
+    background: #ffffff;
+    border-top-color: #e5e7eb;
+}
+
+body.light-theme .tab-close {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+body.light-theme .tab-close:hover {
+    background: #dc2626;
+}
+
+/* Logs */
+body.light-theme .logs-container {
+    background: #f5f7fa;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .log-entry {
+    color: #1e222d;
+    border-bottom-color: #e5e7eb;
+}
+
+/* File input button */
+body.light-theme .btn-file {
+    background: #f5f7fa;
+    border-color: #d1d5db;
+    color: #1e222d;
+}
+
+body.light-theme .btn-file:hover {
+    background: #e5e7eb;
+    border-color: #2962ff;
+}
+
+/* Run buttons */
+body.light-theme .btn-run-backtest,
+body.light-theme .btn-run-optimize {
+    background: #2962ff;
+    color: #ffffff;
+}
+
+body.light-theme .btn-run-backtest:hover:not(:disabled),
+body.light-theme .btn-run-optimize:hover:not(:disabled) {
+    background: #1e53e5;
+}
+
+body.light-theme .btn-run-backtest:disabled,
+body.light-theme .btn-run-optimize:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+}
+
+/* Chart container */
+body.light-theme .chart-canvas,
+body.light-theme #tradingChart,
+body.light-theme #strategyChart,
+body.light-theme #equityChart {
+    background: #ffffff;
+}
+
+/* Badges */
+body.light-theme .badge {
+    border-color: #e5e7eb;
+}
+
+body.light-theme .badge.long {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+body.light-theme .badge.short {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+body.light-theme .profit {
+    color: #10b981;
+}
+
+body.light-theme .loss {
+    color: #ef4444;
+}
+
+/* Exit reason */
+body.light-theme .exit-reason {
+    color: #6b7280;
+    background: #f5f7fa;
+}
+
+/* Modal overlays */
+body.light-theme .modal-overlay {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+body.light-theme .modal-content {
+    background: #ffffff;
+    border-color: #e5e7eb;
+}
+
+body.light-theme .modal-header {
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .modal-footer {
+    border-top-color: #e5e7eb;
+}
+
+/* Connection Container */
+.connection-container {
+    position: relative;
+    display: inline-block;
+}
+
+/* Online Connection Tooltip */
+.online-connection-tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: #1e222d;
+    border: 1px solid #2a2e39;
+    border-radius: 8px;
+    padding: 0;
+    min-width: 320px;
+    max-width: 380px;
+    max-height: 500px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+}
+
+.online-connection-tooltip.show {
+    display: block;
+}
+}
+
+.online-connection-tooltip .tooltip-header {
+    background: #2a2e39;
+    padding: 10px 15px;
+    border-bottom: 1px solid #363a45;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    font-size: 12px;
+    color: #d1d4dc;
+}
+
+.online-connection-tooltip .tooltip-content {
+    padding: 12px 15px;
+}
+
+.online-connection-tooltip .tooltip-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 11px;
+    border-bottom: 1px solid #2a2e39;
+}
+
+.online-connection-tooltip .tooltip-item:last-child {
+    border-bottom: none;
+}
+
+.online-connection-tooltip .tooltip-item span:first-child {
+    color: #787b86;
+    white-space: nowrap;
+    margin-right: 10px;
+}
+
+.online-connection-tooltip .tooltip-item span:last-child {
+    color: #d1d4dc;
+    font-weight: 500;
+}
+
+.quick-profile-select {
+    flex: 1;
+    padding: 6px 8px;
+    background: #131722;
+    border: 1px solid #2a2e39;
+    border-radius: 4px;
+    color: #d1d4dc;
+    font-size: 11px;
+    outline: none;
+    cursor: pointer;
+}
+
+.quick-profile-select:hover {
+    border-color: #2962ff;
+}
+
+.quick-profile-select option {
+    background: #131722;
+    color: #d1d4dc;
+}
+
+.quick-input {
+    flex: 1;
+    padding: 6px 8px;
+    background: #131722;
+    border: 1px solid #2a2e39;
+    border-radius: 4px;
+    color: #d1d4dc;
+    font-size: 11px;
+    outline: none;
+}
+
+.quick-input:hover,
+.quick-input:focus {
+    border-color: #2962ff;
+}
+
+.quick-input::placeholder {
+    color: #787b86;
+}
+
+.online-connection-tooltip .tooltip-footer {
+    border-top: 1px solid #2a2e39;
+    padding: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.online-connection-tooltip .btn-tooltip-action {
+    flex: 1;
+    padding: 8px 12px;
+    background: #2962ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.online-connection-tooltip .btn-tooltip-action:hover {
+    background: #1e53e5;
+}
+
+.online-connection-tooltip .btn-tooltip-delete {
+    padding: 8px 12px;
+    background: #ef5350;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.online-connection-tooltip .btn-tooltip-delete:hover {
+    background: #d32f2f;
+}
+
+/* Light theme for online tooltip */
+body.light-theme .online-connection-tooltip {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .online-connection-tooltip .tooltip-header {
+    background: #f5f7fa;
+    border-bottom-color: #e5e7eb;
+    color: #1e222d;
+}
+
+body.light-theme .online-connection-tooltip .tooltip-item {
+    border-bottom-color: #e5e7eb;
+}
+
+body.light-theme .online-connection-tooltip .tooltip-item span:first-child {
+    color: #6b7280;
+}
+
+body.light-theme .online-connection-tooltip .tooltip-item span:last-child {
+    color: #1e222d;
+}
+
+body.light-theme .online-connection-tooltip .tooltip-footer {
+    border-top-color: #e5e7eb;
+}
+
+body.light-theme .quick-profile-select {
+    background: #ffffff;
+    border-color: #d1d5db;
+    color: #1e222d;
+}
+
+body.light-theme .quick-profile-select option {
+    background: #ffffff;
+    color: #1e222d;
+}
+
+body.light-theme .quick-input {
+    background: #ffffff;
+    border-color: #d1d5db;
+    color: #1e222d;
+}
+
+body.light-theme .quick-input::placeholder {
+    color: #9ca3af;
+}
+</style>
+
+<!-- Timeframe Selection Modal -->
+<div id="timeframeModal" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+">
+    <div style="
+        background: #1e222d;
+        border-radius: 8px;
+        padding: 25px;
+        width: 400px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    ">
+        <h3 style="margin: 0 0 20px 0; color: #fff; font-size: 18px;">📊 Chọn Timeframe</h3>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: #d1d4dc; font-size: 14px;">
+                Timeframe của dữ liệu:
+            </label>
+            <select id="timeframeSelect" style="
+                width: 100%;
+                padding: 10px;
+                background: #2a2e39;
+                border: 1px solid #434651;
+                border-radius: 4px;
+                color: #fff;
+                font-size: 14px;
+                cursor: pointer;
+            ">
+                <option value="1m">1 phút (1m)</option>
+                <option value="3m">3 phút (3m)</option>
+                <option value="5m">5 phút (5m)</option>
+                <option value="15m">15 phút (15m)</option>
+                <option value="30m">30 phút (30m)</option>
+                <option value="1h">1 giờ (1h)</option>
+                <option value="2h">2 giờ (2h)</option>
+                <option value="4h">4 giờ (4h)</option>
+                <option value="1d">1 ngày (1d)</option>
+                <option value="1w">1 tuần (1w)</option>
+            </select>
+        </div>
+        
+        <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="closeTimeframeModal()" style="
+                padding: 8px 20px;
+                background: #434651;
+                border: none;
+                border-radius: 4px;
+                color: #d1d4dc;
+                cursor: pointer;
+                font-size: 14px;
+            ">Hủy</button>
+            <button onclick="confirmTimeframeAndUpload()" style="
+                padding: 8px 20px;
+                background: #2962ff;
+                border: none;
+                border-radius: 4px;
+                color: white;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+            ">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('✅ header_common.html script loaded');
+
+// Global variable for data mode
+let currentDataMode = 'offline';
+
+function changeDataMode(mode) {
+    console.log('🔄 changeDataMode called:', mode);
+    currentDataMode = mode;
+    const offlineBtn = document.getElementById('offlineDataBtn');
+    const onlineBtn = document.getElementById('onlineDataBtn');
+    const uploadContainer = document.getElementById('uploadDataContainer');
+    const connectionContainer = document.getElementById('connectionContainer');
+    
+    localStorage.setItem('dataSource', mode);
+    
+    if (mode === 'offline') {
+        console.log('📁 Switching to Offline mode');
+        if (offlineBtn) {
+            offlineBtn.style.background = '#2962ff';
+            offlineBtn.style.color = 'white';
+            offlineBtn.classList.add('active');
+        }
+        if (onlineBtn) {
+            onlineBtn.style.background = 'transparent';
+            onlineBtn.style.color = '#787b86';
+            onlineBtn.classList.remove('active');
+        }
+        if (uploadContainer) {
+            uploadContainer.style.display = 'inline-block';
+            console.log('✅ Upload container shown');
+        }
+        if (connectionContainer) {
+            connectionContainer.style.display = 'none';
+            console.log('✅ Connection container hidden');
+        }
+        
+        // Close all tooltips
+        document.getElementById('dataTooltip')?.classList.remove('show');
+        document.getElementById('onlineConnectionTooltip')?.classList.remove('show');
+        
+        if (typeof window.onDataSourceChanged === 'function') {
+            window.onDataSourceChanged('offline');
+        }
+    } else {
+        console.log('🌐 Switching to Online mode');
+        console.log('📦 Elements found:', { 
+            offlineBtn: !!offlineBtn, 
+            onlineBtn: !!onlineBtn,
+            uploadContainer: !!uploadContainer, 
+            connectionContainer: !!connectionContainer 
+        });
+        
+        if (offlineBtn) {
+            offlineBtn.style.background = 'transparent';
+            offlineBtn.style.color = '#787b86';
+            offlineBtn.classList.remove('active');
+        }
+        if (onlineBtn) {
+            onlineBtn.style.background = '#2962ff';
+            onlineBtn.style.color = 'white';
+            onlineBtn.classList.add('active');
+        }
+        if (uploadContainer) {
+            uploadContainer.style.display = 'none';
+            console.log('✅ Upload container hidden');
+        } else {
+            console.error('❌ uploadContainer not found!');
+        }
+        if (connectionContainer) {
+            connectionContainer.style.display = 'inline-block';
+            console.log('✅ Connection container shown');
+        } else {
+            console.error('❌ connectionContainer not found!');
+        }
+        
+        // Close all tooltips
+        document.getElementById('dataTooltip')?.classList.remove('show');
+        document.getElementById('onlineConnectionTooltip')?.classList.remove('show');
+        
+        if (typeof window.onDataSourceChanged === 'function') {
+            window.onDataSourceChanged('online');
+        }
+    }
+}
+
+function updateExchangeFields() {
+    const exchange = document.getElementById('exchangeSelect').value;
+    document.getElementById('mt5Fields').style.display = 'none';
+    document.getElementById('binanceFields').style.display = 'none';
+    document.getElementById('dnseFields').style.display = 'none';
+    
+    if (exchange === 'mt5') {
+        document.getElementById('mt5Fields').style.display = 'block';
+    } else if (exchange === 'binance') {
+        document.getElementById('binanceFields').style.display = 'block';
+    } else if (exchange === 'dnse') {
+        document.getElementById('dnseFields').style.display = 'block';
+    }
+}
+
+
+function updateOnlineConnectionTooltip(info) {
+    try {
+        // Update status
+        document.getElementById('onlineStatus').innerHTML = '✅ Đã kết nối';
+        document.getElementById('onlineStatus').style.color = '#26a69a';
+        
+        // Update connected info
+        document.getElementById('connectedExchange').textContent = info.exchange?.toUpperCase() || '--';
+        document.getElementById('connectedCandles').textContent = info.candles ? info.candles.toLocaleString() : '--';
+        document.getElementById('onlineStartDate').textContent = info.start_date || '--';
+        document.getElementById('onlineEndDate').textContent = info.end_date || '--';
+        
+        // Show connected info
+        document.getElementById('onlineConnectedInfo').style.display = 'block';
+        
+        // Update quick select to show current profile, symbol, timeframe
+        const quickSelect = document.getElementById('quickProfileSelect');
+        if (quickSelect && info.profile) {
+            quickSelect.value = info.profile;
+        }
+        
+        const symbolInput = document.getElementById('quickSymbolInput');
+        if (symbolInput && info.symbol) {
+            symbolInput.value = info.symbol;
+        }
+        
+        const timeframeSelect = document.getElementById('quickTimeframeSelect');
+        if (timeframeSelect && info.timeframe) {
+            timeframeSelect.value = info.timeframe;
+        }
+        
+        console.log('✅ Online connection tooltip updated');
+    } catch (error) {
+        console.error('❌ Error updating connection tooltip:', error);
+    }
+}
+
+// Load profiles into quick select dropdown
+window.loadQuickProfileSelect = async function() {
+    try {
+        console.log('🔄 Loading exchange profiles...');
+        const response = await fetch('/api/exchange/profiles');
+        
+        if (!response.ok) {
+            console.error('❌ API response not OK:', response.status);
+            return;
+        }
+        
+        const result = await response.json();
+        
+        console.log('📦 Profiles API response:', JSON.stringify(result, null, 2));
+        
+        const dataSelect = document.getElementById('dataProfileSelect');
+        const noProfileMsg = document.getElementById('noProfileMessage');
+        
+        if (!dataSelect) {
+            console.error('❌ Data profile select element not found in DOM');
+            console.error('  Try again when Connection modal is open...');
+            return;
+        }
+        
+        console.log('✅ Data profile select found');
+        
+        // Store current value
+        const currentDataValue = dataSelect ? dataSelect.value : '';
+        
+        // Clear and rebuild data profile dropdown
+        if (dataSelect) {
+            dataSelect.innerHTML = '';
+            const dataDefaultOption = document.createElement('option');
+            dataDefaultOption.value = '';
+            dataDefaultOption.textContent = '-- Select Data Profile --';
+            dataSelect.appendChild(dataDefaultOption);
+        }
+        
+        console.log('🧹 Cleared select, added default option');
+        
+        if (result.success && result.profiles && result.profiles.length > 0) {
+            // Store profiles for later use
+            window.exchangeProfiles = result.profiles;
+            
+            console.log(`✅ Found ${result.profiles.length} profiles, filtering by usage...`);
+            
+            let dataCount = 0;
+            
+            result.profiles.forEach((profile) => {
+                // Add to data profile dropdown if use_for_data is true
+                if (dataSelect && profile.use_for_data !== false) {  // Default true for backward compatibility
+                    const option = document.createElement('option');
+                    option.value = profile.name;
+                    option.textContent = `${profile.name} (${profile.exchange.toUpperCase()})`;
+                    if (profile.connected) {
+                        option.textContent += ' ✅';
+                    }
+                    dataSelect.appendChild(option);
+                    dataCount++;
+                    console.log(`  📊 Data: ${profile.name}`);
+                }
+            });
+            
+            console.log(`✅ Profiles added - Data: ${dataCount}`);
+            
+            // Restore value if it exists
+            if (dataSelect && currentDataValue && currentDataValue !== '') {
+                dataSelect.value = currentDataValue;
+            }
+            
+            // Hide no profile message
+            if (noProfileMsg) noProfileMsg.style.display = 'none';
+            
+            console.log('✅ Profiles loaded successfully');
+        } else {
+            console.warn('⚠️ No profiles found or API error');
+            window.exchangeProfiles = [];
+            
+            // Show no profile message
+            if (noProfileMsg) noProfileMsg.style.display = 'block';
+        }
+        
+        // Add event listeners to load tickers when profile changes
+        if (dataSelect) {
+            dataSelect.onchange = function() {
+                console.log('Data Profile selected:', this.value);
+                const selectedProfile = window.exchangeProfiles?.find(p => p.name === this.value);
+                
+                if (selectedProfile) {
+                    // Update status and timeframe immediately
+                    const statusDiv = document.getElementById('dataProfileStatus');
+                    const timeframeSpan = document.getElementById('profileTimeframe');
+                    const symbolSelect = document.getElementById('quickSymbolSelect');
+                    const tooltipStatus = document.getElementById('onlineStatus');
+                    
+                    // Check if profile is connected (from localStorage or API) (#3, #7)
+                    const connectedProfiles = JSON.parse(localStorage.getItem('connectedProfiles') || '[]');
+                    const isConnected = selectedProfile.connected || connectedProfiles.includes(selectedProfile.name);
+                    
+                    // Update main tooltip status (#3)
+                    if (tooltipStatus) {
+                        if (isConnected) {
+                            tooltipStatus.innerHTML = '✅ Đã kết nối';
+                            tooltipStatus.style.color = '#26a69a';
+                        } else {
+                            tooltipStatus.innerHTML = 'Chưa kết nối';
+                            tooltipStatus.style.color = '#787b86';
+                        }
+                    }
+                    
+                    if (statusDiv) {
+                        const connectionStatus = isConnected ? '✅ Connected' : '';
+                        statusDiv.innerHTML = `<span style="color: #2962ff;">${connectionStatus} ${selectedProfile.exchange.toUpperCase()} - ${selectedProfile.timeframe || 'M1'}</span>`;
+                    }
+                    
+                    if (timeframeSpan) {
+                        timeframeSpan.textContent = selectedProfile.timeframe || 'M1';
+                        timeframeSpan.style.color = '#2962ff';
+                        timeframeSpan.style.fontWeight = '600';
+                    }
+                    
+                    // Show symbol if available
+                    if (symbolSelect && selectedProfile.symbol) {
+                        symbolSelect.value = selectedProfile.symbol;
+                    }
+                } else {
+                    const statusDiv = document.getElementById('dataProfileStatus');
+                    const timeframeSpan = document.getElementById('profileTimeframe');
+                    const tooltipStatus = document.getElementById('onlineStatus');
+                    
+                    if (statusDiv) statusDiv.innerHTML = '';
+                    if (timeframeSpan) timeframeSpan.textContent = '--';
+                    if (tooltipStatus) {
+                        tooltipStatus.innerHTML = 'Chưa kết nối';
+                        tooltipStatus.style.color = '#787b86';
+                    }
+                }
+                
+                if (window.loadProfileTickers) window.loadProfileTickers(this.value);
+            };
+            
+            // Trigger change event if a profile is already selected (on page load)
+            if (dataSelect.value && dataSelect.value !== '') {
+                dataSelect.onchange();
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error loading quick profiles:', error);
+        console.error('  Stack:', error.stack);
+    }
+}
+
+// Load tickers for selected profile
+window.loadProfileTickers = async function(profileName) {
+    const symbolSelect = document.getElementById('quickSymbolSelect');
+    if (!symbolSelect) return;
+    
+    // Clear current options
+    symbolSelect.innerHTML = '<option value="">-- Chọn Symbol --</option>';
+    
+    if (!profileName || !window.exchangeProfiles) return;
+    
+    // Find profile
+    const profile = window.exchangeProfiles.find(p => p.name === profileName);
+    if (!profile) return;
+    
+    try {
+        // Get profile credentials to extract tickers
+        const response = await fetch(`/api/exchange/profile/${encodeURIComponent(profileName)}/credentials`);
+        const result = await response.json();
+        
+        if (result.success && result.credentials && result.credentials.tickers) {
+            const tickers = result.credentials.tickers.split(',').map(t => t.trim()).filter(t => t);
+            
+            tickers.forEach(ticker => {
+                const option = document.createElement('option');
+                option.value = ticker;
+                option.textContent = ticker;
+                symbolSelect.appendChild(option);
+            });
+            
+            // Auto-select first ticker
+            if (tickers.length > 0) {
+                symbolSelect.value = tickers[0];
+            }
+            
+            console.log(`✅ Loaded ${tickers.length} tickers for profile: ${profileName}`);
+        }
+    } catch (error) {
+        console.error('Error loading tickers:', error);
+    }
+}
+
+// Quick connect from tooltip
+async function quickConnectProfile(event) {
+    const profileName = document.getElementById('quickProfileSelect').value;
+    
+    if (!profileName) {
+        alert('⚠️ Vui lòng chọn Profile!');
+        return;
+    }
+    
+    // Get profile to extract timeframe, tickers, and display_candles
+    const profile = window.exchangeProfiles?.find(p => p.name === profileName);
+    if (!profile) {
+        alert('⚠️ Không tìm thấy profile!');
+        return;
+    }
+    
+    // Get settings from profile
+    let timeframe = profile.timeframe || 'M1';
+    let candles = parseInt(profile.display_candles || '1000', 10); // Get from profile, default 1000
+    console.log('📊 Profile settings:', { timeframe, candles });
+    
+    // Get tickers from profile credentials
+    let tickers = [];
+    try {
+        const credResponse = await fetch(`/api/exchange/profile/${encodeURIComponent(profileName)}/credentials`);
+        const credResult = await credResponse.json();
+        
+        if (credResult.success && credResult.credentials && credResult.credentials.tickers) {
+            tickers = credResult.credentials.tickers.split(',').map(t => t.trim()).filter(t => t);
+        }
+    } catch (error) {
+        console.error('Error loading profile tickers:', error);
+    }
+    
+    if (tickers.length === 0) {
+        alert('⚠️ Profile chưa có tickers. Vui lòng config tickers trong Exchange Settings!');
+        return;
+    }
+    
+    console.log('📊 Profile tickers:', tickers);
+    
+    // Use first ticker as default symbol
+    const symbol = tickers[0];
+    
+    // Show loading on button
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳ Đang kết nối...';
+    btn.disabled = true;
+    
+    try {
+        console.log('📡 Loading data from profile:', profileName, symbol, timeframe);
+        
+        const response = await fetch(`/api/exchange/load-data/${encodeURIComponent(profileName)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                symbol: symbol,
+                timeframe: timeframe,
+                candles: candles
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Connected! Loaded', result.data.length, 'candles');
+            
+            // Save connection info to localStorage
+            const connectionInfo = {
+                profile: profileName,
+                exchange: result.exchange,
+                symbol: result.symbol,
+                timeframe: result.timeframe,
+                candles: result.data.length,
+                start_date: result.start_date,
+                end_date: result.end_date
+            };
+            localStorage.setItem('onlineConnection', JSON.stringify(connectionInfo));
+            localStorage.setItem('dataSource', 'online');
+            
+            // Update online connection tooltip
+            updateOnlineConnectionTooltip(connectionInfo);
+            
+            // Update data tooltip
+            updateOnlineTooltip({
+                exchange: result.exchange.toUpperCase(),
+                symbol: result.symbol,
+                timeframe: result.timeframe,
+                candles: result.data.length,
+                start_date: result.start_date,
+                end_date: result.end_date
+            });
+            
+            // Convert data to offline format for chart
+            const candlesticks = result.data.map(d => ({
+                time: d.time,
+                open: d.open,
+                high: d.high,
+                low: d.low,
+                close: d.close
+            }));
+            
+            const volumes = result.data.map(d => ({
+                time: d.time,
+                value: d.volume || 0,
+                color: d.close >= d.open ? '#26a69a80' : '#ef535080'
+            }));
+            
+            // Store as ONLINE data (do NOT overwrite offlineData which is used by strategy)
+            const exchangeData = {
+                candlesticks,
+                volumes,
+                symbol: result.symbol,
+                timeframe: result.timeframe,
+                exchange: result.exchange,
+                profile: profileName,
+                start_date: result.start_date,
+                end_date: result.end_date
+            };
+
+            // Set on window.onlineData (NOT offlineData)
+            window.onlineData = exchangeData;
+
+            console.log('✅ onlineData updated (offlineData preserved for strategy):', {
+                candles: candlesticks.length,
+                symbol: result.symbol,
+                timeframe: result.timeframe,
+                offlineDataStillAvailable: !!window.offlineData
+            });
+
+            // DO NOT save online data to IndexedDB (only offline CSV data should be saved)
+            
+            // Call callback if exists (for chart.js integration)
+            if (typeof window.onOnlineDataLoaded === 'function') {
+                window.onOnlineDataLoaded(result.data, {
+                    exchange: result.exchange,
+                    symbol: symbol,
+                    timeframe: timeframe,
+                    profile: profileName
+                });
+            }
+            
+            // Populate symbol dropdown on chart with profile tickers
+            if (typeof window.populateSymbolDropdown === 'function') {
+                window.populateSymbolDropdown(tickers, symbol, result.exchange);
+            }
+            
+            // Auto-switch chart timeframe to match profile
+            const tfMap = {
+                'M1': '1m', 'M5': '5m', 'M15': '15m', 'M30': '30m',
+                'H1': '1h', 'H4': '4h', 'D1': '1d'
+            };
+            const chartTimeframe = tfMap[timeframe] || '1m';
+            console.log(`🔄 Auto-switching chart to ${chartTimeframe} (from profile: ${timeframe})`);
+            
+            // Update active timeframe button
+            document.querySelectorAll('.tf-btn').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.querySelector(`.tf-btn[data-tf="${chartTimeframe}"]`);
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+                document.getElementById('timeframeBtn').textContent = chartTimeframe;
+            }
+            
+            // Load data to chart if function exists
+            if (typeof loadOfflineData === 'function') {
+                loadOfflineData();
+            }
+            
+            alert(`✅ Kết nối thành công!\n\nĐã tải ${result.data.length} nến từ ${result.exchange.toUpperCase()}`);
+            
+        } else {
+            console.error('❌ Connection failed:', result.error);
+            alert(`❌ Kết nối thất bại!\n\n${result.error}`);
+        }
+    } catch (error) {
+        console.error('❌ Connection error:', error);
+        alert(`❌ Lỗi kết nối!\n\n${error.message}`);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// Quick connect data profile
+async function quickConnectDataProfile(event) {
+    const profileName = document.getElementById('dataProfileSelect').value;
+    
+    if (!profileName) {
+        alert('⚠️ Vui lòng chọn Data Profile!');
+        return;
+    }
+    
+    const statusDiv = document.getElementById('dataProfileStatus');
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳';
+    btn.disabled = true;
+    statusDiv.textContent = 'Đang kết nối...';
+    statusDiv.style.color = '#ff9800';
+    
+    try {
+        // Set as active data profile
+        const setActiveResponse = await fetch('/api/exchange/set-active-data-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile_name: profileName })
+        });
+        
+        const setActiveResult = await setActiveResponse.json();
+        if (!setActiveResult.success) {
+            throw new Error(setActiveResult.error || 'Failed to set active data profile');
+        }
+        
+        // Connect profile
+        const connectResponse = await fetch(`/api/exchange/connect/${encodeURIComponent(profileName)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const connectResult = await connectResponse.json();
+        
+        if (connectResult.success) {
+            statusDiv.textContent = '✅ Connected (Data)';
+            statusDiv.style.color = '#4caf50';
+            console.log('✅ Data profile connected:', profileName);
+            
+            // Save connected state to backend
+            try {
+                const updateResponse = await fetch('/api/exchange/update-connection-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        profile_name: profileName,
+                        connected: true
+                    })
+                });
+                const updateResult = await updateResponse.json();
+                if (updateResult.success) {
+                    console.log('💾 Connected state saved to JSON');
+                }
+            } catch (err) {
+                console.warn('⚠️ Could not save connected state:', err);
+            }
+            
+            // Save active profile to localStorage
+            const profile = window.exchangeProfiles?.find(p => p.name === profileName);
+            if (profile) {
+                localStorage.setItem('activeDataProfile', JSON.stringify({
+                    name: profileName,
+                    exchange: profile.exchange,
+                    symbol: profile.symbol || '',
+                    timeframe: profile.timeframe || 'M1',
+                    connected: true
+                }));
+                console.log('💾 Saved active profile to localStorage:', profileName);
+                
+                // Save connected profiles list (#3, #7)
+                const connectedProfiles = JSON.parse(localStorage.getItem('connectedProfiles') || '[]');
+                if (!connectedProfiles.includes(profileName)) {
+                    connectedProfiles.push(profileName);
+                    localStorage.setItem('connectedProfiles', JSON.stringify(connectedProfiles));
+                    console.log('💾 Saved to connected profiles list');
+                }
+                
+                // Update tooltip status (#3, #4)
+                const tooltipStatus = document.getElementById('onlineStatus');
+                if (tooltipStatus) {
+                    tooltipStatus.innerHTML = '✅ Đã kết nối';
+                    tooltipStatus.style.color = '#26a69a';
+                    console.log('✅ Tooltip status updated to connected');
+                }
+            }
+            
+            // Reload profiles to show connection status
+            if (window.loadQuickProfileSelect) {
+                await window.loadQuickProfileSelect();
+            }
+        } else if (connectResult.needs_otp) {
+            statusDiv.textContent = '⚠️ OTP Required';
+            statusDiv.style.color = '#ff9800';
+            alert('⚠️ Profile này cần OTP. Vui lòng kết nối qua Exchange Settings!');
+        } else {
+            throw new Error(connectResult.error || 'Connection failed');
+        }
+    } catch (error) {
+        console.error('❌ Data profile connection error:', error);
+        statusDiv.textContent = '❌ ' + error.message;
+        statusDiv.style.color = '#f44336';
+        alert(`❌ Kết nối thất bại!\n\n${error.message}`);
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// Quick connect trading profile
+// REMOVED: Trading Profile moved to Manual/Bot Trading pages only
+// async function quickConnectTradingProfile(event) {
+//     const profileName = document.getElementById('tradingProfileSelect').value;
+//     
+//     if (!profileName) {
+//         alert('⚠️ Vui lòng chọn Trading Profile!');
+//         return;
+//     }
+//     
+//     const statusDiv = document.getElementById('tradingProfileStatus');
+//     const btn = event.target;
+//     const originalText = btn.innerHTML;
+//     btn.innerHTML = '⏳';
+//     btn.disabled = true;
+//     statusDiv.textContent = 'Đang kết nối...';
+//     statusDiv.style.color = '#ff9800';
+//     
+//     try {
+//         // Set as active trading profile
+//         const setActiveResponse = await fetch('/api/exchange/set-active-trading-profile', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({ profile_name: profileName })
+//         });
+//         
+//         const setActiveResult = await setActiveResponse.json();
+//         if (!setActiveResult.success) {
+//             throw new Error(setActiveResult.error || 'Failed to set active trading profile');
+//         }
+//         
+//         // Connect profile
+//         const connectResponse = await fetch(`/api/exchange/connect/${encodeURIComponent(profileName)}`, {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' }
+//         });
+//         
+//         const connectResult = await connectResponse.json();
+//         
+//         if (connectResult.success) {
+//             statusDiv.textContent = '✅ Connected (Trading)';
+//             statusDiv.style.color = '#4caf50';
+//             console.log('✅ Trading profile connected:', profileName);
+//             
+//             // Reload profiles to show connection status
+//             if (window.loadQuickProfileSelect) {
+//                 await window.loadQuickProfileSelect();
+//             }
+//         } else if (connectResult.needs_otp) {
+//             statusDiv.textContent = '⚠️ OTP Required for Trading';
+//             statusDiv.style.color = '#ff9800';
+//             // Open OTP modal or redirect to exchange settings
+//             alert('⚠️ Trading profile cần OTP (Trading Token). Vui lòng kết nối với OTP qua Exchange Settings!');
+//         } else {
+//             throw new Error(connectResult.error || 'Connection failed');
+//         }
+//     } catch (error) {
+//         console.error('❌ Trading profile connection error:', error);
+//         statusDiv.textContent = '❌ ' + error.message;
+//         statusDiv.style.color = '#f44336';
+//         alert(`❌ Kết nối thất bại!\n\n${error.message}`);
+//     } finally {
+//         btn.innerHTML = originalText;
+//         btn.disabled = false;
+//     }
+// }
+
+// Reload connection profiles
+async function reloadConnectionProfiles() {
+    console.log('🔄 Reloading connection profiles...');
+    if (window.loadQuickProfileSelect) {
+        await window.loadQuickProfileSelect();
+    }
+}
+
+// Connect Data Profile (for chart loading only)
+async function quickConnectDataProfile(event) {
+    event.preventDefault();
+    const profileName = document.getElementById('dataProfileSelect').value;
+    const statusDiv = document.getElementById('dataProfileStatus');
+    
+    if (!profileName) {
+        alert('⚠️ Vui lòng chọn Data Profile!');
+        return;
+    }
+    
+    const profile = window.exchangeProfiles?.find(p => p.name === profileName);
+    if (!profile) {
+        alert('⚠️ Không tìm thấy profile!');
+        return;
+    }
+    
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '⏳';
+    btn.disabled = true;
+    
+    try {
+        // Set as active data profile
+        const response = await fetch('/api/exchange/set-active-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile_name: profileName })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log('✅ Data profile connected:', profileName);
+            
+            // Update main status
+            const onlineStatus = document.getElementById('onlineStatus');
+            if (onlineStatus) {
+                onlineStatus.innerHTML = `<span style="color: #2962ff;">✅ Connected</span>`;
+            }
+            
+            // Update profile status
+            if (statusDiv) {
+                statusDiv.innerHTML = `<span style="color: #2962ff;">✅ Connected - Ready to load chart</span>`;
+            }
+            
+            // Load profile tickers for symbol dropdown
+            if (window.loadProfileTickers) {
+                await window.loadProfileTickers(profileName);
+                
+                // Auto-load first symbol if available
+                const symbolSelect = document.getElementById('quickSymbolSelect');
+                if (symbolSelect && symbolSelect.options.length > 1) {
+                    const firstSymbol = symbolSelect.options[1].value; // Skip the placeholder option
+                    if (firstSymbol) {
+                        symbolSelect.value = firstSymbol;
+                        console.log(`📊 Auto-loading first symbol: ${firstSymbol}`);
+                        // Delay a bit to ensure everything is ready
+                        setTimeout(async () => {
+                            await loadChartFromDataProfile(firstSymbol);
+                        }, 500);
+                    }
+                }
+            }
+            
+            // Setup symbol select event listener if not already set
+            const symbolSelect = document.getElementById('quickSymbolSelect');
+            if (symbolSelect && !symbolSelect._hasListener) {
+                symbolSelect.addEventListener('change', async function() {
+                    const symbol = this.value;
+                    if (symbol) {
+                        await loadChartFromDataProfile(symbol);
+                    }
+                });
+                symbolSelect._hasListener = true;
+                console.log('✅ Symbol select listener added');
+            }
+        } else {
+            console.error('❌ Failed to connect data profile:', result.error);
+            
+            // Update main status
+            const onlineStatus = document.getElementById('onlineStatus');
+            if (onlineStatus) {
+                onlineStatus.innerHTML = `<span style="color: #ef5350;">❌ Failed</span>`;
+            }
+            
+            if (statusDiv) {
+                statusDiv.innerHTML = `<span style="color: #ef5350;">❌ ${result.error || 'Connection failed'}</span>`;
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error connecting data profile:', error);
+        if (statusDiv) {
+            statusDiv.innerHTML = `<span style="color: #ef5350;">❌ Error: ${error.message}</span>`;
+        }
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// Load chart data from active data profile
+async function loadChartFromDataProfile(symbol) {
+    const profileName = document.getElementById('dataProfileSelect').value;
+    const statusDiv = document.getElementById('dataProfileStatus');
+    
+    if (!profileName) {
+        alert('⚠️ Vui lòng connect Data Profile trước!');
+        return;
+    }
+    
+    if (!symbol) {
+        alert('⚠️ Vui lòng chọn Symbol!');
+        return;
+    }
+    
+    const profile = window.exchangeProfiles?.find(p => p.name === profileName);
+    if (!profile) {
+        alert('⚠️ Không tìm thấy profile!');
+        return;
+    }
+    
+    const timeframe = profile.timeframe || 'M1';
+    const candles = parseInt(profile.display_candles || '1000', 10); // Get from profile, default 1000
+    
+    // Set base timeframe and timezone for chart (#5, #6)
+    if (typeof window.baseTimeframe !== 'undefined') {
+        window.baseTimeframe = timeframe;
+    }
+    if (typeof window.currentTimezoneOffset !== 'undefined') {
+        window.currentTimezoneOffset = profile.gmt_offset || 0;
+    }
+    console.log(`⚙️ Set base timeframe: ${timeframe}, timezone offset: ${profile.gmt_offset || 0}h`);
+    
+    console.log(`📊 Loading chart: ${symbol} - ${timeframe} from ${profileName} (${candles} candles)`);
+    
+    if (statusDiv) {
+        statusDiv.innerHTML = `<span style="color: #2962ff;">⏳ Loading ${symbol}...</span>`;
+    }
+    
+    try {
+        const response = await fetch(`/api/exchange/load-data/${encodeURIComponent(profileName)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                symbol: symbol,
+                timeframe: timeframe,
+                candles: candles
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data && result.data.length > 0) {
+            console.log(`✅ Loaded ${result.data.length} candles for ${symbol}`);
+            
+            // Get timezone offset for this profile (#6)
+            const timezoneOffsetSeconds = (profile.gmt_offset || 0) * 3600;
+            console.log(`⏰ Applying timezone offset: GMT+${profile.gmt_offset || 0} (${timezoneOffsetSeconds}s)`);
+            
+            // Convert to chart format with timezone offset
+            const candlesticks = result.data.map(d => ({
+                time: d.time + timezoneOffsetSeconds,  // Apply timezone offset
+                open: d.open,
+                high: d.high,
+                low: d.low,
+                close: d.close
+            }));
+            
+            const volumes = result.data.map(d => ({
+                time: d.time + timezoneOffsetSeconds,  // Apply timezone offset
+                value: d.volume || 0,
+                color: d.close >= d.open ? '#26a69a80' : '#ef535080'
+            }));
+            
+            // Update ONLINE data (do NOT overwrite offlineData which is used by strategy)
+            const exchangeData = {
+                candlesticks,
+                volumes,
+                symbol: result.symbol,
+                timeframe: result.timeframe,
+                exchange: result.exchange,
+                metadata: {
+                    fileName: `${result.exchange}_${result.symbol}_${result.timeframe}`,
+                    source: 'exchange',
+                    profile: profileName
+                }
+            };
+
+            // Store in separate onlineData variable (NOT offlineData)
+            window.onlineData = exchangeData;
+
+            console.log('✅ onlineData updated (offlineData preserved for strategy):', {
+                candles: candlesticks.length,
+                symbol: result.symbol,
+                timeframe: result.timeframe,
+                offlineDataStillAvailable: !!window.offlineData
+            });
+
+            // DO NOT save online data to IndexedDB (only offline CSV data should be saved)
+            
+            // Debug: Check what's available
+            console.log('🔍 Chart update methods available:', {
+                loadOfflineData: typeof loadOfflineData,
+                updateChartWithData: typeof updateChartWithData,
+                windowCandlestickSeries: typeof window.candlestickSeries,
+                windowChart: typeof window.chart
+            });
+            
+            // Update chart - just dispatch event and let chart.js handle it
+            console.log('📊 Dispatching chartDataLoaded event...');
+            
+            // Dispatch event IMMEDIATELY (don't wait for other methods)
+            window.dispatchEvent(new CustomEvent('chartDataLoaded', {
+                detail: {
+                    symbol: result.symbol,
+                    timeframe: result.timeframe,
+                    candles: result.data.length,
+                    source: 'loadChartFromDataProfile'
+                }
+            }));
+            
+            console.log('✅ Event dispatched, chart should update via event listener');
+            
+            // Update status
+            if (statusDiv) {
+                statusDiv.innerHTML = `<span style="color: #2962ff;">✅ ${symbol} - ${result.data.length} candles loaded</span>`;
+            }
+            
+            // Update tooltip
+            updateOnlineTooltip({
+                exchange: result.exchange.toUpperCase(),
+                symbol: result.symbol,
+                timeframe: result.timeframe,
+                candles: result.data.length,
+                requested_candles: candles,  // Add requested candles from profile
+                start_date: result.start_date,
+                end_date: result.end_date
+            });
+            
+            // Dispatch event to notify chart was updated
+            window.dispatchEvent(new CustomEvent('chartDataLoaded', {
+                detail: {
+                    symbol: result.symbol,
+                    timeframe: result.timeframe,
+                    candles: result.data.length
+                }
+            }));
+            
+            console.log('✅ Chart updated successfully');
+        } else {
+            throw new Error(result.error || 'No data returned');
+        }
+    } catch (error) {
+        console.error('❌ Error loading chart:', error);
+        if (statusDiv) {
+            statusDiv.innerHTML = `<span style="color: #ef5350;">❌ Error: ${error.message}</span>`;
+        }
+        alert(`❌ Lỗi load chart: ${error.message}`);
+    }
+}
+
+// REMOVED: Trading Profile moved to Manual/Bot Trading pages only
+// async function quickConnectTradingProfile(event) {
+//     event.preventDefault();
+//     const profileName = document.getElementById('tradingProfileSelect').value;
+//     const statusDiv = document.getElementById('tradingProfileStatus');
+//     
+//     if (!profileName) {
+//         alert('⚠️ Vui lòng chọn Trading Profile!');
+//         return;
+//     }
+//     
+//     const profile = window.exchangeProfiles?.find(p => p.name === profileName);
+//     if (!profile) {
+//         alert('⚠️ Không tìm thấy profile!');
+//         return;
+//     }
+//     
+//     const btn = event.target;
+//     const originalText = btn.innerHTML;
+//     btn.innerHTML = '⏳';
+//     btn.disabled = true;
+//     
+//     try {
+//         // Check if DNSE and needs OTP for trading token
+//         if (profile.exchange === 'dnse' && !profile.trading_token) {
+//             // Open OTP modal
+//             if (typeof openDNSETradingOTPModal === 'function') {
+//                 openDNSETradingOTPModal(profileName);
+//                 btn.innerHTML = originalText;
+//                 btn.disabled = false;
+//                 return;
+//             }
+//         }
+//         
+//         // Set as active trading profile
+//         const response = await fetch('/api/exchange/set-active-trading-profile', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({ profile_name: profileName })
+//         });
+//         
+//         const result = await response.json();
+//         
+//         if (result.success) {
+//             console.log('✅ Trading profile connected:', profileName);
+//             if (statusDiv) {
+//                 statusDiv.innerHTML = `<span style="color: #4caf50;">✅ Connected - Ready to trade</span>`;
+//             }
+//         } else {
+//             console.error('❌ Failed to connect trading profile:', result.error);
+//             if (statusDiv) {
+//                 statusDiv.innerHTML = `<span style="color: #ef5350;">❌ ${result.error || 'Connection failed'}</span>`;
+//             }
+//         }
+//     } catch (error) {
+//         console.error('❌ Error connecting trading profile:', error);
+//         if (statusDiv) {
+//             statusDiv.innerHTML = `<span style="color: #ef5350;">❌ Error: ${error.message}</span>`;
+//         }
+//     } finally {
+//         btn.innerHTML = originalText;
+//         btn.disabled = false;
+//     }
+// }
+
+// Disconnect all profiles
+async function disconnectAllProfiles() {
+    if (!confirm('❓ Ngắt tất cả kết nối?')) {
+        return;
+    }
+    
+    try {
+        const profiles = window.exchangeProfiles || [];
+        for (const profile of profiles) {
+            if (profile.connected) {
+                await fetch(`/api/exchange/disconnect/${encodeURIComponent(profile.name)}`, {
+                    method: 'POST'
+                });
+                
+                // Update connected state in JSON
+                await fetch('/api/exchange/update-connection-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        profile_name: profile.name,
+                        connected: false
+                    })
+                });
+            }
+        }
+        
+        // Clear connected profiles from localStorage (#3, #7)
+        localStorage.removeItem('connectedProfiles');
+        localStorage.removeItem('activeDataProfile');
+        console.log('💾 Cleared connected profiles from localStorage');
+        
+        // Clear active data profile
+        await fetch('/api/exchange/set-active-data-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ profile_name: null })
+        });
+        
+        // Clear status
+        const dataStatus = document.getElementById('dataProfileStatus');
+        const tooltipStatus = document.getElementById('onlineStatus');
+        if (dataStatus) dataStatus.textContent = '';
+        if (tooltipStatus) {
+            tooltipStatus.innerHTML = 'Chưa kết nối';
+            tooltipStatus.style.color = '#787b86';
+        }
+        
+        // Reload profiles
+        if (window.loadQuickProfileSelect) {
+            await window.loadQuickProfileSelect();
+        }
+        
+        console.log('✅ All profiles disconnected');
+    } catch (error) {
+        console.error('❌ Disconnect error:', error);
+        alert(`❌ Lỗi ngắt kết nối!\n\n${error.message}`);
+    }
+}
+
+// Disconnect online connection
+function disconnectOnline() {
+    if (!confirm('❓ Ngắt kết nối Exchange?')) {
+        return;
+    }
+    
+    try {
+        // Clear localStorage
+        localStorage.removeItem('onlineConnection');
+        
+        // Clear profile tickers
+        if (typeof window.populateSymbolDropdown === 'function') {
+            window.populateSymbolDropdown([], '', '');
+        }
+        
+        // Reset tooltip
+        document.getElementById('onlineStatus').innerHTML = 'Chưa kết nối';
+        document.getElementById('onlineStatus').style.color = '#787b86';
+        document.getElementById('onlineConnectedInfo').style.display = 'none';
+        document.getElementById('quickProfileSelect').value = '';
+        
+        // Switch to offline mode
+        changeDataMode('offline');  // UI toggle
+        changeDataSource('offline'); // Chart data
+        
+        console.log('✅ Disconnected from exchange');
+        alert('✅ Đã ngắt kết nối!');
+    } catch (error) {
+        console.error('Error disconnecting:', error);
+    }
+}
+
+// Timeframe modal functions (wrapper functions for compatibility across pages)
+function openTimeframeModal() {
+    console.log('📊 Opening timeframe modal...');
+    const modal = document.getElementById('timeframeModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        console.log('✅ Modal opened');
+    } else {
+        console.error('❌ Timeframe modal not found!');
+    }
+}
+
+function closeTimeframeModal() {
+    console.log('❌ Closing timeframe modal...');
+
+    // Check if we're on backtest/optimize page
+    if (typeof closeTimeframeModalBacktest === 'function') {
+        console.log('🔄 Delegating to closeTimeframeModalBacktest');
+        closeTimeframeModalBacktest();
+    } else if (typeof closeTimeframeModalOptimize === 'function') {
+        console.log('🔄 Delegating to closeTimeframeModalOptimize');
+        closeTimeframeModalOptimize();
+    } else {
+        // Default behavior for other pages
+        const modal = document.getElementById('timeframeModal');
+        if (modal) {
+            modal.style.display = 'none';
+            console.log('✅ Modal closed');
+        }
+    }
+}
+
+function confirmTimeframeAndUpload() {
+    console.log('✅ Confirming timeframe...');
+
+    // Check if we're on backtest/optimize page
+    if (typeof confirmTimeframeAndUploadBacktest === 'function') {
+        console.log('🔄 Delegating to confirmTimeframeAndUploadBacktest');
+        confirmTimeframeAndUploadBacktest();
+    } else if (typeof confirmTimeframeAndUploadOptimize === 'function') {
+        console.log('🔄 Delegating to confirmTimeframeAndUploadOptimize');
+        confirmTimeframeAndUploadOptimize();
+    } else {
+        // Default behavior for other pages
+        const timeframe = document.getElementById('timeframeSelect').value;
+        const fileInput = document.getElementById('csvFile');
+
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            alert('⚠️ Vui lòng chọn file CSV!');
+            return;
+        }
+
+        console.log('📊 Selected timeframe:', timeframe);
+        console.log('📂 File:', fileInput.files[0].name);
+
+        // Close modal
+        const modal = document.getElementById('timeframeModal');
+        if (modal) modal.style.display = 'none';
+
+        // Trigger file upload with selected timeframe
+        if (typeof window.uploadCSVFile === 'function') {
+            window.uploadCSVFile(fileInput.files[0], timeframe);
+        } else {
+            console.warn('⚠️ uploadCSVFile function not found, file upload may need to be handled manually');
+        }
+    }
+}
+
+// Initialize on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM loaded, initializing...');
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        const lightRadio = document.querySelector('input[name="theme"][value="light"]');
+        if (lightRadio) lightRadio.checked = true;
+    }
+    
+    // Setup toggle button click handlers
+    const offlineBtn = document.getElementById('offlineDataBtn');
+    const onlineBtn = document.getElementById('onlineDataBtn');
+    
+    if (offlineBtn) {
+        offlineBtn.addEventListener('click', function() {
+            console.log('📁 Offline button clicked');
+            changeDataMode('offline');  // UI toggle
+            changeDataSource('offline'); // Chart data
+        });
+    }
+    
+    if (onlineBtn) {
+        onlineBtn.addEventListener('click', function() {
+            console.log('🌐 Online button clicked');
+            changeDataMode('online');  // UI toggle
+            changeDataSource('online'); // Chart data
+        });
+    }
+    
+    // Setup Upload Data button tooltip toggle
+    const uploadDataBtn = document.getElementById('uploadDataBtn');
+    const dataTooltip = document.getElementById('dataTooltip');
+    
+    if (uploadDataBtn && dataTooltip) {
+        uploadDataBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log('📁 Upload button clicked!');
+            const isVisible = dataTooltip.classList.contains('show');
+            
+            // Close all tooltips first
+            document.getElementById('onlineConnectionTooltip')?.classList.remove('show');
+            
+            // Toggle this tooltip
+            if (isVisible) {
+                console.log('Closing tooltip');
+                dataTooltip.classList.remove('show');
+            } else {
+                console.log('Opening tooltip');
+                dataTooltip.classList.add('show');
+            }
+        });
+        console.log('✅ Upload button listener added');
+    } else {
+        console.error('❌ Upload button or tooltip not found!', { uploadDataBtn, dataTooltip });
+    }
+
+    // NOTE: CSV file upload button listeners are handled by individual page scripts
+    // (backtest.js, optimize.js) to avoid conflicts. Do not add listeners here.
+
+    // Setup Connection button tooltip toggle
+    const connectionBtn = document.getElementById('connectionBtn');
+    const onlineTooltip = document.getElementById('onlineConnectionTooltip');
+    
+    if (connectionBtn && onlineTooltip) {
+        connectionBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            console.log('🌐 Connection button clicked!');
+            const isVisible = onlineTooltip.classList.contains('show');
+            
+            // Close all tooltips first
+            document.getElementById('dataTooltip')?.classList.remove('show');
+            
+            // Toggle this tooltip
+            if (isVisible) {
+                console.log('Closing online tooltip');
+                onlineTooltip.classList.remove('show');
+            } else {
+                console.log('Opening online tooltip');
+                onlineTooltip.classList.add('show');
+                // Load profiles when tooltip opens (use await to ensure completion)
+                if (window.loadQuickProfileSelect) {
+                    console.log('🔄 Loading profiles into Connection modal...');
+                    window.loadQuickProfileSelect().then(() => {
+                        console.log('✅ Profiles loaded into Connection modal');
+                    }).catch(err => {
+                        console.error('❌ Failed to load profiles:', err);
+                    });
+                }
+            }
+        });
+        console.log('✅ Connection button listener added');
+    } else {
+        console.error('❌ Connection button or tooltip not found!', { connectionBtn, onlineTooltip });
+    }
+    
+    // Close tooltips when clicking outside
+    document.addEventListener('click', function(e) {
+        if (dataTooltip && !dataTooltip.contains(e.target) && e.target !== uploadDataBtn) {
+            dataTooltip.classList.remove('show');
+        }
+        
+        if (onlineTooltip && !onlineTooltip.contains(e.target) && e.target !== connectionBtn) {
+            onlineTooltip.classList.remove('show');
+        }
+    });
+    
+    // Prevent tooltip clicks from closing itself
+    if (dataTooltip) {
+        dataTooltip.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    if (onlineTooltip) {
+        onlineTooltip.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    // Restore data source from localStorage
+    const savedDataSource = localStorage.getItem('dataSource') || 'offline';
+    if (savedDataSource === 'online') {
+        changeDataMode('online');  // UI toggle
+        changeDataSource('online'); // Chart data
+    } else {
+        changeDataMode('offline');  // UI toggle
+        changeDataSource('offline'); // Chart data
+    }
+
+    // IMPORTANT: Always restore online connection info if it exists, regardless of current mode
+    // This ensures the tooltip shows correct connection status even when user switches to offline
+    const connectionInfo = localStorage.getItem('onlineConnection');
+    if (connectionInfo) {
+        try {
+            const info = JSON.parse(connectionInfo);
+            updateOnlineConnectionTooltip(info);
+            console.log('✅ Restored online connection tooltip:', info.profile);
+        } catch (e) {
+            console.error('❌ Error parsing connection info:', e);
+        }
+    }
+    
+    // Load profiles for quick select, then auto-restore if saved
+    if (window.loadQuickProfileSelect) {
+        loadQuickProfileSelect().then(async () => {
+            console.log('✅ Profiles loaded');
+            
+            // Auto-restore active profiles from server
+            try {
+                const response = await fetch('/api/exchange/get-active-profiles');
+                const result = await response.json();
+                
+                if (result.success && result.profiles) {
+                    console.log('📊 Restoring active profiles from server:', result.profiles);
+                    
+                    // Restore data profile
+                    if (result.profiles.active_data_profile) {
+                        const dataSelect = document.getElementById('dataProfileSelect');
+                        if (dataSelect) {
+                            dataSelect.value = result.profiles.active_data_profile;
+                            console.log('✅ Restored data profile:', result.profiles.active_data_profile);
+                            
+                            // Trigger onchange to update timeframe and symbol
+                            if (dataSelect.onchange) {
+                                dataSelect.onchange();
+                                console.log('🔄 Triggered onchange for restored profile');
+                            }
+                        }
+                    }
+                    
+                    // Trading profile would be restored here if we had trading profile select
+                    // For now, trading profile is managed in Manual/Bot pages
+                }
+            } catch (error) {
+                console.log('ℹ️ Could not restore active profiles:', error.message);
+            }
+            
+            // Fallback: try localStorage (legacy support)
+            const savedProfile = localStorage.getItem('activeDataProfile');
+            console.log('🔍 Checking for saved profile:', savedProfile ? 'Found' : 'Not found');
+            
+            if (savedProfile) {
+                try {
+                    const profileData = JSON.parse(savedProfile);
+                    console.log('🔄 Attempting to restore profile:', profileData.name);
+                    
+                    // Set dropdown value
+                    const dropdown = document.getElementById('dataProfileSelect');
+                    console.log('🔍 Dropdown element:', dropdown ? 'Found' : 'NOT FOUND');
+                    
+                    if (dropdown) {
+                        dropdown.value = profileData.name;
+                        console.log('✅ Dropdown value set to:', profileData.name);
+                    } else {
+                        console.warn('⚠️ dataProfileSelect not found - skipping auto-restore');
+                        return; // Exit early if dropdown not available
+                    }
+                    
+                    // Auto-connect
+                    const statusDiv = document.getElementById('dataProfileStatus');
+                    if (statusDiv) {
+                        statusDiv.textContent = 'Đang kết nối...';
+                        statusDiv.style.color = '#ff9800';
+                    }
+                    
+                    // Set as active
+                    const setActiveResponse = await fetch('/api/exchange/set-active-data-profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ profile_name: profileData.name })
+                    });
+                    
+                    const setActiveResult = await setActiveResponse.json();
+                    if (!setActiveResult.success) {
+                        throw new Error(setActiveResult.error || 'Failed to set active');
+                    }
+                    
+                    // Connect
+                    const connectResponse = await fetch(`/api/exchange/connect/${encodeURIComponent(profileData.name)}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const connectResult = await connectResponse.json();
+                    
+                    if (connectResult.success) {
+                        if (statusDiv) {
+                            statusDiv.textContent = '✅ Connected (Data)';
+                            statusDiv.style.color = '#4caf50';
+                        }
+                        console.log('✅ Auto-connected to:', profileData.name);
+                        
+                        // Reload profiles to show connection status
+                        if (window.loadQuickProfileSelect) {
+                            await window.loadQuickProfileSelect();
+                            
+                            // IMPORTANT: Restore dropdown value after reload
+                            const dropdown = document.getElementById('dataProfileSelect');
+                            if (dropdown) {
+                                dropdown.value = profileData.name;
+                                console.log('🔄 Dropdown value restored to:', profileData.name);
+                            }
+                        }
+                        
+                        // Auto-load chart if symbol exists
+                        if (profileData.symbol && typeof loadChartFromDataProfile === 'function') {
+                            console.log('📊 Auto-loading chart:', profileData.symbol);
+                            setTimeout(() => {
+                                loadChartFromDataProfile(profileData.symbol);
+                            }, 500); // Small delay to ensure everything is ready
+                        }
+                    } else if (connectResult.needs_otp) {
+                        if (statusDiv) {
+                            statusDiv.textContent = '⚠️ OTP Required';
+                            statusDiv.style.color = '#ff9800';
+                        }
+                        console.warn('⚠️ Profile requires OTP');
+                    } else {
+                        throw new Error(connectResult.error || 'Connection failed');
+                    }
+                } catch (error) {
+                    console.error('❌ Auto-connect failed:', error);
+                    const statusDiv = document.getElementById('dataProfileStatus');
+                    if (statusDiv) {
+                        statusDiv.textContent = '❌ ' + error.message;
+                        statusDiv.style.color = '#f44336';
+                    }
+                    // Clear saved profile if connection fails
+                    localStorage.removeItem('activeDataProfile');
+                }
+            }
+        }).catch(err => {
+            console.error('❌ Failed to load profiles:', err);
+        });
+    }
+});
+
+function updateOnlineTooltip(info) {
+    try {
+        document.getElementById('tooltipStatus').innerHTML = '✅ Đã kết nối';
+        document.getElementById('tooltipExchange').textContent = info.exchange || '--';
+        document.getElementById('tooltipSymbol').textContent = info.symbol || '--';
+        document.getElementById('tooltipTimeframe').textContent = info.timeframe || '--';
+        document.getElementById('tooltipStartDate').textContent = info.start_date || '--';
+        document.getElementById('tooltipEndDate').textContent = info.end_date || '--';
+        
+        // Show requested candles and received candles
+        const requestedCandles = info.requested_candles || info.candles;
+        const receivedCandles = info.candles || 0;
+        if (info.requested_candles && info.requested_candles !== receivedCandles) {
+            document.getElementById('tooltipCandles').textContent = 
+                `${requestedCandles.toLocaleString()} (${receivedCandles.toLocaleString()} received)`;
+        } else {
+            document.getElementById('tooltipCandles').textContent = 
+                receivedCandles ? receivedCandles.toLocaleString() : '--';
+        }
+        
+        // Update profile timeframe in connection tooltip
+        const profileTimeframeSpan = document.getElementById('profileTimeframe');
+        if (profileTimeframeSpan && info.timeframe) {
+            profileTimeframeSpan.textContent = info.timeframe;
+        }
+        
+        console.log('✅ Online tooltip updated');
+    } catch (error) {
+        console.error('❌ Error updating online tooltip:', error);
+    }
+}
+function openSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'flex';
+}
+
+function closeSettingsModal() {
+    document.getElementById('settingsModal').style.display = 'none';
+}
+
+function switchTheme(theme) {
+    if (theme === 'light') {
+        document.body.classList.add('light-theme');
+    } else {
+        document.body.classList.remove('light-theme');
+    }
+    localStorage.setItem('theme', theme);
+}
+
+// Close modal when clicking outside
+document.getElementById('settingsModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSettingsModal();
+    }
+});
+
+
+// Highlight active tab based on current page
+document.addEventListener('DOMContentLoaded', function() {
+    const path = window.location.pathname;
+    const hash = window.location.hash.substring(1); // Remove #
+    const tabs = document.querySelectorAll('.header-tab');
+    
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+        const page = tab.getAttribute('data-page');
+        
+        // Check hash first for trading/bot
+        if (hash && (hash === 'trading' || hash === 'bot')) {
+            if (page === hash) tab.classList.add('active');
+        }
+        // Then check path for other pages
+        else if ((path === '/' || path === '/index.html') && page === 'trading') {
+            tab.classList.add('active');
+        } else if (path.includes('strategy') && page === 'strategy') {
+            tab.classList.add('active');
+        } else if (path.includes('backtest') && page === 'backtest') {
+            tab.classList.add('active');
+        } else if (path.includes('optimize') && page === 'optimize') {
+            tab.classList.add('active');
+        } else if (path.includes('hft') && page === 'hft') {
+            tab.classList.add('active');
+        } else if (path.includes('exchange') && page === 'exchange') {
+            tab.classList.add('active');
+        }
+    });
+});
+</script>
+

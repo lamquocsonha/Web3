@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimize - AUTO OPTIMIZE TRADING SYSTEM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/workspace.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar-fix.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/optimize-layout.css') }}">
+    <style>
+        /* 3-Panel Layout */
+        .optimize-container {
+            display: grid;
+            grid-template-columns: 260px 1fr 340px;
+            grid-template-rows: auto 1fr auto;
+            gap: 8px;
+            padding: 8px;
+            height: calc(100vh - 140px);
+            max-width: 100%;
+            margin: 0;
+        }
+
+        .left-panel {
+            grid-row: 1 / 4;
+            background: #1e222d;
+            border-radius: 6px;
+            padding: 12px;
+            overflow-y: auto;
+            border: 1px solid #2a2e39;
+        }
+
+        .center-panel {
+            grid-row: 1 / 3;
+            background: #1e222d;
+            border-radius: 6px;
+            padding: 15px;
+            overflow-y: auto;
+            border: 1px solid #2a2e39;
+        }
+
+        .right-panel {
+            grid-row: 1 / 3;
+            background: #131722;
+            border-radius: 6px;
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid #2a2e39;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-panel {
+            grid-column: 2 / 4;
+            grid-row: 3;
+            background: #1e222d;
+            border-radius: 6px;
+            padding: 12px;
+            max-height: 350px;
+            overflow-y: auto;
+            border: 1px solid #2a2e39;
+        }
+
+        /* Left Panel - Parameter Tree */
+        .param-tree {
+            margin-top: 15px;
+        }
+
+        .tree-section {
+            margin-bottom: 15px;
+            border: 1px solid #2a2e39;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .tree-header {
+            background: #252933;
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .tree-header:hover {
+            background: #2a2e39;
+        }
+
+        .tree-header.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+
+        .arrow {
+            transition: transform 0.3s;
+            font-size: 12px;
+        }
+
+        .tree-content {
+            padding: 10px;
+            background: #1e222d;
+            max-height: 500px;
+            overflow-y: auto;
+            transition: max-height 0.3s ease;
+        }
+
+        .tree-content.collapsed {
+            max-height: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .tree-item {
+            padding: 8px 10px;
+            margin: 5px 0;
+            background: #252933;
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+        }
+
+        .tree-item.selected {
+            border-left-color: #2962ff;
+            background: #2a2e39;
+        }
+
+        .tree-item label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #d1d4dc;
+        }
+
+        .tree-item input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .param-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            margin-top: 8px;
+            padding-left: 24px;
+        }
+
+        .param-range input {
+            background: #131722;
+            border: 1px solid #2a2e39;
+            color: #d1d4dc;
+            padding: 4px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .param-range label {
+            font-size: 10px;
+            color: #787b86;
+            margin-bottom: 2px;
+        }
+
+        /* Center Panel - Progress */
+        .progress-section {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-container {
+            background: #252933;
+            border-radius: 4px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #2962ff 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .metric-card {
+            background: #252933;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #2962ff;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #787b86;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #d1d4dc;
+        }
+
+        .metric-value.positive {
+            color: #26a69a;
+        }
+
+        .metric-value.negative {
+            color: #ef5350;
+        }
+
+        /* Right Panel - Terminal */
+        .terminal-header {
+            background: #252933;
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2e39;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #d1d4dc;
+        }
+
+        .terminal-line {
+            margin: 3px 0;
+            padding: 2px 0;
+        }
+
+        .terminal-line.success {
+            color: #26a69a;
+        }
+
+        .terminal-line.error {
+            color: #ef5350;
+        }
+
+        .terminal-line.warning {
+            color: #ffb74d;
+        }
+
+        .terminal-line.info {
+            color: #64b5f6;
+        }
+
+        /* Results Table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .results-table thead {
+            background: #252933;
+            position: sticky;
+            top: 0;
+        }
+
+        .results-table th {
+            padding: 12px 8px;
+            text-align: left;
+            color: #d1d4dc;
+            font-weight: 600;
+            border-bottom: 2px solid #2a2e39;
+        }
+
+        .results-table td {
+            padding: 10px 8px;
+            color: #d1d4dc;
+            border-bottom: 1px solid #2a2e39;
+        }
+
+        .results-table tbody tr:hover {
+            background: #252933;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-view {
+            background: #2962ff;
+            color: white;
+        }
+
+        .btn-apply {
+            background: #26a69a;
+            color: white;
+        }
+
+        .btn-save {
+            background: #764ba2;
+            color: white;
+        }
+
+        .btn-small:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="workspace-container">
+        <!-- Header -->
+        {% include 'header_common.html' %}
+
+        <!-- 3-Panel Layout -->
+        <div class="optimize-container">
+            <!-- LEFT Panel - Settings -->
+            <div class="left-panel">
+                <div class="panel-section">
+                    <h3 style="margin: 0 0 12px 0; font-size: 14px; color: #d1d4dc;">📊 Data & Strategy</h3>
+
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label style="font-size: 11px; color: #787b86; margin-bottom: 4px; display: block;">Upload CSV File:</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="csvFile" accept=".csv" style="display:none;">
+                            <button class="btn-file" id="btnChooseFile" title="" style="width: 100%; padding: 6px; background: #252933; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; cursor: pointer; font-size: 11px;">
+                                <span id="csvFileName">Choose CSV...</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="strategySelect" style="font-size: 11px; color: #787b86; margin-bottom: 4px; display: block;">Strategy:</label>
+                        <select id="strategySelect" style="width: 100%; padding: 6px; background: #252933; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 11px;">
+                            <option value="">Select strategy...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-section" style="margin-top: 15px;">
+                    <h3 style="margin: 0 0 8px 0; font-size: 14px; color: #d1d4dc;">⚙️ Settings</h3>
+
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 11px; color: #787b86; margin-bottom: 3px; display: block;">Algorithm:</label>
+                        <select id="algorithmSelect" style="width: 100%; padding: 5px; background: #252933; border: 1px solid #2a2e39; border-radius: 3px; color: #d1d4dc; font-size: 11px;">
+                            <option value="genetic">Genetic Algorithm</option>
+                            <option value="grid">Grid Search</option>
+                            <option value="bayesian">Bayesian</option>
+                            <option value="random">Random</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 11px; color: #787b86; margin-bottom: 3px; display: block;">Timeframe:</label>
+                        <select id="timeframe" style="width: 100%; padding: 5px; background: #252933; border: 1px solid #2a2e39; border-radius: 3px; color: #d1d4dc; font-size: 11px;">
+                            <option value="1m">1 Minute</option>
+                            <option value="5m">5 Minutes</option>
+                            <option value="15m">15 Minutes</option>
+                            <option value="30m">30 Minutes</option>
+                            <option value="1H" selected>1 Hour</option>
+                            <option value="2H">2 Hours</option>
+                            <option value="4H">4 Hours</option>
+                            <option value="1D">1 Day</option>
+                            <option value="1W">1 Week</option>
+                            <option value="1M">1 Month</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                        <div class="form-group">
+                            <label style="font-size: 11px; color: #787b86; margin-bottom: 3px; display: block;">Population:</label>
+                            <input type="number" id="populationSize" value="50" min="10" max="200" step="10" style="width: 100%; padding: 5px; background: #252933; border: 1px solid #2a2e39; border-radius: 3px; color: #d1d4dc; font-size: 11px;">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 11px; color: #787b86; margin-bottom: 3px; display: block;">Generations:</label>
+                            <input type="number" id="generations" value="20" min="5" max="100" step="5" style="width: 100%; padding: 5px; background: #252933; border: 1px solid #2a2e39; border-radius: 3px; color: #d1d4dc; font-size: 11px;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="font-size: 11px; color: #787b86; margin-bottom: 3px; display: block;">Max Results:</label>
+                        <input type="number" id="maxResults" value="10" min="1" max="50" style="width: 100%; padding: 5px; background: #252933; border: 1px solid #2a2e39; border-radius: 3px; color: #d1d4dc; font-size: 11px;">
+                    </div>
+                </div>
+
+                <button id="runOptimize" onclick="startOptimization()" disabled style="width: 100%; margin-top: 15px; padding: 10px; background: #2962ff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; opacity: 0.5;">
+                    🚀 Start Optimization
+                </button>
+
+                <button id="runAutoOptimize" onclick="showAutoOptimizeModal()" disabled style="width: 100%; margin-top: 8px; padding: 6px; background: #26a69a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; opacity: 0.5;">
+                    🤖 Auto
+                </button>
+            </div>
+
+            <!-- CENTER Panel - Parameters -->
+            <div class="center-panel">
+                <!-- Parameter Selection with Tabs -->
+                <div style="height: 100%; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0; font-size: 15px; color: #d1d4dc;">🎯 Select Parameters to Optimize</h3>
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="expandAllParams()" style="padding: 4px 8px; background: #252933; border: 1px solid #2a2e39; border-radius: 3px; color: #d1d4dc; cursor: pointer; font-size: 10px;">
+                                Expand All
+                            </button>
+                            <button onclick="collapseAllParams()" style="padding: 4px 8px; background: #252933; border: 1px solid #2a2e39; border-radius: 3px; color: #d1d4dc; cursor: pointer; font-size: 10px;">
+                                Collapse All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Parameter Tabs -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 2px solid #2a2e39;">
+                        <button class="param-tab active" onclick="switchParamTab('entry')" style="flex: 1; padding: 10px 16px; background: #2962ff; color: white; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">
+                            🎯 Entry Conditions
+                        </button>
+                        <button class="param-tab" onclick="switchParamTab('exit')" style="flex: 1; padding: 10px 16px; background: #252933; color: #d1d4dc; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;">
+                            🚪 Exit Rules
+                        </button>
+                    </div>
+
+                    <!-- Entry Tab Content -->
+                    <div id="entryParamTab" class="param-tab-content" style="flex: 1; overflow-y: auto; display: block;">
+                        <div class="param-tree" id="entryParamTree">
+                            <div style="text-align: center; color: #787b86; padding: 30px 10px; font-size: 12px;">
+                                Select a strategy to view entry parameters
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exit Tab Content -->
+                    <div id="exitParamTab" class="param-tab-content" style="flex: 1; overflow-y: auto; display: none;">
+                        <div class="param-tree" id="exitParamTree">
+                            <div style="text-align: center; color: #787b86; padding: 30px 10px; font-size: 12px;">
+                                Select a strategy to view exit parameters
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT Panel - Terminal -->
+            <div class="right-panel">
+                <div class="terminal-header">
+                    <span style="font-size: 13px; font-weight: bold; color: #d1d4dc;">📟 Terminal</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="clearTerminal()" style="padding: 4px 8px; background: #2a2e39; border: 1px solid #3a3e49; border-radius: 3px; color: #d1d4dc; cursor: pointer; font-size: 11px;">
+                            Clear
+                        </button>
+                        <button onclick="exportLog()" style="padding: 4px 8px; background: #2a2e39; border: 1px solid #3a3e49; border-radius: 3px; color: #d1d4dc; cursor: pointer; font-size: 11px;">
+                            Export
+                        </button>
+                    </div>
+                </div>
+                <div class="terminal-body" id="terminal">
+                    <div class="terminal-line" style="color: #787b86;">
+                        Terminal ready. Waiting for optimization to start...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel (Bottom, full width) -->
+            <div class="results-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0; font-size: 16px; color: #d1d4dc;">🏆 Optimization Results</h3>
+                    <button onclick="exportResultsCSV()" style="padding: 8px 12px; background: #26a69a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                        📥 Export CSV
+                    </button>
+                </div>
+
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Win Rate</th>
+                            <th>Profit (pts)</th>
+                            <th>Drawdown</th>
+                            <th>Profit Factor</th>
+                            <th>Trades</th>
+                            <th>Fitness</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #787b86; padding: 30px;">
+                                Run optimization to see results
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/data-manager.js') }}?v=15.1"></script>
+    <script src="{{ url_for('static', filename='js/optimize.js') }}?v=2.0"></script>
+    <script>
+        // Parameter tab switching
+        function switchParamTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.param-tab-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+
+            // Remove active class from all tabs
+            document.querySelectorAll('.param-tab').forEach(tab => {
+                tab.style.background = '#252933';
+                tab.style.color = '#d1d4dc';
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName + 'ParamTab').style.display = 'block';
+
+            // Add active class to clicked tab
+            event.target.style.background = '#2962ff';
+            event.target.style.color = 'white';
+            event.target.classList.add('active');
+        }
+
+        // Tree expansion
+        function expandAllParams() {
+            document.querySelectorAll('.tree-header').forEach(header => {
+                header.classList.remove('collapsed');
+                const content = header.nextElementSibling;
+                if (content) content.classList.remove('collapsed');
+            });
+        }
+
+        function collapseAllParams() {
+            document.querySelectorAll('.tree-header').forEach(header => {
+                header.classList.add('collapsed');
+                const content = header.nextElementSibling;
+                if (content) content.classList.add('collapsed');
+            });
+        }
+
+        function toggleTree(element) {
+            element.classList.toggle('collapsed');
+            const content = element.nextElementSibling;
+            if (content) {
+                content.classList.toggle('collapsed');
+            }
+        }
+
+        // Terminal functions
+        function clearTerminal() {
+            document.getElementById('terminal').innerHTML = '<div class="terminal-line" style="color: #787b86;">Terminal cleared.</div>';
+        }
+
+        function exportLog() {
+            const terminal = document.getElementById('terminal');
+            const logText = terminal.innerText;
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `optimize_log_${Date.now()}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function addTerminalLine(message, type = 'info') {
+            const terminal = document.getElementById('terminal');
+            const line = document.createElement('div');
+            line.className = `terminal-line ${type}`;
+            line.textContent = message;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Export results to CSV
+        function exportResultsCSV() {
+            addTerminalLine('Exporting results to CSV...', 'info');
+            // TODO: Implement CSV export
+        }
+
+        // Start optimization
+        function startOptimization() {
+            addTerminalLine('🚀 Starting optimization...', 'success');
+            addTerminalLine('📊 Loading strategy and data...', 'info');
+            // TODO: Implement optimization logic
+        }
+
+        // Auto Optimization Modal
+        function showAutoOptimizeModal() {
+            document.getElementById('autoOptimizeModal').style.display = 'flex';
+        }
+
+        function closeAutoOptimizeModal() {
+            document.getElementById('autoOptimizeModal').style.display = 'none';
+        }
+
+        function startAutoOptimization() {
+            const iterations = parseInt(document.getElementById('autoIterations').value);
+            const targetMetric = document.getElementById('autoTargetMetric').value;
+            const targetValue = parseFloat(document.getElementById('autoTargetValue').value);
+
+            closeAutoOptimizeModal();
+
+            addTerminalLine('═'.repeat(50), 'info');
+            addTerminalLine('🤖 AUTO OPTIMIZATION STARTED', 'success');
+            addTerminalLine('═'.repeat(50), 'info');
+            addTerminalLine(`🔄 Iterations: ${iterations}`, 'info');
+            addTerminalLine(`🎯 Target Metric: ${targetMetric}`, 'info');
+            addTerminalLine(`📊 Target Value: ${targetValue}`, 'info');
+            addTerminalLine('─'.repeat(50), 'info');
+            addTerminalLine('📍 Strategy: Optimize Entry → Optimize Exit → Repeat', 'info');
+            addTerminalLine('─'.repeat(50), 'info');
+
+            // TODO: Implement auto optimization logic
+            addTerminalLine('⚠️ Auto optimization implementation in progress...', 'warning');
+        }
+    </script>
+
+    <!-- Auto Optimization Modal -->
+    <div id="autoOptimizeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+        <div style="background: #1e222d; border-radius: 8px; padding: 25px; width: 500px; max-width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: #26a69a; font-size: 18px;">🤖 Auto Optimization Settings</h2>
+                <button onclick="closeAutoOptimizeModal()" style="background: none; border: none; color: #787b86; font-size: 24px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 20px; padding: 15px; background: #252933; border-radius: 6px; border-left: 3px solid #26a69a;">
+                <div style="font-size: 12px; color: #d1d4dc; line-height: 1.6;">
+                    <strong style="color: #26a69a;">Auto Optimization Strategy:</strong><br>
+                    1️⃣ Optimize <strong>Entry Conditions</strong> → Save best parameters<br>
+                    2️⃣ Optimize <strong>Exit Rules</strong> with optimized entry → Save best<br>
+                    3️⃣ Repeat for specified iterations<br>
+                    4️⃣ Find the best overall combination
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 6px; color: #787b86; font-size: 12px; font-weight: 600;">Number of Iterations:</label>
+                <input type="number" id="autoIterations" value="5" min="1" max="20" style="width: 100%; padding: 10px; background: #252933; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                <div style="font-size: 10px; color: #787b86; margin-top: 4px;">How many Entry→Exit optimization cycles to run</div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 6px; color: #787b86; font-size: 12px; font-weight: 600;">Target Metric:</label>
+                <select id="autoTargetMetric" style="width: 100%; padding: 10px; background: #252933; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                    <option value="total_profit">Total Profit (Points)</option>
+                    <option value="win_rate">Win Rate (%)</option>
+                    <option value="profit_factor">Profit Factor</option>
+                    <option value="sharpe_ratio">Sharpe Ratio</option>
+                    <option value="combined">Combined Score</option>
+                </select>
+                <div style="font-size: 10px; color: #787b86; margin-top: 4px;">Primary metric to optimize for</div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 6px; color: #787b86; font-size: 12px; font-weight: 600;">Max Drawdown Limit (%):</label>
+                <input type="number" id="autoTargetValue" value="20" min="1" max="100" step="1" style="width: 100%; padding: 10px; background: #252933; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                <div style="font-size: 10px; color: #787b86; margin-top: 4px;">Maximum acceptable drawdown percentage</div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeAutoOptimizeModal()" style="flex: 1; padding: 12px; background: #2a2e39; color: #d1d4dc; border: 1px solid #3a3e49; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                    Cancel
+                </button>
+                <button onclick="startAutoOptimization()" style="flex: 2; padding: 12px; background: #26a69a; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                    🚀 Start Auto Optimization
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

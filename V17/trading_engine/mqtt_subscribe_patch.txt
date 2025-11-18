@@ -1,0 +1,14 @@
+# Patch for line 1274-1278 (DNSE _on_connect)
+    def _on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            logger.info(f"✅ MQTT Connected successfully")
+            # Auto-subscribe to tickers
+            if self.tickers:
+                for symbol in self.tickers:
+                    # Subscribe to stock info (realtime price)
+                    self.subscribe_symbol(symbol, 'stockinfo')
+                    # Subscribe to OHLC 1 minute
+                    self.subscribe_symbol(symbol, 'ohlc_1m')
+                logger.info(f"📊 Subscribed to {len(self.tickers)} symbols")
+        else:
+            logger.error(f"❌ MQTT Connection failed with code: {rc}")

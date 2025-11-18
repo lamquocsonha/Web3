@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Settings - AUTO OPTIMIZE TRADING SYSTEM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/workspace.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar-fix.css') }}">
+    <style>
+        .exchange-container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 50px);
+            overflow: hidden;
+        }
+
+        .exchange-sidebar {
+            width: 350px;
+            background-color: #1e222d;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .exchange-main {
+            flex: 1;
+            background-color: #1e222d;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .exchange-terminal {
+            width: 400px;
+            background-color: #0d1117;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #2a2e39;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #2a2e39;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #d1d4dc;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .profiles-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .profile-item {
+            background: #131722;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #2a2e39;
+            transition: all 0.2s;
+        }
+
+        .profile-item:hover {
+            border-color: #2962ff;
+            background: #1a1e2b;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .profile-name {
+            font-weight: 600;
+            color: #d1d4dc;
+            font-size: 14px;
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            color: #787b86;
+            margin-bottom: 10px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status-connected {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+
+        .status-disconnected {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        .exchange-badge {
+            padding: 3px 8px;
+            background: #2962ff;
+            color: white;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section h3 {
+            font-size: 13px;
+            color: #787b86;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #787b86;
+            font-size: 12px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background: #131722;
+            border: 1px solid #2a2e39;
+            border-radius: 4px;
+            color: #d1d4dc;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2962ff;
+        }
+
+        .form-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .credentials-form {
+            display: none;
+        }
+
+        .credentials-form.active {
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: #2962ff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e53e5;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #da190b;
+        }
+
+        .btn-secondary {
+            background: #2a2e39;
+            color: #d1d4dc;
+        }
+
+        .btn-secondary:hover {
+            background: #363a4a;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 12px;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border-left: 3px solid #4caf50;
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border-left: 3px solid #f44336;
+        }
+
+        .alert-info {
+            background: rgba(41, 98, 255, 0.2);
+            color: #2962ff;
+            border-left: 3px solid #2962ff;
+        }
+
+        .account-info {
+            background: #131722;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border: 1px solid #2a2e39;
+        }
+
+        .account-info h3 {
+            font-size: 13px;
+            color: #d1d4dc;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .account-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .info-item {
+            background: #1e222d;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #2962ff;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #787b86;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #d1d4dc;
+            font-weight: 600;
+        }
+
+        .info-section-title {
+            font-size: 12px;
+            color: #d1d4dc;
+            font-weight: 600;
+            margin: 12px 0 8px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #2a2e39;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #787b86;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            opacity: 0.3;
+            margin-bottom: 12px;
+        }
+
+        .spinner {
+            border: 2px solid #2a2e39;
+            border-top: 2px solid #2962ff;
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        .spinner.show {
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Terminal Styles */
+        .terminal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            font-family: 'Courier New', Consolas, monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #8b949e;
+        }
+
+        .terminal-line {
+            margin-bottom: 8px;
+            word-wrap: break-word;
+        }
+
+        .terminal-line.info {
+            color: #58a6ff;
+        }
+
+        .terminal-line.success {
+            color: #3fb950;
+        }
+
+        .terminal-line.error {
+            color: #f85149;
+        }
+
+        .terminal-line.warning {
+            color: #d29922;
+        }
+
+        .terminal-timestamp {
+            color: #6e7681;
+            margin-right: 8px;
+        }
+
+        .terminal-clear-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: transparent;
+            border: 1px solid #2a2e39;
+            color: #8b949e;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .terminal-clear-btn:hover {
+            background: #2a2e39;
+            color: #d1d4dc;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e222d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2e39;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #363a4a;
+        }
+
+        /* Account Info Modal */
+        .account-info-modal {
+            padding: 20px;
+        }
+
+        .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #2a2e39;
+        }
+
+        .info-header h3 {
+            margin: 0;
+            color: #d1d4dc;
+            font-size: 18px;
+        }
+
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-section h4 {
+            color: #787b86;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2e39;
+            color: #d1d4dc;
+        }
+
+        .info-table td:first-child {
+            color: #787b86;
+            width: 40%;
+        }
+
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .positions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .positions-table th {
+            background: #131722;
+            padding: 10px 15px;
+            text-align: left;
+            font-size: 11px;
+            color: #787b86;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .positions-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #2a2e39;
+            color: #d1d4dc;
+        }
+
+        .positions-table tr:hover {
+            background: #1a1e2b;
+        }
+
+        .text-success {
+            color: #26a69a !important;
+        }
+
+        .text-danger {
+            color: #ef5350 !important;
+        }
+
+        .info-footer {
+            padding-top: 20px;
+            border-top: 1px solid #2a2e39;
+            text-align: right;
+        }
+
+        .btn-info {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #1976d2;
+        }
+
+        /* Modal Tabs */
+        .modal-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #2a2e39;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: #787b86;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #d1d4dc;
+            background: rgba(41, 98, 255, 0.1);
+        }
+
+        .tab-btn.active {
+            color: #2962ff;
+            border-bottom-color: #2962ff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .orders-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #2a2e39;
+            border-radius: 4px;
+        }
+
+        .orders-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .orders-container::-webkit-scrollbar-track {
+            background: #131722;
+        }
+
+        .orders-container::-webkit-scrollbar-thumb {
+            background: #2a2e39;
+            border-radius: 3px;
+        }
+
+        .orders-container::-webkit-scrollbar-thumb:hover {
+            background: #363a4a;
+        }
+
+        .positions-table tbody tr:hover {
+            background: rgba(41, 98, 255, 0.05);
+        }
+
+        .order-row {
+            transition: background 0.2s;
+        }
+
+        /* DNSE OTP Modal - Force center positioning */
+        #dnseOTPModal[style*="display: block"],
+        #dnseOTPModal[style*="display: flex"] {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        {% include 'header_common.html' %}
+
+        <!-- Main Content -->
+        <div class="exchange-container">
+            <!-- Sidebar: Profiles List -->
+            <div class="exchange-sidebar">
+                <div class="panel-header">
+                    <span>📂</span>
+                    <span>Saved Profiles</span>
+                </div>
+                
+                <!-- Profile Filter Buttons -->
+                <div style="padding: 12px 15px; border-bottom: 1px solid #2a2e39; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="filterAll" class="profile-filter-btn active" onclick="filterProfiles('all')" 
+                            style="flex: 1; min-width: 60px; padding: 6px 12px; background: #2962ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">
+                        All
+                    </button>
+                    <button id="filterData" class="profile-filter-btn" onclick="filterProfiles('data')" 
+                            style="flex: 1; min-width: 60px; padding: 6px 12px; background: rgba(41, 98, 255, 0.1); color: #2962ff; border: 1px solid rgba(41, 98, 255, 0.3); border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">
+                        📊 Data
+                    </button>
+                    <button id="filterTrading" class="profile-filter-btn" onclick="filterProfiles('trading')" 
+                            style="flex: 1; min-width: 60px; padding: 6px 12px; background: rgba(76, 175, 80, 0.1); color: #4caf50; border: 1px solid rgba(76, 175, 80, 0.3); border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s;">
+                        📈 Trading
+                    </button>
+                </div>
+                
+                <div class="panel-content">
+                    <div id="profilesList" class="profiles-list">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" />
+                            </svg>
+                            <p>No profiles yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main: Add/Edit Profile -->
+            <div class="exchange-main">
+                <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span id="formPanelTitle" style="display: flex; align-items: center; gap: 10px;">
+                        <span>➕</span>
+                        <span>Add New Profile</span>
+                    </span>
+                    <button id="addNewBtn" onclick="showNewProfileForm()" 
+                            style="display: none; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(102, 126, 234, 0.3)';">
+                        ➕ Add New
+                    </button>
+                </div>
+
+                <div class="panel-content">
+                    <div id="alertBox" class="alert"></div>
+
+                    <form id="profileForm">
+                        <div class="form-section">
+                            <h3>Basic Information</h3>
+                            
+                            <div class="form-group">
+                                <label for="profileName">Profile Name</label>
+                                <input type="text" id="profileName" class="form-control" 
+                                       placeholder="e.g. Binance Main, MT5 Demo" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="exchangeSelect">Exchange</label>
+                                <select id="exchangeSelect" class="form-control" required>
+                                    <option value="">-- Select Exchange --</option>
+                                    <option value="binance">Binance Futures</option>
+                                    <option value="mt5">MetaTrader 5</option>
+                                    <option value="dnse">DNSE</option>
+                                    <option value="entrade">Entrade</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Binance Credentials -->
+                        <div id="binanceCredentials" class="credentials-form">
+                            <div class="form-section">
+                                <h3>Binance API Credentials</h3>
+                                
+                                <div class="form-group">
+                                    <label for="binanceApiKey">API Key</label>
+                                    <input type="text" id="binanceApiKey" class="form-control" 
+                                           placeholder="Enter your API Key">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="binanceApiSecret">API Secret</label>
+                                    <input type="password" id="binanceApiSecret" class="form-control" 
+                                           placeholder="Enter your API Secret">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="binanceTickers">Tickers (phân cách bằng dấu phẩy)</label>
+                                    <input type="text" id="binanceTickers" class="form-control" 
+                                           placeholder="VD: BTCUSDT,ETHUSDT,BNBUSDT">
+                                    <small style="color: #787b86;">Danh sách ticker sẽ hiển thị khi chọn profile</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="binanceTimeframe">Timeframe mặc định</label>
+                                    <select id="binanceTimeframe" class="form-control">
+                                        <option value="M1">1 Minute (M1)</option>
+                                        <option value="M5">5 Minutes (M5)</option>
+                                        <option value="M15">15 Minutes (M15)</option>
+                                        <option value="M30">30 Minutes (M30)</option>
+                                        <option value="H1">1 Hour (H1)</option>
+                                        <option value="H4">4 Hours (H4)</option>
+                                        <option value="D1">1 Day (D1)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Timeframe sẽ tự động được chọn khi kết nối</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="binanceDisplayCandles">Số nến hiển thị</label>
+                                    <input type="number" id="binanceDisplayCandles" class="form-control" 
+                                           placeholder="1000 (mặc định)" min="100" max="10000" value="1000">
+                                    <small style="color: #787b86;">Số lượng nến tối đa được tải về và hiển thị trên chart</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="binanceTimezone">Timezone (GMT Offset)</label>
+                                    <select id="binanceTimezone" class="form-control">
+                                        <option value="0" selected>GMT+0 (UTC)</option>
+                                        <option value="7">GMT+7 (Vietnam, Thailand)</option>
+                                        <option value="8">GMT+8 (Singapore, China)</option>
+                                        <option value="9">GMT+9 (Japan, Korea)</option>
+                                        <option value="-5">GMT-5 (US Eastern)</option>
+                                        <option value="-8">GMT-8 (US Pacific)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Điều chỉnh múi giờ hiển thị trên chart</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MT5 Credentials -->
+                        <div id="mt5Credentials" class="credentials-form">
+                            <div class="form-section">
+                                <h3>MetaTrader 5 Credentials</h3>
+                                
+                                <div class="form-group">
+                                    <label for="mt5Login">Account Number</label>
+                                    <input type="text" id="mt5Login" class="form-control" 
+                                           placeholder="Enter account number">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mt5Password">Password</label>
+                                    <input type="password" id="mt5Password" class="form-control" 
+                                           placeholder="Enter password">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mt5Broker">Broker</label>
+                                    <select id="mt5Broker" class="form-control">
+                                        <option value="">-- Select Broker --</option>
+                                        <option value="exness">Exness</option>
+                                        <option value="icmarkets">IC Markets</option>
+                                        <option value="xm">XM Global</option>
+                                        <option value="alpari">Alpari</option>
+                                        <option value="fxtm">FXTM (ForexTime)</option>
+                                        <option value="pepperstone">Pepperstone</option>
+                                        <option value="tickmill">Tickmill</option>
+                                        <option value="roboforex">RoboForex</option>
+                                        <option value="other">Other Broker</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="mt5Server">Server</label>
+                                    <select id="mt5Server" class="form-control" disabled>
+                                        <option value="">-- Select Broker First --</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group" id="mt5CustomServerGroup" style="display: none;">
+                                    <label for="mt5CustomServer">Custom Server Name</label>
+                                    <input type="text" id="mt5CustomServer" class="form-control" 
+                                           placeholder="e.g. YourBroker-Demo">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mt5Tickers">Tickers (phân cách bằng dấu phẩy)</label>
+                                    <input type="text" id="mt5Tickers" class="form-control" 
+                                           placeholder="VD: XAUUSD,EURUSD,GBPUSD">
+                                    <small style="color: #787b86;">Danh sách ticker sẽ hiển thị khi chọn profile</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mt5Timeframe">Timeframe mặc định</label>
+                                    <select id="mt5Timeframe" class="form-control">
+                                        <option value="M1">1 Minute (M1)</option>
+                                        <option value="M5">5 Minutes (M5)</option>
+                                        <option value="M15">15 Minutes (M15)</option>
+                                        <option value="M30">30 Minutes (M30)</option>
+                                        <option value="H1">1 Hour (H1)</option>
+                                        <option value="H4">4 Hours (H4)</option>
+                                        <option value="D1">1 Day (D1)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Timeframe sẽ tự động được chọn khi kết nối</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mt5DisplayCandles">Số nến hiển thị</label>
+                                    <input type="number" id="mt5DisplayCandles" class="form-control" 
+                                           placeholder="1000 (mặc định)" min="100" max="10000" value="1000">
+                                    <small style="color: #787b86;">Số lượng nến tối đa được tải về và hiển thị trên chart</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="mt5Timezone">Timezone (GMT Offset)</label>
+                                    <select id="mt5Timezone" class="form-control">
+                                        <option value="0">GMT+0 (UTC)</option>
+                                        <option value="2">GMT+2 (EET - MT5 Server Time)</option>
+                                        <option value="3">GMT+3 (Moscow)</option>
+                                        <option value="7">GMT+7 (Vietnam, Thailand)</option>
+                                        <option value="8">GMT+8 (Singapore, China)</option>
+                                        <option value="-5">GMT-5 (US Eastern)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Điều chỉnh múi giờ hiển thị trên chart (MT5 thường dùng GMT+2/+3)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DNSE Credentials -->
+                        <div id="dnseCredentials" class="credentials-form">
+                            <div class="form-section">
+                                <h3>DNSE Credentials (Cổ phiếu + Phái sinh)</h3>
+                                
+                                <div class="form-group">
+                                    <label for="dnseProtocol">Protocol</label>
+                                    <select id="dnseProtocol" class="form-control">
+                                        <option value="rest">REST API (Trading + Email OTP)</option>
+                                        <option value="mqtt">MQTT WebSocket (Market Data - Realtime)</option>
+                                        <option value="public_rest">Public REST API (Historical Data)</option>
+                                    </select>
+                                    <small style="color: #787b86;">REST API cho đặt lệnh, MQTT cho realtime, Public cho historical data (không cần credentials)</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="dnseUsername">Username</label>
+                                    <input type="text" id="dnseUsername" class="form-control" 
+                                           placeholder="Enter username">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="dnsePassword">Password</label>
+                                    <input type="password" id="dnsePassword" class="form-control" 
+                                           placeholder="Enter password">
+                                </div>
+
+                                <div class="form-group">
+                                    <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(33, 150, 243, 0.05); border-radius: 8px; border: 1px solid rgba(33, 150, 243, 0.2);">
+                                        <input type="checkbox" id="dnseRequireOTP" style="width: 18px; height: 18px; cursor: pointer;">
+                                        <label for="dnseRequireOTP" style="margin: 0; cursor: pointer; color: #b2b5be; font-size: 14px;">
+                                            🔐 Yêu cầu xác thực OTP khi kết nối (Email OTP)
+                                        </label>
+                                    </div>
+                                    <small style="color: #787b86; display: block; margin-top: 5px;">
+                                        Nếu bật, sẽ hiện modal nhập OTP khi bấm "Test Connection"
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dnseTickers">Tickers (phân cách bằng dấu phẩy)</label>
+                                    <input type="text" id="dnseTickers" class="form-control" 
+                                           placeholder="VD: VN30F1M,VNM,FPT,VCB">
+                                    <small style="color: #787b86;">Danh sách ticker sẽ hiển thị khi chọn profile</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dnseTimeframe">Timeframe mặc định</label>
+                                    <select id="dnseTimeframe" class="form-control">
+                                        <option value="M1">1 Minute (M1)</option>
+                                        <option value="M5">5 Minutes (M5)</option>
+                                        <option value="M15">15 Minutes (M15)</option>
+                                        <option value="M30">30 Minutes (M30)</option>
+                                        <option value="H1">1 Hour (H1)</option>
+                                        <option value="H4">4 Hours (H4)</option>
+                                        <option value="D1">1 Day (D1)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Timeframe sẽ tự động được chọn khi kết nối</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dnseDisplayCandles">Số nến hiển thị</label>
+                                    <input type="number" id="dnseDisplayCandles" class="form-control" 
+                                           placeholder="1000 (mặc định)" min="100" max="10000" value="1000">
+                                    <small style="color: #787b86;">Số lượng nến tối đa được tải về và hiển thị trên chart</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dnseTimezone">Timezone (GMT Offset)</label>
+                                    <select id="dnseTimezone" class="form-control">
+                                        <option value="0">GMT+0 (UTC)</option>
+                                        <option value="7" selected>GMT+7 (Vietnam, Thailand)</option>
+                                        <option value="8">GMT+8 (Singapore, China)</option>
+                                        <option value="9">GMT+9 (Japan, Korea)</option>
+                                        <option value="-5">GMT-5 (US Eastern)</option>
+                                        <option value="-8">GMT-8 (US Pacific)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Điều chỉnh múi giờ hiển thị trên chart (GMT+7 cho Việt Nam)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Entrade Credentials -->
+                        <div id="entradeCredentials" class="credentials-form">
+                            <div class="form-section">
+                                <h3>Entrade Credentials (Phái sinh)</h3>
+                                
+                                <div class="form-group">
+                                    <label for="entradeProtocol">Protocol</label>
+                                    <select id="entradeProtocol" class="form-control">
+                                        <option value="rest">REST API (Trading - không cần OTP)</option>
+                                        <option value="mqtt">MQTT WebSocket (Market Data - Realtime)</option>
+                                    </select>
+                                    <small style="color: #787b86;">REST API cho đặt lệnh, MQTT cho realtime data</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="entradeUsername">Username</label>
+                                    <input type="text" id="entradeUsername" class="form-control" 
+                                           placeholder="Enter username">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="entradePassword">Password</label>
+                                    <input type="password" id="entradePassword" class="form-control" 
+                                           placeholder="Enter password">
+                                </div>
+
+                                <div class="form-group">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" id="entradeIsDemo" style="width: 16px; height: 16px;">
+                                        <span>Tài khoản Demo (không check = Real)</span>
+                                    </label>
+                                    <small style="color: #787b86;">Entrade hỗ trợ cả tài khoản Real và Demo</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="entradeTickers">Tickers (phân cách bằng dấu phẩy)</label>
+                                    <input type="text" id="entradeTickers" class="form-control" 
+                                           placeholder="VD: VN30F1M,VN30F2M,VN30F3M">
+                                    <small style="color: #787b86;">Danh sách ticker sẽ hiển thị khi chọn profile</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="entradeTimeframe">Timeframe mặc định</label>
+                                    <select id="entradeTimeframe" class="form-control">
+                                        <option value="M1">1 Minute (M1)</option>
+                                        <option value="M5">5 Minutes (M5)</option>
+                                        <option value="M15">15 Minutes (M15)</option>
+                                        <option value="M30">30 Minutes (M30)</option>
+                                        <option value="H1">1 Hour (H1)</option>
+                                        <option value="H4">4 Hours (H4)</option>
+                                        <option value="D1">1 Day (D1)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Timeframe sẽ tự động được chọn khi kết nối</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="entradeDisplayCandles">Số nến hiển thị</label>
+                                    <input type="number" id="entradeDisplayCandles" class="form-control" 
+                                           placeholder="1000 (mặc định)" min="100" max="10000" value="1000">
+                                    <small style="color: #787b86;">Số lượng nến tối đa được tải về và hiển thị trên chart</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="entradeTimezone">Timezone (GMT Offset)</label>
+                                    <select id="entradeTimezone" class="form-control">
+                                        <option value="0">GMT+0 (UTC)</option>
+                                        <option value="7" selected>GMT+7 (Vietnam, Thailand)</option>
+                                        <option value="8">GMT+8 (Singapore, China)</option>
+                                        <option value="9">GMT+9 (Japan, Korea)</option>
+                                        <option value="-5">GMT-5 (US Eastern)</option>
+                                        <option value="-8">GMT-8 (US Pacific)</option>
+                                    </select>
+                                    <small style="color: #787b86;">Điều chỉnh múi giờ hiển thị trên chart (GMT+7 cho Việt Nam)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Usage Section -->
+                        <div class="form-section">
+                            <h3>📌 Profile Usage</h3>
+                            <p style="color: #787b86; font-size: 13px; margin-bottom: 15px;">
+                                Chọn mục đích sử dụng profile này trong Connection modal
+                            </p>
+                            
+                            <div class="form-group" style="margin-bottom: 15px;">
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px; background: rgba(41, 98, 255, 0.05); border-radius: 6px; border: 1px solid rgba(41, 98, 255, 0.2);">
+                                    <input type="checkbox" id="useForData" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                    <div>
+                                        <div style="font-weight: 600; color: #2962ff;">📊 Use for Market Data</div>
+                                        <div style="font-size: 12px; color: #787b86; margin-top: 4px;">
+                                            Profile này sẽ hiện trong dropdown "Data Profile" để load chart
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 12px; background: rgba(76, 175, 80, 0.05); border-radius: 6px; border: 1px solid rgba(76, 175, 80, 0.2);">
+                                    <input type="checkbox" id="useForTrading" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                    <div>
+                                        <div style="font-weight: 600; color: #4caf50;">📈 Use for Trading</div>
+                                        <div style="font-size: 12px; color: #787b86; margin-top: 4px;">
+                                            Profile này sẽ hiện trong dropdown "Trading Profile" để đặt lệnh
+                                            <span style="color: #ff9800; font-weight: 600;">(Cần Trading Token cho DNSE)</span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" onclick="testConnection()">
+                                <span>🔌</span>
+                                <span>Test Connection</span>
+                                <div class="spinner" id="testSpinner"></div>
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <span>💾</span>
+                                <span>Save Profile</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Account Info Display -->
+                    <div id="accountInfo" class="account-info" style="display: none;">
+                        <h3>
+                            <span>ℹ️</span>
+                            <span>Account Information</span>
+                        </h3>
+                        <div id="accountInfoContent" class="account-info-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Panel -->
+            <div class="exchange-terminal">
+                <div class="panel-header" style="position: relative;">
+                    <span>📟</span>
+                    <span>Connection Terminal</span>
+                    <button class="terminal-clear-btn" onclick="clearTerminal()">Clear</button>
+                </div>
+                
+                <div class="terminal-content" id="terminalContent">
+                    <div class="terminal-line info">
+                        <span class="terminal-timestamp">[System]</span>
+                        <span>Terminal ready. Waiting for connection events...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DNSE OTP Modal -->
+    <div id="dnseOTPModal" style="display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+        <div style="position: relative; padding: 0; width: 90%; max-width: 500px; background: linear-gradient(135deg, #1e222d 0%, #2a2e39 100%); border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+            <!-- Modal Header -->
+            <div style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; color: #ffffff; font-size: 20px; font-weight: 600;">
+                    🔐 DNSE Email OTP Verification
+                </h2>
+                <button onclick="closeDNSEOTPModal()" style="background: none; border: none; color: #787b86; font-size: 24px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s;">
+                    ×
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div style="padding: 24px;">
+                <div style="margin-bottom: 20px; padding: 16px; background: rgba(33, 150, 243, 0.1); border-left: 4px solid #2196F3; border-radius: 8px;">
+                    <p style="margin: 0; color: #b2b5be; font-size: 14px; line-height: 1.6;">
+                        📧 Nhấn <strong style="color: #2196F3;">"Request OTP"</strong> để nhận mã xác thực qua Email.<br>
+                        ⏱️ Mã OTP có hiệu lực trong <strong style="color: #2196F3;">2 phút</strong>.
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #b2b5be; font-size: 14px; font-weight: 500;">
+                        Email OTP Code
+                    </label>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" id="dnseModalOTP" placeholder="Enter 6-digit OTP from Email" 
+                               style="flex: 1; padding: 12px 16px; background: #131722; border: 1px solid #2a2e39; border-radius: 8px; color: #ffffff; font-size: 16px; letter-spacing: 2px; font-family: monospace; transition: all 0.3s;"
+                               maxlength="6" pattern="[0-9]*"
+                               onfocus="this.style.borderColor='#2196F3'; this.style.boxShadow='0 0 0 3px rgba(33, 150, 243, 0.1)';"
+                               onblur="this.style.borderColor='#2a2e39'; this.style.boxShadow='none';">
+                        <button onclick="requestDNSEModalOTP()" id="btnRequestDNSEModalOTP"
+                                style="padding: 12px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; white-space: nowrap; transition: all 0.3s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);"
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';">
+                            📱 Request OTP
+                        </button>
+                    </div>
+                    <small style="display: block; margin-top: 8px; color: #787b86; font-size: 12px;">
+                        Check your registered email address for the OTP code
+                    </small>
+                </div>
+
+                <div id="dnseOTPStatus" style="margin-bottom: 20px; padding: 12px; border-radius: 8px; display: none;">
+                    <!-- Status messages will be shown here -->
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div style="padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 12px; justify-content: flex-end;">
+                <button onclick="closeDNSEOTPModal()" 
+                        style="padding: 12px 24px; background: #2a2e39; color: #b2b5be; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s;"
+                        onmouseover="this.style.background='#363a45';"
+                        onmouseout="this.style.background='#2a2e39';">
+                    Cancel
+                </button>
+                <button onclick="submitDNSEOTP()" id="btnSubmitDNSEOTP"
+                        style="padding: 12px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.3s; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.4)';">
+                    🚀 Connect with OTP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/data-manager.js') }}?v=15.1"></script>
+    <script src="{{ url_for('static', filename='js/exchange_manager.js') }}"></script>
+    <script>
+    // Auto-center DNSE OTP modal when displayed
+    const dnseModal = document.getElementById('dnseOTPModal');
+    if (dnseModal) {
+        new MutationObserver(() => {
+            if (dnseModal.style.display === 'block') {
+                dnseModal.style.display = 'flex';
+            }
+        }).observe(dnseModal, { attributes: true, attributeFilter: ['style'] });
+    }
+    
+    // Toggle DNSE credentials visibility based on protocol
+    function toggleDnseCredentials() {
+        const protocol = document.getElementById('dnseProtocol').value;
+        const usernameGroup = document.getElementById('dnseUsername').closest('.form-group');
+        const passwordGroup = document.getElementById('dnsePassword').closest('.form-group');
+        const otpGroup = document.getElementById('dnseRequireOTP').closest('.form-group');
+        const useForTradingCheckbox = document.getElementById('useForTrading');
+        
+        if (protocol === 'public_rest') {
+            // Hide credentials for public API
+            usernameGroup.style.display = 'none';
+            passwordGroup.style.display = 'none';
+            otpGroup.style.display = 'none';
+            
+            // Disable "Use for Trading" checkbox
+            if (useForTradingCheckbox) {
+                useForTradingCheckbox.checked = false;
+                useForTradingCheckbox.disabled = true;
+                useForTradingCheckbox.closest('.form-group').style.opacity = '0.5';
+            }
+        } else {
+            // Show credentials for REST/MQTT
+            usernameGroup.style.display = 'block';
+            passwordGroup.style.display = 'block';
+            otpGroup.style.display = protocol === 'rest' ? 'block' : 'none';
+            
+            // Enable "Use for Trading" checkbox
+            if (useForTradingCheckbox) {
+                useForTradingCheckbox.disabled = false;
+                useForTradingCheckbox.closest('.form-group').style.opacity = '1';
+            }
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const dnseProtocolSelect = document.getElementById('dnseProtocol');
+        if (dnseProtocolSelect) {
+            dnseProtocolSelect.addEventListener('change', toggleDnseCredentials);
+            toggleDnseCredentials(); // Initial call
+        }
+    });
+    </script>
+</body>
+</html>

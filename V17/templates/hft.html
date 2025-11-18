@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HFT - AUTO OPTIMIZE TRADING SYSTEM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/workspace.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar-fix.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hft.css') }}">
+</head>
+<body>
+    <div class="workspace-container">
+        {% include 'header_common.html' %}
+        
+        <div class="hft-layout">
+            <!-- Control Panel -->
+            <div class="hft-control-panel">
+                <div class="panel-header"><h3>⚙️ CONTROL</h3></div>
+                
+                <div class="control-section">
+                    <label>Strategy:</label>
+                    <select id="hftStrategy" class="hft-select">
+                        <option value="scalping">Scalping v2</option>
+                        <option value="arbitrage">Arbitrage</option>
+                        <option value="market_making">Market Making</option>
+                    </select>
+                </div>
+                
+                <div class="control-section">
+                    <label>Exchange:</label>
+                    <select id="hftExchangeSelect" class="hft-select">
+                        <option value="">-- Select Exchange --</option>
+                    </select>
+                </div>
+                
+                <div class="status-section">
+                    <div class="status-item">
+                        <span class="status-label">Status:</span>
+                        <span class="status-value" id="hftStatus">STOPPED</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Connection:</span>
+                        <span class="status-value" id="connectionStatus">DISCONNECTED</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Ping:</span>
+                        <span class="status-value" id="serverPing">--</span>
+                    </div>
+                </div>
+                
+                <div class="control-buttons">
+                    <button id="btnMockData" class="btn-hft btn-mock">📊 MOCKDATA</button>
+                    <button id="btnStart" class="btn-hft btn-start">🟢 START</button>
+                    <button id="btnStop" class="btn-hft btn-stop" disabled>🔴 STOP</button>
+                </div>
+                
+                <div class="risk-limits">
+                    <h4>Risk Limits:</h4>
+                    <div class="limit-item">
+                        <label>Max Orders/min:</label>
+                        <input type="number" id="maxOrdersPerMin" value="100">
+                    </div>
+                    <div class="limit-item">
+                        <label>Max Loss ($):</label>
+                        <input type="number" id="maxLoss" value="500">
+                    </div>
+                    <div class="limit-item">
+                        <label>Position Limit:</label>
+                        <input type="number" id="positionLimit" value="1.0" step="0.1">
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h4>Filters:</h4>
+                    <label><input type="radio" name="filter" value="all" checked> Show All</label>
+                    <label><input type="radio" name="filter" value="filled"> Only FILLED</label>
+                    <label><input type="radio" name="filter" value="errors"> Only Errors</label>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="btnExport" class="btn-secondary">💾 Export</button>
+                    <button id="btnClear" class="btn-secondary">🗑️ Clear</button>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="hft-main-content">
+                <!-- Stats Dashboard -->
+                <div class="hft-stats-dashboard">
+                    <div class="stats-row">
+                        <div class="stat-box">
+                            <div class="stat-label">Orders</div>
+                            <div class="stat-value" id="statOrders">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Fill Rate</div>
+                            <div class="stat-value" id="statFillRate">0%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Avg Latency</div>
+                            <div class="stat-value" id="statLatency">0ms</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Total PnL</div>
+                            <div class="stat-value" id="statPnL">$0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Win Rate</div>
+                            <div class="stat-value" id="statWinRate">0%</div>
+                        </div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-box">
+                            <div class="stat-label">Orders/sec</div>
+                            <div class="stat-value" id="statOrdersPerSec">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Best Trade</div>
+                            <div class="stat-value" id="statBestTrade">$0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Worst Trade</div>
+                            <div class="stat-value" id="statWorstTrade">$0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Slippage</div>
+                            <div class="stat-value" id="statSlippage">0 pts</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Uptime</div>
+                            <div class="stat-value" id="statUptime">00:00:00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Split Terminal Container -->
+                <div class="hft-split-terminal-container">
+                    <!-- Market Data Terminal (Top) - Always Live -->
+                    <div class="market-data-terminal">
+                        <div class="terminal-header">
+                            <h3>📊 MARKET DATA (Tick)</h3>
+                            <span class="live-indicator">● LIVE</span>
+                        </div>
+                        <div class="terminal-content" id="marketDataContent">
+                            <table class="terminal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Price</th>
+                                        <th>Volume</th>
+                                        <th>Side</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="marketDataBody">
+                                    <tr class="terminal-empty">
+                                        <td colspan="4">Waiting for ticks...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Trades Terminal (Bottom) - Only when START -->
+                    <div class="trades-terminal">
+                        <div class="terminal-header">
+                            <h3>📈 TRADES (Orders)</h3>
+                            <label><input type="checkbox" id="autoScroll" checked> Auto-scroll</label>
+                        </div>
+                        <div class="terminal-content" id="tradesContent">
+                            <table class="terminal-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Time</th>
+                                        <th>Side</th>
+                                        <th>Price</th>
+                                        <th>Qty</th>
+                                        <th>Status</th>
+                                        <th>PnL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tradesBody">
+                                    <tr class="terminal-empty">
+                                        <td colspan="7">Press START to begin trading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts -->
+                <div class="hft-charts-container">
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" data-chart="latency">Latency</button>
+                        <button class="chart-tab" data-chart="pnl">PnL</button>
+                        <button class="chart-tab" data-chart="orderflow">Order Flow</button>
+                    </div>
+                    <div class="chart-content">
+                        <canvas id="hftChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/data-manager.js') }}?v=15.1"></script>
+    <script src="{{ url_for('static', filename='js/hft.js') }}"></script>
+    
+    <script>
+    // Load Exchange Profiles for HFT
+    async function loadExchangeProfiles() {
+        try {
+            const response = await fetch('/api/exchange/profiles');
+            const data = await response.json();
+            
+            if (data.success && data.profiles) {
+                const hftSelect = document.getElementById('hftExchangeSelect');
+                
+                // Clear existing options except first one
+                hftSelect.innerHTML = '<option value="">-- Select Exchange --</option>';
+                
+                // Add profiles
+                data.profiles.forEach(profile => {
+                    const option = `<option value="${profile.name}">${profile.name} (${profile.exchange.toUpperCase()})</option>`;
+                    hftSelect.innerHTML += option;
+                });
+                
+                console.log(`✅ Loaded ${data.profiles.length} exchange profiles for HFT`);
+            }
+        } catch (error) {
+            console.error('Error loading exchange profiles:', error);
+        }
+    }
+    
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadExchangeProfiles();
+    });
+    </script>
+</body>
+</html>

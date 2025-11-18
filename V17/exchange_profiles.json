@@ -1,0 +1,102 @@
+{
+  "DNSE": {
+    "exchange": "dnse",
+    "credentials": "eyJwcm90b2NvbCI6ICJyZXN0IiwgInVzZXJuYW1lIjogIjA5MTk5OTA1NDAiLCAicGFzc3dvcmQiOiAiTGFtMzEwaGEqIiwgInJlcXVpcmVfb3RwIjogdHJ1ZSwgInRpY2tlcnMiOiAiIiwgInRpbWVmcmFtZSI6ICJNMSIsICJ1c2VfZm9yX2RhdGEiOiBmYWxzZSwgInVzZV9mb3JfdHJhZGluZyI6IHRydWV9",
+    "display_info": {
+      "username": "0919990540",
+      "protocol": "REST API",
+      "timeframe": "M1"
+    },
+    "timeframe": "M1",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "gmt_offset": 7,
+    "use_for_data": false,
+    "use_for_trading": true,
+    "connected": false,
+    "created_at": "2025-11-12T21:10:20.105660"
+  },
+  "MT5 Exnes demo 274783334": {
+    "exchange": "mt5",
+    "credentials": "eyJsb2dpbiI6ICIyNzQ3ODMzMzQiLCAicGFzc3dvcmQiOiAiTGFtMzEwaGEqIiwgImJyb2tlciI6ICJleG5lc3MiLCAic2VydmVyIjogIkV4bmVzcy1NVDVUcmlhbDE0IiwgInRpY2tlcnMiOiAiWEFVVVNEIiwgInRpbWVmcmFtZSI6ICJNMSIsICJ1c2VfZm9yX2RhdGEiOiBmYWxzZSwgInVzZV9mb3JfdHJhZGluZyI6IHRydWV9",
+    "display_info": {
+      "server": "Exness-MT5Trial14",
+      "broker": "exness",
+      "timeframe": "M1"
+    },
+    "timeframe": "M1",
+    "use_for_data": false,
+    "use_for_trading": true,
+    "connected": false,
+    "created_at": "2025-11-12T21:11:17.225108",
+    "timezone": "UTC",
+    "gmt_offset": 0
+  },
+  "Entrade demo": {
+    "exchange": "entrade",
+    "credentials": "eyJwcm90b2NvbCI6ICJyZXN0IiwgInVzZXJuYW1lIjogIjA5MTk5OTA1NDAiLCAicGFzc3dvcmQiOiAiTGFtMzEwaGEqIiwgInRpY2tlcnMiOiAiVk4zMEYxTSIsICJpc19kZW1vIjogdHJ1ZSwgInRpbWVmcmFtZSI6ICJNMSIsICJ1c2VfZm9yX2RhdGEiOiBmYWxzZSwgInVzZV9mb3JfdHJhZGluZyI6IHRydWV9",
+    "display_info": {
+      "username": "0919990540",
+      "protocol": "REST API",
+      "timeframe": "M1"
+    },
+    "timeframe": "M1",
+    "use_for_data": false,
+    "use_for_trading": true,
+    "connected": false,
+    "created_at": "2025-11-12T21:10:28.355385",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "gmt_offset": 7
+  },
+  "Entrade Real": {
+    "exchange": "entrade",
+    "credentials": "eyJwcm90b2NvbCI6ICJyZXN0IiwgInVzZXJuYW1lIjogIjA5MTk5OTA1NDAiLCAicGFzc3dvcmQiOiAiTGFtMzEwaGEqIiwgInRpY2tlcnMiOiAiVk4zMEYxTSIsICJpc19kZW1vIjogZmFsc2UsICJ0aW1lZnJhbWUiOiAiTTEiLCAidXNlX2Zvcl9kYXRhIjogZmFsc2UsICJ1c2VfZm9yX3RyYWRpbmciOiB0cnVlfQ==",
+    "display_info": {
+      "username": "0919990540",
+      "protocol": "REST API",
+      "timeframe": "M1"
+    },
+    "timeframe": "M1",
+    "use_for_data": false,
+    "use_for_trading": true,
+    "connected": false,
+    "created_at": "2025-11-12T21:11:10.951306",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "gmt_offset": 7
+  },
+  "Entrade MQTT real": {
+    "exchange": "entrade-mqtt",
+    "credentials": "eyJwcm90b2NvbCI6ICJtcXR0IiwgInVzZXJuYW1lIjogIjA5MTk5OTA1NDAiLCAicGFzc3dvcmQiOiAiTGFtMzEwaGEqIiwgInRpY2tlcnMiOiAiVk4zMEYxTSw0MUkxRkIwMDAiLCAiaXNfZGVtbyI6IGZhbHNlLCAidGltZWZyYW1lIjogIk0xIiwgInVzZV9mb3JfZGF0YSI6IGZhbHNlLCAidXNlX2Zvcl90cmFkaW5nIjogdHJ1ZX0=",
+    "display_info": {
+      "username": "0919990540",
+      "protocol": "MQTT WebSocket",
+      "timeframe": "M1"
+    },
+    "timeframe": "M1",
+    "use_for_data": false,
+    "use_for_trading": true,
+    "connected": false,
+    "created_at": "2025-11-12T21:11:05.594217",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "gmt_offset": 7
+  },
+  "DNSE DATA": {
+    "exchange": "dnse-public",
+    "credentials": "eyJwcm90b2NvbCI6ICJwdWJsaWNfcmVzdCIsICJ1c2VybmFtZSI6ICIiLCAicGFzc3dvcmQiOiAiIiwgInJlcXVpcmVfb3RwIjogZmFsc2UsICJ0aWNrZXJzIjogIlZOMzBGMU0iLCAidGltZWZyYW1lIjogIk01IiwgImRpc3BsYXlfY2FuZGxlcyI6ICIxMDAwIiwgInVzZV9mb3JfZGF0YSI6IHRydWUsICJ1c2VfZm9yX3RyYWRpbmciOiBmYWxzZX0=",
+    "display_info": {
+      "protocol": "Public REST API",
+      "timeframe": "M5"
+    },
+    "timeframe": "M5",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "gmt_offset": 7,
+    "use_for_data": true,
+    "use_for_trading": false,
+    "connected": true,
+    "created_at": "2025-11-12T21:33:01.137247"
+  },
+  "active_profiles": {
+    "data": "DNSE DATA",
+    "trading": null,
+    "last_updated": "2025-11-15T23:47:22.427902"
+  }
+}

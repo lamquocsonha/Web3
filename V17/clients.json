@@ -1,0 +1,50 @@
+{
+  "example_client_a": {
+    "client_id": "example_client_a",
+    "name": "Lê Quang Hưng (Hưng rèo)",
+    "email": "nguyenvana@example.com",
+    "phone": "0912345678",
+    "notes": "Client VIP - Tài khoản Entrade Real",
+    "exchange_profiles": {
+      "Entrade Real": {
+        "exchange": "entrade",
+        "credentials": "eyJwcm90b2NvbCI6InJlc3QiLCJ1c2VybmFtZSI6IiIsInBhc3N3b3JkIjoiIn0=",
+        "display_info": {
+          "username": "",
+          "protocol": "REST API",
+          "timeframe": "M1"
+        },
+        "volume_multiplier": 1,
+        "max_position_size": 5,
+        "connected": false
+      }
+    },
+    "active": true,
+    "total_trades": 0,
+    "total_pnl": 0
+  },
+  "client_1763082711431": {
+    "client_id": "client_1763082711431",
+    "name": "Nguyễn Thành Luân (Tí chuột)",
+    "email": "nguyenvanb@gmail.com",
+    "phone": "123456789",
+    "notes": "",
+    "exchange_profiles": {
+      "Entrade": {
+        "exchange": "entrade",
+        "credentials": "eyJwcm90b2NvbCI6InJlc3QiLCJ1c2VybmFtZSI6IiIsInBhc3N3b3JkIjoiIn0=",
+        "display_info": {
+          "username": "",
+          "protocol": "REST API",
+          "timeframe": "M1"
+        },
+        "volume_multiplier": 1,
+        "max_position_size": 5,
+        "connected": false
+      }
+    },
+    "active": true,
+    "total_trades": 0,
+    "total_pnl": 0
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "example_client_a": {
+    "trades": [],
+    "summary": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "total_pnl": 0,
+      "win_rate": 0,
+      "average_win": 0,
+      "average_loss": 0,
+      "largest_win": 0,
+      "largest_loss": 0,
+      "profit_factor": 0
+    }
+  },
+  "client_1763082711431": {
+    "trades": [],
+    "summary": {
+      "total_trades": 0,
+      "winning_trades": 0,
+      "losing_trades": 0,
+      "total_pnl": 0,
+      "win_rate": 0,
+      "average_win": 0,
+      "average_loss": 0,
+      "largest_win": 0,
+      "largest_loss": 0,
+      "profit_factor": 0
+    }
+  }
+}

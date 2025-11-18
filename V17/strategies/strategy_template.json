@@ -1,0 +1,110 @@
+{
+  "name": "Strategy Template",
+  "description": "Template for creating new strategies",
+  "entry_conditions": {
+    "long": [
+      {
+        "name": "Long Entry 1",
+        "conditions": [
+          {
+            "left": "close",
+            "leftOffset": 0,
+            "operator": "cross_above",
+            "right": "ema_20",
+            "rightOffset": 0,
+            "logic": "AND"
+          }
+        ]
+      }
+    ],
+    "short": [
+      {
+        "name": "Short Entry 1",
+        "conditions": [
+          {
+            "left": "close",
+            "leftOffset": 0,
+            "operator": "cross_below",
+            "right": "ema_20",
+            "rightOffset": 0,
+            "logic": "AND"
+          }
+        ]
+      }
+    ]
+  },
+  "exit_rules": {
+    "long": {
+      "dynamic_tp_sl": true,
+      "time_exit": "14:30",
+      "tp_sl_table": [
+        {
+          "profit_range": [0, 2],
+          "tp": 5,
+          "sl": 3,
+          "trailing": 2
+        },
+        {
+          "profit_range": [2, 5],
+          "tp": 8,
+          "sl": 2,
+          "trailing": 3
+        },
+        {
+          "profit_range": [5, 10],
+          "tp": 12,
+          "sl": 1,
+          "trailing": 4
+        }
+      ]
+    },
+    "short": {
+      "dynamic_tp_sl": true,
+      "time_exit": "14:30",
+      "tp_sl_table": [
+        {
+          "profit_range": [0, 2],
+          "tp": 5,
+          "sl": 3,
+          "trailing": 2
+        },
+        {
+          "profit_range": [2, 5],
+          "tp": 8,
+          "sl": 2,
+          "trailing": 3
+        },
+        {
+          "profit_range": [5, 10],
+          "tp": 12,
+          "sl": 1,
+          "trailing": 4
+        }
+      ]
+    }
+  },
+  "indicators": [
+    {
+      "id": "ema_20",
+      "type": "EMA",
+      "params": {
+        "period": 20
+      },
+      "display": {
+        "show": true,
+        "color": "#2962FF",
+        "lineStyle": "solid",
+        "lineWidth": 2
+      }
+    }
+  ],
+  "risk_management": {
+    "max_positions": 1,
+    "position_size_pct": 10,
+    "max_daily_loss": 50,
+    "trading_hours": {
+      "start": "09:00",
+      "end": "14:30"
+    }
+  }
+}

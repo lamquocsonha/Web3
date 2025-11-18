@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTO OPTIMIZE TRADING SYSTEM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar-fix.css') }}">
+    <!-- TradingView Lightweight Charts with fallback -->
+    <script>
+        // Try primary CDN
+        var script = document.createElement('script');
+        script.src = 'https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js';
+        script.onerror = function() {
+            console.warn('Primary CDN failed, trying fallback...');
+            // Fallback CDN
+            var fallback = document.createElement('script');
+            fallback.src = 'https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js';
+            document.head.appendChild(fallback);
+        };
+        document.head.appendChild(script);
+    </script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
+    <style>
+        /* Account Dropdown Selectors */
+        .account-dropdown-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .account-dropdown-btn {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #d1d4dc;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 13px;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .account-dropdown-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(41, 98, 255, 0.5);
+        }
+
+        .dropdown-text {
+            flex: 1;
+            color: #787b86;
+        }
+
+        .dropdown-count {
+            background: #2962ff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-arrow {
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .account-dropdown-btn.open .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .account-dropdown-panel {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: #1e222d;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .account-checkbox-list {
+            padding: 8px;
+        }
+
+        .account-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .account-checkbox-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .account-checkbox-item input[type="checkbox"] {
+            cursor: pointer;
+            margin: 0 8px 0 0; /* Add right margin for spacing */
+        }
+
+        .account-checkbox-label {
+            flex: 1;
+            min-width: 0;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: visible;
+        }
+
+        .account-status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .account-status-dot.connected {
+            background: #4caf50;
+        }
+
+        .account-status-dot.disconnected {
+            background: #ef5350;
+        }
+
+        .account-name {
+            color: #d1d4dc;
+            font-weight: 500;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .account-exchange {
+            color: #787b86;
+            font-size: 10px;
+            flex-shrink: 0;
+            margin-left: 4px;
+        }
+
+        .selected-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            min-height: 0;
+        }
+
+        .account-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(41, 98, 255, 0.15);
+            border: 1px solid rgba(41, 98, 255, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #d1d4dc;
+        }
+
+        .account-tag-name {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .account-tag-remove {
+            background: none;
+            border: none;
+            color: #ef5350;
+            cursor: pointer;
+            padding: 0 2px;
+            font-size: 14px;
+            line-height: 1;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .account-tag-remove:hover {
+            opacity: 1;
+        }
+
+        /* Scrollbar for dropdown */
+        .account-dropdown-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .account-dropdown-panel::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .account-dropdown-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .account-dropdown-panel::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Bot Settings Section */
+        .bot-settings-section {
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .bot-settings-section h3 {
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        /* Trading Engine Sections */
+        .engine-section {
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .engine-section h3 {
+            margin-bottom: 12px;
+            color: #d1d4dc;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .engine-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .btn-save-engine,
+        .btn-load-engine,
+        .btn-test-engine,
+        .btn-export-engine {
+            padding: 10px;
+            background: #2962ff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-save-engine:hover,
+        .btn-load-engine:hover,
+        .btn-test-engine:hover,
+        .btn-export-engine:hover {
+            background: #1e53e5;
+        }
+
+        .configs-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .config-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .config-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #2962ff;
+        }
+
+        .config-item.active {
+            border-color: #26a69a;
+            background: rgba(38, 166, 154, 0.1);
+        }
+
+        .form-label-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            color: #d1d4dc;
+            user-select: none;
+            text-align: left;
+        }
+
+        .form-label-checkbox input[type="checkbox"] {
+            cursor: pointer;
+            margin: 2px 8px 0 0; /* top right bottom left - vertical align + right spacing */
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .form-label-checkbox span {
+            flex: 1;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+
+        .form-label-checkbox:hover {
+            color: #ffffff;
+        }
+
+        /* Volume Height Select */
+        .volume-height-select {
+            background: #1e222d;
+            border: 1px solid #2a2e39;
+            color: #d1d4dc;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: all 0.2s;
+        }
+
+        .volume-height-select:hover {
+            border-color: #2962ff;
+            background: #2a2e39;
+        }
+
+        .volume-height-select:focus {
+            outline: none;
+            border-color: #2962ff;
+        }
+
+        /* Chart Header Price Info */
+        .symbol-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-family: monospace;
+        }
+
+        .symbol-info .symbol {
+            font-weight: 600;
+            font-size: 12px;
+            color: #d1d4dc;
+            margin-right: 6px;
+        }
+
+        .symbol-info .price-label {
+            color: #787b86;
+            font-size: 10px;
+            margin-right: 1px;
+        }
+
+        .symbol-info .price,
+        .symbol-info .high,
+        .symbol-info .low,
+        .symbol-info .close,
+        .symbol-info .volume {
+            color: #d1d4dc;
+            font-weight: 500;
+            font-size: 11px;
+        }
+
+        .symbol-info .high {
+            color: #26a69a;
+        }
+
+        .symbol-info .low {
+            color: #ef5350;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        {% include 'header_common.html' %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chart Section -->
+            <div class="chart-section">
+                <!-- Chart Controls -->
+                <div class="chart-controls">
+                    <div class="symbol-info">
+                        <span class="symbol" id="symbolDisplay">VN30F1M</span>
+                        <span class="timeframe-badge" id="timeframeBadge" style="
+                            background: #2962ff;
+                            color: white;
+                            padding: 2px 8px;
+                            border-radius: 3px;
+                            font-size: 11px;
+                            font-weight: 600;
+                            margin-left: 8px;
+                        ">1m</span>
+                        <span class="price-label">O:</span><span class="price" id="openPrice">1875.50</span>
+                        <span class="price-label">H:</span><span class="high" id="highPrice">1875.60</span>
+                        <span class="price-label">L:</span><span class="low" id="lowPrice">1873.60</span>
+                        <span class="price-label">C:</span><span class="close" id="closePrice">1873.80</span>
+                        <span class="price-label">Vol:</span><span class="volume" id="volumeDisplay">0</span>
+                        <span class="price-label" style="margin-left: 15px;">Position:</span><span class="position-status" id="chartPositionStatus" style="font-weight: 700; color: #787b86;">FLAT</span>
+                    </div>
+                    <div class="chart-buttons">
+                        <button class="btn-icon" onclick="zoomIn()" title="Zoom in">+</button>
+                        <button class="btn-icon" onclick="zoomOut()" title="Zoom out">-</button>
+
+                        <!-- Symbol Selector -->
+                        <div class="symbol-selector-wrapper" style="display: inline-block; position: relative; margin: 0 5px;">
+                            <button class="btn-icon" id="symbolSelectorBtn" onclick="toggleSymbolSelector()" title="Chọn Symbol">
+                                <span id="currentSymbolText">XAUUSD</span> ▼
+                            </button>
+                            <div class="symbol-dropdown" id="symbolDropdown" style="display: none;">
+                                <input type="text" id="symbolSearchInput" placeholder="Nhập symbol..." class="symbol-search">
+                                <div class="symbol-list" id="symbolList">
+                                    <!-- Symbols will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Volume Toggle Button -->
+                        <button class="btn-icon" id="toggleVolumeBtn" onclick="toggleVolume()" title="Bật/tắt Volume">📊 Vol</button>
+
+                        <!-- Chart Indicators Modal Button -->
+                        <button class="btn-chart-feature" onclick="openIndexIndicatorsModal()" title="Indicators Modal">📈 Indicators</button>
+
+                        <!-- Chart Signals Modal Button -->
+                        <button class="btn-chart-feature" onclick="openIndexSignalsModal()" title="Signals Modal">🎯 Signals</button>
+                    </div>
+                </div>
+
+                <!-- TradingView Chart -->
+                <div id="chart" class="chart-container" style="position: relative;"></div>
+
+                <!-- Position Status Overlay on Chart -->
+                <div id="positionOverlay" style="
+                    position: absolute;
+                    z-index: 1000;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                    font-family: monospace;
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: white;
+                    display: none;
+                    pointer-events: none;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                ">
+                    <div id="positionOverlayText">FLAT</div>
+                </div>
+
+                <!-- Timeframe Selector -->
+                <div class="timeframe-selector">
+                    <button class="btn-nav" onclick="scrollToStart()" title="Đầu dữ liệu">⏮️</button>
+                    <button class="btn-nav" onclick="scrollLeft()" title="Trái">◀️</button>
+                    <button class="btn-nav" onclick="scrollRight()" title="Phải">▶️</button>
+                    <button class="btn-nav" onclick="scrollToEnd()" title="Nến cuối">⏭️</button>
+                    <button class="tf-btn" data-tf="tick" onclick="changeTimeframe('tick')" title="Tick chart">TICK</button>
+                    <button class="tf-btn active" data-tf="1m" onclick="changeTimeframe('1m')" title="1 phút">1m</button>
+                    <button class="tf-btn" data-tf="5m" onclick="changeTimeframe('5m')" title="5 phút">5m</button>
+                    <button class="tf-btn" data-tf="15m" onclick="changeTimeframe('15m')" title="15 phút">15m</button>
+                    <button class="tf-btn" data-tf="30m" onclick="changeTimeframe('30m')" title="30 phút">30m</button>
+                    <button class="tf-btn" data-tf="1h" onclick="changeTimeframe('1h')" title="1 giờ">1h</button>
+                    <button class="tf-btn" data-tf="4h" onclick="changeTimeframe('4h')" title="4 giờ">4h</button>
+                    <button class="tf-btn" data-tf="1d" onclick="changeTimeframe('1d')" title="1 ngày">1d</button>
+                    <span class="time-display" id="currentTime">10:40:47 (UTC+7)</span>
+                    <button class="btn-icon" id="autoScaleBtn" onclick="fitChartContent()" title="Auto fit">auto</button>
+                </div>
+            </div>
+
+            <!-- Sidebar Panel -->
+            <div class="sidebar-panel">
+                <!-- Manual Trading Panel -->
+                <div id="tradingPanel" class="sidebar-content active">
+                    <h2 class="sidebar-title">MANUAL TRADING</h2>
+
+                    <h3>Tài khoản của tôi:</h3>
+                    <div class="account-dropdown-wrapper">
+                        <button class="account-dropdown-btn" id="manualYourAccountBtn" onclick="toggleAccountDropdown('manualYour')">
+                            <span class="dropdown-text">Chọn tài khoản</span>
+                            <span class="dropdown-count" id="manualYourCount">0</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="account-dropdown-panel" id="manualYourDropdown" style="display: none;">
+                            <div id="manualYourAccountsList" class="account-checkbox-list"></div>
+                        </div>
+                        <div class="selected-tags" id="manualYourTags"></div>
+                    </div>
+
+                    <h3>Tài khoản Client:</h3>
+                    <div class="account-dropdown-wrapper">
+                        <button class="account-dropdown-btn" id="manualClientAccountBtn" onclick="toggleAccountDropdown('manualClient')">
+                            <span class="dropdown-text">Chọn tài khoản client</span>
+                            <span class="dropdown-count" id="manualClientCount">0</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="account-dropdown-panel" id="manualClientDropdown" style="display: none;">
+                            <div id="manualClientAccountsList" class="account-checkbox-list"></div>
+                        </div>
+                        <div class="selected-tags" id="manualClientTags"></div>
+                    </div>
+
+                    <h3>Mã giao dịch:</h3>
+                    <input type="text" class="form-input" id="symbolInput" value="VN30F1M" placeholder="Symbol">
+
+                    <h3>Loại lệnh:</h3>
+                    <select class="form-select" id="orderType">
+                        <option value="LO">LO</option>
+                        <option value="ATO">ATO</option>
+                        <option value="ATC">ATC</option>
+                        <option value="MP">MP</option>
+                    </select>
+
+                    <h3>Giá:</h3>
+                    <input type="number" class="form-input" id="priceInput" value="1873.80" step="0.1">
+
+                    <h3>Khối lượng:</h3>
+                    <input type="number" class="form-input" id="volumeInput" value="1" min="1">
+
+                    <div class="order-buttons">
+                        <button class="btn-long" onclick="placeOrder('LONG')">Long</button>
+                        <button class="btn-short" onclick="placeOrder('SHORT')">Short</button>
+                    </div>
+                </div>
+
+                <!-- Bot Trading Panel -->
+                <div id="botPanel" class="sidebar-content">
+                    <h2 class="sidebar-title">BOT TRADING</h2>
+                    
+                    <div class="bot-status">
+                        <div class="status-indicator">
+                            <span class="status-dot" id="botStatusDot"></span>
+                            <span class="status-text" id="botStatusText">Đã dừng</span>
+                        </div>
+                    </div>
+
+                    <div class="bot-controls">
+                        <button class="btn-start-bot" id="startBotBtn" onclick="startBot()">▶️ Start Bot</button>
+                        <button class="btn-stop-bot" id="stopBotBtn" onclick="stopBot()" style="display: none;">⏹️ Stop Bot</button>
+                    </div>
+
+                    <h3>Chọn chiến lược:</h3>
+                    <select class="form-select" id="botStrategySelect">
+                        <option value="">-- Chọn strategy --</option>
+                    </select>
+
+                    <h3>Tài khoản của tôi:</h3>
+                    <div class="account-dropdown-wrapper">
+                        <button class="account-dropdown-btn" id="botYourAccountBtn" onclick="toggleAccountDropdown('botYour')">
+                            <span class="dropdown-text">Chọn tài khoản</span>
+                            <span class="dropdown-count" id="botYourCount">0</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="account-dropdown-panel" id="botYourDropdown" style="display: none;">
+                            <div id="botYourAccountsList" class="account-checkbox-list"></div>
+                        </div>
+                        <div class="selected-tags" id="botYourTags"></div>
+                    </div>
+
+                    <h3>Tài khoản Client:</h3>
+                    <div class="account-dropdown-wrapper">
+                        <button class="account-dropdown-btn" id="botClientAccountBtn" onclick="toggleAccountDropdown('botClient')">
+                            <span class="dropdown-text">Chọn tài khoản client</span>
+                            <span class="dropdown-count" id="botClientCount">0</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="account-dropdown-panel" id="botClientDropdown" style="display: none;">
+                            <div id="botClientAccountsList" class="account-checkbox-list"></div>
+                        </div>
+                        <div class="selected-tags" id="botClientTags"></div>
+                    </div>
+
+                    <h3>Mã giao dịch:</h3>
+                    <input type="text" class="form-input" id="botSymbol" value="VN30F1M" placeholder="Symbol">
+
+                    <h3>Timeframe:</h3>
+                    <select class="form-select" id="botTimeframe">
+                        <option value="1m">1 phút</option>
+                        <option value="5m" selected>5 phút</option>
+                        <option value="15m">15 phút</option>
+                        <option value="1h">1 giờ</option>
+                        <option value="4h">4 giờ</option>
+                        <option value="1d">1 ngày</option>
+                    </select>
+
+                    <div class="bot-settings-section">
+                        <h3>Cài đặt Bot:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="botAutoRestart" checked>
+                            <span>Tự động khởi động lại khi lỗi</span>
+                        </label>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="botTelegramAlert" checked>
+                            <span>Thông báo Telegram</span>
+                        </label>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="botEmailAlert">
+                            <span>Thông báo Email</span>
+                        </label>
+                    </div>
+
+                    <div class="bot-stats">
+                        <h3>Thống kê Bot:</h3>
+                        <div class="stat-row">
+                            <span>Thời gian chạy:</span>
+                            <span id="botRuntime">--:--:--</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Tổng lệnh:</span>
+                            <span id="botTotalTrades">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Win / Loss:</span>
+                            <span id="botWinLoss">0 / 0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>P&L hôm nay:</span>
+                            <span id="botPnl" class="pnl-value">0đ</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Lệnh đang mở:</span>
+                            <span id="botOpenPositions">0</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Trading Engine Panel -->
+                <div id="strategyPanel" class="sidebar-content">
+                    <h2 class="sidebar-title">TRADING ENGINE</h2>
+                    
+                    <div class="engine-section">
+                        <h3>Engine Control:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="engineActive" checked>
+                            <span>✅ Engine Active (Master Switch)</span>
+                        </label>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="buyActive" checked>
+                            <span>📈 Buy Active (Allow Long Positions)</span>
+                        </label>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="shortActive" checked>
+                            <span>📉 Short Active (Allow Short Positions)</span>
+                        </label>
+                    </div>
+
+                    <div class="engine-section">
+                        <h3>Trading Hours:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="tradingHoursActive" checked>
+                            <span>⏰ Enable Trading Hours Filter</span>
+                        </label>
+                        <label class="form-label">
+                            Start Time:
+                            <input type="time" class="form-input" id="startTime" value="09:00">
+                        </label>
+                        <label class="form-label">
+                            End Time:
+                            <input type="time" class="form-input" id="endTime" value="14:30">
+                        </label>
+                        <label class="form-label">
+                            Base Time (for daily levels):
+                            <input type="time" class="form-input" id="baseTime" value="09:00">
+                        </label>
+                    </div>
+
+                    <div class="engine-section">
+                        <h3>Order Limits:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="orderLimitsActive" checked>
+                            <span>🔢 Enable Order Limits</span>
+                        </label>
+                        <label class="form-label">
+                            Buy Order Limit (max long trades):
+                            <input type="number" class="form-input" id="buyOrderLimit" value="10" min="1" max="100">
+                        </label>
+                        <label class="form-label">
+                            Short Order Limit (max short trades):
+                            <input type="number" class="form-input" id="shortOrderLimit" value="10" min="1" max="100">
+                        </label>
+                    </div>
+
+                    <div class="engine-section">
+                        <h3>Position Sizing:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="positionSizingActive" checked>
+                            <span>💰 Enable Position Sizing</span>
+                        </label>
+                        <label class="form-label">
+                            Position Size (% of capital):
+                            <input type="number" class="form-input" id="positionSize" value="10" min="1" max="100">
+                        </label>
+                        <label class="form-label">
+                            Max Open Positions:
+                            <input type="number" class="form-input" id="maxPositions" value="1" min="1" max="10">
+                        </label>
+                    </div>
+
+                    <div class="engine-section">
+                        <h3>TP/SL Configuration:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="dynamicTpSlActive" checked>
+                            <span>🎯 Enable Dynamic TP/SL (AFL Style)</span>
+                        </label>
+                        <div style="font-size: 11px; color: #787b86; margin: 8px 0; line-height: 1.4;">
+                            ℹ️ Dynamic TP/SL adjusts based on profit levels (from AFL):<br>
+                            • Profit ≥28: Trailing 55% of profit<br>
+                            • Profit ≥20: Trailing 68% of profit<br>
+                            • Profit ≥10: Trailing 12 points, SL 1 point<br>
+                            • Profit ≥2: Trailing 13.9 points, SL 10.8 points<br>
+                            • Default: Trailing 11.9 points, SL 10.3 points
+                        </div>
+                        <label class="form-label">
+                            Initial Stop Loss (points):
+                            <input type="number" class="form-input" id="initialSL" value="10.3" step="0.1">
+                        </label>
+                        <label class="form-label">
+                            Fee/Tax per trade (points):
+                            <input type="number" class="form-input" id="feeTax" value="1.0" step="0.1">
+                        </label>
+                        
+                        <!-- TP/SL Table for Long -->
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #26a69a; font-size: 13px; margin-bottom: 8px;">📈 Long TP/SL Rules</h4>
+                            <div id="tpslTableLong" style="font-size: 12px;"></div>
+                        </div>
+                        
+                        <!-- TP/SL Table for Short -->
+                        <div style="margin-top: 15px;">
+                            <h4 style="color: #ef5350; font-size: 13px; margin-bottom: 8px;">📉 Short TP/SL Rules</h4>
+                            <div id="tpslTableShort" style="font-size: 12px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="engine-section">
+                        <h3>Entry/Exit Rules:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="noRepaintActive" checked>
+                            <span>🚫 No Repaint (Entry on next candle)</span>
+                        </label>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="exitInCandleActive" checked>
+                            <span>⚡ Exit within current candle (H/L check)</span>
+                        </label>
+                        <div style="font-size: 11px; color: #787b86; margin: 8px 0; line-height: 1.4;">
+                            ℹ️ Entry: Signal at bar[i] → Enter at bar[i+1] Open<br>
+                            ℹ️ Exit: Check SL/TP within bar[i] using High/Low
+                        </div>
+                    </div>
+
+                    <div class="engine-section">
+                        <h3>Pivot Levels:</h3>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="pivotLevelsActive">
+                            <span>📊 Calculate Daily Pivot Levels</span>
+                        </label>
+                        <label class="form-label-checkbox">
+                            <input type="checkbox" id="hhvLlvActive" checked>
+                            <span>📈 Track HHV/LLV since base time</span>
+                        </label>
+                    </div>
+
+                    <div class="engine-section">
+                        <h3>Strategy Selection:</h3>
+                        <label class="form-label">
+                            Choose Signal Strategy:
+                            <select class="form-select" id="signalStrategy">
+                                <option value="">-- Chọn strategy --</option>
+                                <option value="strategy_11">Chiến lược 11</option>
+                                <option value="ema_cross">EMA Crossover</option>
+                                <option value="rsi_divergence">RSI Divergence</option>
+                                <option value="custom">Custom AFL Strategy</option>
+                            </select>
+                        </label>
+                        <div style="font-size: 11px; color: #ef5350; margin: 8px 0;">
+                            ⚠️ Strategy must be selected before starting bot
+                        </div>
+                    </div>
+
+                    <div class="engine-buttons">
+                        <button class="btn-save-engine" onclick="saveEngineConfig()">💾 Save Config</button>
+                        <button class="btn-load-engine" onclick="loadEngineConfig()">📂 Load Config</button>
+                        <button class="btn-test-engine" onclick="testEngine()">🧪 Test Engine</button>
+                        <button class="btn-export-engine" onclick="exportEngineConfig()">📤 Export JSON</button>
+                    </div>
+
+                    <div class="saved-configs">
+                        <h3>Saved Configurations:</h3>
+                        <div id="engineConfigsList" class="configs-list">
+                            <div class="no-data">Chưa có config nào</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backtest Panel -->
+                <div id="backtestPanel" class="sidebar-content">
+                    <h2 class="sidebar-title">BACKTEST</h2>
+                    
+                    <h3>Chiến lược:</h3>
+                    <select class="form-select" id="strategySelect">
+                        <option>EMA Crossover</option>
+                        <option>RSI + MACD</option>
+                        <option>Bollinger Bands</option>
+                        <option>Custom Strategy</option>
+                    </select>
+
+                    <h3>Mã giao dịch:</h3>
+                    <input type="text" class="form-input" id="btSymbol" value="VN30F1M">
+
+                    <h3>Timeframe:</h3>
+                    <select class="form-select" id="btTimeframe">
+                        <option value="1m">1 phút</option>
+఼                        <option value="5m">5 phút</option>
+                        <option value="15m">15 phút</option>
+                        <option value="1h" selected>1 giờ</option>
+                        <option value="1d">1 ngày</option>
+                    </select>
+
+                    <h3>Khoảng thời gian:</h3>
+                    <div class="date-range">
+                        <input type="date" class="form-input" id="btStartDate" value="2024-01-01">
+                        <input type="date" class="form-input" id="btEndDate" value="2024-12-31">
+                    </div>
+
+                    <h3>Vốn ban đầu:</h3>
+                    <input type="number" class="form-input" id="btCapital" value="100000000" step="1000000">
+
+                    <h3>Risk per trade (%):</h3>
+                    <input type="number" class="form-input" id="btRisk" value="2" step="0.1" min="0.1" max="10">
+
+                    <div class="backtest-buttons">
+                        <button class="btn-backtest" onclick="runBacktest()">Chạy Backtest</button>
+                        <button class="btn-optimize" onclick="optimizeStrategy()">Tối ưu hóa</button>
+                    </div>
+
+                    <div id="backtestResults" class="backtest-results">
+                        <h3>Kết quả:</h3>
+                        <div class="result-item">
+                            <span>Total Trades:</span>
+                            <span id="btTotalTrades">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Win Rate:</span>
+                            <span id="btWinRate">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Profit Factor:</span>
+                            <span id="btProfitFactor">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Net Profit:</span>
+                            <span id="btNetProfit">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span>Max Drawdown:</span>
+                            <span id="btMaxDD">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Panel -->
+                <div id="settingsPanel" class="sidebar-content">
+                    <h2 class="sidebar-title">CÀI ĐẶT</h2>
+                    
+                    <h3>Tài khoản MT5:</h3>
+                    <input type="text" class="form-input" id="mt5Account" placeholder="Account Number">
+                    
+                    <h3>MT5 Server:</h3>
+                    <input type="text" class="form-input" id="mt5Server" placeholder="Server Name">
+                    
+                    <h3>MT5 Password:</h3>
+                    <input type="password" class="form-input" id="mt5Password" placeholder="Password">
+
+                    <div class="settings-section">
+                        <h3>API Configuration:</h3>
+                        <input type="text" class="form-input" id="apiKey" placeholder="API Key">
+                        <input type="text" class="form-input" id="apiSecret" placeholder="API Secret">
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Telegram Bot:</h3>
+                        <input type="text" class="form-input" id="telegramToken" placeholder="Bot Token">
+                        <input type="text" class="form-input" id="telegramChatId" placeholder="Chat ID">
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Giao diện:</h3>
+                        <select class="form-select" id="themeSelect">
+                            <option value="dark">Dark Mode</option>
+                            <option value="light">Light Mode</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Ngôn ngữ:</h3>
+                        <select class="form-select" id="languageSelect">
+                            <option value="vi">Tiếng Việt</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-buttons">
+                        <button class="btn-save-settings" onclick="saveSettings()">Lưu cài đặt</button>
+                        <button class="btn-test-connection" onclick="testConnection()">Test Connection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Tabs -->
+        <div class="bottom-section">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('orders')">
+                    <span class="tab-icon">⭕</span> SỔ LỆNH
+                </button>
+                <button class="tab-btn" onclick="switchTab('positions')">
+                    VỊ THẾ <span class="tab-icon">⭕</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('botlogs')">
+                    📋 BOT LOGS
+                </button>
+                <button class="tab-close" onclick="closeAllPositions()">Đóng tất cả</button>
+            </div>
+
+            <!-- Orders Table -->
+            <div id="ordersTab" class="tab-content active">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tài Khoản</th>
+                            <th>Thời Gian</th>
+                            <th>Lệnh</th>
+                            <th>Mã</th>
+                            <th>Giá Đặt</th>
+                            <th>Giá Khớp</th>
+                            <th>Khối Lượng</th>
+                            <th>Trạng Thái</th>
+                            <th>Hủy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr>
+                            <td colspan="9" class="no-data">Không có lệnh nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Positions Table -->
+            <div id="positionsTab" class="tab-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tài Khoản</th>
+                            <th>Mã</th>
+                            <th>Vị Thế</th>
+                            <th>Giá Khớp</th>
+                            <th>Giá Hiện Tại</th>
+                            <th>Khối Lượng</th>
+                            <th>Lãi Lỗ</th>
+                            <th>Trạng Thái</th>
+                            <th>Đóng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positionsTableBody">
+                        <tr>
+                            <td colspan="9" class="no-data">Không có vị thế nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bot Logs Tab -->
+            <div id="botlogsTab" class="tab-content">
+                <div id="botLogsList" class="logs-container" style="max-height: 200px; overflow-y: auto; padding: 10px; background: #1a1e27; border-radius: 4px;">
+                    <div class="log-entry" style="color: #787b86; font-size: 12px; padding: 4px 0;">Chờ bot khởi động...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicators Display Panel -->
+    <div id="indicatorsDisplayPanel" class="indicators-panel hidden">
+        <div class="panel-header">
+            <h3>📈 Chart Indicators</h3>
+            <button class="btn-close" onclick="toggleIndicatorsDisplayPanel()">×</button>
+        </div>
+        <div class="panel-content" id="indicatorsPanelContent">
+            <p class="empty-state">No indicators added yet. Add indicators in Strategy Builder first.</p>
+        </div>
+    </div>
+
+    <!-- Index Chart Indicators Modal -->
+    <div id="indexIndicatorsModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 800px; max-height: 85vh;">
+            <div class="modal-header">
+                <h3 style="color: #2962ff;">📈 Chart Indicators</h3>
+                <button class="btn-close" onclick="closeIndexIndicatorsModal()">×</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;">
+                <!-- Indicator Categories -->
+                <div class="indicator-categories" style="margin-bottom: 20px;">
+                    <button class="category-btn active" onclick="filterIndexIndicators('all')">All</button>
+                    <button class="category-btn" onclick="filterIndexIndicators('trend')">Trend</button>
+                    <button class="category-btn" onclick="filterIndexIndicators('momentum')">Momentum</button>
+                    <button class="category-btn" onclick="filterIndexIndicators('volatility')">Volatility</button>
+                    <button class="category-btn" onclick="filterIndexIndicators('volume')">Volume</button>
+                    <button class="category-btn" onclick="filterIndexIndicators('custom')">Custom</button>
+                </div>
+
+                <!-- Active Indicators on Chart -->
+                <div class="section" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Active Indicators on Chart</h3>
+                    <div id="indexActiveIndicatorsList" style="min-height: 100px;">
+                        <div style="text-align: center; color: #787b86; padding: 20px;">
+                            No indicators added yet. Add indicators from the list below.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Indicators -->
+                <div class="section">
+                    <h3 style="margin-bottom: 15px;">Available Indicators</h3>
+                    <div id="indexAvailableIndicatorsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeIndexIndicatorsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Index Chart Signals Modal -->
+    <div id="indexSignalsModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 900px; max-height: 85vh;">
+            <div class="modal-header">
+                <h3 style="color: #2962ff;">🎯 Chart Signals</h3>
+                <button class="btn-close" onclick="closeIndexSignalsModal()">×</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;">
+                <!-- Signals Summary -->
+                <div class="section" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Signals Summary</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                        <div class="stat-card" style="background: #1e222d; padding: 15px; border-radius: 6px; border-left: 3px solid #089981;">
+                            <div class="stat-label" style="font-size: 11px; color: #787b86; margin-bottom: 8px;">BUY SIGNALS</div>
+                            <div class="stat-value" id="indexBuySignalsCount" style="font-size: 24px; color: #089981; font-weight: 700;">0</div>
+                        </div>
+                        <div class="stat-card" style="background: #1e222d; padding: 15px; border-radius: 6px; border-left: 3px solid #f23645;">
+                            <div class="stat-label" style="font-size: 11px; color: #787b86; margin-bottom: 8px;">SELL SIGNALS</div>
+                            <div class="stat-value" id="indexSellSignalsCount" style="font-size: 24px; color: #f23645; font-weight: 700;">0</div>
+                        </div>
+                        <div class="stat-card" style="background: #1e222d; padding: 15px; border-radius: 6px; border-left: 3px solid #ff9800;">
+                            <div class="stat-label" style="font-size: 11px; color: #787b86; margin-bottom: 8px;">SHORT SIGNALS</div>
+                            <div class="stat-value" id="indexShortSignalsCount" style="font-size: 24px; color: #ff9800; font-weight: 700;">0</div>
+                        </div>
+                        <div class="stat-card" style="background: #1e222d; padding: 15px; border-radius: 6px; border-left: 3px solid #2196f3;">
+                            <div class="stat-label" style="font-size: 11px; color: #787b86; margin-bottom: 8px;">COVER SIGNALS</div>
+                            <div class="stat-value" id="indexCoverSignalsCount" style="font-size: 24px; color: #2196f3; font-weight: 700;">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Display Controls -->
+                <div class="section" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Chart Display Controls</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-icon" id="indexTogglePositionPanel" onclick="toggleIndexPositionPanel()" title="Bật/tắt Position Panel" style="padding: 10px 15px;">
+                            📊 Position Panel
+                        </button>
+                        <button class="btn-icon" id="indexToggleBuySignals" onclick="toggleIndexBuySignals()" title="Bật/tắt Buy Signals" style="background: #26a69a; padding: 10px 15px;">
+                            🔼 Buy Signals
+                        </button>
+                        <button class="btn-icon" id="indexToggleShortSignals" onclick="toggleIndexShortSignals()" title="Bật/tắt Short Signals" style="background: #ef5350; padding: 10px 15px;">
+                            🔽 Short Signals
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Signals Timeline -->
+                <div class="section">
+                    <h3 style="margin-bottom: 15px;">Recent Signals</h3>
+                    <div id="indexRecentSignalsList" style="min-height: 200px; max-height: 400px; overflow-y: auto;">
+                        <div style="text-align: center; color: #787b86; padding: 30px;">
+                            No signals detected yet. Signals will appear here when chart is loaded.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeIndexSignalsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Index Indicator Config Modal -->
+    <div id="indexIndicatorConfigModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 style="color: #2962ff;">⚙️ Configure Indicator</h3>
+                <button class="btn-close" onclick="closeIndexIndicatorConfigModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Indicator Type (readonly) -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Indicator Type</label>
+                    <input type="text" id="indexConfigIndicatorType" readonly style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                </div>
+
+                <!-- Indicator Name -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Display Name</label>
+                    <input type="text" id="indexConfigIndicatorName" placeholder="e.g., EMA 20" style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                </div>
+
+                <!-- Color Picker -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Line Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="indexConfigColor" value="#2962ff" style="width: 60px; height: 38px; border: 1px solid #2a2e39; border-radius: 4px; cursor: pointer;">
+                        <input type="text" id="indexConfigColorHex" value="#2962ff" maxlength="7" style="flex: 1; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                    </div>
+                </div>
+
+                <!-- Line Width -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Line Width</label>
+                    <input type="number" id="indexConfigLineWidth" value="2" min="1" max="5" step="1" style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                </div>
+
+                <!-- Dynamic Parameters Container -->
+                <div id="indexConfigParamsContainer">
+                    <!-- Parameters will be dynamically added here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeIndexIndicatorConfigModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveIndexIndicatorConfig()" style="padding: 10px 20px; background: #2962ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                    Add to Chart
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/data-manager.js') }}?v=15.1"></script>
+    <script src="{{ url_for('static', filename='js/signal-engine.js') }}?v=17.2"></script>
+    <script src="{{ url_for('static', filename='js/chart.js') }}?v=15.3"></script>
+    <script src="{{ url_for('static', filename='js/strategy-builder.js') }}?v=17.1"></script>
+    <script src="{{ url_for('static', filename='js/trading-engine.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='js/index-chart-indicators.js') }}?v=1.2"></script>
+    <script src="{{ url_for('static', filename='js/position-markers.js') }}?v=1.0"></script>
+
+    <script>
+    // Global variables for accounts
+    let allAccounts = {
+        your_accounts: [],
+        client_accounts: []
+    };
+    let selectedManualYourAccounts = new Set();
+    let selectedManualClientAccounts = new Set();
+    let selectedBotYourAccounts = new Set();
+    let selectedBotClientAccounts = new Set();
+
+    // Save selected accounts to localStorage
+    function saveSelectedAccounts() {
+        try {
+            const data = {
+                manualYour: Array.from(selectedManualYourAccounts),
+                manualClient: Array.from(selectedManualClientAccounts),
+                botYour: Array.from(selectedBotYourAccounts),
+                botClient: Array.from(selectedBotClientAccounts)
+            };
+            localStorage.setItem('selectedAccounts', JSON.stringify(data));
+        } catch (error) {
+            console.error('Error saving accounts:', error);
+        }
+    }
+
+    // Restore selected accounts from localStorage
+    function restoreSelectedAccounts() {
+        try {
+            const saved = localStorage.getItem('selectedAccounts');
+            if (!saved) return;
+
+            const data = JSON.parse(saved);
+            
+            if (data.manualYour) {
+                selectedManualYourAccounts = new Set(data.manualYour);
+                data.manualYour.forEach(id => {
+                    const cb = document.getElementById(`manualYour_${id}`);
+                    if (cb) cb.checked = true;
+                });
+                updateDropdownUI('manualYour');
+            }
+            
+            if (data.manualClient) {
+                selectedManualClientAccounts = new Set(data.manualClient);
+                data.manualClient.forEach(id => {
+                    const cb = document.getElementById(`manualClient_${id}`);
+                    if (cb) cb.checked = true;
+                });
+                updateDropdownUI('manualClient');
+            }
+            
+            if (data.botYour) {
+                selectedBotYourAccounts = new Set(data.botYour);
+                data.botYour.forEach(id => {
+                    const cb = document.getElementById(`botYour_${id}`);
+                    if (cb) cb.checked = true;
+                });
+                updateDropdownUI('botYour');
+            }
+            
+            if (data.botClient) {
+                selectedBotClientAccounts = new Set(data.botClient);
+                data.botClient.forEach(id => {
+                    const cb = document.getElementById(`botClient_${id}`);
+                    if (cb) cb.checked = true;
+                });
+                updateDropdownUI('botClient');
+            }
+
+            console.log('✅ Restored accounts from localStorage');
+        } catch (error) {
+            console.error('Error restoring accounts:', error);
+        }
+    }
+
+    // Load all accounts
+    async function loadAllAccounts() {
+        try {
+            console.log('🔄 Loading accounts...');
+            const response = await fetch('/api/accounts/all');
+            if (response.ok) {
+                allAccounts = await response.json();
+
+                console.log('✅ Loaded accounts:', allAccounts);
+                console.log('  - Your accounts:', allAccounts.your_accounts.length);
+                console.log('  - Client accounts:', allAccounts.client_accounts.length);
+
+                // Check if DOM elements exist
+                const elements = [
+                    'manualYourAccountsList',
+                    'manualClientAccountsList', 
+                    'botYourAccountsList',
+                    'botClientAccountsList'
+                ];
+                
+                let allExist = true;
+                elements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (!el) {
+                        console.error(`❌ Element not found: ${id}`);
+                        allExist = false;
+                    } else {
+                        console.log(`✅ Element found: ${id}`);
+                    }
+                });
+
+                if (!allExist) {
+                    console.error('❌ Some elements missing, retrying in 500ms...');
+                    setTimeout(loadAllAccounts, 500);
+                    return;
+                }
+
+                // Load all dropdowns
+                console.log('📋 Loading dropdowns...');
+                loadAccountDropdown('manualYour', allAccounts.your_accounts, false);
+                loadAccountDropdown('manualClient', allAccounts.client_accounts, true);
+                loadAccountDropdown('botYour', allAccounts.your_accounts, false);
+                loadAccountDropdown('botClient', allAccounts.client_accounts, true);
+                console.log('✅ All dropdowns loaded!');
+                
+                // Restore selected accounts from localStorage
+                setTimeout(() => restoreSelectedAccounts(), 100);
+            } else {
+                console.error('❌ Failed to load accounts:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ Error loading accounts:', error);
+        }
+    }
+
+    // Toggle account dropdown
+    function toggleAccountDropdown(type) {
+        const dropdown = document.getElementById(`${type}Dropdown`);
+        const btn = document.getElementById(`${type}AccountBtn`);
+
+        if (dropdown.style.display === 'none') {
+            // Close all other dropdowns
+            document.querySelectorAll('.account-dropdown-panel').forEach(d => d.style.display = 'none');
+            document.querySelectorAll('.account-dropdown-btn').forEach(b => b.classList.remove('open'));
+
+            // Open this dropdown
+            dropdown.style.display = 'block';
+            btn.classList.add('open');
+        } else {
+            dropdown.style.display = 'none';
+            btn.classList.remove('open');
+        }
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.account-dropdown-wrapper')) {
+            document.querySelectorAll('.account-dropdown-panel').forEach(d => d.style.display = 'none');
+            document.querySelectorAll('.account-dropdown-btn').forEach(b => b.classList.remove('open'));
+        }
+    });
+
+    // Get selected set for dropdown type
+    function getSelectedSet(type) {
+        if (type === 'manualYour') return selectedManualYourAccounts;
+        if (type === 'manualClient') return selectedManualClientAccounts;
+        if (type === 'botYour') return selectedBotYourAccounts;
+        if (type === 'botClient') return selectedBotClientAccounts;
+        return new Set();
+    }
+
+    // Create account checkbox item
+    function createAccountCheckboxItem(account, type, isClient) {
+        const item = document.createElement('div');
+        item.className = 'account-checkbox-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = account.id;
+        checkbox.id = `${type}_${account.id}`;
+        checkbox.dataset.account = JSON.stringify(account);
+        checkbox.onchange = () => handleAccountCheck(type);
+
+        // Check if already selected
+        const selectedSet = getSelectedSet(type);
+        checkbox.checked = selectedSet.has(account.id);
+
+        const label = document.createElement('label');
+        label.className = 'account-checkbox-label';
+        label.htmlFor = checkbox.id;
+
+        const statusDot = document.createElement('span');
+        statusDot.className = `account-status-dot ${account.connected ? 'connected' : 'disconnected'}`;
+
+        const name = document.createElement('span');
+        name.className = 'account-name';
+        name.textContent = isClient ? `${account.client_name} - ${account.profile_name}` : account.name;
+
+        const exchange = document.createElement('span');
+        exchange.className = 'account-exchange';
+        exchange.textContent = account.exchange.toUpperCase();
+
+        label.appendChild(statusDot);
+        label.appendChild(name);
+        label.appendChild(document.createTextNode(' '));
+        label.appendChild(exchange);
+
+        item.appendChild(checkbox);
+        item.appendChild(label);
+
+        // Make entire item clickable
+        item.onclick = (e) => {
+            if (e.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+                handleAccountCheck(type);
+            }
+        };
+
+        return item;
+    }
+
+    // Load account dropdown
+    function loadAccountDropdown(type, accounts, isClient) {
+        const list = document.getElementById(`${type}AccountsList`);
+        if (!list) {
+            console.error(`❌ ${type}AccountsList not found!`);
+            return;
+        }
+
+        console.log(`📋 Loading ${type}: ${accounts.length} accounts`);
+        list.innerHTML = '';
+
+        if (accounts.length === 0) {
+            list.innerHTML = '<div style="color: #787b86; font-size: 11px; padding: 8px; text-align: center;">Không có tài khoản</div>';
+            console.log(`  ℹ️ No accounts for ${type}`);
+        } else {
+            accounts.forEach((account, index) => {
+                console.log(`  ${index + 1}. Adding: ${account.name} (${account.exchange})`);
+                const item = createAccountCheckboxItem(account, type, isClient);
+                list.appendChild(item);
+            });
+            console.log(`  ✅ Added ${accounts.length} items to ${type}AccountsList`);
+        }
+
+        console.log(`  ✓ Loaded ${type}: ${accounts.length} accounts`);
+    }
+
+    // Handle account checkbox change
+    function handleAccountCheck(type) {
+        const selectedSet = getSelectedSet(type);
+        selectedSet.clear();
+
+        // Get all checked checkboxes for this dropdown
+        document.querySelectorAll(`#${type}AccountsList input:checked`).forEach(cb => {
+            selectedSet.add(cb.value);
+        });
+
+        console.log(`📋 Selected ${type}:`, selectedSet.size);
+
+        // Update UI
+        updateDropdownUI(type);
+        
+        // Save to localStorage
+        saveSelectedAccounts();
+    }
+
+    // Update dropdown UI (count and tags)
+    function updateDropdownUI(type) {
+        const selectedSet = getSelectedSet(type);
+        const countElement = document.getElementById(`${type}Count`);
+        const tagsContainer = document.getElementById(`${type}Tags`);
+        const btnText = document.querySelector(`#${type}AccountBtn .dropdown-text`);
+
+        // Update count badge
+        countElement.textContent = selectedSet.size;
+
+        // Update button text
+        if (selectedSet.size === 0) {
+            btnText.textContent = type.includes('Client') ? 'Chọn tài khoản client' : 'Chọn tài khoản';
+            btnText.style.color = '#787b86';
+        } else {
+            btnText.textContent = `Đã chọn ${selectedSet.size} tài khoản`;
+            btnText.style.color = '#d1d4dc';
+        }
+
+        // Clear and rebuild tags
+        tagsContainer.innerHTML = '';
+
+        [...selectedSet].forEach(accountId => {
+            const account = [...allAccounts.your_accounts, ...allAccounts.client_accounts].find(a => a.id === accountId);
+            if (!account) return;
+
+            const tag = document.createElement('div');
+            tag.className = 'account-tag';
+
+            const tagName = document.createElement('span');
+            tagName.className = 'account-tag-name';
+
+            const statusDot = document.createElement('span');
+            statusDot.className = `account-status-dot ${account.connected ? 'connected' : 'disconnected'}`;
+
+            const name = document.createTextNode(
+                account.type === 'client_account'
+                    ? `${account.client_name} - ${account.profile_name}`
+                    : account.name
+            );
+
+            tagName.appendChild(statusDot);
+            tagName.appendChild(name);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'account-tag-remove';
+            removeBtn.textContent = '×';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeAccountTag(type, accountId);
+            };
+
+            tag.appendChild(tagName);
+            tag.appendChild(removeBtn);
+            tagsContainer.appendChild(tag);
+        });
+    }
+
+    // Remove account tag
+    function removeAccountTag(type, accountId) {
+        const selectedSet = getSelectedSet(type);
+        selectedSet.delete(accountId);
+
+        // Uncheck the checkbox
+        const checkbox = document.getElementById(`${type}_${accountId}`);
+        if (checkbox) checkbox.checked = false;
+
+        // Update UI
+        updateDropdownUI(type);
+    }
+    
+    // Load Exchange Profiles
+    async function loadExchangeProfiles() {
+        try {
+            const response = await fetch('/api/exchange/profiles');
+            const data = await response.json();
+            
+            if (data.success && data.profiles) {
+                const manualSelect = document.getElementById('manualExchangeSelect');
+                const botSelect = document.getElementById('botExchangeSelect');
+                
+                // Check if elements exist (optional exchange selects may not be present)
+                if (!manualSelect || !botSelect) {
+                    console.log('ℹ️ Exchange selects not found - using account dropdown system');
+                    return;
+                }
+                
+                // Clear existing options except first one
+                manualSelect.innerHTML = '<option value="">-- Select Exchange --</option>';
+                botSelect.innerHTML = '<option value="">-- Select Exchange --</option>';
+                
+                // Filter only TRADING profiles (use_for_trading = true)
+                const tradingProfiles = data.profiles.filter(profile => {
+                    return profile.use_for_trading === true;
+                });
+                
+                // Add trading profiles only
+                tradingProfiles.forEach(profile => {
+                    const option = `<option value="${profile.name}">${profile.name} (${profile.exchange.toUpperCase()})</option>`;
+                    manualSelect.innerHTML += option;
+                    botSelect.innerHTML += option;
+                });
+                
+                console.log(`✅ Loaded ${tradingProfiles.length} trading profiles (filtered from ${data.profiles.length} total)`);
+            }
+        } catch (error) {
+            console.error('Error loading exchange profiles:', error);
+        }
+    }
+    
+    // Load on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 DOM Content Loaded');
+        loadExchangeProfiles();
+        
+        // Wait a bit for DOM to be fully ready
+        setTimeout(() => {
+            console.log('⏰ Starting account load after delay');
+            loadAllAccounts();
+        }, 300);
+    });
+    </script>
+
+    <!-- Indicator Selection Modal -->
+    <div id="indicatorSelectionModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000;" onclick="if(event.target.id === 'indicatorSelectionModal') { this.style.display = 'none'; }">
+        <div style="background: #1e222d; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #2a2e39; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" onclick="event.stopPropagation()">
+            <!-- Header -->
+            <div style="padding: 20px; border-bottom: 1px solid #2a2e39; display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; color: #2962ff; font-size: 18px;">📊 Add Indicator</h2>
+                <button onclick="document.getElementById('indicatorSelectionModal').style.display = 'none';" style="background: transparent; border: none; color: #d1d4dc; font-size: 28px; cursor: pointer; padding: 0; width: 40px; height: 40px; line-height: 30px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.color='#ef5350'" onmouseout="this.style.color='#d1d4dc'">&times;</button>
+            </div>
+
+            <!-- Content -->
+            <div style="flex: 1; overflow-y: auto; padding: 20px;">
+                <h3 style="color: #d1d4dc; font-size: 14px; margin-bottom: 12px;">Select Indicator Type:</h3>
+
+                <!-- Indicator Type Selection -->
+                <select id="indicatorTypeSelect" onchange="updateIndicatorParams()" style="width: 100%; padding: 10px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px; margin-bottom: 20px;">
+                    <option value="">-- Select Type --</option>
+                    <option value="EMA">EMA (Exponential Moving Average)</option>
+                    <option value="SMA">SMA (Simple Moving Average)</option>
+                    <option value="WMA">WMA (Weighted Moving Average)</option>
+                    <option value="RSI">RSI (Relative Strength Index)</option>
+                    <option value="MACD">MACD (Moving Average Convergence Divergence)</option>
+                    <option value="BollingerBands">Bollinger Bands</option>
+                    <option value="ATR">ATR (Average True Range)</option>
+                    <option value="Stochastic">Stochastic</option>
+                    <option value="ADX">ADX (Average Directional Index)</option>
+                    <option value="CCI">CCI (Commodity Channel Index)</option>
+                    <option value="ROC">ROC (Rate of Change)</option>
+                    <option value="MFI">MFI (Money Flow Index)</option>
+                </select>
+
+                <!-- Parameters Section -->
+                <div id="indicatorParamsSection" style="display: none;">
+                    <h3 style="color: #d1d4dc; font-size: 14px; margin-bottom: 12px;">Parameters:</h3>
+                    <div id="indicatorParamsContainer"></div>
+                </div>
+
+                <!-- Display Settings -->
+                <div id="indicatorDisplaySection" style="display: none; margin-top: 20px;">
+                    <h3 style="color: #d1d4dc; font-size: 14px; margin-bottom: 12px;">Display Settings:</h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Color</label>
+                            <input type="color" id="indicatorColor" value="#2962ff" style="width: 100%; height: 36px; border: 1px solid #2a2e39; border-radius: 4px; background: #131722; cursor: pointer;">
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Line Style</label>
+                            <select id="indicatorLineStyle" style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                <option value="solid">Solid</option>
+                                <option value="dotted">Dotted</option>
+                                <option value="dashed">Dashed</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Line Width</label>
+                            <select id="indicatorLineWidth" style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                <option value="1">1px</option>
+                                <option value="2" selected>2px</option>
+                                <option value="3">3px</option>
+                                <option value="4">4px</option>
+                                <option value="5">5px</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 15px 20px; border-top: 1px solid #2a2e39; display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="document.getElementById('indicatorSelectionModal').style.display = 'none';" style="padding: 10px 20px; background: #2a2e39; color: #d1d4dc; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">Cancel</button>
+                <button onclick="addSelectedIndicator()" style="padding: 10px 20px; background: #2962ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Add Indicator</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

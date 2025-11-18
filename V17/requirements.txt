@@ -1,0 +1,12 @@
+Flask==3.0.0
+flask-socketio==5.3.5
+flask-cors==4.0.0
+python-socketio==5.10.0
+eventlet==0.33.3
+pandas==2.0.3
+numpy==1.24.3
+MetaTrader5==5.0.45
+requests==2.31.0
+reportlab==4.0.7
+matplotlib==3.7.2
+paho-mqtt==1.6.1

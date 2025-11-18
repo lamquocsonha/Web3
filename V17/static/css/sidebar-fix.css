@@ -1,0 +1,156 @@
+/* SIDEBAR FIX - Ngăn sidebar nhảy dòng */
+
+/* Strategy Actions Buttons */
+.strategy-actions button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    transition: all 0.2s;
+}
+
+.btn-action-run:hover {
+    background: #1e53e5 !important;
+}
+
+/* Upload Data Container trong Header */
+/* Tooltip CSS đã được chuyển sang style.css và header_common.html */
+/* Không dùng hover nữa - chỉ dùng click với class .show */
+
+.tooltip-header {
+    color: #2962ff;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2a2e39;
+}
+
+.tooltip-content {
+    margin-bottom: 10px;
+}
+
+.tooltip-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    color: #d1d4dc;
+    font-size: 12px;
+}
+
+.tooltip-item span:first-child {
+    color: #787b86;
+}
+
+.tooltip-footer {
+    display: flex;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #2a2e39;
+}
+
+.btn-tooltip-action,
+.btn-tooltip-delete {
+    flex: 1;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-tooltip-action {
+    background: #2962ff;
+    color: white;
+}
+
+.btn-tooltip-action:hover {
+    background: #1e53e5;
+}
+
+.btn-tooltip-delete {
+    background: #ef5350;
+    color: white;
+}
+
+.btn-tooltip-delete:hover {
+    background: #d32f2f;
+}
+
+/* Grid layout 60-40% cho tất cả trang */
+.main-content,
+.workspace-main {
+    display: grid !important;
+    grid-template-columns: 60% 40% !important;
+    gap: 0 !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+}
+
+/* Chart section - 60% */
+.chart-section,
+.workspace-chart {
+    grid-column: 1 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Sidebar panel - 40% */
+.sidebar-panel,
+.workspace-panel {
+    grid-column: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Fix tất cả form elements trong sidebar - EXCEPT account items and bot settings */
+.sidebar-panel *:not(.account-checkbox-item):not(.account-checkbox-item *):not(.form-label-checkbox):not(.form-label-checkbox *),
+.workspace-panel *:not(.account-checkbox-item):not(.account-checkbox-item *):not(.form-label-checkbox):not(.form-label-checkbox *) {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.sidebar-panel input:not([type="checkbox"]),
+.sidebar-panel select,
+.sidebar-panel textarea,
+.sidebar-panel button,
+.workspace-panel input:not([type="checkbox"]),
+.workspace-panel select,
+.workspace-panel textarea,
+.workspace-panel button {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.sidebar-panel input[type="text"],
+.sidebar-panel input[type="password"],
+.sidebar-panel input[type="number"],
+.workspace-panel input[type="text"],
+.workspace-panel input[type="password"],
+.workspace-panel input[type="number"] {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Ngăn text tràn - EXCEPT checkbox labels */
+.sidebar-panel h2,
+.sidebar-panel h3,
+.sidebar-panel label:not(.account-checkbox-label):not(.form-label-checkbox):not(.checkbox-label),
+.workspace-panel h2,
+.workspace-panel h3,
+.workspace-panel label:not(.account-checkbox-label):not(.form-label-checkbox):not(.checkbox-label) {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+/* Global checkbox style */
+input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    margin: 0 8px 0 0 !important; /* top right bottom left - add right margin for spacing */
+    accent-color: #2962ff;
+}
+

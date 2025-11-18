@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtest - AUTO OPTIMIZE TRADING SYSTEM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/workspace.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar-fix.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/backtest-layout.css') }}">
+</head>
+<body>
+    <div class="workspace-container">
+        <!-- Header -->
+        {% include 'header_common.html' %}
+
+        <!-- Main Content -->
+        <div class="backtest-main">
+            <!-- Left Sidebar Control -->
+            <div class="backtest-sidebar">
+                <div class="panel-section">
+                    <h3>📊 Data & Strategy</h3>
+
+                    <div class="form-group">
+                        <label>Upload CSV File:</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="csvFile" accept=".csv" style="display:none;">
+                            <button class="btn-file" id="btnChooseFile" title="">
+                                <span id="csvFileName">Choose CSV File...</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="strategySelect">Strategy:</label>
+                        <select id="strategySelect" class="form-control">
+                            <option value="">Select strategy...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h3>⚙️ Settings</h3>
+                
+                    <div class="form-group">
+                        <label for="initialCapital">Initial Capital ($):</label>
+                        <input type="number" id="initialCapital" class="form-control" value="10000" min="1000" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commission">Commission (points):</label>
+                        <input type="number" id="commission" class="form-control" value="0.5" min="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="slippage">Slippage (points):</label>
+                        <input type="number" id="slippage" class="form-control" value="0.1" min="0" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="timeframe">Timeframe:</label>
+                        <select id="timeframe" class="form-control">
+                            <option value="1m">1 Minute</option>
+                            <option value="5m">5 Minutes</option>
+                            <option value="15m">15 Minutes</option>
+                            <option value="30m">30 Minutes</option>
+                            <option value="1H" selected>1 Hour</option>
+                            <option value="2H">2 Hours</option>
+                            <option value="4H">4 Hours</option>
+                            <option value="1D">1 Day</option>
+                            <option value="1W">1 Week</option>
+                            <option value="1M">1 Month</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="runBacktest" class="btn-run-backtest" disabled title="Please select CSV file and strategy">
+                    🚀 Run Backtest
+                </button>
+
+                <button id="exportPDF" class="btn-run-backtest" style="margin-top: 10px; background: #dc2626;">
+                    📄 Export PDF
+                </button>
+            </div>
+            
+            <!-- Right Main Area -->
+            <div class="backtest-content">
+            <!-- Stats Grid - Full Width -->
+            <div class="stats-grid-fullwidth">
+                <div class="stat-card">
+                    <div class="stat-label">Net Profit</div>
+                    <div class="stat-value positive" id="statNetProfit">$0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Net Profit %</div>
+                    <div class="stat-value positive" id="statNetProfitPct">0.00%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Trades</div>
+                    <div class="stat-value" id="statTotalTrades">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-value" id="statWinRate">0.00%</div>
+                </div>
+                <div class="stat-card negative">
+                    <div class="stat-label">Max Drawdown</div>
+                    <div class="stat-value" id="statMaxDrawdown">0.00%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Profit Factor</div>
+                    <div class="stat-value" id="statProfitFactor">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Sharpe Ratio</div>
+                    <div class="stat-value" id="statSharpe">0.00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Annual Return</div>
+                    <div class="stat-value" id="statAnnualReturn">0.00%</div>
+                </div>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="backtest-tabs">
+                <button class="backtest-tab active" onclick="switchBacktestTab('charts')">📈 Charts</button>
+                <button class="backtest-tab" onclick="switchBacktestTab('performance')">📊 Performance</button>
+                <button class="backtest-tab" onclick="switchBacktestTab('history')">📋 History</button>
+                <button class="backtest-tab" onclick="switchBacktestTab('terminal')">📟 Terminal</button>
+            </div>
+            
+            <!-- Tab Contents -->
+            <div class="backtest-tab-content">
+                <!-- Charts Tab -->
+                <div id="chartsTab" class="tab-panel active">
+                    <div class="chart-container">
+                        <h3>📈 Cumulative Profit</h3>
+                        <canvas id="cumulativeProfitChart" style="height: 280px;"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>💰 Equity Curve</h3>
+                        <canvas id="equityChart" style="height: 280px;"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Performance Tab -->
+                <div id="performanceTab" class="tab-panel" style="display:none;">
+                    <div class="detailed-stats-container">
+                        <h3>📊 Performance Summary</h3>
+                        <div class="table-wrapper">
+                            <table class="stats-table-3col">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; width: 30%;">Metric</th>
+                                        <th style="text-align: center; width: 23%; background: #dcfce7;">Long Trades</th>
+                                        <th style="text-align: center; width: 23%; background: #fee2e2;">Short Trades</th>
+                                        <th style="text-align: center; width: 24%; background: #dbeafe;">All Trades</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Total Net Profit</strong></td>
+                                        <td id="longNetProfit" class="text-center">$0.00</td>
+                                        <td id="shortNetProfit" class="text-center">$0.00</td>
+                                        <td id="allNetProfit" class="text-center">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Gross Profit</strong></td>
+                                        <td id="longGrossProfit" class="text-center positive">$0.00</td>
+                                        <td id="shortGrossProfit" class="text-center positive">$0.00</td>
+                                        <td id="allGrossProfit" class="text-center positive">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Gross Loss</strong></td>
+                                        <td id="longGrossLoss" class="text-center negative">$0.00</td>
+                                        <td id="shortGrossLoss" class="text-center negative">$0.00</td>
+                                        <td id="allGrossLoss" class="text-center negative">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total # of Trades</strong></td>
+                                        <td id="longTotalTrades" class="text-center">0</td>
+                                        <td id="shortTotalTrades" class="text-center">0</td>
+                                        <td id="allTotalTrades" class="text-center">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Winning Trades</strong></td>
+                                        <td id="longWinTrades" class="text-center">0</td>
+                                        <td id="shortWinTrades" class="text-center">0</td>
+                                        <td id="allWinTrades" class="text-center">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Losing Trades</strong></td>
+                                        <td id="longLoseTrades" class="text-center">0</td>
+                                        <td id="shortLoseTrades" class="text-center">0</td>
+                                        <td id="allLoseTrades" class="text-center">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Win Rate %</strong></td>
+                                        <td id="longWinRate" class="text-center">0.00%</td>
+                                        <td id="shortWinRate" class="text-center">0.00%</td>
+                                        <td id="allWinRate" class="text-center">0.00%</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Profit Factor</strong></td>
+                                        <td id="longProfitFactor" class="text-center">0.00</td>
+                                        <td id="shortProfitFactor" class="text-center">0.00</td>
+                                        <td id="allProfitFactor" class="text-center">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Average Win</strong></td>
+                                        <td id="longAvgWin" class="text-center positive">$0.00</td>
+                                        <td id="shortAvgWin" class="text-center positive">$0.00</td>
+                                        <td id="allAvgWin" class="text-center positive">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Average Loss</strong></td>
+                                        <td id="longAvgLoss" class="text-center negative">$0.00</td>
+                                        <td id="shortAvgLoss" class="text-center negative">$0.00</td>
+                                        <td id="allAvgLoss" class="text-center negative">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Largest Win</strong></td>
+                                        <td id="longLargestWin" class="text-center positive">$0.00</td>
+                                        <td id="shortLargestWin" class="text-center positive">$0.00</td>
+                                        <td id="allLargestWin" class="text-center positive">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Largest Loss</strong></td>
+                                        <td id="longLargestLoss" class="text-center negative">$0.00</td>
+                                        <td id="shortLargestLoss" class="text-center negative">$0.00</td>
+                                        <td id="allLargestLoss" class="text-center negative">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Max Drawdown</strong></td>
+                                        <td id="longMaxDD" class="text-center negative">$0.00</td>
+                                        <td id="shortMaxDD" class="text-center negative">$0.00</td>
+                                        <td id="allMaxDD" class="text-center negative">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sharpe Ratio</strong></td>
+                                        <td id="longSharpe" class="text-center">0.00</td>
+                                        <td id="shortSharpe" class="text-center">0.00</td>
+                                        <td id="allSharpe" class="text-center">0.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Keep old detailed stats hidden for reference -->
+                    <div class="detailed-stats-container" style="display:none;">
+                        <h3>📊 Detailed Statistics (Legacy)</h3>
+                        <div class="table-wrapper">
+                            <table class="stats-table">
+                                <tbody>
+                                    <!-- All Trades -->
+                                    <tr class="section-header">
+                                        <td colspan="2"><strong>All Trades</strong></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Net Profit</td>
+                                        <td id="detailNetProfit" class="positive">$0.00</td>
+                                        <td>Gross Profit</td>
+                                        <td id="detailGrossProfit" class="positive">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Gross Loss</td>
+                                        <td id="detailGrossLoss" class="negative">$0.00</td>
+                                        <td>Total # of Trades</td>
+                                        <td id="detailTotalTrades">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Profit Factor</td>
+                                        <td id="detailProfitFactor">0.00</td>
+                                        <td>Max. Drawdown</td>
+                                        <td id="detailMaxDD" class="negative">$0.00 (0.00%)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Return on Initial Capital</td>
+                                        <td id="detailROI">0.00%</td>
+                                        <td>Annual Return %</td>
+                                        <td id="detailAnnualReturn">0.00%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Exposure %</td>
+                                        <td id="detailExposure">0.00%</td>
+                                        <td>CAR/MaxDD</td>
+                                        <td id="detailCARMaxDD">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recovery Factor</td>
+                                        <td id="detailRecoveryFactor">0.00</td>
+                                        <td>Sharpe Ratio</td>
+                                        <td id="detailSharpe">0.00</td>
+                                    </tr>
+                                    
+                                    <!-- Winning Trades -->
+                                    <tr class="section-header">
+                                        <td colspan="2"><strong>Winning Trades</strong></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total # Winners</td>
+                                        <td id="detailWinners">0</td>
+                                        <td>Average Win</td>
+                                        <td id="detailAvgWin" class="positive">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Largest Win</td>
+                                        <td id="detailLargestWin" class="positive">$0.00</td>
+                                        <td>Avg Win %</td>
+                                        <td id="detailAvgWinPct">0.00%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Max Consecutive Wins</td>
+                                        <td id="detailMaxConsecWins">0</td>
+                                        <td>Avg Bars in Winners</td>
+                                        <td id="detailAvgBarsWin">0</td>
+                                    </tr>
+                                    
+                                    <!-- Losing Trades -->
+                                    <tr class="section-header">
+                                        <td colspan="2"><strong>Losing Trades</strong></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total # Losers</td>
+                                        <td id="detailLosers">0</td>
+                                        <td>Average Loss</td>
+                                        <td id="detailAvgLoss" class="negative">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Largest Loss</td>
+                                        <td id="detailLargestLoss" class="negative">$0.00</td>
+                                        <td>Avg Loss %</td>
+                                        <td id="detailAvgLossPct">0.00%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Max Consecutive Losses</td>
+                                        <td id="detailMaxConsecLoss">0</td>
+                                        <td>Avg Bars in Losers</td>
+                                        <td id="detailAvgBarsLoss">0</td>
+                                    </tr>
+                                    
+                                    <!-- Additional Metrics -->
+                                    <tr class="section-header">
+                                        <td colspan="2"><strong>Additional Metrics</strong></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Avg Trade</td>
+                                        <td id="detailAvgTrade">$0.00</td>
+                                        <td>Avg Trade %</td>
+                                        <td id="detailAvgTradePct">0.00%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Avg Win/Loss Ratio</td>
+                                        <td id="detailWinLossRatio">0.00</td>
+                                        <td>Expectancy</td>
+                                        <td id="detailExpectancy">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Avg Bars in Trade</td>
+                                        <td id="detailAvgBars">0</td>
+                                        <td>Commission Paid</td>
+                                        <td id="detailCommission">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Slippage</td>
+                                        <td id="detailSlippage">$0.00</td>
+                                        <td>Win Rate %</td>
+                                        <td id="detailWinRate">0.00%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- History Tab -->
+                <div id="historyTab" class="tab-panel" style="display:none;">
+                    <div class="trades-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Trade History</h3>
+                            <button id="exportTrades" class="btn-secondary">
+                                <span class="btn-icon">💾</span>
+                                Export CSV
+                            </button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="tradesTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Entry Time</th>
+                                        <th>Entry Price</th>
+                                        <th>Exit Time</th>
+                                        <th>Exit Price</th>
+                                        <th>Direction</th>
+                                        <th>P&L ($)</th>
+                                        <th>P&L (pts)</th>
+                                        <th>Exit Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tradesTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal Tab -->
+                <div id="terminalTab" class="tab-panel" style="display:none;">
+                    <div class="terminal-container" style="background: #131722; border-radius: 6px; overflow: hidden; height: 600px; display: flex; flex-direction: column;">
+                        <div class="terminal-header" style="background: #252933; padding: 12px 20px; border-bottom: 1px solid #2a2e39; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 14px; font-weight: bold; color: #d1d4dc;">📟 Backtest Terminal</span>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="clearBacktestTerminal()" style="padding: 6px 12px; background: #2a2e39; border: 1px solid #3a3e49; border-radius: 4px; color: #d1d4dc; cursor: pointer; font-size: 12px;">
+                                    Clear
+                                </button>
+                                <button onclick="exportBacktestLog()" style="padding: 6px 12px; background: #2a2e39; border: 1px solid #3a3e49; border-radius: 4px; color: #d1d4dc; cursor: pointer; font-size: 12px;">
+                                    Export Log
+                                </button>
+                            </div>
+                        </div>
+                        <div id="backtestTerminal" class="terminal-body" style="flex: 1; padding: 15px 20px; overflow-y: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; line-height: 1.6; color: #d1d4dc;">
+                            <div class="terminal-line" style="color: #787b86;">
+                                Terminal ready. Run backtest to see logs...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="{{ url_for('static', filename='js/data-manager.js') }}?v=15.1"></script>
+    <script src="{{ url_for('static', filename='js/backtest.js') }}?v=2.0"></script>
+    <script>
+    function switchBacktestTab(tabName) {
+        // Hide all tab panels
+        document.querySelectorAll('.tab-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+
+        // Remove active class from all tabs
+        document.querySelectorAll('.backtest-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show selected tab panel
+        document.getElementById(tabName + 'Tab').style.display = 'block';
+
+        // Add active class to clicked tab
+        event.target.classList.add('active');
+    }
+
+    // Terminal functions
+    function addBacktestTerminalLine(message, type = 'info') {
+        const terminal = document.getElementById('backtestTerminal');
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+
+        // Color coding based on type
+        const colors = {
+            'success': '#26a69a',
+            'error': '#ef5350',
+            'warning': '#ffb74d',
+            'info': '#64b5f6',
+            'default': '#d1d4dc'
+        };
+
+        line.style.color = colors[type] || colors['default'];
+        line.style.marginBottom = '4px';
+        line.textContent = message;
+
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function clearBacktestTerminal() {
+        const terminal = document.getElementById('backtestTerminal');
+        terminal.innerHTML = '<div class="terminal-line" style="color: #787b86;">Terminal cleared.</div>';
+    }
+
+    function exportBacktestLog() {
+        const terminal = document.getElementById('backtestTerminal');
+        const logText = terminal.innerText;
+        const blob = new Blob([logText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `backtest_log_${Date.now()}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+        addBacktestTerminalLine('✅ Log exported successfully', 'success');
+    }
+    </script>
+</body>
+</html>
