@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+
+{% block title %}Optimize{% endblock %}
+
+{% set active_page = 'optimize' %}
+
+{% block content %}
+<div class="layout-with-sidebar">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">📊 Data & Strategy</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Upload CSV File:</label>
+                    <div style="position: relative;">
+                        <button id="optimize-upload-btn" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <span>📁</span>
+                            <span id="optimize-file-name">Choose CSV File...</span>
+                        </button>
+                        
+                        <!-- Tooltip Upload - Giống Header -->
+                        <div id="optimize-upload-tooltip" style="display: none; position: absolute; top: 100%; left: 0; right: 0; margin-top: 0.5rem; background: #1a1f2e; border: 1px solid #2d3748; border-radius: 8px; padding: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000;">
+                            <h3 style="margin: 0 0 1rem 0; color: #3b82f6; font-size: 1rem;">📁 Thông tin dữ liệu:</h3>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Trạng thái:</span>
+                                    <span id="optimize-data-status" style="color: #10b981; display: flex; align-items: center; gap: 0.25rem;">
+                                        <input type="checkbox" checked disabled style="margin: 0;">
+                                        <span>Sử dụng data Backtest</span>
+                                    </span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Tên file:</span>
+                                    <span style="color: var(--text-primary);" id="optimize-data-filename">---</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Timeframe:</span>
+                                    <span style="color: #3b82f6; font-weight: 600;" id="optimize-data-timeframe">---</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">GTM:</span>
+                                    <span style="color: var(--text-primary);" id="optimize-data-gtm">---</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Từ ngày:</span>
+                                    <span style="color: var(--text-primary);" id="optimize-data-from">---</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Đến ngày:</span>
+                                    <span style="color: var(--text-primary);" id="optimize-data-to">---</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Số nến:</span>
+                                    <span style="color: var(--text-primary);" id="optimize-data-bars">---</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: var(--text-secondary);">Dung lượng:</span>
+                                    <span style="color: var(--text-primary);" id="optimize-data-size">---</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                <button id="optimize-upload-file-btn" class="btn btn-primary" style="flex: 1; padding: 0.5rem;">📁 Upload</button>
+                                <button id="optimize-delete-data-btn" class="btn btn-danger" style="flex: 1; padding: 0.5rem;">🗑️ Xóa</button>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                                💡 Sử dụng chung data với Backtest
+                            </div>
+                        </div>
+                        
+                        <input type="file" id="optimize-csv-input" accept=".csv" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Strategy:</label>
+                    <select id="strategy-selector-optimize" class="form-control">
+                        <option value="">Select strategy...</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">⚙️ Settings</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Algorithm:</label>
+                    <select id="algorithm-selector" class="form-control">
+                        <option value="genetic" selected>Genetic Algorithm</option>
+                        <option value="grid">Grid Search</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Timeframe:</label>
+                    <select id="timeframe-optimize" class="form-control">
+                        <option value="1 Hour" selected>1 Hour</option>
+                    </select>
+                </div>
+                
+                <div class="settings-input-group">
+                    <div class="form-group">
+                        <label class="form-label">Population:</label>
+                        <input type="number" id="population-input" class="form-control" value="50">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Generations:</label>
+                        <input type="number" id="generations-input" class="form-control" value="20">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Max Results:</label>
+                    <input type="number" id="max-results-input" class="form-control" value="10">
+                </div>
+                
+                <button id="start-optimization-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">🚀 Start Optimization</button>
+                <button id="auto-optimization-btn" class="btn btn-success" style="width: 100%; margin-top: 0.5rem;">🔄 Auto</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div style="padding: 2rem; height: calc(100vh - 120px); display: flex; flex-direction: column; gap: 1rem;">
+                <div style="flex: 0 0 auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2>🎯 Select Parameters to Optimize</h2>
+                        <div>
+                            <button id="expand-all-btn" class="btn btn-sm btn-secondary">Expand All</button>
+                            <button id="collapse-all-btn" class="btn btn-sm btn-secondary">Collapse All</button>
+                        </div>
+                    </div>
+                    
+                    <div class="strategy-tabs" style="border-bottom: 1px solid var(--border-color);">
+                        <button class="strategy-tab parameters-tab active" data-tab="entry">🎯 Entry Conditions</button>
+                        <button class="strategy-tab parameters-tab" data-tab="exit">🚪 Exit Rules</button>
+                    </div>
+                    
+                    <div class="parameters-content" data-tab="entry" style="display: block; padding: 1rem;">
+                        <p class="empty-state" id="entry-parameters-container">Select a strategy to view entry parameters</p>
+                    </div>
+                    <div class="parameters-content" data-tab="exit" style="display: none; padding: 1rem;">
+                        <p class="empty-state" id="exit-parameters-container">Select a strategy to view exit parameters</p>
+                    </div>
+                </div>
+                
+                <div style="flex: 1; display: flex; gap: 1rem; min-height: 0;">
+                    <div style="flex: 2; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2>🏆 Optimization Results</h2>
+                            <button id="export-csv-btn" class="btn btn-sm btn-success">📥 Export CSV</button>
+                        </div>
+                        <div style="flex: 1; overflow-y: auto; background-color: var(--bg-secondary); border-radius: 8px; padding: 1rem;">
+                            <table class="table optimization-results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th><th>Win Rate</th><th>Profit (pts)</th><th>Drawdown</th>
+                                        <th>Profit Factor</th><th>Trades</th><th>Fitness</th><th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="8" style="text-align: center; padding: 2rem;">Run optimization to see results</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <h2 style="margin-bottom: 1rem;">💻 Terminal</h2>
+                        <div class="terminal" style="flex: 1;">
+                            <div class="terminal-header">
+                                <div class="terminal-title">System Terminal</div>
+                                <div class="terminal-actions">
+                                    <button class="terminal-clear">Clear</button>
+                                </div>
+                            </div>
+                            <div class="terminal-line terminal-output">Terminal ready. Waiting for optimization to start...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal Timeframe & GTM -->
+<div id="optimize-timeframe-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">
+    <div style="background: #1a1f2e; border: 1px solid #2d3748; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90%;">
+        <h3 style="margin: 0 0 1.5rem 0; color: #3b82f6; font-size: 1.25rem;">⚙️ Cấu hình dữ liệu</h3>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">Timeframe:</label>
+            <select id="optimize-modal-timeframe" class="form-control">
+                <option value="1M">1 Minute</option>
+                <option value="5M">5 Minutes</option>
+                <option value="15M">15 Minutes</option>
+                <option value="30M">30 Minutes</option>
+                <option value="1H" selected>1 Hour</option>
+                <option value="4H">4 Hours</option>
+                <option value="1D">1 Day</option>
+            </select>
+        </div>
+        
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">GTM (Timezone):</label>
+            <select id="optimize-modal-gtm" class="form-control">
+                <option value="+7" selected>GTM +7 (Việt Nam)</option>
+                <option value="+0">GTM +0 (UTC)</option>
+                <option value="+1">GTM +1</option>
+                <option value="+2">GTM +2</option>
+                <option value="+3">GTM +3</option>
+                <option value="+8">GTM +8</option>
+                <option value="+9">GTM +9</option>
+            </select>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+            <button id="optimize-modal-cancel" class="btn btn-secondary" style="flex: 1;">❌ Hủy</button>
+            <button id="optimize-modal-confirm" class="btn btn-primary" style="flex: 1;">✅ Xác nhận</button>
+        </div>
+    </div>
+</div>
+{%endblock%}
+
+{% block extra_js %}
+    <script>
+    // Optimize Data Manager - Shares data with Backtest via localStorage
+    window.OptimizeDataManager = {
+        pendingFile: null,
+        
+        init() {
+            console.log('🎯 OptimizeDataManager initialized');
+            
+            const uploadBtn = document.getElementById('optimize-upload-btn');
+            const tooltip = document.getElementById('optimize-upload-tooltip');
+            const csvInput = document.getElementById('optimize-csv-input');
+            const uploadFileBtn = document.getElementById('optimize-upload-file-btn');
+            const deleteBtn = document.getElementById('optimize-delete-data-btn');
+            
+            // Toggle tooltip
+            if (uploadBtn) {
+                uploadBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.updateTooltipUI();
+                    tooltip.style.display = tooltip.style.display === 'none' ? 'block' : 'none';
+                });
+            }
+            
+            // Close tooltip when clicking outside
+            document.addEventListener('click', (e) => {
+                if (tooltip && !tooltip.contains(e.target) && e.target !== uploadBtn) {
+                    tooltip.style.display = 'none';
+                }
+            });
+            
+            // Upload button in tooltip
+            if (uploadFileBtn) {
+                uploadFileBtn.addEventListener('click', () => {
+                    csvInput.click();
+                });
+            }
+            
+            // Handle file selection
+            if (csvInput) {
+                csvInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.pendingFile = e.target.files[0];
+                        this.showTimeframeModal();
+                    }
+                });
+            }
+            
+            // Delete button
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', () => this.deleteData());
+            }
+            
+            // Modal handlers
+            this.initModal();
+            
+            // Load saved data on page load
+            this.loadSavedData();
+        },
+        
+        initModal() {
+            const modal = document.getElementById('optimize-timeframe-modal');
+            const cancelBtn = document.getElementById('optimize-modal-cancel');
+            const confirmBtn = document.getElementById('optimize-modal-confirm');
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    modal.style.display = 'none';
+                    this.pendingFile = null;
+                });
+            }
+            
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => {
+                    const timeframe = document.getElementById('optimize-modal-timeframe').value;
+                    const gtm = document.getElementById('optimize-modal-gtm').value;
+                    modal.style.display = 'none';
+                    this.handleFileUpload(this.pendingFile, timeframe, gtm);
+                });
+            }
+        },
+        
+        showTimeframeModal() {
+            const modal = document.getElementById('optimize-timeframe-modal');
+            modal.style.display = 'flex';
+        },
+        
+        async handleFileUpload(file, timeframe, gtm) {
+            if (!file) return;
+            
+            console.log('📂 File selected:', file.name);
+            console.log('⚙️ Timeframe:', timeframe, 'GTM:', gtm);
+            
+            try {
+                const text = await file.text();
+                const rows = text.split('\n').filter(row => row.trim());
+                
+                if (rows.length < 2) {
+                    alert('❌ File CSV không hợp lệ!');
+                    return;
+                }
+                
+                // Parse CSV
+                const headers = rows[0].split(',').map(h => h.trim());
+                const data = [];
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const values = rows[i].split(',');
+                    if (values.length >= headers.length) {
+                        const row = {};
+                        headers.forEach((header, index) => {
+                            row[header] = values[index]?.trim();
+                        });
+                        data.push(row);
+                    }
+                }
+                
+                // Get date range
+                const firstBar = data[0];
+                const lastBar = data[data.length - 1];
+                
+                const fileInfo = {
+                    name: file.name,
+                    size: file.size,
+                    rows: data.length,
+                    timeframe: timeframe,
+                    gtm: gtm,
+                    from: `${firstBar.Date} ${firstBar.Time}`,
+                    to: `${lastBar.Date} ${lastBar.Time}`,
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                // Save to SHARED localStorage (same as Backtest)
+                localStorage.setItem('backtest_csv_data', JSON.stringify(data));
+                localStorage.setItem('backtest_file_info', JSON.stringify(fileInfo));
+                
+                console.log('✅ Optimize data saved (shared with Backtest):', data.length, 'rows');
+                
+                // Update UI
+                this.updateUI(fileInfo);
+                
+                // Close tooltip
+                document.getElementById('optimize-upload-tooltip').style.display = 'none';
+                
+            } catch (error) {
+                console.error('❌ Error reading file:', error);
+                alert('❌ Lỗi khi đọc file: ' + error.message);
+            }
+        },
+        
+        loadSavedData() {
+            try {
+                const savedInfo = localStorage.getItem('backtest_file_info');
+                
+                console.log('🔍 Loading optimize data from localStorage...');
+                console.log('- savedInfo:', savedInfo ? 'exists' : 'null');
+                
+                if (savedInfo) {
+                    const fileInfo = JSON.parse(savedInfo);
+                    console.log('✅ Loaded shared data:', fileInfo.rows, 'rows');
+                    console.log('📋 File info:', fileInfo);
+                    
+                    // Update both UI and tooltip
+                    this.updateUI(fileInfo);
+                    this.updateTooltipUI();
+                } else {
+                    console.log('ℹ️ No saved optimize data found');
+                }
+            } catch (error) {
+                console.error('❌ Error loading saved data:', error);
+            }
+        },
+        
+        deleteData() {
+            if (!confirm('🗑️ Bạn có chắc muốn xóa dữ liệu? (Sẽ xóa data của cả Backtest)')) return;
+            
+            try {
+                localStorage.removeItem('backtest_csv_data');
+                localStorage.removeItem('backtest_file_info');
+                
+                this.updateUI(null);
+                document.getElementById('optimize-upload-tooltip').style.display = 'none';
+                
+                console.log('🗑️ Data deleted');
+            } catch (error) {
+                console.error('❌ Error deleting data:', error);
+            }
+        },
+        
+        updateUI(fileInfo) {
+            const fileName = document.getElementById('optimize-file-name');
+            
+            if (fileInfo && fileName) {
+                fileName.textContent = fileInfo.name;
+            } else if (fileName) {
+                fileName.textContent = 'Choose CSV File...';
+            }
+        },
+        
+        updateTooltipUI() {
+            const savedInfo = localStorage.getItem('backtest_file_info');
+            
+            if (!savedInfo) {
+                document.getElementById('optimize-data-status').innerHTML = '<input type="checkbox" disabled style="margin: 0;"><span>Chưa có dữ liệu</span>';
+                document.getElementById('optimize-data-filename').textContent = '---';
+                document.getElementById('optimize-data-timeframe').textContent = '---';
+                document.getElementById('optimize-data-gtm').textContent = '---';
+                document.getElementById('optimize-data-from').textContent = '---';
+                document.getElementById('optimize-data-to').textContent = '---';
+                document.getElementById('optimize-data-bars').textContent = '---';
+                document.getElementById('optimize-data-size').textContent = '---';
+                return;
+            }
+            
+            const fileInfo = JSON.parse(savedInfo);
+            
+            document.getElementById('optimize-data-status').innerHTML = '<input type="checkbox" checked disabled style="margin: 0;"><span>Đã lưu</span>';
+            document.getElementById('optimize-data-filename').textContent = fileInfo.name;
+            document.getElementById('optimize-data-timeframe').textContent = fileInfo.timeframe || '---';
+            document.getElementById('optimize-data-gtm').textContent = fileInfo.gtm || '---';
+            document.getElementById('optimize-data-from').textContent = fileInfo.from || '---';
+            document.getElementById('optimize-data-to').textContent = fileInfo.to || '---';
+            document.getElementById('optimize-data-bars').textContent = fileInfo.rows?.toLocaleString() || '---';
+            document.getElementById('optimize-data-size').textContent = fileInfo.size ? (fileInfo.size / (1024 * 1024)).toFixed(2) + ' MB' : '---';
+        },
+        
+        getData() {
+            try {
+                const savedData = localStorage.getItem('backtest_csv_data');
+                const savedInfo = localStorage.getItem('backtest_file_info');
+                
+                return {
+                    csvData: savedData ? JSON.parse(savedData) : null,
+                    fileInfo: savedInfo ? JSON.parse(savedInfo) : null
+                };
+            } catch (error) {
+                console.error('❌ Error getting data:', error);
+                return { csvData: null, fileInfo: null };
+            }
+        },
+        
+        hasData() {
+            const data = this.getData();
+            return data.csvData && data.csvData.length > 0;
+        }
+    };
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        window.OptimizeDataManager.init();
+    });
+    </script>
+    <script src="{{ url_for('static', filename='js/optimize.js') }}"></script>
+{% endblock %}
