@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volume Scale Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0e1a;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        #chart-container {
+            width: 100%;
+            height: 600px;
+            position: relative;
+            background: #141824;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #1a1f2e;
+            border-radius: 8px;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            background: #3b82f6;
+            border: none;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Volume Scale Test - Cố định đáy</h1>
+    
+    <div id="chart-container"></div>
+    
+    <div class="info">
+        <h3>Test Cases:</h3>
+        <div class="controls">
+            <button onclick="testVolumeScale(0.2)">Volume 20% (Default)</button>
+            <button onclick="testVolumeScale(0.3)">Volume 30%</button>
+            <button onclick="testVolumeScale(0.4)">Volume 40%</button>
+            <button onclick="testVolumeScale(0.1)">Volume 10%</button>
+        </div>
+        <div id="status" style="margin-top: 15px; padding: 10px; background: #0a0e1a; border-radius: 4px;">
+            <strong>Status:</strong> Ready to test
+        </div>
+        <div style="margin-top: 15px;">
+            <strong>Expected Behavior:</strong><br>
+            ✅ Đáy volume luôn ở y=0 (bottom cố định)<br>
+            ✅ Khi tăng % volume → chỉ top thay đổi<br>
+            ❌ Đáy KHÔNG được xuống âm (-20K, -40K...)<br>
+            ❌ Volume KHÔNG được thu hẹp về giữa
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script>
+        let chart = null;
+        let candlestickSeries = null;
+        let volumeSeries = null;
+        let currentVolumeHeight = 0.2;
+
+        function initChart() {
+            const container = document.getElementById('chart-container');
+            
+            chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: container.clientHeight,
+                layout: {
+                    background: { color: '#141824' },
+                    textColor: '#a0a0a0',
+                },
+                grid: {
+                    vertLines: { color: '#1a1f2e' },
+                    horzLines: { color: '#1a1f2e' },
+                },
+                leftPriceScale: {
+                    visible: true,
+                    borderColor: '#2d3748',
+                },
+                rightPriceScale: {
+                    borderColor: '#2d3748',
+                },
+                timeScale: {
+                    borderColor: '#2d3748',
+                    timeVisible: true,
+                },
+            });
+
+            // Create candlestick series
+            candlestickSeries = chart.addCandlestickSeries({
+                upColor: '#10b981',
+                downColor: '#ef4444',
+                borderUpColor: '#10b981',
+                borderDownColor: '#ef4444',
+                wickUpColor: '#10b981',
+                wickDownColor: '#ef4444',
+                priceScaleId: 'right',
+            });
+
+            // Create volume series with autoscaleInfoProvider
+            createVolumeSeries();
+
+            // Generate mock data
+            const data = generateMockData(200);
+            candlestickSeries.setData(data.candles);
+            volumeSeries.setData(data.volumes);
+
+            chart.timeScale().fitContent();
+
+            updateStatus('Chart initialized with volume height: ' + (currentVolumeHeight * 100) + '%');
+        }
+
+        function createVolumeSeries() {
+            if (volumeSeries) {
+                chart.removeSeries(volumeSeries);
+            }
+
+            // FIX: Volume scale với autoscaleInfoProvider
+            volumeSeries = chart.addHistogramSeries({
+                color: '#3b82f6',
+                priceFormat: {
+                    type: 'volume',
+                },
+                priceScaleId: 'left',
+                scaleMargins: {
+                    top: 1 - currentVolumeHeight,
+                    bottom: 0,
+                },
+                autoscaleInfoProvider: () => ({
+                    priceRange: {
+                        minValue: 0,  // Đáy luôn là 0
+                        maxValue: null,
+                    },
+                }),
+            });
+
+            // Apply scale margins to left price scale
+            chart.priceScale('left').applyOptions({
+                scaleMargins: {
+                    top: 1 - currentVolumeHeight,
+                    bottom: 0,
+                },
+            });
+        }
+
+        function generateMockData(count) {
+            const candles = [];
+            const volumes = [];
+            const basePrice = 1900;
+            let currentPrice = basePrice;
+            const now = Math.floor(Date.now() / 1000);
+            const interval = 60; // 1 minute
+
+            for (let i = 0; i < count; i++) {
+                const time = now - (count - i) * interval;
+                const change = (Math.random() - 0.5) * 10;
+                currentPrice += change;
+
+                const open = currentPrice;
+                const close = currentPrice + (Math.random() - 0.5) * 5;
+                const high = Math.max(open, close) + Math.random() * 3;
+                const low = Math.min(open, close) - Math.random() * 3;
+
+                candles.push({
+                    time: time,
+                    open: parseFloat(open.toFixed(2)),
+                    high: parseFloat(high.toFixed(2)),
+                    low: parseFloat(low.toFixed(2)),
+                    close: parseFloat(close.toFixed(2)),
+                });
+
+                volumes.push({
+                    time: time,
+                    value: Math.floor(Math.random() * 10000) + 1000,
+                    color: close > open ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+                });
+
+                currentPrice = close;
+            }
+
+            return { candles, volumes };
+        }
+
+        function testVolumeScale(newHeight) {
+            currentVolumeHeight = newHeight;
+            
+            // Recreate volume series with new height
+            const data = generateMockData(200);
+            
+            createVolumeSeries();
+            candlestickSeries.setData(data.candles);
+            volumeSeries.setData(data.volumes);
+            
+            chart.timeScale().fitContent();
+
+            updateStatus('Volume height changed to: ' + (newHeight * 100) + '%. Check if bottom stays at 0!');
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = '<strong>Status:</strong> ' + message;
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initChart);
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('chart-container');
+            if (chart) {
+                chart.applyOptions({
+                    width: container.clientWidth,
+                    height: container.clientHeight,
+                });
+            }
+        });
+    </script>
+</body>
+</html>
