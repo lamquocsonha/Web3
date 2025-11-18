@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}HFT{% endblock %}
+
+{% set active_page = 'hft' %}
+
+{% block content %}
+<div style="display: flex; height: calc(100vh - 60px); background-color: var(--bg-primary);">
+        <!-- Sidebar 40% -->
+        <div class="hft-sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">⚙️ CONTROL</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Strategy:</label>
+                    <select id="strategy-selector" class="form-control">
+                        <option value="scalping_v2" selected>Scalping v2</option>
+                        <option value="market_making">Market Making</option>
+                        <option value="arbitrage">Arbitrage</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Exchange:</label>
+                    <select id="exchange-selector" class="form-control">
+                        <option value="">-- Select Exchange --</option>
+                        <option value="binance">Binance</option>
+                        <option value="mt5">MetaTrader 5</option>
+                        <option value="dnse">DNSE</option>
+                        <option value="entrade">Entrade</option>
+                    </select>
+                </div>
+                
+                <div class="hft-status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Status:</span>
+                        <span class="status-value status-stopped" id="hft-status">STOPPED</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Connection:</span>
+                        <span class="status-value status-disconnected" id="connection-status">DISCONNECTED</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Ping:</span>
+                        <span class="status-value" id="ping-value">--</span>
+                    </div>
+                </div>
+                
+                <div class="hft-control-buttons">
+                    <button id="mockdata-btn" class="btn btn-primary btn-block">📊 MOCKDATA</button>
+                    <button id="start-btn" class="btn btn-success btn-block">🟢 START</button>
+                    <button id="stop-btn" class="btn btn-danger btn-block" disabled>🔴 STOP</button>
+                </div>
+            </div>
+            
+            <div class="sidebar-header" style="margin-top: 1rem;">
+                <h3 class="sidebar-title">🛡️ Risk Limits:</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Max Orders/min:</label>
+                    <input type="number" id="max-orders" class="form-control" value="100">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Max Loss ($):</label>
+                    <input type="number" id="max-loss" class="form-control" value="500">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Position Limit:</label>
+                    <input type="number" id="position-limit" class="form-control" value="1.0" step="0.1">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content 60% -->
+        <div class="hft-main-content">
+            <!-- Metrics Grid -->
+            <div class="hft-metrics-grid">
+                <div class="hft-metric-card">
+                    <div class="metric-label">ORDERS</div>
+                    <div class="metric-value" id="metric-orders">0</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">FILL RATE</div>
+                    <div class="metric-value" id="metric-fill-rate">0%</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">AVG LATENCY</div>
+                    <div class="metric-value" id="metric-latency">0ms</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">TOTAL PNL</div>
+                    <div class="metric-value" id="metric-pnl">$0</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">WIN RATE</div>
+                    <div class="metric-value" id="metric-win-rate">0%</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">ORDERS/SEC</div>
+                    <div class="metric-value" id="metric-orders-sec">0</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">BEST TRADE</div>
+                    <div class="metric-value text-success" id="metric-best">$0</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">WORST TRADE</div>
+                    <div class="metric-value text-danger" id="metric-worst">$0</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">SLIPPAGE</div>
+                    <div class="metric-value" id="metric-slippage">0 pts</div>
+                </div>
+                <div class="hft-metric-card">
+                    <div class="metric-label">UPTIME</div>
+                    <div class="metric-value" id="metric-uptime">00:00:00</div>
+                </div>
+            </div>
+            
+            <!-- Market Data Table -->
+            <div class="hft-section">
+                <div class="hft-section-header">
+                    <h3>📊 MARKET DATA (Tick)</h3>
+                    <span class="live-badge">● LIVE</span>
+                </div>
+                <div class="hft-table-container">
+                    <table class="hft-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Price</th>
+                                <th>Volume</th>
+                                <th>Side</th>
+                            </tr>
+                        </thead>
+                        <tbody id="market-data-tbody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                    Waiting for ticks...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Trades Section -->
+            <div class="hft-section">
+                <div class="hft-section-header">
+                    <h3>📋 TRADES (Orders)</h3>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <input type="checkbox" id="auto-scroll" checked>
+                        <span>Auto-scroll</span>
+                    </label>
+                </div>
+                
+                <div class="hft-tabs">
+                    <button class="hft-tab active" data-tab="latency">Latency</button>
+                    <button class="hft-tab" data-tab="pnl">PnL</button>
+                    <button class="hft-tab" data-tab="flow">Order Flow</button>
+                </div>
+                
+                <div class="hft-tab-content" data-tab="latency" style="display: block;">
+                    <div id="latency-chart" style="width: 100%; height: 300px; background-color: var(--bg-secondary);"></div>
+                </div>
+                
+                <div class="hft-tab-content" data-tab="pnl" style="display: none;">
+                    <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        PnL chart will be displayed here
+                    </div>
+                </div>
+                
+                <div class="hft-tab-content" data-tab="flow" style="display: none;">
+                    <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                        Order flow visualization will be displayed here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{%endblock%}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/hft.js') }}"></script>
+{% endblock %}

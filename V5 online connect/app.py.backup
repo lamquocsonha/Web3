@@ -1,0 +1,126 @@
+from flask import Flask, render_template, jsonify, request
+from flask_cors import CORS
+import json
+from datetime import datetime
+
+app = Flask(__name__)
+CORS(app)
+
+# Routes for pages
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/manual-trading')
+def manual_trading():
+    return render_template('manual-trading.html')
+
+@app.route('/bot-trading')
+def bot_trading():
+    return render_template('bot-trading.html')
+
+@app.route('/strategy')
+def strategy():
+    return render_template('strategy.html')
+
+@app.route('/backtest')
+def backtest():
+    return render_template('backtest.html')
+
+@app.route('/optimize')
+def optimize():
+    return render_template('optimize.html')
+
+@app.route('/exchange')
+def exchange():
+    return render_template('exchange.html')
+
+@app.route('/clients')
+def clients():
+    return render_template('clients.html')
+
+# API endpoints for future development
+@app.route('/api/market-data', methods=['GET'])
+def get_market_data():
+    # TODO: Implement real market data fetching
+    return jsonify({
+        'symbol': 'VN30F1M',
+        'price': 1892.00,
+        'change': +0.50,
+        'volume': 5781
+    })
+
+@app.route('/api/orders', methods=['GET', 'POST'])
+def handle_orders():
+    if request.method == 'POST':
+        # TODO: Implement order placement
+        order_data = request.json
+        return jsonify({'status': 'success', 'order_id': '12345'})
+    else:
+        # TODO: Implement order listing
+        return jsonify({'orders': []})
+
+@app.route('/api/strategies', methods=['GET', 'POST'])
+def handle_strategies():
+    if request.method == 'POST':
+        # TODO: Implement strategy saving
+        strategy_data = request.json
+        return jsonify({'status': 'success', 'strategy_id': '12345'})
+    else:
+        # TODO: Implement strategy listing
+        return jsonify({'strategies': []})
+
+@app.route('/api/backtest/run', methods=['POST'])
+def run_backtest():
+    # TODO: Implement backtest execution
+    backtest_params = request.json
+    return jsonify({
+        'status': 'success',
+        'results': {
+            'net_profit': 0,
+            'win_rate': 0,
+            'total_trades': 0
+        }
+    })
+
+@app.route('/api/optimize/run', methods=['POST'])
+def run_optimization():
+    # TODO: Implement optimization using genetic algorithm
+    optimize_params = request.json
+    return jsonify({
+        'status': 'success',
+        'results': []
+    })
+
+@app.route('/api/exchange/profiles', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def handle_exchange_profiles():
+    # TODO: Implement exchange profile management
+    if request.method == 'GET':
+        return jsonify({'profiles': []})
+    elif request.method == 'POST':
+        profile_data = request.json
+        return jsonify({'status': 'success', 'profile_id': '12345'})
+    elif request.method == 'PUT':
+        profile_data = request.json
+        return jsonify({'status': 'success'})
+    elif request.method == 'DELETE':
+        profile_id = request.args.get('id')
+        return jsonify({'status': 'success'})
+
+@app.route('/api/clients', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def handle_clients():
+    # TODO: Implement client management
+    if request.method == 'GET':
+        return jsonify({'clients': []})
+    elif request.method == 'POST':
+        client_data = request.json
+        return jsonify({'status': 'success', 'client_id': '12345'})
+    elif request.method == 'PUT':
+        client_data = request.json
+        return jsonify({'status': 'success'})
+    elif request.method == 'DELETE':
+        client_id = request.args.get('id')
+        return jsonify({'status': 'success'})
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

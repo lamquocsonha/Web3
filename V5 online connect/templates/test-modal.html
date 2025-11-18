@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Indicators Modal</title>
+    <script src="https://unpkg.com/lightweight-charts@latest/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f1419;
+            color: #e2e8f0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #3b82f6;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        #chart-container {
+            width: 100%;
+            height: 500px;
+            background: #141824;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #1a202c;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #2d3748;
+        }
+        
+        .modal-header h5 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .close-btn {
+            background: transparent;
+            border: none;
+            font-size: 28px;
+            color: #a0aec0;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: #2d3748;
+            color: #fff;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 20px 24px;
+            border-top: 1px solid #2d3748;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e0;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background: #0f1419;
+            border: 1px solid #2d3748;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-chart-line"></i> Test Indicators & Signals Modal</h1>
+        
+        <div class="test-buttons">
+            <button class="btn btn-primary" onclick="openIndicatorsModal()">
+                <i class="fas fa-chart-line"></i> Open Indicators Modal
+            </button>
+            <button class="btn btn-primary" onclick="openSignalsModal()">
+                <i class="fas fa-signal"></i> Open Signals Modal
+            </button>
+            <button class="btn btn-secondary" onclick="testAddIndicator()">
+                <i class="fas fa-plus"></i> Add Test Indicator
+            </button>
+        </div>
+        
+        <div id="chart-container"></div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/chart-indicators-modal.js') }}"></script>
+    <script>
+        // Create a simple chart for testing
+        const chart = LightweightCharts.createChart(document.getElementById('chart-container'), {
+            width: document.getElementById('chart-container').clientWidth,
+            height: 500,
+            layout: {
+                background: { color: '#141824' },
+                textColor: '#a0a0a0',
+            },
+            grid: {
+                vertLines: { color: '#1a1f2e' },
+                horzLines: { color: '#1a1f2e' },
+            },
+        });
+        
+        const candlestickSeries = chart.addCandlestickSeries({
+            upColor: '#10b981',
+            downColor: '#ef4444',
+            borderUpColor: '#10b981',
+            borderDownColor: '#ef4444',
+            wickUpColor: '#10b981',
+            wickDownColor: '#ef4444',
+        });
+        
+        // Add some dummy data
+        const dummyData = [];
+        let basePrice = 1900;
+        const now = Math.floor(Date.now() / 1000);
+        
+        for (let i = 0; i < 100; i++) {
+            const time = now - (100 - i) * 60;
+            const open = basePrice + (Math.random() - 0.5) * 10;
+            const close = open + (Math.random() - 0.5) * 5;
+            const high = Math.max(open, close) + Math.random() * 3;
+            const low = Math.min(open, close) - Math.random() * 3;
+            
+            dummyData.push({
+                time: time,
+                open: open,
+                high: high,
+                low: low,
+                close: close
+            });
+            
+            basePrice = close;
+        }
+        
+        candlestickSeries.setData(dummyData);
+        
+        // Initialize indicators modal
+        const indicatorsModal = new ChartIndicatorsModal(chart);
+        window.chartIndicatorsModal = indicatorsModal;
+        
+        // Test functions
+        function openIndicatorsModal() {
+            indicatorsModal.openIndicatorsModal();
+        }
+        
+        function openSignalsModal() {
+            indicatorsModal.openSignalsModal();
+        }
+        
+        function testAddIndicator() {
+            // Add some test signals
+            indicatorsModal.addSignal('buy', now - 1000, 1895.5);
+            indicatorsModal.addSignal('sell', now - 500, 1902.3);
+            indicatorsModal.addSignal('short', now - 300, 1898.7);
+            alert('Added test signals! Open Signals modal to see them.');
+        }
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            chart.applyOptions({
+                width: document.getElementById('chart-container').clientWidth
+            });
+        });
+    </script>
+</body>
+</html>
