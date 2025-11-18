@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Auto Optimize Trading System{% endblock %}
+
+{% set active_page = 'index' %}
+
+{% block content %}
+    <!-- Main Content -->
+    <div id="main-content" style="display: flex; align-items: center; justify-content: center; height: calc(100vh - 60px); flex-direction: column; gap: 2rem;">
+        <h1 style="color: var(--primary); font-size: 3rem; text-align: center;">AUTO OPTIMIZE TRADING SYSTEM</h1>
+        <p style="color: var(--text-secondary); font-size: 1.25rem; text-align: center;">Chọn chức năng từ menu trên để bắt đầu</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1200px; padding: 2rem;">
+            <a href="/manual-trading" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Manual Trading</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Giao dịch thủ công</p>
+                </div>
+            </a>
+            
+            <a href="/bot-trading" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Bot Trading</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Giao dịch tự động</p>
+                </div>
+            </a>
+            
+            <a href="/strategy" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Strategy</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Xây dựng chiến lược</p>
+                </div>
+            </a>
+            
+            <a href="/backtest" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⏮️</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Backtest</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Kiểm tra lịch sử</p>
+                </div>
+            </a>
+            
+            <a href="/optimize" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Optimize</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Tối ưu hóa</p>
+                </div>
+            </a>
+            
+            <a href="/hft" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">HFT</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">High Frequency Trading</p>
+                </div>
+            </a>
+            
+            <a href="/exchange" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔄</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Exchange</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Quản lý sàn</p>
+                </div>
+            </a>
+            
+            <a href="/clients" style="text-decoration: none;">
+                <div style="background: var(--bg-secondary); padding: 2rem; border-radius: 12px; border: 2px solid var(--border-color); text-align: center; transition: all 0.3s; cursor: pointer;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 0.5rem;">Clients</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.875rem;">Quản lý khách hàng</p>
+                </div>
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+{% endblock %}
