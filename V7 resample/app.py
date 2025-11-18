@@ -38,9 +38,7 @@ def bot_trading():
 
 @app.route('/strategy')
 def strategy():
-    # TEMPORARY: Test if route works - should show RED page
-    return render_template('strategy-test.html')
-    # return render_template('strategy.html')
+    return render_template('strategy.html')
 
 @app.route('/backtest')
 def backtest():
