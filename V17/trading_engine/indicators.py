@@ -270,44 +270,150 @@ class Indicators:
 
 # ==================== HELPER FUNCTIONS ====================
 
-def calculate_indicator(indicator_name: str, data: dict, params: dict) -> Union[np.ndarray, Tuple]:
+def resample_indicator_data(data: dict, timeframe: str) -> dict:
     """
-    Universal indicator calculator
-    
+    Resample data to a different timeframe for indicator calculation
+    Similar to Amibroker's TimeFrameSet()
+
+    Args:
+        data: Dict with OHLCV data as numpy arrays
+        timeframe: Target timeframe (e.g., '5m', '15m', '1H', '1D')
+
+    Returns:
+        Resampled data dict with same structure
+    """
+    from .timeframe_resampler import resample_data
+
+    # Convert numpy arrays to dict format for resampler
+    data_dict = {
+        'times': data.get('times', []),
+        'opens': data['open'].tolist() if isinstance(data['open'], np.ndarray) else data['open'],
+        'highs': data['high'].tolist() if isinstance(data['high'], np.ndarray) else data['high'],
+        'lows': data['low'].tolist() if isinstance(data['low'], np.ndarray) else data['low'],
+        'closes': data['close'].tolist() if isinstance(data['close'], np.ndarray) else data['close'],
+        'volumes': data['volume'].tolist() if isinstance(data['volume'], np.ndarray) else data['volume']
+    }
+
+    # Resample
+    resampled = resample_data(data_dict, timeframe)
+
+    # Convert back to numpy arrays
+    return {
+        'times': resampled['times'],
+        'open': np.array(resampled['opens']),
+        'high': np.array(resampled['highs']),
+        'low': np.array(resampled['lows']),
+        'close': np.array(resampled['closes']),
+        'volume': np.array(resampled['volumes'])
+    }
+
+
+def expand_to_original_timeframe(resampled_values: np.ndarray, original_length: int,
+                                  resampled_times: list, original_times: list) -> np.ndarray:
+    """
+    Expand resampled indicator values back to original timeframe
+    Similar to Amibroker's TimeFrameExpand()
+
+    Args:
+        resampled_values: Indicator values on resampled timeframe
+        original_length: Length of original data
+        resampled_times: Timestamps of resampled data
+        original_times: Timestamps of original data
+
+    Returns:
+        Expanded values matching original timeframe length
+    """
+    expanded = np.full(original_length, np.nan)
+
+    # Map each original time to closest resampled time
+    for i, orig_time in enumerate(original_times):
+        # Find the resampled bar this original bar belongs to
+        idx = np.searchsorted(resampled_times, orig_time, side='right') - 1
+        if 0 <= idx < len(resampled_values):
+            expanded[i] = resampled_values[idx]
+
+    return expanded
+
+
+def calculate_indicator(indicator_name: str, data: dict, params: dict, timeframe: str = None) -> Union[np.ndarray, Tuple]:
+    """
+    Universal indicator calculator with multi-timeframe support
+
     Args:
         indicator_name: Name of indicator (e.g., 'EMA', 'RSI', 'MACD')
         data: Dict with 'open', 'high', 'low', 'close', 'volume' as numpy arrays
         params: Dict with indicator parameters
-    
+        timeframe: Optional timeframe for indicator calculation (e.g., '5m', '1H')
+                   If specified, data will be resampled to this timeframe
+
     Returns:
         Indicator values as numpy array or tuple of arrays
+        If timeframe is specified, values are expanded back to original timeframe
     """
-    ind = Indicators()
-    
-    # Map indicator names to methods
-    indicator_map = {
-        'EMA': lambda: ind.ema(data['close'], params.get('period', 14)),
-        'SMA': lambda: ind.sma(data['close'], params.get('period', 14)),
-        'WMA': lambda: ind.wma(data['close'], params.get('period', 14)),
-        'DEMA': lambda: ind.dema(data['close'], params.get('period', 14)),
-        'TEMA': lambda: ind.tema(data['close'], params.get('period', 14)),
-        'RSI': lambda: ind.rsi(data['close'], params.get('period', 14)),
-        'MACD': lambda: ind.macd(data['close'], params.get('fast', 12), params.get('slow', 26), params.get('signal', 9)),
-        'Stochastic': lambda: ind.stochastic(data['high'], data['low'], data['close'], params.get('k_period', 14), params.get('d_period', 3)),
-        'CCI': lambda: ind.cci(data['high'], data['low'], data['close'], params.get('period', 20)),
-        'MFI': lambda: ind.mfi(data['high'], data['low'], data['close'], data['volume'], params.get('period', 14)),
-        'BollingerBands': lambda: ind.bollinger_bands(data['close'], params.get('period', 20), params.get('std_dev', 2.0)),
-        'ATR': lambda: ind.atr(data['high'], data['low'], data['close'], params.get('period', 14)),
-        'KeltnerChannel': lambda: ind.keltner_channel(data['high'], data['low'], data['close'], params.get('period', 20), params.get('multiplier', 2.0)),
-        'DonchianChannel': lambda: ind.donchian_channel(data['high'], data['low'], params.get('period', 20)),
-        'OBV': lambda: ind.obv(data['close'], data['volume']),
-        'VWAP': lambda: ind.vwap(data['high'], data['low'], data['close'], data['volume']),
-        'SuperTrend': lambda: ind.supertrend(data['high'], data['low'], data['close'], params.get('period', 10), params.get('multiplier', 3.0)),
-        'PivotPoints': lambda: ind.pivot_points(data['high'], data['low'], data['close']),
-        'PeakTrough': lambda: ind.peak_trough(data['high'], data['low'], params.get('lookback', 20))
-    }
-    
-    if indicator_name in indicator_map:
-        return indicator_map[indicator_name]()
+    # Store original data info for expansion later
+    original_length = len(data['close'])
+    original_times = data.get('times', list(range(original_length)))
+
+    # Resample data if timeframe specified
+    if timeframe:
+        try:
+            working_data = resample_indicator_data(data, timeframe)
+            resampled_times = working_data['times']
+        except Exception as e:
+            print(f"Warning: Could not resample to {timeframe}, using original data: {e}")
+            working_data = data
+            timeframe = None
     else:
+        working_data = data
+
+    ind = Indicators()
+
+    # Map indicator names to methods (use working_data for timeframe support)
+    indicator_map = {
+        'EMA': lambda: ind.ema(working_data['close'], params.get('period', 14)),
+        'SMA': lambda: ind.sma(working_data['close'], params.get('period', 14)),
+        'WMA': lambda: ind.wma(working_data['close'], params.get('period', 14)),
+        'DEMA': lambda: ind.dema(working_data['close'], params.get('period', 14)),
+        'TEMA': lambda: ind.tema(working_data['close'], params.get('period', 14)),
+        'RSI': lambda: ind.rsi(working_data['close'], params.get('period', 14)),
+        'MACD': lambda: ind.macd(working_data['close'], params.get('fast', 12), params.get('slow', 26), params.get('signal', 9)),
+        'Stochastic': lambda: ind.stochastic(working_data['high'], working_data['low'], working_data['close'], params.get('k_period', 14), params.get('d_period', 3)),
+        'CCI': lambda: ind.cci(working_data['high'], working_data['low'], working_data['close'], params.get('period', 20)),
+        'MFI': lambda: ind.mfi(working_data['high'], working_data['low'], working_data['close'], working_data['volume'], params.get('period', 14)),
+        'BollingerBands': lambda: ind.bollinger_bands(working_data['close'], params.get('period', 20), params.get('std_dev', 2.0)),
+        'ATR': lambda: ind.atr(working_data['high'], working_data['low'], working_data['close'], params.get('period', 14)),
+        'KeltnerChannel': lambda: ind.keltner_channel(working_data['high'], working_data['low'], working_data['close'], params.get('period', 20), params.get('multiplier', 2.0)),
+        'DonchianChannel': lambda: ind.donchian_channel(working_data['high'], working_data['low'], params.get('period', 20)),
+        'OBV': lambda: ind.obv(working_data['close'], working_data['volume']),
+        'VWAP': lambda: ind.vwap(working_data['high'], working_data['low'], working_data['close'], working_data['volume']),
+        'SuperTrend': lambda: ind.supertrend(working_data['high'], working_data['low'], working_data['close'], params.get('period', 10), params.get('multiplier', 3.0)),
+        'PivotPoints': lambda: ind.pivot_points(working_data['high'], working_data['low'], working_data['close']),
+        'PeakTrough': lambda: ind.peak_trough(working_data['high'], working_data['low'], params.get('lookback', 20))
+    }
+
+    if indicator_name not in indicator_map:
         raise ValueError(f"Unknown indicator: {indicator_name}")
+
+    # Calculate indicator on working data (original or resampled)
+    result = indicator_map[indicator_name]()
+
+    # If timeframe was specified, expand result back to original timeframe
+    if timeframe:
+        if isinstance(result, tuple):
+            # Handle indicators that return multiple arrays (e.g., MACD, Bollinger Bands)
+            expanded_result = []
+            for arr in result:
+                if isinstance(arr, np.ndarray):
+                    expanded = expand_to_original_timeframe(arr, original_length, resampled_times, original_times)
+                    expanded_result.append(expanded)
+                else:
+                    expanded_result.append(arr)
+            return tuple(expanded_result)
+        elif isinstance(result, np.ndarray):
+            # Single array result
+            return expand_to_original_timeframe(result, original_length, resampled_times, original_times)
+        else:
+            # Dict or other types (e.g., PivotPoints)
+            return result
+    else:
+        return result

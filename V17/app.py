@@ -867,6 +867,35 @@ def load_csv_file(filename):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/api/resample-data', methods=['POST'])
+def resample_data_api():
+    """
+    Resample OHLCV data to different timeframe
+    Used for offline CSV data
+    """
+    try:
+        from trading_engine.timeframe_resampler import resample_data
+
+        data = request.json
+        raw_data = data.get('data')
+        target_timeframe = data.get('timeframe', '5m')
+
+        if not raw_data:
+            return jsonify({'status': 'error', 'message': 'No data provided'}), 400
+
+        # Resample data
+        resampled = resample_data(raw_data, target_timeframe)
+
+        return jsonify({
+            'status': 'success',
+            'data': resampled,
+            'timeframe': target_timeframe,
+            'message': f'Resampled to {target_timeframe}'
+        }), 200
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/api/save-strategy', methods=['POST'])
 @app.route('/save_strategy', methods=['POST'])
 def save_strategy():

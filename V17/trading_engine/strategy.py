@@ -36,23 +36,31 @@ class Strategy:
         self._init_components()
     
     def _default_strategy(self) -> Dict:
-        """Default strategy template"""
+        """Default strategy template with multi-timeframe support"""
         return {
             "name": "Default Strategy",
             "version": "1.0",
-            "description": "Basic EMA crossover strategy",
-            
+            "description": "Basic EMA crossover strategy with multi-timeframe support",
+
             "indicators": [
                 {
                     "id": "ema_fast",
                     "type": "EMA",
                     "params": {"period": 5}
+                    # Optional: "timeframe": "5m" to calculate on different timeframe
                 },
                 {
                     "id": "ema_slow",
                     "type": "EMA",
                     "params": {"period": 19}
                 }
+                # Example multi-timeframe indicator:
+                # {
+                #     "id": "ema_20_1H",
+                #     "type": "EMA",
+                #     "params": {"period": 20},
+                #     "timeframe": "1H"  # Calculate EMA on 1H data, expand to current timeframe
+                # }
             ],
             
             "entry_conditions": {
@@ -128,29 +136,44 @@ class Strategy:
     
     def calculate_indicators(self, data: Dict[str, np.ndarray]) -> Dict[str, Any]:
         """
-        Calculate all indicators defined in strategy
-        
+        Calculate all indicators defined in strategy with multi-timeframe support
+
         Args:
             data: Dict with OHLCV data as numpy arrays
-        
+                  Must include 'times' key if using multi-timeframe indicators
+
         Returns:
             Dict with indicator_id -> values
+
+        Example indicator config with timeframe:
+            {
+                "id": "ema_5_1H",
+                "type": "EMA",
+                "params": {"period": 5},
+                "timeframe": "1H"  # Optional: calculate on different timeframe
+            }
         """
         self.indicator_cache = {}
-        
+
         for indicator in self.config["indicators"]:
             ind_id = indicator["id"]
             ind_type = indicator["type"]
             params = indicator.get("params", {})
-            
+            timeframe = indicator.get("timeframe", None)  # Optional timeframe parameter
+
             try:
-                result = calculate_indicator(ind_type, data, params)
+                # Pass timeframe to calculate_indicator for multi-timeframe support
+                result = calculate_indicator(ind_type, data, params, timeframe)
                 self.indicator_cache[ind_id] = result
-                print(f"  ✓ {ind_id} ({ind_type}) calculated")
+
+                if timeframe:
+                    print(f"  ✓ {ind_id} ({ind_type} on {timeframe}) calculated")
+                else:
+                    print(f"  ✓ {ind_id} ({ind_type}) calculated")
             except Exception as e:
                 print(f"  ✗ Error calculating {ind_id}: {e}")
                 self.indicator_cache[ind_id] = None
-        
+
         return self.indicator_cache
     
     def evaluate_condition(self, condition: str, bar_index: int, data: Dict, left_offset: int = 0, right_offset: int = 0) -> bool:
