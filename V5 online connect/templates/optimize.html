@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Optimize{% endblock %}
+
+{% set active_page = 'optimize' %}
+
+{% block content %}
+<div class="layout-with-sidebar">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">📊 Data & Strategy</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Upload CSV File:</label>
+                    <div class="file-upload-area">
+                        <div class="file-upload-icon">📁</div>
+                        <div class="file-upload-text">Choose CSV...</div>
+                        <input type="file" id="csv-file-input-optimize" class="file-upload-input" accept=".csv">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Strategy:</label>
+                    <select id="strategy-selector-optimize" class="form-control">
+                        <option value="">Select strategy...</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">⚙️ Settings</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Algorithm:</label>
+                    <select id="algorithm-selector" class="form-control">
+                        <option value="genetic" selected>Genetic Algorithm</option>
+                        <option value="grid">Grid Search</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Timeframe:</label>
+                    <select id="timeframe-optimize" class="form-control">
+                        <option value="1 Hour" selected>1 Hour</option>
+                    </select>
+                </div>
+                
+                <div class="settings-input-group">
+                    <div class="form-group">
+                        <label class="form-label">Population:</label>
+                        <input type="number" id="population-input" class="form-control" value="50">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Generations:</label>
+                        <input type="number" id="generations-input" class="form-control" value="20">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Max Results:</label>
+                    <input type="number" id="max-results-input" class="form-control" value="10">
+                </div>
+                
+                <button id="start-optimization-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">🚀 Start Optimization</button>
+                <button id="auto-optimization-btn" class="btn btn-success" style="width: 100%; margin-top: 0.5rem;">🔄 Auto</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div style="padding: 2rem; height: calc(100vh - 120px); display: flex; flex-direction: column; gap: 1rem;">
+                <div style="flex: 0 0 auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h2>🎯 Select Parameters to Optimize</h2>
+                        <div>
+                            <button id="expand-all-btn" class="btn btn-sm btn-secondary">Expand All</button>
+                            <button id="collapse-all-btn" class="btn btn-sm btn-secondary">Collapse All</button>
+                        </div>
+                    </div>
+                    
+                    <div class="strategy-tabs" style="border-bottom: 1px solid var(--border-color);">
+                        <button class="strategy-tab parameters-tab active" data-tab="entry">🎯 Entry Conditions</button>
+                        <button class="strategy-tab parameters-tab" data-tab="exit">🚪 Exit Rules</button>
+                    </div>
+                    
+                    <div class="parameters-content" data-tab="entry" style="display: block; padding: 1rem;">
+                        <p class="empty-state" id="entry-parameters-container">Select a strategy to view entry parameters</p>
+                    </div>
+                    <div class="parameters-content" data-tab="exit" style="display: none; padding: 1rem;">
+                        <p class="empty-state" id="exit-parameters-container">Select a strategy to view exit parameters</p>
+                    </div>
+                </div>
+                
+                <div style="flex: 1; display: flex; gap: 1rem; min-height: 0;">
+                    <div style="flex: 2; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2>🏆 Optimization Results</h2>
+                            <button id="export-csv-btn" class="btn btn-sm btn-success">📥 Export CSV</button>
+                        </div>
+                        <div style="flex: 1; overflow-y: auto; background-color: var(--bg-secondary); border-radius: 8px; padding: 1rem;">
+                            <table class="table optimization-results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th><th>Win Rate</th><th>Profit (pts)</th><th>Drawdown</th>
+                                        <th>Profit Factor</th><th>Trades</th><th>Fitness</th><th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="8" style="text-align: center; padding: 2rem;">Run optimization to see results</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <h2 style="margin-bottom: 1rem;">💻 Terminal</h2>
+                        <div class="terminal" style="flex: 1;">
+                            <div class="terminal-header">
+                                <div class="terminal-title">System Terminal</div>
+                                <div class="terminal-actions">
+                                    <button class="terminal-clear">Clear</button>
+                                </div>
+                            </div>
+                            <div class="terminal-line terminal-output">Terminal ready. Waiting for optimization to start...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{%endblock%}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/optimize.js') }}"></script>
+{% endblock %}

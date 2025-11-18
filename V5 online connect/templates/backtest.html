@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Backtest{% endblock %}
+
+{% set active_page = 'backtest' %}
+
+{% block content %}
+<div class="layout-with-sidebar">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">📊 Data & Strategy</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Upload CSV File:</label>
+                    <div class="file-upload-area">
+                        <div class="file-upload-icon">📁</div>
+                        <div class="file-upload-text">Choose CSV File...</div>
+                        <input type="file" id="csv-file-input" class="file-upload-input" accept=".csv">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Strategy:</label>
+                    <select id="strategy-selector-backtest" class="form-control">
+                        <option value="">Select strategy...</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="sidebar-header">
+                <h3 class="sidebar-title">⚙️ Settings</h3>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="form-group">
+                    <label class="form-label">Initial Capital ($):</label>
+                    <input type="number" id="initial-capital" class="form-control" value="10000">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Commission (points):</label>
+                    <input type="number" id="commission" class="form-control" value="0.5" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Slippage (points):</label>
+                    <input type="number" id="slippage" class="form-control" value="0.1" step="0.1">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Timeframe:</label>
+                    <select id="timeframe-backtest" class="form-control">
+                        <option value="1 Hour" selected>1 Hour</option>
+                        <option value="1 Day">1 Day</option>
+                    </select>
+                </div>
+                
+                <button id="run-backtest-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">🚀 Run Backtest</button>
+                <button id="export-pdf-btn" class="btn btn-danger" style="width: 100%; margin-top: 0.5rem;">📄 Export PDF</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div style="padding: 2rem;">
+                <div class="metrics-grid">
+                    <div class="metric-card"><div class="metric-label">NET PROFIT</div><div class="metric-value" id="net-profit">$0.00</div></div>
+                    <div class="metric-card"><div class="metric-label">NET PROFIT %</div><div class="metric-value" id="net-profit-pct">0.00%</div></div>
+                    <div class="metric-card"><div class="metric-label">TOTAL TRADES</div><div class="metric-value" id="total-trades">0</div></div>
+                    <div class="metric-card"><div class="metric-label">WIN RATE</div><div class="metric-value" id="win-rate">0.00%</div></div>
+                    <div class="metric-card"><div class="metric-label">MAX DRAWDOWN</div><div class="metric-value negative" id="max-drawdown">0.00%</div></div>
+                    <div class="metric-card"><div class="metric-label">PROFIT FACTOR</div><div class="metric-value" id="profit-factor">0.00</div></div>
+                    <div class="metric-card"><div class="metric-label">SHARPE RATIO</div><div class="metric-value" id="sharpe-ratio">0.00</div></div>
+                    <div class="metric-card"><div class="metric-label">ANNUAL RETURN</div><div class="metric-value" id="annual-return">0.00%</div></div>
+                </div>
+                
+                <div class="chart-tabs" style="margin-top: 2rem;">
+                    <button class="chart-tab" data-tab="charts">📊 Charts</button>
+                    <button class="chart-tab active" data-tab="performance">📈 Performance</button>
+                    <button class="chart-tab" data-tab="history">📝 History</button>
+                    <button class="chart-tab" data-tab="terminal">💻 Terminal</button>
+                </div>
+                
+                <div class="tab-content-backtest" data-tab="performance" style="display: block; margin-top: 1rem;">
+                    <h3 style="margin-bottom: 1rem;">📊 Performance Summary</h3>
+                    <table class="table performance-table">
+                        <thead>
+                            <tr><th>Metric</th><th>Long Trades</th><th>Short Trades</th><th>All Trades</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="4" style="text-align: center; padding: 2rem;">Chưa có dữ liệu</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{%endblock%}
+
+{% block extra_js %}
+    <script src="{{ url_for('static', filename='js/backtest.js') }}"></script>
+{% endblock %}

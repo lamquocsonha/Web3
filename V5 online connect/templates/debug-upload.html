@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Upload Data</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background: #0a0e1a;
+            color: #0f0;
+            font-size: 14px;
+        }
+        .section {
+            background: #1a1f2e;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+        .info { color: #0ff; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #0f0;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #0c0; }
+        pre {
+            background: #000;
+            padding: 10px;
+            overflow-x: auto;
+            border-left: 3px solid #0f0;
+        }
+        .stat {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background: #000;
+            border: 1px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 DEBUG UPLOAD DATA</h1>
+    
+    <div class="section">
+        <h2>1. CHECK UPLOAD DATA MANAGER</h2>
+        <button onclick="checkUploadManager()">Check UploadDataManager</button>
+        <button onclick="checkChartInstances()">Check Chart Instances</button>
+        <button onclick="testDataConversion()">Test Data Conversion</button>
+        <div id="check-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. CSV DATA INFO</h2>
+        <div id="csv-info"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. CHART DATA INFO</h2>
+        <div id="chart-info"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. MANUAL FIX</h2>
+        <button onclick="forceReload()">Force Reload Data to Charts</button>
+        <button onclick="clearAndReload()">Clear Charts & Reload</button>
+        <div id="fix-result"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. CONSOLE LOGS</h2>
+        <div id="logs" style="max-height: 300px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        function log(msg, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const time = new Date().toLocaleTimeString();
+            const className = type;
+            logsDiv.innerHTML += `<div class="${className}">[${time}] ${msg}</div>`;
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(msg);
+        }
+
+        function checkUploadManager() {
+            const result = document.getElementById('check-result');
+            log('Checking UploadDataManager...', 'info');
+            
+            if (!window.UploadDataManager) {
+                result.innerHTML = '<p class="error">❌ UploadDataManager NOT FOUND</p>';
+                log('UploadDataManager not found', 'error');
+                return;
+            }
+
+            const mgr = window.UploadDataManager;
+            const csvData = mgr.csvData;
+            const fileInfo = mgr.fileInfo;
+
+            let html = '<p class="success">✅ UploadDataManager EXISTS</p>';
+            
+            if (csvData && csvData.length > 0) {
+                html += `<div class="stat">CSV Bars: ${csvData.length}</div>`;
+                html += `<div class="stat">First: ${csvData[0].date} ${csvData[0].time}</div>`;
+                html += `<div class="stat">Last: ${csvData[csvData.length-1].date} ${csvData[csvData.length-1].time}</div>`;
+                
+                log(`CSV Data: ${csvData.length} bars`, 'success');
+                log(`First bar: ${JSON.stringify(csvData[0])}`, 'info');
+                log(`Last bar: ${JSON.stringify(csvData[csvData.length-1])}`, 'info');
+                
+                // Display CSV info
+                document.getElementById('csv-info').innerHTML = `
+                    <pre>${JSON.stringify(csvData[0], null, 2)}</pre>
+                    <p>Total bars: ${csvData.length}</p>
+                    <p>CSV UTC: ${fileInfo?.csvUtc || 'Not set (default +7)'}</p>
+                `;
+            } else {
+                html += '<p class="warning">⚠️ No CSV data loaded</p>';
+                log('No CSV data', 'warning');
+            }
+
+            result.innerHTML = html;
+        }
+
+        function checkChartInstances() {
+            const result = document.getElementById('check-result');
+            log('Checking chart instances...', 'info');
+
+            let html = '<h3>Chart Instances:</h3>';
+            let found = false;
+
+            if (window.chartManual) {
+                html += '<p class="success">✅ chartManual exists</p>';
+                const data = window.chartManual.candlestickSeries?.data?.() || [];
+                html += `<div class="stat">Manual bars: ${data.length}</div>`;
+                log(`chartManual: ${data.length} bars`, 'info');
+                found = true;
+                
+                if (data.length > 0) {
+                    document.getElementById('chart-info').innerHTML += `
+                        <h4>Manual Chart:</h4>
+                        <pre>${JSON.stringify(data[0], null, 2)}</pre>
+                        <p>Total: ${data.length} bars</p>
+                    `;
+                }
+            } else {
+                html += '<p class="warning">⚠️ chartManual not found</p>';
+            }
+
+            if (window.chartBot) {
+                html += '<p class="success">✅ chartBot exists</p>';
+                const data = window.chartBot.candlestickSeries?.data?.() || [];
+                html += `<div class="stat">Bot bars: ${data.length}</div>`;
+                log(`chartBot: ${data.length} bars`, 'info');
+                found = true;
+            } else {
+                html += '<p class="warning">⚠️ chartBot not found</p>';
+            }
+
+            if (window.chartStrategy) {
+                html += '<p class="success">✅ chartStrategy exists</p>';
+                const data = window.chartStrategy.candlestickSeries?.data?.() || [];
+                html += `<div class="stat">Strategy bars: ${data.length}</div>`;
+                log(`chartStrategy: ${data.length} bars`, 'info');
+                found = true;
+            } else {
+                html += '<p class="warning">⚠️ chartStrategy not found</p>';
+            }
+
+            if (!found) {
+                html += '<p class="error">❌ No chart instances found. Open a chart page first!</p>';
+            }
+
+            result.innerHTML += html;
+        }
+
+        function testDataConversion() {
+            log('Testing data conversion...', 'info');
+            
+            if (!window.UploadDataManager || !window.UploadDataManager.csvData) {
+                log('No CSV data to test', 'error');
+                return;
+            }
+
+            const mgr = window.UploadDataManager;
+            const bar = mgr.csvData[0];
+            const csvUtc = mgr.fileInfo?.csvUtc || 7;
+
+            log('Testing first bar conversion:', 'info');
+            log(`CSV: ${bar.date} ${bar.time} (UTC+${csvUtc})`, 'info');
+
+            // Parse date components
+            const dateParts = bar.date.split('-');
+            const timeParts = bar.time.split(':');
+            
+            const year = parseInt(dateParts[0]);
+            const month = parseInt(dateParts[1]) - 1;
+            const day = parseInt(dateParts[2]);
+            const hour = parseInt(timeParts[0]);
+            const minute = parseInt(timeParts[1]);
+            const second = parseInt(timeParts[2] || 0);
+
+            log(`Parsed: ${year}-${month+1}-${day} ${hour}:${minute}:${second}`, 'info');
+
+            const csvTimestamp = Date.UTC(year, month, day, hour, minute, second);
+            const utcTimestamp = csvTimestamp - (csvUtc * 3600 * 1000);
+            const unixTimestamp = Math.floor(utcTimestamp / 1000);
+
+            log(`CSV as UTC: ${new Date(csvTimestamp)}`, 'info');
+            log(`Adjusted UTC: ${new Date(utcTimestamp)}`, 'info');
+            log(`Unix timestamp: ${unixTimestamp}`, 'success');
+
+            // Test display with chart UTC
+            const chartUtc = window.chartManual?.utcOffset || 7;
+            const displayTime = utcTimestamp + (chartUtc * 3600 * 1000);
+            log(`Display time (UTC+${chartUtc}): ${new Date(displayTime)}`, 'success');
+        }
+
+        function forceReload() {
+            log('Force reloading data to charts...', 'warning');
+            
+            if (!window.UploadDataManager) {
+                log('UploadDataManager not found', 'error');
+                return;
+            }
+
+            try {
+                window.UploadDataManager.loadToChart();
+                log('✅ Force reload completed', 'success');
+                
+                setTimeout(() => {
+                    checkChartInstances();
+                }, 500);
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        function clearAndReload() {
+            log('Clearing charts and reloading...', 'warning');
+
+            if (window.chartManual) {
+                window.chartManual.candlestickSeries?.setData([]);
+                window.chartManual.volumeSeries?.setData([]);
+                log('Cleared chartManual', 'info');
+            }
+
+            if (window.chartBot) {
+                window.chartBot.candlestickSeries?.setData([]);
+                window.chartBot.volumeSeries?.setData([]);
+                log('Cleared chartBot', 'info');
+            }
+
+            if (window.chartStrategy) {
+                window.chartStrategy.candlestickSeries?.setData([]);
+                window.chartStrategy.volumeSeries?.setData([]);
+                log('Cleared chartStrategy', 'info');
+            }
+
+            setTimeout(() => {
+                forceReload();
+            }, 500);
+        }
+
+        // Auto check on load
+        window.addEventListener('load', () => {
+            log('=== Debug page loaded ===', 'success');
+            setTimeout(() => {
+                checkUploadManager();
+                checkChartInstances();
+            }, 1000);
+        });
+
+        // Intercept console.log
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ');
+            if (msg.includes('📊') || msg.includes('✅') || msg.includes('❌') || msg.includes('⚠️')) {
+                log(msg, 'info');
+            }
+        };
+    </script>
+</body>
+</html>
