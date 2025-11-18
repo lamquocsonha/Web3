@@ -160,60 +160,145 @@
             </div>
         </div>
         
-        <!-- Trading Panel 40% -->
-        <div class="trading-panel trading-panel-40">
-            <div class="trading-panel-header">
-                <h2 class="trading-panel-title">STRATEGY BUILDER</h2>
+        <!-- Trading Engine Panel 40% -->
+        <div class="trading-panel trading-panel-40" style="overflow-y: auto; padding: 1rem;">
+            <h2 style="color: #3b82f6; margin: 0 0 1rem 0; font-size: 1.25rem;">TRADING ENGINE</h2>
+
+            <!-- Engine Control -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Engine Control:</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="engineActive" checked>
+                    <span style="font-size: 0.875rem;">✅ Engine Active (Master Switch)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="buyActive" checked>
+                    <span style="font-size: 0.875rem;">📈 Buy Active (Allow Long)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="shortActive" checked>
+                    <span style="font-size: 0.875rem;">📉 Short Active (Allow Short)</span>
+                </label>
             </div>
-            
-            <div class="order-form">
-                <div class="form-group">
-                    <label class="form-label">Tài khoản của tôi:</label>
-                    <select id="account-selector" class="form-control">
-                        <option value="">Chọn tài khoản</option>
+
+            <!-- Trading Hours -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Trading Hours:</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="tradingHoursActive" checked>
+                    <span style="font-size: 0.875rem;">⏰ Enable Trading Hours Filter</span>
+                </label>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <label style="font-size: 0.875rem; color: var(--text-secondary);">
+                        Start Time:
+                        <input type="time" class="form-control" style="margin-top: 0.25rem;" id="startTime" value="09:00">
+                    </label>
+                    <label style="font-size: 0.875rem; color: var(--text-secondary);">
+                        End Time:
+                        <input type="time" class="form-control" style="margin-top: 0.25rem;" id="endTime" value="14:30">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Order Limits -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Order Limits:</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="orderLimitsActive" checked>
+                    <span style="font-size: 0.875rem;">🔢 Enable Order Limits</span>
+                </label>
+                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">
+                    Buy Order Limit:
+                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="buyOrderLimit" value="10" min="1" max="100">
+                </label>
+                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
+                    Short Order Limit:
+                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="shortOrderLimit" value="10" min="1" max="100">
+                </label>
+            </div>
+
+            <!-- Position Sizing -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Position Sizing:</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="positionSizingActive" checked>
+                    <span style="font-size: 0.875rem;">💰 Enable Position Sizing</span>
+                </label>
+                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">
+                    Position Size (% of capital):
+                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="positionSize" value="10" min="1" max="100">
+                </label>
+                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
+                    Max Open Positions:
+                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="maxPositions" value="1" min="1" max="10">
+                </label>
+            </div>
+
+            <!-- TP/SL Configuration -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">TP/SL Configuration:</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="dynamicTpSlActive" checked>
+                    <span style="font-size: 0.875rem;">🎯 Enable Dynamic TP/SL</span>
+                </label>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.4;">
+                    ℹ️ Dynamic TP/SL adjusts based on profit levels
+                </div>
+                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">
+                    Initial Stop Loss (points):
+                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="initialSL" value="10.3" step="0.1">
+                </label>
+                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
+                    Fee/Tax per trade (points):
+                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="feeTax" value="1.0" step="0.1">
+                </label>
+            </div>
+
+            <!-- Entry/Exit Rules -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Entry/Exit Rules:</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="noRepaintActive" checked>
+                    <span style="font-size: 0.875rem;">🚫 No Repaint (Enter next candle)</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="exitInCandleActive" checked>
+                    <span style="font-size: 0.875rem;">⚡ Exit within current candle</span>
+                </label>
+            </div>
+
+            <!-- Strategy Selection -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Strategy Selection:</h3>
+                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
+                    Choose Signal Strategy:
+                    <select class="form-control" style="margin-top: 0.25rem;" id="signalStrategy">
+                        <option value="">-- Chọn strategy --</option>
+                        <option value="strategy_11">Chiến lược 11</option>
+                        <option value="ema_cross">EMA Crossover</option>
+                        <option value="rsi_divergence">RSI Divergence</option>
+                        <option value="custom">Custom AFL Strategy</option>
                     </select>
-                    <button class="btn btn-sm btn-primary" style="margin-top: 0.5rem; width: 100%;">0 ▼</button>
+                </label>
+                <div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem;">
+                    ⚠️ Strategy must be selected before starting bot
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Tài khoản Client:</label>
-                    <select id="client-selector" class="form-control">
-                        <option value="">Chọn tài khoản client</option>
-                    </select>
-                    <button class="btn btn-sm btn-primary" style="margin-top: 0.5rem; width: 100%;">0 ▼</button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <button class="btn btn-primary" onclick="saveEngineConfig()">💾 Save Config</button>
+                <button class="btn btn-secondary" onclick="loadEngineConfig()">📂 Load Config</button>
+                <button class="btn btn-secondary" onclick="testEngine()">🧪 Test Engine</button>
+                <button class="btn btn-secondary" onclick="exportEngineConfig()">📤 Export JSON</button>
+            </div>
+
+            <!-- Saved Configurations -->
+            <div style="margin-top: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Saved Configurations:</h3>
+                <div id="engineConfigsList" style="padding: 1rem; background: var(--bg-secondary); border-radius: 4px; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
+                    Chưa có config nào
                 </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Mã giao dịch:</label>
-                    <input type="text" id="symbol-input" class="form-control" value="VN30F1M" readonly>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Loại lệnh:</label>
-                    <select id="order-type" class="form-control">
-                        <option value="LO" selected>LO</option>
-                        <option value="MP">MP</option>
-                        <option value="ATO">ATO</option>
-                        <option value="ATC">ATC</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Giá:</label>
-                    <input type="number" id="price-input" class="form-control" placeholder="1892.00" step="0.01">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Khối lượng:</label>
-                    <input type="number" id="quantity-input" class="form-control" placeholder="1" min="1" value="1">
-                </div>
-                
-                <div class="order-actions">
-                    <button id="buy-btn" class="order-button-buy">MUA</button>
-                    <button id="sell-btn" class="order-button-sell">BÁN</button>
-                </div>
-                
-                <button id="close-all-btn" class="close-all-button">Đóng tất cả</button>
             </div>
         </div>
     </div>
