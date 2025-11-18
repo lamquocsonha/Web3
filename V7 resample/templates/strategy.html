@@ -173,11 +173,11 @@
                 </label>
                 <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
                     <input type="checkbox" id="buyActive" checked>
-                    <span style="font-size: 0.875rem;">📈 Buy Active (Allow Long)</span>
+                    <span style="font-size: 0.875rem;">📈 Buy Active (Allow Long Positions)</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                     <input type="checkbox" id="shortActive" checked>
-                    <span style="font-size: 0.875rem;">📉 Short Active (Allow Short)</span>
+                    <span style="font-size: 0.875rem;">📉 Short Active (Allow Short Positions)</span>
                 </label>
             </div>
 
@@ -196,6 +196,10 @@
                     <label style="font-size: 0.875rem; color: var(--text-secondary);">
                         End Time:
                         <input type="time" class="form-control" style="margin-top: 0.25rem;" id="endTime" value="14:30">
+                    </label>
+                    <label style="font-size: 0.875rem; color: var(--text-secondary);">
+                        Base Time (for daily levels):
+                        <input type="time" class="form-control" style="margin-top: 0.25rem;" id="baseTime" value="09:00">
                     </label>
                 </div>
             </div>
@@ -239,10 +243,15 @@
                 <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">TP/SL Configuration:</h3>
                 <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
                     <input type="checkbox" id="dynamicTpSlActive" checked>
-                    <span style="font-size: 0.875rem;">🎯 Enable Dynamic TP/SL</span>
+                    <span style="font-size: 0.875rem;">🎯 Enable Dynamic TP/SL (AFL Style)</span>
                 </label>
-                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.5rem; line-height: 1.4;">
-                    ℹ️ Dynamic TP/SL adjusts based on profit levels
+                <div style="font-size: 11px; color: #787b86; margin: 8px 0; line-height: 1.4;">
+                    ℹ️ Dynamic TP/SL adjusts based on profit levels (from AFL):<br>
+                    • Profit ≥28: Trailing 55% of profit<br>
+                    • Profit ≥20: Trailing 68% of profit<br>
+                    • Profit ≥10: Trailing 12 points, SL 1 point<br>
+                    • Profit ≥2: Trailing 13.9 points, SL 10.8 points<br>
+                    • Default: Trailing 11.9 points, SL 10.3 points
                 </div>
                 <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">
                     Initial Stop Loss (points):
@@ -252,6 +261,18 @@
                     Fee/Tax per trade (points):
                     <input type="number" class="form-control" style="margin-top: 0.25rem;" id="feeTax" value="1.0" step="0.1">
                 </label>
+
+                <!-- TP/SL Table for Long -->
+                <div style="margin-top: 15px;">
+                    <h4 style="color: #26a69a; font-size: 13px; margin-bottom: 8px;">📈 Long TP/SL Rules</h4>
+                    <div id="tpslTableLong" style="font-size: 12px;"></div>
+                </div>
+
+                <!-- TP/SL Table for Short -->
+                <div style="margin-top: 15px;">
+                    <h4 style="color: #ef5350; font-size: 13px; margin-bottom: 8px;">📉 Short TP/SL Rules</h4>
+                    <div id="tpslTableShort" style="font-size: 12px;"></div>
+                </div>
             </div>
 
             <!-- Entry/Exit Rules -->
@@ -259,11 +280,28 @@
                 <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Entry/Exit Rules:</h3>
                 <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
                     <input type="checkbox" id="noRepaintActive" checked>
-                    <span style="font-size: 0.875rem;">🚫 No Repaint (Enter next candle)</span>
+                    <span style="font-size: 0.875rem;">🚫 No Repaint (Entry on next candle)</span>
                 </label>
                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
                     <input type="checkbox" id="exitInCandleActive" checked>
-                    <span style="font-size: 0.875rem;">⚡ Exit within current candle</span>
+                    <span style="font-size: 0.875rem;">⚡ Exit within current candle (H/L check)</span>
+                </label>
+                <div style="font-size: 11px; color: #787b86; margin: 8px 0; line-height: 1.4;">
+                    ℹ️ Entry: Signal at bar[i] → Enter at bar[i+1] Open<br>
+                    ℹ️ Exit: Check SL/TP within bar[i] using High/Low
+                </div>
+            </div>
+
+            <!-- Pivot Levels -->
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
+                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Pivot Levels:</h3>
+                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="pivotLevelsActive">
+                    <span style="font-size: 0.875rem;">📊 Calculate Daily Pivot Levels</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" id="hhvLlvActive" checked>
+                    <span style="font-size: 0.875rem;">📈 Track HHV/LLV since base time</span>
                 </label>
             </div>
 
@@ -280,7 +318,7 @@
                         <option value="custom">Custom AFL Strategy</option>
                     </select>
                 </label>
-                <div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem;">
+                <div style="font-size: 11px; color: #ef5350; margin: 8px 0;">
                     ⚠️ Strategy must be selected before starting bot
                 </div>
             </div>
