@@ -160,192 +160,1151 @@
             </div>
         </div>
         
-        <!-- Trading Engine Panel 40% -->
-        <div class="trading-panel trading-panel-40" style="overflow-y: auto; padding: 1rem;">
-            <h2 style="color: #3b82f6; margin: 0 0 1rem 0; font-size: 1.25rem;">TRADING ENGINE</h2>
-
-            <!-- Engine Control -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Engine Control:</h3>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="engineActive" checked>
-                    <span style="font-size: 0.875rem;">✅ Engine Active (Master Switch)</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="buyActive" checked>
-                    <span style="font-size: 0.875rem;">📈 Buy Active (Allow Long Positions)</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="shortActive" checked>
-                    <span style="font-size: 0.875rem;">📉 Short Active (Allow Short Positions)</span>
-                </label>
-            </div>
-
-            <!-- Trading Hours -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Trading Hours:</h3>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="tradingHoursActive" checked>
-                    <span style="font-size: 0.875rem;">⏰ Enable Trading Hours Filter</span>
-                </label>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <label style="font-size: 0.875rem; color: var(--text-secondary);">
-                        Start Time:
-                        <input type="time" class="form-control" style="margin-top: 0.25rem;" id="startTime" value="09:00">
-                    </label>
-                    <label style="font-size: 0.875rem; color: var(--text-secondary);">
-                        End Time:
-                        <input type="time" class="form-control" style="margin-top: 0.25rem;" id="endTime" value="14:30">
-                    </label>
-                    <label style="font-size: 0.875rem; color: var(--text-secondary);">
-                        Base Time (for daily levels):
-                        <input type="time" class="form-control" style="margin-top: 0.25rem;" id="baseTime" value="09:00">
-                    </label>
-                </div>
-            </div>
-
-            <!-- Order Limits -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Order Limits:</h3>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="orderLimitsActive" checked>
-                    <span style="font-size: 0.875rem;">🔢 Enable Order Limits</span>
-                </label>
-                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">
-                    Buy Order Limit:
-                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="buyOrderLimit" value="10" min="1" max="100">
-                </label>
-                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
-                    Short Order Limit:
-                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="shortOrderLimit" value="10" min="1" max="100">
-                </label>
-            </div>
-
-            <!-- Position Sizing -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Position Sizing:</h3>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="positionSizingActive" checked>
-                    <span style="font-size: 0.875rem;">💰 Enable Position Sizing</span>
-                </label>
-                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">
-                    Position Size (% of capital):
-                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="positionSize" value="10" min="1" max="100">
-                </label>
-                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
-                    Max Open Positions:
-                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="maxPositions" value="1" min="1" max="10">
-                </label>
-            </div>
-
-            <!-- TP/SL Configuration -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">TP/SL Configuration:</h3>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="dynamicTpSlActive" checked>
-                    <span style="font-size: 0.875rem;">🎯 Enable Dynamic TP/SL (AFL Style)</span>
-                </label>
-                <div style="font-size: 11px; color: #787b86; margin: 8px 0; line-height: 1.4;">
-                    ℹ️ Dynamic TP/SL adjusts based on profit levels (from AFL):<br>
-                    • Profit ≥28: Trailing 55% of profit<br>
-                    • Profit ≥20: Trailing 68% of profit<br>
-                    • Profit ≥10: Trailing 12 points, SL 1 point<br>
-                    • Profit ≥2: Trailing 13.9 points, SL 10.8 points<br>
-                    • Default: Trailing 11.9 points, SL 10.3 points
-                </div>
-                <label style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block;">
-                    Initial Stop Loss (points):
-                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="initialSL" value="10.3" step="0.1">
-                </label>
-                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
-                    Fee/Tax per trade (points):
-                    <input type="number" class="form-control" style="margin-top: 0.25rem;" id="feeTax" value="1.0" step="0.1">
-                </label>
-
-                <!-- TP/SL Table for Long -->
-                <div style="margin-top: 15px;">
-                    <h4 style="color: #26a69a; font-size: 13px; margin-bottom: 8px;">📈 Long TP/SL Rules</h4>
-                    <div id="tpslTableLong" style="font-size: 12px;"></div>
+        <!-- Strategy Builder Panel 40% -->
+        <div class="trading-panel trading-panel-40" style="overflow-y: auto; padding: 0;">
+                <!-- Strategy Actions - Above Tabs -->
+                <div class="strategy-actions" style="display: flex; gap: 10px; padding: 15px; border-bottom: 1px solid #2a2e39;">
+                    <button class="btn-action-new" onclick="newStrategy()" style="flex: 1; background: #2a2e39; color: #4caf50; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                        ➕ New
+                    </button>
+                    <button class="btn-action-primary" onclick="saveStrategy()" style="flex: 1; background: #2a2e39; color: #d1d4dc; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                        💾 Save
+                    </button>
+                    <button class="btn-action-primary" onclick="loadStrategy()" style="flex: 1; background: #2a2e39; color: #d1d4dc; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                        📂 Load
+                    </button>
                 </div>
 
-                <!-- TP/SL Table for Short -->
-                <div style="margin-top: 15px;">
-                    <h4 style="color: #ef5350; font-size: 13px; margin-bottom: 8px;">📉 Short TP/SL Rules</h4>
-                    <div id="tpslTableShort" style="font-size: 12px;"></div>
+                <!-- Strategy Information - Above Tabs -->
+                <div class="strategy-info" style="padding: 15px; border-bottom: 1px solid #2a2e39; background: #1e222d;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="margin: 0; font-size: 14px; color: #d1d4dc;">Strategy Information</h3>
+                        <button onclick="openAutoGenerateModal()" style="padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
+                            🤖 Auto
+                        </button>
+                    </div>
+                    <input type="text" class="form-input" id="strategyName" placeholder="Strategy Name" value="My Strategy" style="margin-bottom: 8px;">
+                    <textarea class="form-input" id="strategyDescription" placeholder="Description" rows="2" style="resize: vertical;"></textarea>
                 </div>
-            </div>
 
-            <!-- Entry/Exit Rules -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Entry/Exit Rules:</h3>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="noRepaintActive" checked>
-                    <span style="font-size: 0.875rem;">🚫 No Repaint (Entry on next candle)</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="exitInCandleActive" checked>
-                    <span style="font-size: 0.875rem;">⚡ Exit within current candle (H/L check)</span>
-                </label>
-                <div style="font-size: 11px; color: #787b86; margin: 8px 0; line-height: 1.4;">
-                    ℹ️ Entry: Signal at bar[i] → Enter at bar[i+1] Open<br>
-                    ℹ️ Exit: Check SL/TP within bar[i] using High/Low
+                <div class="panel-tabs">
+                    <button class="panel-tab active" onclick="switchPanel('entry')">Entry</button>
+                    <button class="panel-tab" onclick="switchPanel('exit')">Exit</button>
+                    <button class="panel-tab" onclick="switchPanel('indicators')">Indicator</button>
+                    <button class="panel-tab" onclick="switchPanel('settings')">Trading Engine</button>
                 </div>
-            </div>
 
-            <!-- Pivot Levels -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Pivot Levels:</h3>
-                <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="pivotLevelsActive">
-                    <span style="font-size: 0.875rem;">📊 Calculate Daily Pivot Levels</span>
-                </label>
-                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                    <input type="checkbox" id="hhvLlvActive" checked>
-                    <span style="font-size: 0.875rem;">📈 Track HHV/LLV since base time</span>
-                </label>
-            </div>
+                <!-- Entry Tab (formerly Builder) -->
+                <div class="panel-content" id="entryPanel">
+                    <!-- Entry Direction Tabs -->
+                    <div class="entry-direction-tabs" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #2a2e39;">
+                        <button class="entry-direction-tab active" onclick="switchEntryDirection('long')" id="longEntryTab" style="flex: 1; padding: 10px; background: #2962ff; color: white; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                            📈 Long Entry
+                        </button>
+                        <button class="entry-direction-tab" onclick="switchEntryDirection('short')" id="shortEntryTab" style="flex: 1; padding: 10px; background: transparent; color: #787b86; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                            📉 Short Entry
+                        </button>
+                    </div>
 
-            <!-- Strategy Selection -->
-            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Strategy Selection:</h3>
-                <label style="font-size: 0.875rem; color: var(--text-secondary); display: block;">
-                    Choose Signal Strategy:
-                    <select class="form-control" style="margin-top: 0.25rem;" id="signalStrategy">
-                        <option value="">-- Chọn strategy --</option>
-                        <option value="strategy_11">Chiến lược 11</option>
-                        <option value="ema_cross">EMA Crossover</option>
-                        <option value="rsi_divergence">RSI Divergence</option>
-                        <option value="custom">Custom AFL Strategy</option>
+                    <!-- Long Entry Content -->
+                    <div class="entry-direction-content" id="longEntryContent">
+                        <div class="section">
+                            <h3>Long Entry Conditions</h3>
+                            <div id="longConditions" class="conditions-list">
+                                <!-- Conditions will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" onclick="addCondition('long')">+ Add Long Condition</button>
+                        </div>
+
+                        <div class="section">
+                            <h3>⚡ Quick Actions</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-action" onclick="testStrategy()" style="flex: 1; font-size: 12px; padding: 8px;">🧪 Test</button>
+                                <button class="btn-action" onclick="refreshSignals()" style="flex: 1; font-size: 12px; padding: 8px;">🔄 Refresh</button>
+                                <button class="btn-action" onclick="clearStrategy()" style="flex: 1; font-size: 12px; padding: 8px;">🗑️ Clear</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Short Entry Content -->
+                    <div class="entry-direction-content hidden" id="shortEntryContent">
+                        <div class="section">
+                            <h3>Short Entry Conditions</h3>
+                            <div id="shortConditions" class="conditions-list">
+                                <!-- Conditions will be added here dynamically -->
+                            </div>
+                            <button class="btn-add" onclick="addCondition('short')">+ Add Short Condition</button>
+                        </div>
+
+                        <div class="section">
+                            <h3>⚡ Quick Actions</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn-action" onclick="testStrategy()" style="flex: 1; font-size: 12px; padding: 8px;">🧪 Test</button>
+                                <button class="btn-action" onclick="refreshSignals()" style="flex: 1; font-size: 12px; padding: 8px;">🔄 Refresh</button>
+                                <button class="btn-action" onclick="clearStrategy()" style="flex: 1; font-size: 12px; padding: 8px;">🗑️ Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indicators Tab -->
+                <div class="panel-content hidden" id="indicatorsTabPanel">
+                    <!-- Indicator Templates Section -->
+                    <div class="section" style="background: linear-gradient(135deg, #1e222d 0%, #2a2e39 100%); border: 1px solid #2962ff;">
+                        <h3 style="color: #2962ff;">📦 Indicator Templates</h3>
+                        <p style="color: #787b86; font-size: 12px; margin-bottom: 15px;">Quick load pre-configured indicator sets</p>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <select id="templateSelect" class="form-input" style="width: 100%; padding: 12px; font-size: 13px;">
+                                <option value="">Select a template...</option>
+                                <option value="AFL_Complete">AFL Complete Set (30 indicators)</option>
+                                <option value="Classic_Trading">Classic Trading (7 indicators)</option>
+                                <option value="Scalping">Scalping Setup (6 indicators)</option>
+                                <option value="Price_Action">Price Action Only (11 indicators)</option>
+                            </select>
+                            <button onclick="loadIndicatorTemplate()" class="btn-primary" style="width: 100%; background: #2962ff; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                                Load Template
+                            </button>
+                        </div>
+
+                        <div id="templateInfo" style="display: none; background: #2a2e39; padding: 10px; border-radius: 4px; margin-top: 10px; font-size: 12px; color: #787b86;">
+                            <!-- Template info will show here -->
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Add Indicator</h3>
+                        <select id="indicatorSelect" class="form-input">
+                            <optgroup label="Trend">
+                                <option value="EMA">EMA - Exponential Moving Average</option>
+                                <option value="SMA">SMA - Simple Moving Average</option>
+                                <option value="WMA">WMA - Weighted Moving Average</option>
+                                <option value="DEMA">DEMA - Double Exponential MA</option>
+                                <option value="TEMA">TEMA - Triple Exponential MA</option>
+                            </optgroup>
+                            <optgroup label="Momentum">
+                                <option value="RSI">RSI - Relative Strength Index</option>
+                                <option value="MACD">MACD - Moving Average Convergence Divergence</option>
+                                <option value="Stochastic">Stochastic Oscillator</option>
+                                <option value="CCI">CCI - Commodity Channel Index</option>
+                                <option value="MFI">MFI - Money Flow Index</option>
+                            </optgroup>
+                            <optgroup label="Volatility">
+                                <option value="BollingerBands">Bollinger Bands</option>
+                                <option value="ATR">ATR - Average True Range</option>
+                                <option value="KeltnerChannel">Keltner Channel</option>
+                                <option value="DonchianChannel">Donchian Channel</option>
+                            </optgroup>
+                            <optgroup label="Volume">
+                                <option value="OBV">OBV - On Balance Volume</option>
+                                <option value="VWAP">VWAP - Volume Weighted Average Price</option>
+                            </optgroup>
+                            <optgroup label="Trend Indicators">
+                                <option value="MAuptrend">MAuptrend - MA Uptrend (C>MA2>MA3>MA5, MA4>MA5)</option>
+                                <option value="MAdowntrend">MAdowntrend - MA Downtrend (C<MA2<MA3<MA5, MA4<MA5)</option>
+                                <option value="Alluptrend">Alluptrend - Full Uptrend (MA2>MA3>MA4>MA5, C>MA7)</option>
+                                <option value="Alldowntrend">Alldowntrend - Full Downtrend (MA2<MA3<MA4<MA5, C<MA7)</option>
+                                <option value="SlopeMA1">SlopeMA1 - Slope of MA1 (MA1 - MA1[-1])</option>
+                                <option value="GMA12">GMA12 - Average of MA1 & MA2</option>
+                                <option value="GMA23">GMA23 - Average of MA2 & MA3</option>
+                                <option value="GMA45">GMA45 - Average of MA4 & MA5</option>
+                                <option value="MArange">MArange - Max-Min of MA2,3,4,5</option>
+                                <option value="MA7range">MA7range - Distance MA7 to Close</option>
+                            </optgroup>
+                            <optgroup label="Candlestick Patterns">
+                                <option value="Green">Green - Bullish Candle (Close >= Open)</option>
+                                <option value="Red">Red - Bearish Candle (Close < Open)</option>
+                                <option value="Length">Length - Candle Body Length (High - Low)</option>
+                            </optgroup>
+                            <optgroup label="Pivot Points">
+                                <option value="PP">PP - Pivot Point</option>
+                                <option value="R1">R1 - Resistance 1</option>
+                                <option value="R2">R2 - Resistance 2</option>
+                                <option value="R3">R3 - Resistance 3</option>
+                                <option value="S1">S1 - Support 1</option>
+                                <option value="S2">S2 - Support 2</option>
+                                <option value="S3">S3 - Support 3</option>
+                            </optgroup>
+                            <optgroup label="Custom">
+                                <option value="SuperTrend">SuperTrend</option>
+                                <option value="PeakTrough">Peak & Trough</option>
+                                <option value="HHVsinceopen">HHVsinceopen - Highest High Since Open</option>
+                                <option value="LLVsinceopen">LLVsinceopen - Lowest Low Since Open</option>
+                                <option value="HHVsincebuy">HHVsincebuy - Highest High Since Long Entry</option>
+                                <option value="LLVsinceshort">LLVsinceshort - Lowest Low Since Short Entry</option>
+                                <option value="HHVresline">HHVresline - HHV Resistance Line</option>
+                                <option value="LLVresline">LLVresline - LLV Resistance Line</option>
+                                <option value="HHVresline1">HHVresline1 - HHV Resistance Line 1</option>
+                                <option value="LLVresline1">LLVresline1 - LLV Resistance Line 1</option>
+                                <option value="HHVresline2">HHVresline2 - HHV Resistance Line 2</option>
+                                <option value="LLVresline2">LLVresline2 - LLV Resistance Line 2</option>
+                                <option value="HHVresline3">HHVresline3 - HHV Resistance Line 3</option>
+                                <option value="LLVresline3">LLVresline3 - LLV Resistance Line 3</option>
+                                <option value="HHVresline4">HHVresline4 - HHV Resistance Line 4</option>
+                                <option value="LLVresline4">LLVresline4 - LLV Resistance Line 4</option>
+                                <option value="resHL">resHL - Range High/Low</option>
+                                <option value="AvgHL">AvgHL - Average High/Low</option>
+                                <option value="RealtimeOH">RealtimeOH - Open to High Range</option>
+                                <option value="RealtimeOL">RealtimeOL - Open to Low Range</option>
+                                <option value="RangetoHHV">RangetoHHV - Distance to Highest</option>
+                                <option value="RangetoLLV">RangetoLLV - Distance to Lowest</option>
+                                <option value="Baseprice">Baseprice - Session Open Price</option>
+                            </optgroup>
+                        </select>
+                        <button class="btn-add" onclick="addIndicator()">+ Add Indicator</button>
+                    </div>
+
+                    <!-- Active Indicators List -->
+                    <div class="section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0;">📊 Active Indicators</h3>
+                            <button onclick="clearAllIndicators()" style="padding: 6px 12px; background: #ef5350; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                                🗑️ Clear All
+                            </button>
+                        </div>
+                        <div id="activeIndicators" style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="color: #787b86; font-size: 12px; padding: 20px; text-align: center;">No indicators added yet</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exit Tab -->
+                <div class="panel-content hidden" id="exitPanel">
+                    <!-- Exit Direction Tabs -->
+                    <div class="exit-direction-tabs" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #2a2e39;">
+                        <button class="exit-direction-tab active" onclick="switchExitDirection('long')" id="longExitTab" style="flex: 1; padding: 10px; background: #2962ff; color: white; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                            📈 Long Exit
+                        </button>
+                        <button class="exit-direction-tab" onclick="switchExitDirection('short')" id="shortExitTab" style="flex: 1; padding: 10px; background: transparent; color: #787b86; border: none; border-radius: 4px 4px 0 0; cursor: pointer; font-weight: 600; transition: all 0.3s;">
+                            📉 Short Exit
+                        </button>
+                    </div>
+
+                    <!-- Long Exit Content -->
+                    <div class="exit-direction-content" id="longExitContent">
+                        <!-- TP/SL/Trailing Points Configuration -->
+                        <div class="section">
+                            <h3 style="color: #26a69a; display: flex; align-items: center; gap: 8px;">
+                                💹 Long Position Exit Points
+                            </h3>
+                            <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                                Configure exit points for Long positions (used by Trading Engine)
+                            </p>
+                            <div style="background: #131722; padding: 12px; border-radius: 6px; border-left: 3px solid #26a69a;">
+                                <div style="display: grid; gap: 12px;">
+                                    <div>
+                                        <label style="display: block; font-size: 11px; color: #787b86; margin-bottom: 4px; font-weight: 600;">
+                                            Take Profit (points):
+                                        </label>
+                                        <input type="number" id="tpBuyPoints" value="10" min="0" step="0.5"
+                                               style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                        <div style="font-size: 10px; color: #787b86; margin-top: 4px;">
+                                            Exit when High touches: Entry Price + TP Points
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 11px; color: #787b86; margin-bottom: 4px; font-weight: 600;">
+                                            Stop Loss (points):
+                                        </label>
+                                        <input type="number" id="stopLossPoints" value="20" min="0" step="0.5"
+                                               style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                        <div style="font-size: 10px; color: #787b86; margin-top: 4px;">
+                                            Exit when Low touches: Entry Price - SL Points
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trailing Stop Configuration -->
+                        <div class="section">
+                            <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                                🎯 Trailing Stop Configuration
+                            </h3>
+                            <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                                Choose trailing type and configure parameters
+                            </p>
+
+                            <!-- Trailing Type Selection -->
+                            <div style="background: #131722; padding: 15px; border-radius: 6px; border-left: 3px solid #2962ff; margin-bottom: 15px;">
+                                <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 10px;">
+                                    <input type="radio" name="trailingType" value="fixed" checked style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                            📊 Fixed Trailing Points
+                                        </div>
+                                        <div style="font-size: 11px; color: #787b86; margin-top: 3px;">
+                                            Use fixed points for trailing stop
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                    <input type="radio" name="trailingType" value="dynamic" style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                            💎 Dynamic Trailing by Profit %
+                                        </div>
+                                        <div style="font-size: 11px; color: #787b86; margin-top: 3px;">
+                                            Adaptive trailing based on profit tiers
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Fixed Trailing Config (shown by default) -->
+                            <div id="fixedTrailingConfig" style="background: #131722; padding: 15px; border-radius: 6px; border-left: 3px solid #26a69a;">
+                                <div style="display: grid; gap: 12px;">
+                                    <div>
+                                        <label style="display: block; font-size: 11px; color: #787b86; margin-bottom: 4px; font-weight: 600;">
+                                            Long Trailing Points:
+                                        </label>
+                                        <input type="number" id="fixedTrailingBuyPoints" value="5" min="0" step="0.5"
+                                               style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                        <div style="font-size: 10px; color: #787b86; margin-top: 4px;">
+                                            Exit when Low ≤ HHV[n-1] - Trailing Points
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 11px; color: #787b86; margin-bottom: 4px; font-weight: 600;">
+                                            Short Trailing Points:
+                                        </label>
+                                        <input type="number" id="fixedTrailingShortPoints" value="5" min="0" step="0.5"
+                                               style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                        <div style="font-size: 10px; color: #787b86; margin-top: 4px;">
+                                            Exit when High ≥ LLV[n-1] + Trailing Points
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Trailing Config (hidden by default) -->
+                            <div id="dynamicTrailingConfig" style="display: none; background: #131722; padding: 15px; border-radius: 6px; border-left: 3px solid #f4b400;">
+                                <div style="font-size: 12px; color: #787b86; margin-bottom: 10px;">
+                                    Configure profit tiers and trailing percentages (applies to both LONG and SHORT):
+                                </div>
+
+                                <!-- Tier Table -->
+                                <div style="background: #1a1e2b; border-radius: 4px; overflow: hidden;">
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #2a2e39;">
+                                                <th style="padding: 10px; text-align: left; font-size: 11px; color: #787b86; font-weight: 600;">Min Profit</th>
+                                                <th style="padding: 10px; text-align: left; font-size: 11px; color: #787b86; font-weight: 600;">Max Profit</th>
+                                                <th style="padding: 10px; text-align: left; font-size: 11px; color: #787b86; font-weight: 600;">Trailing %</th>
+                                                <th style="padding: 10px; text-align: left; font-size: 11px; color: #787b86; font-weight: 600;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dynamicTierTable" style="font-size: 12px; color: #d1d4dc;">
+                                            <!-- Tiers will be dynamically rendered here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Add Tier Button -->
+                                <button onclick="addDynamicTier()" style="width: 100%; margin-top: 10px; padding: 10px; background: #2962ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                    <span>➕</span>
+                                    <span>Add Tier</span>
+                                </button>
+
+                                <div style="margin-top: 12px; padding: 10px; background: #1a1e2b; border-radius: 4px;">
+                                    <div style="font-size: 11px; color: #f4b400; font-weight: 600; margin-bottom: 4px;">
+                                        ℹ️ Example:
+                                    </div>
+                                    <div style="font-size: 10px; color: #787b86; line-height: 1.5;">
+                                        Profit = 25 pts → Tier 2 (50%) → Trailing = 12.5 pts → Line = Entry + (25 - 12.5)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>Time-based Exit (Long)</h3>
+                            <label>Exit Time:</label>
+                            <input type="time" class="form-input" id="exitTimeLong" value="14:30">
+                        </div>
+                    </div>
+
+                    <!-- Short Exit Content -->
+                    <div class="exit-direction-content hidden" id="shortExitContent">
+                        <!-- TP/SL/Trailing Points Configuration -->
+                        <div class="section">
+                            <h3 style="color: #ef5350; display: flex; align-items: center; gap: 8px;">
+                                💹 Short Position Exit Points
+                            </h3>
+                            <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                                Configure exit points for Short positions (used by Trading Engine)
+                            </p>
+                            <div style="background: #131722; padding: 12px; border-radius: 6px; border-left: 3px solid #ef5350;">
+                                <div style="display: grid; gap: 12px;">
+                                    <div>
+                                        <label style="display: block; font-size: 11px; color: #787b86; margin-bottom: 4px; font-weight: 600;">
+                                            Take Profit (points):
+                                        </label>
+                                        <input type="number" id="tpShortPoints" value="10" min="0" step="0.5"
+                                               style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                        <div style="font-size: 10px; color: #787b86; margin-top: 4px;">
+                                            Exit when Low touches: Entry Price - TP Points
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 11px; color: #787b86; margin-bottom: 4px; font-weight: 600;">
+                                            Stop Loss (points):
+                                        </label>
+                                        <input type="number" id="slShortPoints" value="20" min="0" step="0.5"
+                                               style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                        <div style="font-size: 10px; color: #787b86; margin-top: 4px;">
+                                            Exit when High touches: Entry Price + SL Points
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="font-size: 11px; color: #787b86; margin-top: 10px; padding: 8px; background: #1a1e2b; border-radius: 4px;">
+                                ℹ️ <strong>Trailing Stop config is shared</strong> - Configure it in the Long Exit tab above
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>Time-based Exit (Short)</h3>
+                            <label>Exit Time:</label>
+                            <input type="time" class="form-input" id="exitTimeShort" value="14:30">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Engine Tab -->
+                <div class="panel-content hidden" id="settingsPanel">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: white; font-size: 16px; display: flex; align-items: center; gap: 8px;">
+                            ⚙️ Trading Engine Configuration
+                        </h3>
+                        <p style="margin: 5px 0 0 0; font-size: 12px; color: rgba(255,255,255,0.9);">
+                            Core engine settings - the heart of the trading system
+                        </p>
+                    </div>
+
+                    <!-- Entry Price Type Configuration -->
+                    <div class="section">
+                        <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                            💰 Entry Price Type
+                        </h3>
+                        <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                            Which price to use when entering position
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="entryPriceType" value="O" style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">Open (O)</div>
+                                    <div style="font-size: 11px; color: #787b86;">Candle open</div>
+                                </div>
+                            </label>
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="entryPriceType" value="H" style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">High (H)</div>
+                                    <div style="font-size: 11px; color: #787b86;">Candle high</div>
+                                </div>
+                            </label>
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="entryPriceType" value="L" style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">Low (L)</div>
+                                    <div style="font-size: 11px; color: #787b86;">Candle low</div>
+                                </div>
+                            </label>
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="entryPriceType" value="C" checked style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">Close (C)</div>
+                                    <div style="font-size: 11px; color: #787b86;">Candle close</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Entry After Candle -->
+                    <div class="section">
+                        <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                            🕐 Entry After Candle
+                        </h3>
+                        <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                            When signal is formed, enter position after N candles (can select multiple)
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="checkbox" id="entryAfter1" name="entryAfterCandle" value="1" checked style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">After 1 Candle</div>
+                                    <div style="font-size: 11px; color: #787b86; margin-top: 2px;">Quick entry</div>
+                                </div>
+                            </label>
+                            <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="checkbox" id="entryAfter2" name="entryAfterCandle" value="2" style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">After 2 Candles</div>
+                                    <div style="font-size: 11px; color: #787b86; margin-top: 2px;">Confirmed entry</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Position Management -->
+                    <div class="section">
+                        <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                            📊 Position Management
+                        </h3>
+                        <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                            Control which positions can be opened
+                        </p>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Only Long -->
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="positionMode" value="long_only" checked style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #26a69a; display: flex; align-items: center; gap: 6px;">
+                                        📈 Only Long Position
+                                    </div>
+                                    <div style="font-size: 11px; color: #787b86; margin-top: 3px;">
+                                        Only open long positions, ignore short signals
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Only Short -->
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="positionMode" value="short_only" style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #ef5350; display: flex; align-items: center; gap: 6px;">
+                                        📉 Only Short Position
+                                    </div>
+                                    <div style="font-size: 11px; color: #787b86; margin-top: 3px;">
+                                        Only open short positions, ignore long signals
+                                    </div>
+                                </div>
+                            </label>
+
+                            <!-- Long and Short -->
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="positionMode" value="long_and_short" style="margin: 0 0 0 0 !important; width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #2962ff; display: flex; align-items: center; gap: 6px;">
+                                        ⚡ Long and Short
+                                    </div>
+                                    <div style="font-size: 11px; color: #787b86; margin-top: 3px;">
+                                        Can open both long and short, but only when position is Flat
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Exit Method Configuration -->
+                    <div class="section">
+                        <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                            🚪 Exit Method
+                        </h3>
+                        <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                            Select how to close positions (can select multiple)
+                        </p>
+
+                        <!-- Exit by Opposite Signal -->
+                        <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 10px;">
+                            <input type="checkbox" id="exitBySignal" name="exitBySignal" checked style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                    🔄 Exit by Opposite Signal
+                                </div>
+                                <div style="font-size: 11px; color: #787b86; line-height: 1.4; margin-top: 2px;">
+                                    Close LONG when SHORT signal appears, close SHORT when BUY signal appears
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Exit by Take Profit -->
+                        <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 10px;">
+                            <input type="checkbox" id="exitByTP" name="exitByTP" style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                    ✅ Exit by Take Profit (TP)
+                                </div>
+                                <div style="font-size: 11px; color: #787b86; line-height: 1.4; margin-top: 2px;">
+                                    Close when price touches TP line (Entry ± TP points)
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Exit by Stop Loss -->
+                        <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 10px;">
+                            <input type="checkbox" id="exitBySL" name="exitBySL" style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                    🛑 Exit by Stop Loss (SL)
+                                </div>
+                                <div style="font-size: 11px; color: #787b86; line-height: 1.4; margin-top: 2px;">
+                                    Close when price touches SL line (Entry ∓ SL points)
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Exit by Trailing Stop -->
+                        <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                            <input type="checkbox" id="exitByTrailing" name="exitByTrailing" style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                    📉 Exit by Trailing Stop
+                                </div>
+                                <div style="font-size: 11px; color: #787b86; line-height: 1.4; margin-top: 2px;">
+                                    Close when price touches trailing line (HHV/LLV ∓ Trailing points)
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Exit Timing -->
+                    <div class="section" id="exitTimingSection">
+                        <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                            ⏱️ Exit Timing
+                        </h3>
+                        <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                            When to execute exit after exit condition is met
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <label class="radio-card" id="exitTimingSameCandle" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="exitTiming" value="same_candle" checked style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">Exit in Same Candle</div>
+                                    <div style="font-size: 11px; color: #787b86; margin-top: 2px;">Immediate exit when condition is met</div>
+                                </div>
+                            </label>
+                            <label class="radio-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s;">
+                                <input type="radio" name="exitTiming" value="after_1_candle" style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">Exit After 1 Candle</div>
+                                    <div style="font-size: 11px; color: #787b86; margin-top: 2px;">Exit in the next candle</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Expiry Day Configuration -->
+                    <div class="section">
+                        <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                            📅 Expiry Day Exit
+                        </h3>
+                        <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                            Automatically close positions on specific expiry dates and time
+                        </p>
+
+                        <!-- Enable Expiry Exit Checkbox -->
+                        <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 15px;">
+                            <input type="checkbox" id="exitByExpiry" name="exitByExpiry" style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                    📅 Close on Expiry Day
+                                </div>
+                                <div style="font-size: 11px; color: #787b86; line-height: 1.4; margin-top: 2px;">
+                                    Close all positions at specified expiry dates and time
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Expiry Configuration (shown when checkbox is checked) -->
+                        <div id="expiryConfig" style="display: none;">
+                            <div style="background: #131722; padding: 15px; border-radius: 6px; border-left: 3px solid #f4b400;">
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: block; font-size: 12px; color: #d1d4dc; font-weight: 600; margin-bottom: 6px;">
+                                        Expiry Dates:
+                                    </label>
+                                    <input type="text" id="expiryDates" placeholder="150125,200125,250125"
+                                           style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px; font-family: 'Courier New', monospace;">
+                                    <div style="font-size: 10px; color: #787b86; margin-top: 6px; line-height: 1.5;">
+                                        Format: <span style="color: #f4b400;">DDMMYY</span>, separated by comma<br>
+                                        Example: <span style="color: #26a69a;">150125,200125,250125</span> (15 Jan 2025, 20 Jan 2025, 25 Jan 2025)
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; font-size: 12px; color: #d1d4dc; font-weight: 600; margin-bottom: 6px;">
+                                        Expiry Time:
+                                    </label>
+                                    <input type="text" id="expiryTime" placeholder="143000" value="143000"
+                                           style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px; font-family: 'Courier New', monospace;">
+                                    <div style="font-size: 10px; color: #787b86; margin-top: 6px; line-height: 1.5;">
+                                        Format: <span style="color: #f4b400;">HHMMSS</span> (24-hour format)<br>
+                                        Example: <span style="color: #26a69a;">143000</span> (14:30:00) or <span style="color: #26a69a;">093000</span> (09:30:00)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HHV/LLV Configuration -->
+                    <div class="section">
+                        <h3 style="color: #9c27b0; display: flex; align-items: center; gap: 8px;">
+                            🕐 HHV/LLV Configuration
+                        </h3>
+                        <p style="font-size: 12px; color: #787b86; margin-bottom: 12px;">
+                            Configure how Highest High Value (HHV) and Lowest Low Value (LLV) indicators are calculated
+                        </p>
+
+                        <!-- Base Time -->
+                        <div style="background: #131722; padding: 15px; border-radius: 6px; border-left: 3px solid #9c27b0; margin-bottom: 15px;">
+                            <label style="display: block; font-size: 12px; color: #d1d4dc; font-weight: 600; margin-bottom: 8px;">
+                                📅 Base Time (Session Start):
+                            </label>
+                            <input type="time" id="baseTime" value="09:00"
+                                   style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                            <div style="font-size: 10px; color: #787b86; margin-top: 8px; line-height: 1.5;">
+                                ℹ️ HHV/LLV will be calculated from this time onwards each day<br>
+                                Example: Set to 09:00 → HHV/LLV resets at 09:00 daily
+                            </div>
+                        </div>
+
+                        <!-- Skip Long Candle Checkbox -->
+                        <label class="checkbox-card" style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #1e222d; border: 2px solid #2a2e39; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-bottom: 10px;">
+                            <input type="checkbox" id="skipLongCandleForTrailing" name="skipLongCandleForTrailing" style="width: 18px !important; height: 18px !important; cursor: pointer; flex-shrink: 0 !important; margin: 0 0 0 0 !important;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 14px; color: #d1d4dc;">
+                                    📏 Skip Long Candle for HHV/LLV Update
+                                </div>
+                                <div style="font-size: 11px; color: #787b86; line-height: 1.4; margin-top: 2px;">
+                                    Don't update HHV/LLV when encountering long candles (reduces repaint)
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Long Candle Size Config (Hidden by default) -->
+                        <div id="longCandleConfig" style="display: none;">
+                            <div style="background: #131722; padding: 15px; border-radius: 6px; border-left: 3px solid #f4b400;">
+                                <div>
+                                    <label style="display: block; font-size: 11px; color: #787b86; margin-bottom: 4px; font-weight: 600;">
+                                        Long Candle Size (H - L in points):
+                                    </label>
+                                    <input type="number" id="longCandleSize" value="50" min="0" step="0.5"
+                                           style="width: 100%; padding: 10px; background: #1e222d; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                                    <div style="font-size: 10px; color: #787b86; margin-top: 4px;">
+                                        Candles with (High - Low) >= this value are considered "long candles"
+                                    </div>
+                                </div>
+                                <div style="margin-top: 12px; padding: 10px; background: #1a1e2b; border-radius: 4px;">
+                                    <div style="font-size: 11px; color: #f4b400; font-weight: 600; margin-bottom: 4px;">
+                                        ℹ️ How it works:
+                                    </div>
+                                    <div style="font-size: 10px; color: #787b86; line-height: 1.5;">
+                                        • When a long candle appears, HHV/LLV won't be updated<br>
+                                        • Trailing line is calculated using HHV/LLV from previous candle<br>
+                                        • This prevents repaint when big candles appear
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Position Status -->
+                    <div class="section">
+                        <h3 style="color: #2962ff; display: flex; align-items: center; gap: 8px;">
+                            🎯 Position Status
+                        </h3>
+                        <div style="background: #131722; padding: 15px; border-radius: 6px; border-left: 4px solid #2962ff;">
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+                                <div>
+                                    <div style="font-size: 11px; color: #787b86; margin-bottom: 5px;">LONG</div>
+                                    <div id="longPositionCount" style="font-size: 24px; font-weight: 700; color: #26a69a;">0</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #787b86; margin-bottom: 5px;">SHORT</div>
+                                    <div id="shortPositionCount" style="font-size: 24px; font-weight: 700; color: #ef5350;">0</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 11px; color: #787b86; margin-bottom: 5px;">STATUS</div>
+                                    <div id="currentPositionStatus" style="font-size: 16px; font-weight: 700; color: #787b86;">FLAT</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <!-- Condition Modal -->
+    <div id="conditionModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="conditionModalTitle">Add Long Entry Signal</h3>
+                <button class="btn-close" onclick="closeConditionModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Signal Name -->
+                <label>Signal Name:</label>
+                <input type="text" class="form-input" id="signalName" placeholder="e.g., Buy1, Buy2" readonly style="background-color: #2a2e39;">
+
+                <!-- Conditions Builder -->
+                <div id="conditionsBuilder">
+                    <!-- Conditions will be added here -->
+                </div>
+
+                <button class="btn-add" onclick="addSubCondition()" style="width: 100%; margin-top: 10px;">+ Add Condition (AND/OR)</button>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-action" onclick="saveSignal()">✅ Complete Signal</button>
+                <button class="btn-secondary" onclick="closeConditionModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-condition Template (hidden) -->
+    <template id="subConditionTemplate">
+        <div class="sub-condition" style="background: #1e222d; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 3px solid #2962ff;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 5px; align-items: center; flex: 1; min-width: 200px;">
+                    <select class="form-input sub-left-operand" style="flex: 1;">
+                        <option value="">Select Indicator/Price</option>
+                        <option value="close">Close</option>
+                        <option value="open">Open</option>
+                        <option value="high">High</option>
+                        <option value="low">Low</option>
                     </select>
+                    <input type="number" class="form-input sub-left-offset" placeholder="[-n]" title="Offset: 0=current, -1=previous bar" style="width: 60px;" value="0" min="-100" max="0">
+                </div>
+
+                <select class="form-input sub-operator" onchange="handleOperatorChange(this)" style="flex: 1; min-width: 150px;">
+                    <option value=">">Greater than (>)</option>
+                    <option value="<">Less than (<)</option>
+                    <option value=">=">Greater or equal (>=)</option>
+                    <option value="<=">Less or equal (<=)</option>
+                    <option value="==">Equal (==)</option>
+                    <option value="!=">Not equal (!=)</option>
+                    <option value="is_true">is True ✓</option>
+                    <option value="is_false">is False ✗</option>
+                    <option value="cross_above">Cross Up ↗</option>
+                    <option value="cross_below">Cross Down ↘</option>
+                </select>
+
+                <select class="form-input sub-right-type" onchange="toggleRightInput(this)" style="flex: 0.8; min-width: 120px;">
+                    <option value="indicator">Indicator/Price</option>
+                    <option value="number">Number</option>
+                </select>
+
+                <div style="display: flex; gap: 5px; align-items: center; flex: 1; min-width: 200px;">
+                    <select class="form-input sub-right-operand" style="flex: 1;">
+                        <option value="">Select Indicator/Price</option>
+                        <option value="close">Close</option>
+                        <option value="open">Open</option>
+                        <option value="high">High</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <input type="number" class="form-input sub-right-offset" placeholder="[-n]" title="Offset: 0=current, -1=previous bar" style="width: 60px;" value="0" min="-100" max="0">
+                </div>
+
+                <input type="number" class="form-input sub-right-number" placeholder="Value" style="flex: 1; min-width: 150px; display: none;" step="0.01">
+
+                <select class="form-input sub-logic" style="flex: 0.5; min-width: 80px;">
+                    <option value="AND">AND</option>
+                    <option value="OR">OR</option>
+                </select>
+
+                <button class="btn-remove" onclick="removeSubCondition(this)" style="background: #ef5350; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">✕</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Auto Generate Modal -->
+    <div id="autoGenerateModal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999999; display: flex; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: #1e222d; border-radius: 8px; padding: 25px; width: 500px; max-width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: #d1d4dc; font-size: 18px;">🤖 Auto Generate Strategies</h2>
+                <button onclick="closeAutoGenerateModal()" style="background: none; border: none; color: #787b86; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px;">&times;</button>
+            </div>
+
+            <div class="section" style="background: #2a2e39; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #667eea; font-size: 13px;">📊 Entry Conditions</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="display: block; color: #d1d4dc; font-size: 12px; margin-bottom: 5px;">Long Entry Signals:</label>
+                        <input type="number" id="autoGenLongSignals" class="form-input" value="2" min="1" max="5" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: #d1d4dc; font-size: 12px; margin-bottom: 5px;">Short Entry Signals:</label>
+                        <input type="number" id="autoGenShortSignals" class="form-input" value="2" min="1" max="5" style="width: 100%;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; color: #d1d4dc; font-size: 12px; margin-bottom: 5px;">Indicators per Signal (AND logic):</label>
+                    <input type="number" id="autoGenIndicatorsPerSignal" class="form-input" value="2" min="1" max="5" style="width: 100%;">
+                </div>
+            </div>
+
+            <div class="section" style="background: #2a2e39; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #667eea; font-size: 13px;">💹 TP/SL Configuration</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="display: block; color: #d1d4dc; font-size: 12px; margin-bottom: 5px;">Number of Profit Levels:</label>
+                        <input type="number" id="autoGenProfitLevels" class="form-input" value="4" min="2" max="10" style="width: 100%;">
+                    </div>
+                    <div>
+                        <label style="display: block; color: #d1d4dc; font-size: 12px; margin-bottom: 5px;">Profit Step Size (points):</label>
+                        <input type="number" id="autoGenProfitStep" class="form-input" value="3" min="1" max="10" style="width: 100%;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" style="background: #2a2e39; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
+                <h4 style="margin: 0 0 10px 0; color: #667eea; font-size: 13px;">⚙️ Options</h4>
+                <label style="display: flex; align-items: center; gap: 8px; color: #d1d4dc; font-size: 13px; cursor: pointer; margin-bottom: 8px;">
+                    <input type="checkbox" id="autoGenKeepIndicators" checked style="margin: 0;">
+                    <span>Keep existing indicators</span>
                 </label>
-                <div style="font-size: 11px; color: #ef5350; margin: 8px 0;">
-                    ⚠️ Strategy must be selected before starting bot
+                <label style="display: flex; align-items: center; gap: 8px; color: #d1d4dc; font-size: 13px; cursor: pointer;">
+                    <input type="checkbox" id="autoGenRandomizeTPSL" checked style="margin: 0;">
+                    <span>Randomize TP/SL values within ranges</span>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="startAutoGeneration()" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    🚀 Start Generation
+                </button>
+                <button onclick="closeAutoGenerateModal()" style="flex: 1; padding: 12px; background: #2a2e39; color: #d1d4dc; border: 1px solid #3a3e49; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    Cancel
+                </button>
+            </div>
+
+            <!-- Progress Section -->
+            <div id="autoGenProgress" class="hidden" style="margin-top: 20px; padding: 15px; background: #2a2e39; border-radius: 4px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <div class="spinner" style="width: 20px; height: 20px; border: 3px solid #3a3e49; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <span id="autoGenStatus" style="color: #d1d4dc; font-size: 13px;">Generating strategies...</span>
+                </div>
+                <div style="background: #1e222d; border-radius: 4px; height: 8px; overflow: hidden;">
+                    <div id="autoGenProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s;"></div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <button class="btn btn-primary" onclick="saveEngineConfig()">💾 Save Config</button>
-                <button class="btn btn-secondary" onclick="loadEngineConfig()">📂 Load Config</button>
-                <button class="btn btn-secondary" onclick="testEngine()">🧪 Test Engine</button>
-                <button class="btn btn-secondary" onclick="exportEngineConfig()">📤 Export JSON</button>
+            <!-- Results Section -->
+            <div id="autoGenResults" class="hidden" style="margin-top: 20px; max-height: 300px; overflow-y: auto;">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+
+    <!-- Indicator Config Modal (for sidebar) -->
+    <div id="indicatorConfigModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000;">
+        <div id="indicatorConfigModalContent" style="background: #1e222d; border-radius: 8px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #2a2e39; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            <!-- Header -->
+            <div style="padding: 20px; border-bottom: 1px solid #2a2e39; display: flex; justify-content: space-between; align-items: center;">
+                <h2 id="modalConfigTitle" style="margin: 0; color: #2962ff; font-size: 18px;">📊 Configure Indicator</h2>
+                <button onclick="closeIndicatorConfigModal();" style="background: transparent; border: none; color: #d1d4dc; font-size: 28px; cursor: pointer; padding: 0; width: 40px; height: 40px; line-height: 30px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.color='#ef5350'" onmouseout="this.style.color='#d1d4dc'">&times;</button>
             </div>
 
-            <!-- Saved Configurations -->
-            <div style="margin-top: 1rem;">
-                <h3 style="font-size: 0.875rem; margin: 0 0 0.5rem 0; color: var(--text-secondary);">Saved Configurations:</h3>
-                <div id="engineConfigsList" style="padding: 1rem; background: var(--bg-secondary); border-radius: 4px; text-align: center; color: var(--text-secondary); font-size: 0.875rem;">
-                    Chưa có config nào
+            <!-- Content -->
+            <div style="flex: 1; overflow-y: auto; padding: 20px;">
+                <!-- Indicator Type (readonly when adding) -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Indicator Type</label>
+                    <input type="text" id="modalIndicatorType" readonly style="width: 100%; padding: 10px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
                 </div>
+
+                <!-- Indicator ID -->
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Indicator ID</label>
+                    <input type="text" id="modalIndicatorId" placeholder="e.g., ema_20, rsi_14" style="width: 100%; padding: 10px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                    <small style="color: #787b86; font-size: 11px;">Unique identifier for this indicator</small>
+                </div>
+
+                <!-- Parameters Section -->
+                <div id="modalParamsSection">
+                    <h3 style="color: #d1d4dc; font-size: 14px; margin-bottom: 12px;">Parameters:</h3>
+                    <div id="modalParamsContainer"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 15px 20px; border-top: 1px solid #2a2e39; display: flex; justify-content: flex-end; gap: 10px;">
+                <button onclick="closeIndicatorConfigModal();" style="padding: 10px 20px; background: #2a2e39; color: #d1d4dc; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">Cancel</button>
+                <button id="modalSaveBtn" onclick="saveIndicatorFromModal()" style="padding: 10px 20px; background: #2962ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">Add Indicator</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Indicators Modal (độc lập với sidebar) -->
+    <div id="chartIndicatorsModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 800px; max-height: 85vh;">
+            <div class="modal-header">
+                <h3 style="color: #2962ff;">📈 Chart Indicators</h3>
+                <button class="btn-close" onclick="closeChartIndicatorsModal()">×</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;">
+                <!-- Indicator Categories -->
+                <div class="indicator-categories" style="margin-bottom: 20px;">
+                    <button class="category-btn active" onclick="filterChartIndicators('all')">All</button>
+                    <button class="category-btn" onclick="filterChartIndicators('trend')">Trend</button>
+                    <button class="category-btn" onclick="filterChartIndicators('momentum')">Momentum</button>
+                    <button class="category-btn" onclick="filterChartIndicators('volatility')">Volatility</button>
+                    <button class="category-btn" onclick="filterChartIndicators('volume')">Volume</button>
+                    <button class="category-btn" onclick="filterChartIndicators('custom')">Custom</button>
+                </div>
+
+                <!-- Active Indicators on Chart -->
+                <div class="section" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Active Indicators on Chart</h3>
+                    <div id="chartActiveIndicatorsList" style="min-height: 100px;">
+                        <div style="text-align: center; color: #787b86; padding: 20px;">
+                            No indicators added yet. Add indicators from the list below.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Indicators -->
+                <div class="section">
+                    <h3 style="margin-bottom: 15px;">Available Indicators</h3>
+                    <div id="chartAvailableIndicatorsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeChartIndicatorsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Signals Modal (độc lập) -->
+    <div id="chartSignalsModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 900px; max-height: 85vh;">
+            <div class="modal-header">
+                <h3 style="color: #2962ff;">🎯 Chart Signals</h3>
+                <button class="btn-close" onclick="closeChartSignalsModal()">×</button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto;">
+                <!-- Signals Summary -->
+                <div class="section" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Signals Summary</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div class="stat-card" style="background: #1e222d; padding: 15px; border-radius: 6px; border-left: 3px solid #089981;">
+                            <div class="stat-label" style="font-size: 11px; color: #787b86; margin-bottom: 8px;">LONG SIGNALS</div>
+                            <div class="stat-value" id="chartLongSignalsCount" style="font-size: 24px; color: #089981; font-weight: 700;">0</div>
+                        </div>
+                        <div class="stat-card" style="background: #1e222d; padding: 15px; border-radius: 6px; border-left: 3px solid #f23645;">
+                            <div class="stat-label" style="font-size: 11px; color: #787b86; margin-bottom: 8px;">SHORT SIGNALS</div>
+                            <div class="stat-value" id="chartShortSignalsCount" style="font-size: 24px; color: #f23645; font-weight: 700;">0</div>
+                        </div>
+                        <div class="stat-card" style="background: #1e222d; padding: 15px; border-radius: 6px; border-left: 3px solid #2962ff;">
+                            <div class="stat-label" style="font-size: 11px; color: #787b86; margin-bottom: 8px;">TOTAL SIGNALS</div>
+                            <div class="stat-value" id="chartTotalSignalsCount" style="font-size: 24px; color: #2962ff; font-weight: 700;">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Display Controls -->
+                <div class="section" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Chart Display Controls</h3>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-icon" id="togglePositionPanel" onclick="togglePositionPanel()" title="Bật/tắt Position Panel" style="padding: 10px 15px;">
+                            📊 Position Panel
+                        </button>
+                        <button class="btn-icon" id="toggleBuySignals" onclick="toggleBuySignals()" title="Bật/tắt Buy Signals" style="background: #26a69a; padding: 10px 15px;">
+                            🔼 Buy Signals
+                        </button>
+                        <button class="btn-icon" id="toggleShortSignals" onclick="toggleShortSignals()" title="Bật/tắt Short Signals" style="background: #ef5350; padding: 10px 15px;">
+                            🔽 Short Signals
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Long Entry Signals -->
+                <div class="section" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px; color: #089981;">Long Entry Signals</h3>
+                    <div id="chartLongSignalsList" style="min-height: 80px;">
+                        <div style="text-align: center; color: #787b86; padding: 15px;">
+                            No long entry signals configured
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Short Entry Signals -->
+                <div class="section">
+                    <h3 style="margin-bottom: 15px; color: #f23645;">Short Entry Signals</h3>
+                    <div id="chartShortSignalsList" style="min-height: 80px;">
+                        <div style="text-align: center; color: #787b86; padding: 15px;">
+                            No short entry signals configured
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeChartSignalsModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Indicator Config Modal -->
+    <div id="chartIndicatorConfigModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 style="color: #2962ff;">⚙️ Configure Indicator</h3>
+                <button class="btn-close" onclick="closeChartIndicatorConfigModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Indicator Type (readonly) -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Indicator Type</label>
+                    <input type="text" id="chartConfigIndicatorType" readonly style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                </div>
+
+                <!-- Indicator Name -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Display Name</label>
+                    <input type="text" id="chartConfigIndicatorName" placeholder="e.g., EMA 20" style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                </div>
+
+                <!-- Color Picker -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Line Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="chartConfigColor" value="#2962ff" style="width: 60px; height: 38px; border: 1px solid #2a2e39; border-radius: 4px; cursor: pointer;">
+                        <input type="text" id="chartConfigColorHex" value="#2962ff" maxlength="7" style="flex: 1; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                    </div>
+                </div>
+
+                <!-- Line Width -->
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-size: 12px; color: #787b86; margin-bottom: 5px;">Line Width</label>
+                    <input type="number" id="chartConfigLineWidth" value="2" min="1" max="5" step="1" style="width: 100%; padding: 8px; background: #131722; border: 1px solid #2a2e39; border-radius: 4px; color: #d1d4dc; font-size: 13px;">
+                </div>
+
+                <!-- Dynamic Parameters Container -->
+                <div id="chartConfigParamsContainer">
+                    <!-- Parameters will be dynamically added here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeChartIndicatorConfigModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveChartIndicatorConfig()" style="padding: 10px 20px; background: #2962ff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                    Add to Chart
+                </button>
             </div>
         </div>
     </div>
 {% endblock %}
 
 {% block extra_js %}
-    <script src="{{ url_for('static', filename='js/chart-indicators-modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/data-manager.js') }}?v=17.0"></script>
+    <script src="{{ url_for('static', filename='js/signal-engine.js') }}?v=17.2"></script>
+    <script src="{{ url_for('static', filename='js/workspace.js') }}?v=17.7"></script>
+    <script src="{{ url_for('static', filename='js/strategy-builder.js') }}?v=17.6"></script>
+    <script src="{{ url_for('static', filename='js/chart-indicators.js') }}?v=1.3"></script>
+    <script src="{{ url_for('static', filename='js/position-markers.js') }}?v=1.0"></script>
+    <script src="{{ url_for('static', filename='js/trading-engine-core.js') }}?v=1.3"></script>
     <script src="{{ url_for('static', filename='js/chart-strategy.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/strategy.js') }}"></script>
     <script>
         // Setup indicators and signals buttons
         document.addEventListener('DOMContentLoaded', function() {
