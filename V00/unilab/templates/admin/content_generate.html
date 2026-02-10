@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+{% block title %}Generate Content{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_content') }}">AI Content</a><span class="sep">></span>Generate{% endblock %}
+{% block content %}
+<h1 class="page-title">Generate AI Content</h1>
+
+<form method="POST" style="max-width:800px">
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Title *</label><input class="form-input" name="title" required placeholder="e.g. Cao su chan phuoc la gi?"></div>
+    <div class="form-group"><label class="form-label">Vertical</label>
+      <select name="vertical_slug" class="form-select"><option value="">-- All --</option>{% for v in verticals %}<option value="{{ v.slug }}">{{ v.name }}</option>{% endfor %}</select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group"><label class="form-label">Content Type</label>
+      <select name="content_type" class="form-select"><option value="article">Article (text)</option><option value="image">Image</option><option value="translate">Translation</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">AI Provider</label>
+      <select name="ai_provider" class="form-select"><option value="openai">OpenAI GPT-4o</option><option value="claude">Claude Sonnet</option><option value="gemini">Google Gemini</option><option value="dalle">DALL-E 3 (image)</option></select>
+    </div>
+  </div>
+
+  <div class="form-group"><label class="form-label">Prompt / Instructions</label>
+    <textarea class="form-textarea" name="prompt" style="min-height:200px" placeholder="Write detailed instructions for AI...&#10;&#10;Example:&#10;Write an 800-word SEO article about 'cao su chan phuoc' for CUV vehicles.&#10;Include: what it is, when to replace, cost, DIY guide.&#10;Keywords: cao su phuoc o to, thay cao su chan phuoc&#10;Tone: expert but easy to understand"></textarea>
+  </div>
+
+  <!-- Pricing Info -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:20px">
+    <div style="font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:8px">ESTIMATED COST</div>
+    <div style="display:flex;gap:24px;font-size:13px">
+      <span>GPT-4o article: ~1,500d</span>
+      <span>Claude article: ~1,000d</span>
+      <span>DALL-E image: ~1,000d</span>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Generate</button>
+    <a href="{{ url_for('admin_content') }}" class="btn btn-ghost">Cancel</a>
+  </div>
+</form>
+
+<!-- How API Works -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:32px;max-width:800px">
+  <h3 style="font-size:15px;margin-bottom:12px">How AI API Works</h3>
+  <div style="display:flex;gap:8px;font-size:12px;color:var(--text-dim)">
+    <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px"><strong style="color:var(--accent)">1. You write prompt</strong><br>Title, keywords, tone, length</div>
+    <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+    <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px"><strong style="color:var(--accent)">2. Server calls API</strong><br>POST to OpenAI/Claude with your prompt</div>
+    <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+    <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px"><strong style="color:var(--accent)">3. AI returns result</strong><br>Full article/image ready to review</div>
+    <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+    <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px"><strong style="color:var(--accent)">4. You review & publish</strong><br>Edit if needed, then publish</div>
+  </div>
+  <p style="font-size:11px;color:var(--text-dim);margin-top:12px">* Add your API keys in <a href="{{ url_for('admin_settings') }}" style="color:var(--accent)">Settings</a> to enable real AI generation.</p>
+</div>
+{% endblock %}

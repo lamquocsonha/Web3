@@ -1,0 +1,185 @@
+{# Car Zone Diagram - Interactive SVG "Butcher Chart" for CUV #}
+{# Usage: {% include 'car/_car_diagram.html' %} #}
+{# Variables: segment, active_zone_slug (optional) #}
+
+<div class="car-diagram-wrap">
+  <div class="cd-title">📐 Sơ đồ vùng xe — <strong>{{ segment.name }}</strong></div>
+  <div class="cd-subtitle">Di chuột hoặc chạm vào vùng trên xe để xem chi tiết</div>
+
+  <svg class="car-diagram-svg" viewBox="0 0 960 480" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="groundGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="transparent"/>
+        <stop offset="20%" stop-color="var(--cd-ground)"/>
+        <stop offset="80%" stop-color="var(--cd-ground)"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </linearGradient>
+    </defs>
+
+    <!-- Ground shadow -->
+    <ellipse cx="480" cy="420" rx="380" ry="12" fill="url(#groundGrad)" opacity="0.3"/>
+
+    <!-- ═══ CAR BODY OUTLINE ═══ -->
+    <path class="car-body-outline" d="
+      M 140,320
+      L 140,260
+      C 140,240 160,220 180,210
+      L 260,190
+      L 280,190
+      L 310,130
+      C 320,115 340,105 360,105
+      L 580,105
+      C 600,105 620,115 630,130
+      L 660,190
+      L 780,200
+      C 810,205 830,225 830,255
+      L 830,320
+      Z
+    "/>
+
+    <!-- Wheel wells -->
+    <path class="car-body-outline" d="M 200,320 A 55,55 0 0 1 310,320"/>
+    <path class="car-body-outline" d="M 650,320 A 55,55 0 0 1 760,320"/>
+
+    <!-- Windows -->
+    <path class="car-window" d="
+      M 325,135 L 360,110 L 470,110 L 470,180 L 315,180 Z
+    "/>
+    <path class="car-window" d="
+      M 480,110 L 580,110 C 595,110 610,118 618,130 L 645,180 L 480,180 Z
+    "/>
+
+    <!-- Lights -->
+    <rect class="car-light-front" x="140" y="240" width="18" height="30" rx="4"/>
+    <rect class="car-light-rear" x="815" y="230" width="16" height="40" rx="4"/>
+
+    <!-- ═══ ZONE OVERLAYS (interactive) ═══ -->
+    {% for z in segment.zones %}
+    <a href="{{ url_for('car_zone', segment_slug=segment.slug, zone_slug=z.slug) }}" class="car-zone-link">
+      <g class="car-zone-group {% if active_zone_slug is defined and active_zone_slug == z.slug %}active{% endif %}"
+         data-zone="{{ z.slug }}" data-name="{{ z.name }}" data-color="{{ z.color }}">
+
+        {% if z.slug == 'dong-co' %}
+        <!-- Động cơ: Front hood area -->
+        <path class="zone-fill" d="M 145,260 C 145,242 162,224 180,214 L 260,194 L 300,194 L 300,315 L 200,315 A 55,50 0 0 1 210,280 L 145,280 Z" />
+        <circle class="zone-dot" cx="220" cy="245" r="6"/>
+        <text class="zone-label" x="220" y="268">{{ z.icon }} Động cơ</text>
+
+        {% elif z.slug == 'he-thong-treo' %}
+        <!-- Hệ thống treo: Wheel areas -->
+        <path class="zone-fill" d="M 195,275 A 60,60 0 0 0 315,275 L 315,325 A 55,55 0 0 1 195,325 Z"/>
+        <path class="zone-fill" d="M 645,275 A 60,60 0 0 0 765,275 L 765,325 A 55,55 0 0 1 645,325 Z"/>
+        <circle class="zone-dot" cx="255" cy="350" r="6"/>
+        <text class="zone-label" x="255" y="373">{{ z.icon }} Treo</text>
+        <circle class="zone-dot" cx="705" cy="350" r="6"/>
+        <text class="zone-label" x="705" y="373">{{ z.icon }} Treo</text>
+
+        {% elif z.slug == 'he-thong-phanh' %}
+        <!-- Hệ thống phanh: Near wheels inner -->
+        <circle class="zone-fill" cx="255" cy="310" r="32"/>
+        <circle class="zone-fill" cx="705" cy="310" r="32"/>
+        <circle class="zone-dot" cx="255" cy="395" r="6"/>
+        <text class="zone-label" x="255" y="415">{{ z.icon }} Phanh</text>
+
+        {% elif z.slug == 'he-thong-dien' %}
+        <!-- Hệ thống điện: Middle-front area -->
+        <rect class="zone-fill" x="310" y="185" width="120" height="90" rx="8"/>
+        <circle class="zone-dot" cx="370" cy="230" r="6"/>
+        <text class="zone-label" x="370" y="250">{{ z.icon }} Điện</text>
+
+        {% elif z.slug == 'he-thong-lai' %}
+        <!-- Hệ thống lái: Steering area -->
+        <rect class="zone-fill" x="300" y="120" width="80" height="65" rx="8"/>
+        <circle class="zone-dot" cx="340" cy="152" r="6"/>
+        <text class="zone-label" x="340" y="105">{{ z.icon }} Lái</text>
+
+        {% elif z.slug == 'gam-xe' %}
+        <!-- Gầm xe: Bottom strip -->
+        <rect class="zone-fill" x="310" y="295" width="340" height="30" rx="6"/>
+        <circle class="zone-dot" cx="480" cy="310" r="6"/>
+        <text class="zone-label" x="480" y="340">{{ z.icon }} Gầm</text>
+
+        {% elif z.slug == 'noi-that' %}
+        <!-- Nội thất: Cabin interior -->
+        <path class="zone-fill" d="M 320,130 C 325,118 340,110 355,110 L 580,110 C 595,110 610,118 618,130 L 650,185 L 310,185 Z"/>
+        <circle class="zone-dot" cx="480" cy="145" r="6"/>
+        <text class="zone-label" x="480" y="165">{{ z.icon }} Nội thất</text>
+
+        {% elif z.slug == 'ngoai-that' %}
+        <!-- Ngoại thất: Body panels -->
+        <path class="zone-fill" d="M 650,195 L 780,205 C 808,208 825,225 828,252 L 828,315 L 765,315 A 55,50 0 0 1 765,280 L 650,280 Z"/>
+        <circle class="zone-dot" cx="740" cy="240" r="6"/>
+        <text class="zone-label" x="740" y="263">{{ z.icon }} Ngoại thất</text>
+
+        {% else %}
+        <!-- Fallback zone -->
+        <rect class="zone-fill" x="440" y="200" width="100" height="60" rx="8"/>
+        <text class="zone-label" x="490" y="235">{{ z.icon }} {{ z.name[:8] }}</text>
+        {% endif %}
+      </g>
+    </a>
+    {% endfor %}
+
+    <!-- Wheels (on top) -->
+    <circle class="car-wheel" cx="255" cy="320" r="42"/>
+    <circle class="car-wheel-inner" cx="255" cy="320" r="22"/>
+    <circle class="car-wheel-hub" cx="255" cy="320" r="6"/>
+    <circle class="car-wheel" cx="705" cy="320" r="42"/>
+    <circle class="car-wheel-inner" cx="705" cy="320" r="22"/>
+    <circle class="car-wheel-hub" cx="705" cy="320" r="6"/>
+
+  </svg>
+
+  <!-- Zone info tooltip -->
+  <div class="cd-tooltip" id="cdTooltip">
+    <span class="cd-tt-icon" id="cdTtIcon"></span>
+    <span class="cd-tt-name" id="cdTtName"></span>
+    <span class="cd-tt-count" id="cdTtCount"></span>
+  </div>
+
+  <!-- Zone legend -->
+  <div class="cd-legend">
+    {% for z in segment.zones %}
+    <a href="{{ url_for('car_zone', segment_slug=segment.slug, zone_slug=z.slug) }}"
+       class="cd-legend-item {% if active_zone_slug is defined and active_zone_slug == z.slug %}active{% endif %}"
+       data-zone="{{ z.slug }}"
+       onmouseenter="highlightZone('{{ z.slug }}')" onmouseleave="unhighlightZone('{{ z.slug }}')">
+      <span class="cd-legend-dot" style="background:{{ z.color }}"></span>
+      <span class="cd-legend-name">{{ z.name }}</span>
+      <span class="cd-legend-count">{{ z.parts|length }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+// Zone interaction
+document.querySelectorAll('.car-zone-group').forEach(g => {
+  const slug = g.dataset.zone;
+  const name = g.dataset.name;
+  const color = g.dataset.color;
+  
+  g.addEventListener('mouseenter', () => {
+    g.classList.add('hover');
+    // Highlight legend
+    document.querySelectorAll(`.cd-legend-item[data-zone="${slug}"]`).forEach(l => l.classList.add('hover'));
+    // Show tooltip
+    const tt = document.getElementById('cdTooltip');
+    tt.classList.add('visible');
+    document.getElementById('cdTtName').textContent = name;
+  });
+  
+  g.addEventListener('mouseleave', () => {
+    g.classList.remove('hover');
+    document.querySelectorAll(`.cd-legend-item[data-zone="${slug}"]`).forEach(l => l.classList.remove('hover'));
+    document.getElementById('cdTooltip').classList.remove('visible');
+  });
+});
+
+function highlightZone(slug) {
+  document.querySelectorAll(`.car-zone-group[data-zone="${slug}"]`).forEach(g => g.classList.add('hover'));
+}
+function unhighlightZone(slug) {
+  document.querySelectorAll(`.car-zone-group[data-zone="${slug}"]`).forEach(g => g.classList.remove('hover'));
+}
+</script>

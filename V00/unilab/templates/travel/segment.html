@@ -1,0 +1,13 @@
+{% extends "travel/base.html" %}{% block title %}{{ segment.name }}{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('travel_index') }}">UniTravel</a><span class="sep">›</span>{{ segment.name }}</div>{% endblock %}
+{% block content %}
+<div class="page-hero"><span style="font-size:36px">{{ segment.icon }}</span><h1>{{ segment.name }}</h1><p class="subtitle">{{ segment.description }}</p></div>
+
+{% if segment.slug == 'trong-nuoc' %}{% include 'travel/_travel_diagram.html' %}{% endif %}
+
+<section class="section"><div class="section-header-pub"><h2>Danh mục ({{ segment.zones|length }})</h2></div>
+  <div class="zones-grid">{% for z in segment.zones %}<a href="{{ url_for('travel_zone', segment_slug=segment.slug, zone_slug=z.slug) }}" class="zone-card-pub">
+    <span class="zone-icon-pub" style="background:{{ z.color }}20;color:{{ z.color }}">{{ z.icon }}</span><div><h3>{{ z.name }}</h3><p>{{ z.description[:80] }}...</p><span class="zone-count">{{ z.parts|length }} mục</span></div></a>{% endfor %}</div></section>
+{% if articles %}<section class="section"><div class="section-header-pub"><h2>📖 Bài viết liên quan</h2></div>
+  <div class="articles-grid">{% for a in articles %}<a href="{{ url_for('travel_article', slug=a.slug) }}" class="article-card-sm"><div class="acs-tier {{ a.tier }}">{{ a.tier|replace('-',' ')|title }}</div><h4>{{ a.title[:60] }}...</h4><p>{{ a.excerpt[:90] }}...</p><div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div></a>{% endfor %}</div></section>{% endif %}
+{% endblock %}

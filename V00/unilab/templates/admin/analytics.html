@@ -1,0 +1,86 @@
+{% extends "admin/base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Analytics{% endblock %}
+{% block content %}
+<h1 class="page-title">Analytics</h1>
+
+<!-- 4 Levels -->
+<div class="items-grid" style="grid-template-columns:1fr 1fr">
+  <div class="item-card" style="border-left:4px solid #00cec9">
+    <div style="font-family:'DM Mono';font-size:10px;color:#00cec9;margin-bottom:8px">LEVEL 1 - CROSS-VERTICAL</div>
+    <h3>System Overview</h3>
+    <div class="item-desc" style="margin-top:8px;line-height:1.6">
+      Compare performance across verticals: car vs pet vs finance.<br>
+      Which vertical is growing, which needs more investment.<br>
+      Total revenue, traffic, top pages across all subdomains.<br>
+      Marketing budget allocation by ROI per vertical.
+    </div>
+    <div class="item-meta" style="margin-top:12px">{{ verticals|length }} verticals active</div>
+  </div>
+
+  <div class="item-card" style="border-left:4px solid #8b5cf6">
+    <div style="font-family:'DM Mono';font-size:10px;color:#8b5cf6;margin-bottom:8px">LEVEL 2 - PER VERTICAL</div>
+    <h3>Vertical Deep Dive</h3>
+    <div class="item-desc" style="margin-top:8px;line-height:1.6">
+      car.unilab.vn: traffic by segment (CUV vs Sedan vs SUV).<br>
+      Top searched parts, hottest zones.<br>
+      Revenue by product category, by affiliate network.<br>
+      SEO: keyword rankings, organic traffic trend.
+    </div>
+    <div class="item-meta" style="margin-top:12px">
+      {% for v in verticals %}<span style="margin-right:12px">{{ v.icon }} {{ v.slug }}</span>{% endfor %}
+    </div>
+  </div>
+
+  <div class="item-card" style="border-left:4px solid #fdcb6e">
+    <div style="font-family:'DM Mono';font-size:10px;color:#fdcb6e;margin-bottom:8px">LEVEL 3 - PER PAGE</div>
+    <h3>Page & Product Analytics</h3>
+    <div class="item-desc" style="margin-top:8px;line-height:1.6">
+      Heatmap: where users click on 3D model.<br>
+      Funnel: view article > click product > click affiliate > purchase.<br>
+      Products with high CTR but low conversion > optimize.<br>
+      A/B test results: which layout converts better.
+    </div>
+    <div class="item-meta" style="margin-top:12px">Requires Google Analytics integration</div>
+  </div>
+
+  <div class="item-card" style="border-left:4px solid #fd79a8">
+    <div style="font-family:'DM Mono';font-size:10px;color:#fd79a8;margin-bottom:8px">LEVEL 4 - USER BEHAVIOR</div>
+    <h3>User Intelligence</h3>
+    <div class="item-desc" style="margin-top:8px;line-height:1.6">
+      User journey: from Google search > which page > what click > what buy.<br>
+      Cohort: return rate, cross-vertical (viewed car then home).<br>
+      Intent detection: browsing vs ready to buy.<br>
+      Device & geo: mobile vs desktop, HCM vs HN.
+    </div>
+    <div class="item-meta" style="margin-top:12px">Advanced tracking required</div>
+  </div>
+</div>
+
+<!-- Subdomain Management -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:24px">
+  <h3 style="font-size:16px;margin-bottom:16px">Subdomain Status</h3>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Subdomain</th><th>Status</th><th>Segments</th><th>Parts</th><th>Mode</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for v in verticals %}
+        <tr>
+          <td style="font-family:'DM Mono';font-size:13px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{{ v.color }};margin-right:6px"></span>{{ v.slug }}.unilab.vn</td>
+          <td><span class="status-badge {{ v.status }}">{{ v.status }}</span></td>
+          <td>{{ v.segments|length }}</td>
+          <td>-</td>
+          <td style="font-size:12px">{{ v.default_mode }}</td>
+          <td><a href="{{ url_for('admin_vertical_detail', vid=v.id) }}" class="btn btn-ghost btn-sm">Manage</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius);padding:20px;margin-top:16px;font-size:13px;color:var(--text-dim)">
+  <strong style="color:var(--accent)">Note:</strong> Full analytics requires Google Analytics 4 or Plausible integration.
+  Demo data is shown above. Connect your analytics provider in <a href="{{ url_for('admin_settings') }}" style="color:var(--accent)">Settings</a>.
+</div>
+{% endblock %}

@@ -1,0 +1,178 @@
+{# Travel Zone Diagram - Interactive SVG Vietnam Map #}
+{# For segment "Trong nước" - 3 regions highlighted #}
+
+<div class="travel-diagram-wrap">
+  <div class="cd-title">🗺️ Bản đồ du lịch — <strong>{{ segment.name }}</strong></div>
+  <div class="cd-subtitle">Di chuột hoặc chạm vào vùng trên bản đồ để khám phá</div>
+
+  <svg class="travel-diagram-svg" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- ═══ VIETNAM MAP OUTLINE ═══ -->
+    <!-- Simplified S-shape Vietnam map -->
+
+    <!-- Background sea -->
+    <rect class="travel-sea" x="0" y="0" width="500" height="700" rx="16"/>
+
+    {% for z in segment.zones %}
+    <a href="{{ url_for('travel_zone', segment_slug=segment.slug, zone_slug=z.slug) }}" class="travel-zone-link">
+      <g class="travel-zone-group {% if active_zone_slug is defined and active_zone_slug == z.slug %}active{% endif %}"
+         data-zone="{{ z.slug }}" data-name="{{ z.name }}" data-color="{{ z.color }}">
+
+        {% if z.slug == 'mien-bac' %}
+        <!-- Miền Bắc: Northern Vietnam -->
+        <path class="zone-fill" d="
+          M 180,60 L 220,50 L 260,42 L 290,48 L 320,55
+          L 340,70 L 355,90 L 360,115 L 350,140
+          L 340,160 L 320,175 L 300,185 L 280,190
+          L 260,195 L 240,200 L 225,210
+          L 210,200 L 195,185 L 180,170
+          L 165,150 L 155,130 L 150,110
+          L 155,90 L 165,75 Z
+        "/>
+        <circle class="zone-dot" cx="260" cy="120" r="8"/>
+        <text class="zone-label" x="260" y="105" style="font-size:14px">{{ z.icon }} Miền Bắc</text>
+        <!-- Hanoi marker -->
+        <circle cx="250" cy="130" r="4" fill="#e74c3c" opacity="0.8"/>
+        <text class="zone-city" x="266" y="135">Hà Nội</text>
+        <!-- Ha Long -->
+        <circle cx="310" cy="110" r="3" fill="#e74c3c" opacity="0.6"/>
+        <text class="zone-city" x="318" y="115">Hạ Long</text>
+        <!-- Sa Pa -->
+        <circle cx="200" cy="72" r="3" fill="#e74c3c" opacity="0.6"/>
+        <text class="zone-city" x="170" y="68">Sa Pa</text>
+
+        {% elif z.slug == 'mien-trung' %}
+        <!-- Miền Trung: Central Vietnam (narrow S-shape) -->
+        <path class="zone-fill" d="
+          M 225,210 L 240,200 L 260,195 L 280,190
+          L 300,200 L 310,220 L 315,245
+          L 320,270 L 330,295 L 340,320
+          L 350,345 L 355,370 L 350,395
+          L 340,410 L 325,420 L 310,425
+          L 295,420 L 280,410 L 270,395
+          L 260,375 L 255,350 L 248,325
+          L 240,300 L 235,275 L 230,250
+          L 225,230 Z
+        "/>
+        <circle class="zone-dot" cx="300" cy="310" r="8"/>
+        <text class="zone-label" x="300" y="295" style="font-size:14px">{{ z.icon }} Miền Trung</text>
+        <!-- Hue -->
+        <circle cx="275" cy="235" r="3" fill="#3498db" opacity="0.8"/>
+        <text class="zone-city" x="245" y="230">Huế</text>
+        <!-- Da Nang -->
+        <circle cx="305" cy="268" r="3" fill="#3498db" opacity="0.8"/>
+        <text class="zone-city" x="315" y="273">Đà Nẵng</text>
+        <!-- Hoi An -->
+        <circle cx="310" cy="285" r="3" fill="#3498db" opacity="0.6"/>
+        <text class="zone-city" x="320" y="290">Hội An</text>
+        <!-- Nha Trang -->
+        <circle cx="330" cy="375" r="3" fill="#3498db" opacity="0.6"/>
+        <text class="zone-city" x="340" y="380">Nha Trang</text>
+        <!-- Da Lat -->
+        <circle cx="300" cy="400" r="3" fill="#3498db" opacity="0.6"/>
+        <text class="zone-city" x="265" y="405">Đà Lạt</text>
+
+        {% elif z.slug == 'mien-nam' %}
+        <!-- Miền Nam: Southern Vietnam (wider delta) -->
+        <path class="zone-fill" d="
+          M 310,425 L 325,420 L 340,410
+          L 350,420 L 355,440 L 350,465
+          L 340,490 L 330,510 L 315,530
+          L 295,545 L 270,555 L 245,560
+          L 220,555 L 200,545 L 185,530
+          L 175,510 L 175,490 L 180,470
+          L 190,450 L 205,435 L 225,425
+          L 245,420 L 265,418 L 280,415
+          L 295,420 Z
+        "/>
+        <circle class="zone-dot" cx="270" cy="480" r="8"/>
+        <text class="zone-label" x="270" y="465" style="font-size:14px">{{ z.icon }} Miền Nam</text>
+        <!-- HCM City -->
+        <circle cx="290" cy="465" r="4" fill="#2ecc71" opacity="0.8"/>
+        <text class="zone-city" x="300" y="470">TP.HCM</text>
+        <!-- Phu Quoc -->
+        <circle cx="180" cy="530" r="3" fill="#2ecc71" opacity="0.6"/>
+        <text class="zone-city" x="150" y="545">Phú Quốc</text>
+        <!-- Can Tho -->
+        <circle cx="240" cy="520" r="3" fill="#2ecc71" opacity="0.6"/>
+        <text class="zone-city" x="248" y="525">Cần Thơ</text>
+        <!-- Vung Tau -->
+        <circle cx="325" cy="490" r="3" fill="#2ecc71" opacity="0.6"/>
+        <text class="zone-city" x="333" y="495">Vũng Tàu</text>
+
+        {% else %}
+        <ellipse class="zone-fill" cx="260" cy="350" rx="60" ry="40"/>
+        <text class="zone-label" x="260" y="355">{{ z.icon }} {{ z.name[:10] }}</text>
+        {% endif %}
+      </g>
+    </a>
+    {% endfor %}
+
+    <!-- Map outline (on top for crisp edges) -->
+    <path class="travel-outline" d="
+      M 180,60 L 220,50 L 260,42 L 290,48 L 320,55
+      L 340,70 L 355,90 L 360,115 L 350,140
+      L 340,160 L 320,175 L 300,185 L 310,220
+      L 315,245 L 320,270 L 330,295 L 340,320
+      L 350,345 L 355,370 L 350,395
+      L 355,440 L 350,465 L 340,490 L 330,510
+      L 315,530 L 295,545 L 270,555 L 245,560
+      L 220,555 L 200,545 L 185,530
+      L 175,510 L 175,490 L 180,470
+      L 190,450 L 205,435 L 225,425
+      L 225,210 L 210,200 L 195,185
+      L 180,170 L 165,150 L 155,130
+      L 150,110 L 155,90 L 165,75 Z
+    "/>
+
+    <!-- Compass -->
+    <g transform="translate(430,80)">
+      <circle cx="0" cy="0" r="22" class="compass-bg"/>
+      <text x="0" y="-8" class="compass-text" text-anchor="middle">N</text>
+      <line x1="0" y1="-4" x2="0" y2="10" class="compass-line"/>
+      <polygon points="0,-18 -4,-10 4,-10" class="compass-arrow"/>
+    </g>
+
+    <!-- Scale bar -->
+    <g transform="translate(380,640)">
+      <line x1="0" y1="0" x2="80" y2="0" class="scale-line"/>
+      <line x1="0" y1="-4" x2="0" y2="4" class="scale-line"/>
+      <line x1="80" y1="-4" x2="80" y2="4" class="scale-line"/>
+      <text x="40" y="15" class="scale-text" text-anchor="middle">~500km</text>
+    </g>
+
+    <!-- Biển Đông label -->
+    <text x="420" y="350" class="sea-label" transform="rotate(15,420,350)">Biển Đông</text>
+
+  </svg>
+
+  <!-- Legend -->
+  <div class="cd-legend">
+    {% for z in segment.zones %}
+    <a href="{{ url_for('travel_zone', segment_slug=segment.slug, zone_slug=z.slug) }}"
+       class="cd-legend-item {% if active_zone_slug is defined and active_zone_slug == z.slug %}active{% endif %}"
+       data-zone="{{ z.slug }}"
+       onmouseenter="highlightTravelZone('{{ z.slug }}')" onmouseleave="unhighlightTravelZone('{{ z.slug }}')">
+      <span class="cd-legend-dot" style="background:{{ z.color }}"></span>
+      <span class="cd-legend-name">{{ z.name }}</span>
+      <span class="cd-legend-count">{{ z.parts|length }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.travel-zone-group').forEach(g => {
+  const slug = g.dataset.zone;
+  g.addEventListener('mouseenter', () => {
+    g.classList.add('hover');
+    document.querySelectorAll(`.cd-legend-item[data-zone="${slug}"]`).forEach(l => l.classList.add('hover'));
+  });
+  g.addEventListener('mouseleave', () => {
+    g.classList.remove('hover');
+    document.querySelectorAll(`.cd-legend-item[data-zone="${slug}"]`).forEach(l => l.classList.remove('hover'));
+  });
+});
+function highlightTravelZone(slug) { document.querySelectorAll(`.travel-zone-group[data-zone="${slug}"]`).forEach(g => g.classList.add('hover')); }
+function unhighlightTravelZone(slug) { document.querySelectorAll(`.travel-zone-group[data-zone="${slug}"]`).forEach(g => g.classList.remove('hover')); }
+</script>

@@ -1,0 +1,74 @@
+{# Shared products layout with sidebar — include from car/pet/travel products.html #}
+{# Required vars: segments, zone_counts, f_zone, f_network, networks, products, product_url #}
+
+<div class="products-layout">
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="prod-sidebar">
+    <div class="ps-header">
+      <h3>📂 Danh mục</h3>
+      <a href="{{ url_for(product_url) }}" class="ps-all {% if not f_zone %}active{% endif %}">
+        Tất cả <span class="ps-count">{{ products|length }}</span>
+      </a>
+    </div>
+
+    {% for seg in segments %}
+    <div class="ps-segment">
+      <div class="ps-seg-name">{{ seg.icon }} {{ seg.name }}</div>
+      {% for z in seg.zones %}
+      {% set zcount = zone_counts.get(z.slug, 0) %}
+      <a href="{{ url_for(product_url, zone=z.slug, network=f_network) }}"
+         class="ps-zone {% if f_zone == z.slug %}active{% endif %}">
+        <span class="ps-zone-icon" style="color:{{ z.color }}">{{ z.icon }}</span>
+        <span class="ps-zone-name">{{ z.name }}</span>
+        {% if zcount %}<span class="ps-count">{{ zcount }}</span>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <div class="prod-main">
+    <!-- Top bar: network filter + count -->
+    <div class="pm-topbar">
+      <div class="pm-info">
+        {% if f_zone %}
+        <span class="pm-active-zone">{{ f_zone|replace('-',' ')|title }}</span>
+        <a href="{{ url_for(product_url, network=f_network) }}" class="pm-clear-zone">✕</a>
+        {% endif %}
+        <span class="pm-count">{{ products|length }} sản phẩm</span>
+      </div>
+      <div class="pm-filters">
+        {% for n in networks %}
+        <a href="{{ url_for(product_url, zone=f_zone, network=n if f_network != n else '') }}"
+           class="pm-net-btn {% if f_network == n %}active{% endif %} pc-net-{{ n }}">
+          {{ n|title }}
+        </a>
+        {% endfor %}
+        {% if f_network %}
+        <a href="{{ url_for(product_url, zone=f_zone) }}" class="pm-net-btn pm-clear">Tất cả sàn</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Product Grid -->
+    {% if products %}
+    <div class="products-grid">
+      {% for al, part, zone, seg in products %}
+      <div class="product-card">
+        <div class="pc-header">
+          <span class="pc-zone" style="background:{{ zone.color }}15;color:{{ zone.color }}">{{ zone.icon }} {{ zone.name }}</span>
+          <span class="pc-network pc-net-{{ al.network }}">{{ al.network }}</span>
+        </div>
+        <h3 class="pc-name">{{ al.product_name or part.name_vi }}</h3>
+        <p class="pc-path">{{ seg.name }} › {{ zone.name }} › {{ part.name_vi }}</p>
+        {% if al.price %}<div class="pc-price">{{ "{:,.0f}".format(al.price) }}<small>đ</small></div>{% endif %}
+        <a href="{{ al.url }}" target="_blank" rel="nofollow" class="pc-buy">Xem trên {{ al.network|title }} →</a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-pub"><p>Không tìm thấy sản phẩm phù hợp</p></div>
+    {% endif %}
+  </div>
+</div>
