@@ -1,0 +1,10 @@
+{% extends "pet/base.html" %}{% block title %}Sản phẩm{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('pet_index') }}">UniPet</a><span class="sep">›</span>Sản phẩm</div>{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <span style="font-size:36px">🛒</span>
+  <h1>Sản phẩm thú cưng</h1>
+  <p class="subtitle">Thức ăn, phụ kiện, y tế — giá tốt từ các sàn TMĐT</p>
+</div>
+{% include '_products_layout.html' %}
+{% endblock %}

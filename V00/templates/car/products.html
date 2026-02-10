@@ -1,0 +1,10 @@
+{% extends "car/base.html" %}{% block title %}Sản phẩm{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('car_index') }}">UniCar</a><span class="sep">›</span>Sản phẩm</div>{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <span style="font-size:36px">🛒</span>
+  <h1>Sản phẩm phụ tùng ô tô</h1>
+  <p class="subtitle">Giá tốt nhất từ các sàn TMĐT — Shopee, Lazada, Tiki</p>
+</div>
+{% include '_products_layout.html' %}
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "car/base.html" %}
+{% block title %}UniCar — Kiến thức ô tô chi tiết{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="hero-content">
+    <h1 class="hero-title">Kiến thức ô tô<br><span class="hero-accent">từ tổng thể đến từng bu-lông</span></h1>
+    <p class="hero-desc">Tìm hiểu chi tiết về phụ tùng, hệ thống xe, bảo dưỡng và nâng cấp. Tra cứu mã OEM, so sánh giá, và mua đúng sản phẩm.</p>
+    <div class="hero-actions">
+      <a href="#segments" class="hero-btn primary">Khám phá phân khúc</a>
+      <a href="{{ url_for('car_knowledge') }}" class="hero-btn secondary">Đọc kiến thức</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hs-item"><span class="hs-num">{{ vertical.segments|length }}</span><span class="hs-label">phân khúc xe</span></div>
+      <div class="hs-item"><span class="hs-num">{{ recent_articles|length * 2 }}+</span><span class="hs-label">bài viết</span></div>
+      <div class="hs-item"><span class="hs-num">3</span><span class="hs-label">tầng kiến thức</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- KNOWLEDGE TIERS -->
+<section class="section">
+  <div class="section-header-pub">
+    <h2>📚 3 tầng kiến thức</h2>
+    <a href="{{ url_for('car_knowledge') }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="tier-grid">
+    <div class="tier-card tier-nganh">
+      <div class="tier-badge">T1</div>
+      <h3>Kiến thức ngành</h3>
+      <p>Thị trường, xu hướng, OEM vs aftermarket, chi phí bảo dưỡng tổng quan.</p>
+      <span class="tier-count">{{ articles_nganh|length }} bài viết</span>
+    </div>
+    <div class="tier-card tier-chung">
+      <div class="tier-badge">T2</div>
+      <h3>Kiến thức hệ thống</h3>
+      <p>Hệ thống treo, phanh, điện, động cơ — cấu tạo và nguyên lý hoạt động.</p>
+      <span class="tier-count">{{ articles_chung|length }} bài viết</span>
+    </div>
+    <div class="tier-card tier-chitiet">
+      <div class="tier-badge">T3</div>
+      <h3>Chi tiết phụ tùng</h3>
+      <p>Bài viết sâu về từng phụ tùng: khi nào thay, chọn loại nào, mẹo tiết kiệm.</p>
+      <span class="tier-count">{{ articles_chitiet|length }} bài viết</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED ARTICLES - NGANH -->
+{% if articles_nganh %}
+<section class="section">
+  <div class="section-header-pub">
+    <h2>🏭 Kiến thức ngành</h2>
+    <a href="{{ url_for('car_knowledge') }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="articles-featured">
+    {% for a in articles_nganh[:3] %}
+    <a href="{{ url_for('car_article', slug=a.slug) }}" class="article-card {% if loop.first %}featured{% endif %}">
+      <div class="ac-tier">Kiến thức ngành</div>
+      <h3 class="ac-title">{{ a.title }}</h3>
+      <p class="ac-excerpt">{{ a.excerpt[:120] }}{% if a.excerpt|length > 120 %}...{% endif %}</p>
+      <div class="ac-meta">
+        <span>{{ a.reading_time }} phút đọc</span>
+        <span>{{ "{:,}".format(a.views) }} views</span>
+        {% if a.ai_generated %}<span class="ac-ai">AI ✨</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- SEGMENTS -->
+<section class="section" id="segments">
+  <div class="section-header-pub">
+    <h2>🚗 Phân khúc xe</h2>
+  </div>
+  <div class="segments-grid">
+    {% for s in vertical.segments %}
+    <a href="{{ url_for('car_segment', segment_slug=s.slug) }}" class="segment-card-pub">
+      <span class="seg-icon">{{ s.icon }}</span>
+      <h3>{{ s.name }}</h3>
+      <p>{{ s.description[:80] }}{% if s.description|length > 80 %}...{% endif %}</p>
+      <span class="seg-count">{{ s.zones|length }} zones</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ARTICLES - CHUNG -->
+{% if articles_chung %}
+<section class="section">
+  <div class="section-header-pub">
+    <h2>⚙️ Kiến thức hệ thống</h2>
+    <a href="{{ url_for('car_knowledge') }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="articles-grid">
+    {% for a in articles_chung[:4] %}
+    <a href="{{ url_for('car_article', slug=a.slug) }}" class="article-card-sm">
+      <div class="acs-tier chung">Hệ thống</div>
+      <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
+      <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
+      <div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ARTICLES - CHI TIET -->
+{% if articles_chitiet %}
+<section class="section">
+  <div class="section-header-pub">
+    <h2>🔧 Chi tiết phụ tùng</h2>
+    <a href="{{ url_for('car_knowledge') }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="articles-grid">
+    {% for a in articles_chitiet[:4] %}
+    <a href="{{ url_for('car_article', slug=a.slug) }}" class="article-card-sm">
+      <div class="acs-tier chitiet">Chi tiết</div>
+      <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
+      <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
+      <div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="section cta-section">
+  <h2>Không tìm thấy phụ tùng cần tra cứu?</h2>
+  <p>Hệ thống kiến thức UniCar đang được mở rộng mỗi ngày. Chọn phân khúc xe để xem chi tiết từng hệ thống.</p>
+  <a href="#segments" class="hero-btn primary">Chọn phân khúc →</a>
+</section>
+
+{% endblock %}

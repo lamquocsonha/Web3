@@ -1,0 +1,11 @@
+{% extends "pet/base.html" %}{% block title %}Kiến thức{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('pet_index') }}">UniPet</a><span class="sep">›</span>Kiến thức</div>{% endblock %}
+{% block content %}
+<div class="page-hero"><h1>📚 Kiến thức</h1><p class="subtitle">Kiến thức chăm sóc thú cưng — từ tổng quan đến chi tiết.</p></div>
+{% if articles_nganh %}<section class="section"><div class="kb-tier-header nganh"><span class="kb-badge">T1</span><h2>Kiến thức ngành</h2></div>
+  <div class="articles-grid">{% for a in articles_nganh %}<a href="{{ url_for('pet_article', slug=a.slug) }}" class="article-card-sm"><div class="acs-tier nganh">Ngành</div><h4>{{ a.title }}</h4><p>{{ a.excerpt[:100] }}...</p><div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div></a>{% endfor %}</div></section>{% endif %}
+{% if articles_chung %}<section class="section"><div class="kb-tier-header chung"><span class="kb-badge">T2</span><h2>Kiến thức chung</h2></div>
+  <div class="articles-grid">{% for a in articles_chung %}<a href="{{ url_for('pet_article', slug=a.slug) }}" class="article-card-sm"><div class="acs-tier chung">{{ a.category|replace('-',' ')|title }}</div><h4>{{ a.title }}</h4><p>{{ a.excerpt[:100] }}...</p><div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div></a>{% endfor %}</div></section>{% endif %}
+{% if articles_chitiet %}<section class="section"><div class="kb-tier-header chitiet"><span class="kb-badge">T3</span><h2>Chi tiết</h2></div>
+  <div class="articles-grid">{% for a in articles_chitiet %}<a href="{{ url_for('pet_article', slug=a.slug) }}" class="article-card-sm"><div class="acs-tier chitiet">{{ a.category|replace('-',' ')|title }}</div><h4>{{ a.title }}</h4><p>{{ a.excerpt[:100] }}...</p><div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div></a>{% endfor %}</div></section>{% endif %}
+{% endblock %}

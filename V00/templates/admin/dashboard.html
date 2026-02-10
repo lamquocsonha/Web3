@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="page-title">Dashboard</h1>
+
+<div class="stats-grid" style="grid-template-columns:repeat(6,1fr)">
+  <div class="stat-card"><div class="stat-label">Verticals</div><div class="stat-value">{{ verticals|length }}</div></div>
+  <div class="stat-card"><div class="stat-label">Parts</div><div class="stat-value">{{ total_parts }}</div></div>
+  <div class="stat-card"><div class="stat-label">Affiliate Links</div><div class="stat-value">{{ total_links }}</div></div>
+  <div class="stat-card"><div class="stat-label">Total Clicks</div><div class="stat-value" style="color:#22c55e">{{ "{:,}".format(total_clicks) }}</div></div>
+  <div class="stat-card"><div class="stat-label">Conversions</div><div class="stat-value" style="color:#8b5cf6">{{ total_conversions }}</div></div>
+  <div class="stat-card"><div class="stat-label">AI Contents</div><div class="stat-value" style="color:#f59e0b">{{ total_ai }}</div></div>
+</div>
+
+<!-- KPI -->
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:32px">
+  <div class="stat-card" style="border-left:3px solid #00cec9"><div class="stat-label">Traffic (demo)</div><div class="stat-value" style="font-size:22px">{{ "{:,}".format(demo_traffic) }}</div><div style="font-size:11px;color:var(--text-dim)">pageviews today</div></div>
+  <div class="stat-card" style="border-left:3px solid #8b5cf6"><div class="stat-label">Revenue (demo)</div><div class="stat-value" style="font-size:22px">{{ "{:,.0f}".format(demo_revenue) }}d</div><div style="font-size:11px;color:var(--text-dim)">commission today</div></div>
+  <div class="stat-card" style="border-left:3px solid #fdcb6e"><div class="stat-label">CVR</div><div class="stat-value" style="font-size:22px">{% if total_clicks > 0 %}{{ "%.1f"|format(total_conversions/total_clicks*100) }}%{% else %}0%{% endif %}</div><div style="font-size:11px;color:var(--text-dim)">click to purchase</div></div>
+  <div class="stat-card" style="border-left:3px solid #fd79a8"><div class="stat-label">Networks</div><div class="stat-value" style="font-size:22px">{{ networks|length }}</div><div style="font-size:11px;color:var(--text-dim)">{{ networks|selectattr('status','eq','connected')|list|length }} connected</div></div>
+</div>
+
+<!-- Quick Actions -->
+<div class="section-header"><h2>Quick Actions</h2></div>
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:32px">
+  <a href="{{ url_for('admin_vertical_new') }}" class="item-card" style="text-align:center"><div class="item-icon">+</div><h3>New Vertical</h3></a>
+  <a href="{{ url_for('admin_content_generate') }}" class="item-card" style="text-align:center"><div class="item-icon">&#129302;</div><h3>AI Generate</h3></a>
+  <a href="{{ url_for('admin_affiliate') }}" class="item-card" style="text-align:center"><div class="item-icon">&#128279;</div><h3>Affiliate Hub</h3></a>
+  <a href="{{ url_for('admin_settings') }}" class="item-card" style="text-align:center"><div class="item-icon">&#9881;</div><h3>Settings</h3></a>
+</div>
+
+<!-- Verticals -->
+<div class="section-header"><h2>Verticals</h2><a href="{{ url_for('admin_verticals') }}" class="btn btn-ghost btn-sm">View all</a></div>
+<div class="items-grid">
+  {% for v in verticals %}
+  <a href="{{ url_for('admin_vertical_detail', vid=v.id) }}" class="item-card">
+    <div class="item-icon">{{ v.icon }}</div>
+    <h3>{{ v.name }}</h3>
+    <div class="item-desc">{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</div>
+    <div class="item-meta"><span class="item-color" style="background:{{ v.color }}"></span>{{ v.slug }}.unilab.vn <span class="status-badge {{ v.status }}">{{ v.status }}</span></div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

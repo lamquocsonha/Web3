@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}UniTravel{% endblock %} — travel.unilab.vn</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/travel.css') }}">
+</head>
+<body data-mode="minimal">
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ url_for('travel_index') }}" class="site-logo"><span class="logo-mark">✈️</span><span class="logo-name">UniTravel</span></a>
+    <nav class="site-nav">
+      <a href="{{ url_for('travel_index') }}">Trang chủ</a>
+      <a href="{{ url_for('travel_knowledge') }}">Kiến thức</a>
+      <a href="{{ url_for('travel_products') }}">Sản phẩm</a>
+      <a href="{{ url_for('travel_hotels') }}">Khách sạn</a>
+      <a href="{{ url_for('travel_attractions') }}">Vé tham quan</a>
+      <a href="{{ url_for('travel_index') }}#segments">Danh mục</a>
+    </nav>
+    <div class="header-actions">
+      <button class="mode-toggle" onclick="toggleMode()" title="Chuyển giao diện"><span class="mode-icon">◐</span><span class="mode-label">Minimal</span></button>
+    </div>
+  </div>
+</header>
+<main class="site-main">{% block breadcrumbs %}{% endblock %}{% block content %}{% endblock %}</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col"><div class="footer-brand">✈️ UniTravel</div><p class="footer-desc">Du lịch & khách sạn — review, tips, booking thông minh cho người Việt.</p></div>
+      <div class="footer-col"><div class="footer-heading">Kiến thức</div><a href="{{ url_for('travel_knowledge') }}">Tất cả bài viết</a></div>
+      <div class="footer-col"><div class="footer-heading">Hệ sinh thái</div><a href="/">UniLab</a><a href="/car">UniCar</a><a href="/pet">UniPet</a><a href="/travel">UniTravel</a></div>
+    </div>
+    <div class="footer-bottom"><span>© 2026 UniTravel — travel.unilab.vn</span><span>Hệ sinh thái kiến thức Unilab</span></div>
+  </div>
+</footer>
+<script>
+function toggleMode() {
+  const body = document.body;
+  const mode = body.dataset.mode === 'minimal' ? 'modern' : 'minimal';
+  body.dataset.mode = mode;
+  document.querySelector('.mode-label').textContent = mode === 'minimal' ? 'Minimal' : 'Modern';
+  localStorage.setItem('unilab-mode', mode);
+}
+const saved = localStorage.getItem('unilab-mode');
+if (saved) { document.body.dataset.mode = saved; document.querySelector('.mode-label').textContent = saved === 'minimal' ? 'Minimal' : 'Modern'; }
+</script>
+</body></html>

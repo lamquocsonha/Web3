@@ -1,0 +1,10 @@
+{% extends "travel/base.html" %}{% block title %}Sản phẩm{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('travel_index') }}">UniTravel</a><span class="sep">›</span>Sản phẩm</div>{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <span style="font-size:36px">🛒</span>
+  <h1>Đặt phòng & Tour du lịch</h1>
+  <p class="subtitle">Deal khách sạn, resort, tour — giá tốt nhất từ các nền tảng</p>
+</div>
+{% include '_products_layout.html' %}
+{% endblock %}
