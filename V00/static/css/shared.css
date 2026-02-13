@@ -1605,6 +1605,98 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 [data-mode="dark"] .hpm-map-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
 .hpm-map-card svg { width:100%; height:auto; }
 
+/* ═══ Vietnam Map SVG Styles ═══ */
+.vn-map-svg { display:block; border-radius:10px; }
+
+/* Sea background */
+[data-mode="light"] .map-sea { fill:#e8f4fd; }
+[data-mode="dark"] .map-sea { fill:#0c1a2a; }
+[data-mode="light"] .map-sea-label { fill:#b0d4f1; font-size:14px; font-weight:800; letter-spacing:6px; text-anchor:middle; }
+[data-mode="dark"] .map-sea-label { fill:#1a3a5c; font-size:14px; font-weight:800; letter-spacing:6px; text-anchor:middle; }
+
+/* Province path base */
+.prov-path { stroke-width:0.8; cursor:pointer; transition:all 0.2s; }
+[data-mode="light"] .prov-path { stroke:#c8dce8; }
+[data-mode="dark"] .prov-path { stroke:#1e3a50; }
+
+/* Province color palette - light */
+[data-mode="light"] .prov-c1 { fill:#a8d5ba; }
+[data-mode="light"] .prov-c2 { fill:#b8d4e3; }
+[data-mode="light"] .prov-c3 { fill:#f7d794; }
+[data-mode="light"] .prov-c4 { fill:#deb3e0; }
+[data-mode="light"] .prov-c5 { fill:#f8b4b4; }
+
+/* Province color palette - dark */
+[data-mode="dark"] .prov-c1 { fill:#2a5a3c; }
+[data-mode="dark"] .prov-c2 { fill:#1e3d55; }
+[data-mode="dark"] .prov-c3 { fill:#5a4a20; }
+[data-mode="dark"] .prov-c4 { fill:#4a2a5a; }
+[data-mode="dark"] .prov-c5 { fill:#5a2a2a; }
+
+/* Province hover */
+.prov-shape:hover .prov-path,
+.prov-shape.hover .prov-path {
+  filter:brightness(1.15);
+  stroke-width:1.5;
+}
+[data-mode="light"] .prov-shape:hover .prov-path,
+[data-mode="light"] .prov-shape.hover .prov-path { stroke:#0984e3; }
+[data-mode="dark"] .prov-shape:hover .prov-path,
+[data-mode="dark"] .prov-shape.hover .prov-path { stroke:#48dbfb; }
+
+/* Active province pulse animation */
+.prov-pulse { fill:none; stroke-width:2; opacity:0; animation:pulse-ring 2s ease-out infinite; }
+[data-mode="light"] .prov-pulse { stroke:#e74c3c; }
+[data-mode="dark"] .prov-pulse { stroke:#ff6b6b; }
+@keyframes pulse-ring {
+  0% { r:5; opacity:0.8; }
+  100% { r:22; opacity:0; }
+}
+
+.prov-dot-active { stroke-width:2; }
+[data-mode="light"] .prov-dot-active { fill:#e74c3c; stroke:#fff; }
+[data-mode="dark"] .prov-dot-active { fill:#ff6b6b; stroke:#1a1a2e; }
+
+/* Province labels */
+.prov-label { font-size:10px; font-weight:700; text-anchor:middle; pointer-events:none; }
+[data-mode="light"] .prov-label { fill:#2d3436; }
+[data-mode="dark"] .prov-label { fill:#f1f5f9; }
+.prov-label-bg { opacity:0.85; }
+[data-mode="light"] .prov-label-bg { fill:#fff; stroke:#ddd; stroke-width:0.5; }
+[data-mode="dark"] .prov-label-bg { fill:#1a1a2e; stroke:#333; stroke-width:0.5; }
+
+/* Hoang Sa / Truong Sa boxes */
+.hs-box { stroke-width:1; stroke-dasharray:3,2; }
+[data-mode="light"] .hs-box { fill:#f0f8ff; stroke:#90c4e8; }
+[data-mode="dark"] .hs-box { fill:#0c1e30; stroke:#1e4060; }
+.hs-title { font-size:10px; font-weight:700; text-anchor:middle; }
+[data-mode="light"] .hs-title { fill:#2980b9; }
+[data-mode="dark"] .hs-title { fill:#48b1e8; }
+.hs-flag { font-size:8px; text-anchor:middle; }
+[data-mode="light"] .hs-flag { fill:#666; }
+[data-mode="dark"] .hs-flag { fill:#8899aa; }
+.hs-dot-sea { opacity:0.4; }
+[data-mode="light"] .hs-dot-sea { fill:#74b9ff; }
+[data-mode="dark"] .hs-dot-sea { fill:#1a5080; }
+
+/* Compass */
+.compass-circle { stroke-width:1; }
+[data-mode="light"] .compass-circle { fill:#fff; stroke:#ccc; }
+[data-mode="dark"] .compass-circle { fill:#1a1a2e; stroke:#333; }
+.compass-text { font-size:9px; font-weight:800; text-anchor:middle; }
+[data-mode="light"] .compass-text { fill:#555; }
+[data-mode="dark"] .compass-text { fill:#aaa; }
+.compass-needle { stroke-width:2; }
+[data-mode="light"] .compass-needle { stroke:#e74c3c; }
+[data-mode="dark"] .compass-needle { stroke:#ff6b6b; }
+
+/* Scale bar */
+[data-mode="light"] .scale-bar { stroke:#999; stroke-width:1.5; }
+[data-mode="dark"] .scale-bar { stroke:#555; stroke-width:1.5; }
+.scale-label { font-size:8px; text-anchor:middle; }
+[data-mode="light"] .scale-label { fill:#999; }
+[data-mode="dark"] .scale-label { fill:#666; }
+
 /* Hotel responsive */
 @media (max-width: 1024px) {
   .hotel-3col { grid-template-columns:1fr; }
