@@ -1600,19 +1600,19 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 
 /* Map column */
 .hp-map-col { position:sticky; top:80px; }
-.hpm-map-card { border-radius:12px; padding:14px; overflow:hidden; }
+.hpm-map-card { border-radius:12px; padding:14px; overflow:visible; }
 [data-mode="light"] .hpm-map-card { background:#fff; border:1px solid #e8e2d8; }
 [data-mode="dark"] .hpm-map-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
 .hpm-map-card svg { width:100%; height:auto; }
 
 /* ═══ Vietnam Map SVG Styles ═══ */
-.vn-map-svg { display:block; border-radius:10px; }
+.vn-map-svg { display:block; border-radius:10px; font-family:var(--font-primary); overflow:visible; }
 
 /* Sea background */
 [data-mode="light"] .map-sea { fill:#e8f4fd; }
 [data-mode="dark"] .map-sea { fill:#0c1a2a; }
-[data-mode="light"] .map-sea-label { fill:#b0d4f1; font-size:14px; font-weight:800; letter-spacing:6px; text-anchor:middle; }
-[data-mode="dark"] .map-sea-label { fill:#1a3a5c; font-size:14px; font-weight:800; letter-spacing:6px; text-anchor:middle; }
+[data-mode="light"] .map-sea-label { fill:#b0d4f1; font-size:14px; font-weight:800; letter-spacing:6px; text-anchor:middle; font-family:var(--font-primary); }
+[data-mode="dark"] .map-sea-label { fill:#1a3a5c; font-size:14px; font-weight:800; letter-spacing:6px; text-anchor:middle; font-family:var(--font-primary); }
 
 /* Province path base */
 .prov-path { stroke-width:0.8; cursor:pointer; transition:all 0.2s; }
@@ -1658,7 +1658,7 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 [data-mode="dark"] .prov-dot-active { fill:#ff6b6b; stroke:#1a1a2e; }
 
 /* Province labels */
-.prov-label { font-size:10px; font-weight:700; text-anchor:middle; pointer-events:none; }
+.prov-label { font-size:10px; font-weight:700; text-anchor:middle; pointer-events:none; font-family:var(--font-primary); }
 [data-mode="light"] .prov-label { fill:#2d3436; }
 [data-mode="dark"] .prov-label { fill:#f1f5f9; }
 .prov-label-bg { opacity:0.85; }
@@ -1669,10 +1669,10 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 .hs-box { stroke-width:1; stroke-dasharray:3,2; }
 [data-mode="light"] .hs-box { fill:#f0f8ff; stroke:#90c4e8; }
 [data-mode="dark"] .hs-box { fill:#0c1e30; stroke:#1e4060; }
-.hs-title { font-size:10px; font-weight:700; text-anchor:middle; }
+.hs-title { font-size:10px; font-weight:700; text-anchor:middle; font-family:var(--font-primary); }
 [data-mode="light"] .hs-title { fill:#2980b9; }
 [data-mode="dark"] .hs-title { fill:#48b1e8; }
-.hs-flag { font-size:8px; text-anchor:middle; }
+.hs-flag { font-size:8px; text-anchor:middle; font-family:var(--font-primary); }
 [data-mode="light"] .hs-flag { fill:#666; }
 [data-mode="dark"] .hs-flag { fill:#8899aa; }
 .hs-dot-sea { opacity:0.4; }
@@ -1683,7 +1683,7 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 .compass-circle { stroke-width:1; }
 [data-mode="light"] .compass-circle { fill:#fff; stroke:#ccc; }
 [data-mode="dark"] .compass-circle { fill:#1a1a2e; stroke:#333; }
-.compass-text { font-size:9px; font-weight:800; text-anchor:middle; }
+.compass-text { font-size:9px; font-weight:800; text-anchor:middle; font-family:var(--font-primary); }
 [data-mode="light"] .compass-text { fill:#555; }
 [data-mode="dark"] .compass-text { fill:#aaa; }
 .compass-needle { stroke-width:2; }
@@ -1693,7 +1693,7 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 /* Scale bar */
 [data-mode="light"] .scale-bar { stroke:#999; stroke-width:1.5; }
 [data-mode="dark"] .scale-bar { stroke:#555; stroke-width:1.5; }
-.scale-label { font-size:8px; text-anchor:middle; }
+.scale-label { font-size:8px; text-anchor:middle; font-family:var(--font-primary); }
 [data-mode="light"] .scale-label { fill:#999; }
 [data-mode="dark"] .scale-label { fill:#666; }
 
