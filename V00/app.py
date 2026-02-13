@@ -132,13 +132,15 @@ THEME_STYLES = {
 @app.context_processor
 def inject_globals():
     try:
+        site_mode = SiteSettings.get('site_mode', 'demo')
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
             'now': datetime.utcnow(),
-            'THEME_STYLES': THEME_STYLES
+            'THEME_STYLES': THEME_STYLES,
+            'site_mode': site_mode,
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES}
+        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo'}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -544,7 +546,7 @@ def admin_analytics():
 @app.route('/admin/settings', methods=['GET','POST'])
 def admin_settings():
     if request.method == 'POST':
-        for key in ['openai_key','claude_key','dalle_key','deepl_key','site_name','default_mode',
+        for key in ['site_mode','openai_key','claude_key','dalle_key','deepl_key','site_name','default_mode',
                      'agoda_api_key','agoda_site_id','agoda_cid','agoda_enabled']:
             val = request.form.get(key,'')
             cat = 'api' if '_key' in key or '_id' in key or '_cid' in key else 'general'
@@ -553,6 +555,15 @@ def admin_settings():
         return redirect(url_for('admin_settings'))
     settings = {s.key: s.value for s in SiteSettings.query.all()}
     return render_template('admin/settings.html', settings=settings)
+
+@app.route('/admin/toggle-mode', methods=['POST'])
+def admin_toggle_mode():
+    """Quick toggle site mode between demo and live"""
+    current = SiteSettings.get('site_mode', 'demo')
+    new_mode = 'live' if current == 'demo' else 'demo'
+    SiteSettings.set_val('site_mode', new_mode, 'general')
+    flash(f'Site mode switched to {new_mode.upper()}', 'success')
+    return redirect(request.referrer or url_for('admin_dashboard'))
 
 @app.route('/admin/deployment')
 def admin_deployment():

@@ -5,6 +5,27 @@
 <h1 class="page-title">Settings</h1>
 
 <form method="POST" style="max-width:800px">
+  <!-- Site Mode -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="font-size:15px;margin:0">Site Mode</h3>
+      {% if site_mode == 'live' %}
+      <span class="site-mode-badge site-mode-live"><span class="mode-dot"></span> LIVE</span>
+      {% else %}
+      <span class="site-mode-badge site-mode-demo"><span class="mode-dot"></span> DEMO</span>
+      {% endif %}
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);margin-bottom:14px">
+      <strong>Demo:</strong> Data m\u1eabu t\u1eeb seed, placeholder images. Khi chuy\u1ec3n Live s\u1ebd d\u00f9ng data th\u1eadt t\u1eeb API.
+    </p>
+    <div class="form-group">
+      <select class="form-select" name="site_mode" style="max-width:200px">
+        <option value="demo" {% if settings.get('site_mode','demo')=='demo' %}selected{% endif %}>Demo</option>
+        <option value="live" {% if settings.get('site_mode')=='live' %}selected{% endif %}>Live</option>
+      </select>
+    </div>
+  </div>
+
   <!-- General -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
     <h3 style="font-size:15px;margin-bottom:16px">General</h3>
