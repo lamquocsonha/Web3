@@ -1118,6 +1118,218 @@ def admin_products_bulk_delete():
     flash(f'Da xoa {count:,} san pham ({label})', 'success')
     return redirect(url_for('admin_products'))
 
+@app.route('/admin/products/ai-classify')
+def admin_products_ai_classify():
+    """AI Product Classification page - detect mismatched products"""
+    verticals = Vertical.query.all()
+    openai_key = SiteSettings.get('openai_key')
+    claude_key = SiteSettings.get('claude_key')
+    has_ai = bool(openai_key or claude_key)
+
+    vert_stats = []
+    for v in verticals:
+        cnt = db.session.query(AffiliateLink).join(Part).join(Zone).join(Segment).filter(
+            Segment.vertical_id == v.id).count()
+        vert_stats.append({'id': v.id, 'name': v.name, 'icon': v.icon, 'slug': v.slug, 'count': cnt})
+
+    total = AffiliateLink.query.count()
+    return render_template('admin/products_ai_classify.html',
+        verticals=vert_stats, total=total, has_ai=has_ai)
+
+
+@app.route('/admin/products/ai-classify/scan', methods=['POST'])
+def admin_products_ai_classify_scan():
+    """AJAX: Scan a batch of products using AI to detect misclassification"""
+    import requests as req
+
+    data = request.get_json()
+    vertical_id = data.get('vertical_id')
+    offset = data.get('offset', 0)
+    batch_size = min(data.get('batch_size', 20), 30)
+
+    q = db.session.query(AffiliateLink, Part, Zone, Segment, Vertical).join(
+        Part, AffiliateLink.part_id == Part.id
+    ).join(Zone, Part.zone_id == Zone.id
+    ).join(Segment, Zone.segment_id == Segment.id
+    ).join(Vertical, Segment.vertical_id == Vertical.id)
+
+    if vertical_id:
+        q = q.filter(Vertical.id == vertical_id)
+
+    total = q.count()
+    products = q.order_by(AffiliateLink.id).offset(offset).limit(batch_size).all()
+
+    if not products:
+        return jsonify({'done': True, 'results': [], 'total': total, 'processed': offset})
+
+    # Build vertical + zone context for AI
+    all_verticals = Vertical.query.all()
+    vert_zones = {}
+    for v in all_verticals:
+        zones = []
+        for s in v.segments:
+            for z in s.zones:
+                zones.append(z.name)
+        vert_zones[v.name] = zones
+
+    # Build product list
+    product_list = []
+    for al, part, zone, seg, vert in products:
+        product_list.append({
+            'id': al.id,
+            'name': al.product_name or part.name_vi,
+            'current_vertical': vert.name,
+            'current_zone': zone.name,
+            'current_part': part.name_vi,
+            'url': (al.url or '')[:100],
+            'price': al.price,
+        })
+
+    # Build AI prompt
+    vert_context = ""
+    for vname, zones in vert_zones.items():
+        vert_context += f"\n- {vname}: {', '.join(zones[:15])}"
+
+    prompt = f"""Ban la chuyen gia phan loai san pham. Phan tich danh sach san pham duoi day va xac dinh chung thuoc nganh hang (vertical) nao.
+
+Danh sach Verticals va cac Zone:{vert_context}
+
+San pham can phan loai:
+"""
+    for i, p in enumerate(product_list):
+        prompt += f"\n{i+1}. [{p['id']}] \"{p['name']}\" (hien tai: {p['current_vertical']} > {p['current_zone']})"
+
+    prompt += """
+
+Tra loi CHINH XAC theo format JSON array:
+[{"id": <product_id>, "correct_vertical": "<ten vertical dung>", "confidence": "high/medium/low", "reason": "<ly do ngan>"}]
+
+Chi tra ve JSON array, KHONG giai thich them. Neu san pham dang o dung vertical thi correct_vertical = vertical hien tai."""
+
+    # Try Claude API first, then OpenAI
+    claude_key = SiteSettings.get('claude_key')
+    openai_key = SiteSettings.get('openai_key')
+    ai_results = None
+
+    if claude_key:
+        try:
+            resp = req.post('https://api.anthropic.com/v1/messages',
+                headers={
+                    'x-api-key': claude_key,
+                    'anthropic-version': '2023-06-01',
+                    'content-type': 'application/json'
+                },
+                json={
+                    'model': 'claude-sonnet-4-5-20250929',
+                    'max_tokens': 4000,
+                    'messages': [{'role': 'user', 'content': prompt}]
+                },
+                timeout=60
+            )
+            if resp.status_code == 200:
+                content = resp.json()['content'][0]['text']
+                ai_results = _parse_ai_classify_response(content)
+        except Exception:
+            pass
+
+    if not ai_results and openai_key:
+        try:
+            resp = req.post('https://api.openai.com/v1/chat/completions',
+                headers={
+                    'Authorization': f'Bearer {openai_key}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'model': 'gpt-4o-mini',
+                    'messages': [
+                        {'role': 'system', 'content': 'You are a product classification expert. Always respond with valid JSON.'},
+                        {'role': 'user', 'content': prompt}
+                    ],
+                    'max_tokens': 4000,
+                    'temperature': 0.2
+                },
+                timeout=60
+            )
+            if resp.status_code == 200:
+                content = resp.json()['choices'][0]['message']['content']
+                ai_results = _parse_ai_classify_response(content)
+        except Exception:
+            pass
+
+    if not ai_results:
+        return jsonify({'error': 'Khong the ket noi AI API. Kiem tra API key trong Settings.'}), 500
+
+    # Compare and build results
+    results = []
+    for p in product_list:
+        ai_item = next((r for r in ai_results if r.get('id') == p['id']), None)
+        if ai_item:
+            suggested = ai_item.get('correct_vertical', p['current_vertical'])
+            is_mismatch = suggested.strip().lower() != p['current_vertical'].strip().lower()
+            results.append({
+                'id': p['id'], 'name': p['name'],
+                'current_vertical': p['current_vertical'], 'current_zone': p['current_zone'],
+                'suggested_vertical': suggested,
+                'confidence': ai_item.get('confidence', 'low'),
+                'reason': ai_item.get('reason', ''),
+                'mismatch': is_mismatch, 'price': p['price'],
+            })
+        else:
+            results.append({
+                'id': p['id'], 'name': p['name'],
+                'current_vertical': p['current_vertical'], 'current_zone': p['current_zone'],
+                'suggested_vertical': p['current_vertical'],
+                'confidence': 'low', 'reason': 'AI khong phan loai duoc',
+                'mismatch': False,
+            })
+
+    return jsonify({
+        'done': offset + batch_size >= total,
+        'results': results, 'total': total,
+        'processed': min(offset + batch_size, total),
+        'next_offset': offset + batch_size
+    })
+
+
+def _parse_ai_classify_response(text):
+    """Parse AI response, extract JSON array"""
+    import json, re
+    text = text.strip()
+    text = re.sub(r'^```(?:json)?\s*', '', text)
+    text = re.sub(r'\s*```$', '', text)
+    text = text.strip()
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r'\[[\s\S]*\]', text)
+        if match:
+            try:
+                return json.loads(match.group())
+            except json.JSONDecodeError:
+                pass
+    return None
+
+
+@app.route('/admin/products/ai-classify/apply', methods=['POST'])
+def admin_products_ai_classify_apply():
+    """Apply AI classification: delete mismatched products"""
+    data = request.get_json()
+    action = data.get('action')
+    product_ids = data.get('product_ids', [])
+
+    if not product_ids:
+        return jsonify({'error': 'Khong co san pham nao duoc chon'}), 400
+
+    if action == 'delete':
+        count = AffiliateLink.query.filter(
+            AffiliateLink.id.in_(product_ids)
+        ).delete(synchronize_session=False)
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'Da xoa {count} san pham khong dung vertical'})
+
+    return jsonify({'error': 'Action khong hop le'}), 400
+
+
 def _build_part_keyword_index(vertical_id=None):
     """Build keyword index from Parts for auto-mapping.
     Returns list of {part_id, keywords: set(), zone_name, part_name, score_boost}

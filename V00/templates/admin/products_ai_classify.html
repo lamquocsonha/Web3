@@ -1,0 +1,282 @@
+{% extends "admin/base.html" %}
+{% block title %}AI Classify Products{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_products') }}">Products</a><span class="sep">></span>AI Classify{% endblock %}
+{% block content %}
+<div class="section-header">
+  <h1 class="page-title" style="margin-bottom:0">AI Phan Loai San Pham</h1>
+  <a href="{{ url_for('admin_products') }}" class="btn btn-ghost">Quay lai Products</a>
+</div>
+
+{% if not has_ai %}
+<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:20px;margin:20px 0">
+  <strong style="color:#ef4444">Chua cau hinh API Key</strong>
+  <p style="font-size:13px;margin-top:6px;color:var(--text-dim)">
+    Vao <a href="{{ url_for('admin_settings') }}" style="color:#3b82f6">Settings</a> de them OpenAI key hoac Claude key (Anthropic).
+  </p>
+</div>
+{% else %}
+
+<!-- Config -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin:20px 0">
+  <h3 style="font-size:14px;margin-bottom:16px">Cau hinh scan</h3>
+  <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Vertical can quet</label>
+      <select id="scanVertical" class="form-select" style="width:200px;padding:8px 10px;font-size:12px">
+        <option value="">Tat ca ({{ total }} sp)</option>
+        {% for v in verticals %}
+        <option value="{{ v.id }}">{{ v.icon }} {{ v.name }} ({{ "{:,}".format(v.count) }} sp)</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Batch size</label>
+      <select id="batchSize" class="form-select" style="width:100px;padding:8px 10px;font-size:12px">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="30">30</option>
+      </select>
+    </div>
+    <button id="btnStartScan" class="btn btn-primary" onclick="startScan()">
+      Bat dau AI Scan
+    </button>
+    <button id="btnStopScan" class="btn btn-danger btn-sm" onclick="stopScan()" style="display:none">
+      Dung lai
+    </button>
+  </div>
+</div>
+
+<!-- Progress -->
+<div id="progressWrap" style="display:none;margin:20px 0">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span style="font-size:13px;font-weight:600" id="progressLabel">Dang scan...</span>
+    <span style="font-size:12px;color:var(--text-dim)" id="progressCount">0 / 0</span>
+  </div>
+  <div style="background:var(--surface);border-radius:6px;height:8px;overflow:hidden">
+    <div id="progressBar" style="height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);width:0%;transition:width .3s;border-radius:6px"></div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div id="statsWrap" style="display:none;margin:20px 0">
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-card">
+      <div class="stat-label">Da quet</div>
+      <div class="stat-value" id="statScanned">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Dung vertical</div>
+      <div class="stat-value" style="color:#2ecc71" id="statCorrect">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sai vertical</div>
+      <div class="stat-value" style="color:#ef4444" id="statMismatch">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Ti le sai</div>
+      <div class="stat-value" style="color:#f59e0b" id="statRate">0%</div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions bar (only mismatched) -->
+<div id="actionsBar" style="display:none;margin:16px 0;padding:12px 16px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;display:none;justify-content:space-between;align-items:center">
+  <div style="display:flex;gap:8px;align-items:center">
+    <label style="font-size:12px;cursor:pointer">
+      <input type="checkbox" id="selectAllMismatch" onchange="toggleSelectAll(this.checked)">
+      Chon tat ca sai
+    </label>
+    <span style="font-size:11px;color:var(--text-dim)" id="selectedCount">0 da chon</span>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-danger btn-sm" onclick="applyAction('delete')">Xoa san pham da chon</button>
+  </div>
+</div>
+
+<!-- Results Table -->
+<div id="resultsWrap" style="display:none">
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <button class="filter-btn active" onclick="filterResults('all', this)">Tat ca</button>
+    <button class="filter-btn" onclick="filterResults('mismatch', this)">Chi hien sai</button>
+    <button class="filter-btn" onclick="filterResults('correct', this)">Chi hien dung</button>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:30px"><input type="checkbox" id="checkAll" onchange="toggleSelectAll(this.checked)"></th>
+          <th style="width:50px">ID</th>
+          <th>Ten san pham</th>
+          <th>Vertical hien tai</th>
+          <th>AI de xuat</th>
+          <th>Do tin cay</th>
+          <th>Ly do</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+{% endif %}
+
+<style>
+.filter-btn{padding:6px 14px;font-size:11px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);cursor:pointer;transition:.15s}
+.filter-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.conf-high{color:#2ecc71;font-weight:700}.conf-medium{color:#f59e0b;font-weight:600}.conf-low{color:var(--text-dim)}
+.row-mismatch{background:rgba(239,68,68,.04)}.row-mismatch td:nth-child(5){color:#ef4444;font-weight:700}
+.row-correct td:nth-child(5){color:#2ecc71}
+</style>
+
+<script>
+let scanning=false, allResults=[], mismatchIds=new Set(), selectedIds=new Set();
+
+function startScan(){
+  scanning=true;
+  allResults=[];mismatchIds.clear();selectedIds.clear();
+  document.getElementById('resultsBody').innerHTML='';
+  document.getElementById('progressWrap').style.display='block';
+  document.getElementById('statsWrap').style.display='block';
+  document.getElementById('resultsWrap').style.display='block';
+  document.getElementById('btnStartScan').disabled=true;
+  document.getElementById('btnStopScan').style.display='inline-block';
+  updateStats();
+  scanBatch(0);
+}
+
+function stopScan(){
+  scanning=false;
+  document.getElementById('btnStopScan').style.display='none';
+  document.getElementById('btnStartScan').disabled=false;
+  document.getElementById('progressLabel').textContent='Da dung';
+}
+
+async function scanBatch(offset){
+  if(!scanning)return;
+  const vertId=document.getElementById('scanVertical').value;
+  const batchSize=parseInt(document.getElementById('batchSize').value);
+  try{
+    const resp=await fetch('/admin/products/ai-classify/scan',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({vertical_id:vertId?parseInt(vertId):null,offset,batch_size:batchSize})
+    });
+    if(!resp.ok){
+      const err=await resp.json();
+      alert(err.error||'Loi API');
+      stopScan();return;
+    }
+    const data=await resp.json();
+    // Update progress
+    const pct=data.total>0?Math.round(data.processed/data.total*100):100;
+    document.getElementById('progressBar').style.width=pct+'%';
+    document.getElementById('progressCount').textContent=data.processed+' / '+data.total;
+    document.getElementById('progressLabel').textContent='Dang scan... '+pct+'%';
+
+    // Add results
+    data.results.forEach(r=>{
+      allResults.push(r);
+      if(r.mismatch)mismatchIds.add(r.id);
+      appendRow(r);
+    });
+    updateStats();
+
+    if(data.done||!scanning){
+      scanning=false;
+      document.getElementById('progressLabel').textContent='Hoan tat!';
+      document.getElementById('btnStopScan').style.display='none';
+      document.getElementById('btnStartScan').disabled=false;
+      if(mismatchIds.size>0){
+        document.getElementById('actionsBar').style.display='flex';
+      }
+    }else{
+      // Small delay between batches
+      setTimeout(()=>scanBatch(data.next_offset),500);
+    }
+  }catch(e){
+    alert('Loi ket noi: '+e.message);
+    stopScan();
+  }
+}
+
+function appendRow(r){
+  const tr=document.createElement('tr');
+  tr.className=r.mismatch?'row-mismatch':'row-correct';
+  tr.dataset.type=r.mismatch?'mismatch':'correct';
+  tr.dataset.id=r.id;
+  const confClass=r.confidence==='high'?'conf-high':r.confidence==='medium'?'conf-medium':'conf-low';
+  tr.innerHTML=`
+    <td>${r.mismatch?'<input type="checkbox" class="row-check" value="'+r.id+'" onchange="toggleSelect('+r.id+',this.checked)">':''}</td>
+    <td style="font-family:'DM Mono';font-size:11px;color:var(--text-dim)">${r.id}</td>
+    <td style="font-size:12px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.name}">${r.name}</td>
+    <td style="font-size:12px">${r.current_vertical} &gt; ${r.current_zone}</td>
+    <td style="font-size:12px">${r.suggested_vertical}</td>
+    <td><span class="${confClass}" style="font-size:11px">${r.confidence}</span></td>
+    <td style="font-size:11px;color:var(--text-dim);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.reason}">${r.reason}</td>
+  `;
+  document.getElementById('resultsBody').appendChild(tr);
+}
+
+function updateStats(){
+  const total=allResults.length;
+  const mis=allResults.filter(r=>r.mismatch).length;
+  const correct=total-mis;
+  document.getElementById('statScanned').textContent=total.toLocaleString();
+  document.getElementById('statCorrect').textContent=correct.toLocaleString();
+  document.getElementById('statMismatch').textContent=mis.toLocaleString();
+  document.getElementById('statRate').textContent=total>0?Math.round(mis/total*100)+'%':'0%';
+}
+
+function filterResults(type, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#resultsBody tr').forEach(tr=>{
+    if(type==='all')tr.style.display='';
+    else if(type==='mismatch')tr.style.display=tr.dataset.type==='mismatch'?'':'none';
+    else tr.style.display=tr.dataset.type==='correct'?'':'none';
+  });
+}
+
+function toggleSelectAll(checked){
+  document.querySelectorAll('.row-check').forEach(cb=>{
+    if(cb.closest('tr').style.display!=='none'){
+      cb.checked=checked;
+      toggleSelect(parseInt(cb.value),checked);
+    }
+  });
+}
+
+function toggleSelect(id,checked){
+  if(checked)selectedIds.add(id);else selectedIds.delete(id);
+  document.getElementById('selectedCount').textContent=selectedIds.size+' da chon';
+}
+
+async function applyAction(action){
+  if(selectedIds.size===0){alert('Chua chon san pham nao');return;}
+  if(!confirm(`${action==='delete'?'Xoa':'Xu ly'} ${selectedIds.size} san pham?`))return;
+  try{
+    const resp=await fetch('/admin/products/ai-classify/apply',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action,product_ids:Array.from(selectedIds)})
+    });
+    const data=await resp.json();
+    if(data.success){
+      alert(data.message);
+      // Remove deleted rows
+      selectedIds.forEach(id=>{
+        const tr=document.querySelector(`tr[data-id="${id}"]`);
+        if(tr)tr.remove();
+      });
+      allResults=allResults.filter(r=>!selectedIds.has(r.id));
+      mismatchIds.forEach(id=>{if(selectedIds.has(id))mismatchIds.delete(id);});
+      selectedIds.clear();
+      updateStats();
+      document.getElementById('selectedCount').textContent='0 da chon';
+    }else{
+      alert(data.error||'Loi');
+    }
+  }catch(e){alert('Loi: '+e.message);}
+}
+</script>
+{% endblock %}
