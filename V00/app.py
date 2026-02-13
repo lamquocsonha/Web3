@@ -517,6 +517,69 @@ def admin_affiliate_connect(nid):
     flash(f'{n.name} -> {"Connected" if n.status=="connected" else "Disconnected"}', 'success')
     return redirect(url_for('admin_affiliate_network', nid=n.id))
 
+@app.route('/admin/affiliate/network/<int:nid>/sync', methods=['POST'])
+def admin_affiliate_sync(nid):
+    """Sync campaigns from affiliate network API"""
+    n = AffiliateNetwork.query.get_or_404(nid)
+    if not n.api_key:
+        flash('API key required to sync', 'error')
+        return redirect(url_for('admin_affiliate_network', nid=n.id))
+
+    try:
+        import requests as req
+        synced = 0
+
+        if n.slug == 'accesstrade':
+            headers = {'Authorization': f'Token {n.api_key}', 'Content-Type': 'application/json'}
+            cat_map = {'26':'Insurance','29':'Finance','35':'Banking','59':'E-Commerce',
+                       '60':'Retail','63':'Travel','65':'Education','66':'Services',
+                       '67':'Food & Beverage','68':'Beauty & Health','69':'Technology','71':'Telecom'}
+            # Fetch all pages of campaigns
+            all_campaigns = []
+            page = 1
+            while True:
+                r = req.get(f'https://api.accesstrade.vn/v1/campaigns?page={page}', headers=headers, timeout=30)
+                if r.status_code != 200:
+                    break
+                data = r.json()
+                all_campaigns.extend(data.get('data', []))
+                total_pages = int(data.get('total_page', 1))
+                if page >= total_pages:
+                    break
+                page += 1
+
+            # Clear old campaigns for this network
+            AffiliateCampaign.query.filter_by(network_id=n.id).delete()
+
+            # Insert fresh data
+            for c in all_campaigns:
+                cat = c.get('category', '')
+                if cat.isdigit():
+                    cat = cat_map.get(cat, cat)
+                sub = c.get('sub_category', '')
+                if sub and not sub.isdigit():
+                    cat = sub.split(',')[0]
+                camp = AffiliateCampaign(
+                    network_id=n.id,
+                    name=c.get('name', ''),
+                    campaign_id_ext=str(c.get('id', '')),
+                    commission=str(c.get('max_com', '')),
+                    status='active' if c.get('status') == 1 else 'inactive',
+                    category=cat,
+                    url=c.get('url', '')
+                )
+                db.session.add(camp)
+                synced += 1
+
+        n.last_sync = datetime.utcnow()
+        db.session.commit()
+        flash(f'Synced {synced} campaigns from {n.name}', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Sync error: {str(e)}', 'error')
+
+    return redirect(url_for('admin_affiliate_network', nid=n.id))
+
 @app.route('/admin/affiliate/performance')
 def admin_affiliate_performance():
     networks = AffiliateNetwork.query.all()
@@ -844,10 +907,10 @@ When the user requests an action, respond in Vietnamese with:
 Keep responses concise and actionable."""
 
         # Call OpenAI API
-        import openai
-        openai.api_key = openai_key
+        from openai import OpenAI
+        client = OpenAI(api_key=openai_key)
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},

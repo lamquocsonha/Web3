@@ -47,33 +47,64 @@
     </div>
     {% endif %}
 
-    <div style="margin-top:16px">
+    <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
       <button class="btn btn-primary">{% if network.status == 'connected' %}Update{% else %}Connect{% endif %}</button>
-      {% if network.last_sync %}<span style="font-size:14px;color:var(--text-dim);margin-left:12px">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
+      {% if network.status == 'connected' and network.slug in ['accesstrade'] %}
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('sync-form').submit()">Sync Campaigns</button>
+      {% endif %}
+      {% if network.last_sync %}<span style="font-size:14px;color:var(--text-dim)">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
     </div>
   </form>
+  {% if network.status == 'connected' and network.slug in ['accesstrade'] %}
+  <form id="sync-form" method="POST" action="{{ url_for('admin_affiliate_sync', nid=network.id) }}" style="display:none"></form>
+  {% endif %}
 </div>
 
 <!-- Campaigns -->
-<div class="section-header"><h2>Campaigns ({{ network.campaigns|length }})</h2></div>
+<div class="section-header">
+  <h2>Campaigns ({{ network.campaigns|length }})</h2>
+  {% if network.campaigns %}
+  <div style="display:flex;gap:8px;align-items:center">
+    <input type="text" id="camp-search" class="form-input" placeholder="Search campaigns..." style="width:240px;padding:6px 12px" oninput="filterCampaigns()">
+    <select id="camp-cat" class="form-input" style="width:180px;padding:6px 12px" onchange="filterCampaigns()">
+      <option value="">All Categories</option>
+      {% set cats = network.campaigns|map(attribute='category')|unique|sort %}
+      {% for cat in cats %}{% if cat %}<option value="{{ cat }}">{{ cat }}</option>{% endif %}{% endfor %}
+    </select>
+  </div>
+  {% endif %}
+</div>
 {% if network.campaigns %}
 <div class="table-wrap">
-  <table class="data-table">
-    <thead><tr><th>Campaign</th><th>ID</th><th>Commission</th><th>Category</th><th>Status</th></tr></thead>
+  <table class="data-table" id="camp-table">
+    <thead><tr><th>Campaign</th><th>ID</th><th>Commission</th><th>Category</th><th>Status</th><th>URL</th></tr></thead>
     <tbody>
       {% for c in network.campaigns %}
-      <tr>
+      <tr data-name="{{ c.name|lower }}" data-cat="{{ c.category }}">
         <td><strong>{{ c.name }}</strong></td>
-        <td style="font-family:'DM Mono';font-size:14px">{{ c.campaign_id_ext }}</td>
+        <td style="font-family:'DM Mono';font-size:14px">{{ c.campaign_id_ext[:16] }}{% if c.campaign_id_ext|length > 16 %}...{% endif %}</td>
         <td>{{ c.commission }}</td>
-        <td>{{ c.category }}</td>
+        <td><span style="font-size:14px;padding:2px 8px;background:var(--bg);border-radius:4px">{{ c.category }}</span></td>
         <td><span class="status-badge {% if c.status=='active' %}live{% else %}draft{% endif %}">{{ c.status }}</span></td>
+        <td>{% if c.url %}<a href="{{ c.url }}" target="_blank" style="font-size:14px">Visit</a>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
+<script>
+function filterCampaigns(){
+  var q=(document.getElementById('camp-search').value||'').toLowerCase();
+  var cat=document.getElementById('camp-cat').value;
+  var rows=document.querySelectorAll('#camp-table tbody tr');
+  rows.forEach(function(r){
+    var nameOk=!q||r.getAttribute('data-name').indexOf(q)>=0;
+    var catOk=!cat||r.getAttribute('data-cat')===cat;
+    r.style.display=(nameOk&&catOk)?'':'none';
+  });
+}
+</script>
 {% else %}
-<div class="empty-state"><p>Connect API to sync campaigns</p></div>
+<div class="empty-state"><p>{% if network.status == 'connected' %}Click "Sync Campaigns" to load campaigns from API{% else %}Connect API to sync campaigns{% endif %}</p></div>
 {% endif %}
 {% endblock %}
