@@ -3,7 +3,7 @@
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_affiliate') }}">Affiliate Hub</a><span class="sep">></span>{{ network.name }}{% endblock %}
 {% block content %}
 <div class="section-header">
-  <h1 class="page-title" style="margin-bottom:0;color:{{ network.color }}">{{ network.name }}</h1>
+  <h1 class="page-title" style="margin-bottom:0;color:{{ network.color }}">{{ network.icon }} {{ network.name }}</h1>
   <span>{% if network.status == 'connected' %}<span class="status-badge live">Connected</span>{% else %}<span class="status-badge draft">Disconnected</span>{% endif %}</span>
 </div>
 
@@ -20,8 +20,37 @@
   <form method="POST" action="{{ url_for('admin_affiliate_connect', nid=network.id) }}">
     <div class="form-group"><label class="form-label">API Endpoint</label><input class="form-input" value="{{ network.api_url }}" disabled></div>
     <div class="form-group"><label class="form-label">API Key</label><input class="form-input" name="api_key" type="password" value="{{ network.api_key }}" placeholder="Paste API key here..."></div>
-    <button class="btn btn-primary">{% if network.status == 'connected' %}Update{% else %}Connect{% endif %}</button>
-    {% if network.last_sync %}<span style="font-size:14px;color:var(--text-dim);margin-left:12px">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
+
+    {% if network.slug == 'agoda' %}
+    <!-- Agoda Extra Fields -->
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Site ID</label><input class="form-input" name="site_id" value="{{ extra.site_id }}" placeholder="123456"></div>
+        <div class="form-group"><label class="form-label">CID (Affiliate)</label><input class="form-input" name="cid" value="{{ extra.cid }}" placeholder="1234567"></div>
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" name="enabled" value="1" {% if extra.enabled %}checked{% endif %}> Enable Agoda integration on Travel pages
+        </label>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:14px;background:rgba(0,79,172,0.05);border-radius:8px;border:1px solid rgba(0,79,172,0.1)">
+      <div style="line-height:1.8;color:var(--text-dim)">
+        <strong style="color:#004fac">Agoda API features:</strong><br>
+        - Hotel search by destination, dates, price range<br>
+        - Real-time pricing & availability<br>
+        - Property details, photos, reviews<br>
+        - Auto-update hotel prices via scheduled sync<br><br>
+        <strong>Setup:</strong> <code>partners.agoda.com</code> > API Access > Generate Key > Copy Site ID & CID
+      </div>
+    </div>
+    {% endif %}
+
+    <div style="margin-top:16px">
+      <button class="btn btn-primary">{% if network.status == 'connected' %}Update{% else %}Connect{% endif %}</button>
+      {% if network.last_sync %}<span style="font-size:14px;color:var(--text-dim);margin-left:12px">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
+    </div>
   </form>
 </div>
 

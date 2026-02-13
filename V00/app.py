@@ -490,7 +490,14 @@ def admin_affiliate():
 @app.route('/admin/affiliate/network/<int:nid>')
 def admin_affiliate_network(nid):
     n = AffiliateNetwork.query.get_or_404(nid)
-    return render_template('admin/affiliate_network.html', network=n)
+    extra = {}
+    if n.slug == 'agoda':
+        extra = {
+            'site_id': SiteSettings.get('agoda_site_id', ''),
+            'cid': SiteSettings.get('agoda_cid', ''),
+            'enabled': SiteSettings.get('agoda_enabled', '0') == '1',
+        }
+    return render_template('admin/affiliate_network.html', network=n, extra=extra)
 
 @app.route('/admin/affiliate/network/<int:nid>/connect', methods=['POST'])
 def admin_affiliate_connect(nid):
@@ -498,6 +505,14 @@ def admin_affiliate_connect(nid):
     n.api_key = request.form.get('api_key','')
     n.status = 'connected' if n.api_key else 'disconnected'
     n.last_sync = datetime.utcnow()
+    # Handle Agoda extra fields
+    if n.slug == 'agoda':
+        SiteSettings.set_val('agoda_api_key', n.api_key, 'api')
+        SiteSettings.set_val('agoda_site_id', request.form.get('site_id', ''), 'api')
+        SiteSettings.set_val('agoda_cid', request.form.get('cid', ''), 'api')
+        enabled = '1' if request.form.get('enabled') else '0'
+        SiteSettings.set_val('agoda_enabled', enabled, 'general')
+        n.status = 'connected' if enabled == '1' and n.api_key else 'disconnected'
     db.session.commit()
     flash(f'{n.name} -> {"Connected" if n.status=="connected" else "Disconnected"}', 'success')
     return redirect(url_for('admin_affiliate_network', nid=n.id))
@@ -582,7 +597,6 @@ def admin_settings():
         tab_keys = {
             'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
-            'agoda': ['agoda_api_key', 'agoda_site_id', 'agoda_cid', 'agoda_enabled'],
         }
         keys_to_save = tab_keys.get(tab, [])
         for key in keys_to_save:
