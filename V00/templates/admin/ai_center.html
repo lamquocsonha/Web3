@@ -10,6 +10,10 @@
     <p style="font-size:12px;color:var(--text-dim);margin:0">Quan ly toan bo van de san pham, bai viet, vertical bang AI</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
+    <button onclick="document.getElementById('guideModal').style.display='block'" class="btn btn-ghost btn-sm"
+      style="font-size:11px;border:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:5px">
+      <span style="font-size:14px">&#128218;</span> Huong dan AI
+    </button>
     <div style="text-align:center;padding:8px 16px;border-radius:10px;
       {% if health_score >= 80 %}background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)
       {% elif health_score >= 50 %}background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)
@@ -633,4 +637,318 @@ function aiApply(action){
   });
 }
 </script>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- GUIDE MODAL - Huong dan vai tro AI          -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="guideModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1100;overflow-y:auto;backdrop-filter:blur(3px)">
+  <div style="max-width:860px;margin:30px auto;background:var(--bg,#fff);border-radius:14px;border:1px solid var(--border);overflow:hidden">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);padding:24px 28px;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <h2 style="margin:0;font-size:20px;font-weight:700">Huong dan vai tro cua AI</h2>
+          <p style="margin:6px 0 0;font-size:13px;opacity:.85">AI ho tro gi trong viec van hanh website? Tung vai tro cu the.</p>
+        </div>
+        <button onclick="document.getElementById('guideModal').style.display='none'"
+          style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer">&times;</button>
+      </div>
+    </div>
+
+    <div style="padding:24px 28px">
+
+      <!-- Guide Nav -->
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="g-tab active" onclick="showGuide('overview',this)">Tong quan</button>
+        <button class="g-tab" onclick="showGuide('products',this)">San pham</button>
+        <button class="g-tab" onclick="showGuide('articles',this)">Bai viet</button>
+        <button class="g-tab" onclick="showGuide('verticals',this)">Verticals</button>
+        <button class="g-tab" onclick="showGuide('workflow',this)">Quy trinh</button>
+      </div>
+
+      <!-- GUIDE: Tong quan -->
+      <div class="g-panel" id="guide-overview">
+        <h3 style="font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#129302;</span> AI lam gi trong he thong?
+        </h3>
+        <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px;line-height:1.6">
+          AI dong <strong>3 vai tro chinh</strong> trong viec van hanh website. Moi vai tro giup admin tiet kiem thoi gian va giam sai sot.
+        </p>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+          <div class="role-card" style="border-top:3px solid #ef4444">
+            <div style="font-size:24px;margin-bottom:8px">&#128269;</div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:4px">1. Phat hien van de</div>
+            <div style="font-size:11px;color:var(--text-dim);line-height:1.5">
+              Quet toan bo san pham va bai viet, tim ra cac van de: trung lap, thieu thong tin, sai phan loai, loi link, hieu suat kem.
+            </div>
+          </div>
+          <div class="role-card" style="border-top:3px solid #f59e0b">
+            <div style="font-size:24px;margin-bottom:8px">&#9889;</div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:4px">2. Phan loai & De xuat</div>
+            <div style="font-size:11px;color:var(--text-dim);line-height:1.5">
+              AI tu dong phan loai san pham vao dung vertical, goi y hanh dong xu ly cho admin, danh gia muc do nghiem trong.
+            </div>
+          </div>
+          <div class="role-card" style="border-top:3px solid #2ecc71">
+            <div style="font-size:24px;margin-bottom:8px">&#128736;</div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:4px">3. Xu ly hang loat</div>
+            <div style="font-size:11px;color:var(--text-dim);line-height:1.5">
+              Admin duyet va thuc thi: xoa SP sai, tat SP kem, cap nhat bai viet. AI ho tro, admin quyet dinh cuoi cung.
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">&#128161; Nguyen tac hoat dong</div>
+          <ul style="font-size:12px;color:var(--text-dim);margin:0;padding-left:18px;line-height:1.8">
+            <li><strong>AI goi y, admin quyet dinh</strong> - AI khong tu dong xoa hay sua gi ca</li>
+            <li><strong>DB check truoc, AI check sau</strong> - Van de don gian (trung URL, thieu hinh) kiem tra bang database, nhanh va mien phi. Chi goi AI cho viec phuc tap (phan loai, SEO)</li>
+            <li><strong>Batch processing</strong> - AI quet theo batch 10-30 SP/lan de tiet kiem chi phi API</li>
+            <li><strong>Health Score</strong> - Diem suc khoe 0-100% tinh tu so van de phat hien, giup admin biet tong quan nhanh</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- GUIDE: San pham -->
+      <div class="g-panel" id="guide-products" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#128230;</span> AI kiem tra san pham nhu the nao?
+        </h3>
+
+        <div style="overflow:auto">
+          <table class="data-table" style="font-size:12px">
+            <thead><tr><th style="width:30px">#</th><th>Van de</th><th style="width:70px">Phat hien</th><th style="width:80px">Muc do</th><th>AI lam gi?</th><th>Admin lam gi?</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>URL trung lap</strong><br><span style="color:var(--text-dim);font-size:10px">Cung 1 SP import nhieu lan</span></td><td>DB</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:11px">Tim nhom URL giong nhau</td>
+                <td style="font-size:11px">Xoa ban sao, giu ban goc</td></tr>
+              <tr><td>2</td><td><strong>Thieu hinh anh</strong><br><span style="color:var(--text-dim);font-size:10px">SP khong co image_url</span></td><td>DB</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:11px">Loc SP thieu hinh</td>
+                <td style="font-size:11px">Bo sung hinh hoac xoa SP</td></tr>
+              <tr><td>3</td><td><strong>Gia = 0</strong><br><span style="color:var(--text-dim);font-size:10px">SP chua co gia hoac gia null</span></td><td>DB</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:11px">Loc SP gia bat thuong</td>
+                <td style="font-size:11px">Cap nhat gia hoac tat SP</td></tr>
+              <tr><td>4</td><td><strong>Nhieu click, 0 conversion</strong><br><span style="color:var(--text-dim);font-size:10px">>10 clicks nhung chua convert</span></td><td>DB</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:11px">Tim SP co ti le chuyen doi = 0%</td>
+                <td style="font-size:11px">Kiem tra link affiliate con hoat dong khong. Doi link hoac tat SP</td></tr>
+              <tr><td>5</td><td><strong>0 clicks (stale)</strong><br><span style="color:var(--text-dim);font-size:10px">SP khong ai click</span></td><td>DB</td>
+                <td><span style="color:#6b7280">Low</span></td>
+                <td style="font-size:11px">Loc SP khong traffic</td>
+                <td style="font-size:11px">Xem xet tat hoac push content</td></tr>
+              <tr><td>6</td><td><strong>Sai vertical</strong><br><span style="color:var(--text-dim);font-size:10px">SP xe may nam trong vertical thu cung</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:11px">Doc ten SP, so sanh voi verticals, de xuat vertical dung, danh gia confidence</td>
+                <td style="font-size:11px">Xoa hoac di chuyen SP sai</td></tr>
+              <tr><td>7</td><td><strong>SP het mua</strong><br><span style="color:var(--text-dim);font-size:10px">Ao am ban mua he</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#f59e0b;font-weight:600">Medium</span></td>
+                <td style="font-size:11px">Phan tich ten + loai SP theo thoi diem hien tai</td>
+                <td style="font-size:11px">Tat tam hoac len lich bat lai</td></tr>
+              <tr><td>8</td><td><strong>Ten SP rac / spam</strong><br><span style="color:var(--text-dim);font-size:10px">Ten SP bat thuong, ky tu la</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#f59e0b;font-weight:600">Medium</span></td>
+                <td style="font-size:11px">Phat hien ten co keyword stuffing, ky tu la, noi dung khong lien quan</td>
+                <td style="font-size:11px">Sua ten hoac xoa SP</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GUIDE: Bai viet -->
+      <div class="g-panel" id="guide-articles" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#128218;</span> AI kiem tra bai viet nhu the nao?
+        </h3>
+
+        <div style="overflow:auto">
+          <table class="data-table" style="font-size:12px">
+            <thead><tr><th style="width:30px">#</th><th>Van de</th><th style="width:70px">Phat hien</th><th style="width:80px">Muc do</th><th>AI lam gi?</th><th>Admin lam gi?</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Noi dung mong (thin)</strong><br><span style="color:var(--text-dim);font-size:10px">Bai viet duoi 500 ky tu</span></td><td>DB</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:11px">Dem so ky tu, loc bai qua ngan</td>
+                <td style="font-size:11px">Bo sung noi dung hoac hop nhat bai</td></tr>
+              <tr><td>2</td><td><strong>Chua gan san pham</strong><br><span style="color:var(--text-dim);font-size:10px">Bai khong co embed code</span></td><td>DB</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:11px">Tim bai khong co embed_code</td>
+                <td style="font-size:11px">Them SP phu hop de kiem tien tu bai. Day la nguon doanh thu bi bo lo!</td></tr>
+              <tr><td>3</td><td><strong>0 views</strong><br><span style="color:var(--text-dim);font-size:10px">Bai viet chua ai doc</span></td><td>DB</td>
+                <td><span style="color:#6b7280">Medium</span></td>
+                <td style="font-size:11px">Loc bai khong traffic</td>
+                <td style="font-size:11px">Toi uu SEO hoac chia se tren MXH</td></tr>
+              <tr><td>4</td><td><strong>SEO Audit</strong><br><span style="color:var(--text-dim);font-size:10px">Thieu meta, headings, keyword</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:11px">Phan tich title, meta, H2/H3, keyword density, de xuat cai thien</td>
+                <td style="font-size:11px">Sua bai theo goi y AI</td></tr>
+              <tr><td>5</td><td><strong>Content trung lap</strong><br><span style="color:var(--text-dim);font-size:10px">2 bai cung noi 1 chu de (cannibalization)</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:11px">So sanh noi dung cac bai, phat hien trung lap</td>
+                <td style="font-size:11px">Hop nhat bai hoac doi keyword</td></tr>
+              <tr><td>6</td><td><strong>Internal Linking</strong><br><span style="color:var(--text-dim);font-size:10px">Bai khong co lien ket noi bo</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:11px">Goi y bai lien quan de chen link vao nhau</td>
+                <td style="font-size:11px">Them link giua cac bai</td></tr>
+              <tr><td>7</td><td><strong>Bai SP sai vertical</strong><br><span style="color:var(--text-dim);font-size:10px">Bai viet gan SP khong lien quan</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:11px">Kiem tra SP trong bai co phu hop vertical cua bai khong</td>
+                <td style="font-size:11px">Doi SP cho phu hop</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GUIDE: Verticals -->
+      <div class="g-panel" id="guide-verticals" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#127760;</span> AI kiem tra Vertical nhu the nao?
+        </h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div class="role-card">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px">Vertical khoe manh la gi?</div>
+            <ul style="font-size:12px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
+              <li>Co <strong>du san pham</strong> trong moi part</li>
+              <li>Co <strong>du bai viet</strong> (>= 3 bai/vertical)</li>
+              <li>Khong co <strong>parts trong</strong> (0 SP)</li>
+              <li>SP duoc <strong>phan loai dung</strong></li>
+              <li><strong>Can bang</strong> giua SP va noi dung</li>
+            </ul>
+          </div>
+          <div class="role-card">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px">AI phat hien van de gi?</div>
+            <ul style="font-size:12px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
+              <li><span style="color:#ef4444;font-weight:600">Trong</span> - Vertical 0 SP, 0 bai</li>
+              <li><span style="color:#f59e0b;font-weight:600">Thieu SP</span> - >50% parts khong co SP</li>
+              <li><span style="color:#f59e0b;font-weight:600">Thieu bai</span> - Duoi 3 bai viet</li>
+              <li><span style="color:#2ecc71;font-weight:600">Tot</span> - Du SP va bai viet</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">&#127919; Muc tieu</div>
+          <p style="font-size:12px;color:var(--text-dim);margin:0;line-height:1.7">
+            Moi vertical nen co: <strong>moi part it nhat 1 SP</strong>, <strong>it nhat 3 bai viet</strong> phu hop tier (nganh/chung/chi-tiet).
+            Tab Verticals giup admin nhin nhanh vertical nao can bo sung noi dung va san pham.
+          </p>
+        </div>
+      </div>
+
+      <!-- GUIDE: Quy trinh -->
+      <div class="g-panel" id="guide-workflow" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#128736;</span> Quy trinh van hanh hang ngay
+        </h3>
+
+        <!-- Flow diagram -->
+        <div style="display:flex;flex-direction:column;gap:0;margin-bottom:24px">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div class="flow-content">
+              <div style="font-size:13px;font-weight:700">Mo AI Control Center</div>
+              <div style="font-size:11px;color:var(--text-dim)">Xem Health Score va tong quan van de</div>
+            </div>
+            <div class="flow-time">1 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-content">
+              <div style="font-size:13px;font-weight:700">Xu ly van de Critical truoc</div>
+              <div style="font-size:11px;color:var(--text-dim)">URL trung lap &#8594; Xoa. Click nhieu 0 conv &#8594; Kiem tra link. Bai chua gan SP &#8594; Them SP.</div>
+            </div>
+            <div class="flow-time">5-10 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-content">
+              <div style="font-size:13px;font-weight:700">Chay AI Scan (tab AI Phan loai)</div>
+              <div style="font-size:11px;color:var(--text-dim)">Chon vertical &#8594; Bat dau scan &#8594; Duyet ket qua &#8594; Xoa SP sai</div>
+            </div>
+            <div class="flow-time">5-15 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div class="flow-content">
+              <div style="font-size:13px;font-weight:700">Kiem tra Verticals</div>
+              <div style="font-size:11px;color:var(--text-dim)">Tim vertical trong &#8594; Bo sung SP/bai viet &#8594; Dieu phoi noi dung</div>
+            </div>
+            <div class="flow-time">5 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step" style="border-color:#2ecc71">
+            <div class="flow-num" style="background:#2ecc71">5</div>
+            <div class="flow-content">
+              <div style="font-size:13px;font-weight:700;color:#2ecc71">Hoan tat!</div>
+              <div style="font-size:11px;color:var(--text-dim)">Health Score tang len. Lap lai moi ngay hoac moi tuan.</div>
+            </div>
+            <div class="flow-time">~20 phut/ngay</div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(59,130,246,.06));border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:16px">
+          <div style="font-size:12px;font-weight:700;margin-bottom:8px">&#128204; Tan suat khuyen nghi</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Hang ngay</div>
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:11px">
+                <li>Check Health Score</li>
+                <li>Xu ly Critical issues</li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Hang tuan</div>
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:11px">
+                <li>AI Scan phan loai SP</li>
+                <li>Review bai viet mong</li>
+                <li>Bo sung SP cho parts trong</li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Hang thang</div>
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:11px">
+                <li>Vertical health toan dien</li>
+                <li>So sanh network hieu suat</li>
+                <li>Don dep SP stale</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.g-tab{padding:8px 14px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);border-radius:6px;cursor:pointer;transition:.15s}
+.g-tab.active{background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:#fff;border-color:transparent}
+.g-tab:hover:not(.active){border-color:#8b5cf6;color:var(--text)}
+.role-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.flow-step{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.flow-num{width:28px;height:28px;border-radius:8px;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.flow-content{flex:1}
+.flow-time{font-size:10px;color:var(--text-dim);font-family:'DM Mono';white-space:nowrap;padding:4px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
+.flow-arrow{text-align:center;font-size:16px;color:var(--text-dim);line-height:1;padding:2px 0}
+</style>
+
+<script>
+function showGuide(panel,btn){
+  document.querySelectorAll('.g-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.g-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('guide-'+panel).style.display='block';
+  btn.classList.add('active');
+}
+/* Close on backdrop click */
+document.getElementById('guideModal').addEventListener('click',function(e){
+  if(e.target===this)this.style.display='none';
+});
+</script>
+
 {% endblock %}
