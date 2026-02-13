@@ -64,6 +64,7 @@
     <thead>
       <tr>
         <th style="width:40px">#</th>
+        <th style="width:50px">Img</th>
         <th>Product</th>
         <th>Vertical / Path</th>
         <th>Network</th>
@@ -78,6 +79,7 @@
       {% for al, part, zone, seg, vert in products %}
       <tr>
         <td style="font-family:'DM Mono';font-size:11px;color:var(--text-dim)">{{ al.id }}</td>
+        <td>{% if al.image_url %}<img src="{{ al.image_url }}" style="width:44px;height:32px;object-fit:cover;border-radius:4px" alt="">{% else %}<span style="display:inline-block;width:44px;height:32px;background:var(--surface);border-radius:4px;text-align:center;line-height:32px;font-size:14px">📦</span>{% endif %}</td>
         <td>
           <strong style="font-size:13px">{{ al.product_name or part.name_vi }}</strong>
           <div style="font-size:10px;color:var(--text-dim);margin-top:2px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">

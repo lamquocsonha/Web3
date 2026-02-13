@@ -56,7 +56,7 @@
             {% for p in related_parts %}
             {% for al in p.affiliate_links if al.is_active %}
             <div class="carousel-card">
-              <div class="cc-image"><div class="cc-placeholder">📦</div></div>
+              <div class="cc-image">{% if al.image_url %}<img src="{{ al.image_url }}" alt="{{ al.product_name or p.name_vi }}" loading="lazy">{% else %}<div class="cc-placeholder">📦</div>{% endif %}</div>
               <div class="cc-body">
                 <div class="cc-network">{{ al.network }}</div>
                 <div class="cc-name">{{ al.product_name or p.name_vi }}</div>

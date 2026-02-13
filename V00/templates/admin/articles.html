@@ -57,6 +57,7 @@
 <div class="table-wrap">
   <table class="data-table">
     <thead><tr>
+      <th style="width:50px">Img</th>
       <th style="cursor:pointer;user-select:none" onclick="sortBy('title')">
         Title {% if current_sort == 'title' %}{{ '↑' if current_order == 'asc' else '↓' }}{% endif %}
       </th>
@@ -73,6 +74,7 @@
     <tbody>
       {% for a in articles %}
       <tr>
+        <td>{% if a.image_url %}<img src="{{ a.image_url }}" style="width:44px;height:32px;object-fit:cover;border-radius:4px" alt="">{% else %}<span style="display:inline-block;width:44px;height:32px;background:var(--surface);border-radius:4px;text-align:center;line-height:32px;font-size:14px">📄</span>{% endif %}</td>
         <td><strong>{{ a.title[:50] }}{% if a.title|length > 50 %}...{% endif %}</strong><br><a href="{{ url_for('vertical_article', vertical_slug=a.vertical_slug, slug=a.slug) }}" target="_blank" style="font-size:11px;color:var(--accent);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">{{ a.vertical_slug }}/bai-viet/{{ a.slug[:30] }}</a></td>
         <td>
           {% if a.tier == 'nganh' %}<span style="color:#e74c3c;font-family:'DM Mono';font-size:10px">NGANH</span>

@@ -851,6 +851,7 @@ def admin_article_new():
             vertical_slug=request.form.get('vertical_slug',''),
             title=request.form['title'], slug=slugify(request.form['title']),
             excerpt=request.form.get('excerpt',''), content=request.form.get('content',''),
+            image_url=request.form.get('image_url',''),
             tier=request.form.get('tier','chung'), category=request.form.get('category',''),
             tags=request.form.get('tags',''),
             related_segment_slug=request.form.get('related_segment_slug',''),
@@ -874,6 +875,7 @@ def admin_article_edit(aid):
         a.title = request.form['title']
         a.excerpt = request.form.get('excerpt','')
         a.content = request.form.get('content','')
+        a.image_url = request.form.get('image_url','')
         a.tier = request.form.get('tier','chung')
         a.category = request.form.get('category','')
         a.tags = request.form.get('tags','')

@@ -4028,6 +4028,7 @@ def seed_sport_articles():
             'excerpt': 'Phân tích toàn cảnh thị trường thể thao Việt Nam: running community tăng 300%, chuỗi gym mở rộng, chi tiêu trung bình 5-15 triệu/năm.',
             'reading_time': 8,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/00b894/ffffff?text=Sport+Market+2025',
             'content': '''<h2>Thể thao Việt Nam đang bùng nổ</h2>
 <p>Thị trường fitness & thể thao Việt Nam đạt giá trị <strong>1.5 tỷ USD</strong> năm 2024, tăng trưởng 25%/năm. Running trở thành phong trào quốc dân với hàng trăm giải chạy mỗi năm.</p>
 
@@ -4052,6 +4053,7 @@ def seed_sport_articles():
             'excerpt': 'Cách chọn giày chạy phù hợp: phân biệt neutral vs stability, đo foot type, chọn đệm mỏng hay dày, budget hợp lý.',
             'reading_time': 10,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/2d3436/ffffff?text=Running+Shoes+Guide',
             'content': '''<h2>3 bước chọn giày chạy bộ</h2>
 
 <h3>Bước 1: Xác định Foot Type</h3>
@@ -4081,6 +4083,7 @@ def seed_sport_articles():
             'excerpt': 'Hướng dẫn dinh dưỡng cho người tập thể thao: tính TDEE, chia macro, timing ăn uống trước/sau tập.',
             'reading_time': 9,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/6c5ce7/ffffff?text=Sport+Nutrition',
             'content': '''<h2>Dinh dưỡng cơ bản cho người tập</h2>
 
 <h3>Bước 1: Tính TDEE (Total Daily Energy Expenditure)</h3>
@@ -4114,6 +4117,7 @@ def seed_sport_articles():
             'excerpt': 'Lộ trình tập gym 12 tuần cho người mới: 4 tuần full body → 4 tuần upper/lower → 4 tuần PPL. Bài tập, số set, rep chi tiết.',
             'reading_time': 12,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/e17055/ffffff?text=Gym+12+Weeks',
             'content': '''<h2>Lộ trình 12 tuần cho người mới tập gym</h2>
 
 <h3>Tuần 1-4: Full Body (3 ngày/tuần)</h3>
@@ -4150,6 +4154,7 @@ def seed_sport_articles():
             'excerpt': 'Training plan chạy Half Marathon 16 tuần cho người mới: từ chạy 3km đến hoàn thành 21km. Phân bổ easy run, tempo, long run.',
             'reading_time': 11,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/0984e3/ffffff?text=Half+Marathon+Plan',
             'content': '''<h2>16 tuần chinh phục Half Marathon</h2>
 
 <h3>Yêu cầu đầu vào</h3>
@@ -4182,6 +4187,7 @@ def seed_sport_articles():
             'excerpt': 'Hướng dẫn phòng chống chấn thương: quy trình warm-up 10 phút, cool-down, stretching, foam rolling, khi nào cần nghỉ.',
             'reading_time': 8,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/00cec9/ffffff?text=Injury+Prevention',
             'content': '''<h2>Phòng chống chấn thương thể thao</h2>
 
 <h3>1. Warm-up đúng cách (10 phút)</h3>
@@ -4221,6 +4227,7 @@ def seed_sport_articles():
             'excerpt': 'So sánh 3 giày chạy bộ phổ biến nhất: Pegasus (đa năng), Nimbus (êm nhất), Clifton (nhẹ nhất). Nên chọn đôi nào?',
             'reading_time': 10,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/2d3436/00b894?text=Pegasus+vs+Nimbus+vs+Clifton',
             'content': '''<h2>So sánh 3 giày chạy bộ best-seller</h2>
 
 <h3>Nike Pegasus 41</h3>
@@ -4252,6 +4259,7 @@ def seed_sport_articles():
             'excerpt': 'Review chi tiết Garmin Forerunner 265 sau 6 tháng sử dụng: GPS chính xác, AMOLED đẹp, Training Readiness hữu ích, pin 13 ngày.',
             'reading_time': 9,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/636e72/00b894?text=Garmin+FR265+Review',
             'content': '''<h2>Garmin Forerunner 265 — Review sau 6 tháng</h2>
 
 <h3>Thiết kế & Màn hình</h3>
@@ -4283,6 +4291,7 @@ def seed_sport_articles():
             'excerpt': 'Review chi tiết ON Gold Standard Whey: 24g protein/scoop, vị ngon, tan tốt, giá hợp lý. So sánh với MuscleTech, MyProtein.',
             'reading_time': 7,
             'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/fdcb6e/2d3436?text=ON+Gold+Standard+Review',
             'content': '''<h2>ON Gold Standard 100% Whey — Có xứng #1?</h2>
 
 <h3>Thành phần</h3>
@@ -4317,6 +4326,7 @@ def seed_sport_articles():
             reading_time=a_data['reading_time'],
             vertical_slug=a_data['vertical_slug'],
             content=a_data['content'],
+            image_url=a_data.get('image_url', ''),
             status='published',
             ai_generated=False
         )
@@ -4345,101 +4355,101 @@ def seed_products_sport():
     sport_products = {
         # Running — Giày chạy
         'nike-pegasus-41': [
-            ('shopee', 'Nike Pegasus 41 Nam — Black/White', 'https://shope.ee/sport001', 3290000),
-            ('lazada', 'Nike Pegasus 41 Nữ — Pink/White', 'https://s.lazada.vn/sport002', 3290000),
-            ('tiki', 'Nike Pegasus 41 — Thunder Blue', 'https://tiki.vn/sport003', 3490000),
+            ('shopee', 'Nike Pegasus 41 Nam — Black/White', 'https://shope.ee/sport001', 3290000, 'https://placehold.co/400x300/2d3436/ffffff?text=Pegasus+41'),
+            ('lazada', 'Nike Pegasus 41 Nữ — Pink/White', 'https://s.lazada.vn/sport002', 3290000, 'https://placehold.co/400x300/e84393/ffffff?text=Pegasus+41+W'),
+            ('tiki', 'Nike Pegasus 41 — Thunder Blue', 'https://tiki.vn/sport003', 3490000, 'https://placehold.co/400x300/0984e3/ffffff?text=Pegasus+41'),
         ],
         'asics-gel-nimbus-26': [
-            ('shopee', 'ASICS Gel-Nimbus 26 Nam — Black/Blue', 'https://shope.ee/sport010', 4190000),
-            ('lazada', 'ASICS Gel-Nimbus 26 Nữ — Lavender', 'https://s.lazada.vn/sport011', 4190000),
+            ('shopee', 'ASICS Gel-Nimbus 26 Nam — Black/Blue', 'https://shope.ee/sport010', 4190000, 'https://placehold.co/400x300/2d3436/4fc3f7?text=Nimbus+26'),
+            ('lazada', 'ASICS Gel-Nimbus 26 Nữ — Lavender', 'https://s.lazada.vn/sport011', 4190000, 'https://placehold.co/400x300/a29bfe/ffffff?text=Nimbus+26+W'),
         ],
         'hoka-clifton-9': [
-            ('shopee', 'Hoka Clifton 9 Nam — Black/White', 'https://shope.ee/sport020', 3690000),
-            ('lazada', 'Hoka Clifton 9 Nữ — Airy Blue', 'https://s.lazada.vn/sport021', 3690000),
-            ('tiki', 'Hoka Clifton 9 Wide — All Black', 'https://tiki.vn/sport022', 3890000),
+            ('shopee', 'Hoka Clifton 9 Nam — Black/White', 'https://shope.ee/sport020', 3690000, 'https://placehold.co/400x300/2d3436/ffffff?text=Clifton+9'),
+            ('lazada', 'Hoka Clifton 9 Nữ — Airy Blue', 'https://s.lazada.vn/sport021', 3690000, 'https://placehold.co/400x300/74b9ff/ffffff?text=Clifton+9+W'),
+            ('tiki', 'Hoka Clifton 9 Wide — All Black', 'https://tiki.vn/sport022', 3890000, 'https://placehold.co/400x300/636e72/ffffff?text=Clifton+9+Wide'),
         ],
         'nike-vaporfly-3': [
-            ('shopee', 'Nike Vaporfly 3 — Volt/Black', 'https://shope.ee/sport030', 5690000),
-            ('lazada', 'Nike Vaporfly 3 — White/Bright Crimson', 'https://s.lazada.vn/sport031', 5890000),
+            ('shopee', 'Nike Vaporfly 3 — Volt/Black', 'https://shope.ee/sport030', 5690000, 'https://placehold.co/400x300/00b894/2d3436?text=Vaporfly+3'),
+            ('lazada', 'Nike Vaporfly 3 — White/Bright Crimson', 'https://s.lazada.vn/sport031', 5890000, 'https://placehold.co/400x300/e17055/ffffff?text=Vaporfly+3'),
         ],
         # Running — Đồng hồ GPS
         'garmin-forerunner-265': [
-            ('shopee', 'Garmin Forerunner 265 Black', 'https://shope.ee/sport040', 10990000),
-            ('lazada', 'Garmin Forerunner 265S Whitestone', 'https://s.lazada.vn/sport041', 10990000),
-            ('tiki', 'Garmin Forerunner 265 Aqua', 'https://tiki.vn/sport042', 10990000),
+            ('shopee', 'Garmin Forerunner 265 Black', 'https://shope.ee/sport040', 10990000, 'https://placehold.co/400x300/2d3436/00b894?text=FR265'),
+            ('lazada', 'Garmin Forerunner 265S Whitestone', 'https://s.lazada.vn/sport041', 10990000, 'https://placehold.co/400x300/dfe6e9/2d3436?text=FR265S'),
+            ('tiki', 'Garmin Forerunner 265 Aqua', 'https://tiki.vn/sport042', 10990000, 'https://placehold.co/400x300/00cec9/ffffff?text=FR265+Aqua'),
         ],
         'coros-pace-3': [
-            ('shopee', 'COROS PACE 3 GPS — Black Silicone', 'https://shope.ee/sport050', 5990000),
-            ('lazada', 'COROS PACE 3 GPS — White Nylon', 'https://s.lazada.vn/sport051', 5990000),
+            ('shopee', 'COROS PACE 3 GPS — Black Silicone', 'https://shope.ee/sport050', 5990000, 'https://placehold.co/400x300/2d3436/ffffff?text=COROS+PACE+3'),
+            ('lazada', 'COROS PACE 3 GPS — White Nylon', 'https://s.lazada.vn/sport051', 5990000, 'https://placehold.co/400x300/dfe6e9/2d3436?text=COROS+PACE+3'),
         ],
         'apple-watch-ultra-2': [
-            ('shopee', 'Apple Watch Ultra 2 Titanium 49mm', 'https://shope.ee/sport060', 18990000),
-            ('tiki', 'Apple Watch Ultra 2 + Alpine Loop', 'https://tiki.vn/sport061', 19990000),
+            ('shopee', 'Apple Watch Ultra 2 Titanium 49mm', 'https://shope.ee/sport060', 18990000, 'https://placehold.co/400x300/636e72/ff7f50?text=AW+Ultra+2'),
+            ('tiki', 'Apple Watch Ultra 2 + Alpine Loop', 'https://tiki.vn/sport061', 19990000, 'https://placehold.co/400x300/e17055/ffffff?text=AW+Ultra+2'),
         ],
         # Running — Đồ chạy
         'ao-chay-nike-dri-fit': [
-            ('shopee', 'Nike Dri-FIT Miler Singlet Nam', 'https://shope.ee/sport070', 790000),
-            ('lazada', 'Nike Dri-FIT ADV AeroSwift Singlet', 'https://s.lazada.vn/sport071', 1290000),
+            ('shopee', 'Nike Dri-FIT Miler Singlet Nam', 'https://shope.ee/sport070', 790000, 'https://placehold.co/400x300/2d3436/ffffff?text=Dri-FIT+Singlet'),
+            ('lazada', 'Nike Dri-FIT ADV AeroSwift Singlet', 'https://s.lazada.vn/sport071', 1290000, 'https://placehold.co/400x300/00b894/ffffff?text=AeroSwift'),
         ],
         'quan-short-chay-2-in-1': [
-            ('shopee', 'Quần short 2-in-1 Under Armour Launch', 'https://shope.ee/sport080', 890000),
-            ('lazada', 'Nike Dri-FIT Stride 2-in-1 Short', 'https://s.lazada.vn/sport081', 990000),
+            ('shopee', 'Quần short 2-in-1 Under Armour Launch', 'https://shope.ee/sport080', 890000, 'https://placehold.co/400x300/636e72/ffffff?text=UA+2in1'),
+            ('lazada', 'Nike Dri-FIT Stride 2-in-1 Short', 'https://s.lazada.vn/sport081', 990000, 'https://placehold.co/400x300/2d3436/ffffff?text=Stride+2in1'),
         ],
         'tat-chay-balega': [
-            ('shopee', 'Balega Hidden Comfort No Show', 'https://shope.ee/sport090', 380000),
-            ('tiki', 'Balega Blister Resist No Show', 'https://tiki.vn/sport091', 350000),
+            ('shopee', 'Balega Hidden Comfort No Show', 'https://shope.ee/sport090', 380000, 'https://placehold.co/400x300/dfe6e9/2d3436?text=Balega+HC'),
+            ('tiki', 'Balega Blister Resist No Show', 'https://tiki.vn/sport091', 350000, 'https://placehold.co/400x300/b2bec3/2d3436?text=Balega+BR'),
         ],
         # Running — Dinh dưỡng chạy
         'gel-nang-luong-gu': [
-            ('shopee', 'GU Energy Gel Tri-Berry x24 gói', 'https://shope.ee/sport100', 720000),
-            ('lazada', 'GU Energy Gel Salted Caramel x8 gói', 'https://s.lazada.vn/sport101', 280000),
+            ('shopee', 'GU Energy Gel Tri-Berry x24 gói', 'https://shope.ee/sport100', 720000, 'https://placehold.co/400x300/6c5ce7/ffffff?text=GU+Gel+x24'),
+            ('lazada', 'GU Energy Gel Salted Caramel x8 gói', 'https://s.lazada.vn/sport101', 280000, 'https://placehold.co/400x300/fdcb6e/2d3436?text=GU+Caramel'),
         ],
         'vien-muoi-dien-giai-saltstick': [
-            ('shopee', 'SaltStick Caps 100 viên', 'https://shope.ee/sport110', 550000),
-            ('lazada', 'SaltStick Fastchews 60 viên', 'https://s.lazada.vn/sport111', 380000),
+            ('shopee', 'SaltStick Caps 100 viên', 'https://shope.ee/sport110', 550000, 'https://placehold.co/400x300/dfe6e9/e17055?text=SaltStick+100'),
+            ('lazada', 'SaltStick Fastchews 60 viên', 'https://s.lazada.vn/sport111', 380000, 'https://placehold.co/400x300/ffeaa7/2d3436?text=SaltStick+FC'),
         ],
         'bot-dien-giai-nuun': [
-            ('shopee', 'Nuun Sport Mixed Pack 4 ống', 'https://shope.ee/sport120', 450000),
-            ('tiki', 'Nuun Sport Citrus Fruit 10 viên', 'https://tiki.vn/sport121', 150000),
+            ('shopee', 'Nuun Sport Mixed Pack 4 ống', 'https://shope.ee/sport120', 450000, 'https://placehold.co/400x300/00b894/ffffff?text=Nuun+Mix'),
+            ('tiki', 'Nuun Sport Citrus Fruit 10 viên', 'https://tiki.vn/sport121', 150000, 'https://placehold.co/400x300/ffeaa7/e17055?text=Nuun+Citrus'),
         ],
         # Gym — Whey Protein
         'whey-protein-isolate': [
-            ('shopee', 'Rule 1 R1 Whey Isolate 5lbs', 'https://shope.ee/sport130', 1890000),
-            ('lazada', 'Dymatize ISO100 Hydrolyzed 5lbs', 'https://s.lazada.vn/sport131', 2290000),
+            ('shopee', 'Rule 1 R1 Whey Isolate 5lbs', 'https://shope.ee/sport130', 1890000, 'https://placehold.co/400x300/0984e3/ffffff?text=R1+Isolate'),
+            ('lazada', 'Dymatize ISO100 Hydrolyzed 5lbs', 'https://s.lazada.vn/sport131', 2290000, 'https://placehold.co/400x300/6c5ce7/ffffff?text=ISO100'),
         ],
         'on-gold-standard-whey': [
-            ('shopee', 'ON Gold Standard 100% Whey 5lbs Chocolate', 'https://shope.ee/sport140', 1790000),
-            ('lazada', 'ON Gold Standard Whey 2lbs Vanilla', 'https://s.lazada.vn/sport141', 890000),
-            ('tiki', 'ON Gold Standard Whey 5lbs Cookies & Cream', 'https://tiki.vn/sport142', 1850000),
+            ('shopee', 'ON Gold Standard 100% Whey 5lbs Chocolate', 'https://shope.ee/sport140', 1790000, 'https://placehold.co/400x300/fdcb6e/2d3436?text=ON+Gold+5lbs'),
+            ('lazada', 'ON Gold Standard Whey 2lbs Vanilla', 'https://s.lazada.vn/sport141', 890000, 'https://placehold.co/400x300/ffeaa7/2d3436?text=ON+Gold+2lbs'),
+            ('tiki', 'ON Gold Standard Whey 5lbs Cookies & Cream', 'https://tiki.vn/sport142', 1850000, 'https://placehold.co/400x300/636e72/ffffff?text=ON+Gold+C%26C'),
         ],
         'mass-gainer-tang-can': [
-            ('shopee', 'ON Serious Mass 12lbs Chocolate', 'https://shope.ee/sport150', 1490000),
-            ('lazada', 'MuscleTech Mass Tech 7lbs', 'https://s.lazada.vn/sport151', 1190000),
+            ('shopee', 'ON Serious Mass 12lbs Chocolate', 'https://shope.ee/sport150', 1490000, 'https://placehold.co/400x300/e17055/ffffff?text=Serious+Mass'),
+            ('lazada', 'MuscleTech Mass Tech 7lbs', 'https://s.lazada.vn/sport151', 1190000, 'https://placehold.co/400x300/d63031/ffffff?text=Mass+Tech'),
         ],
         # Gym — Creatine
         'creatine-monohydrate': [
-            ('shopee', 'ON Micronized Creatine 300g', 'https://shope.ee/sport160', 350000),
-            ('lazada', 'MuscleTech Platinum Creatine 400g', 'https://s.lazada.vn/sport161', 320000),
-            ('tiki', 'MyProtein Creatine Monohydrate 500g', 'https://tiki.vn/sport162', 380000),
+            ('shopee', 'ON Micronized Creatine 300g', 'https://shope.ee/sport160', 350000, 'https://placehold.co/400x300/2d3436/fdcb6e?text=ON+Creatine'),
+            ('lazada', 'MuscleTech Platinum Creatine 400g', 'https://s.lazada.vn/sport161', 320000, 'https://placehold.co/400x300/636e72/ffffff?text=MT+Creatine'),
+            ('tiki', 'MyProtein Creatine Monohydrate 500g', 'https://tiki.vn/sport162', 380000, 'https://placehold.co/400x300/0984e3/ffffff?text=MP+Creatine'),
         ],
         'creatine-hcl': [
-            ('shopee', 'Kaged Muscle C-HCl 75 servings', 'https://shope.ee/sport170', 650000),
-            ('lazada', 'MuscleTech Creactor HCl 120 servings', 'https://s.lazada.vn/sport171', 590000),
+            ('shopee', 'Kaged Muscle C-HCl 75 servings', 'https://shope.ee/sport170', 650000, 'https://placehold.co/400x300/00b894/ffffff?text=Kaged+C-HCl'),
+            ('lazada', 'MuscleTech Creactor HCl 120 servings', 'https://s.lazada.vn/sport171', 590000, 'https://placehold.co/400x300/e17055/ffffff?text=Creactor'),
         ],
         # Gym — Máy tập
         'may-chay-bo-dien': [
-            ('shopee', 'Kingsport MAX-08 3.0HP', 'https://shope.ee/sport180', 12900000),
-            ('lazada', 'Elip Marathon Pro 3.5HP', 'https://s.lazada.vn/sport181', 18900000),
-            ('tiki', 'Máy chạy Xiaomi WalkingPad R2', 'https://tiki.vn/sport182', 8900000),
+            ('shopee', 'Kingsport MAX-08 3.0HP', 'https://shope.ee/sport180', 12900000, 'https://placehold.co/400x300/2d3436/ffffff?text=Kingsport+MAX'),
+            ('lazada', 'Elip Marathon Pro 3.5HP', 'https://s.lazada.vn/sport181', 18900000, 'https://placehold.co/400x300/636e72/ffffff?text=Elip+Pro'),
+            ('tiki', 'Máy chạy Xiaomi WalkingPad R2', 'https://tiki.vn/sport182', 8900000, 'https://placehold.co/400x300/e17055/ffffff?text=WalkingPad'),
         ],
         'ta-don-dieu-chinh': [
-            ('shopee', 'Bowflex SelectTech 552 Adjustable 2-24kg', 'https://shope.ee/sport190', 8900000),
-            ('lazada', 'PowerBlock Elite 2.5-22kg', 'https://s.lazada.vn/sport191', 6900000),
+            ('shopee', 'Bowflex SelectTech 552 Adjustable 2-24kg', 'https://shope.ee/sport190', 8900000, 'https://placehold.co/400x300/2d3436/e17055?text=Bowflex+552'),
+            ('lazada', 'PowerBlock Elite 2.5-22kg', 'https://s.lazada.vn/sport191', 6900000, 'https://placehold.co/400x300/636e72/fdcb6e?text=PowerBlock'),
         ],
         'day-khang-luc': [
-            ('shopee', 'Bộ dây kháng lực 5 mức Aolikes', 'https://shope.ee/sport200', 189000),
-            ('lazada', 'Theraband CLX Resistance Band', 'https://s.lazada.vn/sport201', 450000),
-            ('tiki', 'Bộ tube bands 11 món có tay cầm', 'https://tiki.vn/sport202', 250000),
+            ('shopee', 'Bộ dây kháng lực 5 mức Aolikes', 'https://shope.ee/sport200', 189000, 'https://placehold.co/400x300/00b894/ffffff?text=Bands+5pc'),
+            ('lazada', 'Theraband CLX Resistance Band', 'https://s.lazada.vn/sport201', 450000, 'https://placehold.co/400x300/fdcb6e/2d3436?text=Theraband'),
+            ('tiki', 'Bộ tube bands 11 món có tay cầm', 'https://tiki.vn/sport202', 250000, 'https://placehold.co/400x300/6c5ce7/ffffff?text=Tube+Bands'),
         ],
     }
 
@@ -4448,9 +4458,10 @@ def seed_products_sport():
         for z in seg.zones:
             for p in z.parts:
                 if p.slug in sport_products:
-                    for net, pname, url, price in sport_products[p.slug]:
+                    for net, pname, url, price, img in sport_products[p.slug]:
                         al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
-                            url=url, price=price, clicks=random.randint(20, 1000),
+                            url=url, price=price, image_url=img,
+                            clicks=random.randint(20, 1000),
                             conversions=random.randint(1, 50))
                         db.session.add(al)
                         seeded += 1
