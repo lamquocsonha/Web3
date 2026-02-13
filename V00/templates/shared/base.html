@@ -11,6 +11,7 @@
 
 <!-- Theme variables injected per vertical.style -->
 {% set theme = THEME_STYLES.get(vertical.style or 'classic', THEME_STYLES['classic']) %}
+{% autoescape false %}
 <style>
 :root {
   --max-w: 1400px;
@@ -47,6 +48,7 @@
   --font-secondary: {{ theme.font_secondary }};
 }
 </style>
+{% endautoescape %}
 </head>
 <body data-mode="{{ vertical.default_mode or 'light' }}">
 
