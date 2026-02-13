@@ -7,33 +7,33 @@
 .queue-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px }
 .q-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; text-align:center }
 .q-stat-val { font-size:28px; font-weight:800 }
-.q-stat-label { font-size:12px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:4px }
+.q-stat-label { font-size:14px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:4px }
 
 .queue-filters { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; align-items:center }
 .queue-filters select { padding:8px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface); color:var(--text); font-family:inherit }
-.queue-filters .filter-label { font-size:13px; font-weight:600; color:var(--text-dim) }
+.queue-filters .filter-label { font-size:14px; font-weight:600; color:var(--text-dim) }
 
 .queue-table { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:32px }
 .queue-table table { width:100%; border-collapse:collapse }
-.queue-table th { padding:14px 16px; text-align:left; font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.queue-table th { padding:14px 16px; text-align:left; font-size:14px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
 .queue-table td { padding:14px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
 .queue-table tr:last-child td { border:none }
 .queue-table tr:hover td { background:var(--surface2) }
 
 .q-topic { font-weight:600; font-size:15px; max-width:300px }
-.q-topic-kw { font-size:12px; color:var(--text-dim); margin-top:3px }
+.q-topic-kw { font-size:14px; color:var(--text-dim); margin-top:3px }
 
-.q-badge { display:inline-block; font-size:11px; padding:3px 10px; border-radius:6px; font-weight:700; text-transform:uppercase }
+.q-badge { display:inline-block; font-size:14px; padding:3px 10px; border-radius:6px; font-weight:700; text-transform:uppercase }
 .q-badge.pending { background:#fef3c7; color:#92400e }
 .q-badge.review { background:#dbeafe; color:#1e40af }
 .q-badge.published { background:#d1fae5; color:#065f46 }
 .q-badge.skipped { background:var(--surface2); color:var(--text-dim) }
 .q-badge.generating { background:#fce7f3; color:#9d174d }
 
-.q-layer { font-size:12px; padding:3px 10px; border-radius:6px; font-weight:700; background:var(--accent-dim); color:var(--accent) }
+.q-layer { font-size:14px; padding:3px 10px; border-radius:6px; font-weight:700; background:var(--accent-dim); color:var(--accent) }
 
 .q-actions { display:flex; gap:6px }
-.q-btn { padding:6px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s }
+.q-btn { padding:6px 14px; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; transition:all .15s }
 .q-btn.approve { background:#d1fae5; color:#065f46 }
 .q-btn.approve:hover { background:#a7f3d0 }
 .q-btn.skip { background:#fef3c7; color:#92400e }
@@ -49,7 +49,7 @@
 .modal-box { background:var(--surface); border-radius:16px; padding:32px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,.3) }
 .modal-box h3 { font-size:20px; font-weight:700; margin-bottom:20px }
 .form-row { margin-bottom:16px }
-.form-row label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-dim) }
+.form-row label { display:block; font-size:14px; font-weight:600; margin-bottom:6px; color:var(--text-dim) }
 .form-row input, .form-row select, .form-row textarea { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit }
 .form-row textarea { resize:vertical; min-height:60px }
 .form-actions { display:flex; gap:10px; margin-top:20px }
@@ -131,9 +131,9 @@
           {% else %}-{% endif %}
         </td>
         <td><span class="q-layer">{{ q.knowledge_layer }}</span></td>
-        <td style="font-size:12px;color:var(--text-dim)">{{ q.source_type }}</td>
+        <td style="font-size:14px;color:var(--text-dim)">{{ q.source_type }}</td>
         <td><span class="q-badge {{ q.status }}">{{ q.status }}</span></td>
-        <td style="font-size:13px">{{ q.scheduled_at.strftime('%d/%m %H:%M') if q.scheduled_at else '-' }}</td>
+        <td style="font-size:14px">{{ q.scheduled_at.strftime('%d/%m %H:%M') if q.scheduled_at else '-' }}</td>
         <td>
           <div class="q-actions">
             {% if q.status == 'pending' %}

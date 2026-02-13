@@ -11,7 +11,7 @@ Embed Widgets
   <a href="{{ url_for('admin_voucher_widget_new') }}" class="btn btn-primary">+ Thêm Widget</a>
 </div>
 
-<p style="font-size:13px;color:var(--text-dim);margin:-8px 0 24px">
+<p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">
   Quản lý embed codes từ AccessTrade và các affiliate networks khác. Widgets sẽ hiển thị trên trang voucher.
 </p>
 
@@ -33,55 +33,55 @@ Embed Widgets
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
             <h3 style="font-size:16px;margin:0;font-weight:700">{{ w.name }}</h3>
             {% if not w.is_active %}
-            <span style="padding:2px 8px;background:var(--bg-subtle);border-radius:4px;font-size:11px;font-weight:700;color:var(--text-dim)">HIDDEN</span>
+            <span style="padding:2px 8px;background:var(--bg-subtle);border-radius:4px;font-size:14px;font-weight:700;color:var(--text-dim)">HIDDEN</span>
             {% else %}
-            <span style="padding:2px 8px;background:rgba(34,197,94,0.1);color:#22c55e;border-radius:4px;font-size:11px;font-weight:700">ACTIVE</span>
+            <span style="padding:2px 8px;background:rgba(34,197,94,0.1);color:#22c55e;border-radius:4px;font-size:14px;font-weight:700">ACTIVE</span>
             {% endif %}
           </div>
 
           {% if w.description %}
-          <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">{{ w.description }}</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-bottom:12px">{{ w.description }}</div>
           {% endif %}
 
           <!-- Stats -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Network</div>
-              <div style="font-size:13px;font-weight:600;text-transform:uppercase">{{ w.network }}</div>
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Network</div>
+              <div style="font-size:14px;font-weight:600;text-transform:uppercase">{{ w.network }}</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Placement</div>
-              <div style="font-size:13px;font-weight:600">{{ w.placement.replace('_', ' ').title() }}</div>
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Placement</div>
+              <div style="font-size:14px;font-weight:600">{{ w.placement.replace('_', ' ').title() }}</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Created</div>
-              <div style="font-size:13px;font-weight:600">{{ w.created_at.strftime('%d/%m/%Y') }}</div>
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Created</div>
+              <div style="font-size:14px;font-weight:600">{{ w.created_at.strftime('%d/%m/%Y') }}</div>
             </div>
           </div>
 
           <!-- Embed Code Preview -->
           <details style="margin-top:16px">
-            <summary style="cursor:pointer;font-size:12px;color:var(--text-dim);user-select:none">
+            <summary style="cursor:pointer;font-size:14px;color:var(--text-dim);user-select:none">
               👁️ Xem embed code
             </summary>
             <div style="margin-top:8px;background:var(--code-bg);padding:12px;border-radius:6px;max-height:200px;overflow-y:auto">
-              <pre style="margin:0;font-family:'DM Mono',monospace;font-size:11px;line-height:1.6;white-space:pre-wrap;word-break:break-all">{{ w.embed_code }}</pre>
+              <pre style="margin:0;font-family:'DM Mono',monospace;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-all">{{ w.embed_code }}</pre>
             </div>
           </details>
         </div>
 
         <!-- Actions -->
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <a href="{{ url_for('admin_voucher_widget_edit', wid=w.id) }}" class="btn btn-sm btn-primary" style="font-size:12px;padding:6px 12px">
+          <a href="{{ url_for('admin_voucher_widget_edit', wid=w.id) }}" class="btn btn-sm btn-primary" style="font-size:14px;padding:6px 12px">
             ✏️ Edit
           </a>
           <form method="POST" action="{{ url_for('admin_voucher_widget_toggle', wid=w.id) }}" style="margin:0">
-            <button type="submit" class="btn btn-sm btn-secondary" style="font-size:12px;padding:6px 12px;width:100%">
+            <button type="submit" class="btn btn-sm btn-secondary" style="font-size:14px;padding:6px 12px;width:100%">
               {% if w.is_active %}👁️ Ẩn{% else %}👁️ Hiện{% endif %}
             </button>
           </form>
           <form method="POST" action="{{ url_for('admin_voucher_widget_delete', wid=w.id) }}" onsubmit="return confirm('Xóa widget này?')" style="margin:0">
-            <button type="submit" class="btn btn-sm" style="font-size:12px;padding:6px 12px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)">
+            <button type="submit" class="btn btn-sm" style="font-size:14px;padding:6px 12px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)">
               🗑️ Xóa
             </button>
           </form>
@@ -103,7 +103,7 @@ Embed Widgets
 <!-- Info Box -->
 <div style="background:rgba(59,130,246,0.05);border:2px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:24px;margin-top:24px;max-width:1400px">
   <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">💡 Hướng dẫn</h3>
-  <ul style="font-size:13px;color:var(--text-dim);margin:0;padding-left:20px;line-height:1.8">
+  <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:20px;line-height:1.8">
     <li><strong>AccessTrade:</strong> Copy embed code từ tool tạo widget voucher → Paste vào đây</li>
     <li><strong>Position:</strong> Số thứ tự hiển thị (1 = trên cùng, 2 = dưới...)</li>
     <li><strong>Placement:</strong> Chọn nơi hiển thị widget (voucher_page, sidebar, homepage...)</li>

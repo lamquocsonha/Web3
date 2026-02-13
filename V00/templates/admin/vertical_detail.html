@@ -5,8 +5,8 @@
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0">{{ vertical.icon }} {{ vertical.name }}</h1>
   <div style="display:flex;gap:8px;align-items:center">
-    <span class="status-badge {{ vertical.status }}" style="font-size:12px;padding:5px 14px">{{ vertical.status }}</span>
-    <span style="font-family:'DM Mono';font-size:13px;color:var(--accent)">{{ vertical.slug }}.unilab.vn</span>
+    <span class="status-badge {{ vertical.status }}" style="font-size:14px;padding:5px 14px">{{ vertical.status }}</span>
+    <span style="font-family:'DM Mono';font-size:14px;color:var(--accent)">{{ vertical.slug }}.unilab.vn</span>
     <a href="{{ url_for('admin_vertical_edit', vid=vertical.id) }}" class="btn btn-ghost btn-sm">Edit</a>
     <form method="POST" action="{{ url_for('admin_vertical_toggle', vid=vertical.id) }}" style="display:inline">
       <button class="btn btn-sm {% if vertical.status == 'draft' %}btn-primary{% else %}btn-ghost{% endif %}">{% if vertical.status == 'draft' %}Publish{% else %}Unpublish{% endif %}</button>

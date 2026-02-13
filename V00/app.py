@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue
 from datetime import datetime, date, timedelta
-import os, random
+import os, random, json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///unilab.db'
@@ -129,6 +129,36 @@ THEME_STYLES = {
     },
 }
 
+AVAILABLE_FONTS = [
+    ("'Inter', -apple-system, system-ui, sans-serif", "Inter"),
+    ("'DM Sans', 'Inter', sans-serif", "DM Sans"),
+    ("'DM Mono', monospace", "DM Mono"),
+    ("'Barlow', 'Roboto', sans-serif", "Barlow"),
+    ("'Barlow Condensed', 'Roboto Condensed', sans-serif", "Barlow Condensed"),
+    ("'Playfair Display', 'DM Sans', serif", "Playfair Display"),
+    ("'Montserrat', sans-serif", "Montserrat"),
+    ("'Space Grotesk', 'Inter', sans-serif", "Space Grotesk"),
+    ("'JetBrains Mono', 'Fira Code', monospace", "JetBrains Mono"),
+    ("'Quicksand', 'Nunito', sans-serif", "Quicksand"),
+    ("'Nunito', sans-serif", "Nunito"),
+    ("'Outfit', 'Inter', sans-serif", "Outfit"),
+    ("'Archivo', 'Inter', sans-serif", "Archivo"),
+    ("'Archivo Narrow', 'Roboto Condensed', sans-serif", "Archivo Narrow"),
+    ("'Exo 2', 'Barlow', sans-serif", "Exo 2"),
+]
+
+def get_theme_styles():
+    """Get theme styles — merge DB custom styles with hardcoded defaults"""
+    styles = dict(THEME_STYLES)
+    try:
+        stored = SiteSettings.get('theme_styles_custom', '')
+        if stored:
+            custom = json.loads(stored)
+            styles.update(custom)
+    except:
+        pass
+    return styles
+
 @app.context_processor
 def inject_globals():
     try:
@@ -136,7 +166,7 @@ def inject_globals():
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
             'now': datetime.utcnow(),
-            'THEME_STYLES': THEME_STYLES,
+            'THEME_STYLES': get_theme_styles(),
             'site_mode': site_mode,
         }
     except:
@@ -545,16 +575,69 @@ def admin_analytics():
 # =============================================
 @app.route('/admin/settings', methods=['GET','POST'])
 def admin_settings():
+    tab = request.args.get('tab', 'general')
     if request.method == 'POST':
-        for key in ['site_mode','openai_key','claude_key','dalle_key','deepl_key','site_name','default_mode',
-                     'agoda_api_key','agoda_site_id','agoda_cid','agoda_enabled']:
-            val = request.form.get(key,'')
+        tab = request.form.get('_tab', 'general')
+        # Only save keys relevant to current tab (avoid wiping other tabs)
+        tab_keys = {
+            'general': ['site_mode', 'site_name', 'default_mode'],
+            'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
+            'agoda': ['agoda_api_key', 'agoda_site_id', 'agoda_cid', 'agoda_enabled'],
+        }
+        keys_to_save = tab_keys.get(tab, [])
+        for key in keys_to_save:
+            val = request.form.get(key, '')
             cat = 'api' if '_key' in key or '_id' in key or '_cid' in key else 'general'
             SiteSettings.set_val(key, val, cat)
-        flash('Da luu settings', 'success')
-        return redirect(url_for('admin_settings'))
+        flash('Settings saved!', 'success')
+        return redirect(url_for('admin_settings', tab=tab))
     settings = {s.key: s.value for s in SiteSettings.query.all()}
-    return render_template('admin/settings.html', settings=settings)
+    styles = get_theme_styles()
+    # Determine which are custom (editable) vs default
+    custom_raw = SiteSettings.get('theme_styles_custom', '{}')
+    try:
+        custom_names = set(json.loads(custom_raw).keys())
+    except:
+        custom_names = set()
+    return render_template('admin/settings.html', settings=settings, styles=styles,
+                           active_tab=tab, custom_names=custom_names,
+                           default_names=set(THEME_STYLES.keys()),
+                           available_fonts=AVAILABLE_FONTS)
+
+@app.route('/admin/settings/styles', methods=['POST'])
+def admin_settings_styles():
+    action = request.form.get('action', 'save')
+    name = request.form.get('style_name', '').strip().lower().replace(' ', '-')
+
+    if action == 'delete' and name:
+        custom = json.loads(SiteSettings.get('theme_styles_custom', '{}'))
+        custom.pop(name, None)
+        SiteSettings.set_val('theme_styles_custom', json.dumps(custom), 'styles')
+        flash(f'Deleted style "{name}"', 'success')
+    elif action == 'save' and name:
+        style = {
+            'font_primary': request.form.get('font_primary', "'Inter', sans-serif"),
+            'font_secondary': request.form.get('font_secondary', "'DM Mono', monospace"),
+            'bg_light': request.form.get('bg_light', '#ffffff'),
+            'bg_dark': request.form.get('bg_dark', '#1a1a1a'),
+            'surface_light': request.form.get('surface_light', '#f8f9fa'),
+            'surface_dark': request.form.get('surface_dark', '#2d2d2d'),
+            'border_light': request.form.get('border_light', '#dee2e6'),
+            'border_dark': request.form.get('border_dark', '#444444'),
+            'text_light': request.form.get('text_light', '#212529'),
+            'text_dark': request.form.get('text_dark', '#f8f9fa'),
+            'text_dim_light': request.form.get('text_dim_light', '#6c757d'),
+            'text_dim_dark': request.form.get('text_dim_dark', '#adb5bd'),
+            'accent': request.form.get('accent', '#007bff'),
+            'accent_hover': request.form.get('accent_hover', '#0056b3'),
+            'radius': request.form.get('radius', '8px'),
+        }
+        custom = json.loads(SiteSettings.get('theme_styles_custom', '{}'))
+        custom[name] = style
+        SiteSettings.set_val('theme_styles_custom', json.dumps(custom), 'styles')
+        flash(f'Style "{name}" saved!', 'success')
+
+    return redirect(url_for('admin_settings', tab='styles'))
 
 @app.route('/admin/toggle-mode', methods=['POST'])
 def admin_toggle_mode():

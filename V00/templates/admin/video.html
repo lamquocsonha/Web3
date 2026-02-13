@@ -21,7 +21,7 @@
 
 <!-- Pipeline -->
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px">
-  <div style="display:flex;gap:8px;font-size:12px;color:var(--text-dim);text-align:center">
+  <div style="display:flex;gap:8px;font-size:14px;color:var(--text-dim);text-align:center">
     <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #ff0050"><strong style="color:#ff0050">1. Content</strong><br>Chon bai viet hoac viet script</div>
     <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
     <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #8b5cf6"><strong style="color:#8b5cf6">2. AI Script</strong><br>AI tom tat thanh video script</div>
@@ -44,15 +44,15 @@
       <tr>
         <td><a href="{{ url_for('admin_video_detail', vid=v.id) }}" style="color:var(--text);text-decoration:none"><strong>{{ v.title[:45] }}{% if v.title|length > 45 %}...{% endif %}</strong></a></td>
         <td>
-          {% if v.video_type == 'short' %}<span style="color:#ff0050;font-size:11px;font-family:'DM Mono'">SHORT</span>
-          {% elif v.video_type == 'long' %}<span style="color:#ff0000;font-size:11px;font-family:'DM Mono'">LONG</span>
-          {% else %}<span style="color:#1877f2;font-size:11px;font-family:'DM Mono'">REEL</span>{% endif %}
+          {% if v.video_type == 'short' %}<span style="color:#ff0050;font-size:14px;font-family:'DM Mono'">SHORT</span>
+          {% elif v.video_type == 'long' %}<span style="color:#ff0000;font-size:14px;font-family:'DM Mono'">LONG</span>
+          {% else %}<span style="color:#1877f2;font-size:14px;font-family:'DM Mono'">REEL</span>{% endif %}
         </td>
-        <td style="font-family:'DM Mono';font-size:12px">{{ v.duration }}</td>
+        <td style="font-family:'DM Mono';font-size:14px">{{ v.duration }}</td>
         <td>{{ v.vertical_slug or '-' }}</td>
         <td>{{ v.publishes|length }}</td>
         <td><span class="status-badge {% if v.status=='published' %}live{% elif v.status=='ready' %}draft{% else %}draft{% endif %}">{{ v.status }}</span></td>
-        <td style="font-size:11px;color:var(--text-dim)">{{ v.created_at.strftime('%m/%d %H:%M') }}</td>
+        <td style="font-size:14px;color:var(--text-dim)">{{ v.created_at.strftime('%m/%d %H:%M') }}</td>
         <td>
           <a href="{{ url_for('admin_video_detail', vid=v.id) }}" class="btn btn-ghost btn-sm">View</a>
           <form method="POST" action="{{ url_for('admin_video_delete', vid=v.id) }}" style="display:inline" onsubmit="return confirm('Delete?')"><button class="btn btn-danger btn-sm">X</button></form>

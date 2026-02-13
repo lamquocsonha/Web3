@@ -23,11 +23,11 @@
       <tr>
         <td><a href="{{ url_for('admin_content_detail', cid=c.id) }}" style="color:var(--text);text-decoration:none"><strong>{{ c.title[:40] }}{% if c.title|length > 40 %}...{% endif %}</strong></a></td>
         <td><span class="status-badge {% if c.content_type=='article' %}live{% else %}draft{% endif %}">{{ c.content_type }}</span></td>
-        <td style="font-family:'DM Mono';font-size:11px">{{ c.ai_provider }}</td>
+        <td style="font-family:'DM Mono';font-size:14px">{{ c.ai_provider }}</td>
         <td>{{ c.vertical_slug or '-' }}</td>
-        <td style="font-family:'DM Mono';font-size:11px">{{ "{:,.0f}".format(c.cost_vnd) }}d</td>
+        <td style="font-family:'DM Mono';font-size:14px">{{ "{:,.0f}".format(c.cost_vnd) }}d</td>
         <td><span class="status-badge {{ c.status }}">{{ c.status }}</span></td>
-        <td style="font-size:11px;color:var(--text-dim)">{{ c.created_at.strftime('%m/%d %H:%M') }}</td>
+        <td style="font-size:14px;color:var(--text-dim)">{{ c.created_at.strftime('%m/%d %H:%M') }}</td>
         <td><form method="POST" action="{{ url_for('admin_content_delete', cid=c.id) }}" style="display:inline" onsubmit="return confirm('Delete?')"><button class="btn btn-danger btn-sm">X</button></form></td>
       </tr>
       {% endfor %}

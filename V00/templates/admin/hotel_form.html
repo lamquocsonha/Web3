@@ -15,7 +15,7 @@
   <div class="form-row">
     <div class="form-group"><label class="form-label">Destination slug *</label>
       <input class="form-input" name="destination" value="{{ hotel.destination if hotel else '' }}" required placeholder="da-nang">
-      <div style="font-size:10px;color:var(--text-dim);margin-top:2px">VD: da-nang, phu-quoc, nha-trang, ha-noi, ho-chi-minh</div></div>
+      <div style="font-size:14px;color:var(--text-dim);margin-top:2px">VD: da-nang, phu-quoc, nha-trang, ha-noi, ho-chi-minh</div></div>
     <div class="form-group"><label class="form-label">Destination name</label>
       <input class="form-input" name="destination_name" value="{{ hotel.destination_name if hotel else '' }}" placeholder="Đà Nẵng"></div>
     <div class="form-group"><label class="form-label">Quận/Khu vực</label>
@@ -43,11 +43,11 @@
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin:16px 0">
     <h3 style="font-size:14px;margin:0 0 12px">🔗 Affiliate Links (link đặt phòng có hoa hồng)</h3>
     <div class="form-group"><label class="form-label">Agoda URL</label>
-      <input class="form-input" name="agoda_url" value="{{ hotel.agoda_url if hotel else '' }}" placeholder="https://www.agoda.com/..." style="font-family:'DM Mono';font-size:11px"></div>
+      <input class="form-input" name="agoda_url" value="{{ hotel.agoda_url if hotel else '' }}" placeholder="https://www.agoda.com/..." style="font-family:'DM Mono';font-size:14px"></div>
     <div class="form-group"><label class="form-label">Booking.com URL</label>
-      <input class="form-input" name="booking_url" value="{{ hotel.booking_url if hotel else '' }}" placeholder="https://www.booking.com/..." style="font-family:'DM Mono';font-size:11px"></div>
+      <input class="form-input" name="booking_url" value="{{ hotel.booking_url if hotel else '' }}" placeholder="https://www.booking.com/..." style="font-family:'DM Mono';font-size:14px"></div>
     <div class="form-group"><label class="form-label">Traveloka URL</label>
-      <input class="form-input" name="traveloka_url" value="{{ hotel.traveloka_url if hotel else '' }}" placeholder="https://www.traveloka.com/..." style="font-family:'DM Mono';font-size:11px"></div>
+      <input class="form-input" name="traveloka_url" value="{{ hotel.traveloka_url if hotel else '' }}" placeholder="https://www.traveloka.com/..." style="font-family:'DM Mono';font-size:14px"></div>
   </div>
 
   <div class="form-row">
@@ -58,7 +58,7 @@
   </div>
 
   {% if hotel %}
-  <div style="margin:16px 0;padding:14px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);font-size:12px">
+  <div style="margin:16px 0;padding:14px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);font-size:14px">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
       <div><span style="color:var(--text-dim)">Clicks:</span> <strong>{{ "{:,}".format(hotel.clicks) }}</strong></div>
       <div><span style="color:var(--text-dim)">Bookings:</span> <strong>{{ "{:,}".format(hotel.conversions) }}</strong></div>

@@ -7,25 +7,25 @@
 <div class="section-header">
   <div>
     <h1 class="page-title" style="margin-bottom:4px">AI Control Center</h1>
-    <p style="font-size:12px;color:var(--text-dim);margin:0">Quan ly toan bo van de san pham, bai viet, vertical bang AI</p>
+    <p style="font-size:14px;color:var(--text-dim);margin:0">Quan ly toan bo van de san pham, bai viet, vertical bang AI</p>
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <button onclick="document.getElementById('guideModal').style.display='block'" class="btn btn-ghost btn-sm"
-      style="font-size:11px;border:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:5px">
+      style="font-size:14px;border:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:5px">
       <span style="font-size:14px">&#128218;</span> Huong dan AI
     </button>
     <div style="text-align:center;padding:8px 16px;border-radius:10px;
       {% if health_score >= 80 %}background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)
       {% elif health_score >= 50 %}background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)
       {% else %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3){% endif %}">
-      <div style="font-size:10px;color:var(--text-dim)">Health Score</div>
+      <div style="font-size:14px;color:var(--text-dim)">Health Score</div>
       <div style="font-size:24px;font-weight:800;font-family:'DM Mono';
         {% if health_score >= 80 %}color:#2ecc71{% elif health_score >= 50 %}color:#f59e0b{% else %}color:#ef4444{% endif %}">
-        {{ health_score }}<span style="font-size:12px">%</span>
+        {{ health_score }}<span style="font-size:14px">%</span>
       </div>
     </div>
     {% if not has_ai %}
-    <a href="{{ url_for('admin_settings') }}" class="btn btn-danger btn-sm" style="font-size:11px">Chua co API key</a>
+    <a href="{{ url_for('admin_settings') }}" class="btn btn-danger btn-sm" style="font-size:14px">Chua co API key</a>
     {% endif %}
   </div>
 </div>
@@ -47,12 +47,12 @@
     <div class="stat-card">
       <div class="stat-label">San pham</div>
       <div class="stat-value">{{ "{:,}".format(total_products) }}</div>
-      <div style="font-size:10px;color:var(--text-dim)">{{ active_products }} active</div>
+      <div style="font-size:14px;color:var(--text-dim)">{{ active_products }} active</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Bai viet</div>
       <div class="stat-value">{{ total_articles }}</div>
-      <div style="font-size:10px;color:var(--text-dim)">{{ ai_articles }} AI-generated</div>
+      <div style="font-size:14px;color:var(--text-dim)">{{ ai_articles }} AI-generated</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Verticals</div>
@@ -80,10 +80,10 @@
     <div class="issue-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.15s;border-left:3px solid {{ color }}"
          onclick="showDetail('{{ key }}')">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:12px;font-weight:600">{{ label }}</span>
+        <span style="font-size:14px;font-weight:600">{{ label }}</span>
         <span style="font-size:18px;font-weight:800;font-family:'DM Mono';color:{{ color }}">{{ "{:,}".format(count) }}</span>
       </div>
-      <div style="font-size:10px;color:var(--text-dim);margin-top:4px">{{ desc }}</div>
+      <div style="font-size:14px;color:var(--text-dim);margin-top:4px">{{ desc }}</div>
     </div>
     {% endfor %}
   </div>
@@ -98,10 +98,10 @@
         {% for n in net_stats %}
         <tr>
           <td><strong>{{ n.name }}</strong></td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px">{{ "{:,}".format(n.count) }}</td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px">{{ "{:,}".format(n.clicks) }}</td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px">{{ "{:,}".format(n.conv) }}</td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px;font-weight:600;
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(n.count) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(n.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(n.conv) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px;font-weight:600;
             {% if n.clicks > 0 and n.conv / n.clicks > 0.02 %}color:#2ecc71{% elif n.clicks > 0 %}color:#f59e0b{% else %}color:var(--text-dim){% endif %}">
             {% if n.clicks > 0 %}{{ "%.1f"|format(n.conv / n.clicks * 100) }}%{% else %}-{% endif %}
           </td>
@@ -118,7 +118,7 @@
 <!-- ═══════════════════════════════════════════ -->
 <div class="ai-panel" id="panel-products" style="display:none">
   <h3 style="font-size:14px;margin:16px 0 12px">Kiem tra suc khoe san pham</h3>
-  <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">Tat ca cac van de co the xay ra voi san pham. Click de xem chi tiet va xu ly.</p>
+  <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">Tat ca cac van de co the xay ra voi san pham. Click de xem chi tiet va xu ly.</p>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
     <!-- Product issues -->
@@ -213,7 +213,7 @@
 <!-- ═══════════════════════════════════════════ -->
 <div class="ai-panel" id="panel-articles" style="display:none">
   <h3 style="font-size:14px;margin:16px 0 12px">Kiem tra suc khoe bai viet</h3>
-  <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">Cac van de lien quan den bai viet, noi dung, SEO.</p>
+  <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">Cac van de lien quan den bai viet, noi dung, SEO.</p>
 
   <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
     <div class="check-card" onclick="showDetail('thin_articles')">
@@ -304,26 +304,26 @@
         {% for v in vert_health %}
         <tr>
           <td><strong>{{ v.icon }} {{ v.name }}</strong></td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px">{{ v.parts }}</td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px">{{ "{:,}".format(v.products) }}</td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px">{{ v.articles }}</td>
-          <td style="text-align:right;font-family:'DM Mono';font-size:12px;{% if v.parts_empty > 0 %}color:#ef4444;font-weight:700{% endif %}">
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ v.parts }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(v.products) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ v.articles }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px;{% if v.parts_empty > 0 %}color:#ef4444;font-weight:700{% endif %}">
             {{ v.parts_empty }}{% if v.parts > 0 %} <span style="color:var(--text-dim);font-weight:400">({{ "%.0f"|format(v.parts_empty / v.parts * 100) }}%)</span>{% endif %}
           </td>
           <td>
             {% if v.products == 0 and v.articles == 0 %}
-            <span style="color:#ef4444;font-size:11px;font-weight:600">Trong</span>
+            <span style="color:#ef4444;font-size:14px;font-weight:600">Trong</span>
             {% elif v.parts_empty > v.parts * 0.5 %}
-            <span style="color:#f59e0b;font-size:11px;font-weight:600">Thieu SP</span>
+            <span style="color:#f59e0b;font-size:14px;font-weight:600">Thieu SP</span>
             {% elif v.articles < 3 %}
-            <span style="color:#f59e0b;font-size:11px;font-weight:600">Thieu bai</span>
+            <span style="color:#f59e0b;font-size:14px;font-weight:600">Thieu bai</span>
             {% else %}
-            <span style="color:#2ecc71;font-size:11px;font-weight:600">Tot</span>
+            <span style="color:#2ecc71;font-size:14px;font-weight:600">Tot</span>
             {% endif %}
           </td>
           <td>
             {% if v.parts_empty > 0 %}
-            <button class="btn btn-ghost btn-sm" style="font-size:10px" onclick="showDetail('parts_empty', {{ v.id }})">
+            <button class="btn btn-ghost btn-sm" style="font-size:14px" onclick="showDetail('parts_empty', {{ v.id }})">
               Xem parts trong
             </button>
             {% endif %}
@@ -342,18 +342,18 @@
   {% if not has_ai %}
   <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:20px;margin:16px 0">
     <strong style="color:#ef4444">Chua cau hinh API Key</strong>
-    <p style="font-size:13px;margin-top:6px;color:var(--text-dim)">
+    <p style="font-size:14px;margin-top:6px;color:var(--text-dim)">
       Vao <a href="{{ url_for('admin_settings') }}" style="color:#3b82f6">Settings</a> de them OpenAI key hoac Claude key.
     </p>
   </div>
   {% else %}
   <h3 style="font-size:14px;margin:16px 0 8px">AI Phan loai san pham</h3>
-  <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">AI se kiem tra tung san pham xem co dang o dung vertical/zone hay khong. San pham sai se duoc danh dau de xoa hoac di chuyen.</p>
+  <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">AI se kiem tra tung san pham xem co dang o dung vertical/zone hay khong. San pham sai se duoc danh dau de xoa hoac di chuyen.</p>
 
   <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:20px">
     <div>
-      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Vertical can quet</label>
-      <select id="aiVertical" class="form-select" style="width:200px;padding:8px 10px;font-size:12px">
+      <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:4px">Vertical can quet</label>
+      <select id="aiVertical" class="form-select" style="width:200px;padding:8px 10px;font-size:14px">
         <option value="">Tat ca ({{ "{:,}".format(total_products) }} SP)</option>
         {% for v in vert_health %}
         <option value="{{ v.id }}">{{ v.icon }} {{ v.name }} ({{ "{:,}".format(v.products) }} SP)</option>
@@ -361,8 +361,8 @@
       </select>
     </div>
     <div>
-      <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px">Batch size</label>
-      <select id="aiBatch" class="form-select" style="width:100px;padding:8px 10px;font-size:12px">
+      <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:4px">Batch size</label>
+      <select id="aiBatch" class="form-select" style="width:100px;padding:8px 10px;font-size:14px">
         <option value="10">10</option>
         <option value="20" selected>20</option>
         <option value="30">30</option>
@@ -375,8 +375,8 @@
   <!-- AI Progress -->
   <div id="aiProgress" style="display:none;margin-bottom:20px">
     <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-      <span style="font-size:12px;font-weight:600" id="aiLabel">Dang scan...</span>
-      <span style="font-size:11px;color:var(--text-dim)" id="aiCount">0/0</span>
+      <span style="font-size:14px;font-weight:600" id="aiLabel">Dang scan...</span>
+      <span style="font-size:14px;color:var(--text-dim)" id="aiCount">0/0</span>
     </div>
     <div style="background:var(--surface);border-radius:6px;height:6px;overflow:hidden">
       <div id="aiBar" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);width:0%;transition:width .3s"></div>
@@ -395,9 +395,9 @@
 
   <!-- AI Actions bar -->
   <div id="aiActions" style="display:none;padding:10px 14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;margin-bottom:12px;display:none;justify-content:space-between;align-items:center">
-    <label style="font-size:12px;cursor:pointer"><input type="checkbox" id="aiSelectAll" onchange="aiToggleAll(this.checked)"> Chon tat ca sai</label>
+    <label style="font-size:14px;cursor:pointer"><input type="checkbox" id="aiSelectAll" onchange="aiToggleAll(this.checked)"> Chon tat ca sai</label>
     <div style="display:flex;gap:8px;align-items:center">
-      <span style="font-size:11px;color:var(--text-dim)" id="aiSelected">0 chon</span>
+      <span style="font-size:14px;color:var(--text-dim)" id="aiSelected">0 chon</span>
       <button class="btn btn-danger btn-sm" onclick="aiApply('delete')">Xoa da chon</button>
     </div>
   </div>
@@ -433,11 +433,11 @@
     </div>
     <div style="padding:12px 20px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <span style="font-size:12px;color:var(--text-dim)" id="detailCount">0 items</span>
+        <span style="font-size:14px;color:var(--text-dim)" id="detailCount">0 items</span>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-sm" id="detailSelectBtn" onclick="detailToggleAll()" style="font-size:10px">Chon tat ca</button>
-          <button class="btn btn-danger btn-sm" id="detailDeleteBtn" onclick="detailBulkDelete()" style="font-size:10px">Xoa da chon</button>
-          <button class="btn btn-ghost btn-sm" id="detailDeactivateBtn" onclick="detailBulkDeactivate()" style="font-size:10px">Tat da chon</button>
+          <button class="btn btn-ghost btn-sm" id="detailSelectBtn" onclick="detailToggleAll()" style="font-size:14px">Chon tat ca</button>
+          <button class="btn btn-danger btn-sm" id="detailDeleteBtn" onclick="detailBulkDelete()" style="font-size:14px">Xoa da chon</button>
+          <button class="btn btn-ghost btn-sm" id="detailDeactivateBtn" onclick="detailBulkDeactivate()" style="font-size:14px">Tat da chon</button>
         </div>
       </div>
       <div class="table-wrap" style="max-height:400px;overflow-y:auto">
@@ -451,7 +451,7 @@
 </div>
 
 <style>
-.ai-tab{padding:10px 18px;font-size:12px;font-weight:600;border:none;background:none;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.ai-tab{padding:10px 18px;font-size:14px;font-weight:600;border:none;background:none;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
 .ai-tab.active{color:var(--text);border-bottom-color:#8b5cf6}
 .ai-tab:hover{color:var(--text)}
 .ai-panel{padding:0 0 20px}
@@ -459,14 +459,14 @@
 .check-card:hover{border-color:#8b5cf6;transform:translateY(-1px)}
 .check-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .check-info{flex:1;min-width:0}
-.check-title{font-size:12px;font-weight:600}
-.check-desc{font-size:10px;color:var(--text-dim);margin-top:2px}
+.check-title{font-size:14px;font-weight:600}
+.check-desc{font-size:14px;color:var(--text-dim);margin-top:2px}
 .check-count{font-size:14px;font-weight:800;font-family:'DM Mono';padding:4px 10px;border-radius:6px;flex-shrink:0}
 .check-count.bad{background:rgba(239,68,68,.1);color:#ef4444}
 .check-count.warn{background:rgba(245,158,11,.1);color:#f59e0b}
 .check-count.good{background:rgba(46,204,113,.1);color:#2ecc71}
 .check-count.neutral{background:var(--surface);color:var(--text-dim)}
-.ai-filter{padding:5px 12px;font-size:11px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);cursor:pointer}
+.ai-filter{padding:5px 12px;font-size:14px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);cursor:pointer}
 .ai-filter.active{background:#8b5cf6;color:#fff;border-color:#8b5cf6}
 .row-bad{background:rgba(239,68,68,.04)}.row-bad td:nth-child(5){color:#ef4444;font-weight:700}
 .row-ok td:nth-child(5){color:#2ecc71}
@@ -512,10 +512,10 @@ function showDetail(type, verticalId){
     detailItems.forEach(r=>{
       const tr=document.createElement('tr');
       tr.innerHTML=`<td><input type="checkbox" class="d-check" value="${r.id}" onchange="detailToggle(${r.id},this.checked)"></td>
-        <td style="font-family:'DM Mono';font-size:11px">${r.id}</td>
-        <td style="font-size:12px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name||''}</td>
-        <td style="font-size:11px;color:var(--text-dim)">${r.detail||''}</td>
-        <td style="font-size:11px">${r.network||''}</td>`;
+        <td style="font-family:'DM Mono';font-size:14px">${r.id}</td>
+        <td style="font-size:14px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name||''}</td>
+        <td style="font-size:14px;color:var(--text-dim)">${r.detail||''}</td>
+        <td style="font-size:14px">${r.network||''}</td>`;
       tbody.appendChild(tr);
     });
   });
@@ -597,12 +597,12 @@ function aiAppendRow(r){
   tr.dataset.type=r.mismatch?'mismatch':'correct';tr.dataset.id=r.id;
   const cc=r.confidence==='high'?'conf-h':r.confidence==='medium'?'conf-m':'conf-l';
   tr.innerHTML=`<td>${r.mismatch?'<input type="checkbox" class="ai-chk" value="'+r.id+'" onchange="aiToggleSel('+r.id+',this.checked)">':''}</td>
-    <td style="font-family:'DM Mono';font-size:11px">${r.id}</td>
-    <td style="font-size:12px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.name}">${r.name}</td>
-    <td style="font-size:11px">${r.current_vertical} &gt; ${r.current_zone}</td>
-    <td style="font-size:11px">${r.suggested_vertical}</td>
-    <td><span class="${cc}" style="font-size:11px">${r.confidence}</span></td>
-    <td style="font-size:10px;color:var(--text-dim);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.reason}">${r.reason}</td>`;
+    <td style="font-family:'DM Mono';font-size:14px">${r.id}</td>
+    <td style="font-size:14px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.name}">${r.name}</td>
+    <td style="font-size:14px">${r.current_vertical} &gt; ${r.current_zone}</td>
+    <td style="font-size:14px">${r.suggested_vertical}</td>
+    <td><span class="${cc}" style="font-size:14px">${r.confidence}</span></td>
+    <td style="font-size:14px;color:var(--text-dim);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.reason}">${r.reason}</td>`;
   document.getElementById('aiBody').appendChild(tr);
 }
 function aiUpdateStats(){
@@ -649,7 +649,7 @@ function aiApply(action){
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <div>
           <h2 style="margin:0;font-size:20px;font-weight:700">Huong dan vai tro cua AI</h2>
-          <p style="margin:6px 0 0;font-size:13px;opacity:.85">AI ho tro gi trong viec van hanh website? Tung vai tro cu the.</p>
+          <p style="margin:6px 0 0;font-size:14px;opacity:.85">AI ho tro gi trong viec van hanh website? Tung vai tro cu the.</p>
         </div>
         <button onclick="document.getElementById('guideModal').style.display='none'"
           style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer">&times;</button>
@@ -672,37 +672,37 @@ function aiApply(action){
         <h3 style="font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px">
           <span style="font-size:20px">&#129302;</span> AI lam gi trong he thong?
         </h3>
-        <p style="font-size:13px;color:var(--text-dim);margin:0 0 16px;line-height:1.6">
+        <p style="font-size:14px;color:var(--text-dim);margin:0 0 16px;line-height:1.6">
           AI dong <strong>3 vai tro chinh</strong> trong viec van hanh website. Moi vai tro giup admin tiet kiem thoi gian va giam sai sot.
         </p>
 
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
           <div class="role-card" style="border-top:3px solid #ef4444">
             <div style="font-size:24px;margin-bottom:8px">&#128269;</div>
-            <div style="font-size:13px;font-weight:700;margin-bottom:4px">1. Phat hien van de</div>
-            <div style="font-size:11px;color:var(--text-dim);line-height:1.5">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">1. Phat hien van de</div>
+            <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
               Quet toan bo san pham va bai viet, tim ra cac van de: trung lap, thieu thong tin, sai phan loai, loi link, hieu suat kem.
             </div>
           </div>
           <div class="role-card" style="border-top:3px solid #f59e0b">
             <div style="font-size:24px;margin-bottom:8px">&#9889;</div>
-            <div style="font-size:13px;font-weight:700;margin-bottom:4px">2. Phan loai & De xuat</div>
-            <div style="font-size:11px;color:var(--text-dim);line-height:1.5">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">2. Phan loai & De xuat</div>
+            <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
               AI tu dong phan loai san pham vao dung vertical, goi y hanh dong xu ly cho admin, danh gia muc do nghiem trong.
             </div>
           </div>
           <div class="role-card" style="border-top:3px solid #2ecc71">
             <div style="font-size:24px;margin-bottom:8px">&#128736;</div>
-            <div style="font-size:13px;font-weight:700;margin-bottom:4px">3. Xu ly hang loat</div>
-            <div style="font-size:11px;color:var(--text-dim);line-height:1.5">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">3. Xu ly hang loat</div>
+            <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
               Admin duyet va thuc thi: xoa SP sai, tat SP kem, cap nhat bai viet. AI ho tro, admin quyet dinh cuoi cung.
             </div>
           </div>
         </div>
 
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
-          <div style="font-size:12px;font-weight:700;margin-bottom:8px">&#128161; Nguyen tac hoat dong</div>
-          <ul style="font-size:12px;color:var(--text-dim);margin:0;padding-left:18px;line-height:1.8">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">&#128161; Nguyen tac hoat dong</div>
+          <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:18px;line-height:1.8">
             <li><strong>AI goi y, admin quyet dinh</strong> - AI khong tu dong xoa hay sua gi ca</li>
             <li><strong>DB check truoc, AI check sau</strong> - Van de don gian (trung URL, thieu hinh) kiem tra bang database, nhanh va mien phi. Chi goi AI cho viec phuc tap (phan loai, SEO)</li>
             <li><strong>Batch processing</strong> - AI quet theo batch 10-30 SP/lan de tiet kiem chi phi API</li>
@@ -718,41 +718,41 @@ function aiApply(action){
         </h3>
 
         <div style="overflow:auto">
-          <table class="data-table" style="font-size:12px">
+          <table class="data-table" style="font-size:14px">
             <thead><tr><th style="width:30px">#</th><th>Van de</th><th style="width:70px">Phat hien</th><th style="width:80px">Muc do</th><th>AI lam gi?</th><th>Admin lam gi?</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td><strong>URL trung lap</strong><br><span style="color:var(--text-dim);font-size:10px">Cung 1 SP import nhieu lan</span></td><td>DB</td>
+              <tr><td>1</td><td><strong>URL trung lap</strong><br><span style="color:var(--text-dim);font-size:14px">Cung 1 SP import nhieu lan</span></td><td>DB</td>
                 <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
-                <td style="font-size:11px">Tim nhom URL giong nhau</td>
-                <td style="font-size:11px">Xoa ban sao, giu ban goc</td></tr>
-              <tr><td>2</td><td><strong>Thieu hinh anh</strong><br><span style="color:var(--text-dim);font-size:10px">SP khong co image_url</span></td><td>DB</td>
+                <td style="font-size:14px">Tim nhom URL giong nhau</td>
+                <td style="font-size:14px">Xoa ban sao, giu ban goc</td></tr>
+              <tr><td>2</td><td><strong>Thieu hinh anh</strong><br><span style="color:var(--text-dim);font-size:14px">SP khong co image_url</span></td><td>DB</td>
                 <td><span style="color:#f59e0b;font-weight:600">High</span></td>
-                <td style="font-size:11px">Loc SP thieu hinh</td>
-                <td style="font-size:11px">Bo sung hinh hoac xoa SP</td></tr>
-              <tr><td>3</td><td><strong>Gia = 0</strong><br><span style="color:var(--text-dim);font-size:10px">SP chua co gia hoac gia null</span></td><td>DB</td>
+                <td style="font-size:14px">Loc SP thieu hinh</td>
+                <td style="font-size:14px">Bo sung hinh hoac xoa SP</td></tr>
+              <tr><td>3</td><td><strong>Gia = 0</strong><br><span style="color:var(--text-dim);font-size:14px">SP chua co gia hoac gia null</span></td><td>DB</td>
                 <td><span style="color:#f59e0b;font-weight:600">High</span></td>
-                <td style="font-size:11px">Loc SP gia bat thuong</td>
-                <td style="font-size:11px">Cap nhat gia hoac tat SP</td></tr>
-              <tr><td>4</td><td><strong>Nhieu click, 0 conversion</strong><br><span style="color:var(--text-dim);font-size:10px">>10 clicks nhung chua convert</span></td><td>DB</td>
+                <td style="font-size:14px">Loc SP gia bat thuong</td>
+                <td style="font-size:14px">Cap nhat gia hoac tat SP</td></tr>
+              <tr><td>4</td><td><strong>Nhieu click, 0 conversion</strong><br><span style="color:var(--text-dim);font-size:14px">>10 clicks nhung chua convert</span></td><td>DB</td>
                 <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
-                <td style="font-size:11px">Tim SP co ti le chuyen doi = 0%</td>
-                <td style="font-size:11px">Kiem tra link affiliate con hoat dong khong. Doi link hoac tat SP</td></tr>
-              <tr><td>5</td><td><strong>0 clicks (stale)</strong><br><span style="color:var(--text-dim);font-size:10px">SP khong ai click</span></td><td>DB</td>
+                <td style="font-size:14px">Tim SP co ti le chuyen doi = 0%</td>
+                <td style="font-size:14px">Kiem tra link affiliate con hoat dong khong. Doi link hoac tat SP</td></tr>
+              <tr><td>5</td><td><strong>0 clicks (stale)</strong><br><span style="color:var(--text-dim);font-size:14px">SP khong ai click</span></td><td>DB</td>
                 <td><span style="color:#6b7280">Low</span></td>
-                <td style="font-size:11px">Loc SP khong traffic</td>
-                <td style="font-size:11px">Xem xet tat hoac push content</td></tr>
-              <tr><td>6</td><td><strong>Sai vertical</strong><br><span style="color:var(--text-dim);font-size:10px">SP xe may nam trong vertical thu cung</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td style="font-size:14px">Loc SP khong traffic</td>
+                <td style="font-size:14px">Xem xet tat hoac push content</td></tr>
+              <tr><td>6</td><td><strong>Sai vertical</strong><br><span style="color:var(--text-dim);font-size:14px">SP xe may nam trong vertical thu cung</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
                 <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
-                <td style="font-size:11px">Doc ten SP, so sanh voi verticals, de xuat vertical dung, danh gia confidence</td>
-                <td style="font-size:11px">Xoa hoac di chuyen SP sai</td></tr>
-              <tr><td>7</td><td><strong>SP het mua</strong><br><span style="color:var(--text-dim);font-size:10px">Ao am ban mua he</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td style="font-size:14px">Doc ten SP, so sanh voi verticals, de xuat vertical dung, danh gia confidence</td>
+                <td style="font-size:14px">Xoa hoac di chuyen SP sai</td></tr>
+              <tr><td>7</td><td><strong>SP het mua</strong><br><span style="color:var(--text-dim);font-size:14px">Ao am ban mua he</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
                 <td><span style="color:#f59e0b;font-weight:600">Medium</span></td>
-                <td style="font-size:11px">Phan tich ten + loai SP theo thoi diem hien tai</td>
-                <td style="font-size:11px">Tat tam hoac len lich bat lai</td></tr>
-              <tr><td>8</td><td><strong>Ten SP rac / spam</strong><br><span style="color:var(--text-dim);font-size:10px">Ten SP bat thuong, ky tu la</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td style="font-size:14px">Phan tich ten + loai SP theo thoi diem hien tai</td>
+                <td style="font-size:14px">Tat tam hoac len lich bat lai</td></tr>
+              <tr><td>8</td><td><strong>Ten SP rac / spam</strong><br><span style="color:var(--text-dim);font-size:14px">Ten SP bat thuong, ky tu la</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
                 <td><span style="color:#f59e0b;font-weight:600">Medium</span></td>
-                <td style="font-size:11px">Phat hien ten co keyword stuffing, ky tu la, noi dung khong lien quan</td>
-                <td style="font-size:11px">Sua ten hoac xoa SP</td></tr>
+                <td style="font-size:14px">Phat hien ten co keyword stuffing, ky tu la, noi dung khong lien quan</td>
+                <td style="font-size:14px">Sua ten hoac xoa SP</td></tr>
             </tbody>
           </table>
         </div>
@@ -765,37 +765,37 @@ function aiApply(action){
         </h3>
 
         <div style="overflow:auto">
-          <table class="data-table" style="font-size:12px">
+          <table class="data-table" style="font-size:14px">
             <thead><tr><th style="width:30px">#</th><th>Van de</th><th style="width:70px">Phat hien</th><th style="width:80px">Muc do</th><th>AI lam gi?</th><th>Admin lam gi?</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td><strong>Noi dung mong (thin)</strong><br><span style="color:var(--text-dim);font-size:10px">Bai viet duoi 500 ky tu</span></td><td>DB</td>
+              <tr><td>1</td><td><strong>Noi dung mong (thin)</strong><br><span style="color:var(--text-dim);font-size:14px">Bai viet duoi 500 ky tu</span></td><td>DB</td>
                 <td><span style="color:#f59e0b;font-weight:600">High</span></td>
-                <td style="font-size:11px">Dem so ky tu, loc bai qua ngan</td>
-                <td style="font-size:11px">Bo sung noi dung hoac hop nhat bai</td></tr>
-              <tr><td>2</td><td><strong>Chua gan san pham</strong><br><span style="color:var(--text-dim);font-size:10px">Bai khong co embed code</span></td><td>DB</td>
+                <td style="font-size:14px">Dem so ky tu, loc bai qua ngan</td>
+                <td style="font-size:14px">Bo sung noi dung hoac hop nhat bai</td></tr>
+              <tr><td>2</td><td><strong>Chua gan san pham</strong><br><span style="color:var(--text-dim);font-size:14px">Bai khong co embed code</span></td><td>DB</td>
                 <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
-                <td style="font-size:11px">Tim bai khong co embed_code</td>
-                <td style="font-size:11px">Them SP phu hop de kiem tien tu bai. Day la nguon doanh thu bi bo lo!</td></tr>
-              <tr><td>3</td><td><strong>0 views</strong><br><span style="color:var(--text-dim);font-size:10px">Bai viet chua ai doc</span></td><td>DB</td>
+                <td style="font-size:14px">Tim bai khong co embed_code</td>
+                <td style="font-size:14px">Them SP phu hop de kiem tien tu bai. Day la nguon doanh thu bi bo lo!</td></tr>
+              <tr><td>3</td><td><strong>0 views</strong><br><span style="color:var(--text-dim);font-size:14px">Bai viet chua ai doc</span></td><td>DB</td>
                 <td><span style="color:#6b7280">Medium</span></td>
-                <td style="font-size:11px">Loc bai khong traffic</td>
-                <td style="font-size:11px">Toi uu SEO hoac chia se tren MXH</td></tr>
-              <tr><td>4</td><td><strong>SEO Audit</strong><br><span style="color:var(--text-dim);font-size:10px">Thieu meta, headings, keyword</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td style="font-size:14px">Loc bai khong traffic</td>
+                <td style="font-size:14px">Toi uu SEO hoac chia se tren MXH</td></tr>
+              <tr><td>4</td><td><strong>SEO Audit</strong><br><span style="color:var(--text-dim);font-size:14px">Thieu meta, headings, keyword</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
                 <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
-                <td style="font-size:11px">Phan tich title, meta, H2/H3, keyword density, de xuat cai thien</td>
-                <td style="font-size:11px">Sua bai theo goi y AI</td></tr>
-              <tr><td>5</td><td><strong>Content trung lap</strong><br><span style="color:var(--text-dim);font-size:10px">2 bai cung noi 1 chu de (cannibalization)</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td style="font-size:14px">Phan tich title, meta, H2/H3, keyword density, de xuat cai thien</td>
+                <td style="font-size:14px">Sua bai theo goi y AI</td></tr>
+              <tr><td>5</td><td><strong>Content trung lap</strong><br><span style="color:var(--text-dim);font-size:14px">2 bai cung noi 1 chu de (cannibalization)</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
                 <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
-                <td style="font-size:11px">So sanh noi dung cac bai, phat hien trung lap</td>
-                <td style="font-size:11px">Hop nhat bai hoac doi keyword</td></tr>
-              <tr><td>6</td><td><strong>Internal Linking</strong><br><span style="color:var(--text-dim);font-size:10px">Bai khong co lien ket noi bo</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td style="font-size:14px">So sanh noi dung cac bai, phat hien trung lap</td>
+                <td style="font-size:14px">Hop nhat bai hoac doi keyword</td></tr>
+              <tr><td>6</td><td><strong>Internal Linking</strong><br><span style="color:var(--text-dim);font-size:14px">Bai khong co lien ket noi bo</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
                 <td><span style="color:#f59e0b;font-weight:600">High</span></td>
-                <td style="font-size:11px">Goi y bai lien quan de chen link vao nhau</td>
-                <td style="font-size:11px">Them link giua cac bai</td></tr>
-              <tr><td>7</td><td><strong>Bai SP sai vertical</strong><br><span style="color:var(--text-dim);font-size:10px">Bai viet gan SP khong lien quan</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td style="font-size:14px">Goi y bai lien quan de chen link vao nhau</td>
+                <td style="font-size:14px">Them link giua cac bai</td></tr>
+              <tr><td>7</td><td><strong>Bai SP sai vertical</strong><br><span style="color:var(--text-dim);font-size:14px">Bai viet gan SP khong lien quan</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
                 <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
-                <td style="font-size:11px">Kiem tra SP trong bai co phu hop vertical cua bai khong</td>
-                <td style="font-size:11px">Doi SP cho phu hop</td></tr>
+                <td style="font-size:14px">Kiem tra SP trong bai co phu hop vertical cua bai khong</td>
+                <td style="font-size:14px">Doi SP cho phu hop</td></tr>
             </tbody>
           </table>
         </div>
@@ -809,8 +809,8 @@ function aiApply(action){
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
           <div class="role-card">
-            <div style="font-size:13px;font-weight:700;margin-bottom:8px">Vertical khoe manh la gi?</div>
-            <ul style="font-size:12px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
+            <div style="font-size:14px;font-weight:700;margin-bottom:8px">Vertical khoe manh la gi?</div>
+            <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
               <li>Co <strong>du san pham</strong> trong moi part</li>
               <li>Co <strong>du bai viet</strong> (>= 3 bai/vertical)</li>
               <li>Khong co <strong>parts trong</strong> (0 SP)</li>
@@ -819,8 +819,8 @@ function aiApply(action){
             </ul>
           </div>
           <div class="role-card">
-            <div style="font-size:13px;font-weight:700;margin-bottom:8px">AI phat hien van de gi?</div>
-            <ul style="font-size:12px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
+            <div style="font-size:14px;font-weight:700;margin-bottom:8px">AI phat hien van de gi?</div>
+            <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
               <li><span style="color:#ef4444;font-weight:600">Trong</span> - Vertical 0 SP, 0 bai</li>
               <li><span style="color:#f59e0b;font-weight:600">Thieu SP</span> - >50% parts khong co SP</li>
               <li><span style="color:#f59e0b;font-weight:600">Thieu bai</span> - Duoi 3 bai viet</li>
@@ -830,8 +830,8 @@ function aiApply(action){
         </div>
 
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
-          <div style="font-size:12px;font-weight:700;margin-bottom:8px">&#127919; Muc tieu</div>
-          <p style="font-size:12px;color:var(--text-dim);margin:0;line-height:1.7">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">&#127919; Muc tieu</div>
+          <p style="font-size:14px;color:var(--text-dim);margin:0;line-height:1.7">
             Moi vertical nen co: <strong>moi part it nhat 1 SP</strong>, <strong>it nhat 3 bai viet</strong> phu hop tier (nganh/chung/chi-tiet).
             Tab Verticals giup admin nhin nhanh vertical nao can bo sung noi dung va san pham.
           </p>
@@ -849,8 +849,8 @@ function aiApply(action){
           <div class="flow-step">
             <div class="flow-num">1</div>
             <div class="flow-content">
-              <div style="font-size:13px;font-weight:700">Mo AI Control Center</div>
-              <div style="font-size:11px;color:var(--text-dim)">Xem Health Score va tong quan van de</div>
+              <div style="font-size:14px;font-weight:700">Mo AI Control Center</div>
+              <div style="font-size:14px;color:var(--text-dim)">Xem Health Score va tong quan van de</div>
             </div>
             <div class="flow-time">1 phut</div>
           </div>
@@ -858,8 +858,8 @@ function aiApply(action){
           <div class="flow-step">
             <div class="flow-num">2</div>
             <div class="flow-content">
-              <div style="font-size:13px;font-weight:700">Xu ly van de Critical truoc</div>
-              <div style="font-size:11px;color:var(--text-dim)">URL trung lap &#8594; Xoa. Click nhieu 0 conv &#8594; Kiem tra link. Bai chua gan SP &#8594; Them SP.</div>
+              <div style="font-size:14px;font-weight:700">Xu ly van de Critical truoc</div>
+              <div style="font-size:14px;color:var(--text-dim)">URL trung lap &#8594; Xoa. Click nhieu 0 conv &#8594; Kiem tra link. Bai chua gan SP &#8594; Them SP.</div>
             </div>
             <div class="flow-time">5-10 phut</div>
           </div>
@@ -867,8 +867,8 @@ function aiApply(action){
           <div class="flow-step">
             <div class="flow-num">3</div>
             <div class="flow-content">
-              <div style="font-size:13px;font-weight:700">Chay AI Scan (tab AI Phan loai)</div>
-              <div style="font-size:11px;color:var(--text-dim)">Chon vertical &#8594; Bat dau scan &#8594; Duyet ket qua &#8594; Xoa SP sai</div>
+              <div style="font-size:14px;font-weight:700">Chay AI Scan (tab AI Phan loai)</div>
+              <div style="font-size:14px;color:var(--text-dim)">Chon vertical &#8594; Bat dau scan &#8594; Duyet ket qua &#8594; Xoa SP sai</div>
             </div>
             <div class="flow-time">5-15 phut</div>
           </div>
@@ -876,8 +876,8 @@ function aiApply(action){
           <div class="flow-step">
             <div class="flow-num">4</div>
             <div class="flow-content">
-              <div style="font-size:13px;font-weight:700">Kiem tra Verticals</div>
-              <div style="font-size:11px;color:var(--text-dim)">Tim vertical trong &#8594; Bo sung SP/bai viet &#8594; Dieu phoi noi dung</div>
+              <div style="font-size:14px;font-weight:700">Kiem tra Verticals</div>
+              <div style="font-size:14px;color:var(--text-dim)">Tim vertical trong &#8594; Bo sung SP/bai viet &#8594; Dieu phoi noi dung</div>
             </div>
             <div class="flow-time">5 phut</div>
           </div>
@@ -885,26 +885,26 @@ function aiApply(action){
           <div class="flow-step" style="border-color:#2ecc71">
             <div class="flow-num" style="background:#2ecc71">5</div>
             <div class="flow-content">
-              <div style="font-size:13px;font-weight:700;color:#2ecc71">Hoan tat!</div>
-              <div style="font-size:11px;color:var(--text-dim)">Health Score tang len. Lap lai moi ngay hoac moi tuan.</div>
+              <div style="font-size:14px;font-weight:700;color:#2ecc71">Hoan tat!</div>
+              <div style="font-size:14px;color:var(--text-dim)">Health Score tang len. Lap lai moi ngay hoac moi tuan.</div>
             </div>
             <div class="flow-time">~20 phut/ngay</div>
           </div>
         </div>
 
         <div style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(59,130,246,.06));border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:16px">
-          <div style="font-size:12px;font-weight:700;margin-bottom:8px">&#128204; Tan suat khuyen nghi</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:12px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">&#128204; Tan suat khuyen nghi</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:14px">
             <div>
               <div style="font-weight:600;margin-bottom:4px">Hang ngay</div>
-              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:11px">
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:14px">
                 <li>Check Health Score</li>
                 <li>Xu ly Critical issues</li>
               </ul>
             </div>
             <div>
               <div style="font-weight:600;margin-bottom:4px">Hang tuan</div>
-              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:11px">
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:14px">
                 <li>AI Scan phan loai SP</li>
                 <li>Review bai viet mong</li>
                 <li>Bo sung SP cho parts trong</li>
@@ -912,7 +912,7 @@ function aiApply(action){
             </div>
             <div>
               <div style="font-weight:600;margin-bottom:4px">Hang thang</div>
-              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:11px">
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:14px">
                 <li>Vertical health toan dien</li>
                 <li>So sanh network hieu suat</li>
                 <li>Don dep SP stale</li>
@@ -927,14 +927,14 @@ function aiApply(action){
 </div>
 
 <style>
-.g-tab{padding:8px 14px;font-size:11px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);border-radius:6px;cursor:pointer;transition:.15s}
+.g-tab{padding:8px 14px;font-size:14px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);border-radius:6px;cursor:pointer;transition:.15s}
 .g-tab.active{background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:#fff;border-color:transparent}
 .g-tab:hover:not(.active){border-color:#8b5cf6;color:var(--text)}
 .role-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
 .flow-step{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
-.flow-num{width:28px;height:28px;border-radius:8px;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.flow-num{width:28px;height:28px;border-radius:8px;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0}
 .flow-content{flex:1}
-.flow-time{font-size:10px;color:var(--text-dim);font-family:'DM Mono';white-space:nowrap;padding:4px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
+.flow-time{font-size:14px;color:var(--text-dim);font-family:'DM Mono';white-space:nowrap;padding:4px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
 .flow-arrow{text-align:center;font-size:16px;color:var(--text-dim);line-height:1;padding:2px 0}
 </style>
 

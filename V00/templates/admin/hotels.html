@@ -16,15 +16,15 @@
 
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
   <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap">
-    <select name="destination" class="form-select" style="width:150px;padding:8px;font-size:12px">
+    <select name="destination" class="form-select" style="width:150px;padding:8px;font-size:14px">
       <option value="">All Destinations</option>
       {% for d in destinations %}<option value="{{ d[0] }}" {% if f_dest == d[0] %}selected{% endif %}>{{ d[1] }}</option>{% endfor %}
     </select>
-    <select name="stars" class="form-select" style="width:120px;padding:8px;font-size:12px">
+    <select name="stars" class="form-select" style="width:120px;padding:8px;font-size:14px">
       <option value="">All Stars</option>
       {% for s in [5,4,3] %}<option value="{{ s }}" {% if f_stars == s|string %}selected{% endif %}>{{ s }}⭐</option>{% endfor %}
     </select>
-    <select name="status" class="form-select" style="width:120px;padding:8px;font-size:12px">
+    <select name="status" class="form-select" style="width:120px;padding:8px;font-size:14px">
       <option value="">All Status</option>
       <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
       <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
@@ -45,20 +45,20 @@
     <tbody>
       {% for h in hotels %}
       <tr>
-        <td style="font-family:'DM Mono';font-size:11px;color:var(--text-dim)">{{ h.id }}</td>
+        <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ h.id }}</td>
         <td>
-          <strong style="font-size:13px">{{ h.name }}</strong>
-          {% if h.is_featured %}<span style="font-size:9px;background:#ff6b35;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px">HOT</span>{% endif %}
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">{{ h.district }} · {{ h.amenities[:50] }}{% if h.amenities|length > 50 %}...{% endif %}</div>
+          <strong style="font-size:14px">{{ h.name }}</strong>
+          {% if h.is_featured %}<span style="font-size:14px;background:#ff6b35;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px">HOT</span>{% endif %}
+          <div style="font-size:14px;color:var(--text-dim);margin-top:2px">{{ h.district }} · {{ h.amenities[:50] }}{% if h.amenities|length > 50 %}...{% endif %}</div>
         </td>
-        <td><span style="font-size:12px">{{ h.destination_name }}</span></td>
+        <td><span style="font-size:14px">{{ h.destination_name }}</span></td>
         <td>{% for i in range(h.stars) %}⭐{% endfor %}</td>
-        <td style="text-align:center"><span style="background:#004fac;color:#fff;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700">{{ h.rating }}</span></td>
-        <td style="text-align:right;font-family:'DM Mono';font-size:12px;font-weight:600">{{ "{:,.0f}".format(h.price_from) }}đ</td>
-        <td style="text-align:center;font-family:'DM Mono';font-size:12px">{{ "{:,}".format(h.clicks) }}</td>
+        <td style="text-align:center"><span style="background:#004fac;color:#fff;padding:2px 6px;border-radius:4px;font-size:14px;font-weight:700">{{ h.rating }}</span></td>
+        <td style="text-align:right;font-family:'DM Mono';font-size:14px;font-weight:600">{{ "{:,.0f}".format(h.price_from) }}đ</td>
+        <td style="text-align:center;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(h.clicks) }}</td>
         <td>
           <form method="POST" action="{{ url_for('admin_hotel_toggle', hid=h.id) }}" style="display:inline">
-            <button type="submit" class="status-badge {% if h.is_active %}live{% else %}draft{% endif %}" style="cursor:pointer;border:none;font-size:10px">
+            <button type="submit" class="status-badge {% if h.is_active %}live{% else %}draft{% endif %}" style="cursor:pointer;border:none;font-size:14px">
               {{ 'Active' if h.is_active else 'Off' }}
             </button>
           </form>
@@ -76,7 +76,7 @@
     </tbody>
   </table>
 </div>
-<div style="margin-top:12px;font-size:12px;color:var(--text-dim)">{{ hotels|length }} hotels</div>
+<div style="margin-top:12px;font-size:14px;color:var(--text-dim)">{{ hotels|length }} hotels</div>
 {% else %}
 <div class="empty-state"><div class="empty-icon">🏨</div><p>No hotels yet</p><a href="{{ url_for('admin_hotel_new') }}" class="btn btn-primary" style="margin-top:12px">Add first hotel</a></div>
 {% endif %}

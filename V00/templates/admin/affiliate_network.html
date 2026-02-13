@@ -21,7 +21,7 @@
     <div class="form-group"><label class="form-label">API Endpoint</label><input class="form-input" value="{{ network.api_url }}" disabled></div>
     <div class="form-group"><label class="form-label">API Key</label><input class="form-input" name="api_key" type="password" value="{{ network.api_key }}" placeholder="Paste API key here..."></div>
     <button class="btn btn-primary">{% if network.status == 'connected' %}Update{% else %}Connect{% endif %}</button>
-    {% if network.last_sync %}<span style="font-size:11px;color:var(--text-dim);margin-left:12px">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
+    {% if network.last_sync %}<span style="font-size:14px;color:var(--text-dim);margin-left:12px">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
   </form>
 </div>
 
@@ -35,7 +35,7 @@
       {% for c in network.campaigns %}
       <tr>
         <td><strong>{{ c.name }}</strong></td>
-        <td style="font-family:'DM Mono';font-size:11px">{{ c.campaign_id_ext }}</td>
+        <td style="font-family:'DM Mono';font-size:14px">{{ c.campaign_id_ext }}</td>
         <td>{{ c.commission }}</td>
         <td>{{ c.category }}</td>
         <td><span class="status-badge {% if c.status=='active' %}live{% else %}draft{% endif %}">{{ c.status }}</span></td>

@@ -3,7 +3,7 @@
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Article Feedbacks{% endblock %}
 {% block content %}
 <h1 class="page-title">📝 Article Feedbacks</h1>
-<p style="font-size:13px;color:var(--text-dim);margin:-8px 0 24px">Quản lý phản hồi từ người đọc về nội dung bài viết</p>
+<p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">Quản lý phản hồi từ người đọc về nội dung bài viết</p>
 
 <!-- Filter tabs -->
 <div class="tabs" style="margin-bottom:24px">
@@ -43,10 +43,10 @@
       <tr>
         <td>
           <div style="max-width:300px">
-            <a href="{{ url_for('vertical_article', vertical_slug=fb.article.vertical_slug, slug=fb.article.slug) }}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;font-size:13px">
+            <a href="{{ url_for('vertical_article', vertical_slug=fb.article.vertical_slug, slug=fb.article.slug) }}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;font-size:14px">
               {{ fb.article.title[:50] }}{% if fb.article.title|length > 50 %}...{% endif %}
             </a>
-            <div style="font-size:11px;color:var(--text-dim);margin-top:4px">
+            <div style="font-size:14px;color:var(--text-dim);margin-top:4px">
               {{ fb.article.vertical_slug|upper }}
             </div>
           </div>
@@ -67,7 +67,7 @@
           </span>
         </td>
         <td>
-          <div style="max-width:250px;font-size:12px;color:var(--text-dim)">
+          <div style="max-width:250px;font-size:14px;color:var(--text-dim)">
             {{ fb.description[:80] if fb.description else '(Không có mô tả)' }}
             {% if fb.description|length > 80 %}...{% endif %}
           </div>
@@ -85,7 +85,7 @@
             {% if fb.status == 'dismissed' %}🚫 Đã bỏ qua{% endif %}
           </span>
         </td>
-        <td style="font-size:12px;color:var(--text-dim)">
+        <td style="font-size:14px;color:var(--text-dim)">
           {{ fb.created_at.strftime('%d/%m/%Y %H:%M') }}
         </td>
         <td>
@@ -121,7 +121,7 @@
   padding: 10px 16px;
   text-decoration: none;
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   border-bottom: 2px solid transparent;
   transition: all 0.2s;
@@ -140,7 +140,7 @@
 .badge {
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;

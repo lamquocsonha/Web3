@@ -9,13 +9,13 @@
 .cal-nav a:hover { background:var(--accent-dim); color:var(--accent) }
 .cal-month { font-size:26px; font-weight:700; min-width:220px; text-align:center }
 .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border); border-radius:12px; overflow:hidden; margin-bottom:32px }
-.cal-day-header { background:var(--surface2); padding:12px 8px; text-align:center; font-weight:700; font-size:13px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px }
+.cal-day-header { background:var(--surface2); padding:12px 8px; text-align:center; font-weight:700; font-size:14px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px }
 .cal-cell { background:var(--surface); min-height:110px; padding:8px; position:relative; transition:background .15s }
 .cal-cell:hover { background:var(--surface2) }
 .cal-cell.other-month { opacity:.35 }
 .cal-cell.today { background:var(--accent-dim); box-shadow:inset 0 -3px 0 var(--accent) }
 .cal-date { font-size:14px; font-weight:700; margin-bottom:6px; color:var(--text) }
-.cal-event { font-size:11px; padding:3px 6px; border-radius:4px; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer }
+.cal-event { font-size:14px; padding:3px 6px; border-radius:4px; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer }
 .cal-event.holiday { background:#fef3c7; color:#92400e }
 .cal-event.seasonal { background:#dbeafe; color:#1e40af }
 .cal-event.trending { background:#fce7f3; color:#9d174d }
@@ -29,14 +29,14 @@
 .event-list { list-style:none }
 .event-list li { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px }
 .event-list li:last-child { border:none }
-.event-badge { font-size:10px; padding:2px 8px; border-radius:99px; font-weight:700; text-transform:uppercase }
+.event-badge { font-size:14px; padding:2px 8px; border-radius:99px; font-weight:700; text-transform:uppercase }
 
 .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); z-index:999; align-items:center; justify-content:center }
 .modal-overlay.show { display:flex }
 .modal-box { background:var(--surface); border-radius:16px; padding:32px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,.3) }
 .modal-box h3 { font-size:20px; font-weight:700; margin-bottom:20px }
 .form-row { margin-bottom:16px }
-.form-row label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-dim) }
+.form-row label { display:block; font-size:14px; font-weight:600; margin-bottom:6px; color:var(--text-dim) }
 .form-row input, .form-row select, .form-row textarea { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit }
 .form-row textarea { resize:vertical; min-height:60px }
 .form-actions { display:flex; gap:10px; margin-top:20px }
@@ -79,7 +79,7 @@
     {% endif %}
     {% endfor %}
     {% if date_events[day]|length > 3 %}
-    <div style="font-size:10px;color:var(--text-dim);padding:2px 6px">+{{ date_events[day]|length - 3 }} more</div>
+    <div style="font-size:14px;color:var(--text-dim);padding:2px 6px">+{{ date_events[day]|length - 3 }} more</div>
     {% endif %}
     {% endif %}
   </div>
@@ -99,7 +99,7 @@
         <span>{{ e.icon }}</span>
         <div style="flex:1">
           <div style="font-weight:600">{{ e.name }}</div>
-          <div style="font-size:12px;color:var(--text-dim)">{{ e.start_date.strftime('%d/%m') }}{% if e.end_date %} - {{ e.end_date.strftime('%d/%m') }}{% endif %}</div>
+          <div style="font-size:14px;color:var(--text-dim)">{{ e.start_date.strftime('%d/%m') }}{% if e.end_date %} - {{ e.end_date.strftime('%d/%m') }}{% endif %}</div>
         </div>
         <span class="event-badge {{ e.event_type }}" style="background:{% if e.event_type=='holiday' %}#fef3c7;color:#92400e{% elif e.event_type=='seasonal' %}#dbeafe;color:#1e40af{% elif e.event_type=='trending' %}#fce7f3;color:#9d174d{% else %}#d1fae5;color:#065f46{% endif %}">{{ e.event_type }}</span>
         <form method="POST" action="{{ url_for('admin_content_event_delete', eid=e.id) }}" style="display:inline">
@@ -120,12 +120,12 @@
     <ul class="event-list">
       {% for q in queue_items[:8] %}
       <li>
-        <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--accent-dim);color:var(--accent);font-weight:700">{{ q.knowledge_layer }}</span>
+        <span style="font-size:14px;padding:2px 8px;border-radius:4px;background:var(--accent-dim);color:var(--accent);font-weight:700">{{ q.knowledge_layer }}</span>
         <div style="flex:1">
-          <div style="font-weight:600;font-size:13px">{{ q.topic[:40] }}</div>
-          <div style="font-size:12px;color:var(--text-dim)">{{ q.scheduled_at.strftime('%d/%m %H:%M') if q.scheduled_at else 'Unscheduled' }}</div>
+          <div style="font-weight:600;font-size:14px">{{ q.topic[:40] }}</div>
+          <div style="font-size:14px;color:var(--text-dim)">{{ q.scheduled_at.strftime('%d/%m %H:%M') if q.scheduled_at else 'Unscheduled' }}</div>
         </div>
-        <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:{% if q.status=='pending' %}#fef3c7;color:#92400e{% elif q.status=='review' %}#dbeafe;color:#1e40af{% elif q.status=='published' %}#d1fae5;color:#065f46{% else %}var(--surface2);color:var(--text-dim){% endif %}">{{ q.status }}</span>
+        <span style="font-size:14px;padding:2px 8px;border-radius:4px;background:{% if q.status=='pending' %}#fef3c7;color:#92400e{% elif q.status=='review' %}#dbeafe;color:#1e40af{% elif q.status=='published' %}#d1fae5;color:#065f46{% else %}var(--surface2);color:var(--text-dim){% endif %}">{{ q.status }}</span>
       </li>
       {% endfor %}
     </ul>

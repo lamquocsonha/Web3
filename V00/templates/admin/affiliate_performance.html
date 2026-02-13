@@ -11,10 +11,10 @@
     <h3 style="color:{{ n.color }};font-size:14px">{{ n.name }}</h3>
     {% set net_stats = stats|selectattr('network','eq',n.slug)|list %}
     <div style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Clicks (30d)</span><strong>{{ "{:,}".format(net_stats|sum(attribute='clicks')) }}</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Conversions</span><strong>{{ net_stats|sum(attribute='conversions') }}</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Revenue</span><strong style="color:#22c55e">{{ "{:,.0f}".format(net_stats|sum(attribute='revenue')) }}d</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0"><span style="color:var(--text-dim)">Commission</span><strong style="color:#8b5cf6">{{ "{:,.0f}".format(net_stats|sum(attribute='commission')) }}d</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Clicks (30d)</span><strong>{{ "{:,}".format(net_stats|sum(attribute='clicks')) }}</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Conversions</span><strong>{{ net_stats|sum(attribute='conversions') }}</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Revenue</span><strong style="color:#22c55e">{{ "{:,.0f}".format(net_stats|sum(attribute='revenue')) }}d</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0"><span style="color:var(--text-dim)">Commission</span><strong style="color:#8b5cf6">{{ "{:,.0f}".format(net_stats|sum(attribute='commission')) }}d</strong></div>
     </div>
   </div>
   {% endfor %}

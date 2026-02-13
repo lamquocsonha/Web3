@@ -16,15 +16,15 @@
 
 <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
   <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap">
-    <select name="destination" class="form-select" style="width:150px;padding:8px;font-size:12px">
+    <select name="destination" class="form-select" style="width:150px;padding:8px;font-size:14px">
       <option value="">All Destinations</option>
       {% for d in destinations %}<option value="{{ d[0] }}" {% if f_dest == d[0] %}selected{% endif %}>{{ d[1] }}</option>{% endfor %}
     </select>
-    <select name="category" class="form-select" style="width:150px;padding:8px;font-size:12px">
+    <select name="category" class="form-select" style="width:150px;padding:8px;font-size:14px">
       <option value="">All Categories</option>
       {% for slug, label in cats %}<option value="{{ slug }}" {% if f_cat == slug %}selected{% endif %}>{{ label }}</option>{% endfor %}
     </select>
-    <select name="network" class="form-select" style="width:140px;padding:8px;font-size:12px">
+    <select name="network" class="form-select" style="width:140px;padding:8px;font-size:14px">
       <option value="">All Networks</option>
       {% for n in ['klook','accesstrade','agoda'] %}<option value="{{ n }}" {% if f_net == n %}selected{% endif %}>{{ n|title }}</option>{% endfor %}
     </select>
@@ -44,21 +44,21 @@
     <tbody>
       {% for a in items %}
       <tr>
-        <td style="font-family:'DM Mono';font-size:11px;color:var(--text-dim)">{{ a.id }}</td>
+        <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ a.id }}</td>
         <td>
-          <strong style="font-size:13px">{{ a.name }}</strong>
-          {% if a.is_featured %}<span style="font-size:9px;background:#ff6b35;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px">HOT</span>{% endif %}
-          <div style="font-size:10px;color:var(--text-dim);margin-top:2px">{{ a.description[:60] }}{% if a.description|length > 60 %}...{% endif %}</div>
+          <strong style="font-size:14px">{{ a.name }}</strong>
+          {% if a.is_featured %}<span style="font-size:14px;background:#ff6b35;color:#fff;padding:1px 5px;border-radius:3px;margin-left:4px">HOT</span>{% endif %}
+          <div style="font-size:14px;color:var(--text-dim);margin-top:2px">{{ a.description[:60] }}{% if a.description|length > 60 %}...{% endif %}</div>
         </td>
-        <td><span style="font-size:12px">{{ cat_map.get(a.category, a.category) }}</span></td>
-        <td><span style="font-size:12px">{{ a.destination_name }}</span></td>
-        <td><span class="pc-network pc-net-{{ a.network }}" style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase">{{ a.network }}</span></td>
-        <td style="text-align:right;font-family:'DM Mono';font-size:12px;font-weight:600">{{ "{:,.0f}".format(a.price_from) }}đ</td>
-        <td style="text-align:center">{% if a.discount_pct %}<span style="color:#e74c3c;font-weight:700;font-size:12px">-{{ a.discount_pct }}%</span>{% else %}-{% endif %}</td>
-        <td style="text-align:center;font-family:'DM Mono';font-size:12px">{{ "{:,}".format(a.clicks) }}</td>
+        <td><span style="font-size:14px">{{ cat_map.get(a.category, a.category) }}</span></td>
+        <td><span style="font-size:14px">{{ a.destination_name }}</span></td>
+        <td><span class="pc-network pc-net-{{ a.network }}" style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:14px;font-weight:700;text-transform:uppercase">{{ a.network }}</span></td>
+        <td style="text-align:right;font-family:'DM Mono';font-size:14px;font-weight:600">{{ "{:,.0f}".format(a.price_from) }}đ</td>
+        <td style="text-align:center">{% if a.discount_pct %}<span style="color:#e74c3c;font-weight:700;font-size:14px">-{{ a.discount_pct }}%</span>{% else %}-{% endif %}</td>
+        <td style="text-align:center;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(a.clicks) }}</td>
         <td>
           <form method="POST" action="{{ url_for('admin_attraction_toggle', aid=a.id) }}" style="display:inline">
-            <button type="submit" class="status-badge {% if a.is_active %}live{% else %}draft{% endif %}" style="cursor:pointer;border:none;font-size:10px">
+            <button type="submit" class="status-badge {% if a.is_active %}live{% else %}draft{% endif %}" style="cursor:pointer;border:none;font-size:14px">
               {{ 'Active' if a.is_active else 'Off' }}
             </button>
           </form>
@@ -76,7 +76,7 @@
     </tbody>
   </table>
 </div>
-<div style="margin-top:12px;font-size:12px;color:var(--text-dim)">{{ items|length }} attractions</div>
+<div style="margin-top:12px;font-size:14px;color:var(--text-dim)">{{ items|length }} attractions</div>
 {% else %}
 <div class="empty-state"><div class="empty-icon">🎫</div><p>No attractions yet</p><a href="{{ url_for('admin_attraction_new') }}" class="btn btn-primary" style="margin-top:12px">Add first attraction</a></div>
 {% endif %}

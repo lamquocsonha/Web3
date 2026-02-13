@@ -73,17 +73,17 @@
         <header class="article-header">
           <div class="article-meta-top">
             {% if vertical %}
-            <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="article-vertical-badge" style="background: {{ vertical.color }}; color: white; padding: 6px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+            <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="article-vertical-badge" style="background: {{ vertical.color }}; color: white; padding: 6px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
               {{ vertical.icon }} {{ vertical.name }}
             </a>
             {% endif %}
             {% if article.category %}
-            <span class="article-category-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            <span class="article-category-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 600;">
               {{ article.category|replace('-', ' ')|title }}
             </span>
             {% endif %}
             {% if article.tier %}
-            <span class="article-tier-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            <span class="article-tier-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 600;">
               {{ article.tier|title }}
             </span>
             {% endif %}
@@ -104,7 +104,7 @@
             <span>⏱️ {{ article.reading_time }} phút đọc</span>
             <span>👁️ {{ "{:,}".format(article.views) }} lượt xem</span>
             {% if article.ai_generated %}
-            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 14px;">
               ✨ AI Generated
             </span>
             {% endif %}
@@ -163,7 +163,7 @@
                 <h4 style="font-family: var(--font-primary); font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--text); margin: 0;">
                   {{ rel_article.title }}
                 </h4>
-                <div style="display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-light);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); font-size: 14px; color: var(--text-light);">
                   <span>{{ rel_article.reading_time }} phút</span>
                   <span>{{ "{:,}".format(rel_article.views) }} views</span>
                 </div>

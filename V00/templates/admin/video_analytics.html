@@ -19,11 +19,11 @@
   <div class="item-card" style="border-top:3px solid {{ color }}">
     <h3 style="color:{{ color }};font-size:14px;text-transform:uppercase">{{ plat }}</h3>
     <div style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Videos</span><strong>{{ plat_pubs|length }}</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Views</span><strong>{{ "{:,}".format(plat_pubs|sum(attribute='views')) }}</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Likes</span><strong style="color:#ef4444">{{ plat_pubs|sum(attribute='likes') }}</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Shares</span><strong style="color:#3b82f6">{{ plat_pubs|sum(attribute='shares') }}</strong></div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0"><span style="color:var(--text-dim)">Click-throughs</span><strong style="color:#22c55e">{{ plat_pubs|sum(attribute='click_throughs') }}</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Videos</span><strong>{{ plat_pubs|length }}</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Views</span><strong>{{ "{:,}".format(plat_pubs|sum(attribute='views')) }}</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Likes</span><strong style="color:#ef4444">{{ plat_pubs|sum(attribute='likes') }}</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-dim)">Shares</span><strong style="color:#3b82f6">{{ plat_pubs|sum(attribute='shares') }}</strong></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0"><span style="color:var(--text-dim)">Click-throughs</span><strong style="color:#22c55e">{{ plat_pubs|sum(attribute='click_throughs') }}</strong></div>
     </div>
   </div>
   {% endfor %}
@@ -40,16 +40,16 @@
       <tr>
         <td><a href="{{ url_for('admin_video_detail', vid=pub.video_id) }}" style="color:var(--text);text-decoration:none"><strong>{{ pub.video.title[:35] if pub.video else '-' }}...</strong></a></td>
         <td>
-          {% if pub.platform == 'tiktok' %}<span style="color:#ff0050;font-family:'DM Mono';font-size:11px">TIKTOK</span>
-          {% elif pub.platform == 'youtube' %}<span style="color:#ff0000;font-family:'DM Mono';font-size:11px">YOUTUBE</span>
-          {% else %}<span style="color:#1877f2;font-family:'DM Mono';font-size:11px">FACEBOOK</span>{% endif %}
+          {% if pub.platform == 'tiktok' %}<span style="color:#ff0050;font-family:'DM Mono';font-size:14px">TIKTOK</span>
+          {% elif pub.platform == 'youtube' %}<span style="color:#ff0000;font-family:'DM Mono';font-size:14px">YOUTUBE</span>
+          {% else %}<span style="color:#1877f2;font-family:'DM Mono';font-size:14px">FACEBOOK</span>{% endif %}
         </td>
-        <td style="font-size:12px">{{ pub.channel.channel_name if pub.channel else '-' }}</td>
+        <td style="font-size:14px">{{ pub.channel.channel_name if pub.channel else '-' }}</td>
         <td style="font-family:'DM Mono';font-weight:600">{{ "{:,}".format(pub.views) }}</td>
         <td style="color:#ef4444">{{ pub.likes }}</td>
         <td style="color:#3b82f6">{{ pub.shares }}</td>
         <td style="color:#22c55e;font-weight:600">{{ pub.click_throughs }}</td>
-        <td style="font-family:'DM Mono';font-size:11px">{% if pub.views > 0 %}{{ "%.1f"|format(pub.click_throughs/pub.views*100) }}%{% else %}0%{% endif %}</td>
+        <td style="font-family:'DM Mono';font-size:14px">{% if pub.views > 0 %}{{ "%.1f"|format(pub.click_throughs/pub.views*100) }}%{% else %}0%{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -60,7 +60,7 @@
 <!-- Insights -->
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:24px">
   <h3 style="font-size:16px;margin-bottom:12px">AI Insights</h3>
-  <div style="font-size:13px;color:var(--text-dim);line-height:1.8">
+  <div style="font-size:14px;color:var(--text-dim);line-height:1.8">
     &#128161; <strong>Best performing platform:</strong>
     {% set best = namespace(plat='', views=0) %}
     {% for plat in ['tiktok','youtube','facebook'] %}

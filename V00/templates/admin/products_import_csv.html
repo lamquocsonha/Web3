@@ -7,17 +7,17 @@ Import CSV
 {% endblock %}
 {% block content %}
 <h1 class="page-title">Import San pham tu CSV</h1>
-<p style="font-size:13px;color:var(--text-dim);margin:-8px 0 24px">Import hang loat san pham tu file CSV — ho tro tu dong phan loai theo Part/Zone</p>
+<p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">Import hang loat san pham tu file CSV — ho tro tu dong phan loai theo Part/Zone</p>
 
 <div style="max-width:900px">
   <!-- CSV Format Info -->
   <div style="background:rgba(59,130,246,0.05);border:2px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:24px;margin-bottom:24px">
     <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">Format CSV</h3>
-    <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">File CSV can co cac cot sau (header row):</p>
-    <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;overflow-x:auto">
+    <p style="font-size:14px;color:var(--text-dim);margin-bottom:12px">File CSV can co cac cot sau (header row):</p>
+    <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:14px;overflow-x:auto">
       sku,name,url,price,discount,image,desc,category
     </div>
-    <ul style="font-size:13px;color:var(--text-dim);margin:12px 0 0;padding-left:20px;line-height:1.8">
+    <ul style="font-size:14px;color:var(--text-dim);margin:12px 0 0;padding-left:20px;line-height:1.8">
       <li><strong>sku:</strong> Ma san pham (khong bat buoc)</li>
       <li><strong>name:</strong> Ten san pham (bat buoc) — dung de auto-detect Part</li>
       <li><strong>url:</strong> Link san pham (bat buoc)</li>
@@ -38,7 +38,7 @@ Import CSV
       <button type="button" onclick="switchTab('url')" id="tabUrl" class="import-tab" style="padding:12px 24px;background:none;border:none;border-bottom:3px solid transparent;font-weight:700;cursor:pointer;color:var(--text-dim)">
         CSV URL (Auto-update)
       </button>
-      <a href="{{ url_for('admin_scheduled_imports') }}" class="btn btn-sm" style="margin-left:auto;align-self:center;font-size:12px;padding:6px 12px">
+      <a href="{{ url_for('admin_scheduled_imports') }}" class="btn btn-sm" style="margin-left:auto;align-self:center;font-size:14px;padding:6px 12px">
         Quan ly Scheduled Imports
       </a>
     </div>
@@ -55,7 +55,7 @@ Import CSV
             <input type="radio" name="mapping_mode" value="auto" checked style="margin-top:2px;width:18px;height:18px">
             <div>
               <strong style="font-size:14px">Auto-detect</strong>
-              <p style="font-size:12px;color:var(--text-dim);margin:4px 0 0">Tu dong nhan dien Part/Zone tu ten san pham + category. VD: "Ma phanh Honda" -> He thong phanh > Ma phanh</p>
+              <p style="font-size:14px;color:var(--text-dim);margin:4px 0 0">Tu dong nhan dien Part/Zone tu ten san pham + category. VD: "Ma phanh Honda" -> He thong phanh > Ma phanh</p>
             </div>
           </label>
           <label style="flex:1;display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s" id="modeManualLabel"
@@ -63,7 +63,7 @@ Import CSV
             <input type="radio" name="mapping_mode" value="manual" style="margin-top:2px;width:18px;height:18px">
             <div>
               <strong style="font-size:14px">Chon Part thu cong</strong>
-              <p style="font-size:12px;color:var(--text-dim);margin:4px 0 0">Tat ca san pham trong CSV se gan vao 1 Part duy nhat</p>
+              <p style="font-size:14px;color:var(--text-dim);margin:4px 0 0">Tat ca san pham trong CSV se gan vao 1 Part duy nhat</p>
             </div>
           </label>
         </div>
@@ -159,7 +159,7 @@ Import CSV
         <label class="form-label">CSV URL <span style="color:#ef4444">*</span></label>
         <input type="url" name="csv_url" class="form-input" required placeholder="https://docs.google.com/spreadsheets/d/xxx/export?format=csv">
         <p class="form-help">Link truc tiep toi file CSV (Google Sheets Export, Dropbox, Drive, etc.)</p>
-        <div style="background:rgba(250,204,21,0.1);border-left:3px solid #facc15;padding:12px;margin-top:8px;font-size:12px;color:var(--text-dim);border-radius:4px">
+        <div style="background:rgba(250,204,21,0.1);border-left:3px solid #facc15;padding:12px;margin-top:8px;font-size:14px;color:var(--text-dim);border-radius:4px">
           <strong>Google Sheets:</strong> File > Share > Publish to web > Sheet > CSV > Copy link<br>
           <strong>Dropbox:</strong> Thay dl=0 thanh dl=1 o cuoi link
         </div>
@@ -205,7 +205,7 @@ Import CSV
         <label class="form-label">Tu dong cap nhat sau <span style="color:#ef4444">*</span></label>
         <div style="display:flex;gap:12px;align-items:center">
           <input type="number" name="update_interval_days" class="form-input" value="7" min="1" max="365" required style="width:100px">
-          <span style="font-size:13px;color:var(--text-dim)">ngay</span>
+          <span style="font-size:14px;color:var(--text-dim)">ngay</span>
         </div>
         <p class="form-help">He thong se tu dong tai va cap nhat san pham tu CSV URL sau so ngay nay</p>
       </div>
@@ -230,34 +230,34 @@ Import CSV
   <!-- Auto-detect Keyword Reference -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:20px">
     <h3 style="font-size:15px;margin-bottom:12px">Auto-detect hoat dong nhu the nao?</h3>
-    <div style="font-size:13px;color:var(--text-dim);line-height:1.8">
+    <div style="font-size:14px;color:var(--text-dim);line-height:1.8">
       <p style="margin-bottom:12px">He thong so khop <strong>ten san pham</strong> + <strong>category</strong> trong CSV voi keywords cua tung Part:</p>
-      <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <table style="width:100%;border-collapse:collapse;font-size:14px">
         <tr style="border-bottom:1px solid var(--border)">
           <th style="text-align:left;padding:8px;font-weight:600">Zone</th>
           <th style="text-align:left;padding:8px;font-weight:600">Keywords (vi du)</th>
         </tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong phanh</td><td style="padding:8px;font-family:monospace;font-size:11px">phanh, brake, ma phanh, dia phanh, caliper, abs...</td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Dong co</td><td style="padding:8px;font-family:monospace;font-size:11px">bugi, loc gio, dau may, piston, truc khuyu, sen, nhong...</td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong dien</td><td style="padding:8px;font-family:monospace;font-size:11px">den, led, ac quy, cam bien, relay, gat mua, motor...</td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong treo</td><td style="padding:8px;font-family:monospace;font-size:11px">phuoc, giam chan, lo xo, cao su, rotuy, suspension...</td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Gam xe</td><td style="padding:8px;font-family:monospace;font-size:11px">lop, mam, bac dan, moay o, khung gam, chan bun...</td></tr>
-        <tr><td style="padding:8px">Ngoai that</td><td style="padding:8px;font-family:monospace;font-size:11px">can, guong, kinh, tem, logo, ong xa, po, capo...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong phanh</td><td style="padding:8px;font-family:monospace;font-size:14px">phanh, brake, ma phanh, dia phanh, caliper, abs...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Dong co</td><td style="padding:8px;font-family:monospace;font-size:14px">bugi, loc gio, dau may, piston, truc khuyu, sen, nhong...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong dien</td><td style="padding:8px;font-family:monospace;font-size:14px">den, led, ac quy, cam bien, relay, gat mua, motor...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong treo</td><td style="padding:8px;font-family:monospace;font-size:14px">phuoc, giam chan, lo xo, cao su, rotuy, suspension...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Gam xe</td><td style="padding:8px;font-family:monospace;font-size:14px">lop, mam, bac dan, moay o, khung gam, chan bun...</td></tr>
+        <tr><td style="padding:8px">Ngoai that</td><td style="padding:8px;font-family:monospace;font-size:14px">can, guong, kinh, tem, logo, ong xa, po, capo...</td></tr>
       </table>
-      <p style="margin-top:12px;font-size:12px">Ngoai ra, Part.tags va Part.name cung duoc dung de match chinh xac hon.</p>
+      <p style="margin-top:12px;font-size:14px">Ngoai ra, Part.tags va Part.name cung duoc dung de match chinh xac hon.</p>
     </div>
   </div>
 
   <!-- Example CSV -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:20px">
     <h3 style="font-size:15px;margin-bottom:12px">Vi du CSV</h3>
-    <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;overflow-x:auto;line-height:1.8">
+    <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:14px;overflow-x:auto;line-height:1.8">
 sku,name,url,price,discount,image,desc,category<br>
 SP001,Ma phanh Honda CRV 2020,https://shopee.vn/product/123,450000,10,https://img.jpg,Ma phanh ceramic,phanh<br>
 SP002,Den hau Toyota Vios LED,https://shopee.vn/product/456,890000,0,https://img2.jpg,Den LED nguyen bo,den<br>
 SP003,Loc gio dong co Hyundai,https://shopee.vn/product/789,120000,5,https://img3.jpg,Air filter OEM,dong co
     </div>
-    <p style="font-size:12px;color:var(--text-dim);margin-top:12px">
+    <p style="font-size:14px;color:var(--text-dim);margin-top:12px">
       <strong>Luu y:</strong> Voi Auto-detect, "Ma phanh Honda CRV" se tu dong vao <strong>He thong phanh > Ma phanh</strong>,
       "Den hau Toyota Vios" vao <strong>He thong dien</strong>, "Loc gio dong co" vao <strong>Dong co</strong>.
     </p>

@@ -26,7 +26,7 @@
         <option value="blog" {% if vertical and vertical.template=='blog' %}selected{% endif %}>Blog — Content-focused</option>
         <option value="finance" {% if vertical and vertical.template=='finance' %}selected{% endif %}>Finance — Professional</option>
       </select>
-      <small style="display:block;margin-top:4px;font-size:11px;color:var(--text-dim)">Layout structure of the website</small>
+      <small style="display:block;margin-top:4px;font-size:14px;color:var(--text-dim)">Layout structure of the website</small>
     </div>
     <div class="form-group">
       <label class="form-label">Style (Giao diện)</label>
@@ -38,7 +38,7 @@
         <option value="car" {% if vertical and vertical.style=='car' %}selected{% endif %}>Car — Sporty, strong</option>
         <option value="pet" {% if vertical and vertical.style=='pet' %}selected{% endif %}>Pet — Friendly, warm</option>
       </select>
-      <small style="display:block;margin-top:4px;font-size:11px;color:var(--text-dim)">Font, colors, buttons via CSS variables</small>
+      <small style="display:block;margin-top:4px;font-size:14px;color:var(--text-dim)">Font, colors, buttons via CSS variables</small>
     </div>
   </div>
   <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" name="description" style="min-height:100px">{{ vertical.description if vertical else '' }}</textarea></div>
