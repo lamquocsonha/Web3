@@ -1415,7 +1415,8 @@ Chi tra ve JSON array, KHONG giai thich them. Neu san pham dang o dung vertical 
     ai_results = _call_ai_api(prompt)
 
     if not ai_results:
-        return jsonify({'error': 'Khong the ket noi AI API. Kiem tra API key trong Settings.'}), 500
+        err_detail = getattr(_call_ai_api, 'last_error', '')
+        return jsonify({'error': f'AI API loi: {err_detail}' if err_detail else 'Khong the ket noi AI API. Kiem tra API key trong Settings.'}), 500
 
     # Compare and build results
     results = []
@@ -1448,10 +1449,16 @@ Chi tra ve JSON array, KHONG giai thich them. Neu san pham dang o dung vertical 
 
 
 def _call_ai_api(prompt):
-    """Unified AI API caller - tries Claude first, then OpenAI. Returns parsed JSON or None."""
+    """Unified AI API caller - tries Claude first, then OpenAI. Returns parsed JSON or None.
+    Sets _call_ai_api.last_error with debug info if all attempts fail."""
     import requests as req
+    _call_ai_api.last_error = ''
     claude_key = SiteSettings.get('claude_key')
     openai_key = SiteSettings.get('openai_key')
+
+    if not claude_key and not openai_key:
+        _call_ai_api.last_error = 'Chua co API key nao. Vao Settings > AI API Keys de them.'
+        return None
 
     if claude_key:
         try:
@@ -1465,8 +1472,12 @@ def _call_ai_api(prompt):
                 result = _parse_ai_json_response(resp.json()['content'][0]['text'])
                 if result:
                     return result
-        except Exception:
-            pass
+                _call_ai_api.last_error = 'Claude tra loi nhung khong parse duoc JSON'
+            else:
+                err_body = resp.text[:300]
+                _call_ai_api.last_error = f'Claude API loi {resp.status_code}: {err_body}'
+        except Exception as e:
+            _call_ai_api.last_error = f'Claude exception: {str(e)}'
 
     if openai_key:
         try:
@@ -1482,8 +1493,12 @@ def _call_ai_api(prompt):
                 result = _parse_ai_json_response(resp.json()['choices'][0]['message']['content'])
                 if result:
                     return result
-        except Exception:
-            pass
+                _call_ai_api.last_error = 'OpenAI tra loi nhung khong parse duoc JSON'
+            else:
+                err_body = resp.text[:300]
+                _call_ai_api.last_error = f'OpenAI API loi {resp.status_code}: {err_body}'
+        except Exception as e:
+            _call_ai_api.last_error = f'OpenAI exception: {str(e)}'
     return None
 
 
