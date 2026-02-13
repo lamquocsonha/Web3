@@ -50,8 +50,8 @@
   <div class="section-header-pub"><h2>📖 Bài viết về {{ zone.name }}</h2></div>
   <div class="articles-grid">
     {% for a in articles %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm {% if a.image_url %}has-thumb{% endif %}">
-      {% if a.image_url %}<div class="acs-thumb"><img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy"></div>{% endif %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
+      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
       <div class="acs-tier {{ a.tier }}">{{ a.tier|replace('-',' ')|title }}</div>
       <h4>{{ a.title[:60] }}...</h4>
       <p>{{ a.excerpt[:90] }}...</p>

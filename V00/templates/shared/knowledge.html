@@ -12,8 +12,8 @@
   <div class="kb-tier-header nganh"><span class="kb-badge">T1</span><h2>Kiến thức ngành</h2><span class="kb-desc">Thị trường, xu hướng, so sánh tổng quan</span></div>
   <div class="articles-grid">
     {% for a in articles_nganh %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm {% if a.image_url %}has-thumb{% endif %}">
-      {% if a.image_url %}<div class="acs-thumb"><img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy"></div>{% endif %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
+      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
       <div class="acs-tier nganh">Ngành</div>
       <h4>{{ a.title }}</h4>
       <p>{{ a.excerpt[:100] }}...</p>
@@ -30,8 +30,8 @@
   <div class="kb-tier-header chung"><span class="kb-badge">T2</span><h2>Kiến thức hệ thống</h2><span class="kb-desc">Hệ thống, quy trình, phương pháp</span></div>
   <div class="articles-grid">
     {% for a in articles_chung %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm {% if a.image_url %}has-thumb{% endif %}">
-      {% if a.image_url %}<div class="acs-thumb"><img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy"></div>{% endif %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
+      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
       <div class="acs-tier chung">{{ a.category|replace('-',' ')|title }}</div>
       <h4>{{ a.title }}</h4>
       <p>{{ a.excerpt[:100] }}...</p>
@@ -48,8 +48,8 @@
   <div class="kb-tier-header chitiet"><span class="kb-badge">T3</span><h2>Chi tiết</h2><span class="kb-desc">Bài viết sâu về từng linh kiện, sản phẩm cụ thể</span></div>
   <div class="articles-grid">
     {% for a in articles_chitiet %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm {% if a.image_url %}has-thumb{% endif %}">
-      {% if a.image_url %}<div class="acs-thumb"><img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy"></div>{% endif %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
+      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
       <div class="acs-tier chitiet">{{ a.category|replace('-',' ')|title }}</div>
       <h4>{{ a.title }}</h4>
       <p>{{ a.excerpt[:100] }}...</p>
