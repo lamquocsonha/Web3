@@ -2149,6 +2149,7 @@ if __name__ == '__main__':
             # Check if seo_content column exists in zone table
             db.session.execute(db.text("SELECT seo_content FROM zone LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Adding seo_content column to zone table...')
             db.session.execute(db.text("ALTER TABLE zone ADD COLUMN seo_content TEXT DEFAULT ''"))
             db.session.commit()
@@ -2157,6 +2158,7 @@ if __name__ == '__main__':
             # Check if banner table exists
             db.session.execute(db.text("SELECT id FROM banner LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Creating banner table...')
             db.session.execute(db.text("""
                 CREATE TABLE IF NOT EXISTS banner (
@@ -2180,21 +2182,48 @@ if __name__ == '__main__':
         try:
             db.session.execute(db.text("SELECT template FROM vertical LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Adding template column to vertical table...')
             db.session.execute(db.text("ALTER TABLE vertical ADD COLUMN template VARCHAR(20) DEFAULT 'general'"))
             db.session.commit()
-            # Set templates for existing verticals
-            template_mapping = {'car': 'general', 'pet': 'general', 'bike': 'general', 'travel': 'travel'}
-            verticals = Vertical.query.all()
-            for v in verticals:
-                v.template = template_mapping.get(v.slug, 'general')
+
+        # Add style column to vertical table (if not exists)
+        try:
+            db.session.execute(db.text("SELECT style FROM vertical LIMIT 1"))
+        except:
+            db.session.rollback()
+            print('[+] Adding style column to vertical table...')
+            db.session.execute(db.text("ALTER TABLE vertical ADD COLUMN style VARCHAR(20) DEFAULT 'classic'"))
             db.session.commit()
-            print('[+] Set templates for existing verticals')
+
+        # Set defaults for template/style on existing verticals
+        try:
+            template_mapping = {'car': 'general', 'pet': 'general', 'bike': 'general', 'travel': 'travel'}
+            style_mapping = {'car': 'car', 'pet': 'pet', 'bike': 'bike', 'travel': 'travel'}
+            verticals = Vertical.query.all()
+            changed = False
+            for v in verticals:
+                if not v.template or v.template == 'general':
+                    new_tmpl = template_mapping.get(v.slug, 'general')
+                    if v.template != new_tmpl:
+                        v.template = new_tmpl
+                        changed = True
+                if not v.style or v.style == 'classic':
+                    new_style = style_mapping.get(v.slug, 'classic')
+                    if v.style != new_style:
+                        v.style = new_style
+                        changed = True
+            if changed:
+                db.session.commit()
+                print('[+] Set template/style for existing verticals')
+        except:
+            db.session.rollback()
 
         # Add deeplink_template column to affiliate_network table (if not exists)
         try:
             db.session.execute(db.text("SELECT deeplink_template FROM affiliate_network LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Adding deeplink_template column to affiliate_network table...')
             db.session.execute(db.text("ALTER TABLE affiliate_network ADD COLUMN deeplink_template VARCHAR(1000) DEFAULT ''"))
             db.session.commit()
@@ -2203,6 +2232,7 @@ if __name__ == '__main__':
         try:
             db.session.execute(db.text("SELECT embed_code FROM voucher LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Adding embed_code column to voucher table...')
             db.session.execute(db.text("ALTER TABLE voucher ADD COLUMN embed_code TEXT DEFAULT ''"))
             db.session.commit()
@@ -2211,6 +2241,7 @@ if __name__ == '__main__':
         try:
             db.session.execute(db.text("SELECT sync_mode FROM voucher LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Adding sync_mode column to voucher table...')
             db.session.execute(db.text("ALTER TABLE voucher ADD COLUMN sync_mode VARCHAR(20) DEFAULT 'manual'"))
             db.session.commit()
@@ -2219,6 +2250,7 @@ if __name__ == '__main__':
         try:
             db.session.execute(db.text("SELECT id FROM scheduled_csv_import LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Creating scheduled_csv_import table...')
             db.session.execute(db.text("""
                 CREATE TABLE IF NOT EXISTS scheduled_csv_import (
@@ -2245,6 +2277,7 @@ if __name__ == '__main__':
         try:
             db.session.execute(db.text("SELECT id FROM voucher_widget LIMIT 1"))
         except:
+            db.session.rollback()
             print('[+] Creating voucher_widget table...')
             db.session.execute(db.text("""
                 CREATE TABLE IF NOT EXISTS voucher_widget (
