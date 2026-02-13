@@ -2135,6 +2135,347 @@ def seed_beauty():
         db.session.add(p)
         db.session.flush()
 
+    # --- Parts for Làm sạch zone (4 products) ---
+    lam_sach_zone = zones['lam-sach']
+    parts_lam_sach = [
+        {
+            'name_vi': 'Sữa rửa mặt CeraVe', 'name_en': 'CeraVe Foaming Cleanser',
+            'slug': 'sua-rua-mat-cerave',
+            'description': 'Sữa rửa mặt CeraVe dịu nhẹ, chứa ceramide phục hồi hàng rào da, pH 5.5.',
+            'content': '''<h2>CeraVe — Sữa rửa mặt bác sĩ da liễu khuyên dùng</h2>
+<p>CeraVe Foaming Facial Cleanser là sữa rửa mặt dạng gel tạo bọt nhẹ, làm sạch sâu mà không gây khô da nhờ 3 ceramide thiết yếu.</p>
+<h2>Thành phần nổi bật</h2>
+<ul>
+<li><strong>3 Ceramide</strong> — Phục hồi hàng rào bảo vệ da</li>
+<li><strong>Niacinamide</strong> — Làm dịu, giảm mẩn đỏ</li>
+<li><strong>Hyaluronic Acid</strong> — Giữ ẩm, không gây khô căng</li>
+</ul>
+<h2>Phù hợp ai?</h2>
+<p>Da dầu, da hỗn hợp, da mụn. Người mới bắt đầu skincare nên chọn CeraVe vì an toàn, ít kích ứng.</p>''',
+            'tags': 'CeraVe,sữa rửa mặt,làm sạch,ceramide,da dầu,skincare',
+        },
+        {
+            'name_vi': 'Tẩy trang dầu DHC', 'name_en': 'DHC Deep Cleansing Oil',
+            'slug': 'tay-trang-dau-dhc',
+            'description': 'Dầu tẩy trang DHC olive, làm sạch makeup chống nước, không gây mụn.',
+            'content': '''<h2>Double Cleanse — Bước 1 quan trọng nhất</h2>
+<p>Dầu tẩy trang là bước đầu tiên trong quy trình double cleanse (rửa mặt 2 bước). DHC Deep Cleansing Oil chứa dầu olive tinh khiết, hòa tan makeup, kem chống nắng và bã nhờn.</p>
+<h2>Cách dùng</h2>
+<ul>
+<li><strong>Bước 1</strong> — Thoa dầu lên da khô, massage 1-2 phút</li>
+<li><strong>Bước 2</strong> — Thêm nước, nhũ hóa thành sữa trắng</li>
+<li><strong>Bước 3</strong> — Rửa sạch bằng nước, tiếp tục sữa rửa mặt</li>
+</ul>''',
+            'tags': 'DHC,tẩy trang,dầu tẩy trang,double cleanse,skincare',
+        },
+        {
+            'name_vi': 'Gel rửa mặt La Roche-Posay', 'name_en': 'La Roche-Posay Effaclar Gel',
+            'slug': 'gel-rua-mat-la-roche-posay',
+            'description': 'Gel rửa mặt cho da dầu mụn, chứa zinc PCA kiểm soát bã nhờn, pH 5.5.',
+            'content': '''<h2>La Roche-Posay Effaclar</h2>
+<p>Dòng sản phẩm chuyên biệt cho da dầu mụn từ thương hiệu dược mỹ phẩm Pháp. Gel rửa mặt Effaclar Purifying Foaming Gel không chứa xà phòng, không paraben.</p>
+<h2>Công dụng</h2>
+<ul>
+<li><strong>Zinc PCA</strong> — Kiểm soát bã nhờn, giảm bóng nhờn</li>
+<li><strong>Thermal Water</strong> — Làm dịu, chống kích ứng</li>
+<li><strong>pH 5.5</strong> — Không phá hủy hàng rào da</li>
+</ul>''',
+            'tags': 'La Roche-Posay,Effaclar,gel rửa mặt,da dầu mụn,skincare',
+        },
+        {
+            'name_vi': 'Nước tẩy trang Bioderma', 'name_en': 'Bioderma Sensibio H2O',
+            'slug': 'nuoc-tay-trang-bioderma',
+            'description': 'Nước tẩy trang micellar Bioderma Sensibio, dịu nhẹ cho da nhạy cảm.',
+            'content': '''<h2>Bioderma Sensibio H2O</h2>
+<p>Nước tẩy trang micellar nổi tiếng nhất thế giới, dùng công nghệ micelle bắt giữ bụi bẩn và makeup mà không cần rửa lại.</p>
+<h2>Vì sao nổi tiếng?</h2>
+<ul>
+<li><strong>Không cần rửa lại</strong> — Tiện lợi, nhanh gọn</li>
+<li><strong>Da nhạy cảm</strong> — Không cồn, không mùi, không paraben</li>
+<li><strong>Cân bằng pH</strong> — Tôn trọng độ pH tự nhiên của da</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Thấm bông tẩy trang, lau nhẹ khắp mặt đến khi bông sạch. Buổi tối dùng trước sữa rửa mặt.</p>''',
+            'tags': 'Bioderma,nước tẩy trang,micellar,da nhạy cảm,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_lam_sach):
+        p = Part(
+            zone_id=lam_sach_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Toner & Essence zone (3 products) ---
+    toner_zone = zones['toner-essence']
+    parts_toner = [
+        {
+            'name_vi': 'Toner Klairs Supple Preparation', 'name_en': 'Klairs Supple Preparation Toner',
+            'slug': 'toner-klairs',
+            'description': 'Toner dưỡng ẩm Klairs không cồn, dịu nhẹ, cấp nước sâu cho da khô.',
+            'content': '''<h2>Klairs Supple Preparation</h2>
+<p>Toner dưỡng ẩm best-seller từ Hàn Quốc, phù hợp mọi loại da kể cả da nhạy cảm. Không cồn, không mùi, pH 5.0.</p>
+<h2>Thành phần</h2>
+<ul>
+<li><strong>Hyaluronic Acid</strong> — Cấp nước sâu, giữ ẩm 24h</li>
+<li><strong>Beta-glucan</strong> — Làm dịu, phục hồi da</li>
+<li><strong>Centella Asiatica</strong> — Chống viêm, làm lành</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Sau rửa mặt, đổ toner ra tay hoặc bông, vỗ nhẹ lên mặt. Có thể dùng 2-3 lớp (7-skin method) cho da khô.</p>''',
+            'tags': 'Klairs,toner,dưỡng ẩm,K-beauty,da nhạy cảm,skincare',
+        },
+        {
+            'name_vi': 'Essence SK-II Facial Treatment', 'name_en': 'SK-II Facial Treatment Essence',
+            'slug': 'essence-sk-ii',
+            'description': 'Nước thần SK-II chứa 90% Pitera, trẻ hóa da, cải thiện kết cấu da rõ rệt.',
+            'content': '''<h2>SK-II Facial Treatment Essence — "Nước thần"</h2>
+<p>Sản phẩm iconic của SK-II với 90% Pitera (men tự nhiên) giúp cải thiện 5 yếu tố: độ mịn, săn chắc, giảm nếp nhăn, giảm đốm nâu, rạng rỡ.</p>
+<h2>Pitera là gì?</h2>
+<ul>
+<li><strong>Nguồn gốc</strong> — Chiết xuất từ quá trình lên men nấm men tự nhiên</li>
+<li><strong>Thành phần</strong> — Vitamin, axit amin, khoáng chất, axit hữu cơ</li>
+<li><strong>Tác dụng</strong> — Tái tạo tế bào, làm sáng da, chống lão hóa</li>
+</ul>
+<h2>Giá & Cách dùng</h2>
+<p>Giá khoảng 2-4 triệu/chai 230ml. Đổ ra bông, vỗ nhẹ lên mặt sau bước toner, trước serum.</p>''',
+            'tags': 'SK-II,nước thần,Pitera,essence,chống lão hóa,skincare',
+        },
+        {
+            'name_vi': 'Toner Some By Mi AHA-BHA-PHA', 'name_en': 'Some By Mi AHA BHA PHA Toner',
+            'slug': 'toner-some-by-mi',
+            'description': 'Toner tẩy da chết hóa học 3 trong 1, cải thiện da mụn trong 30 ngày.',
+            'content': '''<h2>Some By Mi Miracle Toner</h2>
+<p>Toner viral nhất K-beauty với công thức 3 acid tẩy da chết: AHA (glycolic), BHA (salicylic), PHA (gluconolactone). Cam kết cải thiện da trong 30 ngày.</p>
+<h2>Cơ chế hoạt động</h2>
+<ul>
+<li><strong>AHA 10000ppm</strong> — Tẩy tế bào chết bề mặt, sáng da</li>
+<li><strong>BHA</strong> — Thông thoáng lỗ chân lông, giảm mụn</li>
+<li><strong>PHA</strong> — Tẩy da chết nhẹ nhàng, cấp ẩm</li>
+<li><strong>Tràm trà</strong> — Kháng khuẩn, giảm viêm</li>
+</ul>
+<h2>Lưu ý</h2>
+<p>Không dùng cùng retinol hoặc vitamin C. Bắt đầu 2-3 lần/tuần, tăng dần.</p>''',
+            'tags': 'Some By Mi,toner,AHA,BHA,PHA,tẩy da chết,da mụn,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_toner):
+        p = Part(
+            zone_id=toner_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Kem dưỡng zone (4 products) ---
+    kem_duong_zone = zones['kem-duong']
+    parts_kem_duong = [
+        {
+            'name_vi': 'Kem dưỡng ẩm CeraVe', 'name_en': 'CeraVe Moisturizing Cream',
+            'slug': 'kem-duong-am-cerave',
+            'description': 'Kem dưỡng ẩm CeraVe chứa 3 ceramide, phục hồi hàng rào da, dùng cả mặt và body.',
+            'content': '''<h2>CeraVe Moisturizing Cream</h2>
+<p>Kem dưỡng ẩm "quốc dân" được bác sĩ da liễu toàn cầu khuyên dùng. Công nghệ MVE giải phóng dưỡng chất suốt 24h.</p>
+<h2>Thành phần chính</h2>
+<ul>
+<li><strong>3 Ceramide (1, 3, 6-II)</strong> — Phục hồi hàng rào bảo vệ da</li>
+<li><strong>Hyaluronic Acid</strong> — Giữ ẩm, da căng mọng</li>
+<li><strong>MVE Technology</strong> — Giải phóng dưỡng chất từ từ 24h</li>
+</ul>
+<h2>Phù hợp ai?</h2>
+<p>Da khô, da nhạy cảm, da vừa peel/laser cần phục hồi. Texture đặc nhưng không bí, thấm nhanh.</p>''',
+            'tags': 'CeraVe,kem dưỡng ẩm,ceramide,moisturizer,skincare',
+        },
+        {
+            'name_vi': 'Kem dưỡng Laneige Water Bank', 'name_en': 'Laneige Water Bank Cream',
+            'slug': 'kem-duong-laneige',
+            'description': 'Kem dưỡng cấp nước Laneige, công nghệ Blue Hyaluronic Acid, da căng bóng.',
+            'content': '''<h2>Laneige Water Bank Blue Hyaluronic</h2>
+<p>Dòng kem dưỡng cấp nước best-seller từ Laneige (Hàn Quốc), nay nâng cấp với Blue Hyaluronic Acid mạnh hơn HA thường.</p>
+<h2>Công nghệ Blue HA</h2>
+<ul>
+<li><strong>Blue Hyaluronic Acid</strong> — Phân tử nhỏ, thấm sâu hơn HA thường</li>
+<li><strong>Cấp nước 100h</strong> — Da luôn căng mọng, không bị khô</li>
+<li><strong>Texture mỏng nhẹ</strong> — Phù hợp khí hậu nóng ẩm Việt Nam</li>
+</ul>''',
+            'tags': 'Laneige,kem dưỡng,cấp nước,Blue HA,K-beauty,skincare',
+        },
+        {
+            'name_vi': 'Kem dưỡng trắng Pond\'s', 'name_en': 'Pond\'s White Beauty Cream',
+            'slug': 'kem-duong-trang-ponds',
+            'description': 'Kem dưỡng trắng da Pond\'s chứa niacinamide, giá bình dân, hiệu quả rõ.',
+            'content': '''<h2>Pond\'s White Beauty</h2>
+<p>Dòng kem dưỡng trắng da "quốc dân" với giá bình dân nhất thị trường, chứa niacinamide và vitamin B3 giúp da sáng hơn từ bên trong.</p>
+<h2>Các phiên bản</h2>
+<ul>
+<li><strong>Pond\'s White Beauty</strong> — Dưỡng trắng cơ bản, giá ~80K</li>
+<li><strong>Pond\'s Age Miracle</strong> — Chống lão hóa, giá ~200K</li>
+<li><strong>Pond\'s Bright Beauty</strong> — Sáng da nhanh, SPF 15</li>
+</ul>
+<h2>Review thực tế</h2>
+<p>Hiệu quả sáng da nhẹ sau 2-4 tuần, giá tốt cho sinh viên và người mới bắt đầu skincare.</p>''',
+            'tags': 'Pond\'s,kem dưỡng trắng,niacinamide,bình dân,skincare',
+        },
+        {
+            'name_vi': 'Kem dưỡng Innisfree Green Tea', 'name_en': 'Innisfree Green Tea Cream',
+            'slug': 'kem-duong-innisfree',
+            'description': 'Kem dưỡng trà xanh Innisfree, cấp ẩm sâu, thành phần tự nhiên từ đảo Jeju.',
+            'content': '''<h2>Innisfree Green Tea Seed Cream</h2>
+<p>Kem dưỡng chiết xuất trà xanh hữu cơ từ đảo Jeju (Hàn Quốc), cấp ẩm sâu và bảo vệ da khỏi tác hại môi trường.</p>
+<h2>Thành phần</h2>
+<ul>
+<li><strong>Trà xanh Jeju</strong> — Chống oxy hóa, bảo vệ da</li>
+<li><strong>Green Tea Seed Oil</strong> — Khóa ẩm, nuôi dưỡng</li>
+<li><strong>Amino Acid</strong> — Tăng cường hàng rào da</li>
+</ul>
+<h2>Phù hợp ai?</h2>
+<p>Da thường, da hỗn hợp. Texture nhẹ, thấm nhanh, không bí. Mùi trà xanh tự nhiên dễ chịu.</p>''',
+            'tags': 'Innisfree,trà xanh,green tea,Jeju,kem dưỡng,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_kem_duong):
+        p = Part(
+            zone_id=kem_duong_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Chống nắng zone (3 products) ---
+    chong_nang_zone = zones['chong-nang']
+    parts_chong_nang = [
+        {
+            'name_vi': 'Kem chống nắng Anessa', 'name_en': 'Anessa Perfect UV Sunscreen',
+            'slug': 'kem-chong-nang-anessa',
+            'description': 'Kem chống nắng Anessa SPF50+ PA++++ vàng, chống nước, bền bỉ ngoài trời.',
+            'content': '''<h2>Anessa Perfect UV — "Vua" chống nắng</h2>
+<p>Anessa của Shiseido (Nhật) là kem chống nắng #1 tại Nhật 21 năm liên tiếp. SPF50+ PA++++ với công nghệ Auto Booster bền bỉ khi tiếp xúc mồ hôi và nước.</p>
+<h2>Công nghệ đặc biệt</h2>
+<ul>
+<li><strong>Auto Booster</strong> — Càng tiếp xúc nhiệt/mồ hôi, màng chống nắng càng bền</li>
+<li><strong>Smooth Protect</strong> — Texture mỏng nhẹ như sữa, không bết</li>
+<li><strong>Chống nước</strong> — Super Waterproof, phù hợp đi biển</li>
+</ul>
+<h2>Giá</h2>
+<p>Khoảng 350-550K/chai 60ml tùy nơi mua. Nên mua ở Shopee Mall hoặc store chính hãng.</p>''',
+            'tags': 'Anessa,chống nắng,SPF50,Shiseido,chống nước,skincare',
+        },
+        {
+            'name_vi': 'Kem chống nắng Skin Aqua Tone Up', 'name_en': 'Skin Aqua Tone Up UV Essence',
+            'slug': 'kem-chong-nang-skin-aqua',
+            'description': 'Kem chống nắng Skin Aqua nâng tông, giá bình dân, texture nhẹ không bết.',
+            'content': '''<h2>Skin Aqua Tone Up UV Essence</h2>
+<p>Kem chống nắng "quốc dân" của Rohto (Nhật), giá chỉ ~150K nhưng SPF50+ PA++++, có hiệu ứng nâng tông da sáng hồng.</p>
+<h2>Vì sao viral?</h2>
+<ul>
+<li><strong>Giá rẻ</strong> — 150K/chai 80g, dùng được 2-3 tháng</li>
+<li><strong>Nâng tông</strong> — Da trắng hồng tự nhiên không cần makeup</li>
+<li><strong>Texture</strong> — Nhẹ như nước, không bết dính, có mùi hoa lavender</li>
+<li><strong>Hyaluronic Acid</strong> — Cấp ẩm, không gây khô da</li>
+</ul>''',
+            'tags': 'Skin Aqua,chống nắng,nâng tông,bình dân,Rohto,skincare',
+        },
+        {
+            'name_vi': 'Xịt chống nắng Neutrogena', 'name_en': 'Neutrogena Ultra Sheer Spray',
+            'slug': 'xit-chong-nang-neutrogena',
+            'description': 'Xịt chống nắng Neutrogena tiện lợi, dễ bôi lại, không để lại vệt trắng.',
+            'content': '''<h2>Xịt chống nắng — Tiện lợi bôi lại</h2>
+<p>Neutrogena Ultra Sheer Body Mist SPF70 dạng xịt, tiện lợi bôi lại trong ngày mà không cần rửa tay. Phun đều, khô nhanh.</p>
+<h2>Khi nào dùng xịt?</h2>
+<ul>
+<li><strong>Bôi lại</strong> — Xịt qua lớp makeup mà không bị hỏng</li>
+<li><strong>Cơ thể</strong> — Tay, chân, cổ — xịt nhanh hơn thoa kem</li>
+<li><strong>Đi chơi</strong> — Tiện mang theo, bôi lại mỗi 2h</li>
+</ul>
+<h2>Lưu ý</h2>
+<p>Xịt không thay thế kem cho mặt. Mặt nên dùng kem, xịt chỉ dùng bôi lại hoặc cho body.</p>''',
+            'tags': 'Neutrogena,xịt chống nắng,spray,SPF70,bôi lại,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_chong_nang):
+        p = Part(
+            zone_id=chong_nang_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Mặt nạ zone (3 products) ---
+    mat_na_zone = zones['mat-na']
+    parts_mat_na = [
+        {
+            'name_vi': 'Mặt nạ giấy Mediheal', 'name_en': 'Mediheal Sheet Mask',
+            'slug': 'mat-na-giay-mediheal',
+            'description': 'Mặt nạ giấy Mediheal N.M.F Aquaring, cấp ẩm sâu, best-seller Hàn Quốc.',
+            'content': '''<h2>Mediheal N.M.F Aquaring</h2>
+<p>Mặt nạ giấy bán chạy #1 Hàn Quốc với hơn 1 tỷ miếng bán ra. N.M.F (Natural Moisturizing Factor) cấp ẩm sâu, phù hợp mọi loại da.</p>
+<h2>Cách dùng hiệu quả</h2>
+<ul>
+<li><strong>Thời gian</strong> — Đắp 15-20 phút, KHÔNG đắp qua đêm</li>
+<li><strong>Tần suất</strong> — 2-3 lần/tuần</li>
+<li><strong>Sau khi đắp</strong> — Vỗ nhẹ cho thấm, thoa kem dưỡng khóa ẩm</li>
+</ul>
+<h2>Giá</h2>
+<p>Khoảng 15-25K/miếng, mua hộp 10 miếng ~150K. Mua Shopee Mall để tránh hàng giả.</p>''',
+            'tags': 'Mediheal,mặt nạ giấy,N.M.F,cấp ẩm,K-beauty,skincare',
+        },
+        {
+            'name_vi': 'Mặt nạ ngủ Laneige', 'name_en': 'Laneige Water Sleeping Mask',
+            'slug': 'mat-na-ngu-laneige',
+            'description': 'Mặt nạ ngủ Laneige cấp ẩm qua đêm, thức dậy da căng mọng, rạng rỡ.',
+            'content': '''<h2>Laneige Water Sleeping Mask</h2>
+<p>Mặt nạ ngủ iconic từ Laneige, thoa trước khi ngủ và để qua đêm. Sáng dậy da căng bóng, mềm mịn.</p>
+<h2>Thành phần</h2>
+<ul>
+<li><strong>SLEEP-TOX</strong> — Công nghệ thải độc khi ngủ</li>
+<li><strong>Hydro Ionized Mineral Water</strong> — Cấp ẩm sâu suốt đêm</li>
+<li><strong>Apricot & Evening Primrose</strong> — Làm sáng, đều màu da</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Bước cuối skincare tối. Thoa 1 lớp mỏng, để qua đêm, sáng rửa sạch. Dùng 2-3 lần/tuần.</p>''',
+            'tags': 'Laneige,mặt nạ ngủ,sleeping mask,cấp ẩm,K-beauty,skincare',
+        },
+        {
+            'name_vi': 'Mặt nạ đất sét Innisfree', 'name_en': 'Innisfree Volcanic Clay Mask',
+            'slug': 'mat-na-dat-set-innisfree',
+            'description': 'Mặt nạ đất sét núi lửa Jeju, hút bã nhờn, se lỗ chân lông, sạch sâu.',
+            'content': '''<h2>Innisfree Super Volcanic Pore Clay Mask</h2>
+<p>Mặt nạ đất sét từ tro núi lửa đảo Jeju, hút sạch bã nhờn và bụi bẩn trong lỗ chân lông. Best-seller cho da dầu.</p>
+<h2>Công dụng</h2>
+<ul>
+<li><strong>Hút bã nhờn</strong> — Đất sét núi lửa hấp thụ dầu thừa</li>
+<li><strong>Se lỗ chân lông</strong> — Lỗ chân lông nhỏ hơn sau khi đắp</li>
+<li><strong>Sạch sâu</strong> — Loại bỏ bụi bẩn, tế bào chết</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Thoa lớp dày lên da sạch, đợi 10-15 phút đến khi khô, rửa sạch bằng nước ấm. Dùng 1-2 lần/tuần.</p>''',
+            'tags': 'Innisfree,mặt nạ đất sét,volcanic clay,da dầu,se lỗ chân lông,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_mat_na):
+        p = Part(
+            zone_id=mat_na_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
     # Create zones for other segments (makeup, haircare, bodycare, perfume, tools)
     for seg_slug in ['makeup', 'haircare', 'bodycare', 'perfume', 'tools']:
         seg = segments[seg_slug]
@@ -2257,6 +2598,330 @@ def seed_tech():
     for i, p_data in enumerate(parts_camera):
         p = Part(
             zone_id=camera_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Màn hình zone (4 products) ---
+    man_hinh_zone = zones['man-hinh']
+    parts_man_hinh = [
+        {
+            'name_vi': 'Màn hình OLED', 'name_en': 'OLED Display',
+            'slug': 'man-hinh-oled',
+            'description': 'Công nghệ OLED cho màu sắc rực rỡ, đen tuyệt đối, tiết kiệm pin.',
+            'content': '''<h2>Màn hình OLED là gì?</h2>
+<p>OLED (Organic Light-Emitting Diode) là công nghệ mỗi pixel tự phát sáng, không cần đèn nền. Cho màu đen tuyệt đối, tỷ lệ tương phản vô hạn.</p>
+<h2>Ưu điểm</h2>
+<ul>
+<li><strong>Màu đen sâu</strong> — Pixel tắt hoàn toàn khi hiển thị màu đen</li>
+<li><strong>Tiết kiệm pin</strong> — Always-On Display không tốn nhiều pin</li>
+<li><strong>Góc nhìn rộng</strong> — Màu sắc không đổi khi nghiêng</li>
+</ul>''',
+            'tags': 'OLED,màn hình,smartphone,display,tech',
+        },
+        {
+            'name_vi': 'Màn hình AMOLED', 'name_en': 'AMOLED Display',
+            'slug': 'man-hinh-amoled',
+            'description': 'Super AMOLED của Samsung — sáng hơn, tiết kiệm pin hơn OLED truyền thống.',
+            'content': '''<h2>AMOLED vs OLED</h2>
+<p>AMOLED (Active-Matrix OLED) là phiên bản nâng cấp của OLED, tích hợp lớp cảm ứng vào màn hình giúp mỏng hơn và tiết kiệm pin hơn.</p>
+<h2>So sánh các loại</h2>
+<ul>
+<li><strong>Super AMOLED</strong> — Samsung, độ sáng cao, sắc nét ngoài trời</li>
+<li><strong>Dynamic AMOLED 2X</strong> — Flagship Samsung, 120Hz, HDR10+</li>
+<li><strong>LTPO AMOLED</strong> — Thay đổi tần số 1-120Hz linh hoạt</li>
+</ul>''',
+            'tags': 'AMOLED,Super AMOLED,Samsung,màn hình,tech',
+        },
+        {
+            'name_vi': 'Kính cường lực', 'name_en': 'Tempered Glass',
+            'slug': 'kinh-cuong-luc',
+            'description': 'Kính bảo vệ màn hình Gorilla Glass, chống xước, chống vỡ hiệu quả.',
+            'content': '''<h2>Kính cường lực phổ biến</h2>
+<ul>
+<li><strong>Gorilla Glass Victus 2</strong> — Chống rơi 1m trên bê tông, chống xước cát</li>
+<li><strong>Ceramic Shield</strong> — iPhone 15 series, cứng hơn mọi kính smartphone</li>
+<li><strong>Dragontrail</strong> — Nhẹ hơn Gorilla Glass, dùng trên nhiều Android tầm trung</li>
+</ul>
+<h2>Nên dán thêm kính?</h2>
+<p>Dù có Gorilla Glass, vẫn nên dán kính cường lực thêm. Giá chỉ 30-100K nhưng bảo vệ màn hình triệu đồng.</p>''',
+            'tags': 'kính cường lực,Gorilla Glass,bảo vệ màn hình,tech',
+        },
+        {
+            'name_vi': 'Tần số quét 120Hz', 'name_en': '120Hz Refresh Rate',
+            'slug': 'tan-so-quet-120hz',
+            'description': 'Màn hình 120Hz cho thao tác mượt mà, cuộn trang siêu mịn, chơi game đỉnh.',
+            'content': '''<h2>120Hz là gì?</h2>
+<p>Tần số quét 120Hz nghĩa là màn hình cập nhật 120 lần/giây, gấp đôi 60Hz tiêu chuẩn. Mọi thao tác cuộn, vuốt đều mượt hơn rõ rệt.</p>
+<h2>60Hz vs 90Hz vs 120Hz</h2>
+<ul>
+<li><strong>60Hz</strong> — Tiêu chuẩn, đủ dùng cơ bản</li>
+<li><strong>90Hz</strong> — Mượt hơn đáng kể, phổ biến tầm trung</li>
+<li><strong>120Hz</strong> — Flagship, game thủ, cuộn mạng xã hội cực mịn</li>
+</ul>
+<h2>LTPO — Tiết kiệm pin</h2>
+<p>LTPO cho phép tần số thay đổi linh hoạt 1-120Hz, xem ảnh tĩnh chỉ 1Hz, cuộn trang lên 120Hz.</p>''',
+            'tags': '120Hz,tần số quét,LTPO,màn hình mượt,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_man_hinh):
+        p = Part(
+            zone_id=man_hinh_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Chip xử lý zone (3 products) ---
+    chip_zone = zones['chip-xu-ly']
+    parts_chip = [
+        {
+            'name_vi': 'Snapdragon 8 Gen 3', 'name_en': 'Snapdragon 8 Gen 3',
+            'slug': 'snapdragon-8-gen-3',
+            'description': 'Chip flagship Qualcomm mạnh nhất, AI on-device, GPU Adreno 750 cho game đỉnh.',
+            'content': '''<h2>Snapdragon 8 Gen 3</h2>
+<p>Chip flagship mới nhất của Qualcomm, sản xuất trên tiến trình 4nm TSMC. Dùng trên Galaxy S24 Ultra, OnePlus 12, Xiaomi 14 Pro.</p>
+<h2>Thông số</h2>
+<ul>
+<li><strong>CPU</strong> — 1x Cortex-X4 (3.3GHz) + 3x A720 + 4x A520</li>
+<li><strong>GPU</strong> — Adreno 750, mạnh hơn 25% so với Gen 2</li>
+<li><strong>AI</strong> — NPU Hexagon, chạy AI model on-device</li>
+</ul>''',
+            'tags': 'Snapdragon,Qualcomm,chip,processor,flagship,tech',
+        },
+        {
+            'name_vi': 'Apple A17 Pro', 'name_en': 'Apple A17 Pro',
+            'slug': 'apple-a17-pro',
+            'description': 'Chip 3nm đầu tiên trên smartphone, ray tracing hardware, hiệu năng vượt trội.',
+            'content': '''<h2>Apple A17 Pro</h2>
+<p>Chip đầu tiên sản xuất trên tiến trình 3nm, dùng trên iPhone 15 Pro & Pro Max. Hiệu năng đơn nhân mạnh nhất thế giới smartphone.</p>
+<h2>Điểm nổi bật</h2>
+<ul>
+<li><strong>3nm TSMC</strong> — Tiết kiệm pin, mát hơn</li>
+<li><strong>Ray Tracing</strong> — GPU hỗ trợ ray tracing phần cứng</li>
+<li><strong>USB-C 3.0</strong> — Truyền dữ liệu 10Gbps</li>
+</ul>''',
+            'tags': 'Apple,A17 Pro,chip,3nm,iPhone,tech',
+        },
+        {
+            'name_vi': 'Dimensity 9300', 'name_en': 'Dimensity 9300',
+            'slug': 'dimensity-9300',
+            'description': 'Chip MediaTek all big-core, hiệu năng ngang Snapdragon, giá tốt hơn.',
+            'content': '''<h2>Dimensity 9300</h2>
+<p>Chip flagship MediaTek với kiến trúc all big-core (không có nhân tiết kiệm), hiệu năng đa nhân cực mạnh.</p>
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>All big-core</strong> — 4x Cortex-X4 + 4x A720, không nhân nhỏ</li>
+<li><strong>GPU Immortalis-G720</strong> — Chơi game nặng mượt</li>
+<li><strong>Giá tốt</strong> — Giá OEM rẻ hơn Snapdragon, điện thoại rẻ hơn</li>
+</ul>''',
+            'tags': 'Dimensity,MediaTek,chip,processor,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_chip):
+        p = Part(
+            zone_id=chip_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Pin & Sạc zone (4 products) ---
+    pin_zone = zones['pin-sac']
+    parts_pin = [
+        {
+            'name_vi': 'Pin lithium-polymer', 'name_en': 'Lithium-Polymer Battery',
+            'slug': 'pin-lithium-polymer',
+            'description': 'Pin Li-Po mỏng, nhẹ, dung lượng 4500-6000mAh cho smartphone hiện đại.',
+            'content': '''<h2>Pin Li-Po trên smartphone</h2>
+<p>Pin Lithium-Polymer (Li-Po) là loại pin phổ biến nhất trên smartphone hiện nay, mỏng và có thể uốn cong theo thiết kế.</p>
+<h2>Dung lượng phổ biến</h2>
+<ul>
+<li><strong>4500mAh</strong> — Flagship nhỏ gọn, dùng 1 ngày</li>
+<li><strong>5000mAh</strong> — Phổ biến nhất, dùng cả ngày thoải mái</li>
+<li><strong>6000mAh</strong> — Pin trâu, dùng 2 ngày nhẹ nhàng</li>
+</ul>''',
+            'tags': 'pin,lithium,battery,smartphone,tech',
+        },
+        {
+            'name_vi': 'Sạc nhanh 120W', 'name_en': '120W Fast Charging',
+            'slug': 'sac-nhanh-120w',
+            'description': 'Công nghệ sạc nhanh 120W — đầy pin trong 15 phút, an toàn với bảo vệ đa lớp.',
+            'content': '''<h2>Sạc nhanh 120W</h2>
+<p>Sạc siêu nhanh 120W cho phép sạc đầy pin 4500mAh chỉ trong 15 phút. Phổ biến trên Xiaomi, OPPO, realme.</p>
+<h2>So sánh tốc độ sạc</h2>
+<ul>
+<li><strong>25W (Samsung)</strong> — 60 phút đầy, an toàn nhất</li>
+<li><strong>67W (Xiaomi)</strong> — 35 phút đầy</li>
+<li><strong>100W (OPPO)</strong> — 20 phút đầy</li>
+<li><strong>120W (Xiaomi)</strong> — 15 phút đầy</li>
+</ul>
+<h2>Có hại pin không?</h2>
+<p>Sạc nhanh hiện đại có bảo vệ đa lớp: giảm tốc khi nóng, giảm tốc khi gần đầy. Pin vẫn giữ 80% sau 800 chu kỳ.</p>''',
+            'tags': 'sạc nhanh,120W,fast charging,smartphone,tech',
+        },
+        {
+            'name_vi': 'Sạc không dây Qi2', 'name_en': 'Qi2 Wireless Charging',
+            'slug': 'sac-khong-day-qi2',
+            'description': 'Sạc không dây chuẩn Qi2 với nam châm MagSafe, tốc độ 15W, tiện lợi.',
+            'content': '''<h2>Qi2 — Tương lai sạc không dây</h2>
+<p>Qi2 là chuẩn sạc không dây mới, tích hợp nam châm (giống MagSafe của Apple) giúp căn chỉnh chính xác, sạc nhanh hơn.</p>
+<h2>Ưu điểm Qi2</h2>
+<ul>
+<li><strong>Nam châm</strong> — Tự căn chỉnh, không lệch cuộn sạc</li>
+<li><strong>15W</strong> — Nhanh gấp đôi Qi 7.5W cũ</li>
+<li><strong>Tương thích</strong> — Cả iPhone lẫn Android flagship 2024+</li>
+</ul>''',
+            'tags': 'sạc không dây,Qi2,MagSafe,wireless charging,tech',
+        },
+        {
+            'name_vi': 'Pin dự phòng 20000mAh', 'name_en': 'Power Bank 20000mAh',
+            'slug': 'pin-du-phong-20000mah',
+            'description': 'Pin sạc dự phòng 20000mAh, sạc nhanh 65W, mang lên máy bay được.',
+            'content': '''<h2>Chọn pin dự phòng</h2>
+<p>Pin dự phòng 20000mAh sạc được 4-5 lần cho smartphone thông thường, vừa đủ cho chuyến đi 2-3 ngày.</p>
+<h2>Tiêu chí chọn</h2>
+<ul>
+<li><strong>Dung lượng</strong> — 10000mAh (nhẹ), 20000mAh (đủ dùng), 30000mAh (nặng)</li>
+<li><strong>Công suất</strong> — Tối thiểu 22.5W, tốt nhất 65W để sạc nhanh</li>
+<li><strong>Mang lên máy bay</strong> — Dưới 100Wh (≈27000mAh) được mang lên</li>
+</ul>''',
+            'tags': 'pin dự phòng,power bank,sạc dự phòng,20000mAh,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_pin):
+        p = Part(
+            zone_id=pin_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Bộ nhớ zone (3 products) ---
+    bo_nho_zone = zones['bo-nho']
+    parts_bo_nho = [
+        {
+            'name_vi': 'RAM LPDDR5X', 'name_en': 'LPDDR5X RAM',
+            'slug': 'ram-lpddr5x',
+            'description': 'RAM LPDDR5X 8-16GB, tốc độ 8533Mbps, đa nhiệm mượt mà.',
+            'content': '''<h2>LPDDR5X là gì?</h2>
+<p>LPDDR5X là chuẩn RAM nhanh nhất trên smartphone, tốc độ lên đến 8533Mbps, gấp đôi LPDDR5.</p>
+<h2>Bao nhiêu RAM là đủ?</h2>
+<ul>
+<li><strong>6GB</strong> — Dùng cơ bản, mạng xã hội</li>
+<li><strong>8GB</strong> — Đa nhiệm tốt, chơi game vừa</li>
+<li><strong>12GB</strong> — Flagship, đa nhiệm nặng</li>
+<li><strong>16GB</strong> — Thừa cho hầu hết người dùng</li>
+</ul>''',
+            'tags': 'RAM,LPDDR5X,bộ nhớ,đa nhiệm,tech',
+        },
+        {
+            'name_vi': 'Bộ nhớ UFS 4.0', 'name_en': 'UFS 4.0 Storage',
+            'slug': 'bo-nho-ufs-4',
+            'description': 'Bộ nhớ trong UFS 4.0, tốc độ đọc 4200MB/s, mở app cực nhanh.',
+            'content': '''<h2>UFS 4.0 vs UFS 3.1</h2>
+<p>UFS 4.0 nhanh gấp đôi UFS 3.1, mở app gần như tức thì, copy file lớn trong vài giây.</p>
+<h2>Dung lượng nên chọn</h2>
+<ul>
+<li><strong>128GB</strong> — Dùng cơ bản, hay xóa ảnh/video</li>
+<li><strong>256GB</strong> — An toàn cho hầu hết người dùng</li>
+<li><strong>512GB</strong> — Quay video 4K nhiều, tải game nặng</li>
+<li><strong>1TB</strong> — Cho người không muốn lo nghĩ dung lượng</li>
+</ul>''',
+            'tags': 'UFS 4.0,bộ nhớ trong,storage,tốc độ,tech',
+        },
+        {
+            'name_vi': 'Thẻ nhớ microSD', 'name_en': 'microSD Card',
+            'slug': 'the-nho-microsd',
+            'description': 'Thẻ nhớ mở rộng microSD A2 U3, tốc độ đọc 160MB/s, mở rộng lưu trữ.',
+            'content': '''<h2>Chọn thẻ nhớ microSD</h2>
+<p>Nhiều điện thoại Android tầm trung vẫn hỗ trợ thẻ nhớ mở rộng, giúp tăng dung lượng với chi phí thấp.</p>
+<h2>Phân loại tốc độ</h2>
+<ul>
+<li><strong>A1/U1</strong> — Đủ lưu ảnh, nhạc, tài liệu</li>
+<li><strong>A2/U3</strong> — Chạy app từ thẻ nhớ, quay 4K</li>
+<li><strong>V30/V60</strong> — Quay video chuyên nghiệp</li>
+</ul>
+<h2>Thương hiệu uy tín</h2>
+<p>Samsung EVO Plus, SanDisk Extreme, Kingston Canvas Go — tránh hàng giá rẻ không rõ nguồn gốc.</p>''',
+            'tags': 'thẻ nhớ,microSD,mở rộng,lưu trữ,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_bo_nho):
+        p = Part(
+            zone_id=bo_nho_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Thiết kế zone (3 products) ---
+    thiet_ke_zone = zones['thiet-ke']
+    parts_thiet_ke = [
+        {
+            'name_vi': 'Ốp lưng silicon', 'name_en': 'Silicone Case',
+            'slug': 'op-lung-silicon',
+            'description': 'Ốp lưng silicon mềm, chống sốc, bám tay, nhiều màu sắc thời trang.',
+            'content': '''<h2>Ốp silicon — Lựa chọn phổ biến nhất</h2>
+<p>Ốp silicon mềm dẻo, chống sốc tốt, giá rẻ và có hàng ngàn mẫu mã.</p>
+<h2>Các loại ốp phổ biến</h2>
+<ul>
+<li><strong>Silicon trong suốt</strong> — Giữ nguyên thiết kế điện thoại, dễ ố vàng</li>
+<li><strong>Silicon màu</strong> — Nhiều màu sắc, bám tay tốt</li>
+<li><strong>MagSafe silicon</strong> — Có nam châm, tương thích sạc không dây</li>
+</ul>''',
+            'tags': 'ốp lưng,silicon,case,bảo vệ,thời trang,tech',
+        },
+        {
+            'name_vi': 'Khung viền titanium', 'name_en': 'Titanium Frame',
+            'slug': 'khung-vien-titanium',
+            'description': 'Khung viền titanium cao cấp — nhẹ hơn thép, cứng hơn nhôm, sang trọng.',
+            'content': '''<h2>Titanium — Vật liệu flagship 2024</h2>
+<p>iPhone 15 Pro và Galaxy S24 Ultra đều chuyển sang khung titanium. Nhẹ hơn thép không gỉ 15%, cứng hơn nhôm 3 lần.</p>
+<h2>So sánh vật liệu khung</h2>
+<ul>
+<li><strong>Nhựa</strong> — Nhẹ, rẻ, dễ xước (tầm thấp)</li>
+<li><strong>Nhôm</strong> — Nhẹ, bền, truyền nhiệt tốt (tầm trung)</li>
+<li><strong>Thép không gỉ</strong> — Sang trọng, nặng (flagship cũ)</li>
+<li><strong>Titanium</strong> — Nhẹ + bền + sang (flagship mới)</li>
+</ul>''',
+            'tags': 'titanium,khung viền,vật liệu,flagship,thiết kế,tech',
+        },
+        {
+            'name_vi': 'Kính lưng Ceramic', 'name_en': 'Ceramic Back Glass',
+            'slug': 'kinh-lung-ceramic',
+            'description': 'Mặt lưng kính ceramic shield — chống xước, chống vỡ, hỗ trợ sạc không dây.',
+            'content': '''<h2>Mặt lưng kính vs Nhựa</h2>
+<p>Flagship đều dùng mặt lưng kính để hỗ trợ sạc không dây và tạo cảm giác cao cấp.</p>
+<h2>Các loại kính lưng</h2>
+<ul>
+<li><strong>Gorilla Glass 5</strong> — Phổ biến, chống rơi tốt</li>
+<li><strong>Gorilla Glass Victus 2</strong> — Flagship, siêu bền</li>
+<li><strong>Ceramic Shield</strong> — Apple, cứng nhất hiện tại</li>
+<li><strong>Kính nhám (Frosted)</strong> — Chống bám vân tay, sang trọng</li>
+</ul>''',
+            'tags': 'kính lưng,ceramic,Gorilla Glass,thiết kế,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_thiet_ke):
+        p = Part(
+            zone_id=thiet_ke_zone.id,
             name_vi=p_data['name_vi'], name_en=p_data['name_en'],
             slug=p_data['slug'], description=p_data['description'],
             content=p_data['content'], tags=p_data.get('tags', ''),
