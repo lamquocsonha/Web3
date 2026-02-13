@@ -580,7 +580,7 @@ def admin_settings():
         tab = request.form.get('_tab', 'general')
         # Only save keys relevant to current tab (avoid wiping other tabs)
         tab_keys = {
-            'general': ['site_mode', 'site_name', 'default_mode'],
+            'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
             'agoda': ['agoda_api_key', 'agoda_site_id', 'agoda_cid', 'agoda_enabled'],
         }
@@ -3129,7 +3129,8 @@ def vertical_article(vertical_slug, slug):
     if a.related_zone_slug:
         z = Zone.query.filter_by(slug=a.related_zone_slug).first()
         if z:
-            related_parts = Part.query.filter_by(zone_id=z.id, status='published').limit(6).all()
+            carousel_limit = int(SiteSettings.get('carousel_product_limit', '3'))
+            related_parts = Part.query.filter_by(zone_id=z.id, status='published').limit(carousel_limit).all()
 
     # Banners for sidebar (vertical-specific or global)
     banners = Banner.query.filter(

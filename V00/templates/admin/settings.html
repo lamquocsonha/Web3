@@ -47,6 +47,22 @@
     </div>
   </div>
 
+  <div class="scard">
+    <h3 class="scard-title">Article Carousel</h3>
+    <p class="scard-desc">So luong san pham hien thi trong carousel "San pham lien quan" nhung trong bai viet.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">So luong san pham</label>
+        <select class="form-select" name="carousel_product_limit" style="max-width:120px">
+          {% set cur_limit = settings.get('carousel_product_limit', '3') %}
+          {% for n in range(1, 13) %}
+          <option value="{{ n }}" {% if cur_limit|string == n|string %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
   <div class="form-actions"><button type="submit" class="btn btn-primary">Save General</button></div>
 </form>
 </div>
