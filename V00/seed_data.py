@@ -3386,3 +3386,1075 @@ def seed_products_beauty_tech():
     beauty_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'beauty').count() if beauty else 0
     tech_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'tech').count() if tech else 0
     print(f'✅ Beauty+Tech products seeded: Beauty={beauty_count}, Tech={tech_count}')
+
+
+# =============================================
+# SPORT VERTICAL
+# =============================================
+
+def seed_sport():
+    """Seed Sport vertical data for running, gym, football, cycling, swimming, nutrition"""
+
+    # Check if Sport already exists
+    sport_vertical = Vertical.query.filter_by(slug='sport').first()
+    if sport_vertical:
+        print('[SKIP] Sport vertical already exists')
+        return
+
+    print('[+] Seeding Sport vertical...')
+    sport = Vertical(
+        name='Sport',
+        slug='sport',
+        icon='⚽',
+        color='#00b894',
+        description='Thể thao & Fitness — Giày chạy, đồ gym, dinh dưỡng thể thao, thiết bị tập luyện',
+        status='live',
+        style='sport',
+        template='general',
+        default_mode='light'
+    )
+    db.session.add(sport)
+    db.session.flush()
+
+    # Segments (6 bộ môn)
+    segments_data = [
+        ('Running', 'running', '🏃', 'Chạy bộ — Giày chạy, đồ chạy, đồng hồ GPS, dinh dưỡng marathon'),
+        ('Gym & Fitness', 'gym-fitness', '💪', 'Tập gym — Máy tập, quần áo, whey protein, phụ kiện'),
+        ('Football', 'football', '⚽', 'Bóng đá — Giày đá bóng, quần áo, bóng, phụ kiện sân cỏ'),
+        ('Cycling', 'cycling', '🚴', 'Đạp xe thể thao — Xe đạp road/MTB, mũ bảo hiểm, phụ kiện'),
+        ('Swimming', 'swimming', '🏊', 'Bơi lội — Đồ bơi, kính bơi, mũ bơi, phụ kiện bể bơi'),
+        ('Nutrition', 'nutrition', '🥗', 'Dinh dưỡng thể thao — Whey, BCAA, creatine, pre-workout'),
+    ]
+
+    segments = {}
+    for i, (name, slug, icon, desc) in enumerate(segments_data):
+        s = Segment(vertical_id=sport.id, name=name, slug=slug, icon=icon, description=desc, order=i)
+        db.session.add(s)
+        db.session.flush()
+        segments[slug] = s
+
+    # ── Zones for Running segment (6 zones) ──
+    running = segments['running']
+    running_zones_data = [
+        ('Giày chạy', 'giay-chay', '👟', '#4fc3f7', 'Giày chạy bộ — Nike, Adidas, ASICS, Hoka, New Balance'),
+        ('Đồ chạy', 'do-chay', '🩳', '#81c784', 'Quần áo chạy bộ — Áo singlet, quần short, compression'),
+        ('Đồng hồ GPS', 'dong-ho-gps', '⌚', '#ba68c8', 'Đồng hồ GPS — Garmin, COROS, Apple Watch, Suunto'),
+        ('Phụ kiện chạy', 'phu-kien-chay', '🎧', '#ffb74d', 'Đai chạy, bình nước, tai nghe, arm band'),
+        ('Dinh dưỡng chạy', 'dinh-duong-chay', '🥤', '#ff8a65', 'Gel năng lượng, electrolyte, energy bar'),
+        ('Sự kiện & Giải', 'su-kien-giai', '🏅', '#4db6ac', 'Marathon, half marathon, fun run, trail running'),
+    ]
+
+    running_zones = {}
+    for i, (name, slug, icon, color, desc) in enumerate(running_zones_data):
+        z = Zone(segment_id=running.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+        running_zones[slug] = z
+
+    # --- Parts for Giày chạy zone (4 products) ---
+    giay_chay_zone = running_zones['giay-chay']
+    parts_giay_chay = [
+        {
+            'name_vi': 'Nike Pegasus 41', 'name_en': 'Nike Pegasus 41',
+            'slug': 'nike-pegasus-41',
+            'description': 'Giày chạy bộ đa năng hàng đầu Nike, đệm React foam + Zoom Air, phù hợp mọi cự ly.',
+            'content': '''<h2>Nike Pegasus 41 — Giày chạy "quốc dân"</h2>
+<p>Pegasus là dòng giày chạy bán chạy nhất lịch sử Nike, đã qua 41 phiên bản. Phù hợp từ người mới chạy đến runner 42km.</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>React Foam</strong> — Đệm mềm, bật nảy tốt, bền bỉ qua 800km</li>
+<li><strong>Zoom Air</strong> — Túi khí ở gót và mũi, tăng phản hồi năng lượng</li>
+<li><strong>Flywire</strong> — Dây cáp ôm chân, cố định bàn chân khi chạy</li>
+</ul>
+
+<h2>Phù hợp ai?</h2>
+<p>Người mới bắt đầu chạy bộ. Runner chạy daily training 5-21km. Chạy đường nhựa, track. Drop 10mm phù hợp đa số foot type.</p>''',
+            'tags': 'Nike,Pegasus,giày chạy,running,React,Zoom Air',
+        },
+        {
+            'name_vi': 'ASICS Gel-Nimbus 26', 'name_en': 'ASICS Gel-Nimbus 26',
+            'slug': 'asics-gel-nimbus-26',
+            'description': 'Giày chạy êm nhất của ASICS, công nghệ FF BLAST PLUS ECO + PureGEL, lý tưởng cho long run.',
+            'content': '''<h2>ASICS Gel-Nimbus 26 — Êm nhất phân khúc</h2>
+<p>Nimbus là dòng giày chạy max-cushion huyền thoại của ASICS, được runner long-distance yêu thích nhờ độ êm vượt trội.</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>FF BLAST PLUS ECO</strong> — Foam nhẹ hơn 20%, êm hơn thế hệ trước</li>
+<li><strong>PureGEL</strong> — Gel mới nhẹ hơn GEL truyền thống, hấp thụ chấn động tốt</li>
+<li><strong>AHARPLUS</strong> — Đế ngoài siêu bền, chạy được 1000km+</li>
+</ul>
+
+<h2>Phù hợp ai?</h2>
+<p>Runner chạy long run 21-42km. Người cần giày êm chân (khớp gối yếu). Chạy đường nhựa, recovery run.</p>''',
+            'tags': 'ASICS,Gel-Nimbus,giày chạy,running,cushion,marathon',
+        },
+        {
+            'name_vi': 'Hoka Clifton 9', 'name_en': 'Hoka Clifton 9',
+            'slug': 'hoka-clifton-9',
+            'description': 'Giày chạy siêu nhẹ Hoka, đệm dày max-cushion nhưng chỉ nặng 248g, meta-rocker êm ái.',
+            'content': '''<h2>Hoka Clifton 9 — Nhẹ + Êm = Hoàn hảo</h2>
+<p>Hoka Clifton là giày chạy "phá vỡ quy luật" — đệm dày 33mm mà chỉ nặng 248g (size 42). Runner gọi là "chạy trên mây".</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>Compression EVA</strong> — Foam êm, nhẹ, phản hồi tốt</li>
+<li><strong>Meta-Rocker</strong> — Đế cong giúp chuyển tiếp bước chạy mượt mà</li>
+<li><strong>Early Stage</strong> — Thiết kế giúp chân tiếp đất tự nhiên</li>
+</ul>
+
+<h2>So sánh với đối thủ</h2>
+<p>Nhẹ hơn Nimbus 26 (284g) nhưng êm tương đương. Phù hợp người mới chuyển sang Hoka lần đầu.</p>''',
+            'tags': 'Hoka,Clifton,giày chạy,running,max-cushion,nhẹ',
+        },
+        {
+            'name_vi': 'Nike Vaporfly 3', 'name_en': 'Nike Vaporfly 3',
+            'slug': 'nike-vaporfly-3',
+            'description': 'Giày chạy thi đấu carbon plate, ZoomX foam, phá kỷ lục marathon, dành cho race day.',
+            'content': '''<h2>Nike Vaporfly 3 — Giày phá kỷ lục</h2>
+<p>Vaporfly là giày racing đã giúp Eliud Kipchoge phá kỷ lục marathon sub-2h. Carbon plate + ZoomX foam cho tốc độ tối đa.</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>ZoomX Foam</strong> — Foam nhẹ nhất, phản hồi năng lượng 85%+</li>
+<li><strong>Carbon Plate</strong> — Tấm carbon đẩy chân về phía trước mỗi bước</li>
+<li><strong>Drop 8mm</strong> — Tối ưu cho chạy forefoot/midfoot strike</li>
+</ul>
+
+<h2>Lưu ý</h2>
+<p>Chỉ dùng cho race day và tempo run. Tuổi thọ ngắn (~250km). Giá cao (~5-6 triệu). Không phù hợp daily training.</p>''',
+            'tags': 'Nike,Vaporfly,carbon plate,giày đua,marathon,racing',
+        },
+    ]
+    for i, p_data in enumerate(parts_giay_chay):
+        p = Part(
+            zone_id=giay_chay_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Đồng hồ GPS zone (3 products) ---
+    gps_zone = running_zones['dong-ho-gps']
+    parts_gps = [
+        {
+            'name_vi': 'Garmin Forerunner 265', 'name_en': 'Garmin Forerunner 265',
+            'slug': 'garmin-forerunner-265',
+            'description': 'Đồng hồ GPS chạy bộ AMOLED, Training Readiness, Race Predictor, pin 13 ngày.',
+            'content': '''<h2>Garmin Forerunner 265 — Best for Runners</h2>
+<p>Forerunner 265 là đồng hồ chạy bộ tốt nhất tầm giá 10 triệu, màn hình AMOLED sắc nét, GPS multi-band chính xác.</p>
+
+<h2>Tính năng nổi bật</h2>
+<ul>
+<li><strong>Training Readiness</strong> — Đánh giá mức sẵn sàng tập luyện mỗi ngày</li>
+<li><strong>Race Predictor</strong> — Dự đoán thời gian hoàn thành 5K, 10K, HM, FM</li>
+<li><strong>Morning Report</strong> — Tổng hợp giấc ngủ, HRV, thời tiết mỗi sáng</li>
+<li><strong>Pin 13 ngày</strong> — Smartwatch mode, 20h GPS liên tục</li>
+</ul>
+
+<h2>So sánh</h2>
+<p>Tốt hơn Apple Watch về GPS accuracy và pin. Rẻ hơn Garmin Fenix 7 nhưng đầy đủ tính năng running.</p>''',
+            'tags': 'Garmin,Forerunner,GPS,đồng hồ,chạy bộ,running',
+        },
+        {
+            'name_vi': 'COROS PACE 3', 'name_en': 'COROS PACE 3',
+            'slug': 'coros-pace-3',
+            'description': 'Đồng hồ GPS siêu nhẹ 39g, pin 24 ngày, GPS dual-frequency, giá tốt nhất phân khúc.',
+            'content': '''<h2>COROS PACE 3 — Nhẹ nhất, pin trâu nhất</h2>
+<p>COROS PACE 3 chỉ nặng 39g (nhẹ nhất thế giới GPS watch), pin 24 ngày smartwatch, 38h GPS liên tục — lý tưởng cho ultra runner.</p>
+
+<h2>Tính năng</h2>
+<ul>
+<li><strong>39g siêu nhẹ</strong> — Đeo quên luôn, không vướng khi chạy</li>
+<li><strong>GPS Dual-frequency</strong> — Chính xác cao, không bị lệch trong thành phố</li>
+<li><strong>EvoLab</strong> — Training Load, Threshold Pace, Base Fitness</li>
+<li><strong>Pin 24 ngày</strong> — Gấp đôi Garmin 265, sạc 1 lần/tháng</li>
+</ul>
+
+<h2>Giá</h2>
+<p>Khoảng 5-6 triệu, rẻ hơn Garmin 265 gần một nửa mà tính năng running tương đương.</p>''',
+            'tags': 'COROS,PACE 3,GPS,đồng hồ,running,siêu nhẹ',
+        },
+        {
+            'name_vi': 'Apple Watch Ultra 2', 'name_en': 'Apple Watch Ultra 2',
+            'slug': 'apple-watch-ultra-2',
+            'description': 'Smartwatch cao cấp nhất Apple, GPS dual-frequency, Precision Finding, 36h pin.',
+            'content': '''<h2>Apple Watch Ultra 2 — Premium cho iPhone user</h2>
+<p>Apple Watch Ultra 2 là smartwatch thể thao cao cấp nhất của Apple, titanium 49mm, GPS cực chính xác.</p>
+
+<h2>Tính năng thể thao</h2>
+<ul>
+<li><strong>GPS L1+L5</strong> — Dual-frequency, chính xác nhất trong Apple Watch</li>
+<li><strong>Workout Views</strong> — Hiển thị pace, HR zone, elevation real-time</li>
+<li><strong>Depth Gauge</strong> — Đo độ sâu khi bơi/lặn đến 40m</li>
+<li><strong>Action Button</strong> — Nút vật lý bấm nhanh khi chạy</li>
+</ul>
+
+<h2>Hạn chế</h2>
+<p>Pin chỉ 36h (kém xa Garmin/COROS). Chỉ dùng với iPhone. Giá ~19 triệu. Không có Training Load nâng cao.</p>''',
+            'tags': 'Apple Watch,Ultra,GPS,smartwatch,chạy bộ,bơi lội',
+        },
+    ]
+    for i, p_data in enumerate(parts_gps):
+        p = Part(
+            zone_id=gps_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Đồ chạy zone (3 products) ---
+    do_chay_zone = running_zones['do-chay']
+    parts_do_chay = [
+        {
+            'name_vi': 'Áo chạy Nike Dri-FIT', 'name_en': 'Nike Dri-FIT Running Singlet',
+            'slug': 'ao-chay-nike-dri-fit',
+            'description': 'Áo singlet chạy bộ Nike Dri-FIT, thoáng khí, nhanh khô, nhẹ chỉ 90g.',
+            'content': '''<h2>Nike Dri-FIT — Công nghệ thoáng khí hàng đầu</h2>
+<p>Dri-FIT là công nghệ vải độc quyền Nike, hút ẩm mồ hôi và bay hơi nhanh, giữ cơ thể khô ráo khi chạy.</p>
+
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>Dri-FIT</strong> — Hút mồ hôi, bay hơi nhanh gấp 3 lần cotton</li>
+<li><strong>Flatlock seams</strong> — Đường may phẳng, không gây cọ xát</li>
+<li><strong>90g</strong> — Siêu nhẹ, như không mặc gì</li>
+</ul>''',
+            'tags': 'Nike,Dri-FIT,áo chạy,singlet,running,thoáng khí',
+        },
+        {
+            'name_vi': 'Quần short chạy 2-in-1', 'name_en': '2-in-1 Running Shorts',
+            'slug': 'quan-short-chay-2-in-1',
+            'description': 'Quần short chạy 2 lớp, lớp ngoài nhẹ + lớp compression bên trong, túi đựng điện thoại.',
+            'content': '''<h2>Quần 2-in-1 — Tiện lợi nhất cho runner</h2>
+<p>Quần 2-in-1 kết hợp lớp short bên ngoài thoáng mát và lớp compression tight bên trong giữ cơ, chống cọ xát đùi.</p>
+
+<h2>Vì sao runner chọn 2-in-1?</h2>
+<ul>
+<li><strong>Chống cọ xát</strong> — Lớp compression bảo vệ đùi trong</li>
+<li><strong>Túi đựng</strong> — Lớp trong có túi đựng điện thoại, gel, chìa khóa</li>
+<li><strong>Thoáng khí</strong> — Lớp ngoài nhẹ, gió lùa thoải mái</li>
+</ul>''',
+            'tags': 'quần short,2-in-1,running,compression,chạy bộ',
+        },
+        {
+            'name_vi': 'Tất chạy Balega Hidden Comfort', 'name_en': 'Balega Hidden Comfort Socks',
+            'slug': 'tat-chay-balega',
+            'description': 'Tất chạy bộ Balega chống phồng rộp, đệm gót, thoáng khí, best-seller #1 running socks.',
+            'content': '''<h2>Balega Hidden Comfort — Tất chạy tốt nhất</h2>
+<p>Balega Hidden Comfort là tất chạy bán chạy nhất thế giới, được hàng triệu runner tin dùng nhờ khả năng chống phồng rộp tuyệt đối.</p>
+
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>Drynamix</strong> — Sợi hút ẩm, chân luôn khô</li>
+<li><strong>Đệm gót dày</strong> — Giảm chấn động khi tiếp đất</li>
+<li><strong>Hand-linked toe</strong> — Đường may mũi chân phẳng, không cọ xát</li>
+</ul>
+
+<h2>Giá</h2>
+<p>Khoảng 350-400K/đôi. Đắt nhưng bền (chạy 1000km+ vẫn tốt), chống phồng rộp 100%.</p>''',
+            'tags': 'Balega,tất chạy,running socks,chống phồng rộp,marathon',
+        },
+    ]
+    for i, p_data in enumerate(parts_do_chay):
+        p = Part(
+            zone_id=do_chay_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Dinh dưỡng chạy zone (3 products) ---
+    dd_chay_zone = running_zones['dinh-duong-chay']
+    parts_dd_chay = [
+        {
+            'name_vi': 'Gel năng lượng GU', 'name_en': 'GU Energy Gel',
+            'slug': 'gel-nang-luong-gu',
+            'description': 'Gel năng lượng GU chứa 100 calo + caffeine + electrolyte, tiếp năng lượng nhanh khi chạy.',
+            'content': '''<h2>GU Energy Gel — Tiêu chuẩn marathon</h2>
+<p>GU là thương hiệu gel năng lượng phổ biến nhất thế giới, được dùng trong mọi giải marathon lớn.</p>
+
+<h2>Thành phần</h2>
+<ul>
+<li><strong>100 calo</strong> — Maltodextrin + fructose, hấp thụ nhanh</li>
+<li><strong>Caffeine</strong> — 20-40mg tùy vị, tăng tỉnh táo</li>
+<li><strong>Sodium + BCAAs</strong> — Bù điện giải, giảm chuột rút</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>Dùng 1 gel mỗi 45-60 phút khi chạy trên 60 phút. Uống kèm 100-200ml nước. Tập dùng gel khi training, đừng thử lần đầu khi race.</p>''',
+            'tags': 'GU,gel năng lượng,energy gel,marathon,running,dinh dưỡng',
+        },
+        {
+            'name_vi': 'Viên muối điện giải SaltStick', 'name_en': 'SaltStick Electrolyte Caps',
+            'slug': 'vien-muoi-dien-giai-saltstick',
+            'description': 'Viên bù điện giải SaltStick chứa Na, K, Mg, Ca — chống chuột rút khi chạy dài.',
+            'content': '''<h2>SaltStick — Chống chuột rút hiệu quả</h2>
+<p>SaltStick Caps là viên bù điện giải được runner ultra-marathon tin dùng. Công thức cân bằng 4 loại muối khoáng theo tỷ lệ mồ hôi.</p>
+
+<h2>Thành phần mỗi viên</h2>
+<ul>
+<li><strong>Sodium</strong> — 215mg (bù lượng muối mất qua mồ hôi)</li>
+<li><strong>Potassium</strong> — 63mg (chống chuột rút)</li>
+<li><strong>Magnesium</strong> — 11mg (thư giãn cơ)</li>
+<li><strong>Calcium</strong> — 22mg (co cơ bình thường)</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>Uống 1 viên mỗi 30-60 phút khi chạy trên 1 tiếng, đặc biệt trời nóng >30°C. Uống kèm nước.</p>''',
+            'tags': 'SaltStick,điện giải,electrolyte,chuột rút,marathon,running',
+        },
+        {
+            'name_vi': 'Bột điện giải Nuun Sport', 'name_en': 'Nuun Sport Electrolyte Tablets',
+            'slug': 'bot-dien-giai-nuun',
+            'description': 'Viên sủi điện giải Nuun Sport không đường, bù nước nhanh, nhiều vị trái cây.',
+            'content': '''<h2>Nuun Sport — Bù nước không đường</h2>
+<p>Nuun Sport là viên sủi bù điện giải không đường, chỉ 15 calo/viên, hòa tan nhanh trong nước. Vị ngon, dễ uống.</p>
+
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>Không đường</strong> — Chỉ 1g carb, phù hợp keto/low-carb</li>
+<li><strong>4 electrolyte</strong> — Na, K, Mg, Ca cân bằng</li>
+<li><strong>Tiện lợi</strong> — Ống 10 viên nhỏ gọn, bỏ túi chạy</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>Thả 1 viên vào 500ml nước, chờ sủi hết (2 phút), uống trước/trong/sau khi chạy.</p>''',
+            'tags': 'Nuun,điện giải,electrolyte,hydration,running,không đường',
+        },
+    ]
+    for i, p_data in enumerate(parts_dd_chay):
+        p = Part(
+            zone_id=dd_chay_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # ── Zones for Gym & Fitness segment (6 zones) ──
+    gym = segments['gym-fitness']
+    gym_zones_data = [
+        ('Whey Protein', 'whey-protein', '🥛', '#4fc3f7', 'Whey concentrate, isolate, hydrolyzed, plant-based'),
+        ('Creatine', 'creatine', '💊', '#ba68c8', 'Creatine monohydrate, HCL, buffered, micronized'),
+        ('Máy tập', 'may-tap', '🏋️', '#81c784', 'Máy chạy, xe đạp tập, tạ, bench press, dây kháng lực'),
+        ('Quần áo gym', 'quan-ao-gym', '👕', '#ffb74d', 'Quần short, áo tank, legging, găng tay, đai lưng'),
+        ('Pre-Workout', 'pre-workout', '⚡', '#ff8a65', 'Pre-workout, caffeine, beta-alanine, citrulline'),
+        ('Phụ kiện gym', 'phu-kien-gym', '🧤', '#4db6ac', 'Găng tay, đai lưng, dây kéo, bình lắc, foam roller'),
+    ]
+
+    gym_zones = {}
+    for i, (name, slug, icon, color, desc) in enumerate(gym_zones_data):
+        z = Zone(segment_id=gym.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+        gym_zones[slug] = z
+
+    # --- Parts for Whey Protein zone (3 products) ---
+    whey_zone = gym_zones['whey-protein']
+    parts_whey = [
+        {
+            'name_vi': 'Whey Protein Isolate', 'name_en': 'Whey Protein Isolate',
+            'slug': 'whey-protein-isolate',
+            'description': 'Whey Isolate 90%+ protein, ít lactose, ít fat, hấp thụ nhanh, phù hợp giảm cân.',
+            'content': '''<h2>Whey Isolate là gì?</h2>
+<p>Whey Protein Isolate (WPI) là dạng whey tinh khiết nhất, chứa 90-95% protein, gần như không có lactose và chất béo.</p>
+
+<h2>So sánh các loại Whey</h2>
+<ul>
+<li><strong>Whey Concentrate (WPC)</strong> — 70-80% protein, rẻ, có lactose → dễ đầy bụng</li>
+<li><strong>Whey Isolate (WPI)</strong> — 90%+ protein, ít lactose → hấp thụ nhanh, ít bloat</li>
+<li><strong>Whey Hydrolyzed (WPH)</strong> — Đã thủy phân, hấp thụ nhanh nhất, đắt nhất</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>1 scoop (25-30g) pha 200-300ml nước/sữa, uống sau tập 30 phút. Ngày tập: 1-2 scoop. Ngày nghỉ: 1 scoop.</p>''',
+            'tags': 'whey,protein,isolate,WPI,tập gym,tăng cơ',
+        },
+        {
+            'name_vi': 'Optimum Nutrition Gold Standard', 'name_en': 'ON Gold Standard Whey',
+            'slug': 'on-gold-standard-whey',
+            'description': 'Whey protein bán chạy nhất thế giới, blend WPI + WPC, 24g protein/scoop, 120+ calo.',
+            'content': '''<h2>ON Gold Standard — Whey #1 thế giới</h2>
+<p>Optimum Nutrition Gold Standard 100% Whey là sản phẩm whey bán chạy nhất toàn cầu suốt 20+ năm, được gym-goer tin dùng.</p>
+
+<h2>Thành phần mỗi scoop</h2>
+<ul>
+<li><strong>24g Protein</strong> — Blend WPI (chính) + WPC + WPH</li>
+<li><strong>5.5g BCAAs</strong> — Leucine, Isoleucine, Valine tự nhiên</li>
+<li><strong>120 calo</strong> — Ít carb, ít fat, phù hợp cutting</li>
+<li><strong>1g đường</strong> — Gần như không đường</li>
+</ul>
+
+<h2>Vị phổ biến</h2>
+<p>Double Rich Chocolate (best-seller), Vanilla Ice Cream, Cookies & Cream. Chai 2lbs (~30 servings) giá ~800K-1.2 triệu.</p>''',
+            'tags': 'Optimum Nutrition,Gold Standard,whey,protein,gym,tăng cơ',
+        },
+        {
+            'name_vi': 'Mass Gainer tăng cân', 'name_en': 'Serious Mass Gainer',
+            'slug': 'mass-gainer-tang-can',
+            'description': 'Mass Gainer 1200+ calo/serving, dành cho người gầy muốn tăng cân tăng cơ nhanh.',
+            'content': '''<h2>Mass Gainer — Dành cho người gầy khó tăng cân</h2>
+<p>Mass Gainer (hay Weight Gainer) là bột protein cao calo, chứa 1000-1300 calo/serving, giúp người ectomorph (gầy) tăng cân nhanh.</p>
+
+<h2>Khi nào dùng Mass Gainer?</h2>
+<ul>
+<li><strong>Người gầy</strong> — BMI dưới 18.5, ăn nhiều không lên cân</li>
+<li><strong>Bulking</strong> — Giai đoạn tăng cơ cần thặng dư calo</li>
+<li><strong>Không nên</strong> — Người thừa cân, giảm mỡ → dùng Whey Isolate thay thế</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>1 serving pha 500-600ml nước/sữa. Uống giữa các bữa ăn hoặc sau tập. Bắt đầu nửa serving để dạ dày quen.</p>''',
+            'tags': 'mass gainer,tăng cân,tăng cơ,bulking,protein,gym',
+        },
+    ]
+    for i, p_data in enumerate(parts_whey):
+        p = Part(
+            zone_id=whey_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Creatine zone (3 products) ---
+    creatine_zone = gym_zones['creatine']
+    parts_creatine = [
+        {
+            'name_vi': 'Creatine Monohydrate', 'name_en': 'Creatine Monohydrate',
+            'slug': 'creatine-monohydrate',
+            'description': 'Creatine dạng cơ bản nhất, nghiên cứu nhiều nhất, hiệu quả tăng sức mạnh đã chứng minh.',
+            'content': '''<h2>Creatine Monohydrate — Supplement hiệu quả nhất</h2>
+<p>Creatine là supplement được nghiên cứu khoa học nhiều nhất (500+ studies), chứng minh tăng sức mạnh 5-10%, tăng cơ nhanh hơn.</p>
+
+<h2>Cơ chế hoạt động</h2>
+<ul>
+<li><strong>Tái tạo ATP</strong> — Cung cấp năng lượng cho co cơ mạnh</li>
+<li><strong>Giữ nước trong cơ</strong> — Cơ bắp đầy hơn, to hơn</li>
+<li><strong>Tăng sức mạnh</strong> — Nâng nặng hơn → kích thích cơ phát triển</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>5g/ngày, mỗi ngày, bất kể tập hay nghỉ. Pha nước hoặc trộn protein shake. Không cần loading phase. Uống đều đặn 8+ tuần để thấy hiệu quả.</p>''',
+            'tags': 'creatine,monohydrate,tăng sức mạnh,supplement,gym',
+        },
+        {
+            'name_vi': 'Creatine HCL', 'name_en': 'Creatine HCL',
+            'slug': 'creatine-hcl',
+            'description': 'Creatine HCL tan nhanh, hấp thụ tốt hơn, liều thấp hơn monohydrate, ít đầy bụng.',
+            'content': '''<h2>Creatine HCL vs Monohydrate</h2>
+<p>Creatine HCL (Hydrochloride) hòa tan tốt hơn monohydrate 38 lần, nên chỉ cần liều nhỏ hơn (1-2g vs 5g).</p>
+
+<h2>Ưu nhược điểm</h2>
+<ul>
+<li><strong>Ưu</strong> — Tan nhanh, ít bloat, ít đầy bụng, liều nhỏ</li>
+<li><strong>Nhược</strong> — Đắt hơn 3-4 lần, ít nghiên cứu hơn monohydrate</li>
+</ul>
+
+<h2>Nên chọn loại nào?</h2>
+<p>Monohydrate nếu không bị bloat (rẻ + hiệu quả đã chứng minh). HCL nếu dạ dày nhạy cảm, dễ đầy bụng.</p>''',
+            'tags': 'creatine,HCL,supplement,tập gym,tăng sức mạnh',
+        },
+    ]
+    for i, p_data in enumerate(parts_creatine):
+        p = Part(
+            zone_id=creatine_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Máy tập zone (3 products) ---
+    may_tap_zone = gym_zones['may-tap']
+    parts_may_tap = [
+        {
+            'name_vi': 'Máy chạy bộ điện', 'name_en': 'Electric Treadmill',
+            'slug': 'may-chay-bo-dien',
+            'description': 'Máy chạy bộ điện tại nhà, tốc độ 0-16km/h, nghiêng tự động, đo nhịp tim.',
+            'content': '''<h2>Chọn máy chạy bộ tại nhà</h2>
+<p>Máy chạy bộ (treadmill) là thiết bị tập cardio phổ biến nhất tại nhà. Chạy bất kể thời tiết, kiểm soát pace chính xác.</p>
+
+<h2>Tiêu chí chọn mua</h2>
+<ul>
+<li><strong>Motor</strong> — Tối thiểu 2.0 HP (chạy bộ), 3.0 HP (chạy nhanh)</li>
+<li><strong>Mặt chạy</strong> — Tối thiểu 120x40cm (người cao cần 140x50cm)</li>
+<li><strong>Độ nghiêng</strong> — Tự động 0-15% giúp tăng cường độ</li>
+<li><strong>Giảm chấn</strong> — Quan trọng để bảo vệ khớp gối</li>
+</ul>
+
+<h2>Giá tham khảo</h2>
+<p>Tầm trung: 8-15 triệu (Kingsport, Elip). Cao cấp: 20-50 triệu (NordicTrack, Life Fitness).</p>''',
+            'tags': 'máy chạy bộ,treadmill,cardio,tập tại nhà,gym',
+        },
+        {
+            'name_vi': 'Tạ đơn điều chỉnh', 'name_en': 'Adjustable Dumbbell',
+            'slug': 'ta-don-dieu-chinh',
+            'description': 'Tạ đơn điều chỉnh 2-24kg, thay đổi trọng lượng nhanh, tiết kiệm không gian.',
+            'content': '''<h2>Tạ điều chỉnh — Tối ưu cho home gym</h2>
+<p>Tạ đơn điều chỉnh (adjustable dumbbell) cho phép thay đổi trọng lượng từ 2-24kg chỉ với 1 quả tạ, thay thế 10+ quả tạ cố định.</p>
+
+<h2>Ưu điểm</h2>
+<ul>
+<li><strong>Tiết kiệm không gian</strong> — 1 quả = 10+ quả tạ cố định</li>
+<li><strong>Đa năng</strong> — Tập mọi nhóm cơ: vai, tay, ngực, lưng, chân</li>
+<li><strong>Thay đổi nhanh</strong> — Xoay dial/kéo pin, 3 giây đổi mức tạ</li>
+</ul>
+
+<h2>Brands phổ biến</h2>
+<p>Bowflex SelectTech (cao cấp ~8-12 triệu). PowerBlock (bền ~6-10 triệu). Sportslink/Elip (Việt Nam ~2-4 triệu).</p>''',
+            'tags': 'tạ đơn,dumbbell,adjustable,home gym,tập tại nhà',
+        },
+        {
+            'name_vi': 'Dây kháng lực', 'name_en': 'Resistance Bands Set',
+            'slug': 'day-khang-luc',
+            'description': 'Bộ dây kháng lực 5 mức độ, tập toàn thân tại nhà, gọn nhẹ mang đi du lịch.',
+            'content': '''<h2>Dây kháng lực — Gym gọn trong túi</h2>
+<p>Dây kháng lực (resistance bands) là dụng cụ tập gym nhỏ gọn nhất, tập được hầu hết bài tập cơ bản mà không cần máy tập.</p>
+
+<h2>Phân loại</h2>
+<ul>
+<li><strong>Loop bands</strong> — Dạng vòng, tập mông đùi, warm-up</li>
+<li><strong>Tube bands</strong> — Dạng ống có tay cầm, thay thế tạ</li>
+<li><strong>Pull-up bands</strong> — Dây dày, hỗ trợ pull-up, tập lưng</li>
+</ul>
+
+<h2>Set cơ bản</h2>
+<p>Bộ 5 dây: 5lbs, 10lbs, 15lbs, 20lbs, 25lbs. Có thể kết hợp 2-3 dây cho sức kháng cao hơn. Giá ~150K-500K/bộ.</p>''',
+            'tags': 'dây kháng lực,resistance bands,home gym,tập tại nhà,gọn nhẹ',
+        },
+    ]
+    for i, p_data in enumerate(parts_may_tap):
+        p = Part(
+            zone_id=may_tap_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # ── Zones for Football segment (4 zones) ──
+    football = segments['football']
+    football_zones_data = [
+        ('Giày đá bóng', 'giay-da-bong', '👟', '#4fc3f7', 'Giày đá bóng — Nike, Adidas, Puma, sân cỏ nhân tạo/tự nhiên'),
+        ('Quần áo bóng đá', 'quan-ao-bong-da', '👕', '#81c784', 'Áo đấu, quần short, tất, găng tay thủ môn'),
+        ('Bóng thi đấu', 'bong-thi-dau', '⚽', '#ffb74d', 'Bóng FIFA Quality, bóng tập, bóng mini'),
+        ('Phụ kiện bóng đá', 'phu-kien-bong-da', '🧤', '#ff8a65', 'Bảo vệ ống đồng, băng keo, bình nước, túi đựng'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(football_zones_data):
+        z = Zone(segment_id=football.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    # ── Zones for Cycling segment (4 zones) ──
+    cycling = segments['cycling']
+    cycling_zones_data = [
+        ('Xe đạp thể thao', 'xe-dap-the-thao', '🚲', '#4fc3f7', 'Road bike, MTB, gravel, touring, fixie'),
+        ('Mũ bảo hiểm', 'mu-bao-hiem', '⛑️', '#ba68c8', 'Mũ road, MTB, aero, MIPS, full-face'),
+        ('Quần áo đạp xe', 'quan-ao-dap-xe', '🩱', '#81c784', 'Jersey, bib short, áo gió, găng tay'),
+        ('Phụ kiện đạp xe', 'phu-kien-dap-xe', '🔧', '#ffb74d', 'Đèn, bơm, khóa, túi yên, đồng hồ cycling'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(cycling_zones_data):
+        z = Zone(segment_id=cycling.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    # ── Zones for Swimming segment (4 zones) ──
+    swimming = segments['swimming']
+    swimming_zones_data = [
+        ('Đồ bơi', 'do-boi', '🩱', '#4fc3f7', 'Quần bơi, áo bơi, bikini, đồ bơi thi đấu'),
+        ('Kính bơi', 'kinh-boi', '🥽', '#ba68c8', 'Kính bơi tập, thi đấu, open water, cận'),
+        ('Mũ bơi', 'mu-boi', '🧢', '#81c784', 'Mũ bơi silicone, latex, vải, mũ thi đấu'),
+        ('Phụ kiện bơi', 'phu-kien-boi', '🏊', '#ffb74d', 'Phao tập, paddle, chân vịt, pull buoy'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(swimming_zones_data):
+        z = Zone(segment_id=swimming.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    # ── Zones for Nutrition segment (4 zones) ──
+    nutrition = segments['nutrition']
+    nutrition_zones_data = [
+        ('Protein', 'protein', '🥛', '#4fc3f7', 'Whey, casein, plant-based, protein bar'),
+        ('BCAA & EAA', 'bcaa-eaa', '💧', '#ba68c8', 'BCAA 2:1:1, EAA, recovery drink'),
+        ('Vitamin & Khoáng', 'vitamin-khoang', '💊', '#81c784', 'Multivitamin, omega-3, vitamin D, ZMA'),
+        ('Thực phẩm healthy', 'thuc-pham-healthy', '🥑', '#ffb74d', 'Granola, yến mạch, hạt mix, protein snack'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(nutrition_zones_data):
+        z = Zone(segment_id=nutrition.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    db.session.commit()
+    print('✅ Sport vertical seeded with zones and parts!')
+
+
+def seed_sport_articles():
+    """Seed Sport articles - 3-tier content"""
+    from models import Article
+
+    # Check if Sport articles exist
+    if Article.query.filter_by(vertical_slug='sport', tier='nganh').first():
+        print('[SKIP] Sport articles already exist')
+        return
+
+    print('[+] Seeding Sport articles...')
+    articles = [
+        # === TIER 1: NGANH (Industry - Sport market) ===
+        {
+            'title': 'Thị trường thể thao Việt Nam 2025 — Running, Gym & Fitness bùng nổ',
+            'slug': 'thi-truong-the-thao-viet-nam-2025',
+            'tier': 'nganh',
+            'category': 'thi-truong',
+            'tags': 'thị trường,thể thao,running,gym,fitness,Việt Nam,2025',
+            'excerpt': 'Phân tích toàn cảnh thị trường thể thao Việt Nam: running community tăng 300%, chuỗi gym mở rộng, chi tiêu trung bình 5-15 triệu/năm.',
+            'reading_time': 8,
+            'vertical_slug': 'sport',
+            'content': '''<h2>Thể thao Việt Nam đang bùng nổ</h2>
+<p>Thị trường fitness & thể thao Việt Nam đạt giá trị <strong>1.5 tỷ USD</strong> năm 2024, tăng trưởng 25%/năm. Running trở thành phong trào quốc dân với hàng trăm giải chạy mỗi năm.</p>
+
+<h2>3 xu hướng lớn 2025</h2>
+<p><strong>1. Running community bùng nổ</strong> — Hơn 200 giải marathon/năm tại Việt Nam. Các running club ở mỗi quận huyện. VnExpress Marathon, Techcombank HCMC Marathon thu hút 15,000+ VĐV.</p>
+<p><strong>2. Gym & Fitness phổ cập</strong> — Chuỗi gym California, CitiGym, Elite mở rộng mạnh. Phòng gym mini, home gym trend tăng 200%.</p>
+<p><strong>3. Dinh dưỡng thể thao</strong> — Whey protein, creatine từ "niche" trở thành mainstream. Doanh số supplement online tăng 150% YoY trên Shopee.</p>
+
+<h2>Chi tiêu trung bình</h2>
+<ul>
+<li>Runner nghiêm túc: 10-20 triệu/năm (giày, gear, giải chạy)</li>
+<li>Gym-goer: 5-15 triệu/năm (phí gym, supplement, đồ tập)</li>
+<li>Casual: 2-5 triệu/năm (giày, quần áo thể thao)</li>
+</ul>'''
+        },
+        {
+            'title': 'Hướng dẫn chọn giày chạy bộ — Từ A đến Z cho người mới',
+            'slug': 'huong-dan-chon-giay-chay-bo',
+            'tier': 'nganh',
+            'category': 'kien-thuc-chung',
+            'tags': 'giày chạy,running,chọn giày,foot type,pronation,Nike,ASICS',
+            'excerpt': 'Cách chọn giày chạy phù hợp: phân biệt neutral vs stability, đo foot type, chọn đệm mỏng hay dày, budget hợp lý.',
+            'reading_time': 10,
+            'vertical_slug': 'sport',
+            'content': '''<h2>3 bước chọn giày chạy bộ</h2>
+
+<h3>Bước 1: Xác định Foot Type</h3>
+<p><strong>Neutral (bàn chân bình thường)</strong> — 60% runner. Chọn giày neutral: Nike Pegasus, ASICS Nimbus, Hoka Clifton.</p>
+<p><strong>Overpronation (bàn chân bẹt)</strong> — 30% runner. Cần giày stability: ASICS Kayano, Brooks Adrenaline, New Balance 860.</p>
+<p><strong>Supination (vòm cao)</strong> — 10% runner. Chọn giày cushion cao: Hoka Bondi, ASICS Nimbus, New Balance Fresh Foam.</p>
+
+<h3>Bước 2: Chọn mức đệm</h3>
+<p><strong>Max cushion (32-38mm)</strong> — Hoka Bondi, ASICS Nimbus. Cho long run, recovery, runner nặng cân.</p>
+<p><strong>Moderate (28-32mm)</strong> — Nike Pegasus, Adidas Supernova. Đa năng, daily training.</p>
+<p><strong>Minimal (20-28mm)</strong> — Nike Vaporfly, Adidas Adizero. Cho race day, tempo run.</p>
+
+<h3>Bước 3: Thử giày đúng cách</h3>
+<ul>
+<li>Thử giày buổi chiều (chân sưng nhẹ, giống khi chạy)</li>
+<li>Mang tất chạy bộ khi thử, không mang tất cotton</li>
+<li>Chạy thử 5-10 phút trên treadmill tại shop</li>
+<li>Chọn size lớn hơn giày thường 0.5-1 size</li>
+</ul>'''
+        },
+        {
+            'title': 'Dinh dưỡng thể thao cơ bản — Protein, Carb, Fat cho người tập',
+            'slug': 'dinh-duong-the-thao-co-ban',
+            'tier': 'nganh',
+            'category': 'dinh-duong',
+            'tags': 'dinh dưỡng,protein,carb,fat,macro,TDEE,tập gym,chạy bộ',
+            'excerpt': 'Hướng dẫn dinh dưỡng cho người tập thể thao: tính TDEE, chia macro, timing ăn uống trước/sau tập.',
+            'reading_time': 9,
+            'vertical_slug': 'sport',
+            'content': '''<h2>Dinh dưỡng cơ bản cho người tập</h2>
+
+<h3>Bước 1: Tính TDEE (Total Daily Energy Expenditure)</h3>
+<p>TDEE = BMR × Activity Factor. Ví dụ: nam 70kg, cao 175cm, 25 tuổi, tập 4 lần/tuần → TDEE ≈ 2,500 calo/ngày.</p>
+<ul>
+<li><strong>Tăng cơ (Bulk)</strong> — TDEE + 300-500 calo = 2,800-3,000 calo</li>
+<li><strong>Giảm mỡ (Cut)</strong> — TDEE − 300-500 calo = 2,000-2,200 calo</li>
+<li><strong>Duy trì</strong> — Ăn đúng TDEE</li>
+</ul>
+
+<h3>Bước 2: Chia Macro</h3>
+<p><strong>Protein</strong> — 1.6-2.2g/kg thể trọng. 70kg → 112-154g protein/ngày.</p>
+<p><strong>Fat</strong> — 0.8-1g/kg. 70kg → 56-70g fat/ngày.</p>
+<p><strong>Carb</strong> — Phần còn lại từ calo. Carb = (Tổng calo − protein×4 − fat×9) ÷ 4.</p>
+
+<h3>Bước 3: Timing</h3>
+<ul>
+<li><strong>Trước tập 1-2h</strong> — Carb + protein nhẹ (chuối + whey)</li>
+<li><strong>Sau tập 30-60 phút</strong> — Protein + carb (whey + cơm/khoai)</li>
+<li><strong>Trước ngủ</strong> — Casein protein hoặc sữa chua Greek</li>
+</ul>'''
+        },
+
+        # === TIER 2: CHUNG (General - Systems/Methods) ===
+        {
+            'title': 'Chương trình tập gym cho người mới — 12 tuần từ zero đến hero',
+            'slug': 'chuong-trinh-tap-gym-nguoi-moi-12-tuan',
+            'tier': 'chung',
+            'category': 'chuong-trinh-tap',
+            'tags': 'gym,người mới,chương trình tập,12 tuần,full body,PPL',
+            'excerpt': 'Lộ trình tập gym 12 tuần cho người mới: 4 tuần full body → 4 tuần upper/lower → 4 tuần PPL. Bài tập, số set, rep chi tiết.',
+            'reading_time': 12,
+            'vertical_slug': 'sport',
+            'content': '''<h2>Lộ trình 12 tuần cho người mới tập gym</h2>
+
+<h3>Tuần 1-4: Full Body (3 ngày/tuần)</h3>
+<p>Tập toàn thân mỗi buổi, 3 buổi/tuần (T2-T4-T6). Mục tiêu: học form đúng, làm quen các bài compound.</p>
+<ul>
+<li>Squat 3×10 — Chân, mông, core</li>
+<li>Bench Press 3×10 — Ngực, vai trước, tay sau</li>
+<li>Barbell Row 3×10 — Lưng, tay trước</li>
+<li>Overhead Press 3×8 — Vai, tay sau</li>
+<li>Deadlift 3×8 — Lưng dưới, chân sau, mông</li>
+<li>Plank 3×30s — Core</li>
+</ul>
+
+<h3>Tuần 5-8: Upper/Lower Split (4 ngày/tuần)</h3>
+<p>Chia thân trên/dưới, tập 4 buổi/tuần. Tăng khối lượng tạ 2.5kg/tuần nếu form đúng.</p>
+
+<h3>Tuần 9-12: Push/Pull/Legs (6 ngày/tuần)</h3>
+<p>PPL split cho phép tập mỗi nhóm cơ 2 lần/tuần, phù hợp khi đã có nền tảng.</p>
+
+<h2>Lưu ý quan trọng</h2>
+<ul>
+<li>Form quan trọng hơn trọng lượng — sai form = chấn thương</li>
+<li>Nghỉ giữa set: 60-90s (hypertrophy), 2-3 phút (strength)</li>
+<li>Progressive overload: tăng tạ/rep mỗi tuần</li>
+<li>Ngủ 7-8 tiếng, uống 2-3 lít nước/ngày</li>
+</ul>'''
+        },
+        {
+            'title': 'Kế hoạch chạy Half Marathon (21km) cho người mới — 16 tuần',
+            'slug': 'ke-hoach-chay-half-marathon-16-tuan',
+            'tier': 'chung',
+            'category': 'ke-hoach-tap',
+            'tags': 'half marathon,21km,kế hoạch chạy,training plan,running,16 tuần',
+            'excerpt': 'Training plan chạy Half Marathon 16 tuần cho người mới: từ chạy 3km đến hoàn thành 21km. Phân bổ easy run, tempo, long run.',
+            'reading_time': 11,
+            'vertical_slug': 'sport',
+            'content': '''<h2>16 tuần chinh phục Half Marathon</h2>
+
+<h3>Yêu cầu đầu vào</h3>
+<p>Có thể chạy liên tục 3-5km không dừng. Sức khỏe bình thường, không chấn thương. Cam kết tập 4 buổi/tuần.</p>
+
+<h3>Cấu trúc tuần</h3>
+<ul>
+<li><strong>Thứ 2</strong> — Easy Run (pace thoải mái, nói chuyện được)</li>
+<li><strong>Thứ 4</strong> — Tempo Run (pace nhanh hơn easy 30-45s/km)</li>
+<li><strong>Thứ 6</strong> — Easy Run / Cross-training (bơi, đạp xe)</li>
+<li><strong>Chủ nhật</strong> — Long Run (chạy dài, pace easy)</li>
+</ul>
+
+<h3>Progression</h3>
+<p><strong>Tuần 1-4</strong> — Long Run tăng từ 6km → 10km</p>
+<p><strong>Tuần 5-8</strong> — Long Run tăng từ 10km → 14km</p>
+<p><strong>Tuần 9-12</strong> — Long Run tăng từ 14km → 18km</p>
+<p><strong>Tuần 13-14</strong> — Peak: Long Run 19-20km</p>
+<p><strong>Tuần 15-16</strong> — Taper: giảm 40% volume, giữ intensity. Race day!</p>
+
+<h2>Nguyên tắc 10%</h2>
+<p>Không tăng tổng km/tuần quá 10% so với tuần trước để tránh chấn thương.</p>'''
+        },
+        {
+            'title': 'Phòng chống chấn thương thể thao — Warm-up, Cool-down & Recovery',
+            'slug': 'phong-chong-chan-thuong-the-thao',
+            'tier': 'chung',
+            'category': 'suc-khoe',
+            'tags': 'chấn thương,warm-up,cool-down,recovery,stretching,foam roller',
+            'excerpt': 'Hướng dẫn phòng chống chấn thương: quy trình warm-up 10 phút, cool-down, stretching, foam rolling, khi nào cần nghỉ.',
+            'reading_time': 8,
+            'vertical_slug': 'sport',
+            'content': '''<h2>Phòng chống chấn thương thể thao</h2>
+
+<h3>1. Warm-up đúng cách (10 phút)</h3>
+<ul>
+<li><strong>Phút 1-3</strong> — Cardio nhẹ: đi bộ nhanh, chạy chậm</li>
+<li><strong>Phút 4-7</strong> — Dynamic stretching: leg swing, arm circle, lunge walk</li>
+<li><strong>Phút 8-10</strong> — Activation: glute bridge, band walk, bodyweight squat</li>
+</ul>
+
+<h3>2. Cool-down (5-10 phút)</h3>
+<ul>
+<li>Giảm tốc dần dần, không dừng đột ngột</li>
+<li>Static stretching: giữ mỗi tư thế 20-30 giây</li>
+<li>Foam rolling các nhóm cơ chính 1-2 phút mỗi nhóm</li>
+</ul>
+
+<h3>3. Recovery</h3>
+<p><strong>Ngủ</strong> — 7-9 tiếng/đêm, cơ phục hồi trong giấc ngủ sâu.</p>
+<p><strong>Dinh dưỡng</strong> — Protein sau tập 30-60 phút. Uống đủ nước.</p>
+<p><strong>Rest day</strong> — Tối thiểu 1-2 ngày/tuần. Active recovery (đi bộ, yoga).</p>
+
+<h3>4. Dấu hiệu cần nghỉ</h3>
+<ul>
+<li>Đau nhức kéo dài >3 ngày (không phải soreness bình thường)</li>
+<li>Sưng, bầm tím vùng khớp</li>
+<li>Mệt mỏi liên tục, không phục hồi dù nghỉ</li>
+</ul>'''
+        },
+
+        # === TIER 3: CHI-TIET (Detailed product reviews) ===
+        {
+            'title': 'Nike Pegasus 41 vs ASICS Nimbus 26 vs Hoka Clifton 9 — So sánh chi tiết',
+            'slug': 'nike-pegasus-vs-asics-nimbus-vs-hoka-clifton',
+            'tier': 'chi-tiet',
+            'category': 'so-sanh',
+            'tags': 'Nike Pegasus,ASICS Nimbus,Hoka Clifton,so sánh,giày chạy,review',
+            'excerpt': 'So sánh 3 giày chạy bộ phổ biến nhất: Pegasus (đa năng), Nimbus (êm nhất), Clifton (nhẹ nhất). Nên chọn đôi nào?',
+            'reading_time': 10,
+            'vertical_slug': 'sport',
+            'content': '''<h2>So sánh 3 giày chạy bộ best-seller</h2>
+
+<h3>Nike Pegasus 41</h3>
+<p><strong>Giá:</strong> 3.2-3.8 triệu | <strong>Trọng lượng:</strong> 271g | <strong>Drop:</strong> 10mm | <strong>Stack:</strong> 33/23mm</p>
+<p>Đa năng nhất, phù hợp mọi cự ly từ 5K đến marathon. React foam + Zoom Air cho cảm giác bouncy. Bền trên 800km.</p>
+
+<h3>ASICS Gel-Nimbus 26</h3>
+<p><strong>Giá:</strong> 4.0-4.5 triệu | <strong>Trọng lượng:</strong> 284g | <strong>Drop:</strong> 8mm | <strong>Stack:</strong> 40/32mm</p>
+<p>Êm nhất trong 3 đôi, lý tưởng cho long run và recovery. FF BLAST PLUS + PureGEL hấp thụ chấn động cực tốt.</p>
+
+<h3>Hoka Clifton 9</h3>
+<p><strong>Giá:</strong> 3.5-4.0 triệu | <strong>Trọng lượng:</strong> 248g | <strong>Drop:</strong> 5mm | <strong>Stack:</strong> 33/28mm</p>
+<p>Nhẹ nhất mà vẫn max-cushion. Meta-rocker cho cảm giác "lăn" mượt. Phù hợp runner muốn nhẹ + êm.</p>
+
+<h2>Nên chọn đôi nào?</h2>
+<ul>
+<li><strong>Người mới</strong> → Nike Pegasus 41 (đa năng, dễ chạy, giá tốt)</li>
+<li><strong>Long run</strong> → ASICS Nimbus 26 (êm nhất, bảo vệ khớp)</li>
+<li><strong>Runner nhẹ cân</strong> → Hoka Clifton 9 (nhẹ, meta-rocker mượt)</li>
+<li><strong>Thi đấu</strong> → Không đôi nào ở trên — cần Nike Vaporfly hoặc ASICS Metaspeed</li>
+</ul>'''
+        },
+        {
+            'title': 'Review Garmin Forerunner 265 — Đồng hồ chạy bộ tốt nhất 2025',
+            'slug': 'review-garmin-forerunner-265',
+            'tier': 'chi-tiet',
+            'category': 'review',
+            'tags': 'Garmin,Forerunner 265,đồng hồ GPS,review,running,AMOLED',
+            'excerpt': 'Review chi tiết Garmin Forerunner 265 sau 6 tháng sử dụng: GPS chính xác, AMOLED đẹp, Training Readiness hữu ích, pin 13 ngày.',
+            'reading_time': 9,
+            'vertical_slug': 'sport',
+            'content': '''<h2>Garmin Forerunner 265 — Review sau 6 tháng</h2>
+
+<h3>Thiết kế & Màn hình</h3>
+<p>Màn hình AMOLED 1.3" sắc nét, đọc dễ dàng dưới nắng. Bezel polymer nhẹ, ôm tay thoải mái. Nút bấm vật lý — tốt hơn touchscreen khi chạy mưa/mồ hôi.</p>
+
+<h3>GPS & Tracking</h3>
+<p>GPS multi-band (L1+L5), chính xác cả trong thành phố cao tầng. Optical HR Gen 4 đo nhịp tim khá chính xác khi chạy easy-tempo. Kém hơn chest strap khi interval.</p>
+
+<h3>Training Features</h3>
+<ul>
+<li><strong>Training Readiness</strong> — Tổng hợp HRV, giấc ngủ, stress → cho điểm 0-100 → biết nên tập nặng hay nhẹ</li>
+<li><strong>Race Predictor</strong> — Dự đoán finish time khá chính xác (sai lệch ±3%)</li>
+<li><strong>Suggested Workouts</strong> — Gợi ý bài tập hàng ngày dựa trên training load</li>
+<li><strong>PacePro</strong> — Chiến thuật pace cho race day, tính cả elevation</li>
+</ul>
+
+<h3>Pin</h3>
+<p>Smartwatch mode: 13 ngày thực tế (sạc 1 lần/2 tuần). GPS mode: 18-20h liên tục (đủ cho ultra 100km).</p>
+
+<h3>Kết luận</h3>
+<p>Đồng hồ chạy bộ tốt nhất tầm giá 10-12 triệu. Tốt hơn Apple Watch về GPS accuracy, pin, training metrics. Yếu hơn về smartwatch features (không reply tin nhắn, app store hạn chế).</p>'''
+        },
+        {
+            'title': 'Review Optimum Nutrition Gold Standard Whey — Whey #1 thế giới có xứng đáng?',
+            'slug': 'review-on-gold-standard-whey',
+            'tier': 'chi-tiet',
+            'category': 'review',
+            'tags': 'ON,Gold Standard,whey protein,review,gym,supplement,tăng cơ',
+            'excerpt': 'Review chi tiết ON Gold Standard Whey: 24g protein/scoop, vị ngon, tan tốt, giá hợp lý. So sánh với MuscleTech, MyProtein.',
+            'reading_time': 7,
+            'vertical_slug': 'sport',
+            'content': '''<h2>ON Gold Standard 100% Whey — Có xứng #1?</h2>
+
+<h3>Thành phần</h3>
+<p>Mỗi scoop (31g): <strong>24g protein</strong>, 3g carb, 1g fat, 1g sugar, 120 calo. Blend WPI (chính) + WPC + WPH. 5.5g BCAAs tự nhiên.</p>
+
+<h3>Độ tan & Vị</h3>
+<p>Tan rất tốt trong nước lạnh, không vón cục. Double Rich Chocolate — vị chocolate đậm, ngọt vừa, uống ngon cả khi pha nước. Vanilla Ice Cream — ngọt hơn, pha sữa ngon.</p>
+
+<h3>Hiệu quả</h3>
+<p>Dùng 4 tháng, kết hợp tập 5 buổi/tuần: tăng 3kg lean mass, strength tăng rõ rệt. Không bloat, không đau bụng (ít lactose nhờ WPI là thành phần chính).</p>
+
+<h3>So sánh</h3>
+<ul>
+<li><strong>vs MuscleTech NitroTech</strong> — ON ngon hơn, tan tốt hơn. NitroTech protein cao hơn (30g) nhưng đắt hơn.</li>
+<li><strong>vs MyProtein Impact Whey</strong> — MyProtein rẻ hơn 30% nhưng vị kém hơn, tan không bằng ON.</li>
+<li><strong>vs Rule 1 R1</strong> — R1 Isolate thuần WPI, protein cao hơn (25g) nhưng giá đắt hơn 20%.</li>
+</ul>
+
+<h3>Giá & Mua ở đâu</h3>
+<p>2lbs (~30 servings): 800K-1.2 triệu. 5lbs (~74 servings): 1.5-2.2 triệu. Mua trên Shopee (GymStore, SupplementVN) hoặc Lazada chính hãng.</p>'''
+        },
+    ]
+
+    for a_data in articles:
+        a = Article(
+            title=a_data['title'],
+            slug=a_data['slug'],
+            tier=a_data['tier'],
+            category=a_data['category'],
+            tags=a_data['tags'],
+            excerpt=a_data['excerpt'],
+            reading_time=a_data['reading_time'],
+            vertical_slug=a_data['vertical_slug'],
+            content=a_data['content'],
+            status='published',
+            ai_generated=False
+        )
+        db.session.add(a)
+
+    db.session.commit()
+    print(f'✅ Sport articles seeded: {len(articles)} articles')
+
+
+def seed_products_sport():
+    """Seed affiliate product links for Sport vertical"""
+    from models import db, Vertical, Segment, Zone, Part, AffiliateLink
+    import random
+
+    sport = Vertical.query.filter_by(slug='sport').first()
+    if not sport:
+        print('[SKIP] Sport vertical not found — run seed_sport() first')
+        return
+
+    existing = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'sport').count()
+    if existing:
+        print(f'[SKIP] Sport already has {existing} affiliate links')
+        return
+
+    print('[+] Seeding Sport affiliate links...')
+    sport_products = {
+        # Running — Giày chạy
+        'nike-pegasus-41': [
+            ('shopee', 'Nike Pegasus 41 Nam — Black/White', 'https://shope.ee/sport001', 3290000),
+            ('lazada', 'Nike Pegasus 41 Nữ — Pink/White', 'https://s.lazada.vn/sport002', 3290000),
+            ('tiki', 'Nike Pegasus 41 — Thunder Blue', 'https://tiki.vn/sport003', 3490000),
+        ],
+        'asics-gel-nimbus-26': [
+            ('shopee', 'ASICS Gel-Nimbus 26 Nam — Black/Blue', 'https://shope.ee/sport010', 4190000),
+            ('lazada', 'ASICS Gel-Nimbus 26 Nữ — Lavender', 'https://s.lazada.vn/sport011', 4190000),
+        ],
+        'hoka-clifton-9': [
+            ('shopee', 'Hoka Clifton 9 Nam — Black/White', 'https://shope.ee/sport020', 3690000),
+            ('lazada', 'Hoka Clifton 9 Nữ — Airy Blue', 'https://s.lazada.vn/sport021', 3690000),
+            ('tiki', 'Hoka Clifton 9 Wide — All Black', 'https://tiki.vn/sport022', 3890000),
+        ],
+        'nike-vaporfly-3': [
+            ('shopee', 'Nike Vaporfly 3 — Volt/Black', 'https://shope.ee/sport030', 5690000),
+            ('lazada', 'Nike Vaporfly 3 — White/Bright Crimson', 'https://s.lazada.vn/sport031', 5890000),
+        ],
+        # Running — Đồng hồ GPS
+        'garmin-forerunner-265': [
+            ('shopee', 'Garmin Forerunner 265 Black', 'https://shope.ee/sport040', 10990000),
+            ('lazada', 'Garmin Forerunner 265S Whitestone', 'https://s.lazada.vn/sport041', 10990000),
+            ('tiki', 'Garmin Forerunner 265 Aqua', 'https://tiki.vn/sport042', 10990000),
+        ],
+        'coros-pace-3': [
+            ('shopee', 'COROS PACE 3 GPS — Black Silicone', 'https://shope.ee/sport050', 5990000),
+            ('lazada', 'COROS PACE 3 GPS — White Nylon', 'https://s.lazada.vn/sport051', 5990000),
+        ],
+        'apple-watch-ultra-2': [
+            ('shopee', 'Apple Watch Ultra 2 Titanium 49mm', 'https://shope.ee/sport060', 18990000),
+            ('tiki', 'Apple Watch Ultra 2 + Alpine Loop', 'https://tiki.vn/sport061', 19990000),
+        ],
+        # Running — Đồ chạy
+        'ao-chay-nike-dri-fit': [
+            ('shopee', 'Nike Dri-FIT Miler Singlet Nam', 'https://shope.ee/sport070', 790000),
+            ('lazada', 'Nike Dri-FIT ADV AeroSwift Singlet', 'https://s.lazada.vn/sport071', 1290000),
+        ],
+        'quan-short-chay-2-in-1': [
+            ('shopee', 'Quần short 2-in-1 Under Armour Launch', 'https://shope.ee/sport080', 890000),
+            ('lazada', 'Nike Dri-FIT Stride 2-in-1 Short', 'https://s.lazada.vn/sport081', 990000),
+        ],
+        'tat-chay-balega': [
+            ('shopee', 'Balega Hidden Comfort No Show', 'https://shope.ee/sport090', 380000),
+            ('tiki', 'Balega Blister Resist No Show', 'https://tiki.vn/sport091', 350000),
+        ],
+        # Running — Dinh dưỡng chạy
+        'gel-nang-luong-gu': [
+            ('shopee', 'GU Energy Gel Tri-Berry x24 gói', 'https://shope.ee/sport100', 720000),
+            ('lazada', 'GU Energy Gel Salted Caramel x8 gói', 'https://s.lazada.vn/sport101', 280000),
+        ],
+        'vien-muoi-dien-giai-saltstick': [
+            ('shopee', 'SaltStick Caps 100 viên', 'https://shope.ee/sport110', 550000),
+            ('lazada', 'SaltStick Fastchews 60 viên', 'https://s.lazada.vn/sport111', 380000),
+        ],
+        'bot-dien-giai-nuun': [
+            ('shopee', 'Nuun Sport Mixed Pack 4 ống', 'https://shope.ee/sport120', 450000),
+            ('tiki', 'Nuun Sport Citrus Fruit 10 viên', 'https://tiki.vn/sport121', 150000),
+        ],
+        # Gym — Whey Protein
+        'whey-protein-isolate': [
+            ('shopee', 'Rule 1 R1 Whey Isolate 5lbs', 'https://shope.ee/sport130', 1890000),
+            ('lazada', 'Dymatize ISO100 Hydrolyzed 5lbs', 'https://s.lazada.vn/sport131', 2290000),
+        ],
+        'on-gold-standard-whey': [
+            ('shopee', 'ON Gold Standard 100% Whey 5lbs Chocolate', 'https://shope.ee/sport140', 1790000),
+            ('lazada', 'ON Gold Standard Whey 2lbs Vanilla', 'https://s.lazada.vn/sport141', 890000),
+            ('tiki', 'ON Gold Standard Whey 5lbs Cookies & Cream', 'https://tiki.vn/sport142', 1850000),
+        ],
+        'mass-gainer-tang-can': [
+            ('shopee', 'ON Serious Mass 12lbs Chocolate', 'https://shope.ee/sport150', 1490000),
+            ('lazada', 'MuscleTech Mass Tech 7lbs', 'https://s.lazada.vn/sport151', 1190000),
+        ],
+        # Gym — Creatine
+        'creatine-monohydrate': [
+            ('shopee', 'ON Micronized Creatine 300g', 'https://shope.ee/sport160', 350000),
+            ('lazada', 'MuscleTech Platinum Creatine 400g', 'https://s.lazada.vn/sport161', 320000),
+            ('tiki', 'MyProtein Creatine Monohydrate 500g', 'https://tiki.vn/sport162', 380000),
+        ],
+        'creatine-hcl': [
+            ('shopee', 'Kaged Muscle C-HCl 75 servings', 'https://shope.ee/sport170', 650000),
+            ('lazada', 'MuscleTech Creactor HCl 120 servings', 'https://s.lazada.vn/sport171', 590000),
+        ],
+        # Gym — Máy tập
+        'may-chay-bo-dien': [
+            ('shopee', 'Kingsport MAX-08 3.0HP', 'https://shope.ee/sport180', 12900000),
+            ('lazada', 'Elip Marathon Pro 3.5HP', 'https://s.lazada.vn/sport181', 18900000),
+            ('tiki', 'Máy chạy Xiaomi WalkingPad R2', 'https://tiki.vn/sport182', 8900000),
+        ],
+        'ta-don-dieu-chinh': [
+            ('shopee', 'Bowflex SelectTech 552 Adjustable 2-24kg', 'https://shope.ee/sport190', 8900000),
+            ('lazada', 'PowerBlock Elite 2.5-22kg', 'https://s.lazada.vn/sport191', 6900000),
+        ],
+        'day-khang-luc': [
+            ('shopee', 'Bộ dây kháng lực 5 mức Aolikes', 'https://shope.ee/sport200', 189000),
+            ('lazada', 'Theraband CLX Resistance Band', 'https://s.lazada.vn/sport201', 450000),
+            ('tiki', 'Bộ tube bands 11 món có tay cầm', 'https://tiki.vn/sport202', 250000),
+        ],
+    }
+
+    seeded = 0
+    for seg in sport.segments:
+        for z in seg.zones:
+            for p in z.parts:
+                if p.slug in sport_products:
+                    for net, pname, url, price in sport_products[p.slug]:
+                        al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
+                            url=url, price=price, clicks=random.randint(20, 1000),
+                            conversions=random.randint(1, 50))
+                        db.session.add(al)
+                        seeded += 1
+
+    db.session.commit()
+    sport_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'sport').count()
+    print(f'✅ Sport products seeded: {sport_count} affiliate links')

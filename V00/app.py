@@ -115,6 +115,23 @@ THEME_STYLES = {
         'accent_hover': '#e68ae0',
         'radius': '16px',
     },
+    'sport': {
+        'font_primary': "'Manrope', 'Inter', -apple-system, system-ui, sans-serif",
+        'font_secondary': "'DM Mono', 'Roboto Mono', monospace",
+        'bg_light': '#f5faf7',
+        'bg_dark': '#0d1a14',
+        'surface_light': '#ffffff',
+        'surface_dark': '#1a2d22',
+        'border_light': '#c8e6d0',
+        'border_dark': '#2d4a38',
+        'text_light': '#1a2d22',
+        'text_dark': '#f5faf7',
+        'text_dim_light': '#5a8a6a',
+        'text_dim_dark': '#7ab892',
+        'accent': '#00b894',
+        'accent_hover': '#009975',
+        'radius': '10px',
+    },
 }
 
 @app.context_processor
@@ -614,12 +631,23 @@ def admin_seed_data():
             except Exception as e:
                 flash(f'❌ Error seeding Tech: {str(e)}', 'error')
 
+        elif action == 'seed_sport':
+            from seed_data import seed_sport, seed_sport_articles, seed_products_sport
+            try:
+                seed_sport()
+                seed_sport_articles()
+                seed_products_sport()
+                flash('✅ Sport vertical seeded successfully!', 'success')
+            except Exception as e:
+                flash(f'❌ Error seeding Sport: {str(e)}', 'error')
+
         elif action == 'seed_all':
             from seed_data import (seed, seed_articles, seed_networks, seed_video,
                 seed_pet, seed_pet_articles, seed_travel, seed_travel_articles,
                 seed_products_pet_travel, seed_hotels, seed_attractions,
                 seed_bike, seed_vouchers, seed_beauty, seed_beauty_articles,
-                seed_tech, seed_tech_articles, seed_products_beauty_tech)
+                seed_tech, seed_tech_articles, seed_products_beauty_tech,
+                seed_sport, seed_sport_articles, seed_products_sport)
             try:
                 seed()
                 seed_articles()
@@ -638,6 +666,9 @@ def admin_seed_data():
                 seed_tech()
                 seed_tech_articles()
                 seed_products_beauty_tech()
+                seed_sport()
+                seed_sport_articles()
+                seed_products_sport()
                 flash('✅ All verticals seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding all: {str(e)}', 'error')
@@ -1959,7 +1990,64 @@ def get_vertical_config(vertical_slug):
             'products_icon': '🚴',
             'parts_label': 'phụ tùng',
             'parts_heading': 'Phụ tùng xe đạp',
-        }
+        },
+        'beauty': {
+            'hero_title': 'Kiến thức làm đẹp',
+            'hero_subtitle': 'skincare, makeup & chăm sóc bản thân',
+            'hero_desc': 'Review mỹ phẩm, hướng dẫn skincare routine, so sánh thành phần. Serum, kem dưỡng, chống nắng — chọn đúng cho da bạn.',
+            'hero_cta1': 'Khám phá danh mục',
+            'segments_label': 'danh mục',
+            'segments_heading': 'Danh mục làm đẹp',
+            'tier1_desc': 'Thị trường mỹ phẩm, xu hướng K-beauty, clean beauty.',
+            'tier2_desc': 'Quy trình skincare, phương pháp chăm sóc da theo loại da.',
+            'tier3_desc': 'Review chi tiết sản phẩm: thành phần, cách dùng, so sánh giá.',
+            'cta_title': 'Chưa tìm thấy sản phẩm phù hợp?',
+            'cta_desc': 'Hệ thống review mỹ phẩm đang mở rộng mỗi ngày. Khám phá thêm theo danh mục.',
+            'cta_button': 'Xem danh mục →',
+            'products_title': 'Mỹ phẩm & Skincare',
+            'products_subtitle': 'Review chi tiết, giá tốt từ Shopee, Lazada, Tiki',
+            'products_icon': '💄',
+            'parts_label': 'sản phẩm',
+            'parts_heading': 'Sản phẩm',
+        },
+        'tech': {
+            'hero_title': 'Kiến thức công nghệ',
+            'hero_subtitle': 'smartphone, tai nghe & gadgets',
+            'hero_desc': 'So sánh chip, camera, màn hình. Review điện thoại, tai nghe, phụ kiện. Chọn thiết bị phù hợp nhu cầu và ngân sách.',
+            'hero_cta1': 'Khám phá danh mục',
+            'segments_label': 'danh mục',
+            'segments_heading': 'Danh mục thiết bị',
+            'tier1_desc': 'Thị trường smartphone, xu hướng AI, chip mới nhất.',
+            'tier2_desc': 'Hệ thống camera, màn hình, pin — cấu tạo và so sánh.',
+            'tier3_desc': 'Review chi tiết: benchmark, camera test, pin thực tế.',
+            'cta_title': 'Cần tư vấn chọn thiết bị?',
+            'cta_desc': 'So sánh chi tiết giữa các thiết bị, phụ kiện theo ngân sách.',
+            'cta_button': 'Xem danh mục →',
+            'products_title': 'Điện thoại & Phụ kiện',
+            'products_subtitle': 'Giá tốt nhất từ Shopee, Lazada, Tiki, CellphoneS',
+            'products_icon': '📱',
+            'parts_label': 'thiết bị',
+            'parts_heading': 'Thiết bị',
+        },
+        'sport': {
+            'hero_title': 'Kiến thức thể thao',
+            'hero_subtitle': 'từ tập luyện đến thi đấu chuyên nghiệp',
+            'hero_desc': 'Giày chạy, đồ gym, dinh dưỡng thể thao, thiết bị tập luyện. Review chi tiết, so sánh giá, hướng dẫn chọn đúng.',
+            'hero_cta1': 'Khám phá bộ môn',
+            'segments_label': 'bộ môn',
+            'segments_heading': 'Bộ môn thể thao',
+            'tier1_desc': 'Thị trường thể thao, xu hướng fitness, chi phí tập luyện.',
+            'tier2_desc': 'Kỹ thuật tập luyện, phương pháp, chương trình training.',
+            'tier3_desc': 'Review chi tiết gear: giày, đồ tập, thiết bị, dinh dưỡng.',
+            'cta_title': 'Bắt đầu hành trình thể thao?',
+            'cta_desc': 'Khám phá kiến thức từ cơ bản đến nâng cao cho mọi bộ môn.',
+            'cta_button': 'Chọn bộ môn →',
+            'products_title': 'Đồ thể thao & Thiết bị',
+            'products_subtitle': 'Giày, quần áo, gear — giá tốt từ Shopee, Lazada, Decathlon',
+            'products_icon': '🏋️',
+            'parts_label': 'sản phẩm',
+            'parts_heading': 'Sản phẩm',
+        },
     }
     return configs.get(vertical_slug, {})
 
