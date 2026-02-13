@@ -11,9 +11,9 @@ def seed():
     print('[+] Seeding Car vertical...')
     # Vertical: Car
     car = Vertical(
-        name='Car', slug='car', icon='🚗', color='#fdcb6e',
+        name='Car', slug='car', icon='🚗', color='#f39c12',
         description='Kiến thức chi tiết về ô tô — từ tổng thể đến từng bu-lông. Tìm hiểu, sửa chữa, nâng cấp.',
-        status='live'
+        status='live', style='car', template='general', default_mode='light'
     )
     db.session.add(car)
     db.session.flush()
@@ -736,7 +736,7 @@ def seed_pet():
         return
 
     print('[+] Seeding Pet vertical...')
-    v = Vertical(name='Pet', slug='pet', description='Kiến thức chăm sóc thú cưng — chó, mèo, và thú nhỏ', icon='🐾', status='active')
+    v = Vertical(name='Pet', slug='pet', description='Kiến thức chăm sóc thú cưng — chó, mèo, và thú nhỏ', icon='🐾', color='#e17055', status='active', style='pet', template='general', default_mode='light')
     db.session.add(v)
     db.session.flush()
 
@@ -984,7 +984,7 @@ def seed_travel():
         return
 
     print('[+] Seeding Travel vertical...')
-    v = Vertical(name='Travel', slug='travel', description='Du lịch & Khách sạn — Khám phá, đặt phòng, trải nghiệm', icon='✈️', status='active')
+    v = Vertical(name='Travel', slug='travel', description='Du lịch & Khách sạn — Khám phá, đặt phòng, trải nghiệm', icon='✈️', color='#0984e3', status='active', style='travel', template='general', default_mode='light')
     db.session.add(v)
     db.session.flush()
 
@@ -1423,9 +1423,9 @@ def seed_bike():
         name='Bike',
         slug='bike',
         icon='🚴',
-        color='#00b894',
+        color='#00cec9',
         description='Kiến thức về xe đạp và phụ kiện đạp xe — từ chọn xe phù hợp đến nâng cấp chi tiết.',
-        status='live'
+        status='live', style='bike', template='general', default_mode='light'
     )
     db.session.add(bike)
     db.session.flush()
@@ -2031,11 +2031,9 @@ def seed_beauty():
         name='Beauty',
         slug='beauty',
         icon='💄',
-        color='#e91e63',
+        color='#e84393',
         description='Làm đẹp & Chăm sóc — Mỹ phẩm, skincare, makeup từ cơ bản đến nâng cao',
-        status='live',
-        template='beauty',  # Use beauty.css theme
-        default_mode='light'
+        status='live', style='beauty', template='general', default_mode='light'
     )
     db.session.add(beauty)
     db.session.flush()
@@ -2500,11 +2498,9 @@ def seed_tech():
         name='Tech',
         slug='tech',
         icon='📱',
-        color='#0071e3',
+        color='#6c5ce7',
         description='Công nghệ & Thiết bị — Điện thoại, tai nghe, âm thanh, gadgets từ cơ bản đến cao cấp',
-        status='live',
-        template='tech',  # Use tech.css theme
-        default_mode='light'
+        status='live', style='tech', template='general', default_mode='light'
     )
     db.session.add(tech)
     db.session.flush()
