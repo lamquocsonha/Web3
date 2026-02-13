@@ -7,7 +7,7 @@
     <div class="ps-header">
       <h3>📂 Danh mục</h3>
       <a href="{{ url_for(product_url, vertical_slug=vertical.slug) }}" class="ps-all {% if not f_zone %}active{% endif %}">
-        Tất cả <span class="ps-count">{{ products|length }}</span>
+        Tất cả <span class="ps-count">{{ total_count|default(products|length) }}</span>
       </a>
     </div>
 
@@ -36,7 +36,7 @@
         <span class="pm-active-zone">{{ f_zone|replace('-',' ')|title }}</span>
         <a href="{{ url_for(product_url, vertical_slug=vertical.slug, network=f_network) }}" class="pm-clear-zone">✕</a>
         {% endif %}
-        <span class="pm-count">{{ products|length }} sản phẩm</span>
+        <span class="pm-count">{{ total_count|default(products|length) }} sản phẩm</span>
       </div>
       <div class="pm-filters">
         {% for n in networks %}
@@ -68,8 +68,44 @@
       </div>
       {% endfor %}
     </div>
+
+    {# ═══ PAGINATION ═══ #}
+    {% if pagination and pagination.pages > 1 %}
+    <nav class="pagination-nav" style="display:flex;justify-content:center;align-items:center;gap:6px;margin:32px 0;flex-wrap:wrap">
+      {% if pagination.has_prev %}
+      <a href="{{ url_for(product_url, vertical_slug=vertical.slug, zone=f_zone, network=f_network, page=pagination.prev_num) }}"
+         class="pg-btn">&laquo; Trước</a>
+      {% endif %}
+
+      {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+        {% if p %}
+          <a href="{{ url_for(product_url, vertical_slug=vertical.slug, zone=f_zone, network=f_network, page=p) }}"
+             class="pg-btn {% if p == pagination.page %}pg-active{% endif %}">{{ p }}</a>
+        {% else %}
+          <span class="pg-dots">…</span>
+        {% endif %}
+      {% endfor %}
+
+      {% if pagination.has_next %}
+      <a href="{{ url_for(product_url, vertical_slug=vertical.slug, zone=f_zone, network=f_network, page=pagination.next_num) }}"
+         class="pg-btn">Sau &raquo;</a>
+      {% endif %}
+
+      <span class="pg-info" style="margin-left:12px;font-size:12px;color:var(--text-dim)">
+        Trang {{ pagination.page }}/{{ pagination.pages }} ({{ total_count|default(0) }} sản phẩm)
+      </span>
+    </nav>
+    {% endif %}
+
     {% else %}
     <div class="empty-pub"><p>Không tìm thấy sản phẩm phù hợp</p></div>
     {% endif %}
   </div>
 </div>
+
+<style>
+.pg-btn{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:500;color:var(--text);background:var(--surface);text-decoration:none;transition:all .15s}
+.pg-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pg-active{background:var(--accent)!important;color:#fff!important;border-color:var(--accent)!important;pointer-events:none}
+.pg-dots{color:var(--text-dim);padding:0 4px}
+</style>

@@ -971,6 +971,8 @@ def admin_products():
     f_network = request.args.get('network', '')
     f_status = request.args.get('status', '')
     f_search = request.args.get('q', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 50
 
     # Query with joins to get full path
     q = db.session.query(AffiliateLink, Part, Zone, Segment, Vertical).join(
@@ -994,7 +996,8 @@ def admin_products():
             AffiliateLink.url.ilike(f'%{f_search}%')
         ))
 
-    products = q.order_by(AffiliateLink.id.desc()).all()
+    pagination = q.order_by(AffiliateLink.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    products = pagination.items
     verticals = Vertical.query.all()
     # Get unique networks
     networks = db.session.query(AffiliateLink.network).distinct().all()
@@ -1009,7 +1012,8 @@ def admin_products():
     return render_template('admin/products.html',
         products=products, verticals=verticals, networks=networks,
         f_vertical=f_vertical, f_network=f_network, f_status=f_status, f_search=f_search,
-        total=total, active=active, total_clicks=total_clicks, total_conv=total_conv)
+        total=total, active=active, total_clicks=total_clicks, total_conv=total_conv,
+        pagination=pagination, page=page)
 
 @app.route('/admin/product/new', methods=['GET','POST'])
 def admin_product_new():
@@ -1080,9 +1084,140 @@ def admin_product_delete(pid):
     flash('Da xoa san pham', 'success')
     return redirect(url_for('admin_products'))
 
+def _build_part_keyword_index(vertical_id=None):
+    """Build keyword index from Parts for auto-mapping.
+    Returns list of {part_id, keywords: set(), zone_name, part_name, score_boost}
+    """
+    import unicodedata, re
+    def normalize(text):
+        """Lowercase + strip Vietnamese diacritics for fuzzy matching"""
+        text = text.lower().strip()
+        nfkd = unicodedata.normalize('NFKD', text)
+        return ''.join(c for c in nfkd if not unicodedata.combining(c))
+
+    q = db.session.query(Part, Zone, Segment, Vertical).join(
+        Zone, Part.zone_id == Zone.id
+    ).join(Segment, Zone.segment_id == Segment.id
+    ).join(Vertical, Segment.vertical_id == Vertical.id)
+    if vertical_id:
+        q = q.filter(Vertical.id == vertical_id)
+
+    index = []
+    for part, zone, seg, vert in q.all():
+        keywords = set()
+        # Part name (highest signal)
+        keywords.add(normalize(part.name_vi))
+        if part.name_en:
+            keywords.add(normalize(part.name_en))
+        # Tags (good signal)
+        if part.tags:
+            for tag in part.tags.split(','):
+                tag = tag.strip()
+                if len(tag) >= 2:
+                    keywords.add(normalize(tag))
+        # OEM code fragments
+        if part.oem_code:
+            for code in re.findall(r'[A-Za-z0-9]+-[A-Za-z0-9]+', part.oem_code):
+                keywords.add(code.lower())
+
+        index.append({
+            'part_id': part.id,
+            'keywords': keywords,
+            'zone_name': zone.name,
+            'zone_slug': zone.slug,
+            'part_name': part.name_vi,
+            'seg_name': seg.name,
+            'vert_name': vert.name,
+        })
+
+    # Zone-level keyword map (fallback when no Part matches)
+    zone_keywords = {
+        'he-thong-treo': ['phuoc', 'giam chan', 'lo xo', 'cao su', 'rotuy', 'rotuyn', 'thanh can bang',
+                          'shock', 'absorber', 'spring', 'bushing', 'ball joint', 'suspension',
+                          'giam xoc', 'nhun', 'stabilizer', 'sway bar'],
+        'he-thong-phanh': ['phanh', 'brake', 'ma phanh', 'dia phanh', 'bau tro luc', 'abs',
+                           'caliper', 'brake pad', 'brake disc', 'dau phanh', 'tang bua'],
+        'dong-co': ['dong co', 'engine', 'bugi', 'spark plug', 'kim phun', 'turbo', 'block may',
+                    'loc gio', 'loc dau', 'loc nhien lieu', 'dau may', 'oil filter', 'air filter',
+                    'piston', 'xi lanh', 'truc khuyu', 'crankshaft', 'cam', 'van', 'gasket',
+                    'gioang', 'day curoa', 'belt', 'bom nuoc', 'water pump', 'bom xang',
+                    'injector', 'throttle', 'sen', 'chain', 'xich', 'nhong'],
+        'he-thong-dien': ['dien', 'electric', 'ac quy', 'battery', 'may phat', 'alternator',
+                          'den', 'light', 'lamp', 'led', 'bulb', 'bong den', 'day dien', 'wire',
+                          'cau chi', 'fuse', 'cam bien', 'sensor', 'ecu', 'relay', 'coi', 'horn',
+                          'gat mua', 'wiper', 'motor', 'starter', 'khoi dong'],
+        'he-thong-lai': ['lai', 'steering', 'thuoc lai', 'ro tuyn', 'tro luc', 'vo lang',
+                         'power steering', 'rack', 'tie rod', 'tay lai'],
+        'gam-xe': ['gam', 'khung', 'chassis', 'chan bun', 'underbody', 'che gam',
+                   'lop', 'tire', 'mam', 'wheel', 'rim', 'bac dan', 'bearing', 'moay o', 'hub'],
+        'noi-that': ['noi that', 'interior', 'ghe', 'seat', 'taplo', 'dashboard', 'tham',
+                     'mat', 'floor', 'dieu hoa', 'ac', 'air con', 'guong chieu hau', 'kinh'],
+        'ngoai-that': ['ngoai that', 'exterior', 'can', 'bumper', 'guong', 'mirror',
+                       'kinh', 'glass', 'windshield', 'mui', 'roof', 'capo', 'hood', 'cop',
+                       'trunk', 'tem', 'decal', 'logo', 'ong xa', 'exhaust', 'po'],
+    }
+    return index, zone_keywords, normalize
+
+def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn, vertical_id=None):
+    """Match a product name+category to best Part. Returns part_id or None."""
+    text = normalize_fn(f"{product_name} {category}")
+    words = set(text.split())
+
+    best_part_id = None
+    best_score = 0
+
+    # Phase 1: match against Part keywords (exact substring in normalized text)
+    for entry in part_index:
+        score = 0
+        for kw in entry['keywords']:
+            if len(kw) < 2:
+                continue
+            if kw in text:
+                score += len(kw) + 3  # bonus for exact substring match
+            else:
+                # Word-level overlap for multi-word keywords
+                kw_words = set(kw.split())
+                matched = words & kw_words
+                if matched:
+                    score += sum(len(w) for w in matched if len(w) >= 3)
+        if score > best_score:
+            best_score = score
+            best_part_id = entry['part_id']
+
+    if best_score >= 5:
+        return best_part_id
+
+    # Phase 2: fallback to Zone-level keywords (broader matching)
+    best_zone_slug = None
+    best_zone_score = 0
+    for zone_slug, kws in zone_keywords.items():
+        score = 0
+        for kw in kws:
+            if len(kw) >= 3 and kw in text:
+                score += len(kw) + 2
+            elif len(kw) < 3:
+                # Short keywords: only match as whole word
+                if kw in words:
+                    score += 3
+        if score > best_zone_score:
+            best_zone_score = score
+            best_zone_slug = zone_slug
+
+    if best_zone_slug and best_zone_score >= 4:
+        # Find first Part in this zone (within the vertical if specified)
+        q = Part.query.join(Zone).join(Segment)
+        if vertical_id:
+            q = q.filter(Segment.vertical_id == vertical_id)
+        first_part = q.filter(Zone.slug == best_zone_slug).first()
+        if first_part:
+            return first_part.id
+
+    return None
+
+
 @app.route('/admin/products/import-csv', methods=['GET', 'POST'])
 def admin_products_import_csv():
-    """Import products from CSV file (Shopee format)"""
+    """Import products from CSV file with auto-mapping support"""
     if request.method == 'POST':
         if 'csv_file' not in request.files:
             flash('Không có file CSV', 'error')
@@ -1105,13 +1240,26 @@ def admin_products_import_csv():
         csv_reader = csv.DictReader(stream)
 
         # Get form data
+        mapping_mode = request.form.get('mapping_mode', 'manual')  # manual or auto
         part_id = request.form.get('part_id')
+        fallback_part_id = request.form.get('fallback_part_id')
+        vertical_id = request.form.get('vertical_id', type=int)
         network = request.form.get('network', 'shopee')
         apply_deeplink = 'apply_deeplink' in request.form
 
-        if not part_id:
+        if mapping_mode == 'manual' and not part_id:
             flash('Chưa chọn Part để gắn sản phẩm', 'error')
             return redirect(request.url)
+
+        # Build auto-mapping index if auto mode
+        part_index = None
+        zone_kw = None
+        normalize_fn = None
+        if mapping_mode == 'auto':
+            part_index, zone_kw, normalize_fn = _build_part_keyword_index(vertical_id)
+            if not part_index:
+                flash('Không tìm thấy Part nào để auto-map. Hãy tạo Part trước.', 'error')
+                return redirect(request.url)
 
         # Get network for deeplink
         network_obj = None
@@ -1119,34 +1267,77 @@ def admin_products_import_csv():
             network_obj = AffiliateNetwork.query.filter_by(slug=network).first()
 
         count = 0
+        skipped = 0
+        mapped_zones = {}  # Track mapping stats: zone_name -> count
         for row in csv_reader:
             # CSV format: sku, name, url, price, discount, image, desc, category
+            product_name = row.get('name', '')[:200]
             url = row.get('url', '')
+            category = row.get('category', '')
 
             # Apply deeplink if enabled and template exists
             if apply_deeplink and network_obj and network_obj.deeplink_template and url:
                 import urllib.parse
                 url = network_obj.deeplink_template.replace('{url}', urllib.parse.quote(url))
 
-            al = AffiliateLink(
-                part_id=int(part_id),
-                network=network,
-                product_name=row.get('name', '')[:200],
-                url=url,
-                price=float(row.get('price', 0)),
-                image_url=row.get('image', ''),
-                is_active=True
-            )
-            db.session.add(al)
-            count += 1
+            # Determine target part_id
+            target_part_id = None
+            if mapping_mode == 'auto':
+                target_part_id = _match_product_to_part(
+                    product_name, category, part_index, zone_kw, normalize_fn, vertical_id)
+                if not target_part_id and fallback_part_id:
+                    target_part_id = int(fallback_part_id)
+            else:
+                target_part_id = int(part_id)
+
+            if not target_part_id:
+                skipped += 1
+                continue
+
+            # Track mapping stats
+            for entry in (part_index or []):
+                if entry['part_id'] == target_part_id:
+                    zone_label = f"{entry['zone_name']} › {entry['part_name']}"
+                    mapped_zones[zone_label] = mapped_zones.get(zone_label, 0) + 1
+                    break
+
+            try:
+                al = AffiliateLink(
+                    part_id=target_part_id,
+                    network=network,
+                    product_name=product_name,
+                    url=url,
+                    price=float(row.get('price', 0) or 0),
+                    image_url=row.get('image', ''),
+                    is_active=True
+                )
+                db.session.add(al)
+                count += 1
+            except (ValueError, TypeError):
+                skipped += 1
+
+            # Batch commit every 500 rows for performance
+            if count % 500 == 0:
+                db.session.flush()
 
         db.session.commit()
-        flash(f'Đã import {count} sản phẩm thành công!', 'success')
+
+        # Build result message
+        msg = f'Import {count} sản phẩm thành công!'
+        if skipped:
+            msg += f' ({skipped} bỏ qua - không match được Part)'
+        if mapping_mode == 'auto' and mapped_zones:
+            top_zones = sorted(mapped_zones.items(), key=lambda x: -x[1])[:5]
+            detail = ', '.join(f'{name}: {cnt}' for name, cnt in top_zones)
+            msg += f' | Phân bổ: {detail}'
+        flash(msg, 'success')
         return redirect(url_for('admin_products'))
 
     # GET request - show form
     parts_tree = []
+    verticals_list = []
     for v in Vertical.query.all():
+        verticals_list.append({'id': v.id, 'name': v.name, 'icon': v.icon})
         for s in v.segments:
             for z in s.zones:
                 for p in z.parts:
@@ -1156,7 +1347,8 @@ def admin_products_import_csv():
                     })
 
     networks = AffiliateNetwork.query.all()
-    return render_template('admin/products_import_csv.html', parts_tree=parts_tree, networks=networks)
+    return render_template('admin/products_import_csv.html',
+        parts_tree=parts_tree, networks=networks, verticals=verticals_list)
 
 @app.route('/admin/scheduled-imports')
 def admin_scheduled_imports():
@@ -2361,6 +2553,8 @@ def vertical_products(vertical_slug):
     v = Vertical.query.filter_by(slug=vertical_slug).first_or_404()
     f_zone = request.args.get('zone', '')
     f_network = request.args.get('network', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 24
     q = db.session.query(AffiliateLink, Part, Zone, Segment).join(
         Part, AffiliateLink.part_id == Part.id
     ).join(Zone, Part.zone_id == Zone.id
@@ -2370,18 +2564,23 @@ def vertical_products(vertical_slug):
         q = q.filter(Zone.slug == f_zone)
     if f_network:
         q = q.filter(AffiliateLink.network == f_network)
-    products = q.order_by(AffiliateLink.price.desc()).all()
+    total_count = q.count()
+    pagination = q.order_by(AffiliateLink.price.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    products = pagination.items
     segments = Segment.query.filter_by(vertical_id=v.id).all()
     zone_counts = dict(db.session.query(Zone.slug, db.func.count(AffiliateLink.id)).join(
         Part, Zone.id == Part.zone_id).join(AffiliateLink, Part.id == AffiliateLink.part_id
-    ).filter(AffiliateLink.is_active == True).group_by(Zone.slug).all())
+    ).join(Segment, Zone.segment_id == Segment.id).filter(
+        Segment.vertical_id == v.id, AffiliateLink.is_active == True
+    ).group_by(Zone.slug).all())
     networks = db.session.query(AffiliateLink.network).join(Part).join(Zone).join(Segment).filter(
         Segment.vertical_id == v.id).distinct().all()
     config = get_vertical_config(vertical_slug)
     template = get_template_path(vertical_slug, 'products.html')
     return render_template(template, vertical=v, products=products,
         segments=segments, zone_counts=zone_counts, networks=[n[0] for n in networks],
-        f_zone=f_zone, f_network=f_network, product_url='vertical_products', **config)
+        f_zone=f_zone, f_network=f_network, product_url='vertical_products',
+        pagination=pagination, total_count=total_count, page=page, **config)
 
 @app.route('/<vertical_slug>/bai-viet/<slug>')
 def vertical_article(vertical_slug, slug):

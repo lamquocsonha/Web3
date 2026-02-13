@@ -6,26 +6,26 @@
 Import CSV
 {% endblock %}
 {% block content %}
-<h1 class="page-title">📥 Import Sản phẩm từ CSV</h1>
-<p style="font-size:13px;color:var(--text-dim);margin:-8px 0 24px">Import hàng loạt sản phẩm từ file CSV (Shopee format)</p>
+<h1 class="page-title">Import San pham tu CSV</h1>
+<p style="font-size:13px;color:var(--text-dim);margin:-8px 0 24px">Import hang loat san pham tu file CSV — ho tro tu dong phan loai theo Part/Zone</p>
 
 <div style="max-width:900px">
   <!-- CSV Format Info -->
   <div style="background:rgba(59,130,246,0.05);border:2px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:24px;margin-bottom:24px">
-    <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">📋 Format CSV</h3>
-    <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">File CSV cần có các cột sau (header row):</p>
+    <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">Format CSV</h3>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">File CSV can co cac cot sau (header row):</p>
     <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;overflow-x:auto">
       sku,name,url,price,discount,image,desc,category
     </div>
     <ul style="font-size:13px;color:var(--text-dim);margin:12px 0 0;padding-left:20px;line-height:1.8">
-      <li><strong>sku:</strong> Mã sản phẩm (không bắt buộc)</li>
-      <li><strong>name:</strong> Tên sản phẩm (bắt buộc)</li>
-      <li><strong>url:</strong> Link sản phẩm (bắt buộc)</li>
-      <li><strong>price:</strong> Giá (số, không có dấu phẩy)</li>
-      <li><strong>discount:</strong> Giảm giá % (0-100)</li>
-      <li><strong>image:</strong> Link ảnh sản phẩm</li>
-      <li><strong>desc:</strong> Mô tả ngắn</li>
-      <li><strong>category:</strong> Danh mục</li>
+      <li><strong>sku:</strong> Ma san pham (khong bat buoc)</li>
+      <li><strong>name:</strong> Ten san pham (bat buoc) — dung de auto-detect Part</li>
+      <li><strong>url:</strong> Link san pham (bat buoc)</li>
+      <li><strong>price:</strong> Gia (so, khong co dau phay)</li>
+      <li><strong>discount:</strong> Giam gia % (0-100)</li>
+      <li><strong>image:</strong> Link anh san pham</li>
+      <li><strong>desc:</strong> Mo ta ngan</li>
+      <li><strong>category:</strong> Danh muc — dung de auto-detect Part</li>
     </ul>
   </div>
 
@@ -33,28 +33,79 @@ Import CSV
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
     <div style="display:flex;gap:12px;border-bottom:2px solid var(--border);margin-bottom:24px">
       <button type="button" onclick="switchTab('upload')" id="tabUpload" class="import-tab active" style="padding:12px 24px;background:none;border:none;border-bottom:3px solid var(--accent);font-weight:700;cursor:pointer">
-        📤 Upload File
+        Upload File
       </button>
       <button type="button" onclick="switchTab('url')" id="tabUrl" class="import-tab" style="padding:12px 24px;background:none;border:none;border-bottom:3px solid transparent;font-weight:700;cursor:pointer;color:var(--text-dim)">
-        🔗 CSV URL (Auto-update)
+        CSV URL (Auto-update)
       </button>
       <a href="{{ url_for('admin_scheduled_imports') }}" class="btn btn-sm" style="margin-left:auto;align-self:center;font-size:12px;padding:6px 12px">
-        📋 Quản lý Scheduled Imports
+        Quan ly Scheduled Imports
       </a>
     </div>
 
     <!-- Upload Form -->
     <form method="POST" enctype="multipart/form-data" id="formUpload">
-      <!-- Part Selection -->
-      <div class="form-group">
-        <label class="form-label">Chọn Part để gắn sản phẩm <span style="color:#ef4444">*</span></label>
-        <select name="part_id" class="form-select" required>
-          <option value="">-- Chọn Part --</option>
-          {% for part in parts_tree %}
-          <option value="{{ part.id }}">{{ part.label }}</option>
-          {% endfor %}
-        </select>
-        <p class="form-help">Tất cả sản phẩm trong CSV sẽ được gắn vào Part này</p>
+
+      <!-- Mapping Mode Toggle -->
+      <div class="form-group" style="background:rgba(16,185,129,0.06);border:2px solid rgba(16,185,129,0.25);border-radius:12px;padding:20px;margin-bottom:20px">
+        <label class="form-label" style="font-size:15px;font-weight:700;margin-bottom:12px">Phan loai san pham</label>
+        <div style="display:flex;gap:12px;margin-bottom:12px">
+          <label style="flex:1;display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s" id="modeAutoLabel"
+                 onclick="setMappingMode('auto')">
+            <input type="radio" name="mapping_mode" value="auto" checked style="margin-top:2px;width:18px;height:18px">
+            <div>
+              <strong style="font-size:14px">Auto-detect</strong>
+              <p style="font-size:12px;color:var(--text-dim);margin:4px 0 0">Tu dong nhan dien Part/Zone tu ten san pham + category. VD: "Ma phanh Honda" -> He thong phanh > Ma phanh</p>
+            </div>
+          </label>
+          <label style="flex:1;display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s" id="modeManualLabel"
+                 onclick="setMappingMode('manual')">
+            <input type="radio" name="mapping_mode" value="manual" style="margin-top:2px;width:18px;height:18px">
+            <div>
+              <strong style="font-size:14px">Chon Part thu cong</strong>
+              <p style="font-size:12px;color:var(--text-dim);margin:4px 0 0">Tat ca san pham trong CSV se gan vao 1 Part duy nhat</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Auto-detect options (shown when auto mode) -->
+      <div id="autoOptions">
+        <div class="form-group">
+          <label class="form-label">Vertical (pham vi tim kiem)</label>
+          <select name="vertical_id" class="form-select">
+            <option value="">-- Tat ca Verticals --</option>
+            {% for v in verticals %}
+            <option value="{{ v.id }}">{{ v.icon }} {{ v.name }}</option>
+            {% endfor %}
+          </select>
+          <p class="form-help">Chon vertical de thu hep pham vi auto-detect (giam nham lan giua Car/Pet/Travel...)</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fallback Part (khi khong detect duoc)</label>
+          <select name="fallback_part_id" class="form-select">
+            <option value="">-- Bo qua san pham khong match --</option>
+            {% for part in parts_tree %}
+            <option value="{{ part.id }}">{{ part.label }}</option>
+            {% endfor %}
+          </select>
+          <p class="form-help">San pham khong match duoc Part nao se gan vao Part nay. De trong = bo qua.</p>
+        </div>
+      </div>
+
+      <!-- Manual Part Selection (shown when manual mode) -->
+      <div id="manualOptions" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Chon Part de gan san pham <span style="color:#ef4444">*</span></label>
+          <select name="part_id" class="form-select">
+            <option value="">-- Chon Part --</option>
+            {% for part in parts_tree %}
+            <option value="{{ part.id }}">{{ part.label }}</option>
+            {% endfor %}
+          </select>
+          <p class="form-help">Tat ca san pham trong CSV se duoc gan vao Part nay</p>
+        </div>
       </div>
 
       <!-- Network Selection -->
@@ -75,22 +126,22 @@ Import CSV
       <div class="form-group">
         <label class="form-label" style="display:flex;align-items:center;gap:8px">
           <input type="checkbox" name="apply_deeplink" checked style="width:18px;height:18px">
-          <span>Áp dụng Deeplink Template</span>
+          <span>Ap dung Deeplink Template</span>
         </label>
-        <p class="form-help">Tự động chuyển đổi URL thành deeplink affiliate nếu network đã có template</p>
+        <p class="form-help">Tu dong chuyen doi URL thanh deeplink affiliate neu network da co template</p>
       </div>
 
       <!-- File Upload -->
       <div class="form-group">
         <label class="form-label">CSV File <span style="color:#ef4444">*</span></label>
         <input type="file" name="csv_file" accept=".csv" required class="form-input" style="padding:10px">
-        <p class="form-help">Chọn file CSV (encoding: UTF-8)</p>
+        <p class="form-help">Chon file CSV (encoding: UTF-8)</p>
       </div>
 
       <!-- Submit -->
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">📥 Import ngay</button>
-        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Hủy</a>
+        <button type="submit" class="btn btn-primary">Import ngay</button>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Huy</a>
       </div>
     </form>
 
@@ -98,32 +149,32 @@ Import CSV
     <form method="POST" action="{{ url_for('admin_scheduled_import_create') }}" id="formUrl" style="display:none">
       <!-- Job Name -->
       <div class="form-group">
-        <label class="form-label">Tên Job <span style="color:#ef4444">*</span></label>
+        <label class="form-label">Ten Job <span style="color:#ef4444">*</span></label>
         <input type="text" name="name" class="form-input" required placeholder="VD: Shopee Bike Parts - Daily Update">
-        <p class="form-help">Tên để nhận diện scheduled import này</p>
+        <p class="form-help">Ten de nhan dien scheduled import nay</p>
       </div>
 
       <!-- CSV URL -->
       <div class="form-group">
         <label class="form-label">CSV URL <span style="color:#ef4444">*</span></label>
         <input type="url" name="csv_url" class="form-input" required placeholder="https://docs.google.com/spreadsheets/d/xxx/export?format=csv">
-        <p class="form-help">Link trực tiếp tới file CSV (Google Sheets Export, Dropbox, Drive, etc.)</p>
+        <p class="form-help">Link truc tiep toi file CSV (Google Sheets Export, Dropbox, Drive, etc.)</p>
         <div style="background:rgba(250,204,21,0.1);border-left:3px solid #facc15;padding:12px;margin-top:8px;font-size:12px;color:var(--text-dim);border-radius:4px">
-          <strong>💡 Google Sheets:</strong> File → Share → Publish to web → Sheet → CSV → Copy link<br>
-          <strong>💡 Dropbox:</strong> Thay dl=0 thành dl=1 ở cuối link
+          <strong>Google Sheets:</strong> File > Share > Publish to web > Sheet > CSV > Copy link<br>
+          <strong>Dropbox:</strong> Thay dl=0 thanh dl=1 o cuoi link
         </div>
       </div>
 
       <!-- Part Selection -->
       <div class="form-group">
-        <label class="form-label">Chọn Part để gắn sản phẩm <span style="color:#ef4444">*</span></label>
+        <label class="form-label">Chon Part de gan san pham <span style="color:#ef4444">*</span></label>
         <select name="part_id" class="form-select" required>
-          <option value="">-- Chọn Part --</option>
+          <option value="">-- Chon Part --</option>
           {% for part in parts_tree %}
           <option value="{{ part.id }}">{{ part.label }}</option>
           {% endfor %}
         </select>
-        <p class="form-help">Tất cả sản phẩm trong CSV sẽ được gắn vào Part này</p>
+        <p class="form-help">Tat ca san pham trong CSV se duoc gan vao Part nay</p>
       </div>
 
       <!-- Network Selection -->
@@ -144,56 +195,77 @@ Import CSV
       <div class="form-group">
         <label class="form-label" style="display:flex;align-items:center;gap:8px">
           <input type="checkbox" name="apply_deeplink" checked style="width:18px;height:18px">
-          <span>Áp dụng Deeplink Template</span>
+          <span>Ap dung Deeplink Template</span>
         </label>
-        <p class="form-help">Tự động chuyển đổi URL thành deeplink affiliate nếu network đã có template</p>
+        <p class="form-help">Tu dong chuyen doi URL thanh deeplink affiliate neu network da co template</p>
       </div>
 
       <!-- Update Interval -->
       <div class="form-group">
-        <label class="form-label">Tự động cập nhật sau <span style="color:#ef4444">*</span></label>
+        <label class="form-label">Tu dong cap nhat sau <span style="color:#ef4444">*</span></label>
         <div style="display:flex;gap:12px;align-items:center">
           <input type="number" name="update_interval_days" class="form-input" value="7" min="1" max="365" required style="width:100px">
-          <span style="font-size:13px;color:var(--text-dim)">ngày</span>
+          <span style="font-size:13px;color:var(--text-dim)">ngay</span>
         </div>
-        <p class="form-help">Hệ thống sẽ tự động tải và cập nhật sản phẩm từ CSV URL sau số ngày này</p>
+        <p class="form-help">He thong se tu dong tai va cap nhat san pham tu CSV URL sau so ngay nay</p>
       </div>
 
       <!-- Auto-run first import -->
       <div class="form-group">
         <label class="form-label" style="display:flex;align-items:center;gap:8px">
           <input type="checkbox" name="run_now" checked style="width:18px;height:18px">
-          <span>Chạy import ngay lập tức</span>
+          <span>Chay import ngay lap tuc</span>
         </label>
-        <p class="form-help">Nếu bỏ chọn, import đầu tiên sẽ chạy theo lịch</p>
+        <p class="form-help">Neu bo chon, import dau tien se chay theo lich</p>
       </div>
 
       <!-- Submit -->
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">⏰ Tạo Scheduled Import</button>
-        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Hủy</a>
+        <button type="submit" class="btn btn-primary">Tao Scheduled Import</button>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Huy</a>
       </div>
     </form>
   </div>
 
+  <!-- Auto-detect Keyword Reference -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:20px">
+    <h3 style="font-size:15px;margin-bottom:12px">Auto-detect hoat dong nhu the nao?</h3>
+    <div style="font-size:13px;color:var(--text-dim);line-height:1.8">
+      <p style="margin-bottom:12px">He thong so khop <strong>ten san pham</strong> + <strong>category</strong> trong CSV voi keywords cua tung Part:</p>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <tr style="border-bottom:1px solid var(--border)">
+          <th style="text-align:left;padding:8px;font-weight:600">Zone</th>
+          <th style="text-align:left;padding:8px;font-weight:600">Keywords (vi du)</th>
+        </tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong phanh</td><td style="padding:8px;font-family:monospace;font-size:11px">phanh, brake, ma phanh, dia phanh, caliper, abs...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Dong co</td><td style="padding:8px;font-family:monospace;font-size:11px">bugi, loc gio, dau may, piston, truc khuyu, sen, nhong...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong dien</td><td style="padding:8px;font-family:monospace;font-size:11px">den, led, ac quy, cam bien, relay, gat mua, motor...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">He thong treo</td><td style="padding:8px;font-family:monospace;font-size:11px">phuoc, giam chan, lo xo, cao su, rotuy, suspension...</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px">Gam xe</td><td style="padding:8px;font-family:monospace;font-size:11px">lop, mam, bac dan, moay o, khung gam, chan bun...</td></tr>
+        <tr><td style="padding:8px">Ngoai that</td><td style="padding:8px;font-family:monospace;font-size:11px">can, guong, kinh, tem, logo, ong xa, po, capo...</td></tr>
+      </table>
+      <p style="margin-top:12px;font-size:12px">Ngoai ra, Part.tags va Part.name cung duoc dung de match chinh xac hon.</p>
+    </div>
+  </div>
+
   <!-- Example CSV -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:20px">
-    <h3 style="font-size:15px;margin-bottom:12px">📝 Ví dụ CSV</h3>
+    <h3 style="font-size:15px;margin-bottom:12px">Vi du CSV</h3>
     <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;overflow-x:auto;line-height:1.8">
 sku,name,url,price,discount,image,desc,category<br>
-255E+08,Combo sên phấn,https://shopee.vn/product/123,200000,0,https://cf.shopee.vn/img.jpg,Combo sên,bike<br>
-515E+08,Đĩa quây,https://shopee.vn/product/456,72800,5,https://cf.shopee.vn/img2.jpg,Đĩa quây xe,bike<br>
-161E+08,Quạn ngắn,https://shopee.vn/product/789,55000,9,https://cf.shopee.vn/img3.jpg,Quần đạp xe,clothing
+SP001,Ma phanh Honda CRV 2020,https://shopee.vn/product/123,450000,10,https://img.jpg,Ma phanh ceramic,phanh<br>
+SP002,Den hau Toyota Vios LED,https://shopee.vn/product/456,890000,0,https://img2.jpg,Den LED nguyen bo,den<br>
+SP003,Loc gio dong co Hyundai,https://shopee.vn/product/789,120000,5,https://img3.jpg,Air filter OEM,dong co
     </div>
     <p style="font-size:12px;color:var(--text-dim);margin-top:12px">
-      💡 <strong>Lưu ý:</strong> Header row (dòng đầu tiên) bắt buộc phải có để xác định các cột
+      <strong>Luu y:</strong> Voi Auto-detect, "Ma phanh Honda CRV" se tu dong vao <strong>He thong phanh > Ma phanh</strong>,
+      "Den hau Toyota Vios" vao <strong>He thong dien</strong>, "Loc gio dong co" vao <strong>Dong co</strong>.
     </p>
   </div>
 </div>
 
 <script>
 function switchTab(tab) {
-  // Update tab buttons
   document.querySelectorAll('.import-tab').forEach(btn => {
     btn.style.borderBottomColor = 'transparent';
     btn.style.color = 'var(--text-dim)';
@@ -211,5 +283,31 @@ function switchTab(tab) {
     document.getElementById('formUrl').style.display = 'block';
   }
 }
+
+function setMappingMode(mode) {
+  var autoOpts = document.getElementById('autoOptions');
+  var manualOpts = document.getElementById('manualOptions');
+  var autoLabel = document.getElementById('modeAutoLabel');
+  var manualLabel = document.getElementById('modeManualLabel');
+
+  if (mode === 'auto') {
+    autoOpts.style.display = 'block';
+    manualOpts.style.display = 'none';
+    autoLabel.style.borderColor = 'rgba(16,185,129,0.6)';
+    autoLabel.style.background = 'rgba(16,185,129,0.04)';
+    manualLabel.style.borderColor = 'var(--border)';
+    manualLabel.style.background = 'transparent';
+  } else {
+    autoOpts.style.display = 'none';
+    manualOpts.style.display = 'block';
+    manualLabel.style.borderColor = 'rgba(59,130,246,0.6)';
+    manualLabel.style.background = 'rgba(59,130,246,0.04)';
+    autoLabel.style.borderColor = 'var(--border)';
+    autoLabel.style.background = 'transparent';
+  }
+}
+
+// Init
+setMappingMode('auto');
 </script>
 {% endblock %}

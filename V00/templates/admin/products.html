@@ -125,8 +125,32 @@
     </tbody>
   </table>
 </div>
+{% if pagination and pagination.pages > 1 %}
+<nav style="display:flex;justify-content:center;align-items:center;gap:6px;margin:20px 0;flex-wrap:wrap">
+  {% if pagination.has_prev %}
+  <a href="{{ url_for('admin_products', vertical=f_vertical, network=f_network, status=f_status, q=f_search, page=pagination.prev_num) }}"
+     class="btn btn-ghost btn-sm">&laquo; Prev</a>
+  {% endif %}
+  {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+    {% if p %}
+      <a href="{{ url_for('admin_products', vertical=f_vertical, network=f_network, status=f_status, q=f_search, page=p) }}"
+         class="btn btn-sm {% if p == pagination.page %}btn-primary{% else %}btn-ghost{% endif %}"
+         style="min-width:36px;text-align:center">{{ p }}</a>
+    {% else %}
+      <span style="color:var(--text-dim);padding:0 4px">...</span>
+    {% endif %}
+  {% endfor %}
+  {% if pagination.has_next %}
+  <a href="{{ url_for('admin_products', vertical=f_vertical, network=f_network, status=f_status, q=f_search, page=pagination.next_num) }}"
+     class="btn btn-ghost btn-sm">Next &raquo;</a>
+  {% endif %}
+  <span style="margin-left:12px;font-size:11px;color:var(--text-dim)">
+    Page {{ pagination.page }}/{{ pagination.pages }} ({{ total }} total)
+  </span>
+</nav>
+{% endif %}
 <div style="margin-top:12px;font-size:12px;color:var(--text-dim)">
-  Showing {{ products|length }} product{{ 's' if products|length != 1 }}
+  Showing {{ products|length }} of {{ total }} product{{ 's' if total != 1 }}
   {% if f_vertical or f_network or f_status or f_search %} (filtered){% endif %}
 </div>
 {% else %}
