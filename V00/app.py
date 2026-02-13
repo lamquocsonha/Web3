@@ -546,25 +546,31 @@ def admin_seed_data():
         action = request.form.get('action')
 
         if action == 'seed_car':
-            from seed_data import seed
+            from seed_data import seed, seed_articles, seed_networks, seed_products_pet_travel
             try:
                 seed()
+                seed_articles()
+                seed_networks()
                 flash('✅ Car vertical seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding Car: {str(e)}', 'error')
 
         elif action == 'seed_pet':
-            from seed_data import seed_pet
+            from seed_data import seed_pet, seed_pet_articles, seed_products_pet_travel
             try:
                 seed_pet()
+                seed_pet_articles()
                 flash('✅ Pet vertical seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding Pet: {str(e)}', 'error')
 
         elif action == 'seed_travel':
-            from seed_data import seed_travel
+            from seed_data import seed_travel, seed_travel_articles, seed_hotels, seed_attractions, seed_products_pet_travel
             try:
                 seed_travel()
+                seed_travel_articles()
+                seed_hotels()
+                seed_attractions()
                 flash('✅ Travel vertical seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding Travel: {str(e)}', 'error')
@@ -578,30 +584,46 @@ def admin_seed_data():
                 flash(f'❌ Error seeding Bike: {str(e)}', 'error')
 
         elif action == 'seed_beauty':
-            from seed_data import seed_beauty
+            from seed_data import seed_beauty, seed_beauty_articles
             try:
                 seed_beauty()
+                seed_beauty_articles()
                 flash('✅ Beauty vertical seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding Beauty: {str(e)}', 'error')
 
         elif action == 'seed_tech':
-            from seed_data import seed_tech
+            from seed_data import seed_tech, seed_tech_articles
             try:
                 seed_tech()
+                seed_tech_articles()
                 flash('✅ Tech vertical seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding Tech: {str(e)}', 'error')
 
         elif action == 'seed_all':
-            from seed_data import seed, seed_pet, seed_travel, seed_bike, seed_beauty, seed_tech
+            from seed_data import (seed, seed_articles, seed_networks, seed_video,
+                seed_pet, seed_pet_articles, seed_travel, seed_travel_articles,
+                seed_products_pet_travel, seed_hotels, seed_attractions,
+                seed_bike, seed_vouchers, seed_beauty, seed_beauty_articles,
+                seed_tech, seed_tech_articles)
             try:
                 seed()
+                seed_articles()
+                seed_networks()
                 seed_pet()
+                seed_pet_articles()
                 seed_travel()
+                seed_travel_articles()
+                seed_products_pet_travel()
+                seed_hotels()
+                seed_attractions()
                 seed_bike()
+                seed_vouchers()
                 seed_beauty()
+                seed_beauty_articles()
                 seed_tech()
+                seed_tech_articles()
                 flash('✅ All verticals seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding all: {str(e)}', 'error')
