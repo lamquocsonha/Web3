@@ -1,0 +1,210 @@
+{% extends "admin/base.html" %}
+{% block title %}Content Calendar{% endblock %}
+{% block breadcrumb %}AI Engine &rsaquo; Content Calendar{% endblock %}
+{% block content %}
+<style>
+.cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px }
+.cal-nav { display:flex; align-items:center; gap:12px }
+.cal-nav a { padding:8px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); text-decoration:none; font-weight:600; font-size:15px; transition:all .15s }
+.cal-nav a:hover { background:var(--accent-dim); color:var(--accent) }
+.cal-month { font-size:26px; font-weight:700; min-width:220px; text-align:center }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border); border-radius:12px; overflow:hidden; margin-bottom:32px }
+.cal-day-header { background:var(--surface2); padding:12px 8px; text-align:center; font-weight:700; font-size:13px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px }
+.cal-cell { background:var(--surface); min-height:110px; padding:8px; position:relative; transition:background .15s }
+.cal-cell:hover { background:var(--surface2) }
+.cal-cell.other-month { opacity:.35 }
+.cal-cell.today { background:var(--accent-dim); box-shadow:inset 0 -3px 0 var(--accent) }
+.cal-date { font-size:14px; font-weight:700; margin-bottom:6px; color:var(--text) }
+.cal-event { font-size:11px; padding:3px 6px; border-radius:4px; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer }
+.cal-event.holiday { background:#fef3c7; color:#92400e }
+.cal-event.seasonal { background:#dbeafe; color:#1e40af }
+.cal-event.trending { background:#fce7f3; color:#9d174d }
+.cal-event.custom { background:#d1fae5; color:#065f46 }
+.cal-event.queue { background:var(--accent-dim); color:var(--accent); border-left:2px solid var(--accent) }
+
+.cal-sidebar { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px }
+.cal-panel { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px }
+.cal-panel h3 { font-size:17px; font-weight:700; margin-bottom:16px }
+
+.event-list { list-style:none }
+.event-list li { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:14px }
+.event-list li:last-child { border:none }
+.event-badge { font-size:10px; padding:2px 8px; border-radius:99px; font-weight:700; text-transform:uppercase }
+
+.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); z-index:999; align-items:center; justify-content:center }
+.modal-overlay.show { display:flex }
+.modal-box { background:var(--surface); border-radius:16px; padding:32px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,.3) }
+.modal-box h3 { font-size:20px; font-weight:700; margin-bottom:20px }
+.form-row { margin-bottom:16px }
+.form-row label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-dim) }
+.form-row input, .form-row select, .form-row textarea { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit }
+.form-row textarea { resize:vertical; min-height:60px }
+.form-actions { display:flex; gap:10px; margin-top:20px }
+.btn-primary { padding:10px 24px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer }
+.btn-secondary { padding:10px 24px; background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; cursor:pointer }
+.form-check { display:flex; align-items:center; gap:8px }
+.form-check input[type=checkbox] { width:18px; height:18px }
+</style>
+
+<div class="cal-header">
+  <h1 class="page-title" style="margin:0">Content Calendar</h1>
+  <div class="cal-nav">
+    <a href="?year={{ prev_year }}&month={{ prev_month }}">&larr; Prev</a>
+    <span class="cal-month">{{ month_name }} {{ year }}</span>
+    <a href="?year={{ next_year }}&month={{ next_month }}">Next &rarr;</a>
+  </div>
+  <button class="btn-primary" onclick="openModal()">+ Add Event</button>
+</div>
+
+<!-- Calendar Grid -->
+<div class="cal-grid">
+  {% for day_name in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+  <div class="cal-day-header">{{ day_name }}</div>
+  {% endfor %}
+
+  {% for week in weeks %}
+  {% for day in week %}
+  <div class="cal-cell {% if day.month != month %}other-month{% endif %} {% if day == today %}today{% endif %}">
+    <div class="cal-date">{{ day.day }}</div>
+    {% if day in date_events %}
+    {% for item in date_events[day][:3] %}
+    {% if item.type == 'event' %}
+    <div class="cal-event {{ item.obj.event_type }}" title="{{ item.obj.name }}">
+      {{ item.obj.icon }} {{ item.obj.name }}
+    </div>
+    {% else %}
+    <div class="cal-event queue" title="{{ item.obj.topic }}">
+      {{ item.obj.topic[:25] }}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% if date_events[day]|length > 3 %}
+    <div style="font-size:10px;color:var(--text-dim);padding:2px 6px">+{{ date_events[day]|length - 3 }} more</div>
+    {% endif %}
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% endfor %}
+</div>
+
+<!-- Sidebar panels -->
+<div class="cal-sidebar">
+  <!-- Upcoming Events -->
+  <div class="cal-panel">
+    <h3>Upcoming Events</h3>
+    {% if events %}
+    <ul class="event-list">
+      {% for e in events[:8] %}
+      <li>
+        <span>{{ e.icon }}</span>
+        <div style="flex:1">
+          <div style="font-weight:600">{{ e.name }}</div>
+          <div style="font-size:12px;color:var(--text-dim)">{{ e.start_date.strftime('%d/%m') }}{% if e.end_date %} - {{ e.end_date.strftime('%d/%m') }}{% endif %}</div>
+        </div>
+        <span class="event-badge {{ e.event_type }}" style="background:{% if e.event_type=='holiday' %}#fef3c7;color:#92400e{% elif e.event_type=='seasonal' %}#dbeafe;color:#1e40af{% elif e.event_type=='trending' %}#fce7f3;color:#9d174d{% else %}#d1fae5;color:#065f46{% endif %}">{{ e.event_type }}</span>
+        <form method="POST" action="{{ url_for('admin_content_event_delete', eid=e.id) }}" style="display:inline">
+          <button type="submit" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px" onclick="return confirm('Delete?')">&#10005;</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p style="color:var(--text-dim);font-size:14px">No events this month. Add holidays, seasonal dates, or trending topics.</p>
+    {% endif %}
+  </div>
+
+  <!-- Scheduled Content -->
+  <div class="cal-panel">
+    <h3>Scheduled Content</h3>
+    {% if queue_items %}
+    <ul class="event-list">
+      {% for q in queue_items[:8] %}
+      <li>
+        <span style="font-size:10px;padding:2px 8px;border-radius:4px;background:var(--accent-dim);color:var(--accent);font-weight:700">{{ q.knowledge_layer }}</span>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">{{ q.topic[:40] }}</div>
+          <div style="font-size:12px;color:var(--text-dim)">{{ q.scheduled_at.strftime('%d/%m %H:%M') if q.scheduled_at else 'Unscheduled' }}</div>
+        </div>
+        <span style="font-size:11px;padding:2px 8px;border-radius:4px;background:{% if q.status=='pending' %}#fef3c7;color:#92400e{% elif q.status=='review' %}#dbeafe;color:#1e40af{% elif q.status=='published' %}#d1fae5;color:#065f46{% else %}var(--surface2);color:var(--text-dim){% endif %}">{{ q.status }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p style="color:var(--text-dim);font-size:14px">No content scheduled this month. Use Queue to add topics.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Add Event Modal -->
+<div class="modal-overlay" id="eventModal">
+  <div class="modal-box">
+    <h3>Add Content Event</h3>
+    <form method="POST" action="{{ url_for('admin_content_event_save') }}">
+      <div class="form-row">
+        <label>Event Name</label>
+        <input type="text" name="name" required placeholder="e.g. Tet Holiday, Black Friday...">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-row">
+          <label>Type</label>
+          <select name="event_type">
+            <option value="holiday">Holiday</option>
+            <option value="seasonal">Seasonal</option>
+            <option value="trending">Trending</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Icon</label>
+          <input type="text" name="icon" placeholder="emoji">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-row">
+          <label>Start Date</label>
+          <input type="date" name="start_date" required>
+        </div>
+        <div class="form-row">
+          <label>End Date (optional)</label>
+          <input type="date" name="end_date">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Keywords</label>
+        <textarea name="keywords" placeholder="comma separated keywords for AI content generation"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-row">
+          <label>Verticals</label>
+          <select name="verticals">
+            <option value="all">All Verticals</option>
+            {% for v in verticals %}
+            <option value="{{ v.slug }}">{{ v.icon }} {{ v.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Recurrence</label>
+          <select name="recurrence">
+            <option value="yearly">Yearly</option>
+            <option value="one-time">One-time</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-check"><input type="checkbox" name="auto_generate" checked> Auto-generate content for this event</label>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Save Event</button>
+        <button type="button" class="btn-secondary" onclick="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openModal() { document.getElementById('eventModal').classList.add('show'); }
+function closeModal() { document.getElementById('eventModal').classList.remove('show'); }
+document.getElementById('eventModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+</script>
+{% endblock %}

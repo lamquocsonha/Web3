@@ -1,0 +1,172 @@
+{% extends "admin/base.html" %}
+{% block title %}Gap Analysis{% endblock %}
+{% block breadcrumb %}AI Engine &rsaquo; Gap Analysis{% endblock %}
+{% block content %}
+<style>
+.gap-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px }
+.gap-summary { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:32px }
+.gap-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center }
+.gap-stat-val { font-size:28px; font-weight:800 }
+.gap-stat-label { font-size:12px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:4px }
+
+.gap-cards { display:grid; gap:20px; margin-bottom:32px }
+.gap-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; transition:all .2s }
+.gap-card:hover { box-shadow:0 4px 20px rgba(0,0,0,.08) }
+
+.gap-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px }
+.gap-card-title { display:flex; align-items:center; gap:12px }
+.gap-card-title-icon { font-size:32px }
+.gap-card-title-text h3 { font-size:20px; font-weight:700; margin-bottom:2px }
+.gap-card-title-text span { font-size:13px; color:var(--text-dim) }
+
+.coverage-bar-wrap { width:200px }
+.coverage-label { font-size:12px; font-weight:700; color:var(--text-dim); margin-bottom:4px; text-align:right }
+.coverage-bar { height:10px; background:var(--surface2); border-radius:99px; overflow:hidden }
+.coverage-fill { height:100%; border-radius:99px; transition:width .6s }
+
+.gap-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px }
+.gap-metric { background:var(--surface2); border-radius:10px; padding:14px; text-align:center }
+.gap-metric-val { font-size:22px; font-weight:800 }
+.gap-metric-label { font-size:11px; font-weight:600; color:var(--text-dim); margin-top:2px }
+
+.gap-suggestions { margin-top:16px }
+.gap-suggestions h4 { font-size:14px; font-weight:700; margin-bottom:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px }
+
+.suggestion-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--surface2); border-radius:10px; margin-bottom:8px; transition:all .15s }
+.suggestion-item:hover { background:var(--accent-dim) }
+.sug-priority { font-size:10px; padding:3px 10px; border-radius:99px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; flex-shrink:0 }
+.sug-priority.high { background:#fef2f2; color:#dc2626 }
+.sug-priority.medium { background:#fef3c7; color:#d97706 }
+.sug-priority.low { background:#d1fae5; color:#059669 }
+.sug-text { flex:1; font-size:14px; font-weight:500 }
+.sug-action { padding:6px 16px; background:var(--accent); color:#fff; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; white-space:nowrap }
+.sug-action:hover { opacity:.9 }
+
+.empty-zones-list { margin-top:12px }
+.empty-zone { display:inline-flex; align-items:center; gap:4px; font-size:12px; padding:4px 10px; border-radius:6px; background:rgba(239,68,68,.08); color:#ef4444; margin:0 4px 6px 0; font-weight:500 }
+
+.overall-health { background:linear-gradient(135deg, var(--accent-dim), rgba(59,130,246,.06)); border:2px solid var(--accent); border-radius:14px; padding:24px 28px; margin-bottom:32px; display:flex; align-items:center; gap:20px }
+.health-score { font-size:48px; font-weight:900; color:var(--accent) }
+.health-info h3 { font-size:18px; font-weight:700; margin-bottom:4px }
+.health-info p { font-size:14px; color:var(--text-dim) }
+</style>
+
+<div class="gap-header">
+  <h1 class="page-title" style="margin:0">Gap Analysis</h1>
+</div>
+
+{% if analysis %}
+<!-- Overall Health -->
+{% set total_coverage = (analysis|map(attribute='coverage')|list|sum / analysis|length)|round|int if analysis else 0 %}
+{% set total_articles = analysis|map(attribute='articles_count')|list|sum %}
+{% set total_pending = analysis|map(attribute='queue_pending')|list|sum %}
+
+<div class="overall-health">
+  <div class="health-score">{{ total_coverage }}%</div>
+  <div class="health-info">
+    <h3>Overall Content Coverage</h3>
+    <p>{{ analysis|length }} verticals analyzed &bull; {{ total_articles }} articles published &bull; {{ total_pending }} pending in queue</p>
+  </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="gap-summary">
+  <div class="gap-stat">
+    <div class="gap-stat-val">{{ analysis|length }}</div>
+    <div class="gap-stat-label">Verticals</div>
+  </div>
+  <div class="gap-stat">
+    <div class="gap-stat-val" style="color:{% if total_coverage >= 70 %}#22c55e{% elif total_coverage >= 40 %}#f59e0b{% else %}#ef4444{% endif %}">{{ total_coverage }}%</div>
+    <div class="gap-stat-label">Avg Coverage</div>
+  </div>
+  <div class="gap-stat">
+    <div class="gap-stat-val" style="color:#3b82f6">{{ total_articles }}</div>
+    <div class="gap-stat-label">Total Articles</div>
+  </div>
+  <div class="gap-stat">
+    <div class="gap-stat-val" style="color:#f59e0b">{{ total_pending }}</div>
+    <div class="gap-stat-label">Queue Pending</div>
+  </div>
+</div>
+
+<!-- Per-Vertical Analysis -->
+<div class="gap-cards">
+  {% for a in analysis %}
+  <div class="gap-card">
+    <div class="gap-card-header">
+      <div class="gap-card-title">
+        <span class="gap-card-title-icon">{{ a.vertical.icon }}</span>
+        <div class="gap-card-title-text">
+          <h3>{{ a.vertical.name }}</h3>
+          <span>{{ a.vertical.slug }}.unilab.vn</span>
+        </div>
+      </div>
+      <div class="coverage-bar-wrap">
+        <div class="coverage-label">{{ a.coverage }}% coverage</div>
+        <div class="coverage-bar">
+          <div class="coverage-fill" style="width:{{ a.coverage }}%;background:{% if a.coverage >= 70 %}#22c55e{% elif a.coverage >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gap-metrics">
+      <div class="gap-metric">
+        <div class="gap-metric-val">{{ a.total_zones }}</div>
+        <div class="gap-metric-label">Total Zones</div>
+      </div>
+      <div class="gap-metric">
+        <div class="gap-metric-val" style="color:#22c55e">{{ a.zones_with_content }}</div>
+        <div class="gap-metric-label">With Content</div>
+      </div>
+      <div class="gap-metric">
+        <div class="gap-metric-val" style="color:#3b82f6">{{ a.articles_count }}</div>
+        <div class="gap-metric-label">Articles</div>
+      </div>
+      <div class="gap-metric">
+        <div class="gap-metric-val" style="color:{% if a.has_rule %}#22c55e{% else %}var(--text-dim){% endif %}">{% if a.has_rule %}ON{% else %}OFF{% endif %}</div>
+        <div class="gap-metric-label">Auto Rules</div>
+      </div>
+    </div>
+
+    {% if a.empty_zones %}
+    <div class="empty-zones-list">
+      <span style="font-size:12px;font-weight:700;color:var(--text-dim)">Empty zones:</span>
+      {% for ez in a.empty_zones %}
+      <span class="empty-zone">{{ ez.segment }} &rsaquo; {{ ez.zone }}</span>
+      {% endfor %}
+      {% if a.total_zones - a.zones_with_content > 5 %}
+      <span class="empty-zone" style="background:var(--surface2);color:var(--text-dim)">+{{ a.total_zones - a.zones_with_content - 5 }} more</span>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="gap-suggestions">
+      <h4>AI Suggestions</h4>
+      {% for s in a.suggestions %}
+      <div class="suggestion-item">
+        <span class="sug-priority {{ s.priority }}">{{ s.priority }}</span>
+        <span class="sug-text">{{ s.text }}</span>
+        {% if s.action == 'auto_fill' %}
+        <a href="{{ url_for('admin_content_queue') }}?vertical={{ a.vertical.slug }}" class="sug-action">Fill Gaps</a>
+        {% elif s.action == 'fill_zones' %}
+        <a href="{{ url_for('admin_content_queue') }}?vertical={{ a.vertical.slug }}" class="sug-action">Add Content</a>
+        {% elif s.action == 'create_articles' %}
+        <a href="{{ url_for('admin_article_new') }}" class="sug-action">Create Articles</a>
+        {% else %}
+        <a href="{{ url_for('admin_content_calendar') }}" class="sug-action">Plan Content</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">
+  <div style="font-size:48px;margin-bottom:16px">&#128269;</div>
+  <h3 style="font-size:18px;margin-bottom:8px">No verticals to analyze</h3>
+  <p style="font-size:14px">Create and publish verticals first to see gap analysis.</p>
+</div>
+{% endif %}
+{% endblock %}

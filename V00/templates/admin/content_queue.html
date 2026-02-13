@@ -1,0 +1,221 @@
+{% extends "admin/base.html" %}
+{% block title %}Content Queue{% endblock %}
+{% block breadcrumb %}AI Engine &rsaquo; Content Queue{% endblock %}
+{% block content %}
+<style>
+.queue-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px }
+.queue-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px }
+.q-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; text-align:center }
+.q-stat-val { font-size:28px; font-weight:800 }
+.q-stat-label { font-size:12px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:4px }
+
+.queue-filters { display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; align-items:center }
+.queue-filters select { padding:8px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface); color:var(--text); font-family:inherit }
+.queue-filters .filter-label { font-size:13px; font-weight:600; color:var(--text-dim) }
+
+.queue-table { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:32px }
+.queue-table table { width:100%; border-collapse:collapse }
+.queue-table th { padding:14px 16px; text-align:left; font-size:12px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.queue-table td { padding:14px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.queue-table tr:last-child td { border:none }
+.queue-table tr:hover td { background:var(--surface2) }
+
+.q-topic { font-weight:600; font-size:15px; max-width:300px }
+.q-topic-kw { font-size:12px; color:var(--text-dim); margin-top:3px }
+
+.q-badge { display:inline-block; font-size:11px; padding:3px 10px; border-radius:6px; font-weight:700; text-transform:uppercase }
+.q-badge.pending { background:#fef3c7; color:#92400e }
+.q-badge.review { background:#dbeafe; color:#1e40af }
+.q-badge.published { background:#d1fae5; color:#065f46 }
+.q-badge.skipped { background:var(--surface2); color:var(--text-dim) }
+.q-badge.generating { background:#fce7f3; color:#9d174d }
+
+.q-layer { font-size:12px; padding:3px 10px; border-radius:6px; font-weight:700; background:var(--accent-dim); color:var(--accent) }
+
+.q-actions { display:flex; gap:6px }
+.q-btn { padding:6px 14px; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; transition:all .15s }
+.q-btn.approve { background:#d1fae5; color:#065f46 }
+.q-btn.approve:hover { background:#a7f3d0 }
+.q-btn.skip { background:#fef3c7; color:#92400e }
+.q-btn.skip:hover { background:#fde68a }
+.q-btn.delete { background:rgba(239,68,68,.1); color:#ef4444 }
+.q-btn.delete:hover { background:rgba(239,68,68,.2) }
+
+.btn-primary { padding:10px 24px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer }
+.btn-secondary { padding:10px 24px; background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:8px; font-size:14px; font-weight:600; cursor:pointer }
+
+.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); z-index:999; align-items:center; justify-content:center }
+.modal-overlay.show { display:flex }
+.modal-box { background:var(--surface); border-radius:16px; padding:32px; width:100%; max-width:520px; box-shadow:0 20px 60px rgba(0,0,0,.3) }
+.modal-box h3 { font-size:20px; font-weight:700; margin-bottom:20px }
+.form-row { margin-bottom:16px }
+.form-row label { display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-dim) }
+.form-row input, .form-row select, .form-row textarea { width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit }
+.form-row textarea { resize:vertical; min-height:60px }
+.form-actions { display:flex; gap:10px; margin-top:20px }
+
+.empty-state { text-align:center; padding:60px 20px; color:var(--text-dim) }
+.empty-state-icon { font-size:48px; margin-bottom:16px }
+</style>
+
+<div class="queue-header">
+  <h1 class="page-title" style="margin:0">Content Queue</h1>
+  <button class="btn-primary" onclick="openAddModal()">+ Add Topic</button>
+</div>
+
+<!-- Stats -->
+<div class="queue-stats">
+  <div class="q-stat">
+    <div class="q-stat-val" style="color:#f59e0b">{{ stats.pending }}</div>
+    <div class="q-stat-label">Pending</div>
+  </div>
+  <div class="q-stat">
+    <div class="q-stat-val" style="color:#3b82f6">{{ stats.review }}</div>
+    <div class="q-stat-label">In Review</div>
+  </div>
+  <div class="q-stat">
+    <div class="q-stat-val" style="color:#22c55e">{{ stats.published }}</div>
+    <div class="q-stat-label">Published</div>
+  </div>
+  <div class="q-stat">
+    <div class="q-stat-val" style="color:var(--text-dim)">{{ stats.skipped }}</div>
+    <div class="q-stat-label">Skipped</div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="queue-filters">
+  <span class="filter-label">Filter:</span>
+  <form method="GET" id="filterForm" style="display:flex;gap:10px">
+    <select name="status" onchange="this.form.submit()">
+      <option value="all" {% if status_filter=='all' %}selected{% endif %}>All Status</option>
+      <option value="pending" {% if status_filter=='pending' %}selected{% endif %}>Pending</option>
+      <option value="review" {% if status_filter=='review' %}selected{% endif %}>In Review</option>
+      <option value="published" {% if status_filter=='published' %}selected{% endif %}>Published</option>
+      <option value="skipped" {% if status_filter=='skipped' %}selected{% endif %}>Skipped</option>
+    </select>
+    <select name="vertical" onchange="this.form.submit()">
+      <option value="all" {% if vertical_filter=='all' %}selected{% endif %}>All Verticals</option>
+      {% for v in verticals %}
+      <option value="{{ v.slug }}" {% if vertical_filter==v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<!-- Queue Table -->
+{% if queue %}
+<div class="queue-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Topic</th>
+        <th>Vertical</th>
+        <th>Layer</th>
+        <th>Source</th>
+        <th>Status</th>
+        <th>Scheduled</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for q in queue %}
+      <tr>
+        <td>
+          <div class="q-topic">{{ q.topic }}</div>
+          {% if q.keywords %}<div class="q-topic-kw">{{ q.keywords[:60] }}</div>{% endif %}
+        </td>
+        <td>
+          {% if q.vertical %}
+          <span>{{ q.vertical.icon }} {{ q.vertical.name }}</span>
+          {% else %}-{% endif %}
+        </td>
+        <td><span class="q-layer">{{ q.knowledge_layer }}</span></td>
+        <td style="font-size:12px;color:var(--text-dim)">{{ q.source_type }}</td>
+        <td><span class="q-badge {{ q.status }}">{{ q.status }}</span></td>
+        <td style="font-size:13px">{{ q.scheduled_at.strftime('%d/%m %H:%M') if q.scheduled_at else '-' }}</td>
+        <td>
+          <div class="q-actions">
+            {% if q.status == 'pending' %}
+            <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline">
+              <input type="hidden" name="action" value="approve">
+              <button type="submit" class="q-btn approve">Approve</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline">
+              <input type="hidden" name="action" value="skip">
+              <button type="submit" class="q-btn skip">Skip</button>
+            </form>
+            {% elif q.status == 'review' %}
+            <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline">
+              <input type="hidden" name="action" value="publish">
+              <button type="submit" class="q-btn approve">Publish</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin_content_queue_delete', qid=q.id) }}" style="display:inline">
+              <button type="submit" class="q-btn delete" onclick="return confirm('Delete this item?')">&#10005;</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state-icon">&#128203;</div>
+  <h3 style="font-size:18px;margin-bottom:8px">Queue is empty</h3>
+  <p style="font-size:14px">AI will suggest topics based on your auto rules, or add topics manually.</p>
+</div>
+{% endif %}
+
+<!-- Add Topic Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal-box">
+    <h3>Add Topic to Queue</h3>
+    <form method="POST" action="{{ url_for('admin_content_queue_add') }}">
+      <div class="form-row">
+        <label>Topic</label>
+        <input type="text" name="topic" required placeholder="e.g. Top 10 brake pads for Toyota Camry">
+      </div>
+      <div class="form-row">
+        <label>Vertical</label>
+        <select name="vertical_id" required>
+          {% for v in verticals %}
+          <option value="{{ v.id }}">{{ v.icon }} {{ v.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-row">
+          <label>Knowledge Layer</label>
+          <select name="knowledge_layer">
+            <option value="L1">L1 - Overview</option>
+            <option value="L2">L2 - Detailed</option>
+            <option value="L3">L3 - Expert</option>
+            <option value="L4">L4 - Deep Dive</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Schedule</label>
+          <input type="datetime-local" name="scheduled_at">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Keywords</label>
+        <textarea name="keywords" placeholder="comma-separated keywords for SEO..."></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Add to Queue</button>
+        <button type="button" class="btn-secondary" onclick="closeAddModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openAddModal() { document.getElementById('addModal').classList.add('show'); }
+function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
+document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) closeAddModal(); });
+</script>
+{% endblock %}

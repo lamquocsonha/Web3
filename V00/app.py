@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget
+from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue
 from datetime import datetime, date, timedelta
 import os, random
 
@@ -15,8 +15,8 @@ db.init_app(app)
 THEME_STYLES = {
     # ── Fallback / generic ──────────────────────────────────────
     'classic': {
-        'font_primary': "'Georgia', 'Times New Roman', serif",
-        'font_secondary': "'Inter', sans-serif",
+        'font_primary': "'DM Sans', 'Inter', -apple-system, system-ui, sans-serif",
+        'font_secondary': "'DM Mono', 'Inter', sans-serif",
         'bg_light': '#ffffff', 'bg_dark': '#1a1a1a',
         'surface_light': '#f8f9fa', 'surface_dark': '#2d2d2d',
         'border_light': '#dee2e6', 'border_dark': '#444444',
@@ -52,7 +52,7 @@ THEME_STYLES = {
 
     # ── Beauty  ·  Sang trọng, nữ tính, thanh lịch ─────────────
     'beauty': {
-        'font_primary': "'Playfair Display', 'Lora', Georgia, serif",
+        'font_primary': "'Playfair Display', 'DM Sans', -apple-system, sans-serif",
         'font_secondary': "'Montserrat', sans-serif",
         'bg_light': '#fdf6f9', 'bg_dark': '#1a0f16',
         'surface_light': '#ffffff', 'surface_dark': '#2a1a24',
@@ -1775,6 +1775,281 @@ def admin_voucher_widget_delete(wid):
     db.session.commit()
     flash(f'Đã xóa widget: {name}', 'success')
     return redirect(url_for('admin_voucher_widgets'))
+
+# =============================================
+# AI AUTO-CONTENT ENGINE
+# =============================================
+
+@app.route('/admin/content-calendar')
+def admin_content_calendar():
+    """Content Calendar - monthly overview with events and scheduled content"""
+    import calendar as cal_mod
+    year = request.args.get('year', date.today().year, type=int)
+    month = request.args.get('month', date.today().month, type=int)
+
+    # Get calendar data
+    first_day = date(year, month, 1)
+    days_in_month = cal_mod.monthrange(year, month)[1]
+    last_day = date(year, month, days_in_month)
+
+    # Get events for this month
+    events = ContentEvent.query.filter(
+        ContentEvent.start_date <= last_day,
+        db.or_(ContentEvent.end_date >= first_day, ContentEvent.end_date.is_(None)),
+        ContentEvent.is_active == True
+    ).all()
+
+    # Get scheduled queue items
+    queue_items = ContentQueue.query.filter(
+        ContentQueue.scheduled_at >= datetime(year, month, 1),
+        ContentQueue.scheduled_at <= datetime(year, month, days_in_month, 23, 59, 59)
+    ).all()
+
+    # Build calendar grid
+    cal = cal_mod.Calendar(firstweekday=0)
+    weeks = cal.monthdatescalendar(year, month)
+
+    # Map events and queue items to dates
+    date_events = {}
+    for e in events:
+        d = e.start_date
+        end = e.end_date or e.start_date
+        while d <= end and d <= last_day:
+            if d >= first_day:
+                date_events.setdefault(d, []).append({'type': 'event', 'obj': e})
+            d += timedelta(days=1)
+
+    for q in queue_items:
+        if q.scheduled_at:
+            qd = q.scheduled_at.date()
+            date_events.setdefault(qd, []).append({'type': 'queue', 'obj': q})
+
+    # Navigation
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year = year if month < 12 else year + 1
+
+    verticals = Vertical.query.filter_by(status='published').all()
+
+    return render_template('admin/content_calendar.html',
+        year=year, month=month, weeks=weeks, date_events=date_events,
+        events=events, queue_items=queue_items,
+        prev_year=prev_year, prev_month=prev_month,
+        next_year=next_year, next_month=next_month,
+        month_name=cal_mod.month_name[month],
+        today=date.today(), verticals=verticals)
+
+
+@app.route('/admin/content-calendar/event', methods=['POST'])
+def admin_content_event_save():
+    """Save a content event"""
+    event_id = request.form.get('event_id', type=int)
+    if event_id:
+        event = ContentEvent.query.get_or_404(event_id)
+    else:
+        event = ContentEvent(name='', start_date=date.today())
+        db.session.add(event)
+
+    event.name = request.form.get('name', '')
+    event.event_type = request.form.get('event_type', 'holiday')
+    event.start_date = datetime.strptime(request.form.get('start_date', ''), '%Y-%m-%d').date()
+    end = request.form.get('end_date', '')
+    event.end_date = datetime.strptime(end, '%Y-%m-%d').date() if end else None
+    event.keywords = request.form.get('keywords', '')
+    event.verticals = request.form.get('verticals', 'all')
+    event.icon = request.form.get('icon', '')
+    event.recurrence = request.form.get('recurrence', 'yearly')
+    event.auto_generate = 'auto_generate' in request.form
+    event.is_active = True
+    db.session.commit()
+    flash(f'Event saved: {event.name}', 'success')
+    return redirect(url_for('admin_content_calendar'))
+
+
+@app.route('/admin/content-calendar/event/<int:eid>/delete', methods=['POST'])
+def admin_content_event_delete(eid):
+    """Delete a content event"""
+    e = ContentEvent.query.get_or_404(eid)
+    db.session.delete(e)
+    db.session.commit()
+    flash('Event deleted', 'success')
+    return redirect(url_for('admin_content_calendar'))
+
+
+@app.route('/admin/auto-rules')
+def admin_auto_rules():
+    """Auto content rules - configure frequency/tone/layer per vertical"""
+    verticals = Vertical.query.filter_by(status='published').order_by(Vertical.name).all()
+    rules = AutoContentRule.query.all()
+    rules_map = {r.vertical_id: r for r in rules}
+    return render_template('admin/auto_rules.html', verticals=verticals, rules_map=rules_map)
+
+
+@app.route('/admin/auto-rules/save', methods=['POST'])
+def admin_auto_rules_save():
+    """Save auto content rules for a vertical"""
+    vid = request.form.get('vertical_id', type=int)
+    rule = AutoContentRule.query.filter_by(vertical_id=vid).first()
+    if not rule:
+        rule = AutoContentRule(vertical_id=vid)
+        db.session.add(rule)
+
+    rule.frequency = request.form.get('frequency', 'daily')
+    rule.articles_per_day = request.form.get('articles_per_day', 1, type=int)
+    rule.knowledge_layer = request.form.get('knowledge_layer', 'auto')
+    rule.tone = request.form.get('tone', 'seo')
+    rule.auto_publish = 'auto_publish' in request.form
+    rule.is_active = 'is_active' in request.form
+    rule.topics_to_avoid = request.form.get('topics_to_avoid', '')
+    rule.focus_keywords = request.form.get('focus_keywords', '')
+    db.session.commit()
+    flash(f'Rules saved for vertical', 'success')
+    return redirect(url_for('admin_auto_rules'))
+
+
+@app.route('/admin/content-queue')
+def admin_content_queue():
+    """Content Queue - review AI-suggested topics"""
+    status_filter = request.args.get('status', 'all')
+    vertical_filter = request.args.get('vertical', 'all')
+
+    query = ContentQueue.query
+    if status_filter != 'all':
+        query = query.filter_by(status=status_filter)
+    if vertical_filter != 'all':
+        v = Vertical.query.filter_by(slug=vertical_filter).first()
+        if v:
+            query = query.filter_by(vertical_id=v.id)
+
+    queue = query.order_by(ContentQueue.created_at.desc()).all()
+    verticals = Vertical.query.filter_by(status='published').all()
+
+    stats = {
+        'pending': ContentQueue.query.filter_by(status='pending').count(),
+        'review': ContentQueue.query.filter_by(status='review').count(),
+        'published': ContentQueue.query.filter_by(status='published').count(),
+        'skipped': ContentQueue.query.filter_by(status='skipped').count(),
+    }
+
+    return render_template('admin/content_queue.html',
+        queue=queue, verticals=verticals,
+        status_filter=status_filter, vertical_filter=vertical_filter,
+        stats=stats)
+
+
+@app.route('/admin/content-queue/add', methods=['POST'])
+def admin_content_queue_add():
+    """Add item to content queue"""
+    item = ContentQueue(
+        vertical_id=request.form.get('vertical_id', type=int),
+        topic=request.form.get('topic', ''),
+        keywords=request.form.get('keywords', ''),
+        knowledge_layer=request.form.get('knowledge_layer', 'L1'),
+        source_type='manual',
+        status='pending'
+    )
+    scheduled = request.form.get('scheduled_at', '')
+    if scheduled:
+        item.scheduled_at = datetime.strptime(scheduled, '%Y-%m-%dT%H:%M')
+    db.session.add(item)
+    db.session.commit()
+    flash(f'Added to queue: {item.topic}', 'success')
+    return redirect(url_for('admin_content_queue'))
+
+
+@app.route('/admin/content-queue/<int:qid>/action', methods=['POST'])
+def admin_content_queue_action(qid):
+    """Approve/Skip/Edit queue item"""
+    item = ContentQueue.query.get_or_404(qid)
+    action = request.form.get('action', '')
+    if action == 'approve':
+        item.status = 'review'
+    elif action == 'skip':
+        item.status = 'skipped'
+    elif action == 'publish':
+        item.status = 'published'
+        item.published_at = datetime.utcnow()
+    elif action == 'edit':
+        item.topic = request.form.get('topic', item.topic)
+        item.keywords = request.form.get('keywords', item.keywords)
+        item.knowledge_layer = request.form.get('knowledge_layer', item.knowledge_layer)
+    db.session.commit()
+    return redirect(url_for('admin_content_queue'))
+
+
+@app.route('/admin/content-queue/<int:qid>/delete', methods=['POST'])
+def admin_content_queue_delete(qid):
+    """Delete queue item"""
+    item = ContentQueue.query.get_or_404(qid)
+    db.session.delete(item)
+    db.session.commit()
+    flash('Queue item deleted', 'success')
+    return redirect(url_for('admin_content_queue'))
+
+
+@app.route('/admin/gap-analysis')
+def admin_gap_analysis():
+    """Gap Analysis - AI analyzes content gaps and suggests auto-fill"""
+    verticals = Vertical.query.filter_by(status='published').order_by(Vertical.name).all()
+
+    analysis = []
+    for v in verticals:
+        segments = Segment.query.filter_by(vertical_id=v.id).all()
+        total_zones = 0
+        zones_with_content = 0
+        empty_zones = []
+
+        for seg in segments:
+            zones = Zone.query.filter_by(segment_id=seg.id).all()
+            for z in zones:
+                total_zones += 1
+                parts_count = Part.query.filter_by(zone_id=z.id).count()
+                has_seo = bool(z.seo_content and len(z.seo_content.strip()) > 50)
+                if parts_count > 0 or has_seo:
+                    zones_with_content += 1
+                else:
+                    empty_zones.append({'segment': seg.name, 'zone': z.name, 'zone_id': z.id})
+
+        articles_count = Article.query.filter_by(vertical_slug=v.slug, status='published').count()
+        queue_pending = ContentQueue.query.filter_by(vertical_id=v.id, status='pending').count()
+        rule = AutoContentRule.query.filter_by(vertical_id=v.id).first()
+
+        coverage = round(zones_with_content / total_zones * 100) if total_zones > 0 else 0
+
+        analysis.append({
+            'vertical': v,
+            'total_zones': total_zones,
+            'zones_with_content': zones_with_content,
+            'coverage': coverage,
+            'empty_zones': empty_zones[:5],
+            'articles_count': articles_count,
+            'queue_pending': queue_pending,
+            'has_rule': rule is not None and rule.is_active if rule else False,
+            'suggestions': _generate_gap_suggestions(v, coverage, empty_zones, articles_count)
+        })
+
+    return render_template('admin/gap_analysis.html', analysis=analysis, verticals=verticals)
+
+
+def _generate_gap_suggestions(vertical, coverage, empty_zones, articles_count):
+    """Generate content gap suggestions based on analysis"""
+    suggestions = []
+    if coverage < 30:
+        suggestions.append({'priority': 'high', 'text': f'Coverage only {coverage}% - need bulk content for {vertical.name}', 'action': 'auto_fill'})
+    elif coverage < 70:
+        suggestions.append({'priority': 'medium', 'text': f'{len(empty_zones)} zones without content in {vertical.name}', 'action': 'fill_zones'})
+
+    if articles_count < 3:
+        suggestions.append({'priority': 'high', 'text': f'Only {articles_count} articles - need knowledge base content', 'action': 'create_articles'})
+    elif articles_count < 10:
+        suggestions.append({'priority': 'medium', 'text': f'Add more L2/L3 depth articles for {vertical.name}', 'action': 'create_articles'})
+
+    if not suggestions:
+        suggestions.append({'priority': 'low', 'text': f'{vertical.name} looking good! Consider seasonal content.', 'action': 'seasonal'})
+
+    return suggestions
+
 
 # =============================================
 # UNILAB HOMEPAGE — Article aggregation from all verticals

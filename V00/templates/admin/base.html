@@ -69,6 +69,28 @@
         </div>
       </div>
 
+      <!-- AI Engine Dropdown -->
+      <div class="sb-dropdown">
+        <div class="sb-dropdown-header">
+          <span class="sb-icon">&#9889;</span> AI Engine
+          <span class="sb-arrow">›</span>
+        </div>
+        <div class="sb-dropdown-content">
+          <a href="{{ url_for('admin_content_calendar') }}" class="sb-link sb-sub {% if 'content_calendar' in (request.endpoint or '') or 'content_event' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128197;</span> Calendar
+          </a>
+          <a href="{{ url_for('admin_auto_rules') }}" class="sb-link sb-sub {% if 'auto_rules' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#9881;</span> Auto Rules
+          </a>
+          <a href="{{ url_for('admin_content_queue') }}" class="sb-link sb-sub {% if 'content_queue' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128203;</span> Queue
+          </a>
+          <a href="{{ url_for('admin_gap_analysis') }}" class="sb-link sb-sub {% if 'gap_analysis' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128200;</span> Gap Analysis
+          </a>
+        </div>
+      </div>
+
       <!-- Tools Dropdown -->
       <div class="sb-dropdown">
         <div class="sb-dropdown-header">

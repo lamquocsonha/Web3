@@ -1,0 +1,144 @@
+{% extends "admin/base.html" %}
+{% block title %}Auto Rules{% endblock %}
+{% block breadcrumb %}AI Engine &rsaquo; Auto Rules{% endblock %}
+{% block content %}
+<style>
+.rules-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px }
+.rules-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:20px; margin-bottom:32px }
+.rule-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; transition:all .2s }
+.rule-card:hover { box-shadow:0 4px 20px rgba(0,0,0,.08) }
+.rule-card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border) }
+.rule-vertical { display:flex; align-items:center; gap:10px }
+.rule-vertical-icon { font-size:28px }
+.rule-vertical-name { font-size:18px; font-weight:700 }
+.rule-status { font-size:11px; padding:4px 12px; border-radius:99px; font-weight:700; text-transform:uppercase; letter-spacing:.5px }
+.rule-status.active { background:#d1fae5; color:#065f46 }
+.rule-status.inactive { background:var(--surface2); color:var(--text-dim) }
+
+.rule-form { display:grid; gap:14px }
+.rule-row { display:grid; grid-template-columns:1fr 1fr; gap:12px }
+.rule-field label { display:block; font-size:12px; font-weight:700; color:var(--text-dim); margin-bottom:5px; text-transform:uppercase; letter-spacing:.5px }
+.rule-field select, .rule-field input[type=number], .rule-field textarea { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit }
+.rule-field textarea { resize:vertical; min-height:50px; font-size:13px }
+
+.rule-checks { display:flex; gap:20px; flex-wrap:wrap }
+.rule-check { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:500 }
+.rule-check input[type=checkbox] { width:18px; height:18px; accent-color:var(--accent) }
+
+.rule-save { padding:10px 28px; background:var(--accent); color:#fff; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:all .15s }
+.rule-save:hover { opacity:.9; transform:translateY(-1px) }
+
+.freq-badge { display:inline-flex; align-items:center; gap:4px; font-size:12px; padding:4px 10px; border-radius:6px; font-weight:600 }
+.freq-daily { background:#dbeafe; color:#1e40af }
+.freq-3x_week { background:#fef3c7; color:#92400e }
+.freq-weekly { background:#d1fae5; color:#065f46 }
+
+.info-banner { background:linear-gradient(135deg, var(--accent-dim), rgba(59,130,246,.08)); border:1px solid var(--accent); border-radius:12px; padding:20px 24px; margin-bottom:28px; display:flex; align-items:center; gap:14px; font-size:15px }
+.info-banner-icon { font-size:28px }
+</style>
+
+<div class="rules-header">
+  <h1 class="page-title" style="margin:0">Auto Content Rules</h1>
+</div>
+
+<div class="info-banner">
+  <span class="info-banner-icon">&#9889;</span>
+  <div>
+    <strong>Configure how AI auto-generates content per vertical.</strong>
+    Set frequency, tone, knowledge depth, and keywords. Rules run automatically on schedule.
+  </div>
+</div>
+
+<div class="rules-grid">
+  {% for v in verticals %}
+  {% set rule = rules_map.get(v.id) %}
+  <div class="rule-card">
+    <div class="rule-card-header">
+      <div class="rule-vertical">
+        <span class="rule-vertical-icon">{{ v.icon }}</span>
+        <span class="rule-vertical-name">{{ v.name }}</span>
+      </div>
+      {% if rule and rule.is_active %}
+      <span class="rule-status active">Active</span>
+      {% else %}
+      <span class="rule-status inactive">Inactive</span>
+      {% endif %}
+    </div>
+
+    <form method="POST" action="{{ url_for('admin_auto_rules_save') }}">
+      <input type="hidden" name="vertical_id" value="{{ v.id }}">
+      <div class="rule-form">
+        <div class="rule-row">
+          <div class="rule-field">
+            <label>Frequency</label>
+            <select name="frequency">
+              <option value="daily" {% if rule and rule.frequency=='daily' %}selected{% endif %}>Daily</option>
+              <option value="3x_week" {% if rule and rule.frequency=='3x_week' %}selected{% endif %}>3x / Week</option>
+              <option value="weekly" {% if rule and rule.frequency=='weekly' %}selected{% endif %}>Weekly</option>
+            </select>
+          </div>
+          <div class="rule-field">
+            <label>Articles / Day</label>
+            <input type="number" name="articles_per_day" value="{{ rule.articles_per_day if rule else 1 }}" min="1" max="10">
+          </div>
+        </div>
+
+        <div class="rule-row">
+          <div class="rule-field">
+            <label>Knowledge Layer</label>
+            <select name="knowledge_layer">
+              <option value="auto" {% if rule and rule.knowledge_layer=='auto' %}selected{% endif %}>Auto (AI decides)</option>
+              <option value="L1" {% if rule and rule.knowledge_layer=='L1' %}selected{% endif %}>L1 - Overview</option>
+              <option value="L2" {% if rule and rule.knowledge_layer=='L2' %}selected{% endif %}>L2 - Detailed</option>
+              <option value="L3" {% if rule and rule.knowledge_layer=='L3' %}selected{% endif %}>L3 - Expert</option>
+              <option value="L4" {% if rule and rule.knowledge_layer=='L4' %}selected{% endif %}>L4 - Deep Dive</option>
+            </select>
+          </div>
+          <div class="rule-field">
+            <label>Tone</label>
+            <select name="tone">
+              <option value="seo" {% if rule and rule.tone=='seo' %}selected{% endif %}>SEO Optimized</option>
+              <option value="casual" {% if rule and rule.tone=='casual' %}selected{% endif %}>Casual / Friendly</option>
+              <option value="professional" {% if rule and rule.tone=='professional' %}selected{% endif %}>Professional</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="rule-field">
+          <label>Focus Keywords</label>
+          <textarea name="focus_keywords" placeholder="comma-separated priority keywords...">{{ rule.focus_keywords if rule else '' }}</textarea>
+        </div>
+
+        <div class="rule-field">
+          <label>Topics to Avoid</label>
+          <textarea name="topics_to_avoid" placeholder="comma-separated topics to skip...">{{ rule.topics_to_avoid if rule else '' }}</textarea>
+        </div>
+
+        <div class="rule-checks">
+          <label class="rule-check">
+            <input type="checkbox" name="is_active" {% if rule and rule.is_active %}checked{% endif %}>
+            Enable Auto-Generation
+          </label>
+          <label class="rule-check">
+            <input type="checkbox" name="auto_publish" {% if rule and rule.auto_publish %}checked{% endif %}>
+            Auto-Publish (skip review)
+          </label>
+        </div>
+
+        <div>
+          <button type="submit" class="rule-save">Save Rules</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+{% if not verticals %}
+<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">
+  <div style="font-size:48px;margin-bottom:16px">&#128269;</div>
+  <h3 style="font-size:18px;margin-bottom:8px">No published verticals</h3>
+  <p style="font-size:14px">Create and publish verticals first, then configure auto-content rules here.</p>
+</div>
+{% endif %}
+{% endblock %}
