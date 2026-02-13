@@ -166,7 +166,8 @@ def seed():
             ('tiki', f'{p_data["name_vi"]} cao cấp', 'https://tiki.vn/search?q=' + p_data['slug'], 200000 + i*30000),
         ]
         for net, pname, url, price in links:
-            al = AffiliateLink(part_id=p.id, network=net, product_name=pname, url=url, price=price)
+            al = AffiliateLink(part_id=p.id, network=net, product_name=pname, url=url, price=price,
+                image_url=f"https://placehold.co/400x300/f39c12/fff?text={p_data['slug'][:25]}")
             db.session.add(al)
 
     # Parts cho Hệ thống phanh
@@ -207,7 +208,8 @@ def seed():
         db.session.flush()
         for net, price in [('shopee', 250000), ('lazada', 280000), ('tiki', 300000)]:
             al = AffiliateLink(part_id=p.id, network=net, product_name=f'{p_data["name_vi"]} chính hãng',
-                             url=f'https://{net}.vn/search?q={p_data["slug"]}', price=price + i*100000)
+                             url=f'https://{net}.vn/search?q={p_data["slug"]}', price=price + i*100000,
+                             image_url=f"https://placehold.co/400x300/f39c12/fff?text={p_data['slug'][:25]}")
             db.session.add(al)
 
     # Zones cho các segment khác (chỉ tạo zones, chưa có parts)
@@ -960,11 +962,13 @@ def seed_pet_articles():
     ]
 
     for ad in articles:
+        img = ad.get('image_url', f"https://placehold.co/800x450/e17055/fff?text={ad['slug'][:30]}")
         a = Article(vertical_slug='pet', title=ad['title'], slug=ad['slug'], excerpt=ad.get('excerpt',''),
             content=ad.get('content',''), tier=ad.get('tier','chung'), category=ad.get('category',''),
             tags=ad.get('tags',''), related_segment_slug=ad.get('related_segment_slug',''),
             related_zone_slug=ad.get('related_zone_slug',''), embed_code=ad.get('embed_code',''),
-            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(80,5000))
+            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(80,5000),
+            image_url=img)
         db.session.add(a)
     db.session.commit()
     print(f'[OK] {len(articles)} pet articles seeded!')
@@ -1182,11 +1186,13 @@ def seed_travel_articles():
     ]
 
     for ad in articles:
+        img = ad.get('image_url', f"https://placehold.co/800x450/0984e3/fff?text={ad['slug'][:30]}")
         a = Article(vertical_slug='travel', title=ad['title'], slug=ad['slug'], excerpt=ad.get('excerpt',''),
             content=ad.get('content',''), tier=ad.get('tier','chung'), category=ad.get('category',''),
             tags=ad.get('tags',''), related_segment_slug=ad.get('related_segment_slug',''),
             related_zone_slug=ad.get('related_zone_slug',''), embed_code=ad.get('embed_code',''),
-            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(100,8000))
+            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(100,8000),
+            image_url=img)
         db.session.add(a)
     db.session.commit()
     print(f'[OK] {len(articles)} travel articles seeded!')
@@ -1251,7 +1257,8 @@ def seed_products_pet_travel():
                         for net, pname, url, price in pet_products[p.slug]:
                             al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
                                 url=url, price=price, clicks=random.randint(10, 500),
-                                conversions=random.randint(0, 30))
+                                conversions=random.randint(0, 30),
+                                image_url=f"https://placehold.co/400x300/e17055/fff?text={pname.replace(' ','+')[:25]}")
                             db.session.add(al)
 
     # Travel products
@@ -1298,7 +1305,8 @@ def seed_products_pet_travel():
                         for net, pname, url, price in travel_products[p.slug]:
                             al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
                                 url=url, price=price, clicks=random.randint(20, 800),
-                                conversions=random.randint(0, 40))
+                                conversions=random.randint(0, 40),
+                                image_url=f"https://placehold.co/400x300/0984e3/fff?text={pname.replace(' ','+')[:25]}")
                             db.session.add(al)
 
     db.session.commit()
@@ -1566,7 +1574,8 @@ def seed_bike():
                 product_name=f'{p_data["name_vi"]} chính hãng',
                 url=f'https://{net}.vn/search?q={p_data["slug"]}',
                 price=base_price,
-                is_active=True
+                is_active=True,
+                image_url=f"https://placehold.co/400x300/00cec9/fff?text={p_data['slug'][:25]}"
             )
             db.session.add(al)
 
@@ -1628,7 +1637,8 @@ def seed_bike():
                 product_name=f'{p_data["name_vi"]} chính hãng',
                 url=f'https://{net}.vn/search?q={p_data["slug"]}',
                 price=base_price,
-                is_active=True
+                is_active=True,
+                image_url=f"https://placehold.co/400x300/00cec9/fff?text={p_data['slug'][:25]}"
             )
             db.session.add(al)
 
@@ -1756,9 +1766,11 @@ def seed_bike():
         },
     ]
     for a_data in articles_data:
+        slug = a_data['title'].lower().replace(' ','-').replace(':','').replace(',','')[:60]
+        a_data.setdefault('image_url', f"https://placehold.co/800x450/00cec9/fff?text={slug[:30]}")
         a = Article(
             vertical_slug='bike',
-            slug=a_data['title'].lower().replace(' ','-').replace(':','').replace(',','')[:60],
+            slug=slug,
             status='published',
             ai_generated=False,
             **a_data
@@ -3023,6 +3035,7 @@ def seed_beauty_articles():
     ]
     
     for a_data in articles:
+        img = a_data.get('image_url', f"https://placehold.co/800x450/e84393/fff?text={a_data['slug'][:30]}")
         a = Article(
             title=a_data['title'],
             slug=a_data['slug'],
@@ -3034,10 +3047,11 @@ def seed_beauty_articles():
             vertical_slug=a_data['vertical_slug'],
             content=a_data['content'],
             status='published',
-            ai_generated=False
+            ai_generated=False,
+            image_url=img
         )
         db.session.add(a)
-    
+
     db.session.commit()
     print(f'✅ Beauty articles seeded: {len(articles)} articles')
 
@@ -3139,6 +3153,7 @@ def seed_tech_articles():
     ]
     
     for a_data in articles:
+        img = a_data.get('image_url', f"https://placehold.co/800x450/6c5ce7/fff?text={a_data['slug'][:30]}")
         a = Article(
             title=a_data['title'],
             slug=a_data['slug'],
@@ -3150,10 +3165,11 @@ def seed_tech_articles():
             vertical_slug=a_data['vertical_slug'],
             content=a_data['content'],
             status='published',
-            ai_generated=False
+            ai_generated=False,
+            image_url=img
         )
         db.session.add(a)
-    
+
     db.session.commit()
     print(f'✅ Tech articles seeded: {len(articles)} articles')
 
@@ -3265,7 +3281,8 @@ def seed_products_beauty_tech():
                             for net, pname, url, price in beauty_products[p.slug]:
                                 al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
                                     url=url, price=price, clicks=random.randint(20, 800),
-                                    conversions=random.randint(1, 40))
+                                    conversions=random.randint(1, 40),
+                                    image_url=f"https://placehold.co/400x300/e84393/fff?text={pname.replace(' ','+')[:25]}")
                                 db.session.add(al)
                                 seeded += 1
 
@@ -3374,7 +3391,8 @@ def seed_products_beauty_tech():
                             for net, pname, url, price in tech_products[p.slug]:
                                 al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
                                     url=url, price=price, clicks=random.randint(30, 1200),
-                                    conversions=random.randint(2, 60))
+                                    conversions=random.randint(2, 60),
+                                    image_url=f"https://placehold.co/400x300/6c5ce7/fff?text={pname.replace(' ','+')[:25]}")
                                 db.session.add(al)
                                 seeded += 1
 

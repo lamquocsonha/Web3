@@ -43,7 +43,7 @@ body {
 
 .logo-mark { font-size: 20px; }
 .logo-name {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 18px;
   font-weight: 800;
   letter-spacing: -0.5px;
@@ -55,7 +55,7 @@ body {
 }
 
 .site-nav a {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 13px;
   font-weight: 500;
   color: var(--text-dim);
@@ -76,7 +76,7 @@ body {
   border-radius: 20px;
   background: transparent;
   color: var(--text-dim);
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -99,7 +99,7 @@ body {
 
 /* ═══ BREADCRUMBS ═══ */
 .breadcrumbs {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 13px;
   color: var(--text-dim);
   margin-bottom: 32px;
@@ -166,7 +166,7 @@ body {
 }
 
 .segment-card h2 {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 6px;
@@ -180,7 +180,7 @@ body {
 
 .segment-card .card-meta {
   margin-top: 14px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 11px;
   color: var(--text-dim);
 }
@@ -212,7 +212,7 @@ body {
 .zone-card .card-icon { font-size: 24px; margin-bottom: 10px; }
 
 .zone-card h3 {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 4px;
@@ -226,7 +226,7 @@ body {
 
 .zone-card .card-meta {
   margin-top: 10px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 11px;
   color: var(--text-dim);
 }
@@ -260,7 +260,7 @@ body {
 .part-info { flex: 1; }
 
 .part-info h3 {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 2px;
@@ -326,7 +326,7 @@ body {
 }
 
 .widget-title {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 16px 0;
@@ -357,7 +357,7 @@ body {
 .sidebar-article-card .sac-tier {
   display: inline-block;
   font-size: 9px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   padding: 2px 6px;
   border-radius: 4px;
   margin-bottom: 6px;
@@ -381,7 +381,7 @@ body {
 }
 
 .sidebar-article-card h4 {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
@@ -392,7 +392,7 @@ body {
 .sidebar-article-card .sac-meta {
   font-size: 11px;
   color: var(--text-dim);
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
 }
 
 .sidebar-banner {
@@ -424,7 +424,7 @@ body {
 }
 
 .article-body h2 {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 22px;
   font-weight: 700;
   margin: 32px 0 12px;
@@ -455,7 +455,7 @@ body {
 }
 
 .oem-box .oem-label {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
@@ -465,7 +465,7 @@ body {
 }
 
 .oem-box .oem-value {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 13px;
   color: var(--text);
   line-height: 1.6;
@@ -484,7 +484,7 @@ body {
 }
 
 .sidebar-card h4 {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 14px;
@@ -500,7 +500,7 @@ body {
 }
 
 .products-section h2 {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 20px;
@@ -528,7 +528,7 @@ body {
 }
 
 .product-network {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 10px;
   font-weight: 600;
   padding: 4px 10px;
@@ -550,20 +550,20 @@ body {
 
 .product-name {
   flex: 1;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 14px;
   font-weight: 500;
 }
 
 .product-price {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 15px;
   font-weight: 600;
   color: var(--accent);
 }
 
 .product-link {
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 12px;
   font-weight: 600;
   padding: 8px 18px;
@@ -607,7 +607,7 @@ body {
 }
 
 .sidebar-product .sp-price {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 13px;
   font-weight: 600;
   color: var(--accent);
@@ -634,7 +634,7 @@ body {
   padding: 0 32px;
   display: flex;
   justify-content: space-between;
-  font-family: 'Manrope', sans-serif;
+  font-family: var(--font-primary);
   font-size: 12px;
   color: var(--text-dim);
 }
@@ -852,15 +852,15 @@ body {
   border-radius: 10px;
   margin-bottom: 16px;
   font-size: 12px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   display: none; /* Hidden in demo, rendered by JS in production */
 }
 
 /* ═══ HERO SECTION ═══ */
 .hero-section { text-align: center; padding: 60px 0 40px; }
 .hero-title { font-size: 2.4em; line-height: 1.2; margin-bottom: 16px; }
-[data-mode="light"] .hero-title { color: #2d2a26; font-family: 'Newsreader', serif; }
-[data-mode="dark"] .hero-title { color: #f1f5f9; font-family: 'Manrope', sans-serif; }
+[data-mode="light"] .hero-title { color: #2d2a26; font-family: var(--font-primary); }
+[data-mode="dark"] .hero-title { color: #f1f5f9; font-family: var(--font-primary); }
 .hero-accent {
   background: linear-gradient(135deg, #c45d3e 0%, #e8856b 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -1030,7 +1030,7 @@ body {
 [data-mode="light"] .part-card-pub p { color: #7a6f5f; }
 [data-mode="dark"] .part-card-pub p { color: #94a3b8; }
 .part-card-footer { display: flex; gap: 8px; flex-wrap: wrap; }
-.part-oem { font-size: 10px; font-family: 'DM Mono', monospace; padding: 2px 6px; border-radius: 4px; }
+.part-oem { font-size: 10px; font-family: var(--font-secondary); padding: 2px 6px; border-radius: 4px; }
 [data-mode="light"] .part-oem { background: #f5f3ef; color: #7a6f5f; }
 [data-mode="dark"] .part-oem { background: rgba(255,255,255,0.06); color: #64748b; }
 .part-tag-count, .part-price-badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
@@ -1191,8 +1191,8 @@ body {
   font-size: 11px; font-weight: 600; text-anchor: middle; pointer-events: none;
   opacity: 0.7; transition: opacity 0.3s;
 }
-[data-mode="light"] .zone-label { fill: #5a4f3e; font-family: 'Manrope', sans-serif; }
-[data-mode="dark"] .zone-label { fill: #94a3b8; font-family: 'Manrope', sans-serif; }
+[data-mode="light"] .zone-label { fill: #5a4f3e; font-family: var(--font-primary); }
+[data-mode="dark"] .zone-label { fill: #94a3b8; font-family: var(--font-primary); }
 
 .zone-dot {
   opacity: 0.5; transition: all 0.3s; pointer-events: none;
@@ -1287,10 +1287,10 @@ body {
 /* ═══ PUBLIC PRODUCTS PAGE ═══ */
 .products-filter { margin: 0 0 24px; }
 .pf-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.pf-select { padding: 8px 12px; border-radius: 8px; font-size: 13px; font-family: "Manrope", sans-serif; cursor: pointer; }
+.pf-select { padding: 8px 12px; border-radius: 8px; font-size: 13px; font-family: var(--font-primary); cursor: pointer; }
 [data-mode="light"] .pf-select { background: #fff; border: 1px solid #e8e2d8; color: #2d2a26; }
 [data-mode="dark"] .pf-select { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: #f1f5f9; }
-.pf-btn { padding: 8px 20px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: "Manrope", sans-serif; }
+.pf-btn { padding: 8px 20px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: var(--font-primary); }
 [data-mode="light"] .pf-btn { background: #c45d3e; color: #fff; }
 [data-mode="dark"] .pf-btn { background: #8b5cf6; color: #fff; }
 .pf-clear { font-size: 12px; text-decoration: none; }
@@ -1323,7 +1323,7 @@ body {
 .pc-path { font-size: 11px; margin: 0 0 12px; flex: 1; }
 [data-mode="light"] .pc-path { color: #8a7e6e; }
 [data-mode="dark"] .pc-path { color: #64748b; }
-.pc-price { font-size: 20px; font-weight: 700; margin-bottom: 12px; font-family: "DM Mono", monospace; }
+.pc-price { font-size: 20px; font-weight: 700; margin-bottom: 12px; font-family: var(--font-secondary); }
 [data-mode="light"] .pc-price { color: #c45d3e; }
 [data-mode="dark"] .pc-price { color: #a78bfa; }
 .pc-price small { font-size: 13px; font-weight: 500; }
@@ -1452,7 +1452,7 @@ body {
 }
 
 .popular-rank {
-  font-family: 'Newsreader', serif;
+  font-family: var(--font-secondary);
   font-size: 28px;
   font-weight: 700;
   color: var(--accent);
