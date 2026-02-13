@@ -4,7 +4,34 @@
 {% block content %}
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0">📦 Product Management</h1>
-  <div style="display:flex;gap:8px">
+  <div style="display:flex;gap:8px;align-items:center">
+    {% if total > 0 %}
+    <div style="position:relative;display:inline-block" id="bulkDeleteWrap">
+      <button type="button" class="btn btn-danger btn-sm" onclick="document.getElementById('bulkDeleteMenu').style.display=document.getElementById('bulkDeleteMenu').style.display==='block'?'none':'block'"
+              style="font-size:11px;padding:6px 12px">🗑 Xoa hang loat</button>
+      <div id="bulkDeleteMenu" style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;min-width:280px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.15)">
+        <p style="font-size:12px;font-weight:700;margin-bottom:10px;color:var(--text)">Xoa san pham</p>
+        {% if f_vertical or f_network %}
+        <form method="POST" action="{{ url_for('admin_products_bulk_delete') }}" onsubmit="return confirm('Xoa tat ca san pham theo filter hien tai?')">
+          <input type="hidden" name="action" value="delete_filtered">
+          <input type="hidden" name="vertical" value="{{ f_vertical }}">
+          <input type="hidden" name="network" value="{{ f_network }}">
+          <button type="submit" class="btn btn-danger btn-sm" style="width:100%;margin-bottom:8px;font-size:11px">
+            Xoa theo filter hien tai
+            {% if f_vertical %}({{ f_vertical }}){% endif %}
+            {% if f_network %}({{ f_network }}){% endif %}
+          </button>
+        </form>
+        {% endif %}
+        <form method="POST" action="{{ url_for('admin_products_bulk_delete') }}" onsubmit="return confirm('⚠️ XOA TOAN BO ' + {{ total }} + ' SAN PHAM? Hanh dong nay KHONG THE hoan tac!')">
+          <input type="hidden" name="action" value="delete_all">
+          <button type="submit" class="btn btn-sm" style="width:100%;font-size:11px;background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b">
+            ⚠️ Reset toan bo ({{ "{:,}".format(total) }} san pham)
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
     <a href="{{ url_for('admin_products_import_csv') }}" class="btn btn-secondary">📥 Import CSV</a>
     <a href="{{ url_for('admin_product_new') }}" class="btn btn-primary">+ Add Product</a>
   </div>

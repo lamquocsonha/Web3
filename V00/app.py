@@ -1084,6 +1084,40 @@ def admin_product_delete(pid):
     flash('Da xoa san pham', 'success')
     return redirect(url_for('admin_products'))
 
+@app.route('/admin/products/bulk-delete', methods=['POST'])
+def admin_products_bulk_delete():
+    """Delete products in bulk: by filter, by network, or all"""
+    action = request.form.get('action', '')
+    f_vertical = request.form.get('vertical', '')
+    f_network = request.form.get('network', '')
+
+    q = AffiliateLink.query
+    label = 'tat ca'
+
+    if action == 'delete_filtered':
+        # Delete by current filters
+        if f_vertical:
+            q = q.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == f_vertical)
+            label = f'vertical "{f_vertical}"'
+        if f_network:
+            q = q.filter(AffiliateLink.network == f_network)
+            label = f'network "{f_network}"' if not f_vertical else f'{label} + network "{f_network}"'
+    elif action == 'delete_all':
+        label = 'tat ca'
+    else:
+        flash('Action khong hop le', 'error')
+        return redirect(url_for('admin_products'))
+
+    count = q.count()
+    if count == 0:
+        flash('Khong co san pham nao de xoa', 'warning')
+        return redirect(url_for('admin_products'))
+
+    q.delete(synchronize_session=False)
+    db.session.commit()
+    flash(f'Da xoa {count:,} san pham ({label})', 'success')
+    return redirect(url_for('admin_products'))
+
 def _build_part_keyword_index(vertical_id=None):
     """Build keyword index from Parts for auto-mapping.
     Returns list of {part_id, keywords: set(), zone_name, part_name, score_boost}
