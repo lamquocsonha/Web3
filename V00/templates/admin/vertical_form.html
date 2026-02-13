@@ -17,15 +17,29 @@
       </select>
     </div>
   </div>
-  <div class="form-group">
-    <label class="form-label">Template Preset 🎨</label>
-    <select class="form-select" name="template">
-      <option value="general" {% if vertical and vertical.template=='general' %}selected{% elif not vertical %}selected{% endif %}>General — Car, Bike, Pet (Product-focused)</option>
-      <option value="travel" {% if vertical and vertical.template=='travel' %}selected{% endif %}>Travel — Hotels, Attractions, Tours</option>
-      <option value="blog" {% if vertical and vertical.template=='blog' %}selected{% endif %}>Blog — Content-focused, minimal</option>
-      <option value="finance" {% if vertical and vertical.template=='finance' %}selected{% endif %}>Finance — Clean, professional</option>
-    </select>
-    <small style="display:block;margin-top:4px;font-size:11px;color:var(--text-dim)">Template determines the CSS styling and layout structure for this vertical</small>
+  <div class="form-row">
+    <div class="form-group">
+      <label class="form-label">Template (Bố cục)</label>
+      <select class="form-select" name="template">
+        <option value="general" {% if vertical and vertical.template=='general' %}selected{% elif not vertical %}selected{% endif %}>General — Product-focused</option>
+        <option value="travel" {% if vertical and vertical.template=='travel' %}selected{% endif %}>Travel — Hotels, Tours</option>
+        <option value="blog" {% if vertical and vertical.template=='blog' %}selected{% endif %}>Blog — Content-focused</option>
+        <option value="finance" {% if vertical and vertical.template=='finance' %}selected{% endif %}>Finance — Professional</option>
+      </select>
+      <small style="display:block;margin-top:4px;font-size:11px;color:var(--text-dim)">Layout structure of the website</small>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Style (Giao diện)</label>
+      <select class="form-select" name="style">
+        <option value="classic" {% if vertical and vertical.style=='classic' %}selected{% elif not vertical %}selected{% endif %}>Classic — Traditional, serif</option>
+        <option value="modern" {% if vertical and vertical.style=='modern' %}selected{% endif %}>Modern — Minimalist, clean</option>
+        <option value="tech" {% if vertical and vertical.style=='tech' %}selected{% endif %}>Tech — Bold, sharp, dark</option>
+        <option value="beauty" {% if vertical and vertical.style=='beauty' %}selected{% endif %}>Beauty — Elegant, soft</option>
+        <option value="car" {% if vertical and vertical.style=='car' %}selected{% endif %}>Car — Sporty, strong</option>
+        <option value="pet" {% if vertical and vertical.style=='pet' %}selected{% endif %}>Pet — Friendly, warm</option>
+      </select>
+      <small style="display:block;margin-top:4px;font-size:11px;color:var(--text-dim)">Font, colors, buttons via CSS variables</small>
+    </div>
   </div>
   <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" name="description" style="min-height:100px">{{ vertical.description if vertical else '' }}</textarea></div>
   <div class="form-actions">

@@ -48,21 +48,21 @@ THEME_STYLES = {
         'radius': '12px',
     },
     'tech': {
-        'font_primary': "'Inter', 'SF Pro Display', -apple-system, system-ui, sans-serif",
-        'font_secondary': "'SF Mono', 'Consolas', monospace",
-        'bg_light': '#f5f5f7',
+        'font_primary': "'Rajdhani', 'Inter', -apple-system, system-ui, sans-serif",
+        'font_secondary': "'Roboto', 'Inter', sans-serif",
+        'bg_light': '#f0f0f3',
         'bg_dark': '#000000',
         'surface_light': '#ffffff',
-        'surface_dark': '#1d1d1f',
-        'border_light': '#d2d2d7',
-        'border_dark': '#424245',
-        'text_light': '#1d1d1f',
-        'text_dark': '#f5f5f7',
-        'text_dim_light': '#6e6e73',
-        'text_dim_dark': '#a1a1a6',
-        'accent': '#0071e3',
-        'accent_hover': '#0077ed',
-        'radius': '8px',
+        'surface_dark': '#111111',
+        'border_light': '#d5d5d5',
+        'border_dark': '#2a2a2a',
+        'text_light': '#111111',
+        'text_dark': '#f5f5f5',
+        'text_dim_light': '#666666',
+        'text_dim_dark': '#999999',
+        'accent': '#eb0028',
+        'accent_hover': '#c70022',
+        'radius': '0px',
     },
     'beauty': {
         'font_primary': "'Lora', 'Cormorant Garamond', Georgia, serif",
@@ -243,7 +243,8 @@ def admin_vertical_new():
             name=request.form['name'], slug=slugify(request.form['name']),
             icon=request.form.get('icon',''), color=request.form.get('color','#6c5ce7'),
             description=request.form.get('description',''), status='draft',
-            template=request.form.get('template','general')
+            template=request.form.get('template','general'),
+            style=request.form.get('style','classic')
         )
         db.session.add(v)
         db.session.commit()
@@ -266,6 +267,7 @@ def admin_vertical_edit(vid):
         v.description = request.form.get('description','')
         v.default_mode = request.form.get('default_mode','minimal')
         v.template = request.form.get('template','general')
+        v.style = request.form.get('style','classic')
         db.session.commit()
         flash(f'Da cap nhat: {v.name}', 'success')
         return redirect(url_for('admin_vertical_detail', vid=v.id))
