@@ -3,7 +3,13 @@
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Verticals{% endblock %}
 
 {% block content %}
-<h1 class="page-title">Verticals</h1>
+<div class="section-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+  <h1 class="page-title" style="margin:0">Verticals</h1>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('admin_article_new') }}" class="btn btn-primary btn-sm">+ New Article</a>
+    <a href="{{ url_for('admin_vertical_new') }}" class="btn btn-primary btn-sm">+ New Vertical</a>
+  </div>
+</div>
 
 <div class="table-wrap">
   <table class="data-table">
@@ -13,6 +19,8 @@
         <th>Tên</th>
         <th>Subdomain</th>
         <th>Segments</th>
+        <th>Products</th>
+        <th>Articles</th>
         <th>Template</th>
         <th>Style</th>
         <th>Mode</th>
@@ -21,12 +29,15 @@
       </tr>
     </thead>
     <tbody>
-      {% for v in verticals %}
+      {% for data in verticals_data %}
+      {% set v = data.vertical %}
       <tr>
         <td class="icon-cell">{{ v.icon }}</td>
         <td><strong>{{ v.name }}</strong></td>
         <td><a href="{{ url_for('vertical_index', vertical_slug=v.slug) }}" target="_blank" style="font-family:'DM Mono',monospace; font-size:12px; color:var(--accent); text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">{{ v.slug }}.unilab.vn</a></td>
-        <td>{{ v.segments|length }}</td>
+        <td style="font-family:'DM Mono'">{{ v.segments|length }}</td>
+        <td style="font-family:'DM Mono'">{{ data.products }}</td>
+        <td style="font-family:'DM Mono'">{{ data.articles }}</td>
         <td><span style="font-family:'DM Mono',monospace; font-size:11px; padding:3px 8px; background:var(--bg-subtle); border-radius:4px; color:var(--text-secondary)">{{ v.template or 'general' }}</span></td>
         <td><span style="font-family:'DM Mono',monospace; font-size:11px; padding:3px 8px; background:rgba(139,92,246,0.1); border-radius:4px; color:#8b5cf6; font-weight:600">{{ v.style or 'classic' }}</span></td>
         <td><span style="font-size:11px; padding:3px 8px; background:var(--accent-bg); border-radius:4px; color:var(--accent); font-weight:600">{{ v.default_mode or 'light' }}</span></td>

@@ -225,7 +225,16 @@ def admin_dashboard():
 @app.route('/admin/verticals')
 def admin_verticals():
     verticals = Vertical.query.order_by(Vertical.created_at.desc()).all()
-    return render_template('admin/verticals.html', verticals=verticals)
+    verticals_data = []
+    for v in verticals:
+        products_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).filter(Segment.vertical_id == v.id).count()
+        articles_count = Article.query.filter_by(vertical_slug=v.slug).count()
+        verticals_data.append({
+            'vertical': v,
+            'products': products_count,
+            'articles': articles_count
+        })
+    return render_template('admin/verticals.html', verticals=verticals, verticals_data=verticals_data)
 
 @app.route('/admin/vertical/new', methods=['GET','POST'])
 def admin_vertical_new():
@@ -637,13 +646,15 @@ def admin_seed_data():
         zones_count = Zone.query.join(Segment).filter(Segment.vertical_id == v.id).count()
         parts_count = Part.query.join(Zone).join(Segment).filter(Segment.vertical_id == v.id).count()
         articles_count = Article.query.filter_by(vertical_slug=v.slug).count()
+        products_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).filter(Segment.vertical_id == v.id).count()
 
         verticals_data.append({
             'vertical': v,
             'segments': segments_count,
             'zones': zones_count,
             'parts': parts_count,
-            'articles': articles_count
+            'articles': articles_count,
+            'products': products_count
         })
 
     return render_template('admin/seed_data.html', verticals_data=verticals_data)
