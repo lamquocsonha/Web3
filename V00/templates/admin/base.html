@@ -76,6 +76,9 @@
           <span class="sb-arrow">›</span>
         </div>
         <div class="sb-dropdown-content">
+          <a href="{{ url_for('admin_ai_center') }}" class="sb-link sb-sub {% if 'ai_center' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
+            <span class="sb-icon">&#129302;</span> AI Control Center
+          </a>
           <a href="{{ url_for('admin_content_calendar') }}" class="sb-link sb-sub {% if 'content_calendar' in (request.endpoint or '') or 'content_event' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#128197;</span> Calendar
           </a>

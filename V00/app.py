@@ -1118,28 +1118,239 @@ def admin_products_bulk_delete():
     flash(f'Da xoa {count:,} san pham ({label})', 'success')
     return redirect(url_for('admin_products'))
 
-@app.route('/admin/products/ai-classify')
-def admin_products_ai_classify():
-    """AI Product Classification page - detect mismatched products"""
-    verticals = Vertical.query.all()
+# =============================================
+# AI CONTROL CENTER - Unified AI Operations Hub
+# =============================================
+
+@app.route('/admin/ai-center')
+def admin_ai_center():
+    """Unified AI Control Center - all AI operations in one place"""
+    from sqlalchemy import func
+
     openai_key = SiteSettings.get('openai_key')
     claude_key = SiteSettings.get('claude_key')
     has_ai = bool(openai_key or claude_key)
 
-    vert_stats = []
+    # ── Product Health Stats ──
+    total_products = AffiliateLink.query.count()
+    active_products = AffiliateLink.query.filter_by(is_active=True).count()
+
+    # Duplicate URLs
+    dup_sub = db.session.query(
+        AffiliateLink.url, func.count(AffiliateLink.id).label('cnt')
+    ).group_by(AffiliateLink.url).having(func.count(AffiliateLink.id) > 1).subquery()
+    dup_urls = db.session.query(func.count()).select_from(dup_sub).scalar() or 0
+
+    # Missing images
+    no_image = AffiliateLink.query.filter(
+        db.or_(AffiliateLink.image_url == '', AffiliateLink.image_url == None)
+    ).count()
+
+    # Price issues (0 or null)
+    zero_price = AffiliateLink.query.filter(
+        db.or_(AffiliateLink.price == 0, AffiliateLink.price == None)
+    ).count()
+
+    # Stale products (0 clicks)
+    stale_products = AffiliateLink.query.filter(AffiliateLink.clicks == 0).count()
+
+    # High clicks but 0 conversions (potential link issues)
+    suspect_links = AffiliateLink.query.filter(
+        AffiliateLink.clicks > 10, AffiliateLink.conversions == 0
+    ).count()
+
+    # Inactive products
+    inactive_products = AffiliateLink.query.filter_by(is_active=False).count()
+
+    # ── Article Health Stats ──
+    total_articles = Article.query.count()
+    # Thin content (content < 500 chars ~ approx 100 words)
+    thin_articles = Article.query.filter(
+        db.or_(func.length(Article.content) < 500, Article.content == '', Article.content == None)
+    ).count()
+    # No views
+    zero_view_articles = Article.query.filter(
+        db.or_(Article.views == 0, Article.views == None)
+    ).count()
+    # Articles without embed code (no products linked)
+    no_product_articles = Article.query.filter(
+        db.or_(Article.embed_code == '', Article.embed_code == None)
+    ).count()
+    # AI-generated articles
+    ai_articles = Article.query.filter_by(ai_generated=True).count()
+
+    # ── Vertical Health ──
+    verticals = Vertical.query.all()
+    vert_health = []
     for v in verticals:
-        cnt = db.session.query(AffiliateLink).join(Part).join(Zone).join(Segment).filter(
+        prod_count = db.session.query(AffiliateLink).join(Part).join(Zone).join(Segment).filter(
             Segment.vertical_id == v.id).count()
-        vert_stats.append({'id': v.id, 'name': v.name, 'icon': v.icon, 'slug': v.slug, 'count': cnt})
+        art_count = Article.query.filter_by(vertical_slug=v.slug).count()
+        part_count = db.session.query(Part).join(Zone).join(Segment).filter(
+            Segment.vertical_id == v.id).count()
+        # Parts with no products
+        parts_no_prod = db.session.query(Part).join(Zone).join(Segment).filter(
+            Segment.vertical_id == v.id
+        ).outerjoin(AffiliateLink).filter(AffiliateLink.id == None).count()
+        vert_health.append({
+            'id': v.id, 'name': v.name, 'icon': v.icon, 'slug': v.slug,
+            'products': prod_count, 'articles': art_count,
+            'parts': part_count, 'parts_empty': parts_no_prod,
+            'status': v.status
+        })
 
-    total = AffiliateLink.query.count()
-    return render_template('admin/products_ai_classify.html',
-        verticals=vert_stats, total=total, has_ai=has_ai)
+    # ── Network Health ──
+    networks = db.session.query(
+        AffiliateLink.network,
+        func.count(AffiliateLink.id),
+        func.sum(AffiliateLink.clicks),
+        func.sum(AffiliateLink.conversions)
+    ).group_by(AffiliateLink.network).all()
+    net_stats = [{'name': n[0], 'count': n[1], 'clicks': n[2] or 0, 'conv': n[3] or 0} for n in networks]
+
+    # Score: overall health (0-100)
+    issues_total = dup_urls + no_image + zero_price + suspect_links + thin_articles
+    health_score = max(0, 100 - min(issues_total, 100))
+
+    return render_template('admin/ai_center.html',
+        has_ai=has_ai, health_score=health_score,
+        total_products=total_products, active_products=active_products,
+        dup_urls=dup_urls, no_image=no_image, zero_price=zero_price,
+        stale_products=stale_products, suspect_links=suspect_links,
+        inactive_products=inactive_products,
+        total_articles=total_articles, thin_articles=thin_articles,
+        zero_view_articles=zero_view_articles, no_product_articles=no_product_articles,
+        ai_articles=ai_articles,
+        vert_health=vert_health, net_stats=net_stats,
+        verticals=verticals)
+
+# Keep old route as redirect for backwards compatibility
+@app.route('/admin/products/ai-classify')
+def admin_products_ai_classify():
+    return redirect(url_for('admin_ai_center'))
 
 
-@app.route('/admin/products/ai-classify/scan', methods=['POST'])
-def admin_products_ai_classify_scan():
-    """AJAX: Scan a batch of products using AI to detect misclassification"""
+@app.route('/admin/ai-center/health-detail', methods=['POST'])
+def admin_ai_center_health_detail():
+    """AJAX: Get detailed list for a specific health issue"""
+    from sqlalchemy import func
+    data = request.get_json()
+    issue_type = data.get('type', '')
+    page = data.get('page', 1)
+    per_page = 50
+
+    results = []
+
+    if issue_type == 'dup_urls':
+        dup_urls = db.session.query(AffiliateLink.url).group_by(
+            AffiliateLink.url).having(func.count(AffiliateLink.id) > 1).all()
+        dup_url_list = [u[0] for u in dup_urls]
+        items = AffiliateLink.query.filter(AffiliateLink.url.in_(dup_url_list)).order_by(
+            AffiliateLink.url).offset((page-1)*per_page).limit(per_page).all()
+        for al in items:
+            results.append({'id': al.id, 'name': al.product_name, 'detail': al.url[:80],
+                           'network': al.network, 'price': al.price})
+
+    elif issue_type == 'no_image':
+        items = AffiliateLink.query.filter(
+            db.or_(AffiliateLink.image_url == '', AffiliateLink.image_url == None)
+        ).offset((page-1)*per_page).limit(per_page).all()
+        for al in items:
+            results.append({'id': al.id, 'name': al.product_name, 'detail': 'Thieu hinh anh',
+                           'network': al.network, 'price': al.price})
+
+    elif issue_type == 'zero_price':
+        items = AffiliateLink.query.filter(
+            db.or_(AffiliateLink.price == 0, AffiliateLink.price == None)
+        ).offset((page-1)*per_page).limit(per_page).all()
+        for al in items:
+            results.append({'id': al.id, 'name': al.product_name, 'detail': 'Gia = 0',
+                           'network': al.network, 'price': 0})
+
+    elif issue_type == 'suspect_links':
+        items = AffiliateLink.query.filter(
+            AffiliateLink.clicks > 10, AffiliateLink.conversions == 0
+        ).order_by(AffiliateLink.clicks.desc()).offset((page-1)*per_page).limit(per_page).all()
+        for al in items:
+            results.append({'id': al.id, 'name': al.product_name,
+                           'detail': f'{al.clicks} clicks, 0 conv',
+                           'network': al.network, 'price': al.price})
+
+    elif issue_type == 'stale':
+        items = AffiliateLink.query.filter(
+            AffiliateLink.clicks == 0
+        ).offset((page-1)*per_page).limit(per_page).all()
+        for al in items:
+            results.append({'id': al.id, 'name': al.product_name, 'detail': '0 clicks',
+                           'network': al.network, 'price': al.price})
+
+    elif issue_type == 'thin_articles':
+        from sqlalchemy import func as fn
+        items = Article.query.filter(
+            db.or_(fn.length(Article.content) < 500, Article.content == '', Article.content == None)
+        ).offset((page-1)*per_page).limit(per_page).all()
+        for a in items:
+            results.append({'id': a.id, 'name': a.title,
+                           'detail': f'{len(a.content or "")} ky tu', 'network': a.vertical_slug})
+
+    elif issue_type == 'no_product_articles':
+        items = Article.query.filter(
+            db.or_(Article.embed_code == '', Article.embed_code == None)
+        ).offset((page-1)*per_page).limit(per_page).all()
+        for a in items:
+            results.append({'id': a.id, 'name': a.title,
+                           'detail': 'Chua gan san pham', 'network': a.vertical_slug})
+
+    elif issue_type == 'parts_empty':
+        vid = data.get('vertical_id')
+        q = db.session.query(Part, Zone, Segment, Vertical).join(
+            Zone, Part.zone_id == Zone.id).join(
+            Segment, Zone.segment_id == Segment.id).join(
+            Vertical, Segment.vertical_id == Vertical.id
+        ).outerjoin(AffiliateLink).filter(AffiliateLink.id == None)
+        if vid:
+            q = q.filter(Vertical.id == vid)
+        items = q.offset((page-1)*per_page).limit(per_page).all()
+        for part, zone, seg, vert in items:
+            results.append({'id': part.id, 'name': part.name_vi,
+                           'detail': f'{vert.icon} {vert.name} > {zone.name}', 'network': ''})
+
+    return jsonify({'results': results, 'page': page})
+
+
+@app.route('/admin/ai-center/bulk-action', methods=['POST'])
+def admin_ai_center_bulk_action():
+    """AJAX: Perform bulk actions on products/articles from AI Center"""
+    data = request.get_json()
+    action = data.get('action')
+    item_type = data.get('item_type', 'product')  # product or article
+    ids = data.get('ids', [])
+
+    if not ids:
+        return jsonify({'error': 'Khong co item nao duoc chon'}), 400
+
+    if item_type == 'product':
+        if action == 'delete':
+            count = AffiliateLink.query.filter(AffiliateLink.id.in_(ids)).delete(synchronize_session=False)
+            db.session.commit()
+            return jsonify({'success': True, 'message': f'Da xoa {count} san pham'})
+        elif action == 'deactivate':
+            AffiliateLink.query.filter(AffiliateLink.id.in_(ids)).update(
+                {'is_active': False}, synchronize_session=False)
+            db.session.commit()
+            return jsonify({'success': True, 'message': f'Da tat {len(ids)} san pham'})
+    elif item_type == 'article':
+        if action == 'delete':
+            count = Article.query.filter(Article.id.in_(ids)).delete(synchronize_session=False)
+            db.session.commit()
+            return jsonify({'success': True, 'message': f'Da xoa {count} bai viet'})
+
+    return jsonify({'error': 'Action khong hop le'}), 400
+
+
+@app.route('/admin/ai-center/ai-scan', methods=['POST'])
+def admin_ai_center_ai_scan():
+    """AJAX: AI-powered scan for product classification"""
     import requests as req
 
     data = request.get_json()
@@ -1162,7 +1373,7 @@ def admin_products_ai_classify_scan():
     if not products:
         return jsonify({'done': True, 'results': [], 'total': total, 'processed': offset})
 
-    # Build vertical + zone context for AI
+    # Build vertical + zone context
     all_verticals = Vertical.query.all()
     vert_zones = {}
     for v in all_verticals:
@@ -1172,17 +1383,12 @@ def admin_products_ai_classify_scan():
                 zones.append(z.name)
         vert_zones[v.name] = zones
 
-    # Build product list
     product_list = []
     for al, part, zone, seg, vert in products:
         product_list.append({
-            'id': al.id,
-            'name': al.product_name or part.name_vi,
-            'current_vertical': vert.name,
-            'current_zone': zone.name,
-            'current_part': part.name_vi,
-            'url': (al.url or '')[:100],
-            'price': al.price,
+            'id': al.id, 'name': al.product_name or part.name_vi,
+            'current_vertical': vert.name, 'current_zone': zone.name,
+            'current_part': part.name_vi, 'url': (al.url or '')[:100], 'price': al.price,
         })
 
     # Build AI prompt
@@ -1206,55 +1412,7 @@ Tra loi CHINH XAC theo format JSON array:
 
 Chi tra ve JSON array, KHONG giai thich them. Neu san pham dang o dung vertical thi correct_vertical = vertical hien tai."""
 
-    # Try Claude API first, then OpenAI
-    claude_key = SiteSettings.get('claude_key')
-    openai_key = SiteSettings.get('openai_key')
-    ai_results = None
-
-    if claude_key:
-        try:
-            resp = req.post('https://api.anthropic.com/v1/messages',
-                headers={
-                    'x-api-key': claude_key,
-                    'anthropic-version': '2023-06-01',
-                    'content-type': 'application/json'
-                },
-                json={
-                    'model': 'claude-sonnet-4-5-20250929',
-                    'max_tokens': 4000,
-                    'messages': [{'role': 'user', 'content': prompt}]
-                },
-                timeout=60
-            )
-            if resp.status_code == 200:
-                content = resp.json()['content'][0]['text']
-                ai_results = _parse_ai_classify_response(content)
-        except Exception:
-            pass
-
-    if not ai_results and openai_key:
-        try:
-            resp = req.post('https://api.openai.com/v1/chat/completions',
-                headers={
-                    'Authorization': f'Bearer {openai_key}',
-                    'Content-Type': 'application/json'
-                },
-                json={
-                    'model': 'gpt-4o-mini',
-                    'messages': [
-                        {'role': 'system', 'content': 'You are a product classification expert. Always respond with valid JSON.'},
-                        {'role': 'user', 'content': prompt}
-                    ],
-                    'max_tokens': 4000,
-                    'temperature': 0.2
-                },
-                timeout=60
-            )
-            if resp.status_code == 200:
-                content = resp.json()['choices'][0]['message']['content']
-                ai_results = _parse_ai_classify_response(content)
-        except Exception:
-            pass
+    ai_results = _call_ai_api(prompt)
 
     if not ai_results:
         return jsonify({'error': 'Khong the ket noi AI API. Kiem tra API key trong Settings.'}), 500
@@ -1271,16 +1429,14 @@ Chi tra ve JSON array, KHONG giai thich them. Neu san pham dang o dung vertical 
                 'current_vertical': p['current_vertical'], 'current_zone': p['current_zone'],
                 'suggested_vertical': suggested,
                 'confidence': ai_item.get('confidence', 'low'),
-                'reason': ai_item.get('reason', ''),
-                'mismatch': is_mismatch, 'price': p['price'],
+                'reason': ai_item.get('reason', ''), 'mismatch': is_mismatch,
             })
         else:
             results.append({
                 'id': p['id'], 'name': p['name'],
                 'current_vertical': p['current_vertical'], 'current_zone': p['current_zone'],
                 'suggested_vertical': p['current_vertical'],
-                'confidence': 'low', 'reason': 'AI khong phan loai duoc',
-                'mismatch': False,
+                'confidence': 'low', 'reason': 'AI khong phan loai duoc', 'mismatch': False,
             })
 
     return jsonify({
@@ -1291,7 +1447,47 @@ Chi tra ve JSON array, KHONG giai thich them. Neu san pham dang o dung vertical 
     })
 
 
-def _parse_ai_classify_response(text):
+def _call_ai_api(prompt):
+    """Unified AI API caller - tries Claude first, then OpenAI. Returns parsed JSON or None."""
+    import requests as req
+    claude_key = SiteSettings.get('claude_key')
+    openai_key = SiteSettings.get('openai_key')
+
+    if claude_key:
+        try:
+            resp = req.post('https://api.anthropic.com/v1/messages',
+                headers={'x-api-key': claude_key, 'anthropic-version': '2023-06-01',
+                         'content-type': 'application/json'},
+                json={'model': 'claude-sonnet-4-5-20250929', 'max_tokens': 4000,
+                      'messages': [{'role': 'user', 'content': prompt}]},
+                timeout=60)
+            if resp.status_code == 200:
+                result = _parse_ai_json_response(resp.json()['content'][0]['text'])
+                if result:
+                    return result
+        except Exception:
+            pass
+
+    if openai_key:
+        try:
+            resp = req.post('https://api.openai.com/v1/chat/completions',
+                headers={'Authorization': f'Bearer {openai_key}', 'Content-Type': 'application/json'},
+                json={'model': 'gpt-4o-mini',
+                      'messages': [
+                          {'role': 'system', 'content': 'You are a product classification expert. Always respond with valid JSON.'},
+                          {'role': 'user', 'content': prompt}],
+                      'max_tokens': 4000, 'temperature': 0.2},
+                timeout=60)
+            if resp.status_code == 200:
+                result = _parse_ai_json_response(resp.json()['choices'][0]['message']['content'])
+                if result:
+                    return result
+        except Exception:
+            pass
+    return None
+
+
+def _parse_ai_json_response(text):
     """Parse AI response, extract JSON array"""
     import json, re
     text = text.strip()
@@ -1310,24 +1506,10 @@ def _parse_ai_classify_response(text):
     return None
 
 
+# Keep old apply route as alias
 @app.route('/admin/products/ai-classify/apply', methods=['POST'])
 def admin_products_ai_classify_apply():
-    """Apply AI classification: delete mismatched products"""
-    data = request.get_json()
-    action = data.get('action')
-    product_ids = data.get('product_ids', [])
-
-    if not product_ids:
-        return jsonify({'error': 'Khong co san pham nao duoc chon'}), 400
-
-    if action == 'delete':
-        count = AffiliateLink.query.filter(
-            AffiliateLink.id.in_(product_ids)
-        ).delete(synchronize_session=False)
-        db.session.commit()
-        return jsonify({'success': True, 'message': f'Da xoa {count} san pham khong dung vertical'})
-
-    return jsonify({'error': 'Action khong hop le'}), 400
+    return admin_ai_center_bulk_action()
 
 
 def _build_part_keyword_index(vertical_id=None):
