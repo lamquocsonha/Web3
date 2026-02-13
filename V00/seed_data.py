@@ -3160,3 +3160,229 @@ def seed_tech_articles():
     
     db.session.commit()
     print(f'✅ Tech articles seeded: {len(articles)} articles')
+
+
+def seed_products_beauty_tech():
+    """Seed affiliate product links for Beauty and Tech verticals"""
+    from models import db, Vertical, Segment, Zone, Part, AffiliateLink
+    import random
+
+    seeded = 0
+
+    # ── Beauty products ──
+    beauty = Vertical.query.filter_by(slug='beauty').first()
+    if beauty:
+        existing = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'beauty').count()
+        if existing:
+            print(f'[SKIP] Beauty already has {existing} affiliate links')
+        else:
+            print('[+] Seeding Beauty affiliate links...')
+            beauty_products = {
+                'serum-vitamin-c': [
+                    ('shopee', 'Serum Vitamin C Melano CC Rohto 20ml', 'https://shope.ee/beauty001', 185000),
+                    ('lazada', 'Serum Obagi Vitamin C 15% 30ml', 'https://s.lazada.vn/beauty002', 1250000),
+                    ('tiki', 'Serum Klairs Vitamin C 35ml', 'https://tiki.vn/beauty003', 350000),
+                ],
+                'serum-niacinamide': [
+                    ('shopee', "The Ordinary Niacinamide 10% 30ml", 'https://shope.ee/beauty010', 195000),
+                    ('lazada', 'Paula\'s Choice 10% Niacinamide Booster', 'https://s.lazada.vn/beauty011', 780000),
+                ],
+                'serum-retinol': [
+                    ('shopee', 'The Ordinary Retinol 0.5% 30ml', 'https://shope.ee/beauty020', 220000),
+                    ('lazada', 'CeraVe Resurfacing Retinol Serum', 'https://s.lazada.vn/beauty021', 450000),
+                ],
+                'sua-rua-mat-cerave': [
+                    ('shopee', 'CeraVe Foaming Cleanser 236ml', 'https://shope.ee/beauty030', 285000),
+                    ('lazada', 'CeraVe Hydrating Cleanser 473ml', 'https://s.lazada.vn/beauty031', 380000),
+                    ('tiki', 'CeraVe SA Smoothing Cleanser 236ml', 'https://tiki.vn/beauty032', 320000),
+                ],
+                'tay-trang-dau-dhc': [
+                    ('shopee', 'DHC Deep Cleansing Oil 200ml', 'https://shope.ee/beauty040', 520000),
+                    ('lazada', 'DHC Deep Cleansing Oil 70ml', 'https://s.lazada.vn/beauty041', 250000),
+                ],
+                'gel-rua-mat-la-roche-posay': [
+                    ('shopee', 'La Roche-Posay Effaclar Gel 400ml', 'https://shope.ee/beauty050', 485000),
+                    ('tiki', 'La Roche-Posay Effaclar Duo+ 40ml', 'https://tiki.vn/beauty051', 520000),
+                ],
+                'nuoc-tay-trang-bioderma': [
+                    ('shopee', 'Bioderma Sensibio H2O 500ml', 'https://shope.ee/beauty060', 385000),
+                    ('lazada', 'Bioderma Sensibio H2O 250ml', 'https://s.lazada.vn/beauty061', 250000),
+                ],
+                'toner-klairs': [
+                    ('shopee', 'Klairs Supple Preparation Toner 180ml', 'https://shope.ee/beauty070', 320000),
+                    ('lazada', 'Klairs Supple Preparation Unscented 180ml', 'https://s.lazada.vn/beauty071', 335000),
+                ],
+                'essence-sk-ii': [
+                    ('shopee', 'SK-II Facial Treatment Essence 230ml', 'https://shope.ee/beauty080', 3800000),
+                    ('tiki', 'SK-II Facial Treatment Essence 75ml', 'https://tiki.vn/beauty081', 1650000),
+                ],
+                'toner-some-by-mi': [
+                    ('shopee', 'Some By Mi AHA-BHA-PHA Toner 150ml', 'https://shope.ee/beauty090', 265000),
+                    ('lazada', 'Some By Mi AHA-BHA-PHA Serum 50ml', 'https://s.lazada.vn/beauty091', 280000),
+                ],
+                'kem-duong-am-cerave': [
+                    ('shopee', 'CeraVe Moisturizing Cream 340g', 'https://shope.ee/beauty100', 385000),
+                    ('lazada', 'CeraVe PM Facial Moisturizing Lotion 52ml', 'https://s.lazada.vn/beauty101', 350000),
+                ],
+                'kem-duong-laneige': [
+                    ('shopee', 'Laneige Water Bank Blue HA Cream 50ml', 'https://shope.ee/beauty110', 750000),
+                    ('tiki', 'Laneige Water Bank Gel Cream 50ml', 'https://tiki.vn/beauty111', 680000),
+                ],
+                'kem-duong-trang-ponds': [
+                    ('shopee', 'Pond\'s White Beauty 50g', 'https://shope.ee/beauty120', 89000),
+                    ('lazada', 'Pond\'s Age Miracle Night Cream 50g', 'https://s.lazada.vn/beauty121', 210000),
+                ],
+                'kem-duong-innisfree': [
+                    ('shopee', 'Innisfree Green Tea Seed Cream 50ml', 'https://shope.ee/beauty130', 420000),
+                    ('lazada', 'Innisfree Green Tea Seed Serum 80ml', 'https://s.lazada.vn/beauty131', 380000),
+                ],
+                'kem-chong-nang-anessa': [
+                    ('shopee', 'Anessa Perfect UV Milk SPF50+ 60ml', 'https://shope.ee/beauty140', 450000),
+                    ('lazada', 'Anessa Perfect UV Gel SPF50+ 90g', 'https://s.lazada.vn/beauty141', 520000),
+                    ('tiki', 'Anessa Whitening UV Gel SPF50+ 90g', 'https://tiki.vn/beauty142', 480000),
+                ],
+                'kem-chong-nang-skin-aqua': [
+                    ('shopee', 'Skin Aqua Tone Up UV Essence 80g', 'https://shope.ee/beauty150', 155000),
+                    ('lazada', 'Skin Aqua Super Moisture Milk SPF50 40ml', 'https://s.lazada.vn/beauty151', 125000),
+                ],
+                'xit-chong-nang-neutrogena': [
+                    ('shopee', 'Neutrogena Ultra Sheer Spray SPF70 141g', 'https://shope.ee/beauty160', 280000),
+                    ('tiki', 'Neutrogena Ultra Sheer Dry-Touch SPF55 88ml', 'https://tiki.vn/beauty161', 245000),
+                ],
+                'mat-na-giay-mediheal': [
+                    ('shopee', 'Mediheal N.M.F Aquaring Ampoule Mask 10 miếng', 'https://shope.ee/beauty170', 155000),
+                    ('lazada', 'Mediheal Tea Tree Mask 10 miếng', 'https://s.lazada.vn/beauty171', 160000),
+                ],
+                'mat-na-ngu-laneige': [
+                    ('shopee', 'Laneige Water Sleeping Mask 70ml', 'https://shope.ee/beauty180', 580000),
+                    ('lazada', 'Laneige Lip Sleeping Mask 20g', 'https://s.lazada.vn/beauty181', 350000),
+                ],
+                'mat-na-dat-set-innisfree': [
+                    ('shopee', 'Innisfree Super Volcanic Pore Clay Mask 100ml', 'https://shope.ee/beauty190', 280000),
+                    ('tiki', 'Innisfree Volcanic Color Clay Mask 70ml', 'https://tiki.vn/beauty191', 250000),
+                ],
+            }
+            for seg in beauty.segments:
+                for z in seg.zones:
+                    for p in z.parts:
+                        if p.slug in beauty_products:
+                            for net, pname, url, price in beauty_products[p.slug]:
+                                al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
+                                    url=url, price=price, clicks=random.randint(20, 800),
+                                    conversions=random.randint(1, 40))
+                                db.session.add(al)
+                                seeded += 1
+
+    # ── Tech products ──
+    tech = Vertical.query.filter_by(slug='tech').first()
+    if tech:
+        existing = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'tech').count()
+        if existing:
+            print(f'[SKIP] Tech already has {existing} affiliate links')
+        else:
+            print('[+] Seeding Tech affiliate links...')
+            tech_products = {
+                'camera-chinh': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra 200MP', 'https://shope.ee/tech001', 31990000),
+                    ('lazada', 'iPhone 15 Pro Max 48MP', 'https://s.lazada.vn/tech002', 34990000),
+                    ('tiki', 'Xiaomi 14 Ultra Leica 50MP', 'https://tiki.vn/tech003', 23990000),
+                ],
+                'camera-goc-rong': [
+                    ('shopee', 'Google Pixel 8 Pro Ultrawide', 'https://shope.ee/tech010', 22990000),
+                    ('lazada', 'Samsung Galaxy S24+ Ultrawide 12MP', 'https://s.lazada.vn/tech011', 25990000),
+                ],
+                'camera-zoom': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Zoom 5x', 'https://shope.ee/tech020', 31990000),
+                    ('tiki', 'iPhone 15 Pro Max Telephoto 5x', 'https://tiki.vn/tech021', 34990000),
+                ],
+                'man-hinh-oled': [
+                    ('shopee', 'Samsung Galaxy A55 OLED 120Hz', 'https://shope.ee/tech030', 9990000),
+                    ('lazada', 'OPPO Reno 11 OLED 120Hz', 'https://s.lazada.vn/tech031', 10490000),
+                ],
+                'man-hinh-amoled': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Dynamic AMOLED 2X', 'https://shope.ee/tech040', 31990000),
+                    ('lazada', 'OnePlus 12 LTPO AMOLED 120Hz', 'https://s.lazada.vn/tech041', 19990000),
+                ],
+                'kinh-cuong-luc': [
+                    ('shopee', 'Kính cường lực Nillkin iPhone 15 Pro Max', 'https://shope.ee/tech050', 89000),
+                    ('lazada', 'Kính cường lực Spigen Samsung S24 Ultra', 'https://s.lazada.vn/tech051', 120000),
+                    ('tiki', 'Kính cường lực ZAGG Glass XTR3 iPhone', 'https://tiki.vn/tech052', 350000),
+                ],
+                'tan-so-quet-120hz': [
+                    ('shopee', 'Redmi Note 13 Pro 120Hz AMOLED', 'https://shope.ee/tech060', 6990000),
+                    ('lazada', 'Samsung Galaxy A35 120Hz Super AMOLED', 'https://s.lazada.vn/tech061', 8490000),
+                ],
+                'snapdragon-8-gen-3': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Snapdragon 8 Gen 3', 'https://shope.ee/tech070', 31990000),
+                    ('lazada', 'OnePlus 12 Snapdragon 8 Gen 3', 'https://s.lazada.vn/tech071', 19990000),
+                    ('tiki', 'Xiaomi 14 Pro Snapdragon 8 Gen 3', 'https://tiki.vn/tech072', 18990000),
+                ],
+                'apple-a17-pro': [
+                    ('shopee', 'iPhone 15 Pro 256GB', 'https://shope.ee/tech080', 28990000),
+                    ('tiki', 'iPhone 15 Pro Max 256GB', 'https://tiki.vn/tech081', 34990000),
+                ],
+                'dimensity-9300': [
+                    ('shopee', 'vivo X100 Pro Dimensity 9300', 'https://shope.ee/tech090', 19990000),
+                    ('lazada', 'OPPO Find X7 Ultra Dimensity 9300', 'https://s.lazada.vn/tech091', 24990000),
+                ],
+                'pin-lithium-polymer': [
+                    ('shopee', 'Samsung Galaxy M55 5000mAh', 'https://shope.ee/tech100', 8990000),
+                    ('lazada', 'Xiaomi Redmi Note 13 5000mAh', 'https://s.lazada.vn/tech101', 4990000),
+                ],
+                'sac-nhanh-120w': [
+                    ('shopee', 'Xiaomi 14 120W HyperCharge', 'https://shope.ee/tech110', 17990000),
+                    ('lazada', 'Bộ sạc nhanh Xiaomi 120W GaN chính hãng', 'https://s.lazada.vn/tech111', 450000),
+                    ('tiki', 'Bộ sạc OPPO SuperVOOC 100W', 'https://tiki.vn/tech112', 380000),
+                ],
+                'sac-khong-day-qi2': [
+                    ('shopee', 'Apple MagSafe Charger 15W', 'https://shope.ee/tech120', 950000),
+                    ('lazada', 'Anker MagGo Qi2 15W', 'https://s.lazada.vn/tech121', 650000),
+                    ('tiki', 'Belkin BoostCharge Qi2 15W', 'https://tiki.vn/tech122', 750000),
+                ],
+                'pin-du-phong-20000mah': [
+                    ('shopee', 'Anker PowerCore 20000mAh 65W', 'https://shope.ee/tech130', 890000),
+                    ('lazada', 'Xiaomi Power Bank 20000mAh 50W', 'https://s.lazada.vn/tech131', 450000),
+                    ('tiki', 'Baseus Blade 20000mAh 100W', 'https://tiki.vn/tech132', 1250000),
+                ],
+                'ram-lpddr5x': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra 12GB LPDDR5X', 'https://shope.ee/tech140', 31990000),
+                    ('lazada', 'OnePlus 12 16GB LPDDR5X', 'https://s.lazada.vn/tech141', 22990000),
+                ],
+                'bo-nho-ufs-4': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra 512GB UFS 4.0', 'https://shope.ee/tech150', 37990000),
+                    ('tiki', 'iPhone 15 Pro Max 1TB', 'https://tiki.vn/tech151', 46990000),
+                ],
+                'the-nho-microsd': [
+                    ('shopee', 'Samsung EVO Plus 256GB A2 U3', 'https://shope.ee/tech160', 350000),
+                    ('lazada', 'SanDisk Extreme 256GB A2 U3', 'https://s.lazada.vn/tech161', 380000),
+                    ('tiki', 'Kingston Canvas Go Plus 128GB A2', 'https://tiki.vn/tech162', 250000),
+                ],
+                'op-lung-silicon': [
+                    ('shopee', 'Ốp silicon Apple MagSafe iPhone 15 Pro', 'https://shope.ee/tech170', 1290000),
+                    ('lazada', 'Ốp Spigen Liquid Air Samsung S24 Ultra', 'https://s.lazada.vn/tech171', 350000),
+                    ('tiki', 'Ốp UAG Civilian iPhone 15 Pro Max', 'https://tiki.vn/tech172', 890000),
+                ],
+                'khung-vien-titanium': [
+                    ('shopee', 'iPhone 15 Pro Max Titanium 256GB', 'https://shope.ee/tech180', 34990000),
+                    ('tiki', 'Samsung Galaxy S24 Ultra Titanium 256GB', 'https://tiki.vn/tech181', 31990000),
+                ],
+                'kinh-lung-ceramic': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Gorilla Armor', 'https://shope.ee/tech190', 31990000),
+                    ('lazada', 'iPhone 15 Pro Ceramic Shield', 'https://s.lazada.vn/tech191', 28990000),
+                ],
+            }
+            for seg in tech.segments:
+                for z in seg.zones:
+                    for p in z.parts:
+                        if p.slug in tech_products:
+                            for net, pname, url, price in tech_products[p.slug]:
+                                al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
+                                    url=url, price=price, clicks=random.randint(30, 1200),
+                                    conversions=random.randint(2, 60))
+                                db.session.add(al)
+                                seeded += 1
+
+    db.session.commit()
+    beauty_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'beauty').count() if beauty else 0
+    tech_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'tech').count() if tech else 0
+    print(f'✅ Beauty+Tech products seeded: Beauty={beauty_count}, Tech={tech_count}')
