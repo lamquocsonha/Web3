@@ -59,7 +59,7 @@
       <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Kiến thức</a>
       <a href="{{ url_for('vertical_products', vertical_slug=vertical.slug) }}">Sản phẩm</a>
       <a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}#segments">{% block nav_segments %}Phân khúc{% endblock %}</a>
-      {% block extra_nav %}{% endblock %}
+      {% block extra_nav %}{% if vertical.slug == 'travel' %}<a href="{{ url_for('travel_hotels') }}">🏨 Khách sạn</a><a href="{{ url_for('travel_attractions') }}">📍 Vé tham quan</a>{% endif %}{% endblock %}
     </nav>
     <div class="header-actions">
       <button class="mode-toggle" onclick="toggleMode()" title="Chuyển chế độ sáng/tối">

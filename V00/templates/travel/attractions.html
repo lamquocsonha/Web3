@@ -1,9 +1,5 @@
 {% extends "shared/base.html" %}
 {% block title %}Vé tham quan{% endblock %}
-{% block extra_nav %}
-<a href="{{ url_for('travel_hotels') }}">🏨 Khách sạn</a>
-<a href="{{ url_for('travel_attractions') }}">📍 Vé tham quan</a>
-{% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Vé tham quan</div>{% endblock %}
 {% block content %}
 <div class="page-hero">

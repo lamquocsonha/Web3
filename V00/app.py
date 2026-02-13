@@ -1873,15 +1873,9 @@ def travel_attractions():
 # SHARED VERTICAL ROUTES (Dynamic)
 # =============================================
 def get_template_path(vertical_slug, template_name):
-    """Get the correct template path for a vertical. Travel uses its own templates to include special nav."""
-    if vertical_slug == 'travel':
-        # Check if travel-specific template exists
-        travel_template = f'travel/{template_name}'
-        try:
-            app.jinja_env.get_template(travel_template)
-            return travel_template
-        except:
-            pass
+    """Get the correct template path for a vertical.
+    All verticals use shared templates. Extra nav (hotels, attractions)
+    is handled via conditional block in shared/base.html."""
     return f'shared/{template_name}'
 
 def get_vertical_config(vertical_slug):

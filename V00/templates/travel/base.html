@@ -1,7 +1,0 @@
-{% extends "shared/base.html" %}
-
-{# Override navigation to add Travel-specific links #}
-{% block extra_nav %}
-<a href="{{ url_for('travel_hotels') }}">🏨 Khách sạn</a>
-<a href="{{ url_for('travel_attractions') }}">📍 Vé tham quan</a>
-{% endblock %}
