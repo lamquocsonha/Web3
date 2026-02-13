@@ -47,24 +47,22 @@
         {% endfor %}
 
         {# Product Carousel in the middle #}
-        {% if article.embed_code or related_parts %}
+        {% if article.embed_code or carousel_items %}
         <div class="product-carousel-section">
           <h2>🛒 Sản phẩm liên quan</h2>
           <p class="carousel-desc">Sản phẩm gợi ý từ các sàn thương mại — phù hợp với nội dung bài viết.</p>
-          {% if related_parts %}
+          {% if carousel_items %}
           <div class="carousel-grid">
-            {% for p in related_parts %}
-            {% for al in p.affiliate_links if al.is_active %}
+            {% for al in carousel_items %}
             <div class="carousel-card">
-              <div class="cc-image">{% if al.image_url %}<img src="{{ al.image_url }}" alt="{{ al.product_name or p.name_vi }}" loading="lazy">{% else %}<div class="cc-placeholder">📦</div>{% endif %}</div>
+              <div class="cc-image">{% if al.image_url %}<img src="{{ al.image_url }}" alt="{{ al.product_name or al.part.name_vi }}" loading="lazy">{% else %}<div class="cc-placeholder">📦</div>{% endif %}</div>
               <div class="cc-body">
                 <div class="cc-network">{{ al.network }}</div>
-                <div class="cc-name">{{ al.product_name or p.name_vi }}</div>
+                <div class="cc-name">{{ al.product_name or al.part.name_vi }}</div>
                 <div class="cc-price">{{ "{:,.0f}".format(al.price) }}đ</div>
                 <a href="{{ al.url }}" target="_blank" rel="nofollow" class="cc-btn">Xem sản phẩm →</a>
               </div>
             </div>
-            {% endfor %}
             {% endfor %}
           </div>
           {% endif %}

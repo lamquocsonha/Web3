@@ -3124,13 +3124,21 @@ def vertical_article(vertical_slug, slug):
     featured = Article.query.filter(Article.id != a.id, Article.vertical_slug==vertical_slug, Article.status=='published'
     ).order_by(Article.views.desc()).limit(5).all()
 
-    # Related parts for product carousel
-    related_parts = []
+    # Related parts for product carousel — flatten to individual affiliate cards
+    carousel_items = []
     if a.related_zone_slug:
         z = Zone.query.filter_by(slug=a.related_zone_slug).first()
         if z:
             carousel_limit = int(SiteSettings.get('carousel_product_limit', '3'))
-            related_parts = Part.query.filter_by(zone_id=z.id, status='published').limit(carousel_limit).all()
+            parts = Part.query.filter_by(zone_id=z.id, status='published').all()
+            for p in parts:
+                for al in p.affiliate_links:
+                    if al.is_active:
+                        carousel_items.append(al)
+                        if len(carousel_items) >= carousel_limit:
+                            break
+                if len(carousel_items) >= carousel_limit:
+                    break
 
     # Banners for sidebar (vertical-specific or global)
     banners = Banner.query.filter(
@@ -3139,7 +3147,7 @@ def vertical_article(vertical_slug, slug):
         db.or_(Banner.vertical_slug=='', Banner.vertical_slug==vertical_slug)
     ).order_by(Banner.position).all()
 
-    return render_template('shared/article.html', vertical=v, article=a, related=related, featured=featured, related_parts=related_parts, banners=banners)
+    return render_template('shared/article.html', vertical=v, article=a, related=related, featured=featured, carousel_items=carousel_items, banners=banners)
 
 @app.route('/article/<int:article_id>/feedback', methods=['POST'])
 def submit_article_feedback(article_id):
