@@ -1,0 +1,220 @@
+{% extends "shared/base.html" %}
+{% block title %}{{ article.title }}{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}">Uni{{ vertical.name }}</a><span class="sep">›</span><a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Kiến thức</a><span class="sep">›</span>{{ article.title[:40] }}{% if article.title|length > 40 %}...{% endif %}</div>
+{% endblock %}
+{% block content %}
+<div class="article-layout">
+  <!-- Main Content Column -->
+  <div class="article-main">
+    <div class="page-hero">
+      <div class="article-tier-label {% if article.tier == 'nganh' %}nganh{% elif article.tier == 'chung' %}chung{% else %}chitiet{% endif %}">
+        {% if article.tier == 'nganh' %}🏭 Kiến thức ngành{% elif article.tier == 'chung' %}⚙️ Kiến thức hệ thống{% else %}🔍 Chi tiết{% endif %}
+      </div>
+      <h1>{{ article.title }}</h1>
+      {% if article.excerpt %}<p class="subtitle">{{ article.excerpt }}</p>{% endif %}
+    </div>
+
+    <!-- Meta bar -->
+    <div class="article-meta-bar">
+      <span>📖 {{ article.reading_time }} phút đọc</span>
+      <span>👁 {{ "{:,}".format(article.views) }} lượt xem</span>
+      {% if article.ai_generated %}<span class="ac-ai">✨ AI Generated</span>{% endif %}
+      {% if article.category %}<span>📂 {{ article.category|replace('-',' ')|title }}</span>{% endif %}
+    </div>
+
+    <!-- Tags -->
+    {% if article.tags %}
+    <div class="part-tags">
+      {% for tag in article.tags.split(',') %}
+      <span class="part-tag">{{ tag.strip() }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Content with carousel in the middle -->
+    <article class="article-body">
+      {% if article.content %}
+        {% set paragraphs = article.content.split('</p>') %}
+        {% set total = paragraphs|length %}
+        {% set mid = (total // 2)|int %}
+
+        {# First half #}
+        {% for i in range(mid) %}
+          {% if paragraphs[i].strip() %}
+            {{ paragraphs[i]|safe }}</p>
+          {% endif %}
+        {% endfor %}
+
+        {# Product Carousel in the middle #}
+        {% if article.embed_code or related_parts %}
+        <div class="product-carousel-section">
+          <h2>🛒 Sản phẩm liên quan</h2>
+          <p class="carousel-desc">Sản phẩm gợi ý từ các sàn thương mại — phù hợp với nội dung bài viết.</p>
+          {% if related_parts %}
+          <div class="carousel-grid">
+            {% for p in related_parts %}
+            {% for al in p.affiliate_links if al.is_active %}
+            <div class="carousel-card">
+              <div class="cc-image"><div class="cc-placeholder">📦</div></div>
+              <div class="cc-body">
+                <div class="cc-network">{{ al.network }}</div>
+                <div class="cc-name">{{ al.product_name or p.name_vi }}</div>
+                <div class="cc-price">{{ "{:,.0f}".format(al.price) }}đ</div>
+                <a href="{{ al.url }}" target="_blank" rel="nofollow" class="cc-btn">Xem sản phẩm →</a>
+              </div>
+            </div>
+            {% endfor %}
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% if article.embed_code %}<div class="embed-zone">{{ article.embed_code|safe }}</div>{% endif %}
+        </div>
+        {% endif %}
+
+        {# Second half #}
+        {% for i in range(mid, total) %}
+          {% if paragraphs[i].strip() %}
+            {{ paragraphs[i]|safe }}{% if not paragraphs[i].endswith('</p>') %}</p>{% endif %}
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <p>Nội dung đang được cập nhật...</p>
+      {% endif %}
+    </article>
+
+    <!-- Article Feedback Section -->
+    <div class="article-feedback-widget">
+      <h3 class="feedback-title">📝 Phản hồi về nội dung</h3>
+      <p class="feedback-desc">Nội dung chưa chính xác? Hãy cho chúng tôi biết để cải thiện bài viết.</p>
+
+      <form action="{{ url_for('submit_article_feedback', article_id=article.id) }}" method="POST" class="feedback-form" id="feedbackForm">
+        <div class="feedback-options">
+          <label class="feedback-option">
+            <input type="radio" name="feedback_type" value="inaccurate" required>
+            <span class="option-label">
+              <span class="option-icon">❌</span>
+              <span class="option-text">Thông tin không chính xác</span>
+            </span>
+          </label>
+
+          <label class="feedback-option">
+            <input type="radio" name="feedback_type" value="outdated" required>
+            <span class="option-label">
+              <span class="option-icon">⏰</span>
+              <span class="option-text">Nội dung đã lỗi thời</span>
+            </span>
+          </label>
+
+          <label class="feedback-option">
+            <input type="radio" name="feedback_type" value="incomplete" required>
+            <span class="option-label">
+              <span class="option-icon">📄</span>
+              <span class="option-text">Thiếu thông tin quan trọng</span>
+            </span>
+          </label>
+
+          <label class="feedback-option">
+            <input type="radio" name="feedback_type" value="misleading" required>
+            <span class="option-label">
+              <span class="option-icon">⚠️</span>
+              <span class="option-text">Gây hiểu lầm</span>
+            </span>
+          </label>
+
+          <label class="feedback-option">
+            <input type="radio" name="feedback_type" value="other" required>
+            <span class="option-label">
+              <span class="option-icon">💬</span>
+              <span class="option-text">Khác</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="feedback-details" style="display:none;">
+          <textarea name="description" placeholder="Mô tả chi tiết (tùy chọn)..." rows="3" class="feedback-textarea"></textarea>
+          <input type="email" name="user_email" placeholder="Email của bạn (tùy chọn)" class="feedback-email">
+          <button type="submit" class="feedback-submit">Gửi phản hồi</button>
+        </div>
+      </form>
+
+      <script>
+      // Show details when feedback option is selected
+      document.querySelectorAll('input[name="feedback_type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          document.querySelector('.feedback-details').style.display = 'block';
+        });
+      });
+      </script>
+    </div>
+
+  </div>
+
+  <!-- Sidebar Column -->
+  <div class="article-sidebar">
+    <!-- Popular/Featured Articles Widget (Homepage style) -->
+    {% if featured %}
+    <div class="sidebar-widget">
+      <h3 class="widget-title">🔥 Phổ biến</h3>
+      <div class="popular-list">
+        {% for f in featured %}
+        <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=f.slug) }}" class="popular-item">
+          <div class="popular-rank">{{ loop.index }}</div>
+          <div class="popular-content">
+            <h4 class="popular-title">{{ f.title }}</h4>
+            <div class="popular-meta">
+              <span class="popular-vertical">{{ vertical.slug|upper }}</span>
+              <span>•</span>
+              <span>{{ "{:,}".format(f.views) }} views</span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Banner Ad Slot 1 (Top) -->
+    {% for banner in banners if banner.position == 1 %}
+    <div class="sidebar-widget sidebar-banner">
+      {% if banner.html_code %}
+        {{ banner.html_code|safe }}
+      {% elif banner.image_url %}
+        <a href="{{ banner.link_url }}" target="_blank" rel="nofollow sponsored">
+          <img src="{{ banner.image_url }}" alt="{{ banner.name }}" style="width:100%;border-radius:8px">
+        </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <!-- Related Articles Widget -->
+    {% if related %}
+    <div class="sidebar-widget">
+      <h3 class="widget-title">🔗 Bài viết liên quan</h3>
+      <div class="sidebar-articles">
+        {% for r in related %}
+        <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=r.slug) }}" class="sidebar-article-card">
+          <div class="sac-tier {{ r.tier }}">{{ r.tier|replace('-',' ')|upper }}</div>
+          <h4>{{ r.title[:60] }}{% if r.title|length > 60 %}...{% endif %}</h4>
+          <div class="sac-meta">👁 {{ "{:,}".format(r.views) }} · {{ r.reading_time }}min</div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Banner Ad Slot 2 (Bottom) -->
+    {% for banner in banners if banner.position == 2 %}
+    <div class="sidebar-widget sidebar-banner">
+      {% if banner.html_code %}
+        {{ banner.html_code|safe }}
+      {% elif banner.image_url %}
+        <a href="{{ banner.link_url }}" target="_blank" rel="nofollow sponsored">
+          <img src="{{ banner.image_url }}" alt="{{ banner.name }}" style="width:100%;border-radius:8px">
+        </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ voucher.code }} — {{ voucher.title }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/voucher.css') }}">
+</head>
+<body data-mode="light">
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ url_for('voucher_index') }}" class="site-logo">
+      <span class="logo-mark">🎫</span>
+      <span class="logo-name">UniVoucher</span>
+    </a>
+    <nav class="site-nav">
+      <a href="{{ url_for('voucher_index') }}">Trang chủ</a>
+      <a href="{{ url_for('voucher_index', category='food') }}">🍔 Ăn uống</a>
+      <a href="{{ url_for('voucher_index', category='shopping') }}">🛍️ Mua sắm</a>
+      <a href="{{ url_for('voucher_index', category='travel') }}">✈️ Du lịch</a>
+    </nav>
+    <div class="header-actions">
+      <button class="mode-toggle" onclick="toggleMode()" title="Chuyển chế độ sáng/tối">
+        <span class="mode-icon">☀️</span>
+        <span class="mode-label">Light</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  <div class="breadcrumbs">
+    <a href="{{ url_for('voucher_index') }}">UniVoucher</a>
+    <span class="sep">›</span>
+    <a href="{{ url_for('voucher_index', category=voucher.category) }}">{{ voucher.category|title }}</a>
+    <span class="sep">›</span>
+    {{ voucher.code }}
+  </div>
+
+  <!-- VOUCHER DETAIL -->
+  <div class="voucher-detail">
+    <div class="vd-main">
+      <!-- Hero Card -->
+      <div class="vd-hero" style="background:linear-gradient(135deg, {{ voucher.color }} 0%, {{ voucher.color }}dd 100%)">
+        <div class="vd-badge">{{ voucher.get_discount_text() }}</div>
+        <div class="vd-merchant">{{ voucher.icon }} {{ voucher.merchant }}</div>
+        <h1>{{ voucher.title }}</h1>
+        <p class="vd-desc">{{ voucher.description }}</p>
+        {% if voucher.is_exclusive %}<div class="vd-exclusive">✨ Voucher độc quyền UniLab</div>{% endif %}
+      </div>
+
+      <!-- Code Box -->
+      <div class="vd-code-box">
+        <div class="vd-code-label">Mã giảm giá</div>
+        <div class="vd-code-value" id="voucherCode">{{ voucher.code }}</div>
+        <button class="vd-copy-btn" onclick="copyCode()">📋 Sao chép mã</button>
+        {% if voucher.affiliate_url %}
+        <a href="{{ voucher.affiliate_url }}" target="_blank" class="vd-use-btn" onclick="trackUsage()">
+          🛒 Đi đến {{ voucher.merchant }} →
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Details -->
+      <div class="vd-section">
+        <h3>📋 Chi tiết voucher</h3>
+        <div class="vd-info-grid">
+          <div class="vd-info-item">
+            <span class="vd-info-label">Giảm giá:</span>
+            <span class="vd-info-value">{{ voucher.get_discount_text() }}</span>
+          </div>
+          {% if voucher.min_order > 0 %}
+          <div class="vd-info-item">
+            <span class="vd-info-label">Đơn tối thiểu:</span>
+            <span class="vd-info-value">{{ '{:,.0f}'.format(voucher.min_order) }}đ</span>
+          </div>
+          {% endif %}
+          {% if voucher.max_discount > 0 and voucher.discount_type == 'percentage' %}
+          <div class="vd-info-item">
+            <span class="vd-info-label">Giảm tối đa:</span>
+            <span class="vd-info-value">{{ '{:,.0f}'.format(voucher.max_discount) }}đ</span>
+          </div>
+          {% endif %}
+          <div class="vd-info-item">
+            <span class="vd-info-label">Hiệu lực:</span>
+            <span class="vd-info-value">{{ voucher.valid_from.strftime('%d/%m/%Y') }} - {{ voucher.valid_to.strftime('%d/%m/%Y') }}</span>
+          </div>
+          {% if voucher.usage_limit > 0 %}
+          <div class="vd-info-item">
+            <span class="vd-info-label">Số lượng:</span>
+            <span class="vd-info-value">Còn {{ voucher.usage_limit - voucher.usage_count }} mã</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Terms -->
+      {% if voucher.terms %}
+      <div class="vd-section">
+        <h3>📜 Điều kiện & Điều khoản</h3>
+        <div class="vd-terms">{{ voucher.terms|safe }}</div>
+      </div>
+      {% endif %}
+
+      <!-- Embed Code Widget -->
+      {% if voucher.embed_code %}
+      <div class="vd-section">
+        <h3>🔗 Nhúng vào website</h3>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">
+          Sao chép đoạn code dưới đây để nhúng voucher này vào website của bạn
+        </p>
+
+        <!-- Embed Code Display -->
+        <div style="position:relative;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px">
+          <textarea id="embedCodeText" readonly style="width:100%;height:150px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.6;background:transparent;border:none;resize:vertical;color:var(--text)">{{ voucher.embed_code }}</textarea>
+          <button onclick="copyEmbedCode()" class="btn-copy-embed" style="position:absolute;top:12px;right:12px;background:var(--accent);color:#fff;border:none;border-radius:6px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer">
+            📋 Copy
+          </button>
+        </div>
+
+        <!-- Preview -->
+        <div style="border:2px solid var(--border);border-radius:8px;padding:20px;background:var(--bg-subtle)">
+          <div style="font-size:11px;font-weight:700;color:var(--text-dim);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px">Preview:</div>
+          {{ voucher.embed_code|safe }}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Stats -->
+      <div class="vd-stats">
+        <span>👁️ {{ voucher.clicks }} lượt xem</span>
+        <span>✅ {{ voucher.conversions }} lượt sử dụng</span>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="vd-sidebar">
+      <!-- Related -->
+      {% if related %}
+      <div class="vd-related">
+        <h3>🔗 Voucher liên quan</h3>
+        {% for v in related[:5] %}
+        <a href="{{ url_for('voucher_detail', code=v.code) }}" class="vd-related-item">
+          <div class="vd-ri-badge">{{ v.get_discount_text() }}</div>
+          <div class="vd-ri-body">
+            <div class="vd-ri-merchant">{{ v.icon }} {{ v.merchant }}</div>
+            <div class="vd-ri-title">{{ v.title[:40] }}{% if v.title|length > 40 %}...{% endif %}</div>
+            <div class="vd-ri-code">{{ v.code }}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- CTA -->
+      <div class="vd-cta">
+        <h4>💡 Mẹo tiết kiệm</h4>
+        <p>Kết hợp nhiều voucher để tối ưu giảm giá!</p>
+        <a href="{{ url_for('voucher_index') }}" class="vd-cta-btn">Xem tất cả voucher →</a>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<script>
+function copyCode() {
+  const code = document.getElementById('voucherCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.vd-copy-btn');
+    btn.textContent = '✓ Đã sao chép!';
+    btn.style.background = '#27ae60';
+    setTimeout(() => {
+      btn.textContent = '📋 Sao chép mã';
+      btn.style.background = '';
+    }, 2000);
+  });
+}
+
+function copyEmbedCode() {
+  const embedText = document.getElementById('embedCodeText');
+  embedText.select();
+  navigator.clipboard.writeText(embedText.value).then(() => {
+    const btn = document.querySelector('.btn-copy-embed');
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#27ae60';
+    setTimeout(() => {
+      btn.textContent = '📋 Copy';
+      btn.style.background = '';
+    }, 2000);
+  });
+}
+
+function trackUsage() {
+  fetch(`/voucher/{{ voucher.id }}/use`, {method: 'POST'});
+}
+
+function toggleMode() {
+  const body = document.body;
+  const mode = body.dataset.mode === 'light' ? 'dark' : 'light';
+  body.dataset.mode = mode;
+  const icon = mode === 'light' ? '☀️' : '🌙';
+  const label = mode === 'light' ? 'Light' : 'Dark';
+  const iconEl = document.querySelector('.mode-icon');
+  const labelEl = document.querySelector('.mode-label');
+  if (iconEl) iconEl.textContent = icon;
+  if (labelEl) labelEl.textContent = label;
+  localStorage.setItem('voucher-mode', mode);
+}
+
+// Load saved mode on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const savedMode = localStorage.getItem('voucher-mode') || 'light';
+  document.body.dataset.mode = savedMode;
+  const icon = savedMode === 'light' ? '☀️' : '🌙';
+  const label = savedMode === 'light' ? 'Light' : 'Dark';
+  const iconEl = document.querySelector('.mode-icon');
+  const labelEl = document.querySelector('.mode-label');
+  if (iconEl) iconEl.textContent = icon;
+  if (labelEl) labelEl.textContent = label;
+});
+</script>
+
+</body>
+</html>

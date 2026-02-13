@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+{% block title %}Seed Data{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Seed Data{% endblock %}
+
+{% block content %}
+<div class="section-header">
+  <h1 class="page-title">Seed Data Management</h1>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px">
+  <h3 style="margin:0 0 12px 0;font-size:16px">⚠️ Warning</h3>
+  <p style="margin:0;color:var(--text-secondary);font-size:14px;line-height:1.6">
+    Seeding data will create sample content for verticals. If data already exists, the seed function will skip it.
+    This action cannot be easily undone. Make sure you understand what each seed function does before running it.
+  </p>
+</div>
+
+<!-- Seed All Button -->
+<div style="margin-bottom:32px">
+  <form method="POST" style="display:inline" onsubmit="return confirm('Seed ALL verticals? This will create sample data for all verticals.')">
+    <input type="hidden" name="action" value="seed_all">
+    <button type="submit" class="btn btn-primary" style="padding:12px 24px;font-size:15px">
+      🌱 Seed All Verticals
+    </button>
+  </form>
+</div>
+
+<!-- Verticals Stats -->
+<h2 style="font-size:18px;margin:0 0 16px 0">Verticals Overview</h2>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Segments</th>
+        <th>Zones</th>
+        <th>Parts</th>
+        <th>Articles</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for data in verticals_data %}
+      <tr>
+        <td class="icon-cell">{{ data.vertical.icon }}</td>
+        <td><strong>{{ data.vertical.name }}</strong></td>
+        <td style="font-family:'DM Mono'">{{ data.segments }}</td>
+        <td style="font-family:'DM Mono'">{{ data.zones }}</td>
+        <td style="font-family:'DM Mono'">{{ data.parts }}</td>
+        <td style="font-family:'DM Mono'">{{ data.articles }}</td>
+        <td>
+          <form method="POST" style="display:inline">
+            <input type="hidden" name="action" value="seed_{{ data.vertical.slug }}">
+            <button type="submit" class="btn btn-sm {% if data.segments > 0 %}btn-ghost{% else %}btn-primary{% endif %}"
+                    onclick="return confirm('Seed {{ data.vertical.name }} vertical?')">
+              {% if data.segments > 0 %}
+                🔄 Re-seed
+              {% else %}
+                🌱 Seed
+              {% endif %}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div style="margin-top:32px;padding:20px;background:var(--bg-subtle);border-radius:var(--radius)">
+  <h3 style="margin:0 0 12px 0;font-size:14px;font-weight:600">What does seeding do?</h3>
+  <ul style="margin:0;padding-left:20px;color:var(--text-secondary);font-size:13px;line-height:1.8">
+    <li><strong>Car:</strong> Creates 6 segments (Sedan, CUV, SUV, etc.), zones (suspension, brakes, engine), sample parts, and articles</li>
+    <li><strong>Pet:</strong> Creates pet care segments, zones, and knowledge articles</li>
+    <li><strong>Travel:</strong> Creates travel segments, zones, hotels, attractions, and articles</li>
+    <li><strong>Bike:</strong> Creates bike segments, zones, parts, and articles</li>
+    <li><strong>Beauty:</strong> Creates beauty segments (Skincare, Makeup, etc.), zones, products, and articles</li>
+    <li><strong>Tech:</strong> Creates tech segments (Smartphone, Headphones, etc.), zones, products, and articles</li>
+  </ul>
+</div>
+
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends "admin/base.html" %}
+{% block title %}Import Products CSV{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>
+<a href="{{ url_for('admin_products') }}">Products</a><span class="sep">></span>
+Import CSV
+{% endblock %}
+{% block content %}
+<h1 class="page-title">📥 Import Sản phẩm từ CSV</h1>
+<p style="font-size:13px;color:var(--text-dim);margin:-8px 0 24px">Import hàng loạt sản phẩm từ file CSV (Shopee format)</p>
+
+<div style="max-width:900px">
+  <!-- CSV Format Info -->
+  <div style="background:rgba(59,130,246,0.05);border:2px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:24px;margin-bottom:24px">
+    <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">📋 Format CSV</h3>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px">File CSV cần có các cột sau (header row):</p>
+    <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;overflow-x:auto">
+      sku,name,url,price,discount,image,desc,category
+    </div>
+    <ul style="font-size:13px;color:var(--text-dim);margin:12px 0 0;padding-left:20px;line-height:1.8">
+      <li><strong>sku:</strong> Mã sản phẩm (không bắt buộc)</li>
+      <li><strong>name:</strong> Tên sản phẩm (bắt buộc)</li>
+      <li><strong>url:</strong> Link sản phẩm (bắt buộc)</li>
+      <li><strong>price:</strong> Giá (số, không có dấu phẩy)</li>
+      <li><strong>discount:</strong> Giảm giá % (0-100)</li>
+      <li><strong>image:</strong> Link ảnh sản phẩm</li>
+      <li><strong>desc:</strong> Mô tả ngắn</li>
+      <li><strong>category:</strong> Danh mục</li>
+    </ul>
+  </div>
+
+  <!-- Import Methods Tabs -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+    <div style="display:flex;gap:12px;border-bottom:2px solid var(--border);margin-bottom:24px">
+      <button type="button" onclick="switchTab('upload')" id="tabUpload" class="import-tab active" style="padding:12px 24px;background:none;border:none;border-bottom:3px solid var(--accent);font-weight:700;cursor:pointer">
+        📤 Upload File
+      </button>
+      <button type="button" onclick="switchTab('url')" id="tabUrl" class="import-tab" style="padding:12px 24px;background:none;border:none;border-bottom:3px solid transparent;font-weight:700;cursor:pointer;color:var(--text-dim)">
+        🔗 CSV URL (Auto-update)
+      </button>
+      <a href="{{ url_for('admin_scheduled_imports') }}" class="btn btn-sm" style="margin-left:auto;align-self:center;font-size:12px;padding:6px 12px">
+        📋 Quản lý Scheduled Imports
+      </a>
+    </div>
+
+    <!-- Upload Form -->
+    <form method="POST" enctype="multipart/form-data" id="formUpload">
+      <!-- Part Selection -->
+      <div class="form-group">
+        <label class="form-label">Chọn Part để gắn sản phẩm <span style="color:#ef4444">*</span></label>
+        <select name="part_id" class="form-select" required>
+          <option value="">-- Chọn Part --</option>
+          {% for part in parts_tree %}
+          <option value="{{ part.id }}">{{ part.label }}</option>
+          {% endfor %}
+        </select>
+        <p class="form-help">Tất cả sản phẩm trong CSV sẽ được gắn vào Part này</p>
+      </div>
+
+      <!-- Network Selection -->
+      <div class="form-group">
+        <label class="form-label">Affiliate Network</label>
+        <select name="network" class="form-select">
+          <option value="shopee">Shopee</option>
+          <option value="lazada">Lazada</option>
+          <option value="tiki">Tiki</option>
+          <option value="accesstrade">AccessTrade</option>
+          {% for net in networks %}
+          <option value="{{ net.slug }}">{{ net.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Deeplink Option -->
+      <div class="form-group">
+        <label class="form-label" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" name="apply_deeplink" checked style="width:18px;height:18px">
+          <span>Áp dụng Deeplink Template</span>
+        </label>
+        <p class="form-help">Tự động chuyển đổi URL thành deeplink affiliate nếu network đã có template</p>
+      </div>
+
+      <!-- File Upload -->
+      <div class="form-group">
+        <label class="form-label">CSV File <span style="color:#ef4444">*</span></label>
+        <input type="file" name="csv_file" accept=".csv" required class="form-input" style="padding:10px">
+        <p class="form-help">Chọn file CSV (encoding: UTF-8)</p>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">📥 Import ngay</button>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Hủy</a>
+      </div>
+    </form>
+
+    <!-- URL Form (Scheduled Import) -->
+    <form method="POST" action="{{ url_for('admin_scheduled_import_create') }}" id="formUrl" style="display:none">
+      <!-- Job Name -->
+      <div class="form-group">
+        <label class="form-label">Tên Job <span style="color:#ef4444">*</span></label>
+        <input type="text" name="name" class="form-input" required placeholder="VD: Shopee Bike Parts - Daily Update">
+        <p class="form-help">Tên để nhận diện scheduled import này</p>
+      </div>
+
+      <!-- CSV URL -->
+      <div class="form-group">
+        <label class="form-label">CSV URL <span style="color:#ef4444">*</span></label>
+        <input type="url" name="csv_url" class="form-input" required placeholder="https://docs.google.com/spreadsheets/d/xxx/export?format=csv">
+        <p class="form-help">Link trực tiếp tới file CSV (Google Sheets Export, Dropbox, Drive, etc.)</p>
+        <div style="background:rgba(250,204,21,0.1);border-left:3px solid #facc15;padding:12px;margin-top:8px;font-size:12px;color:var(--text-dim);border-radius:4px">
+          <strong>💡 Google Sheets:</strong> File → Share → Publish to web → Sheet → CSV → Copy link<br>
+          <strong>💡 Dropbox:</strong> Thay dl=0 thành dl=1 ở cuối link
+        </div>
+      </div>
+
+      <!-- Part Selection -->
+      <div class="form-group">
+        <label class="form-label">Chọn Part để gắn sản phẩm <span style="color:#ef4444">*</span></label>
+        <select name="part_id" class="form-select" required>
+          <option value="">-- Chọn Part --</option>
+          {% for part in parts_tree %}
+          <option value="{{ part.id }}">{{ part.label }}</option>
+          {% endfor %}
+        </select>
+        <p class="form-help">Tất cả sản phẩm trong CSV sẽ được gắn vào Part này</p>
+      </div>
+
+      <!-- Network Selection -->
+      <div class="form-group">
+        <label class="form-label">Affiliate Network</label>
+        <select name="network" class="form-select">
+          <option value="shopee">Shopee</option>
+          <option value="lazada">Lazada</option>
+          <option value="tiki">Tiki</option>
+          <option value="accesstrade">AccessTrade</option>
+          {% for net in networks %}
+          <option value="{{ net.slug }}">{{ net.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Deeplink Option -->
+      <div class="form-group">
+        <label class="form-label" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" name="apply_deeplink" checked style="width:18px;height:18px">
+          <span>Áp dụng Deeplink Template</span>
+        </label>
+        <p class="form-help">Tự động chuyển đổi URL thành deeplink affiliate nếu network đã có template</p>
+      </div>
+
+      <!-- Update Interval -->
+      <div class="form-group">
+        <label class="form-label">Tự động cập nhật sau <span style="color:#ef4444">*</span></label>
+        <div style="display:flex;gap:12px;align-items:center">
+          <input type="number" name="update_interval_days" class="form-input" value="7" min="1" max="365" required style="width:100px">
+          <span style="font-size:13px;color:var(--text-dim)">ngày</span>
+        </div>
+        <p class="form-help">Hệ thống sẽ tự động tải và cập nhật sản phẩm từ CSV URL sau số ngày này</p>
+      </div>
+
+      <!-- Auto-run first import -->
+      <div class="form-group">
+        <label class="form-label" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" name="run_now" checked style="width:18px;height:18px">
+          <span>Chạy import ngay lập tức</span>
+        </label>
+        <p class="form-help">Nếu bỏ chọn, import đầu tiên sẽ chạy theo lịch</p>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">⏰ Tạo Scheduled Import</button>
+        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Hủy</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Example CSV -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:20px">
+    <h3 style="font-size:15px;margin-bottom:12px">📝 Ví dụ CSV</h3>
+    <div style="background:var(--code-bg);padding:16px;border-radius:8px;font-family:'DM Mono',monospace;font-size:11px;overflow-x:auto;line-height:1.8">
+sku,name,url,price,discount,image,desc,category<br>
+255E+08,Combo sên phấn,https://shopee.vn/product/123,200000,0,https://cf.shopee.vn/img.jpg,Combo sên,bike<br>
+515E+08,Đĩa quây,https://shopee.vn/product/456,72800,5,https://cf.shopee.vn/img2.jpg,Đĩa quây xe,bike<br>
+161E+08,Quạn ngắn,https://shopee.vn/product/789,55000,9,https://cf.shopee.vn/img3.jpg,Quần đạp xe,clothing
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:12px">
+      💡 <strong>Lưu ý:</strong> Header row (dòng đầu tiên) bắt buộc phải có để xác định các cột
+    </p>
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  // Update tab buttons
+  document.querySelectorAll('.import-tab').forEach(btn => {
+    btn.style.borderBottomColor = 'transparent';
+    btn.style.color = 'var(--text-dim)';
+  });
+
+  if (tab === 'upload') {
+    document.getElementById('tabUpload').style.borderBottomColor = 'var(--accent)';
+    document.getElementById('tabUpload').style.color = 'var(--text)';
+    document.getElementById('formUpload').style.display = 'block';
+    document.getElementById('formUrl').style.display = 'none';
+  } else {
+    document.getElementById('tabUrl').style.borderBottomColor = 'var(--accent)';
+    document.getElementById('tabUrl').style.color = 'var(--text)';
+    document.getElementById('formUpload').style.display = 'none';
+    document.getElementById('formUrl').style.display = 'block';
+  }
+}
+</script>
+{% endblock %}

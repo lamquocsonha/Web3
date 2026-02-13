@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniVoucher — Mã giảm giá & Voucher</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/voucher.css') }}">
+</head>
+<body data-mode="light">
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ url_for('voucher_index') }}" class="site-logo">
+      <span class="logo-mark">🎫</span>
+      <span class="logo-name">UniVoucher</span>
+    </a>
+    <nav class="site-nav">
+      <a href="{{ url_for('voucher_index') }}">Trang chủ</a>
+      <a href="{{ url_for('voucher_index', category='food') }}">🍔 Ăn uống</a>
+      <a href="{{ url_for('voucher_index', category='shopping') }}">🛍️ Mua sắm</a>
+      <a href="{{ url_for('voucher_index', category='travel') }}">✈️ Du lịch</a>
+    </nav>
+    <div class="header-actions">
+      <button class="mode-toggle" onclick="toggleMode()" title="Chuyển chế độ sáng/tối">
+        <span class="mode-icon">☀️</span>
+        <span class="mode-label">Light</span>
+      </button>
+      <a href="/admin/vouchers" class="admin-link">⚙️ Admin</a>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  <!-- HERO -->
+  <div class="page-hero">
+    <h1>🎫 Mã giảm giá & Voucher</h1>
+    <p class="subtitle">{{ vouchers|length }} mã giảm giá đang hoạt động từ Shopee, Lazada, Grab, Tiki...</p>
+  </div>
+
+  <!-- FEATURED VOUCHERS -->
+  {% if featured %}
+  <section class="section">
+    <div class="section-header-pub">
+      <h2>⭐ Voucher nổi bật</h2>
+    </div>
+    <div class="voucher-featured">
+      {% for v in featured[:3] %}
+      <a href="{{ url_for('voucher_detail', code=v.code) }}" class="voucher-card-featured">
+        <div class="vcf-badge">{{ v.get_discount_text() }}</div>
+        <div class="vcf-merchant">{{ v.icon }} {{ v.merchant }}</div>
+        <h3>{{ v.title }}</h3>
+        <p>{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</p>
+        <div class="vcf-meta">
+          <span>HSD: {{ v.valid_to.strftime('%d/%m') }}</span>
+          {% if v.is_exclusive %}<span class="vcf-exclusive">✨ Độc quyền</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- VOUCHER WIDGETS (AccessTrade, etc.) -->
+  {% if widgets %}
+  {% for widget in widgets %}
+  <section class="section" style="margin-bottom:48px">
+    <div class="section-header-pub">
+      <h2>{{ widget.name }}</h2>
+      {% if widget.description %}
+      <p style="font-size:13px;color:#666;margin-top:4px">{{ widget.description }}</p>
+      {% endif %}
+    </div>
+    <div style="margin-top:20px">
+      {{ widget.embed_code|safe }}
+    </div>
+  </section>
+  {% endfor %}
+  {% endif %}
+
+  <!-- FILTERS & GRID -->
+  <div class="voucher-layout">
+    <!-- SIDEBAR -->
+    <aside class="voucher-sidebar">
+      <div class="vs-section">
+        <h3>📂 Danh mục</h3>
+        <a href="{{ url_for('voucher_index') }}" class="vs-cat {% if not f_category %}active{% endif %}">
+          Tất cả <span class="vs-count">{{ vouchers|length }}</span>
+        </a>
+        {% for cat, count in categories.items() %}
+        <a href="{{ url_for('voucher_index', category=cat) }}" class="vs-cat {% if f_category == cat %}active{% endif %}">
+          {% if cat == 'food' %}🍔 Ăn uống
+          {% elif cat == 'shopping' %}🛍️ Mua sắm
+          {% elif cat == 'travel' %}✈️ Du lịch
+          {% elif cat == 'services' %}🔧 Dịch vụ
+          {% elif cat == 'entertainment' %}🎬 Giải trí
+          {% elif cat == 'tech' %}💻 Công nghệ
+          {% elif cat == 'health' %}💊 Sức khỏe
+          {% elif cat == 'education' %}📚 Giáo dục
+          {% else %}{{ cat }}{% endif %}
+          <span class="vs-count">{{ count }}</span>
+        </a>
+        {% endfor %}
+      </div>
+
+      <div class="vs-section">
+        <h3>🏪 Thương hiệu</h3>
+        {% for m in merchants[:10] %}
+        <a href="{{ url_for('voucher_index', merchant=m, category=f_category) }}" class="vs-merchant {% if f_merchant == m %}active{% endif %}">
+          {{ m }}
+        </a>
+        {% endfor %}
+      </div>
+
+      <div class="vs-section">
+        <h3>💰 Loại giảm giá</h3>
+        <a href="{{ url_for('voucher_index', type='percentage', category=f_category) }}" class="vs-type {% if f_type == 'percentage' %}active{% endif %}">% Phần trăm</a>
+        <a href="{{ url_for('voucher_index', type='fixed_amount', category=f_category) }}" class="vs-type {% if f_type == 'fixed_amount' %}active{% endif %}">₫ Số tiền</a>
+        <a href="{{ url_for('voucher_index', type='free_shipping', category=f_category) }}" class="vs-type {% if f_type == 'free_shipping' %}active{% endif %}">🚚 Freeship</a>
+      </div>
+    </aside>
+
+    <!-- GRID -->
+    <div class="voucher-main">
+      {% if vouchers %}
+      <div class="voucher-grid">
+        {% for v in vouchers %}
+        <a href="{{ url_for('voucher_detail', code=v.code) }}" class="voucher-card">
+          <div class="vc-header" style="background:linear-gradient(135deg, {{ v.color }} 0%, {{ v.color }}dd 100%)">
+            <div class="vc-discount">{{ v.get_discount_text() }}</div>
+            <div class="vc-merchant">{{ v.icon }} {{ v.merchant }}</div>
+          </div>
+          <div class="vc-body">
+            <h4>{{ v.title[:50] }}{% if v.title|length > 50 %}...{% endif %}</h4>
+            <p>{{ v.description[:70] }}{% if v.description|length > 70 %}...{% endif %}</p>
+            <div class="vc-meta">
+              <span>📅 HSD: {{ v.valid_to.strftime('%d/%m/%Y') }}</span>
+              {% if v.min_order > 0 %}<span>💵 Đơn tối thiểu: {{ '{:,.0f}'.format(v.min_order) }}đ</span>{% endif %}
+            </div>
+            {% if v.is_exclusive %}<div class="vc-exclusive">✨ Độc quyền UniLab</div>{% endif %}
+          </div>
+          <div class="vc-footer">
+            <span class="vc-code">{{ v.code }}</span>
+            <span class="vc-action">Sao chép →</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <span style="font-size:64px">🔍</span>
+        <h3>Không tìm thấy voucher</h3>
+        <p>Thử thay đổi bộ lọc hoặc quay lại sau</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p>🎫 UniVoucher — Mã giảm giá & Voucher từ các sàn TMĐT hàng đầu</p>
+    <p style="opacity:0.6;font-size:13px">Shopee · Lazada · Tiki · Grab · Accesstrade</p>
+  </div>
+</footer>
+
+<script>
+function toggleMode() {
+  const body = document.body;
+  const mode = body.dataset.mode === 'light' ? 'dark' : 'light';
+  body.dataset.mode = mode;
+  const icon = mode === 'light' ? '☀️' : '🌙';
+  const label = mode === 'light' ? 'Light' : 'Dark';
+  const iconEl = document.querySelector('.mode-icon');
+  const labelEl = document.querySelector('.mode-label');
+  if (iconEl) iconEl.textContent = icon;
+  if (labelEl) labelEl.textContent = label;
+  localStorage.setItem('voucher-mode', mode);
+}
+
+// Load saved mode on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const savedMode = localStorage.getItem('voucher-mode') || 'light';
+  document.body.dataset.mode = savedMode;
+  const icon = savedMode === 'light' ? '☀️' : '🌙';
+  const label = savedMode === 'light' ? 'Light' : 'Dark';
+  const iconEl = document.querySelector('.mode-icon');
+  const labelEl = document.querySelector('.mode-label');
+  if (iconEl) iconEl.textContent = icon;
+  if (labelEl) labelEl.textContent = label;
+});
+</script>
+
+</body>
+</html>

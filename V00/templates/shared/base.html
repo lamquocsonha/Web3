@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Uni{{ vertical.name }}{% endblock %} — {{ vertical.slug }}.unilab.vn</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Shared CSS for all verticals -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}?v=20250213">
+
+<!-- Theme variables injected per vertical.style -->
+{% set theme = THEME_STYLES.get(vertical.style or 'classic', THEME_STYLES['classic']) %}
+<style>
+:root {
+  --max-w: 1400px;
+  --radius: {{ theme.radius }};
+}
+
+[data-mode="light"] {
+  --bg: {{ theme.bg_light }};
+  --surface: {{ theme.surface_light }};
+  --border: {{ theme.border_light }};
+  --text: {{ theme.text_light }};
+  --text-dim: {{ theme.text_dim_light }};
+  --accent: {{ theme.accent }};
+  --accent-hover: {{ theme.accent_hover }};
+  --accent-bg: {{ theme.accent }}18;
+  --tag-bg: {{ theme.border_light }};
+  --font-primary: {{ theme.font_primary }};
+  --font-secondary: {{ theme.font_secondary }};
+}
+
+[data-mode="dark"] {
+  --bg: {{ theme.bg_dark }};
+  --surface: {{ theme.surface_dark }};
+  --border: {{ theme.border_dark }};
+  --text: {{ theme.text_dark }};
+  --text-dim: {{ theme.text_dim_dark }};
+  --accent: {{ theme.accent }};
+  --accent-hover: {{ theme.accent_hover }};
+  --accent-bg: {{ theme.accent }}28;
+  --tag-bg: {{ theme.border_dark }};
+  --font-primary: {{ theme.font_primary }};
+  --font-secondary: {{ theme.font_secondary }};
+}
+</style>
+</head>
+<body data-mode="{{ vertical.default_mode or 'light' }}">
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}" class="site-logo">
+      <span class="logo-mark">{{ vertical.icon }}</span>
+      <span class="logo-name">Uni{{ vertical.name }}</span>
+    </a>
+    <nav class="site-nav">
+      <a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}">Trang chủ</a>
+      <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Kiến thức</a>
+      <a href="{{ url_for('vertical_products', vertical_slug=vertical.slug) }}">Sản phẩm</a>
+      <a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}#segments">{% block nav_segments %}Phân khúc{% endblock %}</a>
+      {% block extra_nav %}{% endblock %}
+    </nav>
+    <div class="header-actions">
+      <button class="mode-toggle" onclick="toggleMode()" title="Chuyển chế độ sáng/tối">
+        <span class="mode-icon">☀️</span>
+        <span class="mode-label">Light</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+  {% block breadcrumbs %}{% endblock %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand">{{ vertical.icon }} Uni{{ vertical.name }}</div>
+        <p class="footer-desc">{{ vertical.description }}</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-heading">Kiến thức</div>
+        <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Tất cả bài viết</a>
+        <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Kiến thức ngành</a>
+        <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Hệ thống</a>
+        <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Chi tiết</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-heading">Hệ sinh thái</div>
+        <a href="/admin">UniLab</a>
+        {% for v in sidebar_verticals %}
+        <a href="{{ url_for('vertical_index', vertical_slug=v.slug) }}">Uni{{ v.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Uni{{ vertical.name }} — {{ vertical.slug }}.unilab.vn</span>
+      <span>Hệ sinh thái kiến thức Unilab</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleMode() {
+  const body = document.body;
+  const mode = body.dataset.mode === 'light' ? 'dark' : 'light';
+  body.dataset.mode = mode;
+  const icon = mode === 'light' ? '☀️' : '🌙';
+  const label = mode === 'light' ? 'Light' : 'Dark';
+  document.querySelector('.mode-icon').textContent = icon;
+  document.querySelector('.mode-label').textContent = label;
+  localStorage.setItem('unilab-mode', mode);
+}
+const saved = localStorage.getItem('unilab-mode');
+if (saved) {
+  document.body.dataset.mode = saved;
+  const icon = saved === 'light' ? '☀️' : '🌙';
+  const label = saved === 'light' ? 'Light' : 'Dark';
+  document.querySelector('.mode-icon').textContent = icon;
+  document.querySelector('.mode-label').textContent = label;
+}
+</script>
+</body>
+</html>

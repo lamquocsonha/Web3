@@ -1,0 +1,44 @@
+{% extends "admin/base.html" %}
+{% block title %}Affiliate Hub{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Affiliate Hub{% endblock %}
+{% block content %}
+<h1 class="page-title">Affiliate Hub</h1>
+
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+  <div class="stat-card"><div class="stat-label">Networks</div><div class="stat-value">{{ networks|length }}</div></div>
+  <div class="stat-card"><div class="stat-label">Total Links</div><div class="stat-value">{{ total_links }}</div></div>
+  <div class="stat-card"><div class="stat-label">Total Clicks</div><div class="stat-value" style="color:#22c55e">{{ "{:,}".format(total_clicks) }}</div></div>
+  <div class="stat-card"><div class="stat-label">Conversions</div><div class="stat-value" style="color:#8b5cf6">{{ total_conv }}</div></div>
+</div>
+
+<div class="section-header">
+  <h2>Networks</h2>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('admin_deeplinks') }}" class="btn btn-secondary btn-sm">🔗 Deeplink Templates</a>
+    <a href="{{ url_for('admin_affiliate_performance') }}" class="btn btn-primary btn-sm">Performance Dashboard</a>
+  </div>
+</div>
+
+<div class="items-grid" style="grid-template-columns:repeat(4,1fr)">
+  {% for n in networks %}
+  <a href="{{ url_for('admin_affiliate_network', nid=n.id) }}" class="item-card" style="border-top:3px solid {{ n.color }}">
+    <h3 style="color:{{ n.color }}">{{ n.name }}</h3>
+    <div class="item-desc">Commission: {{ n.commission_rate }}<br>Cookie: {{ n.cookie_days }} days<br>Payment: {{ n.payment_cycle }}</div>
+    <div class="item-meta">
+      {% if n.status == 'connected' %}<span style="color:#22c55e">&#9679; Connected</span>{% else %}<span style="color:#f59e0b">&#9675; Not connected</span>{% endif %}
+      <br>{{ n.campaigns|length }} campaigns
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Smart Link Explanation -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:24px">
+  <h3 style="font-size:16px;margin-bottom:12px">Smart Link Router</h3>
+  <p style="font-size:13px;color:var(--text-dim);line-height:1.6">
+    When a product has links from multiple networks, the system automatically selects the best link based on:
+    commission rate, product availability, and conversion history. If one network goes down or a campaign ends,
+    it auto-switches to the next best option.
+  </p>
+</div>
+{% endblock %}

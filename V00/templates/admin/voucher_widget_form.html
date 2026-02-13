@@ -1,0 +1,105 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if widget else 'New' }} Voucher Widget{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ '✏️ Edit' if widget else '➕ New' }} Voucher Widget</h1>
+</div>
+
+<form method="POST" class="form-horizontal" style="max-width:900px">
+  <div class="form-grid">
+    <!-- Basic Info -->
+    <div class="form-section">
+      <h3>Basic Information</h3>
+
+      <div class="form-group">
+        <label>Widget Name *</label>
+        <input type="text" name="name" value="{{ widget.name if widget }}" required placeholder="VD: AccessTrade Vouchers - Trang chủ">
+        <small>Tên để nhận diện widget này trong admin</small>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" rows="2" placeholder="Mô tả hoặc ghi chú về widget này...">{{ widget.description if widget }}</textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Network *</label>
+          <select name="network" required>
+            <option value="accesstrade" {{ 'selected' if widget and widget.network == 'accesstrade' }}>AccessTrade</option>
+            <option value="shopee" {{ 'selected' if widget and widget.network == 'shopee' }}>Shopee</option>
+            <option value="lazada" {{ 'selected' if widget and widget.network == 'lazada' }}>Lazada</option>
+            <option value="tiki" {{ 'selected' if widget and widget.network == 'tiki' }}>Tiki</option>
+            <option value="other" {{ 'selected' if widget and widget.network == 'other' }}>Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Position *</label>
+          <input type="number" name="position" value="{{ widget.position if widget else 1 }}" required min="1" max="100">
+          <small>Thứ tự hiển thị (1 = trên cùng)</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Embed Code -->
+    <div class="form-section">
+      <h3>🔗 Embed Code</h3>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px">
+        Copy embed code từ AccessTrade hoặc affiliate network → Paste vào đây
+      </p>
+
+      <div class="form-group">
+        <label>HTML/JavaScript Embed Code *</label>
+        <textarea
+          name="embed_code"
+          rows="12"
+          required
+          placeholder="<!-- Paste embed code từ AccessTrade hoặc network khác -->"
+          style="font-family:'DM Mono',monospace;font-size:12px;line-height:1.6">{{ widget.embed_code if widget }}</textarea>
+        <small>
+          <strong>VD AccessTrade:</strong> &lt;div id="at-voucher-widget"&gt;&lt;/div&gt;&lt;script src="..."&gt;&lt;/script&gt;
+        </small>
+      </div>
+
+      {% if widget and widget.embed_code %}
+      <div style="margin-top:16px;padding:12px;background:var(--bg-subtle);border-radius:8px">
+        <strong style="font-size:12px;color:var(--text-dim)">Preview:</strong>
+        <div style="margin-top:8px;max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:12px;background:#fff">
+          {{ widget.embed_code|safe }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Display Settings -->
+    <div class="form-section">
+      <h3>Display Settings</h3>
+
+      <div class="form-group">
+        <label>Placement *</label>
+        <select name="placement" required>
+          <option value="voucher_page" {{ 'selected' if not widget or widget.placement == 'voucher_page' }}>Voucher Page (Trang danh sách voucher)</option>
+          <option value="sidebar" {{ 'selected' if widget and widget.placement == 'sidebar' }}>Sidebar</option>
+          <option value="homepage" {{ 'selected' if widget and widget.placement == 'homepage' }}>Homepage</option>
+        </select>
+        <small>Chọn nơi hiển thị widget này</small>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_active" {{ 'checked' if not widget or widget.is_active }}>
+          <span>Active (Hiển thị widget)</span>
+        </label>
+        <small>Bỏ chọn để tạm ẩn widget mà không cần xóa</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">💾 {{ 'Update' if widget else 'Create' }}</button>
+    <a href="{{ url_for('admin_voucher_widgets') }}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+{% endblock %}

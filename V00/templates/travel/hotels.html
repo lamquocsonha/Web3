@@ -1,0 +1,229 @@
+{% extends "shared/base.html" %}
+{% block title %}Khách sạn{% endblock %}
+{% block extra_nav %}
+<a href="{{ url_for('travel_hotels') }}">🏨 Khách sạn</a>
+<a href="{{ url_for('travel_attractions') }}">📍 Vé tham quan</a>
+{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Khách sạn</div>{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <span style="font-size:36px">🏨</span>
+  <h1>Tìm khách sạn giá tốt</h1>
+  <p class="subtitle">So sánh giá từ Agoda — 34 tỉnh thành Việt Nam</p>
+</div>
+
+{% if api_status != 'configured' and not destination %}
+<div class="hotel-api-notice notice-warn">
+  <span>⚙️</span> <strong>Demo Mode</strong> — Agoda API chưa cấu hình. <a href="/admin/settings">Cài đặt API →</a>
+</div>
+{% endif %}
+
+<!-- ═══ SEARCH BAR — tripzone style ═══ -->
+<div class="tz-search-wrap">
+  <div class="tz-search-tabs">
+    <a href="{{ url_for('travel_hotels') }}" class="tz-tab active">🏨 Khách sạn</a>
+    <a href="{{ url_for('travel_attractions') }}" class="tz-tab">📍 Vé tham quan</a>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug='travel') }}" class="tz-tab">📖 Kinh nghiệm</a>
+  </div>
+  <form method="GET" action="{{ url_for('travel_hotels') }}" class="tz-search-form">
+    <div class="tz-sf-row">
+      <div class="tz-sf-field tz-sf-dest">
+        <label>Khu vực</label>
+        <input type="hidden" name="destination" value="{{ destination }}" id="destInput">
+        <div class="tz-sf-display">{% if destination %}<span class="tz-dest-tag">{{ destination }} <a href="{{ url_for('travel_hotels') }}" class="tz-dest-x">×</a></span>{% else %}<span class="tz-dest-hint">Chọn tỉnh thành trên bản đồ</span>{% endif %}</div>
+      </div>
+      <div class="tz-sf-field">
+        <label>Danh mục</label>
+        <select name="stars" class="tz-sf-input">
+          <option value="">Tất cả</option>
+          {% for s in [3,4,5] %}<option value="{{ s }}" {{ 'selected' if stars==s|string }}>{{ s }} sao</option>{% endfor %}
+        </select>
+      </div>
+      <div class="tz-sf-field">
+        <label>Check-in</label>
+        <input type="date" name="checkin" value="{{ checkin }}" class="tz-sf-input">
+      </div>
+      <div class="tz-sf-field">
+        <label>Check-out</label>
+        <input type="date" name="checkout" value="{{ checkout }}" class="tz-sf-input">
+      </div>
+      <div class="tz-sf-field tz-sf-sm">
+        <label>Khách</label>
+        <select name="guests" class="tz-sf-input">
+          {% for n in range(1,6) %}<option value="{{ n }}" {{ 'selected' if guests==n|string }}>{{ n }}</option>{% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="tz-sf-btn">🔍 Tìm kiếm</button>
+    </div>
+  </form>
+</div>
+
+<!-- ═══ 3-COLUMN LAYOUT ═══ -->
+<div class="hotel-3col">
+  <!-- COL 1: Sidebar -->
+  <aside class="hp-sidebar">
+    <div class="hps-title">📍 34 Tỉnh thành</div>
+    <div class="hps-search-wrap">
+      <input type="text" class="hps-search" placeholder="Tìm tỉnh thành..." id="provSearch">
+    </div>
+    <div class="hps-region">
+      <div class="hps-region-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>🔴 Miền Bắc</span><span class="hps-rcount">15</span>
+      </div>
+      <div class="hps-region-body">
+        {% set mien_bac = [
+          ('ha-noi','Hà Nội','🏛️',1),('cao-bang','Cao Bằng','🏔️',0),('lang-son','Lạng Sơn','🏔️',0),
+          ('lai-chau','Lai Châu','🏔️',0),('dien-bien','Điện Biên','🏔️',0),('son-la','Sơn La','🏔️',0),
+          ('tuyen-quang','Tuyên Quang','🏔️',0),('lao-cai','Lào Cai','🏔️',0),('thai-nguyen','Thái Nguyên','🏭',0),
+          ('phu-tho','Phú Thọ','🏛️',0),('bac-ninh','Bắc Ninh','🏭',0),('hung-yen','Hưng Yên','🌾',0),
+          ('hai-phong','Hải Phòng','⚓',1),('quang-ninh','Quảng Ninh','🌊',0),('ninh-binh','Ninh Bình','🏯',0)
+        ] %}
+        {% for slug, name, icon, isTP in mien_bac %}
+        <a href="{{ url_for('travel_hotels', destination=slug) }}" class="hps-prov {% if destination == slug %}active{% endif %}" data-prov="{{ slug }}" data-name="{{ name }}">
+          <span class="hps-icon">{{ icon }}</span><span class="hps-name">{{ name }}</span>{% if isTP %}<span class="hps-tp">TP</span>{% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="hps-region">
+      <div class="hps-region-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>🔵 Miền Trung</span><span class="hps-rcount">11</span>
+      </div>
+      <div class="hps-region-body">
+        {% set mien_trung = [
+          ('thanh-hoa','Thanh Hóa','🌾',0),('nghe-an','Nghệ An','🌾',0),('ha-tinh','Hà Tĩnh','🌾',0),
+          ('quang-tri','Quảng Trị','🏛️',0),('hue','Huế','🏯',1),('da-nang','Đà Nẵng','🏖️',1),
+          ('quang-ngai','Quảng Ngãi','🏖️',0),('gia-lai','Gia Lai','🌿',0),('khanh-hoa','Khánh Hòa','🌊',0),
+          ('dak-lak','Đắk Lắk','🌿',0),('lam-dong','Lâm Đồng','🌸',0)
+        ] %}
+        {% for slug, name, icon, isTP in mien_trung %}
+        <a href="{{ url_for('travel_hotels', destination=slug) }}" class="hps-prov {% if destination == slug %}active{% endif %}" data-prov="{{ slug }}" data-name="{{ name }}">
+          <span class="hps-icon">{{ icon }}</span><span class="hps-name">{{ name }}</span>{% if isTP %}<span class="hps-tp">TP</span>{% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="hps-region">
+      <div class="hps-region-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span>🟢 Miền Nam</span><span class="hps-rcount">8</span>
+      </div>
+      <div class="hps-region-body">
+        {% set mien_nam = [
+          ('ho-chi-minh','TP. Hồ Chí Minh','🏙️',1),('dong-nai','Đồng Nai','🏭',0),('tay-ninh','Tây Ninh','🏛️',0),
+          ('can-tho','Cần Thơ','🌾',1),('an-giang','An Giang','🌾',0),('dong-thap','Đồng Tháp','🌸',0),
+          ('vinh-long','Vĩnh Long','🌾',0),('ca-mau','Cà Mau','🌊',0)
+        ] %}
+        {% for slug, name, icon, isTP in mien_nam %}
+        <a href="{{ url_for('travel_hotels', destination=slug) }}" class="hps-prov {% if destination == slug %}active{% endif %}" data-prov="{{ slug }}" data-name="{{ name }}">
+          <span class="hps-icon">{{ icon }}</span><span class="hps-name">{{ name }}</span>{% if isTP %}<span class="hps-tp">TP</span>{% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+
+  <!-- COL 2: Results -->
+  <div class="hp-main">
+    {% if destination %}
+    <div class="tz-results-header">
+      <h2>Khách sạn tại <strong>{{ destination }}</strong></h2>
+      <span class="tz-results-count">{{ hotels|length }} kết quả</span>
+      {% if api_status != 'configured' %}<span class="tz-demo-badge">DEMO</span>{% endif %}
+    </div>
+    {% if hotels %}
+    <div class="tz-hotel-list">
+      {% for h in hotels %}
+      <div class="tz-hotel-card">
+        <div class="tz-hc-img">
+          {% if h.image_url %}<img src="{{ h.image_url }}" alt="{{ h.name }}" loading="lazy">
+          {% else %}<div class="tz-hc-img-ph"><span>🏨</span></div>{% endif %}
+          <span class="tz-hc-cat-badge">Khách sạn</span>
+        </div>
+        <div class="tz-hc-body">
+          <div class="tz-hc-meta">
+            <span class="tz-hc-meta-cat">Khách sạn</span>
+            <span class="tz-hc-meta-sep">—</span>
+            <span class="tz-hc-meta-loc">{{ h.district or h.destination_name }}</span>
+          </div>
+          {% if h.price_from %}
+          <div class="tz-hc-price-row">
+            <span class="tz-hc-price">{{ '{:,.0f}'.format(h.price_from or 0) }}đ</span>
+            {% if h.original_price and h.original_price > (h.price_from or 0) %}
+            <span class="tz-hc-discount">{{ ((1 - h.price_from / h.original_price) * 100)|int }}%</span>
+            <span class="tz-hc-price-old">{{ '{:,.0f}'.format(h.original_price) }}đ</span>
+            {% endif %}
+          </div>
+          {% endif %}
+          <h3 class="tz-hc-name"><a href="{{ h.agoda_url or h.booking_url or '#' }}" target="_blank" rel="nofollow">{{ h.name }}</a></h3>
+          <div class="tz-hc-address">{{ h.address or h.district or '' }}</div>
+          <div class="tz-hc-footer">
+            <span class="tz-hc-stars">⭐ Tiêu chuẩn: {{ h.stars }}</span>
+            {% if h.breakfast %}<span class="tz-hc-bf tz-bf-yes">✓ Có ăn sáng</span>{% else %}<span class="tz-hc-bf tz-bf-no">✗ Không ăn sáng</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><span style="font-size:48px">🔍</span><h3>Chưa có khách sạn tại {{ destination }}</h3><p>Thử chọn tỉnh thành khác</p></div>
+    {% endif %}
+
+    {% elif popular %}
+    <h2 class="tz-section-title">Cùng UniTravel khám phá khách sạn, homestay được yêu thích tại khắp Việt Nam</h2>
+    <div class="tz-dest-grid">
+      {% for p in popular %}
+      <a href="{{ url_for('travel_hotels', destination=p.slug) }}" class="tz-dest-card">
+        <div class="tz-dc-icon">{{ p.icon }}</div>
+        <div class="tz-dc-info">
+          <h4>{{ p.name }}</h4>
+          <span>{{ p.count }} Khách sạn, homestay</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="tz-empty-hero">
+      <div class="tz-eh-icon">🗺️</div>
+      <h3>Khám phá Việt Nam</h3>
+      <p>Chọn tỉnh thành trên bản đồ hoặc sidebar bên trái</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- COL 3: Map -->
+  <aside class="hp-map-col">
+    <div class="hpm-map-card">
+      {% set active_province = destination %}
+      {% include 'travel/_vietnam_map_34.html' %}
+    </div>
+  </aside>
+</div>
+
+<script>
+document.getElementById('provSearch')?.addEventListener('input', function(e) {
+  const q = e.target.value.toLowerCase();
+  document.querySelectorAll('.hps-prov').forEach(p => {
+    p.style.display = p.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+  });
+  if (q) document.querySelectorAll('.hps-region').forEach(r => r.classList.remove('collapsed'));
+});
+document.querySelectorAll('.hps-prov').forEach(el => {
+  el.addEventListener('mouseenter', function() {
+    const g = document.querySelector('.prov-shape[data-slug="'+this.dataset.prov+'"]');
+    if (g) g.classList.add('hover');
+  });
+  el.addEventListener('mouseleave', function() {
+    document.querySelectorAll('.prov-shape.hover').forEach(g => g.classList.remove('hover'));
+  });
+});
+document.querySelectorAll('.prov-shape').forEach(g => {
+  g.addEventListener('mouseenter', function() {
+    const s = document.querySelector('.hps-prov[data-prov="'+this.dataset.slug+'"]');
+    if (s) s.classList.add('map-hover');
+  });
+  g.addEventListener('mouseleave', function() {
+    document.querySelectorAll('.hps-prov.map-hover').forEach(s => s.classList.remove('map-hover'));
+  });
+});
+</script>
+{% endblock %}

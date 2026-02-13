@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1 class="page-title">Dashboard</h1>
+
+<div class="stats-grid" style="grid-template-columns:repeat(6,1fr)">
+  <div class="stat-card"><div class="stat-label">Verticals</div><div class="stat-value">{{ verticals|length }}</div></div>
+  <div class="stat-card"><div class="stat-label">Parts</div><div class="stat-value">{{ total_parts }}</div></div>
+  <div class="stat-card"><div class="stat-label">Affiliate Links</div><div class="stat-value">{{ total_links }}</div></div>
+  <div class="stat-card"><div class="stat-label">Total Clicks</div><div class="stat-value" style="color:#22c55e">{{ "{:,}".format(total_clicks) }}</div></div>
+  <div class="stat-card"><div class="stat-label">Conversions</div><div class="stat-value" style="color:#8b5cf6">{{ total_conversions }}</div></div>
+  <div class="stat-card"><div class="stat-label">AI Contents</div><div class="stat-value" style="color:#f59e0b">{{ total_ai }}</div></div>
+</div>
+
+<!-- KPI -->
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:32px">
+  <div class="stat-card" style="border-left:3px solid #00cec9"><div class="stat-label">Traffic (demo)</div><div class="stat-value" style="font-size:22px">{{ "{:,}".format(demo_traffic) }}</div><div style="font-size:11px;color:var(--text-dim)">pageviews today</div></div>
+  <div class="stat-card" style="border-left:3px solid #8b5cf6"><div class="stat-label">Revenue (demo)</div><div class="stat-value" style="font-size:22px">{{ "{:,.0f}".format(demo_revenue) }}d</div><div style="font-size:11px;color:var(--text-dim)">commission today</div></div>
+  <div class="stat-card" style="border-left:3px solid #fdcb6e"><div class="stat-label">CVR</div><div class="stat-value" style="font-size:22px">{% if total_clicks > 0 %}{{ "%.1f"|format(total_conversions/total_clicks*100) }}%{% else %}0%{% endif %}</div><div style="font-size:11px;color:var(--text-dim)">click to purchase</div></div>
+  <div class="stat-card" style="border-left:3px solid #fd79a8"><div class="stat-label">Networks</div><div class="stat-value" style="font-size:22px">{{ networks|length }}</div><div style="font-size:11px;color:var(--text-dim)">{{ networks|selectattr('status','eq','connected')|list|length }} connected</div></div>
+</div>
+
+<!-- Quick Actions -->
+<div class="section-header"><h2>Quick Actions</h2></div>
+<div class="stats-grid" style="grid-template-columns:repeat(6,1fr); margin-bottom:32px">
+  <a href="{{ url_for('unilab_home') }}" class="item-card" style="text-align:center;background:linear-gradient(135deg,rgba(231,76,60,0.05),rgba(231,76,60,0.15));border:2px solid #e74c3c"><div class="item-icon">🏛️</div><h3>Unilab Home</h3></a>
+  <a href="{{ url_for('admin_deployment') }}" class="item-card" style="text-align:center;background:linear-gradient(135deg,rgba(59,130,246,0.05),rgba(139,92,246,0.15));border:2px solid #3b82f6"><div class="item-icon">🚀</div><h3>Deployment</h3></a>
+  <a href="{{ url_for('admin_vertical_new') }}" class="item-card" style="text-align:center"><div class="item-icon">+</div><h3>New Vertical</h3></a>
+  <a href="{{ url_for('admin_content_generate') }}" class="item-card" style="text-align:center"><div class="item-icon">&#129302;</div><h3>AI Generate</h3></a>
+  <a href="{{ url_for('admin_affiliate') }}" class="item-card" style="text-align:center"><div class="item-icon">&#128279;</div><h3>Affiliate Hub</h3></a>
+  <a href="{{ url_for('admin_vouchers') }}" class="item-card" style="text-align:center"><div class="item-icon">🎫</div><h3>Vouchers</h3></a>
+  <a href="{{ url_for('admin_settings') }}" class="item-card" style="text-align:center"><div class="item-icon">&#9881;</div><h3>Settings</h3></a>
+</div>
+
+<!-- AccessTrade Integration -->
+{% if accesstrade and accesstrade.connected %}
+<div class="section-header">
+  <h2>🔗 AccessTrade</h2>
+  <span style="font-size:12px;color:var(--text-dim)">{{ accesstrade.account.name if accesstrade.account else '' }}</span>
+</div>
+
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr); margin-bottom:32px">
+  <div class="stat-card" style="background:linear-gradient(135deg,rgba(231,76,60,0.1),rgba(231,76,60,0.05))">
+    <div class="stat-label">Campaigns</div>
+    <div class="stat-value" style="color:#e74c3c">{{ accesstrade.stats.campaigns_count if accesstrade.stats else 0 }}</div>
+    <div style="font-size:11px;color:var(--text-dim)">available campaigns</div>
+  </div>
+  <div class="stat-card" style="background:linear-gradient(135deg,rgba(52,152,219,0.1),rgba(52,152,219,0.05))">
+    <div class="stat-label">Clicks (30d)</div>
+    <div class="stat-value" style="color:#3498db">{{ "{:,}".format(accesstrade.stats.clicks) if accesstrade.stats else 0 }}</div>
+    <div style="font-size:11px;color:var(--text-dim)">tracking clicks</div>
+  </div>
+  <div class="stat-card" style="background:linear-gradient(135deg,rgba(46,204,113,0.1),rgba(46,204,113,0.05))">
+    <div class="stat-label">Conversions (30d)</div>
+    <div class="stat-value" style="color:#2ecc71">{{ "{:,}".format(accesstrade.stats.conversions) if accesstrade.stats else 0 }}</div>
+    <div style="font-size:11px;color:var(--text-dim)">successful sales</div>
+  </div>
+  <div class="stat-card" style="background:linear-gradient(135deg,rgba(155,89,182,0.1),rgba(155,89,182,0.05))">
+    <div class="stat-label">Commission (30d)</div>
+    <div class="stat-value" style="color:#9b59b6">{{ "{:,.0f}".format(accesstrade.stats.commission) if accesstrade.stats else 0 }}₫</div>
+    <div style="font-size:11px;color:var(--text-dim)">total earned</div>
+  </div>
+</div>
+
+{% if accesstrade.campaigns %}
+<div style="margin-bottom:24px">
+  <div style="font-weight:600;margin-bottom:12px;font-size:13px">📋 Top Campaigns</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+    {% for campaign in accesstrade.campaigns[:5] %}
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">
+      <img src="{{ campaign.logo }}" style="width:40px;height:40px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px">{{ campaign.name[:60] }}{% if campaign.name|length > 60 %}...{% endif %}</div>
+        <div style="font-size:11px;color:var(--text-dim)">
+          <span style="color:#3498db">{{ campaign.category }}</span>
+          {% if campaign.max_com %} · <span style="color:#2ecc71">{{ campaign.max_com }}</span>{% endif %}
+        </div>
+      </div>
+      <div>
+        {% if campaign.status == 1 %}
+        <span style="font-size:10px;padding:4px 8px;background:rgba(46,204,113,0.1);color:#2ecc71;border-radius:4px;font-weight:600">ACTIVE</span>
+        {% else %}
+        <span style="font-size:10px;padding:4px 8px;background:var(--bg);color:var(--text-dim);border-radius:4px">INACTIVE</span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if accesstrade.offers %}
+<div style="margin-bottom:32px">
+  <div style="font-weight:600;margin-bottom:12px;font-size:13px">🎁 Available Offers & Coupons</div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+    {% for offer in accesstrade.offers[:4] %}
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text)">{{ offer.name[:50] }}{% if offer.name|length > 50 %}...{% endif %}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px">{{ offer.merchant.name if offer.merchant else '' }}</div>
+      {% if offer.coupons %}
+      <div style="font-size:10px;padding:4px 8px;background:rgba(241,196,15,0.1);color:#f1c40f;border-radius:4px;display:inline-block;font-family:'DM Mono',monospace">
+        {{ offer.coupons[0].coupon_code }}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Verticals -->
+<div class="section-header"><h2>Verticals</h2><a href="{{ url_for('admin_verticals') }}" class="btn btn-ghost btn-sm">View all</a></div>
+<div class="items-grid">
+  {% for v in verticals %}
+  <a href="{{ url_for('admin_vertical_detail', vid=v.id) }}" class="item-card">
+    <div class="item-icon">{{ v.icon }}</div>
+    <h3>{{ v.name }}</h3>
+    <div class="item-desc">{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</div>
+    <div class="item-meta"><span class="item-color" style="background:{{ v.color }}"></span>{{ v.slug }}.unilab.vn <span class="status-badge {{ v.status }}">{{ v.status }}</span></div>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

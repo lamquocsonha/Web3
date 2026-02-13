@@ -1,0 +1,692 @@
+/* Import base travel styles */
+@import url('/static/css/travel.css');
+
+/* Voucher-specific overrides for light mode */
+[data-mode="light"] {
+  --accent: #e74c3c;
+  --accent-bg: rgba(231, 76, 60, 0.07);
+  --accent-hover: #c0392b;
+  --text-secondary: #6b6560;
+  --text-tertiary: #999;
+  --surface-hover: #f8f8f8;
+  --code-bg: #f5f5f5;
+  --bg-subtle: #fafafa;
+}
+
+/* Dark mode overrides for voucher */
+[data-mode="dark"] {
+  --accent: #ff6b6b;
+  --accent-bg: rgba(255, 107, 107, 0.1);
+  --accent-hover: #ff5252;
+  --text-secondary: #aaa;
+  --text-tertiary: #888;
+  --surface-hover: #1a1a22;
+  --code-bg: #0d0d12;
+  --bg-subtle: #13131a;
+}
+
+/* Voucher Grid */
+.voucher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 24px;
+}
+
+/* Voucher Card */
+.voucher-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s;
+  text-decoration: none;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+.voucher-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  border-color: var(--accent);
+}
+
+.vc-header {
+  padding: 24px 20px;
+  color: white;
+  position: relative;
+}
+
+.vc-discount {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.vc-merchant {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.vc-body {
+  padding: 20px;
+  flex: 1;
+}
+
+.vc-body h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.vc-body p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.vc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.vc-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vc-exclusive {
+  display: inline-block;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+.vc-footer {
+  padding: 16px 20px;
+  background: var(--surface-hover);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.vc-code {
+  font-family: 'DM Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.vc-action {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Featured Vouchers */
+.voucher-featured {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.voucher-card-featured {
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  padding: 28px;
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.voucher-card-featured:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(231, 76, 60, 0.2);
+}
+
+.voucher-card-featured::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, var(--accent-bg) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.vcf-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.vcf-merchant {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+
+.voucher-card-featured h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.voucher-card-featured p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.vcf-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.vcf-exclusive {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* Voucher Layout */
+.voucher-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 32px;
+  margin-top: 32px;
+}
+
+/* Voucher Sidebar */
+.voucher-sidebar {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.vs-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.vs-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.vs-cat, .vs-merchant, .vs-type {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.vs-cat:hover, .vs-merchant:hover, .vs-type:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.vs-cat.active, .vs-merchant.active, .vs-type.active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.vs-count {
+  background: var(--surface-hover);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.vs-cat.active .vs-count {
+  background: var(--accent);
+  color: white;
+}
+
+@media (max-width: 1024px) {
+  .voucher-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .voucher-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .voucher-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .voucher-featured {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Header Actions - Fix layout for toggle + admin buttons */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+/* Admin Link Button */
+.admin-link {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-decoration: none;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════
+   VOUCHER DETAIL PAGE
+   ═══════════════════════════════════════ */
+
+.voucher-detail {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.vd-main {
+  flex: 1;
+}
+
+/* Hero Card */
+.vd-hero {
+  border-radius: 16px;
+  padding: 40px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.vd-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.vd-merchant {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 16px;
+}
+
+.vd-hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+.vd-desc {
+  font-size: 16px;
+  opacity: 0.95;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.vd-exclusive {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+/* Code Box */
+.vd-code-box {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.vd-code-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.vd-code-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--accent-bg);
+  border-radius: 8px;
+}
+
+.vd-copy-btn, .vd-use-btn {
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0 6px;
+}
+
+.vd-copy-btn {
+  background: var(--accent);
+  color: white;
+}
+
+.vd-copy-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.vd-use-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--border);
+}
+
+.vd-use-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* Section */
+.vd-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+
+.vd-section h3 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+/* Info Grid */
+.vd-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.vd-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vd-info-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.vd-info-value {
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Terms */
+.vd-terms {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+/* Stats */
+.vd-stats {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  background: var(--surface-hover);
+  border-radius: 8px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* Sidebar */
+.vd-sidebar {
+  position: sticky;
+  top: 80px;
+  height: fit-content;
+}
+
+/* Related Vouchers */
+.vd-related {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.vd-related h3 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.vd-related-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+  margin-bottom: 8px;
+}
+
+.vd-related-item:hover {
+  background: var(--surface-hover);
+}
+
+.vd-ri-badge {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 4px;
+}
+
+.vd-ri-body {
+  flex: 1;
+}
+
+.vd-ri-merchant {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-bottom: 4px;
+}
+
+.vd-ri-title {
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.3;
+}
+
+.vd-ri-code {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* CTA Box */
+.vd-cta {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: white;
+}
+
+.vd-cta h4 {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.vd-cta p {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.vd-cta-btn {
+  display: inline-block;
+  background: white;
+  color: var(--accent);
+  font-family: 'Manrope', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.vd-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .voucher-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .vd-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .vd-hero {
+    padding: 28px 20px;
+  }
+
+  .vd-hero h1 {
+    font-size: 24px;
+  }
+
+  .vd-code-box {
+    padding: 20px;
+  }
+
+  .vd-code-value {
+    font-size: 20px;
+  }
+
+  .vd-info-grid {
+    grid-template-columns: 1fr;
+  }
+}

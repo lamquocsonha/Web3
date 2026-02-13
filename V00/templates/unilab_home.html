@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniLab — Hệ sinh thái kiến thức đa ngành</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/newspaper.css') }}">
+</head>
+<body>
+
+<!-- Header -->
+<header class="unilab-header">
+  <div class="header-inner">
+    <div class="header-top">
+      <a href="/" class="site-logo">
+        <span class="logo-mark">🏛️</span>
+        <span class="logo-name">UniLab</span>
+      </a>
+      <nav class="header-nav">
+        {% for v in verticals %}
+        <a href="{{ url_for('vertical_index', vertical_slug=v.slug) }}" class="nav-item">
+          <span class="nav-icon">{{ v.icon }}</span>
+          <span class="nav-label">{{ v.name }}</span>
+        </a>
+        {% endfor %}
+        <a href="/admin" class="nav-item admin-link">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Admin</span>
+        </a>
+      </nav>
+    </div>
+    <div class="header-tagline">
+      <span class="tagline-text">Hệ sinh thái kiến thức đa ngành — Travel, Car, Pet, Bike & More</span>
+      <span class="tagline-date">{{ now.strftime('%d/%m/%Y') }}</span>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="unilab-main">
+  <div class="content-wrapper">
+
+    <!-- Hero / Featured Article -->
+    {% if featured %}
+    <section class="hero-section">
+      <a href="{{ url_for('unilab_article', slug=featured.slug) }}" class="hero-card">
+        <div class="hero-image" style="background-image: url('{{ featured.image_url or '/static/img/placeholder.jpg' }}')">
+          <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+          <div class="hero-meta">
+            <span class="hero-category">{{ featured.vertical_slug|upper }}</span>
+            <span class="hero-sep">•</span>
+            <span class="hero-time">{{ featured.reading_time }} phút đọc</span>
+          </div>
+          <h1 class="hero-title">{{ featured.title }}</h1>
+          <p class="hero-excerpt">{{ featured.excerpt[:200] }}...</p>
+          <div class="hero-stats">
+            <span>{{ "{:,}".format(featured.views) }} lượt xem</span>
+            {% if featured.ai_generated %}
+            <span class="ai-badge">AI Generated ✨</span>
+            {% endif %}
+          </div>
+        </div>
+      </a>
+    </section>
+    {% endif %}
+
+    <!-- Layout: Main + Sidebar -->
+    <div class="content-grid">
+
+      <!-- Left: Main Content -->
+      <div class="main-content">
+
+        <!-- Recent Articles Grid -->
+        {% if recent_articles %}
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title">Bài viết mới nhất</h2>
+            <span class="section-count">{{ recent_articles|length }} bài</span>
+          </div>
+          <div class="articles-grid">
+            {% for article in recent_articles %}
+            <a href="{{ url_for('unilab_article', slug=article.slug) }}" class="article-card">
+              {% if article.image_url %}
+              <div class="article-image" style="background-image: url('{{ article.image_url }}')"></div>
+              {% endif %}
+              <div class="article-body">
+                <div class="article-meta">
+                  <span class="article-vertical">{{ article.vertical_slug|upper }}</span>
+                  {% if article.category %}
+                  <span class="article-category">{{ article.category|replace('-', ' ')|title }}</span>
+                  {% endif %}
+                </div>
+                <h3 class="article-title">{{ article.title }}</h3>
+                <p class="article-excerpt">{{ article.excerpt[:120] }}...</p>
+                <div class="article-footer">
+                  <span class="article-time">{{ article.reading_time }} phút</span>
+                  <span class="article-views">{{ "{:,}".format(article.views) }} views</span>
+                  {% if article.ai_generated %}
+                  <span class="article-ai">AI ✨</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+
+        <!-- Vertical Sections (Category Blocks) -->
+        {% for slug, data in vertical_articles.items() %}
+        <section class="section vertical-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-icon">{{ data.vertical.icon }}</span>
+              {{ data.vertical.name }}
+            </h2>
+            <a href="{{ url_for('vertical_knowledge', vertical_slug=slug) }}" class="section-link">Xem tất cả →</a>
+          </div>
+          <div class="vertical-grid">
+            {% for article in data.articles %}
+            <a href="{{ url_for('unilab_article', slug=article.slug) }}" class="vertical-card">
+              {% if article.image_url %}
+              <div class="vertical-card-image" style="background-image: url('{{ article.image_url }}')"></div>
+              {% endif %}
+              <div class="vertical-card-body">
+                {% if article.category %}
+                <div class="vertical-card-tag">{{ article.category|replace('-', ' ')|title }}</div>
+                {% endif %}
+                <h4 class="vertical-card-title">{{ article.title }}</h4>
+                <div class="vertical-card-meta">
+                  <span>{{ article.reading_time }} phút</span>
+                  <span>•</span>
+                  <span>{{ "{:,}".format(article.views) }} views</span>
+                </div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </section>
+        {% endfor %}
+
+      </div>
+
+      <!-- Right: Sidebar -->
+      <aside class="sidebar">
+
+        <!-- Popular Articles -->
+        {% if popular_articles %}
+        <div class="sidebar-widget">
+          <h3 class="widget-title">🔥 Phổ biến</h3>
+          <div class="popular-list">
+            {% for article in popular_articles %}
+            <a href="{{ url_for('unilab_article', slug=article.slug) }}" class="popular-item">
+              <div class="popular-rank">{{ loop.index }}</div>
+              <div class="popular-content">
+                <h4 class="popular-title">{{ article.title }}</h4>
+                <div class="popular-meta">
+                  <span class="popular-vertical">{{ article.vertical_slug|upper }}</span>
+                  <span>•</span>
+                  <span>{{ "{:,}".format(article.views) }} views</span>
+                </div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Verticals Directory -->
+        <div class="sidebar-widget">
+          <h3 class="widget-title">Hệ sinh thái</h3>
+          <div class="verticals-list">
+            {% for v in verticals %}
+            <a href="{{ url_for('vertical_index', vertical_slug=v.slug) }}" class="vertical-link" style="--vertical-color: {{ v.color }}">
+              <span class="vertical-link-icon">{{ v.icon }}</span>
+              <div class="vertical-link-content">
+                <div class="vertical-link-name">Uni{{ v.name }}</div>
+                <div class="vertical-link-desc">{{ v.description[:50] }}...</div>
+              </div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="unilab-footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand">🏛️ UniLab</div>
+        <p class="footer-desc">Hệ sinh thái kiến thức đa ngành — Travel, Car, Pet, Bike & More</p>
+        <div class="footer-copyright">© 2026 UniLab. All rights reserved.</div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-heading">Verticals</div>
+        {% for v in verticals %}
+        <a href="{{ url_for('vertical_index', vertical_slug=v.slug) }}">{{ v.icon }} Uni{{ v.name }}</a>
+        {% endfor %}
+      </div>
+      <div class="footer-col">
+        <div class="footer-heading">Kiến thức</div>
+        <a href="/">Trang chủ</a>
+        {% for v in verticals[:3] %}
+        <a href="{{ url_for('vertical_knowledge', vertical_slug=v.slug) }}">{{ v.name }}</a>
+        {% endfor %}
+      </div>
+      <div class="footer-col">
+        <div class="footer-heading">Admin</div>
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/verticals">Quản lý Verticals</a>
+        <a href="/admin/articles">Quản lý bài viết</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

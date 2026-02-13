@@ -1,0 +1,116 @@
+{% extends "admin/base.html" %}
+{% block title %}Vouchers{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>🎫 Vouchers</h1>
+  <a href="{{ url_for('admin_voucher_new') }}" class="btn btn-primary">+ Thêm voucher</a>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Vouchers</div>
+    <div class="stat-value">{{ total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Valid Now</div>
+    <div class="stat-value">{{ active }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Total Clicks</div>
+    <div class="stat-value">{{ '{:,}'.format(total_clicks) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Conversions</div>
+    <div class="stat-value">{{ '{:,}'.format(total_conv) }}</div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <form method="GET" class="filter-form">
+    <select name="category" onchange="this.form.submit()">
+      <option value="">All Categories</option>
+      {% for cat_val, cat_label in cats %}
+      <option value="{{ cat_val }}" {{ 'selected' if f_cat == cat_val }}>{{ cat_label }}</option>
+      {% endfor %}
+    </select>
+    <select name="merchant" onchange="this.form.submit()">
+      <option value="">All Merchants</option>
+      {% for m in merchants %}
+      <option value="{{ m }}" {{ 'selected' if f_merchant == m }}>{{ m }}</option>
+      {% endfor %}
+    </select>
+    <select name="status" onchange="this.form.submit()">
+      <option value="">All Status</option>
+      <option value="valid" {{ 'selected' if f_status == 'valid' }}>Valid</option>
+      <option value="expired" {{ 'selected' if f_status == 'expired' }}>Expired</option>
+    </select>
+    <a href="{{ url_for('admin_vouchers') }}" class="btn-reset">Reset</a>
+  </form>
+</div>
+
+<!-- Table -->
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Title</th>
+      <th>Merchant</th>
+      <th>Discount</th>
+      <th>Category</th>
+      <th>Valid Until</th>
+      <th>Usage</th>
+      <th>Stats</th>
+      <th>Status</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in items %}
+    <tr>
+      <td><code>{{ v.code }}</code></td>
+      <td>{{ v.title[:40] }}{% if v.title|length > 40 %}...{% endif %}</td>
+      <td>{{ v.merchant }}</td>
+      <td>
+        {% if v.discount_type == 'percentage' %}{{ v.discount_value }}%
+        {% elif v.discount_type == 'fixed_amount' %}{{ '{:,.0f}'.format(v.discount_value) }}đ
+        {% else %}Freeship{% endif %}
+      </td>
+      <td>{{ cat_map.get(v.category, v.category) }}</td>
+      <td>{{ v.valid_to.strftime('%d/%m/%Y') }}</td>
+      <td>
+        {% if v.usage_limit > 0 %}
+        {{ v.usage_count }}/{{ v.usage_limit }}
+        {% else %}
+        {{ v.usage_count }}/∞
+        {% endif %}
+      </td>
+      <td>{{ v.clicks }} 👁️ · {{ v.conversions }} ✅</td>
+      <td>
+        {% if v.is_valid() %}
+        <span class="badge badge-success">Valid</span>
+        {% else %}
+        <span class="badge badge-secondary">Expired</span>
+        {% endif %}
+        {% if v.is_featured %}<span class="badge badge-warning">Featured</span>{% endif %}
+        {% if v.is_exclusive %}<span class="badge badge-info">Exclusive</span>{% endif %}
+      </td>
+      <td class="actions">
+        <a href="{{ url_for('admin_voucher_edit', vid=v.id) }}">✏️</a>
+        <form method="POST" action="{{ url_for('admin_voucher_delete', vid=v.id) }}" style="display:inline" onsubmit="return confirm('Xóa voucher này?')">
+          <button type="submit" class="btn-delete">🗑️</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if not items %}
+<div class="empty-state">
+  <p>Chưa có voucher nào.</p>
+  <a href="{{ url_for('admin_voucher_new') }}" class="btn btn-primary">+ Thêm voucher đầu tiên</a>
+</div>
+{% endif %}
+
+{% endblock %}

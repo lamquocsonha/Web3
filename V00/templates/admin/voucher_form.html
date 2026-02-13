@@ -1,0 +1,272 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if voucher else 'New' }} Voucher{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>{{ '✏️ Edit' if voucher else '➕ New' }} Voucher</h1>
+</div>
+
+<form method="POST" class="form-horizontal">
+  <div class="form-grid">
+    <div class="form-section">
+      <h3>Basic Information</h3>
+
+      <div class="form-group">
+        <label>Code *</label>
+        <input type="text" name="code" value="{{ voucher.code if voucher }}" required placeholder="SHOPEE50K" style="text-transform:uppercase">
+        <small>Mã giảm giá (viết hoa, không dấu)</small>
+      </div>
+
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" value="{{ voucher.title if voucher }}" required placeholder="Giảm 50k cho đơn hàng từ 200k">
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="Mô tả chi tiết về voucher...">{{ voucher.description if voucher }}</textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Merchant *</label>
+          <input type="text" name="merchant" value="{{ voucher.merchant if voucher else 'Shopee' }}" required placeholder="Shopee">
+        </div>
+
+        <div class="form-group">
+          <label>Category *</label>
+          <select name="category" required>
+            {% for cat_val, cat_label in cats %}
+            <option value="{{ cat_val }}" {{ 'selected' if voucher and voucher.category == cat_val }}>{{ cat_label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Discount Details</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Discount Type *</label>
+          <select name="discount_type" required id="discountType">
+            {% for type_val, type_label in types %}
+            <option value="{{ type_val }}" {{ 'selected' if voucher and voucher.discount_type == type_val }}>{{ type_label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Discount Value *</label>
+          <input type="number" step="0.01" name="discount_value" value="{{ voucher.discount_value if voucher else 10 }}" required placeholder="10">
+          <small id="discountHint">Nhập 10 cho 10% hoặc 10000 cho 10,000đ</small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Min Order</label>
+          <input type="number" step="1" name="min_order" value="{{ voucher.min_order if voucher else 0 }}" placeholder="0">
+          <small>Đơn tối thiểu (0 = không giới hạn)</small>
+        </div>
+
+        <div class="form-group">
+          <label>Max Discount</label>
+          <input type="number" step="1" name="max_discount" value="{{ voucher.max_discount if voucher else 0 }}" placeholder="0">
+          <small>Giảm tối đa (chỉ cho % discount)</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Validity & Limits</h3>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Valid From</label>
+          <input type="date" name="valid_from" value="{{ voucher.valid_from.strftime('%Y-%m-%d') if voucher else '' }}">
+        </div>
+
+        <div class="form-group">
+          <label>Valid To *</label>
+          <input type="date" name="valid_to" value="{{ voucher.valid_to.strftime('%Y-%m-%d') if voucher }}" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Usage Limit</label>
+        <input type="number" name="usage_limit" value="{{ voucher.usage_limit if voucher else 0 }}" placeholder="0">
+        <small>Số lượng mã giới hạn (0 = không giới hạn)</small>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Affiliate & Display</h3>
+
+      <div class="form-group">
+        <label>Sync Mode *</label>
+        <select name="sync_mode" id="syncMode" required>
+          <option value="manual" {{ 'selected' if not voucher or voucher.sync_mode == 'manual' }}>📝 Manual - Nhập tay</option>
+          <option value="api" {{ 'selected' if voucher and voucher.sync_mode == 'api' }}>🔄 API - Tự động đồng bộ từ AccessTrade</option>
+        </select>
+        <small>Chọn "Manual" để tự nhập, "API" để đồng bộ tự động từ AccessTrade API</small>
+      </div>
+
+      <div class="form-group">
+        <label>Network</label>
+        <input type="text" name="network" value="{{ voucher.network if voucher else 'shopee' }}" placeholder="shopee">
+        <small>accesstrade, shopee, lazada, tiki, grab...</small>
+      </div>
+
+      <div class="form-group">
+        <label>Affiliate URL</label>
+        <input type="url" name="affiliate_url" value="{{ voucher.affiliate_url if voucher }}" placeholder="https://accesstrade.vn/...">
+      </div>
+
+      <div class="form-group">
+        <label>Terms & Conditions</label>
+        <textarea name="terms" rows="4" placeholder="- Áp dụng cho đơn hàng từ 200k\n- Không áp dụng với mã khác">{{ voucher.terms if voucher }}</textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Icon</label>
+          <input type="text" name="icon" value="{{ voucher.icon if voucher else '🎫' }}" placeholder="🎫">
+        </div>
+
+        <div class="form-group">
+          <label>Color</label>
+          <input type="color" name="color" value="{{ voucher.color if voucher else '#e74c3c' }}">
+        </div>
+      </div>
+    </div>
+
+    {% if voucher %}
+    <div class="form-section">
+      <h3>🔗 Embed Code</h3>
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px">
+        Nhúng mã này vào website để hiển thị voucher. Phù hợp cho AccessTrade và các affiliate network khác.
+      </p>
+
+      <div class="form-group">
+        <label>HTML Embed Code</label>
+        <textarea name="embed_code" rows="6" placeholder="<!-- Embed code will be generated here -->" style="font-family:'DM Mono',monospace;font-size:12px">{{ voucher.embed_code if voucher }}</textarea>
+        <small>Copy và paste vào website để hiển thị voucher widget</small>
+      </div>
+
+      <button type="button" class="btn btn-secondary" onclick="generateEmbedCode()" style="margin-top:8px">
+        ⚡ Tạo Embed Code tự động
+      </button>
+
+      {% if voucher.embed_code %}
+      <div style="margin-top:16px;padding:12px;background:var(--bg-subtle);border-radius:8px">
+        <strong style="font-size:12px;color:var(--text-dim)">Preview:</strong>
+        <div id="embedPreview" style="margin-top:8px">
+          {{ voucher.embed_code|safe }}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="form-section">
+      <h3>Status</h3>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_active" {{ 'checked' if not voucher or voucher.is_active }}>
+          <span>Active</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_featured" {{ 'checked' if voucher and voucher.is_featured }}>
+          <span>Featured (hiển thị nổi bật)</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" name="is_exclusive" {{ 'checked' if voucher and voucher.is_exclusive }}>
+          <span>Exclusive (độc quyền UniLab)</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">💾 {{ 'Update' if voucher else 'Create' }}</button>
+    <a href="{{ url_for('admin_vouchers') }}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<script>
+// Update hint based on discount type
+document.getElementById('discountType')?.addEventListener('change', function() {
+  const hint = document.getElementById('discountHint');
+  if (this.value === 'percentage') {
+    hint.textContent = 'Nhập 10 cho 10%';
+  } else if (this.value === 'fixed_amount') {
+    hint.textContent = 'Nhập 10000 cho 10,000đ';
+  } else {
+    hint.textContent = 'Freeship - giá trị không quan trọng';
+  }
+});
+
+// Generate embed code
+function generateEmbedCode() {
+  const code = document.querySelector('input[name="code"]').value;
+  const title = document.querySelector('input[name="title"]').value;
+  const merchant = document.querySelector('input[name="merchant"]').value;
+  const discountValue = document.querySelector('input[name="discount_value"]').value;
+  const discountType = document.querySelector('select[name="discount_type"]').value;
+  const color = document.querySelector('input[name="color"]').value;
+  const icon = document.querySelector('input[name="icon"]').value;
+  const affiliateUrl = document.querySelector('input[name="affiliate_url"]').value || '#';
+
+  let discountText = '';
+  if (discountType === 'percentage') {
+    discountText = `Giảm ${discountValue}%`;
+  } else if (discountType === 'fixed_amount') {
+    discountText = `Giảm ${parseInt(discountValue).toLocaleString('vi-VN')}đ`;
+  } else {
+    discountText = 'Freeship';
+  }
+
+  const embedCode = `<!-- UniLab Voucher Widget -->
+<div class="unilab-voucher-widget" style="max-width:400px;border:2px dashed ${color};border-radius:12px;padding:20px;background:linear-gradient(135deg, ${color}15, transparent);font-family:system-ui,-apple-system,sans-serif">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+    <span style="font-size:32px">${icon}</span>
+    <div style="flex:1">
+      <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px">${merchant}</div>
+      <div style="font-size:16px;font-weight:700;color:#222;margin-top:2px">${discountText}</div>
+    </div>
+  </div>
+
+  <div style="font-size:14px;color:#444;margin-bottom:16px;line-height:1.5">${title}</div>
+
+  <div style="display:flex;align-items:center;gap:12px">
+    <div style="flex:1;background:#fff;border:2px dashed ${color};border-radius:8px;padding:10px 12px;text-align:center;font-family:monospace;font-size:15px;font-weight:700;color:${color}">${code}</div>
+    <button onclick="navigator.clipboard.writeText('${code}');this.textContent='✓ Copied'" style="background:${color};color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Copy mã</button>
+  </div>
+
+  <a href="${affiliateUrl}" target="_blank" rel="nofollow" style="display:block;margin-top:12px;text-align:center;background:${color};color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700">
+    🛒 Sử dụng ngay
+  </a>
+</div>
+<!-- End UniLab Voucher Widget -->`;
+
+  document.querySelector('textarea[name="embed_code"]').value = embedCode;
+
+  // Update preview if exists
+  const preview = document.getElementById('embedPreview');
+  if (preview) {
+    preview.innerHTML = embedCode;
+  }
+
+  alert('✓ Đã tạo embed code! Bạn có thể copy và nhúng vào website.');
+}
+</script>
+
+{% endblock %}

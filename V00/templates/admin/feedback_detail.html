@@ -1,0 +1,154 @@
+{% extends "admin/base.html" %}
+{% block title %}Feedback Detail{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>
+<a href="{{ url_for('admin_feedbacks') }}">Feedbacks</a><span class="sep">></span>
+Detail
+{% endblock %}
+{% block content %}
+<h1 class="page-title">📝 Chi tiết phản hồi</h1>
+
+<div style="max-width:900px">
+  <!-- Feedback info -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+    <h3 style="font-size:15px;margin-bottom:16px">Thông tin phản hồi</h3>
+
+    <div style="display:grid;gap:16px">
+      <div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Bài viết</div>
+        <a href="{{ url_for('vertical_article', vertical_slug=article.vertical_slug, slug=article.slug) }}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;font-size:16px">
+          {{ article.title }}
+        </a>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:4px">
+          {{ article.vertical_slug|upper }} · {{ article.views }} views
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+        <div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Loại phản hồi</div>
+          <span class="badge
+            {% if feedback.feedback_type == 'inaccurate' %}badge-danger{% endif %}
+            {% if feedback.feedback_type == 'outdated' %}badge-warning{% endif %}
+            {% if feedback.feedback_type == 'incomplete' %}badge-info{% endif %}
+            {% if feedback.feedback_type == 'misleading' %}badge-warning{% endif %}
+            {% if feedback.feedback_type == 'other' %}badge-secondary{% endif %}
+          ">
+            {% if feedback.feedback_type == 'inaccurate' %}❌ Không chính xác{% endif %}
+            {% if feedback.feedback_type == 'outdated' %}⏰ Lỗi thời{% endif %}
+            {% if feedback.feedback_type == 'incomplete' %}📄 Thiếu thông tin{% endif %}
+            {% if feedback.feedback_type == 'misleading' %}⚠️ Gây hiểu lầm{% endif %}
+            {% if feedback.feedback_type == 'other' %}💬 Khác{% endif %}
+          </span>
+        </div>
+
+        <div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Trạng thái</div>
+          <span class="badge
+            {% if feedback.status == 'pending' %}badge-warning{% endif %}
+            {% if feedback.status == 'reviewed' %}badge-info{% endif %}
+            {% if feedback.status == 'resolved' %}badge-success{% endif %}
+            {% if feedback.status == 'dismissed' %}badge-secondary{% endif %}
+          ">
+            {% if feedback.status == 'pending' %}⏳ Chờ xử lý{% endif %}
+            {% if feedback.status == 'reviewed' %}👁️ Đã xem{% endif %}
+            {% if feedback.status == 'resolved' %}✅ Đã giải quyết{% endif %}
+            {% if feedback.status == 'dismissed' %}🚫 Đã bỏ qua{% endif %}
+          </span>
+        </div>
+      </div>
+
+      {% if feedback.description %}
+      <div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Mô tả từ người dùng</div>
+        <div style="background:var(--bg-subtle);padding:16px;border-radius:8px;font-size:14px;line-height:1.6;white-space:pre-wrap">{{ feedback.description }}</div>
+      </div>
+      {% endif %}
+
+      {% if feedback.user_email %}
+      <div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;text-transform:uppercase;font-weight:700;letter-spacing:0.5px">Email người dùng</div>
+        <a href="mailto:{{ feedback.user_email }}" style="color:var(--accent);text-decoration:none">{{ feedback.user_email }}</a>
+      </div>
+      {% endif %}
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px">Thời gian tạo</div>
+          <div style="font-size:13px">{{ feedback.created_at.strftime('%d/%m/%Y %H:%M') }}</div>
+        </div>
+        {% if feedback.reviewed_at %}
+        <div>
+          <div style="font-size:11px;color:var(--text-dim);margin-bottom:4px">Thời gian xem xét</div>
+          <div style="font-size:13px">{{ feedback.reviewed_at.strftime('%d/%m/%Y %H:%M') }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Update status form -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+    <h3 style="font-size:15px;margin-bottom:16px">Cập nhật trạng thái</h3>
+
+    <form method="POST" action="{{ url_for('admin_feedback_update_status', fid=feedback.id) }}">
+      <div class="form-group">
+        <label class="form-label">Trạng thái</label>
+        <select name="status" class="form-select">
+          <option value="pending" {% if feedback.status == 'pending' %}selected{% endif %}>⏳ Chờ xử lý</option>
+          <option value="reviewed" {% if feedback.status == 'reviewed' %}selected{% endif %}>👁️ Đã xem</option>
+          <option value="resolved" {% if feedback.status == 'resolved' %}selected{% endif %}>✅ Đã giải quyết</option>
+          <option value="dismissed" {% if feedback.status == 'dismissed' %}selected{% endif %}>🚫 Đã bỏ qua</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ghi chú của admin</label>
+        <textarea name="admin_note" class="form-input" rows="4" placeholder="Ghi chú nội bộ về cách xử lý feedback này...">{{ feedback.admin_note }}</textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+        <a href="{{ url_for('admin_feedbacks') }}" class="btn btn-secondary">Quay lại</a>
+        <a href="{{ url_for('admin_article_edit', aid=article.id) }}" class="btn btn-secondary" target="_blank">Sửa bài viết</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-danger {
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+}
+
+.badge-warning {
+  background: rgba(245,158,11,0.1);
+  color: #f59e0b;
+}
+
+.badge-info {
+  background: rgba(59,130,246,0.1);
+  color: #3b82f6;
+}
+
+.badge-success {
+  background: rgba(34,197,94,0.1);
+  color: #22c55e;
+}
+
+.badge-secondary {
+  background: var(--bg-subtle);
+  color: var(--text-dim);
+}
+</style>
+{% endblock %}

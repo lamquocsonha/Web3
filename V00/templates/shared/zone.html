@@ -1,0 +1,72 @@
+{% extends "shared/base.html" %}
+{% block title %}{{ zone.name }}{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}">Uni{{ vertical.name }}</a><span class="sep">›</span><a href="{{ url_for('vertical_segment', vertical_slug=vertical.slug, segment_slug=segment.slug) }}">{{ segment.name }}</a><span class="sep">›</span>{{ zone.name }}</div>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+  <span style="font-size:32px">{{ zone.icon }}</span>
+  <h1>{{ zone.name }}</h1>
+  <p class="subtitle">{{ zone.description }}</p>
+</div>
+
+<!-- Interactive Diagram — active zone highlighted -->
+{% set active_zone_slug = zone.slug %}
+{% block diagram %}
+{% if vertical.slug == 'car' %}{% include 'car/_car_diagram.html' %}{% endif %}
+{% if vertical.slug == 'pet' %}{% include 'pet/_pet_diagram.html' %}{% endif %}
+{% if vertical.slug == 'travel' %}{% include 'travel/_travel_diagram.html' %}{% endif %}
+{% endblock %}
+
+<!-- Quick Info -->
+<div class="zone-quick-info">
+  <div class="qi-item"><span class="qi-num">{{ zone.parts|length }}</span><span class="qi-label">{{ parts_label|default('items') }}</span></div>
+  <div class="qi-item"><span class="qi-num">{{ segment.name }}</span><span class="qi-label">{{ segment_label|default('segment') }}</span></div>
+  <div class="qi-item"><span class="qi-num">{{ articles|length }}</span><span class="qi-label">bài viết</span></div>
+</div>
+
+<!-- Parts Grid -->
+<section class="section">
+  <div class="section-header-pub"><h2>🔩 {{ parts_heading|default('Parts') }} ({{ zone.parts|length }})</h2></div>
+  <div class="parts-grid">
+    {% for p in zone.parts %}
+    <a href="{{ url_for('vertical_part', vertical_slug=vertical.slug, segment_slug=segment.slug, zone_slug=zone.slug, part_slug=p.slug) }}" class="part-card-pub">
+      <h3>{{ p.name_vi }}</h3>
+      {% if p.name_en %}<span class="part-en">{{ p.name_en }}</span>{% endif %}
+      <p>{{ p.description[:90] }}{% if p.description|length > 90 %}...{% endif %}</p>
+      <div class="part-card-footer">
+        {% if p.oem_code %}<span class="part-oem">OEM: {{ p.oem_code[:25] }}{% if p.oem_code|length > 25 %}...{% endif %}</span>{% endif %}
+        {% if p.tags %}<span class="part-tag-count">{{ p.tags.split(',')|length }} tags</span>{% endif %}
+        {% if p.affiliate_links %}<span class="part-price-badge">{{ p.affiliate_links|length }} sản phẩm</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Related Articles -->
+{% if articles %}
+<section class="section">
+  <div class="section-header-pub"><h2>📖 Bài viết về {{ zone.name }}</h2></div>
+  <div class="articles-grid">
+    {% for a in articles %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm">
+      <div class="acs-tier {{ a.tier }}">{{ a.tier|replace('-',' ')|title }}</div>
+      <h4>{{ a.title[:60] }}...</h4>
+      <p>{{ a.excerpt[:90] }}...</p>
+      <div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- SEO Content Section -->
+{% if zone.seo_content %}
+<section class="seo-section">
+  <div class="seo-content">
+    {{ zone.seo_content|safe }}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

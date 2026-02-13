@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Admin{% endblock %} | Unilab Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <span class="logo-icon">&#9881;</span>
+      <span class="logo-text">uni<span>lab</span></span>
+    </div>
+    <nav class="sb-nav">
+      <a href="{{ url_for('admin_dashboard') }}" class="sb-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+        <span class="sb-icon">&#128202;</span> Dashboard
+      </a>
+      <a href="{{ url_for('admin_verticals') }}" class="sb-link {% if 'vertical' in (request.endpoint or '') or 'segment' in (request.endpoint or '') or 'zone' in (request.endpoint or '') or 'part' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#127760;</span> Verticals
+      </a>
+
+      <!-- Content Dropdown -->
+      <div class="sb-dropdown">
+        <div class="sb-dropdown-header">
+          <span class="sb-icon">&#128218;</span> Content
+          <span class="sb-arrow">›</span>
+        </div>
+        <div class="sb-dropdown-content">
+          <a href="{{ url_for('admin_articles') }}" class="sb-link sb-sub {% if 'article' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128218;</span> Articles
+          </a>
+          <a href="{{ url_for('admin_feedbacks') }}" class="sb-link sb-sub {% if 'feedback' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">📝</span> Feedbacks
+          </a>
+          <a href="{{ url_for('admin_content') }}" class="sb-link sb-sub {% if 'content' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#129302;</span> AI Content
+          </a>
+        </div>
+      </div>
+
+      <!-- Monetization Dropdown -->
+      <div class="sb-dropdown">
+        <div class="sb-dropdown-header">
+          <span class="sb-icon">&#128176;</span> Monetization
+          <span class="sb-arrow">›</span>
+        </div>
+        <div class="sb-dropdown-content">
+          <a href="{{ url_for('admin_affiliate') }}" class="sb-link sb-sub {% if 'affiliate' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128279;</span> Affiliate Hub
+          </a>
+          <a href="{{ url_for('admin_products') }}" class="sb-link sb-sub {% if 'product' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128230;</span> Products
+          </a>
+          <a href="{{ url_for('admin_hotels') }}" class="sb-link sb-sub {% if 'hotel' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#127976;</span> Hotels
+          </a>
+          <a href="{{ url_for('admin_attractions') }}" class="sb-link sb-sub {% if 'attraction' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#127903;</span> Attractions
+          </a>
+          <a href="{{ url_for('admin_vouchers') }}" class="sb-link sb-sub {% if request.endpoint == 'admin_vouchers' or request.endpoint == 'admin_voucher_new' or request.endpoint == 'admin_voucher_edit' %}active{% endif %}">
+            <span class="sb-icon">&#127915;</span> Vouchers
+          </a>
+          <a href="{{ url_for('admin_voucher_widgets') }}" class="sb-link sb-sub {% if 'voucher_widget' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#127873;</span> Voucher Widgets
+          </a>
+        </div>
+      </div>
+
+      <!-- Tools Dropdown -->
+      <div class="sb-dropdown">
+        <div class="sb-dropdown-header">
+          <span class="sb-icon">&#128295;</span> Tools
+          <span class="sb-arrow">›</span>
+        </div>
+        <div class="sb-dropdown-content">
+          <a href="{{ url_for('admin_video') }}" class="sb-link sb-sub {% if 'video' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#127909;</span> Video
+          </a>
+          <a href="{{ url_for('admin_analytics') }}" class="sb-link sb-sub {% if 'analytics' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128200;</span> Analytics
+          </a>
+          <a href="{{ url_for('admin_settings') }}" class="sb-link sb-sub {% if 'settings' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#9881;</span> Settings
+          </a>
+          <a href="{{ url_for('admin_seed_data') }}" class="sb-link sb-sub {% if 'seed_data' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#127793;</span> Seed Data
+          </a>
+        </div>
+      </div>
+    </nav>
+    <script>
+    // Dropdown toggle
+    document.querySelectorAll('.sb-dropdown-header').forEach(header => {
+      header.addEventListener('click', function() {
+        const dropdown = this.parentElement;
+        dropdown.classList.toggle('open');
+      });
+    });
+    // Open all dropdowns by default
+    document.querySelectorAll('.sb-dropdown').forEach(dropdown => {
+      dropdown.classList.add('open');
+    });
+    </script>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">{% block breadcrumb %}Dashboard{% endblock %}</div>
+      <div class="topbar-actions">
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <span class="theme-icon light">☀️</span>
+          <span class="theme-icon dark">🌙</span>
+        </button>
+      </div>
+    </header>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+      {% for cat, msg in messages %}
+      <div class="flash flash-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <div class="content">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script>
+// Theme toggle functionality
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+
+// Load saved theme or default to light
+const savedTheme = localStorage.getItem('admin-theme') || 'light';
+html.setAttribute('data-theme', savedTheme);
+
+// Toggle theme on button click
+themeToggle.addEventListener('click', () => {
+  const currentTheme = html.getAttribute('data-theme');
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+  html.setAttribute('data-theme', newTheme);
+  localStorage.setItem('admin-theme', newTheme);
+});
+</script>
+
+<!-- AI Chat Assistant Widget -->
+{% include 'admin/_chat_widget.html' %}
+
+</body>
+</html>

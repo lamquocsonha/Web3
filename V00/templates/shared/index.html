@@ -1,0 +1,138 @@
+{% extends "shared/base.html" %}
+{% block title %}Uni{{ vertical.name }} — {{ hero_title|default('Kiến thức chi tiết') }}{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="hero-content">
+    <h1 class="hero-title">{{ hero_title|default('Kiến thức ' + vertical.name) }}<br><span class="hero-accent">{{ hero_subtitle|default('từ tổng thể đến chi tiết') }}</span></h1>
+    <p class="hero-desc">{{ hero_desc|default(vertical.description) }}</p>
+    <div class="hero-actions">
+      <a href="#segments" class="hero-btn primary">{{ hero_cta1|default('Khám phá') }}</a>
+      <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="hero-btn secondary">Đọc kiến thức</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hs-item"><span class="hs-num">{{ vertical.segments|length }}</span><span class="hs-label">{{ segments_label|default('danh mục') }}</span></div>
+      <div class="hs-item"><span class="hs-num">{{ recent_articles|length * 2 }}+</span><span class="hs-label">bài viết</span></div>
+      <div class="hs-item"><span class="hs-num">3</span><span class="hs-label">tầng kiến thức</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- KNOWLEDGE TIERS -->
+<section class="section">
+  <div class="section-header-pub">
+    <h2>📚 3 tầng kiến thức</h2>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="tier-grid">
+    <div class="tier-card tier-nganh">
+      <div class="tier-badge">T1</div>
+      <h3>Kiến thức ngành</h3>
+      <p>{{ tier1_desc|default('Thị trường, xu hướng, chi phí tổng quan.') }}</p>
+      <span class="tier-count">{{ articles_nganh|length }} bài viết</span>
+    </div>
+    <div class="tier-card tier-chung">
+      <div class="tier-badge">T2</div>
+      <h3>Kiến thức hệ thống</h3>
+      <p>{{ tier2_desc|default('Hệ thống, quy trình, phương pháp.') }}</p>
+      <span class="tier-count">{{ articles_chung|length }} bài viết</span>
+    </div>
+    <div class="tier-card tier-chitiet">
+      <div class="tier-badge">T3</div>
+      <h3>Chi tiết</h3>
+      <p>{{ tier3_desc|default('Review sản phẩm, so sánh, hướng dẫn cụ thể.') }}</p>
+      <span class="tier-count">{{ articles_chitiet|length }} bài viết</span>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED ARTICLES - NGANH -->
+{% if articles_nganh %}
+<section class="section">
+  <div class="section-header-pub">
+    <h2>🏭 Kiến thức ngành</h2>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="articles-featured">
+    {% for a in articles_nganh[:3] %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card {% if loop.first %}featured{% endif %}">
+      <div class="ac-tier">Kiến thức ngành</div>
+      <h3 class="ac-title">{{ a.title }}</h3>
+      <p class="ac-excerpt">{{ a.excerpt[:120] }}{% if a.excerpt|length > 120 %}...{% endif %}</p>
+      <div class="ac-meta">
+        <span>{{ a.reading_time }} phút đọc</span>
+        <span>{{ "{:,}".format(a.views) }} views</span>
+        {% if a.ai_generated %}<span class="ac-ai">AI ✨</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- SEGMENTS -->
+<section class="section" id="segments">
+  <div class="section-header-pub">
+    <h2>{{ vertical.icon }} {{ segments_heading|default('Danh mục') }}</h2>
+  </div>
+  <div class="segments-grid">
+    {% for s in vertical.segments %}
+    <a href="{{ url_for('vertical_segment', vertical_slug=vertical.slug, segment_slug=s.slug) }}" class="segment-card-pub">
+      <span class="seg-icon">{{ s.icon }}</span>
+      <h3>{{ s.name }}</h3>
+      <p>{{ s.description[:80] }}{% if s.description|length > 80 %}...{% endif %}</p>
+      <span class="seg-count">{{ s.zones|length }} zones</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ARTICLES - CHUNG -->
+{% if articles_chung %}
+<section class="section">
+  <div class="section-header-pub">
+    <h2>⚙️ Kiến thức hệ thống</h2>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="articles-grid">
+    {% for a in articles_chung[:4] %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm">
+      <div class="acs-tier chung">Hệ thống</div>
+      <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
+      <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
+      <div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- ARTICLES - CHI TIET -->
+{% if articles_chitiet %}
+<section class="section">
+  <div class="section-header-pub">
+    <h2>🔍 Chi tiết</h2>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="articles-grid">
+    {% for a in articles_chitiet[:4] %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm">
+      <div class="acs-tier chitiet">Chi tiết</div>
+      <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
+      <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
+      <div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<!-- CTA -->
+<section class="section cta-section">
+  <h2>{{ cta_title|default('Khám phá thêm kiến thức') }}</h2>
+  <p>{{ cta_desc|default('Hệ thống kiến thức đang được mở rộng mỗi ngày.') }}</p>
+  <a href="#segments" class="hero-btn primary">{{ cta_button|default('Khám phá ngay →') }}</a>
+</section>
+
+{% endblock %}
