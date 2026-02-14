@@ -571,6 +571,56 @@ def admin_affiliate_sync(nid):
                 db.session.add(camp)
                 synced += 1
 
+            # Also sync offers/vouchers
+            import re as re_mod
+            try:
+                r2 = req.get('https://api.accesstrade.vn/v1/offers_informations', headers=headers, timeout=60)
+                if r2.status_code == 200:
+                    offers = r2.json().get('data', [])
+                    Voucher.query.filter_by(sync_mode='api', network='accesstrade').delete()
+                    voucher_count = 0
+                    for o in offers:
+                        oname = o.get('name', '')
+                        coupons = o.get('coupons', [])
+                        coupon_code = coupons[0].get('coupon_code', '') if coupons else ''
+                        coupon_desc = coupons[0].get('coupon_desc', '') if coupons else ''
+                        desc_text = coupon_desc or oname
+                        d_type, d_val, d_min, d_max = 'percentage', 0, 0, 0
+                        pct = re_mod.search(r'Giảm (\d+)%', desc_text)
+                        if pct:
+                            d_val = float(pct.group(1))
+                        fix = re_mod.search(r'Giảm ([\d,]+)\s*VNĐ', desc_text)
+                        if fix and not pct:
+                            d_type, d_val = 'fixed_amount', float(fix.group(1).replace(',', ''))
+                        mx = re_mod.search(r'tối đa ([\d,]+)\s*VNĐ', desc_text)
+                        if mx:
+                            d_max = float(mx.group(1).replace(',', ''))
+                        mn = re_mod.search(r'tối thiểu ([\d,]+)\s*VNĐ', desc_text)
+                        if mn:
+                            d_min = float(mn.group(1).replace(',', ''))
+                        merchant = o.get('merchant', 'shopee')
+                        bm = re_mod.match(r'\[(.+?)\]', oname)
+                        if bm:
+                            merchant = bm.group(1)
+                        st = o.get('start_time', '')
+                        et = o.get('end_time', '')
+                        try:
+                            vf = datetime.strptime(st, '%Y-%m-%d') if st else datetime.utcnow()
+                            vt = datetime.strptime(et, '%Y-%m-%d') if et else datetime.utcnow()
+                        except:
+                            vf = vt = datetime.utcnow()
+                        v = Voucher(code=coupon_code or o.get('id', ''), title=oname, description=coupon_desc,
+                                    merchant=merchant, category='shopping', discount_type=d_type,
+                                    discount_value=d_val, min_order=d_min, max_discount=d_max,
+                                    valid_from=vf, valid_to=vt, network='accesstrade',
+                                    affiliate_url=o.get('aff_link', ''), image_url=o.get('image', ''),
+                                    is_active=True, sync_mode='api')
+                        db.session.add(v)
+                        voucher_count += 1
+                    synced += voucher_count
+            except:
+                pass  # Voucher sync is optional, don't fail the whole sync
+
         n.last_sync = datetime.utcnow()
         db.session.commit()
         flash(f'Synced {synced} campaigns from {n.name}', 'success')
