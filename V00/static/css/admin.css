@@ -189,10 +189,12 @@ body {
 .main {
   flex: 1;
   margin-left: 240px;
+  overflow-x: hidden;
+  max-width: calc(100vw - 240px);
 }
 
 .topbar {
-  padding: 16px 32px;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   display: flex;
@@ -301,11 +303,13 @@ body {
 .breadcrumb .sep { margin: 0 6px; opacity: 0.4; }
 
 .content {
-  padding: 32px;
+  padding: 24px;
+  overflow-x: hidden;
+  min-width: 0;
 }
 
 /* Flash Messages */
-.flash-messages { padding: 16px 32px 0; }
+.flash-messages { padding: 16px 24px 0; }
 .flash {
   padding: 12px 16px;
   border-radius: var(--radius);
@@ -357,12 +361,16 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
 }
 
 .data-table th {
@@ -370,24 +378,28 @@ body {
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: var(--text-dim);
-  padding: 14px 20px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--border);
   background: var(--surface2);
+  white-space: nowrap;
 }
 
 .data-table td {
-  padding: 14px 20px;
+  padding: 10px 12px;
   font-size: 14px;
   border-bottom: 1px solid rgba(39,39,42,0.5);
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .data-table tr:hover td {
   background: rgba(255,255,255,0.02);
 }
 
-.data-table .icon-cell { font-size: 20px; width: 40px; }
+.data-table .icon-cell { font-size: 20px; width: 36px; padding: 10px 8px; }
 
 .status-badge {
   font-family: 'DM Mono', monospace;
@@ -849,9 +861,25 @@ input[style*="text-transform:uppercase"] {
   overflow: hidden;
 }
 
+/* Filter bar */
+.filter-bar { margin-bottom: 20px; }
+.filter-bar .filter-form {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+}
+.filter-bar select {
+  padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface); color: var(--text); font-size: 14px;
+}
+.filter-bar .btn-reset {
+  font-size: 14px; color: var(--text-dim); text-decoration: none;
+  padding: 8px 12px;
+}
+.filter-bar .btn-reset:hover { color: var(--accent); }
+
 /* Page Header in Forms */
 .page-header {
-  margin-bottom: 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
 }
 
 .page-header h1 {

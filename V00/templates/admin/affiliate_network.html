@@ -77,14 +77,13 @@
 {% if network.campaigns %}
 <div class="table-wrap">
   <table class="data-table" id="camp-table">
-    <thead><tr><th>Campaign</th><th>ID</th><th>Commission</th><th>Category</th><th>Status</th><th>URL</th></tr></thead>
+    <thead><tr><th>Campaign</th><th>Commission</th><th>Category</th><th>Status</th><th>URL</th></tr></thead>
     <tbody>
       {% for c in network.campaigns %}
       <tr data-name="{{ c.name|lower }}" data-cat="{{ c.category }}">
-        <td><strong>{{ c.name }}</strong></td>
-        <td style="font-family:'DM Mono';font-size:14px">{{ c.campaign_id_ext[:16] }}{% if c.campaign_id_ext|length > 16 %}...{% endif %}</td>
-        <td>{{ c.commission }}</td>
-        <td><span style="font-size:14px;padding:2px 8px;background:var(--bg);border-radius:4px">{{ c.category }}</span></td>
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ c.name }}"><strong>{{ c.name[:50] }}{% if c.name|length > 50 %}...{% endif %}</strong></td>
+        <td style="white-space:nowrap;font-family:'DM Mono';font-size:14px">{{ c.commission }}</td>
+        <td style="white-space:nowrap"><span style="font-size:14px;padding:2px 6px;background:var(--bg);border-radius:4px">{{ c.category[:20] }}</span></td>
         <td><span class="status-badge {% if c.status=='active' %}live{% else %}draft{% endif %}">{{ c.status }}</span></td>
         <td>{% if c.url %}<a href="{{ c.url }}" target="_blank" style="font-size:14px">Visit</a>{% endif %}</td>
       </tr>

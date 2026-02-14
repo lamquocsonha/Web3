@@ -91,14 +91,12 @@
   <table class="data-table">
     <thead>
       <tr>
-        <th style="width:40px">#</th>
-        <th style="width:50px">Img</th>
+        <th style="width:36px">#</th>
         <th>Product</th>
-        <th>Vertical / Path</th>
+        <th>Vertical</th>
         <th>Network</th>
         <th style="text-align:right">Price</th>
         <th style="text-align:center">Clicks</th>
-        <th style="text-align:center">Conv</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -107,32 +105,28 @@
       {% for al, part, zone, seg, vert in products %}
       <tr>
         <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ al.id }}</td>
-        <td>{% if al.image_url %}<img src="{{ al.image_url }}" style="width:44px;height:32px;object-fit:cover;border-radius:4px" alt="">{% else %}<span style="display:inline-block;width:44px;height:32px;background:var(--surface);border-radius:4px;text-align:center;line-height:32px;font-size:14px">📦</span>{% endif %}</td>
-        <td>
-          <strong style="font-size:14px">{{ al.product_name or part.name_vi }}</strong>
-          <div style="font-size:14px;color:var(--text-dim);margin-top:2px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-            <a href="{{ al.url }}" target="_blank" rel="nofollow" style="color:var(--text-dim);text-decoration:none" title="{{ al.url }}">🔗 {{ al.url[:60] }}{% if al.url|length > 60 %}...{% endif %}</a>
+        <td style="max-width:280px">
+          <div style="display:flex;gap:8px;align-items:center">
+            {% if al.image_url %}<img src="{{ al.image_url }}" style="width:36px;height:28px;object-fit:cover;border-radius:4px;flex-shrink:0" alt="">{% endif %}
+            <div style="min-width:0">
+              <strong style="font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ al.product_name or part.name_vi }}</strong>
+              <a href="{{ al.url }}" target="_blank" rel="nofollow" style="font-size:14px;color:var(--text-dim);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ al.url }}">{{ al.url[:40] }}{% if al.url|length > 40 %}...{% endif %}</a>
+            </div>
           </div>
         </td>
+        <td style="white-space:nowrap;font-size:14px">{{ vert.icon }} {{ vert.name }}</td>
         <td>
-          <div style="font-size:14px;line-height:1.6">
-            <span style="font-weight:600">{{ vert.icon }} {{ vert.name }}</span>
-            <br><span style="color:var(--text-dim)">{{ seg.name }} › {{ zone.name }} › {{ part.name_vi[:20] }}{% if part.name_vi|length > 20 %}...{% endif %}</span>
-          </div>
-        </td>
-        <td>
-          <span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;
+          <span style="display:inline-block;padding:2px 6px;border-radius:4px;font-size:14px;font-weight:600;text-transform:uppercase;
             {% if al.network == 'shopee' %}background:rgba(238,77,45,0.1);color:#ee4d2d
             {% elif al.network == 'lazada' %}background:rgba(15,0,201,0.08);color:#0f00c9
             {% elif al.network == 'tiki' %}background:rgba(26,148,217,0.1);color:#1a94d9
             {% elif al.network == 'accesstrade' %}background:rgba(0,150,136,0.1);color:#009688
             {% else %}background:var(--surface);color:var(--text-dim){% endif %}">{{ al.network }}</span>
         </td>
-        <td style="text-align:right;font-family:'DM Mono';font-size:14px;font-weight:600">
+        <td style="text-align:right;font-family:'DM Mono';font-size:14px;font-weight:600;white-space:nowrap">
           {% if al.price %}{{ "{:,.0f}".format(al.price) }}đ{% else %}-{% endif %}
         </td>
         <td style="text-align:center;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(al.clicks) }}</td>
-        <td style="text-align:center;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(al.conversions) }}</td>
         <td>
           <form method="POST" action="{{ url_for('admin_product_toggle', pid=al.id) }}" style="display:inline">
             <button type="submit" class="status-badge {% if al.is_active %}live{% else %}draft{% endif %}" style="cursor:pointer;border:none;font-size:14px" title="Click to toggle">
@@ -140,13 +134,11 @@
             </button>
           </form>
         </td>
-        <td>
-          <div style="display:flex;gap:4px">
-            <a href="{{ url_for('admin_product_edit', pid=al.id) }}" class="btn btn-ghost btn-sm">Edit</a>
-            <form method="POST" action="{{ url_for('admin_product_delete', pid=al.id) }}" style="display:inline" onsubmit="return confirm('Delete product?')">
-              <button class="btn btn-danger btn-sm">X</button>
-            </form>
-          </div>
+        <td style="white-space:nowrap">
+          <a href="{{ url_for('admin_product_edit', pid=al.id) }}" class="btn btn-ghost btn-sm">Edit</a>
+          <form method="POST" action="{{ url_for('admin_product_delete', pid=al.id) }}" style="display:inline" onsubmit="return confirm('Delete product?')">
+            <button class="btn btn-danger btn-sm">X</button>
+          </form>
         </td>
       </tr>
       {% endfor %}

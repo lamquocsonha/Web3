@@ -50,6 +50,7 @@
 </div>
 
 <!-- Table -->
+<div class="table-wrap">
 <table class="data-table">
   <thead>
     <tr>
@@ -57,10 +58,8 @@
       <th>Title</th>
       <th>Merchant</th>
       <th>Discount</th>
-      <th>Category</th>
       <th>Valid Until</th>
       <th>Usage</th>
-      <th>Stats</th>
       <th>Status</th>
       <th></th>
     </tr>
@@ -68,43 +67,33 @@
   <tbody>
     {% for v in items %}
     <tr>
-      <td><code>{{ v.code }}</code></td>
-      <td>{{ v.title[:40] }}{% if v.title|length > 40 %}...{% endif %}</td>
-      <td>{{ v.merchant }}</td>
-      <td>
-        {% if v.discount_type == 'percentage' %}{{ v.discount_value }}%
+      <td><code style="font-size:14px;white-space:nowrap">{{ v.code }}</code></td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ v.title }}">{{ v.title[:35] }}{% if v.title|length > 35 %}...{% endif %}</td>
+      <td style="white-space:nowrap">{{ v.merchant[:18] }}{% if v.merchant|length > 18 %}..{% endif %}</td>
+      <td style="white-space:nowrap">
+        {% if v.discount_type == 'percentage' %}{{ v.discount_value|int }}%
         {% elif v.discount_type == 'fixed_amount' %}{{ '{:,.0f}'.format(v.discount_value) }}đ
         {% else %}Freeship{% endif %}
       </td>
-      <td>{{ cat_map.get(v.category, v.category) }}</td>
-      <td>{{ v.valid_to.strftime('%d/%m/%Y') }}</td>
-      <td>
-        {% if v.usage_limit > 0 %}
-        {{ v.usage_count }}/{{ v.usage_limit }}
-        {% else %}
-        {{ v.usage_count }}/∞
-        {% endif %}
+      <td style="white-space:nowrap;font-size:14px">{{ v.valid_to.strftime('%d/%m/%Y') }}</td>
+      <td style="font-family:'DM Mono';font-size:14px">
+        {% if v.usage_limit > 0 %}{{ v.usage_count }}/{{ v.usage_limit }}{% else %}{{ v.usage_count }}{% endif %}
       </td>
-      <td>{{ v.clicks }} 👁️ · {{ v.conversions }} ✅</td>
       <td>
-        {% if v.is_valid() %}
-        <span class="badge badge-success">Valid</span>
-        {% else %}
-        <span class="badge badge-secondary">Expired</span>
-        {% endif %}
-        {% if v.is_featured %}<span class="badge badge-warning">Featured</span>{% endif %}
-        {% if v.is_exclusive %}<span class="badge badge-info">Exclusive</span>{% endif %}
+        {% if v.is_valid() %}<span class="status-badge live">Valid</span>
+        {% else %}<span class="status-badge draft">Expired</span>{% endif %}
       </td>
-      <td class="actions">
-        <a href="{{ url_for('admin_voucher_edit', vid=v.id) }}">✏️</a>
+      <td style="white-space:nowrap">
+        <a href="{{ url_for('admin_voucher_edit', vid=v.id) }}" class="btn btn-ghost btn-sm">Edit</a>
         <form method="POST" action="{{ url_for('admin_voucher_delete', vid=v.id) }}" style="display:inline" onsubmit="return confirm('Xóa voucher này?')">
-          <button type="submit" class="btn-delete">🗑️</button>
+          <button type="submit" class="btn btn-danger btn-sm">X</button>
         </form>
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+</div>
 
 {% if not items %}
 <div class="empty-state">

@@ -17,13 +17,10 @@
       <tr>
         <th></th>
         <th>Tên</th>
-        <th>Subdomain</th>
-        <th>Segments</th>
-        <th>Products</th>
-        <th>Articles</th>
-        <th>Template</th>
+        <th style="text-align:center">Seg</th>
+        <th style="text-align:center">SP</th>
+        <th style="text-align:center">Bài</th>
         <th>Style</th>
-        <th>Mode</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -33,16 +30,16 @@
       {% set v = data.vertical %}
       <tr>
         <td class="icon-cell">{{ v.icon }}</td>
-        <td><strong>{{ v.name }}</strong></td>
-        <td><a href="{{ url_for('vertical_index', vertical_slug=v.slug) }}" target="_blank" style="font-family:'DM Mono',monospace; font-size:14px; color:var(--accent); text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">{{ v.slug }}.unilab.vn</a></td>
-        <td style="font-family:'DM Mono'">{{ v.segments|length }}</td>
-        <td style="font-family:'DM Mono'">{{ data.products }}</td>
-        <td style="font-family:'DM Mono'">{{ data.articles }}</td>
-        <td><span style="font-family:'DM Mono',monospace; font-size:14px; padding:3px 8px; background:var(--bg-subtle); border-radius:4px; color:var(--text-secondary)">{{ v.template or 'general' }}</span></td>
-        <td><span style="font-family:'DM Mono',monospace; font-size:14px; padding:3px 8px; background:rgba(139,92,246,0.1); border-radius:4px; color:#8b5cf6; font-weight:600">{{ v.style or 'classic' }}</span></td>
-        <td><span style="font-size:14px; padding:3px 8px; background:var(--accent-bg); border-radius:4px; color:var(--accent); font-weight:600">{{ v.default_mode or 'light' }}</span></td>
-        <td><span class="status-badge {{ v.status }}">{{ v.status }}</span></td>
         <td>
+          <strong>{{ v.name }}</strong>
+          <div style="font-size:14px;color:var(--text-dim)"><a href="{{ url_for('vertical_index', vertical_slug=v.slug) }}" target="_blank" style="color:var(--accent);text-decoration:none;font-family:'DM Mono'">{{ v.slug }}</a></div>
+        </td>
+        <td style="font-family:'DM Mono';text-align:center">{{ v.segments|length }}</td>
+        <td style="font-family:'DM Mono';text-align:center">{{ data.products }}</td>
+        <td style="font-family:'DM Mono';text-align:center">{{ data.articles }}</td>
+        <td><span style="font-family:'DM Mono';font-size:14px;padding:2px 6px;background:rgba(139,92,246,0.1);border-radius:4px;color:#8b5cf6">{{ v.style or 'classic' }}</span></td>
+        <td><span class="status-badge {% if v.status == 'live' %}live{% else %}draft{% endif %}">{{ v.status }}</span></td>
+        <td style="white-space:nowrap">
           <a href="{{ url_for('admin_vertical_detail', vid=v.id) }}" class="btn btn-ghost btn-sm">Chi tiết</a>
           <form method="POST" action="{{ url_for('admin_vertical_toggle', vid=v.id) }}" style="display:inline">
             <button class="btn btn-sm {% if v.status == 'draft' %}btn-primary{% else %}btn-ghost{% endif %}">
