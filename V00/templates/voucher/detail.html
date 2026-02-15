@@ -87,10 +87,10 @@
             <span class="vd-info-label">Hiệu lực:</span>
             <span class="vd-info-value">{{ voucher.valid_from.strftime('%d/%m/%Y') }} - {{ voucher.valid_to.strftime('%d/%m/%Y') }}</span>
           </div>
-          {% if voucher.usage_limit > 0 %}
+          {% if (voucher.usage_limit or 0) > 0 %}
           <div class="vd-info-item">
             <span class="vd-info-label">Số lượng:</span>
-            <span class="vd-info-value">Còn {{ voucher.usage_limit - voucher.usage_count }} mã</span>
+            <span class="vd-info-value">Còn {{ (voucher.usage_limit or 0) - (voucher.usage_count or 0) }} mã</span>
           </div>
           {% endif %}
         </div>

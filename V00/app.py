@@ -3695,9 +3695,12 @@ def vertical_part(vertical_slug, segment_slug, zone_slug, part_slug):
 @app.route('/voucher')
 def voucher_index():
     """Voucher listing page with filters"""
+    from sqlalchemy import func
     f_category = request.args.get('category', '')
     f_merchant = request.args.get('merchant', '')
     f_type = request.args.get('type', '')  # percentage, fixed_amount, free_shipping
+    f_platform = request.args.get('platform', '')  # shopee, lazada, grab...
+    f_sort = request.args.get('sort', 'newest')  # newest, discount, expiring
 
     # Build query
     q = Voucher.query.filter_by(is_active=True)
@@ -3707,30 +3710,78 @@ def voucher_index():
         q = q.filter(Voucher.merchant.ilike(f'%{f_merchant}%'))
     if f_type:
         q = q.filter_by(discount_type=f_type)
+    if f_platform:
+        q = q.filter(db.or_(
+            Voucher.merchant.ilike(f'%{f_platform}%'),
+            Voucher.network.ilike(f'%{f_platform}%')
+        ))
 
     # Get valid vouchers only
     all_vouchers = q.all()
     vouchers = [v for v in all_vouchers if v.is_valid()]
 
-    # Featured vouchers
+    # Sort
+    if f_sort == 'discount':
+        vouchers.sort(key=lambda v: v.discount_value or 0, reverse=True)
+    elif f_sort == 'expiring':
+        vouchers.sort(key=lambda v: v.valid_to or datetime.max)
+    else:
+        vouchers.sort(key=lambda v: v.created_at or datetime.min, reverse=True)
+
+    # Featured: top discount vouchers as featured if none marked
     featured = Voucher.query.filter_by(is_active=True, is_featured=True).limit(6).all()
     featured = [v for v in featured if v.is_valid()]
+    if not featured:
+        # Auto-feature: highest discount % vouchers
+        featured = sorted(
+            [v for v in Voucher.query.filter_by(is_active=True, discount_type='percentage').all() if v.is_valid()],
+            key=lambda v: v.discount_value or 0, reverse=True
+        )[:6]
 
     # Get category counts
-    from sqlalchemy import func
     cat_counts = db.session.query(Voucher.category, func.count(Voucher.id)).filter_by(is_active=True).group_by(Voucher.category).all()
     categories = dict(cat_counts)
 
-    # Get merchant list
-    merchants = db.session.query(Voucher.merchant).filter_by(is_active=True).distinct().all()
-    merchants = sorted([m[0] for m in merchants])
+    # Get merchant list with counts
+    merchant_counts = db.session.query(Voucher.merchant, func.count(Voucher.id)).filter_by(is_active=True).group_by(Voucher.merchant).order_by(func.count(Voucher.id).desc()).all()
+    merchants = [m[0] for m in merchant_counts]
+    merchant_count_map = dict(merchant_counts)
+
+    # Platform stats (group by network/domain)
+    platform_stats = {}
+    for v in Voucher.query.filter_by(is_active=True).all():
+        # Determine platform from merchant name or network
+        name = (v.merchant or '').lower()
+        if 'shopee' in name:
+            p = 'Shopee'
+        elif 'lazada' in name:
+            p = 'Lazada'
+        elif 'tiki' in name:
+            p = 'Tiki'
+        elif 'grab' in name:
+            p = 'Grab'
+        elif 'traveloka' in name:
+            p = 'Traveloka'
+        else:
+            p = 'Khác'
+        platform_stats[p] = platform_stats.get(p, 0) + 1
+
+    # Expiring soon (within 3 days)
+    expiring_soon = sorted(
+        [v for v in vouchers if v.valid_to and (v.valid_to - datetime.utcnow()).days <= 3],
+        key=lambda v: v.valid_to
+    )[:6]
 
     # Get active voucher widgets for display
     widgets = VoucherWidget.query.filter_by(is_active=True, placement='voucher_page').order_by(VoucherWidget.position).all()
 
     return render_template('voucher/index.html',
-        vouchers=vouchers, featured=featured, categories=categories, merchants=merchants,
-        widgets=widgets, f_category=f_category, f_merchant=f_merchant, f_type=f_type)
+        vouchers=vouchers, featured=featured, categories=categories,
+        merchants=merchants, merchant_count_map=merchant_count_map,
+        platform_stats=platform_stats, expiring_soon=expiring_soon,
+        widgets=widgets, f_category=f_category, f_merchant=f_merchant,
+        f_type=f_type, f_platform=f_platform, f_sort=f_sort,
+        now=datetime.utcnow())
 
 @app.route('/voucher/<code>')
 def voucher_detail(code):
@@ -3738,7 +3789,7 @@ def voucher_detail(code):
     v = Voucher.query.filter_by(code=code).first_or_404()
 
     # Track click
-    v.clicks += 1
+    v.clicks = (v.clicks or 0) + 1
     db.session.commit()
 
     # Related vouchers (same category or merchant)
@@ -3755,8 +3806,8 @@ def voucher_detail(code):
 def voucher_use(vid):
     """Track voucher usage"""
     v = Voucher.query.get_or_404(vid)
-    v.usage_count += 1
-    v.conversions += 1
+    v.usage_count = (v.usage_count or 0) + 1
+    v.conversions = (v.conversions or 0) + 1
     db.session.commit()
     return {'status': 'ok', 'usage_count': v.usage_count}
 
