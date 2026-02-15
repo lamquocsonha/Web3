@@ -165,6 +165,22 @@ def inject_globals():
         site_mode = SiteSettings.get('site_mode', 'demo')
         logo_url = SiteSettings.get('logo_url', '')
         favicon_url = SiteSettings.get('favicon_url', '')
+
+        # Voucher sidebar widget
+        sidebar_vouchers = []
+        vs_enabled = SiteSettings.get('voucher_sidebar_enabled', '1')
+        if vs_enabled == '1':
+            vs_count = int(SiteSettings.get('voucher_sidebar_count', '4'))
+            sidebar_vouchers = Voucher.query.filter_by(
+                is_active=True
+            ).filter(
+                Voucher.valid_to > datetime.utcnow()
+            ).order_by(
+                Voucher.is_featured.desc(),
+                Voucher.discount_value.desc(),
+                Voucher.created_at.desc()
+            ).limit(vs_count).all()
+
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
             'now': datetime.utcnow(),
@@ -172,9 +188,11 @@ def inject_globals():
             'site_mode': site_mode,
             'site_logo_url': logo_url,
             'site_favicon_url': favicon_url,
+            'sidebar_vouchers': sidebar_vouchers,
+            'voucher_sidebar_position': SiteSettings.get('voucher_sidebar_position', 'after_popular'),
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': ''}
+        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular'}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -712,7 +730,8 @@ def admin_settings():
         tab = request.form.get('_tab', 'general')
         # Only save keys relevant to current tab (avoid wiping other tabs)
         tab_keys = {
-            'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit', 'logo_url', 'favicon_url'],
+            'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit', 'logo_url', 'favicon_url',
+                        'voucher_sidebar_enabled', 'voucher_sidebar_count', 'voucher_sidebar_position'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         keys_to_save = tab_keys.get(tab, [])

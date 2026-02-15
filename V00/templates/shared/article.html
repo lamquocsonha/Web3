@@ -172,6 +172,11 @@
     </div>
     {% endif %}
 
+    <!-- Voucher Sidebar Widget (position: after_popular) -->
+    {% if voucher_sidebar_position == 'after_popular' %}
+      {% include 'shared/_voucher_sidebar.html' %}
+    {% endif %}
+
     <!-- Banner Ad Slot 1 (Top) -->
     {% for banner in banners if banner.position == 1 %}
     <div class="sidebar-widget sidebar-banner">
@@ -201,6 +206,11 @@
     </div>
     {% endif %}
 
+    <!-- Voucher Sidebar Widget (position: after_related) -->
+    {% if voucher_sidebar_position == 'after_related' %}
+      {% include 'shared/_voucher_sidebar.html' %}
+    {% endif %}
+
     <!-- Banner Ad Slot 2 (Bottom) -->
     {% for banner in banners if banner.position == 2 %}
     <div class="sidebar-widget sidebar-banner">
@@ -213,6 +223,11 @@
       {% endif %}
     </div>
     {% endfor %}
+
+    <!-- Voucher Sidebar Widget (position: bottom) -->
+    {% if voucher_sidebar_position == 'bottom' %}
+      {% include 'shared/_voucher_sidebar.html' %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

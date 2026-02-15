@@ -95,6 +95,39 @@
     </div>
   </div>
 
+  <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">Voucher Sidebar Widget</h3>
+    <p class="scard-desc">Hiển thị voucher nổi bật trong sidebar của các trang bài viết và sản phẩm.</p>
+    <div class="form-row" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div class="form-group">
+        <label class="form-label">Hiển thị</label>
+        <select class="form-select" name="voucher_sidebar_enabled" style="max-width:140px">
+          {% set vs_enabled = settings.get('voucher_sidebar_enabled', '1') %}
+          <option value="1" {% if vs_enabled == '1' %}selected{% endif %}>Bật</option>
+          <option value="0" {% if vs_enabled == '0' %}selected{% endif %}>Tắt</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Số lượng voucher</label>
+        <select class="form-select" name="voucher_sidebar_count" style="max-width:100px">
+          {% set vs_count = settings.get('voucher_sidebar_count', '4') %}
+          {% for n in range(2, 9) %}
+          <option value="{{ n }}" {% if vs_count|string == n|string %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vị trí</label>
+        <select class="form-select" name="voucher_sidebar_position" style="max-width:180px">
+          {% set vs_pos = settings.get('voucher_sidebar_position', 'after_popular') %}
+          <option value="after_popular" {% if vs_pos == 'after_popular' %}selected{% endif %}>Sau bài phổ biến</option>
+          <option value="after_related" {% if vs_pos == 'after_related' %}selected{% endif %}>Sau bài liên quan</option>
+          <option value="bottom" {% if vs_pos == 'bottom' %}selected{% endif %}>Cuối sidebar</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
   <div class="form-actions"><button type="submit" class="btn btn-primary">Save General</button></div>
 </form>
 </div>
