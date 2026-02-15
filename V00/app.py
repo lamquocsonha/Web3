@@ -1919,69 +1919,97 @@ def _build_part_keyword_index():
     }
     return index, zone_keywords, normalize
 
+def _kw_match(kw, text, words):
+    """Match a keyword against text with word-boundary awareness.
+    Short keywords (< 5 chars): whole-word match only.
+    Long keywords (>= 5 chars): substring match OK (more specific).
+    Multi-word keywords: all words must be present.
+    Returns score (0 = no match)."""
+    if not kw or len(kw) < 2:
+        return 0
+    kw_words = kw.split()
+    if len(kw_words) > 1:
+        # Multi-word keyword: all words must be present as whole words
+        if all(w in words for w in kw_words if len(w) >= 2):
+            return len(kw) + 5
+        return 0
+    # Single-word keyword
+    if len(kw) < 5:
+        # Short: whole-word match only (avoid "day" matching "day dien")
+        if kw in words:
+            return len(kw) + 2
+        return 0
+    else:
+        # Long (>= 5 chars): substring OK, more specific
+        if kw in text:
+            return len(kw) + 4
+        return 0
+
 def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn):
     """Match a product to best Part across all verticals.
-    Returns (part_id, detected_category) tuple. part_id can be None."""
+    Returns (part_id, detected_category) tuple. part_id can be None.
+    Requires high confidence: multiple keyword matches + high score."""
     text = normalize_fn(f"{product_name} {category}")
     words = set(text.split())
 
     best_part_id = None
     best_score = 0
+    best_hits = 0
     best_entry = None
 
-    # Phase 1: match against Part keywords (exact substring in normalized text)
+    # Phase 1: match against Part keywords
     for entry in part_index:
         score = 0
+        hits = 0
         for kw in entry['keywords']:
-            if len(kw) < 2:
-                continue
-            if kw in text:
-                score += len(kw) + 3
-            else:
-                kw_words = set(kw.split())
-                matched = words & kw_words
-                if matched:
-                    score += sum(len(w) for w in matched if len(w) >= 3)
+            s = _kw_match(kw, text, words)
+            if s > 0:
+                score += s
+                hits += 1
         if score > best_score:
             best_score = score
+            best_hits = hits
             best_part_id = entry['part_id']
             best_entry = entry
 
-    if best_score >= 5:
+    # Require score >= 10 AND at least 2 keyword hits for confidence
+    if best_score >= 10 and best_hits >= 2:
         cat = best_entry['zone_slug'] if best_entry else ''
         return best_part_id, cat
 
-    # Phase 2: fallback to Zone-level keywords (broader matching)
+    # Phase 2: fallback to Zone-level keywords
     best_zone_slug = None
     best_zone_score = 0
+    best_zone_hits = 0
     for zone_slug, kws in zone_keywords.items():
         score = 0
+        hits = 0
         for kw in kws:
-            if len(kw) >= 3 and kw in text:
-                score += len(kw) + 2
-            elif len(kw) < 3:
-                if kw in words:
-                    score += 3
+            s = _kw_match(kw, text, words)
+            if s > 0:
+                score += s
+                hits += 1
         if score > best_zone_score:
             best_zone_score = score
+            best_zone_hits = hits
             best_zone_slug = zone_slug
 
-    if best_zone_slug and best_zone_score >= 4:
+    # Require score >= 10 AND at least 2 hits
+    if best_zone_slug and best_zone_score >= 10 and best_zone_hits >= 2:
         first_part = Part.query.join(Zone).filter(Zone.slug == best_zone_slug).first()
         if first_part:
             return first_part.id, best_zone_slug
         return None, best_zone_slug
 
-    # Phase 3: use CSV category directly as fallback
+    # Phase 3: use CSV category directly as fallback (exact zone slug match only)
     if category:
         cat_norm = normalize_fn(category)
-        for zone_slug, kws in zone_keywords.items():
-            for kw in kws:
-                if kw in cat_norm or cat_norm in kw:
-                    first_part = Part.query.join(Zone).filter(Zone.slug == zone_slug).first()
-                    if first_part:
-                        return first_part.id, zone_slug
-                    return None, zone_slug
+        cat_slug = cat_norm.replace(' ', '-')
+        for zone_slug in zone_keywords:
+            if cat_slug == zone_slug or cat_norm == zone_slug.replace('-', ' '):
+                first_part = Part.query.join(Zone).filter(Zone.slug == zone_slug).first()
+                if first_part:
+                    return first_part.id, zone_slug
 
     return None, ''
 
