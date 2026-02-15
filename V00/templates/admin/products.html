@@ -34,6 +34,9 @@
     {% endif %}
     <a href="{{ url_for('admin_ai_center') }}" class="btn btn-secondary" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:#fff;border:none;font-size:14px">AI Control</a>
     <a href="{{ url_for('admin_products_import_csv') }}" class="btn btn-secondary">📥 Import CSV</a>
+    <form method="POST" action="{{ url_for('admin_products_reclassify_hub') }}" style="display:inline" onsubmit="return confirm('Re-classify: chay lai matching cho san pham trong Hub?')">
+      <button type="submit" class="btn btn-secondary" style="background:#10b981;color:#fff;border:none">🔄 Re-classify Hub</button>
+    </form>
     <a href="{{ url_for('admin_product_new') }}" class="btn btn-primary">+ Add Product</a>
   </div>
 </div>

@@ -1806,118 +1806,420 @@ def _build_part_keyword_index():
         })
 
     # Zone-level keyword map — ALL verticals (fallback when no Part matches)
+    # Keywords are normalized (no diacritics, lowercase)
     zone_keywords = {
         # === CAR / OTO ===
         'he-thong-treo': ['phuoc', 'giam chan', 'lo xo', 'cao su', 'rotuy', 'rotuyn', 'thanh can bang',
                           'shock', 'absorber', 'spring', 'bushing', 'ball joint', 'suspension',
-                          'giam xoc', 'nhun', 'stabilizer', 'sway bar'],
-        'he-thong-phanh': ['ma phanh', 'dia phanh', 'bau tro luc', 'abs', 'caliper',
-                           'brake pad', 'brake disc', 'dau phanh', 'tang bua'],
+                          'giam xoc', 'nhun', 'stabilizer', 'sway bar', 'gat phuoc',
+                          'cao su cang a', 'cao su thanh giang', 'thanh giang',
+                          'bilstein', 'kayaba', 'kyb', 'monroe', 'sachs',
+                          'chup mui', 'op bi', 'bi dien'],
+        'he-thong-phanh': ['ma phanh', 'dia phanh', 'bau tro luc', 'caliper',
+                           'brake pad', 'brake disc', 'dau phanh', 'tang bua',
+                           'bo kep phanh', 'phanh tay', 'phanh dia', 'phanh tang trong',
+                           'brembo', 'akebono', 'bendix', 'ferodo', 'bosch brake',
+                           'ong dau phanh', 'tro luc phanh', 'bua phanh'],
         'dong-co': ['dong co', 'engine', 'bugi', 'spark plug', 'kim phun', 'turbo', 'block may',
                     'loc gio', 'loc dau', 'loc nhien lieu', 'dau may', 'oil filter', 'air filter',
                     'piston', 'xi lanh', 'truc khuyu', 'crankshaft', 'gasket',
                     'gioang', 'day curoa', 'bom nuoc', 'water pump', 'bom xang',
-                    'injector', 'throttle'],
+                    'injector', 'throttle', 'nap may', 'supap', 'cam', 'truc cam',
+                    'dau nhot', 'nhot dong co', 'castrol', 'mobil 1', 'shell helix',
+                    'total quartz', 'motul', 'liqui moly', 'denso', 'ngk',
+                    'turbo tang ap', 'intercooler', 'supercharger',
+                    'ron nap may', 'phot dau', 'gioang quy lat'],
         'he-thong-dien': ['ac quy', 'battery oto', 'may phat', 'alternator',
                           'bong den oto', 'day dien oto',
-                          'cau chi', 'fuse', 'cam bien', 'sensor', 'ecu', 'relay',
-                          'gat mua', 'wiper', 'starter', 'khoi dong'],
+                          'cau chi', 'cam bien', 'sensor', 'ecu', 'relay',
+                          'gat mua', 'wiper', 'starter', 'khoi dong',
+                          'den pha', 'den hau', 'den xi nhan', 'den led oto',
+                          'philips oto', 'osram', 'bosch oto', 'varta',
+                          'cam bien oxy', 'cam bien nhiet do', 'cam bien toc do',
+                          'hop den', 'day co', 'cuon danh lua'],
         'he-thong-lai': ['thuoc lai', 'tro luc lai', 'vo lang',
-                         'power steering', 'rack', 'tie rod', 'tay lai'],
+                         'power steering', 'rack', 'tie rod', 'tay lai',
+                         'cao su ro tuyn', 'rotuy lai', 'bom tro luc lai',
+                         'dau tro luc lai', 'tay lai xe'],
         'gam-xe': ['gam xe', 'khung gam', 'chassis', 'chan bun', 'underbody', 'che gam',
-                   'lop oto', 'mam oto', 'bac dan', 'bearing', 'moay o', 'hub'],
+                   'lop oto', 'mam oto', 'bac dan', 'bearing', 'moay o',
+                   'lop xe oto', 'michelin', 'bridgestone', 'goodyear', 'dunlop',
+                   'continental', 'hankook', 'yokohama', 'kumho', 'maxxis',
+                   'mam xe oto', 'la zang', 'lazang', 'bu long banh xe',
+                   'bi moay o', 'phot moay o'],
         'noi-that': ['noi that oto', 'ghe oto', 'taplo', 'dashboard', 'tham oto',
-                     'dieu hoa oto', 'guong chieu hau'],
+                     'dieu hoa oto', 'guong chieu hau', 'boc ghe oto', 'boc vo lang',
+                     'tham lot san oto', 'tham san oto', 'nem tua lung oto',
+                     'camera hanh trinh', 'dashcam', 'dvd oto', 'man hinh oto',
+                     'loc dieu hoa', 'loc gio lanh'],
         'ngoai-that': ['ngoai that oto', 'can oto', 'bumper', 'guong oto',
                        'kinh oto', 'windshield', 'capo', 'hood', 'cop xe',
-                       'tem xe', 'decal', 'ong xa', 'exhaust'],
+                       'tem xe', 'decal', 'ong xa oto', 'exhaust',
+                       'thanh gia noc', 'baga noc', 'can truoc', 'can sau',
+                       'op ca lang', 'body kit', 'spoiler', 'cua gio oto',
+                       'chay bam', 'phu kinh', 'khung bao ve'],
         # === PET ===
         'dinh-duong': ['thuc an cho', 'thuc an meo', 'dog food', 'cat food', 'hat cho', 'hat meo',
                        'royal canin', 'pedigree', 'whiskas', 'taste of the wild', 'nutrience',
-                       'me-o', 'smartheart', 'ganador', 'natural core', 'snack cho', 'snack meo',
-                       'pate cho', 'pate meo', 'sua cho', 'sua meo', 'canin', 'puppy food',
-                       'kitten food', 'dinh duong thu cung', 'pet food'],
+                       'smartheart', 'ganador', 'natural core', 'snack cho', 'snack meo',
+                       'pate cho', 'pate meo', 'sua cho', 'sua meo', 'puppy food',
+                       'kitten food', 'dinh duong thu cung', 'pet food',
+                       'thuc an cho cho', 'thuc an cho meo',
+                       'pro plan', 'proplan', 'hills', 'science diet',
+                       'acana', 'orijen', 'ziwi peak', 'wellness', 'nutro',
+                       'brit care', 'monge', 'reflex', 'minino', 'catsrang',
+                       'iskhan', 'jerhigh', 'inaba', 'ciao churu',
+                       'treats cho', 'treats meo', 'banh thuong cho', 'banh thuong meo',
+                       'thuc an hat', 'thuc an uot', 'thuc an kho'],
         'y-te': ['vaccine cho', 'vaccine meo', 'tay giun', 'thuoc ve', 'thuoc ran',
                  'frontline', 'nexgard', 'heartgard', 'revolution', 'thuoc nho gay',
-                 'thuoc tri nam', 'thuoc tri ve', 'bang ve sinh', 'y te thu cung',
-                 'thuoc cho', 'thuoc meo', 'vet', 'veterinary'],
-        'huan-luyen': ['huan luyen cho', 'day cho', 'training', 'treat huan luyen',
-                       'clicker', 'harness', 'muzzle', 'rom', 'day dan cho'],
+                 'thuoc tri nam', 'thuoc tri ve', 'y te thu cung',
+                 'thuoc cho cho', 'thuoc cho meo',
+                 'advantage', 'advocate', 'bravecto', 'simparica', 'seresto',
+                 'drontal', 'milbemax', 'panacur', 'vetrimec',
+                 'sua tam cho', 'sua tam meo', 'dau goi cho', 'dau goi meo',
+                 've sinh tai', 've sinh rang', 'kem danh rang cho',
+                 'thuoc sat trung', 'biotic', 'probiotic thu cung',
+                 'vitamin thu cung', 'canxi cho', 'canxi meo'],
+        'huan-luyen': ['huan luyen cho', 'day cho', 'treat huan luyen',
+                       'clicker', 'muzzle', 'day dan cho',
+                       'ro mom cho', 'bang khen', 'huan luyen thu cung'],
         'do-dung': ['chuong cho', 'chuong meo', 'long cho', 'long meo', 'bat an', 'binh nuoc',
                     'vong co', 'day dat', 'leash', 'collar', 'ao cho', 'ao meo',
                     'nem cho', 'giuong cho', 'nha meo', 'cat tree', 'cay leo meo',
                     'do choi cho', 'do choi meo', 'balo thu cung', 'tui van chuyen',
                     'xe day thu cung', 'pet carrier', 'khay ve sinh', 'cat ve sinh',
                     'cat toan', 'bentonite', 'tofu cat', 'crystal cat',
-                    'may loc nuoc', 'pet fountain', 'phu kien thu cung'],
+                    'pet fountain', 'phu kien thu cung',
+                    'harness', 'yem cho', 'dai yem cho',
+                    'chuong van chuyen', 'long van chuyen',
+                    'balo meo', 'tui meo', 'nha cho', 'o cho', 'o meo',
+                    'qua bong cho', 'xuong gam', 'cau cao meo',
+                    'mieng lot khay', 'ta cho', 'bim cho',
+                    'mang bat', 'may loc nuoc thu cung',
+                    'luoc chai long', 'keo cat long', 'may cat long',
+                    'ban chai long', 'gang tam', 'may say long'],
         'hamster': ['hamster', 'chuot hamster', 'long hamster', 'thuc an hamster',
-                    'banh xe hamster', 'cat lot hamster'],
+                    'banh xe hamster', 'cat lot hamster', 'chuot lang', 'guinea pig',
+                    'bo hamster', 'binh nuoc hamster', 'nha hamster'],
         'ca-canh': ['ca canh', 'be ca', 'aquarium', 'loc nuoc be ca', 'thuc an ca',
-                    'den be ca', 'co thuy sinh', 'nen be ca', 'ca betta', 'ca vang'],
+                    'den be ca', 'co thuy sinh', 'nen be ca', 'ca betta', 'ca vang',
+                    'may bom oxy', 'may sui', 'loc be ca', 'may loc be ca',
+                    'da trang tri be ca', 'lu be ca', 'kinh be ca'],
         # === BEAUTY ===
         'lam-sach': ['sua rua mat', 'tay trang', 'dau tay trang', 'nuoc tay trang', 'cleansing',
-                     'micellar', 'foam rua mat', 'gel rua mat', 'oil cleanser', 'lam sach da'],
+                     'micellar', 'foam rua mat', 'gel rua mat', 'oil cleanser', 'lam sach da',
+                     'cerave cleanser', 'la roche posay cleanser', 'cetaphil',
+                     'bioderma', 'garnier micellar', 'simple cleanser',
+                     'rua mat', 'kem rua mat', 'bot rua mat',
+                     'tay te bao chet', 'scrub', 'exfoliate', 'peeling gel'],
         'toner-essence': ['toner', 'nuoc hoa hong', 'essence', 'tinh chat lot', 'lotion',
-                          'nuoc can bang', 'first treatment'],
+                          'nuoc can bang', 'first treatment',
+                          'klairs toner', 'thayers', 'hada labo', 'laneige',
+                          'some by mi toner', 'cosrx toner', 'innisfree toner',
+                          'nuoc than', 'nuoc than thanh xuan'],
         'serum': ['serum', 'tinh chat', 'ampoule', 'vitamin c serum', 'retinol', 'niacinamide',
-                  'hyaluronic', 'aha', 'bha', 'peptide', 'serum duong'],
+                  'hyaluronic', 'peptide', 'serum duong',
+                  'the ordinary', 'cerave serum', 'la roche posay serum',
+                  'obagi', 'skinceuticals', 'paula choice', 'drunk elephant',
+                  'cosrx serum', 'some by mi serum', 'klairs serum',
+                  'serum tri mun', 'serum trang da', 'serum chong lao hoa',
+                  'tinh chat duong', 'dac tri'],
         'kem-duong': ['kem duong', 'moisturizer', 'cream', 'kem duong am', 'night cream',
-                      'day cream', 'gel duong', 'emulsion', 'kem mat'],
-        'chong-nang': ['chong nang', 'sunscreen', 'spf', 'kem chong nang', 'sun cream',
-                       'uv protection', 'nang', 'sunblock'],
+                      'day cream', 'gel duong', 'emulsion', 'kem mat',
+                      'cerave cream', 'la roche posay cream', 'laneige cream',
+                      'innisfree cream', 'sulwhasoo', 'whoo', 'sk-ii',
+                      'kem lot', 'primer', 'kem nen', 'foundation',
+                      'kem duong da', 'kem duong mat', 'kem duong the',
+                      'body lotion', 'sua duong the', 'kem tay'],
+        'chong-nang': ['chong nang', 'sunscreen', 'kem chong nang', 'sun cream',
+                       'uv protection', 'sunblock',
+                       'anessa', 'skin aqua', 'biore uv', 'la roche posay uv',
+                       'eucerin sun', 'neutrogena sun', 'innisfree sun',
+                       'chong nang da mat', 'chong nang body', 'xit chong nang',
+                       'gel chong nang', 'sua chong nang'],
         'mat-na': ['mat na', 'mask', 'sheet mask', 'sleeping mask', 'clay mask',
-                   'mat na giay', 'mat na dat set', 'mat na ngu', 'peel off'],
+                   'mat na giay', 'mat na dat set', 'mat na ngu', 'peel off',
+                   'mat na vita', 'mat na collagen', 'mat na hyaluron',
+                   'mediheal', 'jayjun', 'dr jart', 'papa recipe',
+                   'mat na duong', 'mat na trang da', 'mat na tri mun'],
+        'trang-diem': ['son moi', 'lipstick', 'son kem', 'lip tint', 'son duong',
+                       'phan ma', 'blush', 'phan mat', 'eyeshadow', 'mascara',
+                       'ke mat', 'eyeliner', 'ke may', 'eyebrow', 'phan phu',
+                       'cushion', 'bb cream', 'cc cream', 'highlight', 'contour',
+                       'mac', 'maybelline', 'loreal', 'nyx', 'revlon',
+                       'rom&nd', 'romand', 'peripera', '3ce', 'black rouge',
+                       'clio', 'etude', 'missha', 'the saem', 'espoir',
+                       'phan nuoc', 'trang diem', 'makeup', 'kem nen'],
+        'nuoc-hoa': ['nuoc hoa', 'parfum', 'perfume', 'eau de toilette', 'edt', 'edp',
+                     'cologne', 'body mist', 'xit thom',
+                     'chanel', 'dior perfume', 'gucci perfume', 'versace',
+                     'calvin klein', 'narciso', 'jo malone', 'tom ford'],
+        'cham-soc-toc': ['dau goi', 'dau xa', 'shampoo', 'conditioner', 'kem u toc',
+                         'dau duong toc', 'hair serum', 'hair mask',
+                         'nhuom toc', 'uon toc', 'duoi toc', 'keo noi toc',
+                         'pantene', 'dove', 'tresemme', 'loreal hair',
+                         'moroccanoil', 'olaplex', 'kerastase',
+                         'gel vuot toc', 'sap vuot toc', 'keo xit toc',
+                         'may say toc', 'may uon toc', 'may la toc',
+                         'luoc', 'luoc go', 'luoc chai'],
         # === TECH ===
-        'man-hinh': ['man hinh', 'screen', 'display', 'oled', 'amoled', 'lcd', 'ips',
-                     'man hinh dien thoai', 'cuong luc', 'dan man hinh', 'tempered glass'],
-        'chip-xu-ly': ['chip', 'cpu', 'processor', 'snapdragon', 'dimensity', 'exynos',
-                       'apple silicon', 'bionic', 'mediatek', 'qualcomm'],
-        'camera': ['camera', 'ong kinh', 'lens', 'chup anh', 'quay phim',
-                   'camera dien thoai', 'selfie', 'wide angle', 'macro', 'gimbal'],
-        'pin-sac': ['pin', 'sac', 'charger', 'power bank', 'sac nhanh', 'sac khong day',
-                    'wireless charging', 'cap sac', 'adapter', 'magsafe', 'pin du phong'],
-        'bo-nho': ['bo nho', 'ram', 'rom', 'storage', 'the nho', 'sd card', 'usb',
-                   'ssd', 'hdd', 'o cung', 'memory card'],
-        'thiet-ke': ['op lung', 'case', 'bao da', 'skin', 'mieng dan', 'decal dien thoai'],
+        'dien-thoai': ['dien thoai', 'smartphone', 'iphone', 'samsung galaxy', 'xiaomi',
+                       'oppo', 'vivo', 'realme', 'poco', 'oneplus', 'google pixel',
+                       'huawei', 'nokia', 'asus rog phone', 'nothing phone',
+                       'iphone 15', 'iphone 16', 'galaxy s24', 'galaxy s25',
+                       'redmi', 'redmi note'],
+        'laptop': ['laptop', 'macbook', 'thinkpad', 'dell xps', 'asus zenbook',
+                   'hp envy', 'hp pavilion', 'acer swift', 'lenovo ideapad',
+                   'surface', 'chromebook', 'gaming laptop',
+                   'asus vivobook', 'msi gaming', 'acer nitro', 'legion',
+                   'may tinh xach tay', 'ultrabook'],
+        'tablet': ['tablet', 'ipad', 'galaxy tab', 'xiaomi pad',
+                   'may tinh bang', 'kindle', 'but cam ung', 'apple pencil'],
+        'man-hinh': ['man hinh', 'monitor', 'man hinh may tinh', 'man hinh gaming',
+                     'cuong luc', 'dan man hinh', 'tempered glass',
+                     'man hinh 4k', 'man hinh cong', 'ultrawide'],
+        'pin-sac': ['power bank', 'sac nhanh', 'sac khong day',
+                    'wireless charging', 'cap sac', 'adapter', 'magsafe', 'pin du phong',
+                    'anker', 'baseus', 'ugreen', 'belkin', 'aukey',
+                    'cap type c', 'cap lightning', 'cap usb', 'cu sac',
+                    'sac iphone', 'sac samsung', 'sac xe hoi'],
+        'tai-nghe': ['tai nghe', 'headphone', 'earphone', 'earbuds', 'airpods',
+                     'galaxy buds', 'sony wh', 'sony wf', 'jabra', 'jbl',
+                     'bose', 'sennheiser', 'beats', 'marshall',
+                     'tai nghe bluetooth', 'tai nghe khong day', 'tai nghe gaming',
+                     'true wireless', 'chong on', 'noise cancelling'],
+        'loa': ['loa bluetooth', 'loa di dong', 'loa thong minh', 'soundbar',
+                'jbl speaker', 'harman kardon', 'marshall speaker', 'bose speaker',
+                'loa karaoke', 'loa keo', 'loa sub', 'amply'],
+        'dong-ho-thong-minh': ['smartwatch', 'dong ho thong minh', 'apple watch',
+                               'galaxy watch', 'amazfit', 'huawei watch', 'mi band',
+                               'fitbit', 'garmin venu', 'vong deo tay thong minh',
+                               'day dong ho', 'day apple watch'],
+        'phu-kien-tech': ['op lung', 'case', 'bao da', 'mieng dan',
+                          'gia do dien thoai', 'tripod', 'selfie stick',
+                          'the nho', 'sd card', 'usb', 'ssd', 'o cung',
+                          'hub usb', 'dock', 'chuot', 'ban phim',
+                          'webcam', 'microphone', 'ring light',
+                          'tui chong soc', 'balo laptop'],
         # === BIKE ===
-        'khung-xe': ['khung xe dap', 'frame', 'suon xe dap', 'carbon frame', 'nhom frame'],
-        'he-thong-truyen-dong': ['truyen dong', 'shimano', 'sram', 'lip', 'xich xe dap',
+        'khung-xe': ['khung xe dap', 'frame', 'suon xe dap', 'carbon frame', 'nhom frame',
+                     'giant', 'trek', 'specialized', 'cannondale', 'merida',
+                     'xe dap dua', 'xe dap dia hinh', 'xe dap the thao',
+                     'xe dap gap', 'xe dap touring', 'xe dap fixed gear'],
+        'he-thong-truyen-dong': ['truyen dong', 'shimano', 'sram', 'xich xe dap',
                                   'bat dia', 'tay de', 'shifter', 'derailleur', 'groupset',
-                                  'cassette', 'pedal', 'ban dap'],
+                                  'cassette', 'pedal', 'ban dap',
+                                  'shimano deore', 'shimano 105', 'shimano ultegra',
+                                  'shimano dura ace', 'sram eagle', 'sram rival',
+                                  'campagnolo', 'truc giua', 'bottom bracket'],
         'banh-xe': ['banh xe dap', 'lop xe dap', 'vanh xe dap', 'nan hoa', 'hub xe dap',
-                    'sam xe dap', 'tire bike', 'wheelset', 'tubeless'],
+                    'sam xe dap', 'tire bike', 'wheelset', 'tubeless',
+                    'continental tire', 'schwalbe', 'vittoria', 'maxxis tire',
+                    'mavic', 'dt swiss', 'fulcrum', 'lop 700c', 'lop 26', 'lop 29'],
         'yen-va-tay-lai': ['yen xe dap', 'tay lai xe dap', 'ghi dong', 'stem', 'saddle',
-                           'handlebar', 'bar tape', 'grip'],
-        'phu-kien': ['mu bao hiem xe dap', 'helmet bike', 'gang tay dap xe', 'kinh dap xe',
-                     'den xe dap', 'binh nuoc xe dap', 'bom xe dap', 'dong ho xe dap',
-                     'garmin', 'wahoo', 'khoa xe dap'],
+                           'handlebar', 'bar tape', 'grip',
+                           'fizik', 'selle italia', 'brooks saddle', 'ergon',
+                           'phuoc xe dap', 'fox', 'rockshox'],
+        'phu-kien-xe-dap': ['mu bao hiem xe dap', 'helmet bike', 'gang tay dap xe', 'kinh dap xe',
+                            'den xe dap', 'binh nuoc xe dap', 'bom xe dap', 'dong ho xe dap',
+                            'garmin edge', 'wahoo', 'khoa xe dap',
+                            'ao dap xe', 'quan dap xe', 'giay dap xe',
+                            'tui xe dap', 'gac xe dap', 'baga xe dap',
+                            'chuong xe dap', 'ke xe dap', 'bao tay xe dap'],
         # === SPORT ===
         'giay-chay': ['giay chay', 'running shoes', 'nike running', 'adidas running',
                       'asics', 'hoka', 'new balance running', 'saucony', 'brooks',
-                      'giay chay bo', 'giay the thao'],
+                      'giay chay bo', 'giay the thao',
+                      'nike pegasus', 'nike vaporfly', 'adidas ultraboost',
+                      'asics gel', 'asics nimbus', 'asics kayano',
+                      'hoka clifton', 'hoka bondi', 'hoka speedgoat',
+                      'on running', 'on cloud', 'mizuno', 'under armour'],
         'do-chay': ['do chay bo', 'quan chay', 'ao chay', 'running wear',
-                    'shorts chay', 'tights', 'compression'],
+                    'shorts chay', 'tights', 'compression',
+                    'ao tank', 'ao singlet', 'quan short chay',
+                    'nike dri fit', 'adidas climalite', 'under armour heatgear',
+                    'ao giu nhiet', 'ao chong nang chay'],
         'dong-ho-gps': ['dong ho gps', 'garmin forerunner', 'garmin fenix', 'coros',
-                        'apple watch', 'suunto', 'polar', 'dong ho the thao'],
+                        'apple watch ultra', 'suunto', 'polar', 'dong ho the thao',
+                        'coros pace', 'coros apex', 'coros vertix',
+                        'garmin 255', 'garmin 265', 'garmin 965',
+                        'polar vantage', 'polar pacer', 'suunto race'],
         'phu-kien-chay': ['dai deo dien thoai', 'running belt', 'ba lo chay',
-                          'vo chay', 'running socks', 'headband', 'arm sleeve'],
+                          'vo chay', 'running socks', 'headband', 'arm sleeve',
+                          'mu chay', 'kinh chay', 'gang tay chay',
+                          'dai deo nguc', 'heart rate monitor', 'hrm',
+                          'flip belt', 'nathan', 'salomon vest'],
         'dinh-duong-chay': ['gel nang luong', 'energy gel', 'nuoc uong the thao',
-                            'electrolyte', 'bcaa', 'whey protein', 'energy bar'],
+                            'electrolyte', 'bcaa', 'whey protein', 'energy bar',
+                            'gu energy', 'maurten', 'spring energy', 'tailwind',
+                            'nuoc tang luc', 'binh nuoc chay', 'binh nau'],
         # === TRAVEL ===
         'mien-bac': ['ha noi', 'sa pa', 'ha long', 'ninh binh', 'ha giang', 'cao bang',
-                     'moc chau', 'mai chau', 'tam dao', 'cat ba', 'du lich mien bac'],
+                     'moc chau', 'mai chau', 'tam dao', 'cat ba', 'du lich mien bac',
+                     'fansipan', 'dong van', 'ban gioc', 'bac son', 'mu cang chai',
+                     'yen bai', 'lang son', 'bac kan', 'thai nguyen', 'tuyen quang'],
         'mien-trung': ['da nang', 'hoi an', 'hue', 'nha trang', 'da lat', 'quy nhon',
-                       'phu yen', 'quang binh', 'phong nha', 'du lich mien trung'],
+                       'phu yen', 'quang binh', 'phong nha', 'du lich mien trung',
+                       'son tra', 'ba na hills', 'cu lao cham', 'eo gio',
+                       'ninh thuan', 'binh thuan', 'ly son', 'kon tum'],
         'mien-nam': ['sai gon', 'ho chi minh', 'vung tau', 'can tho', 'phu quoc',
-                     'con dao', 'mekong', 'du lich mien nam'],
+                     'con dao', 'mekong', 'du lich mien nam',
+                     'mui ne', 'long hai', 'ho tram', 'binh chau',
+                     'ben tre', 'tien giang', 'an giang', 'chau doc'],
         'dong-nam-a': ['thai lan', 'singapore', 'malaysia', 'bali', 'indonesia',
-                       'philippines', 'cambodia', 'myanmar', 'lao'],
-        'dong-a': ['nhat ban', 'han quoc', 'dai loan', 'trung quoc', 'hong kong'],
-        'budget': ['hostel', 'homestay', 'nha nghi', 'budget hotel', 'backpacker'],
+                       'philippines', 'cambodia', 'myanmar', 'lao',
+                       'bangkok', 'phuket', 'boracay', 'siem reap', 'luang prabang'],
+        'dong-a': ['nhat ban', 'han quoc', 'dai loan', 'trung quoc', 'hong kong',
+                   'tokyo', 'osaka', 'kyoto', 'seoul', 'busan', 'jeju'],
+        'budget': ['hostel', 'homestay', 'nha nghi', 'budget hotel', 'backpacker',
+                   'airbnb', 'phong tro', 'nha dan', 'camping', 'glamping'],
         'resort': ['resort', 'khach san', 'hotel 5 sao', 'hotel 4 sao', 'villa',
-                   'spa resort', 'beach resort'],
+                   'spa resort', 'beach resort',
+                   'vinpearl', 'melia', 'pullman', 'intercontinental',
+                   'marriott', 'hilton', 'accor', 'hyatt', 'six senses',
+                   'amanoi', 'jw marriott'],
+        # === FASHION ===
+        'ao-nam': ['ao polo', 'ao thun nam', 'ao so mi nam', 'ao khoac nam',
+                   'ao vest', 'blazer nam', 'ao hoodie', 'ao len nam',
+                   'ao dai tay nam', 'ao ngan tay nam'],
+        'ao-nu': ['ao thun nu', 'ao so mi nu', 'ao khoac nu', 'ao dai',
+                  'ao croptop', 'ao kiem', 'ao hai day', 'cardigan',
+                  'ao len nu', 'ao choang'],
+        'quan': ['quan jeans', 'quan tay', 'quan kaki', 'quan short',
+                 'quan jogger', 'quan the thao', 'quan dai',
+                 'quan au', 'quan ong rong', 'quan ong dung'],
+        'vay-dam': ['dam', 'vay', 'dam lien', 'dam xoe', 'dam suong',
+                    'chan vay', 'vay midi', 'vay maxi', 'jumpsuit',
+                    'dam du tiec', 'dam cong so'],
+        'giay-dep': ['giay nam', 'giay nu', 'giay sneaker', 'giay boot',
+                     'giay cao got', 'giay the thao', 'dep', 'sandal',
+                     'nike', 'adidas', 'converse', 'vans', 'puma',
+                     'giay da', 'giay luoi', 'giay tay'],
+        'tui-xach': ['tui xach', 'balo', 'vi', 'clutch', 'tui deo cheo',
+                     'tui tote', 'tui deo vai', 'vi nam', 'vi nu',
+                     'charles keith', 'pedro', 'coach', 'michael kors'],
+        'phu-kien-thoi-trang': ['kinh mat', 'dong ho', 'vong tay', 'day chuyen',
+                                'nhan', 'bong tai', 'khan', 'that lung',
+                                'mu non', 'non ket', 'non luoi trai',
+                                'trang suc', 'phu kien toc'],
+        # === HOME & KITCHEN ===
+        'nha-bep': ['noi', 'chao', 'xoong', 'noi com dien', 'lo vi song',
+                    'may xay sinh to', 'may ep', 'binh dun nuoc',
+                    'noi chien khong dau', 'air fryer', 'lo nuong',
+                    'bep tu', 'bep gas', 'bep dien',
+                    'dao', 'thot', 'muong', 'dia', 'chen', 'bat',
+                    'tupperware', 'lock lock', 'tefal', 'sunhouse',
+                    'supor', 'kangaroo', 'electrolux', 'philips'],
+        'noi-that-nha': ['ban', 'ghe', 'tu', 'giuong', 'nem', 'goi',
+                         'ga giuong', 'chan ga', 'rem cua', 'tham',
+                         'den trang tri', 'tranh treo tuong',
+                         'ke sach', 'tu quan ao', 'ban lam viec',
+                         'sofa', 'ghe van phong', 'tu giay'],
+        've-sinh': ['may hut bui', 'robot hut bui', 'may lau nha',
+                    'nuoc lau san', 'nuoc rua chen', 'nuoc giat',
+                    'nuoc xa', 'bot giat', 'vim', 'sunlight',
+                    'comfort', 'downy', 'ariel', 'omo',
+                    'giay ve sinh', 'khan giay', 'tui rac'],
+        'dien-gia-dung': ['may giat', 'tu lanh', 'may lanh', 'dieu hoa',
+                          'quat', 'may loc khong khi', 'may hut am',
+                          'may loc nuoc', 'binh nong lanh',
+                          'samsung', 'lg', 'panasonic', 'toshiba',
+                          'sharp', 'daikin', 'mitsubishi'],
+        # === HEALTH ===
+        'thuc-pham-chuc-nang': ['vitamin', 'omega 3', 'dau ca', 'collagen',
+                                'canxi', 'sat', 'kem', 'magie',
+                                'vitamin c', 'vitamin d', 'vitamin e',
+                                'thuc pham chuc nang', 'tpcn', 'bao',
+                                'dhc', 'blackmores', 'swisse', 'nature made',
+                                'kirkland', 'centrum', 'solgar', 'now foods',
+                                'bo sung dinh duong', 'vien uong',
+                                'tang can', 'giam can', 'detox'],
+        'dung-cu-y-te': ['nhiet ke', 'may do huyet ap', 'may do duong huyet',
+                         'may xong', 'may xong khi dung', 'khau trang',
+                         'bang ca nhan', 'on dinh huyet ap',
+                         'omron', 'microlife', 'beurer', 'yuwell'],
+        # === BABY & KIDS ===
+        'do-tre-em': ['ta em be', 'bim', 'sua bot', 'binh sua',
+                      'xe day tre em', 'ghe an dam', 'noi em be',
+                      'do choi tre em', 'lego', 'xe day', 'carseat',
+                      'ta dan', 'ta quan', 'bobby', 'huggies',
+                      'merries', 'moony', 'pampers', 'mamypoko',
+                      'sua nan', 'sua ensure', 'sua abbott', 'similac',
+                      'vinamilk', 'nutifood', 'friso', 'meiji'],
     }
-    return index, zone_keywords, normalize
+
+    # Power keywords: highly distinctive brands/terms — single hit is enough
+    # These map directly to zone slugs and give bonus score
+    power_keywords = {
+        # PET brands → dinh-duong
+        'royal canin': 'dinh-duong', 'pedigree': 'dinh-duong', 'whiskas': 'dinh-duong',
+        'taste of the wild': 'dinh-duong', 'acana': 'dinh-duong', 'orijen': 'dinh-duong',
+        'smartheart': 'dinh-duong', 'ganador': 'dinh-duong', 'nutrience': 'dinh-duong',
+        'pro plan': 'dinh-duong', 'hills science diet': 'dinh-duong', 'catsrang': 'dinh-duong',
+        'minino': 'dinh-duong', 'ziwi peak': 'dinh-duong', 'jerhigh': 'dinh-duong',
+        'ciao churu': 'dinh-duong', 'inaba': 'dinh-duong',
+        # PET health → y-te
+        'frontline': 'y-te', 'nexgard': 'y-te', 'heartgard': 'y-te',
+        'bravecto': 'y-te', 'simparica': 'y-te', 'seresto': 'y-te',
+        'advocate': 'y-te', 'revolution': 'y-te', 'drontal': 'y-te',
+        # PET accessories → do-dung
+        'bentonite': 'do-dung', 'tofu cat': 'do-dung', 'crystal cat': 'do-dung',
+        'cat tree': 'do-dung', 'pet carrier': 'do-dung', 'pet fountain': 'do-dung',
+        # BEAUTY brands
+        'cerave': 'lam-sach', 'la roche posay': 'lam-sach', 'cetaphil': 'lam-sach',
+        'bioderma': 'lam-sach', 'the ordinary': 'serum', 'obagi': 'serum',
+        'skinceuticals': 'serum', 'paula choice': 'serum',
+        'anessa': 'chong-nang', 'skin aqua': 'chong-nang', 'biore uv': 'chong-nang',
+        'mediheal': 'mat-na', 'dr jart': 'mat-na',
+        'romand': 'trang-diem', 'peripera': 'trang-diem', '3ce': 'trang-diem',
+        'black rouge': 'trang-diem', 'maybelline': 'trang-diem',
+        'moroccanoil': 'cham-soc-toc', 'olaplex': 'cham-soc-toc', 'kerastase': 'cham-soc-toc',
+        # TECH brands
+        'iphone': 'dien-thoai', 'samsung galaxy': 'dien-thoai', 'xiaomi': 'dien-thoai',
+        'macbook': 'laptop', 'thinkpad': 'laptop', 'dell xps': 'laptop',
+        'airpods': 'tai-nghe', 'galaxy buds': 'tai-nghe', 'sony wh': 'tai-nghe',
+        'jbl speaker': 'loa', 'harman kardon': 'loa', 'marshall speaker': 'loa',
+        'apple watch': 'dong-ho-thong-minh', 'galaxy watch': 'dong-ho-thong-minh',
+        'amazfit': 'dong-ho-thong-minh',
+        'anker': 'pin-sac', 'baseus': 'pin-sac', 'ugreen': 'pin-sac',
+        # CAR brands
+        'bilstein': 'he-thong-treo', 'kayaba': 'he-thong-treo', 'kyb': 'he-thong-treo',
+        'brembo': 'he-thong-phanh', 'akebono': 'he-thong-phanh',
+        'castrol': 'dong-co', 'mobil 1': 'dong-co', 'shell helix': 'dong-co',
+        'liqui moly': 'dong-co', 'motul': 'dong-co',
+        'michelin': 'gam-xe', 'bridgestone': 'gam-xe', 'goodyear': 'gam-xe',
+        'continental': 'gam-xe', 'hankook': 'gam-xe', 'yokohama': 'gam-xe',
+        # BIKE brands
+        'shimano': 'he-thong-truyen-dong', 'sram': 'he-thong-truyen-dong',
+        'campagnolo': 'he-thong-truyen-dong',
+        'giant': 'khung-xe', 'trek': 'khung-xe', 'specialized': 'khung-xe',
+        'rockshox': 'yen-va-tay-lai',
+        # SPORT brands
+        'nike pegasus': 'giay-chay', 'nike vaporfly': 'giay-chay',
+        'adidas ultraboost': 'giay-chay', 'hoka clifton': 'giay-chay',
+        'hoka bondi': 'giay-chay', 'on running': 'giay-chay',
+        'garmin forerunner': 'dong-ho-gps', 'garmin fenix': 'dong-ho-gps',
+        'coros pace': 'dong-ho-gps', 'suunto race': 'dong-ho-gps',
+        'maurten': 'dinh-duong-chay', 'gu energy': 'dinh-duong-chay',
+        # BABY brands
+        'huggies': 'do-tre-em', 'pampers': 'do-tre-em', 'merries': 'do-tre-em',
+        'moony': 'do-tre-em', 'bobby': 'do-tre-em', 'mamypoko': 'do-tre-em',
+        'similac': 'do-tre-em', 'friso': 'do-tre-em',
+        # HOME brands
+        'tefal': 'nha-bep', 'sunhouse': 'nha-bep', 'lock lock': 'nha-bep',
+        'air fryer': 'nha-bep', 'noi chien khong dau': 'nha-bep',
+        'robot hut bui': 've-sinh', 'may hut bui': 've-sinh',
+        'daikin': 'dien-gia-dung', 'mitsubishi': 'dien-gia-dung',
+        # HEALTH brands
+        'blackmores': 'thuc-pham-chuc-nang', 'swisse': 'thuc-pham-chuc-nang',
+        'nature made': 'thuc-pham-chuc-nang', 'now foods': 'thuc-pham-chuc-nang',
+        'centrum': 'thuc-pham-chuc-nang', 'kirkland': 'thuc-pham-chuc-nang',
+        'omron': 'dung-cu-y-te', 'microlife': 'dung-cu-y-te',
+        # TRAVEL brands
+        'vinpearl': 'resort', 'six senses': 'resort', 'jw marriott': 'resort',
+    }
+    return index, zone_keywords, power_keywords, normalize
 
 def _kw_match(kw, text, words):
     """Match a keyword against text with word-boundary awareness.
@@ -1945,12 +2247,26 @@ def _kw_match(kw, text, words):
             return len(kw) + 4
         return 0
 
-def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn):
+def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn, power_keywords=None):
     """Match a product to best Part across all verticals.
     Returns (part_id, detected_category) tuple. part_id can be None.
-    Requires high confidence: multiple keyword matches + high score."""
+    Uses 4-phase strategy: Power keywords → Part keywords → Zone keywords → CSV category."""
     text = normalize_fn(f"{product_name} {category}")
     words = set(text.split())
+
+    # Phase 0: Power keywords — brand names so distinctive 1 hit is enough
+    if power_keywords:
+        best_pw_zone = None
+        best_pw_score = 0
+        for pw, zone_slug in power_keywords.items():
+            s = _kw_match(pw, text, words)
+            if s > 0 and s > best_pw_score:
+                best_pw_score = s
+                best_pw_zone = zone_slug
+        if best_pw_zone and best_pw_score >= 6:
+            first_part = Part.query.join(Zone).filter(Zone.slug == best_pw_zone).first()
+            if first_part:
+                return first_part.id, best_pw_zone
 
     best_part_id = None
     best_score = 0
@@ -1994,8 +2310,8 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
             best_zone_hits = hits
             best_zone_slug = zone_slug
 
-    # Require score >= 10 AND at least 2 hits
-    if best_zone_slug and best_zone_score >= 10 and best_zone_hits >= 2:
+    # Require score >= 8 AND at least 1 hit (relaxed for zone-level)
+    if best_zone_slug and best_zone_score >= 8 and best_zone_hits >= 1:
         first_part = Part.query.join(Zone).filter(Zone.slug == best_zone_slug).first()
         if first_part:
             return first_part.id, best_zone_slug
@@ -2110,7 +2426,7 @@ def admin_products_import_csv():
         zone_kw = None
         normalize_fn = None
         if mapping_mode == 'auto':
-            part_index, zone_kw, normalize_fn = _build_part_keyword_index()
+            part_index, zone_kw, power_kw, normalize_fn = _build_part_keyword_index()
 
         # Get network for deeplink
         network_obj = None
@@ -2172,7 +2488,7 @@ def admin_products_import_csv():
                 # Step 2: ALSO match to vertical (if keywords match)
                 if part_index:
                     matched_part_id, detected_category = _match_product_to_part(
-                        product_name, category, part_index, zone_kw, normalize_fn)
+                        product_name, category, part_index, zone_kw, normalize_fn, power_kw)
                     if matched_part_id:
                         al_vert = AffiliateLink(
                             part_id=matched_part_id,
@@ -2247,6 +2563,80 @@ def admin_products_import_csv():
     networks = AffiliateNetwork.query.all()
     return render_template('admin/products_import_csv.html',
         parts_tree=parts_tree, networks=networks)
+
+@app.route('/admin/products/reclassify-hub', methods=['POST'])
+def admin_products_reclassify_hub():
+    """Re-run matching on Hub products → move matched ones to verticals.
+    Called after creating new verticals/parts to classify existing Hub products."""
+    hub = Vertical.query.filter_by(slug='hub').first()
+    if not hub:
+        flash('Chưa có vertical Hub nào.', 'warning')
+        return redirect(url_for('admin_products'))
+
+    # Get all Hub segment/zone/part IDs
+    hub_part_ids = set()
+    for seg in hub.segments:
+        for zone in seg.zones:
+            for part in zone.parts:
+                hub_part_ids.add(part.id)
+
+    if not hub_part_ids:
+        flash('Hub không có sản phẩm nào.', 'warning')
+        return redirect(url_for('admin_products'))
+
+    # Get all products in Hub
+    hub_products = AffiliateLink.query.filter(AffiliateLink.part_id.in_(hub_part_ids)).all()
+    if not hub_products:
+        flash('Hub không có sản phẩm nào cần phân loại.', 'info')
+        return redirect(url_for('admin_products'))
+
+    # Build matching index (excluding Hub parts)
+    part_index, zone_kw, power_kw, normalize_fn = _build_part_keyword_index()
+    # Filter out Hub parts from index
+    part_index = [e for e in part_index if e['vert_slug'] != 'hub']
+
+    if not part_index and not zone_kw:
+        flash('Chưa có vertical/zone nào để match. Hãy tạo vertical trước.', 'warning')
+        return redirect(url_for('admin_products'))
+
+    matched = 0
+    mapped_zones = {}
+    for al in hub_products:
+        matched_part_id, detected_category = _match_product_to_part(
+            al.product_name, al.category or '', part_index, zone_kw, normalize_fn, power_kw)
+        if matched_part_id:
+            # Create a copy in the matched vertical (keep original in Hub)
+            existing = AffiliateLink.query.filter_by(
+                part_id=matched_part_id, url=al.url).first()
+            if not existing:
+                al_vert = AffiliateLink(
+                    part_id=matched_part_id,
+                    network=al.network,
+                    product_name=al.product_name,
+                    url=al.url,
+                    price=al.price,
+                    image_url=al.image_url,
+                    is_active=True,
+                    category=detected_category,
+                )
+                db.session.add(al_vert)
+                matched += 1
+                # Track stats
+                for entry in part_index:
+                    if entry['part_id'] == matched_part_id:
+                        label = f"{entry['vert_name']} › {entry['zone_name']} › {entry['part_name']}"
+                        mapped_zones[label] = mapped_zones.get(label, 0) + 1
+                        break
+
+    db.session.commit()
+
+    msg = f'Re-classify: {matched}/{len(hub_products)} sản phẩm Hub được match vào vertical.'
+    if mapped_zones:
+        top = sorted(mapped_zones.items(), key=lambda x: -x[1])[:8]
+        detail = ', '.join(f'{name}: {cnt}' for name, cnt in top)
+        msg += f' | {detail}'
+    flash(msg, 'success' if matched > 0 else 'info')
+    return redirect(url_for('admin_products'))
 
 @app.route('/admin/scheduled-imports')
 def admin_scheduled_imports():
