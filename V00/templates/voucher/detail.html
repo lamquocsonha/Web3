@@ -52,12 +52,12 @@
       </div>
 
       <!-- Code Box -->
-      <div class="vd-code-box">
+      <div class="vd-code-box" id="codeBox" data-code="{{ voucher.code }}" data-url="{{ voucher.affiliate_url or '' }}">
         <div class="vd-code-label">Mã giảm giá</div>
-        <div class="vd-code-value" id="voucherCode">{{ voucher.code }}</div>
-        <button class="vd-copy-btn" onclick="copyCode()">📋 Sao chép mã</button>
+        <div class="vd-code-value vc-code-hidden" id="voucherCode">{{ voucher.code[:2] }}••••••••</div>
+        <button class="vd-copy-btn" onclick="revealAndCopy()">🔓 Bấm để lấy mã</button>
         {% if voucher.affiliate_url %}
-        <a href="{{ voucher.affiliate_url }}" target="_blank" class="vd-use-btn" onclick="trackUsage()">
+        <a href="{{ voucher.affiliate_url }}" target="_blank" class="vd-use-btn" id="useBtn" style="display:none" onclick="trackUsage()">
           🛒 Đi đến {{ voucher.merchant }} →
         </a>
         {% endif %}
@@ -165,17 +165,42 @@
 </main>
 
 <script>
-function copyCode() {
-  const code = document.getElementById('voucherCode').textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    const btn = document.querySelector('.vd-copy-btn');
-    btn.textContent = '✓ Đã sao chép!';
-    btn.style.background = '#27ae60';
-    setTimeout(() => {
-      btn.textContent = '📋 Sao chép mã';
-      btn.style.background = '';
-    }, 2000);
-  });
+function revealAndCopy() {
+  const box = document.getElementById('codeBox');
+  const codeEl = document.getElementById('voucherCode');
+  const code = box.dataset.code;
+  const url = box.dataset.url;
+  const btn = document.querySelector('.vd-copy-btn');
+  const useBtn = document.getElementById('useBtn');
+
+  // Reveal the code
+  codeEl.textContent = code;
+  codeEl.classList.remove('vc-code-hidden');
+  codeEl.classList.add('vc-code-revealed');
+
+  // Update button
+  btn.textContent = '✓ Đã sao chép!';
+  btn.style.background = '#27ae60';
+  btn.onclick = function() {
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = '✓ Đã sao chép!';
+      setTimeout(() => { btn.textContent = '📋 Sao chép lại'; }, 1500);
+    });
+  };
+
+  // Show "Go to merchant" button
+  if (useBtn) useBtn.style.display = 'inline-block';
+
+  // Copy to clipboard
+  navigator.clipboard.writeText(code);
+
+  // Open affiliate link (registers commission)
+  if (url) {
+    setTimeout(() => window.open(url, '_blank'), 600);
+  }
+
+  // Track click
+  trackUsage();
 }
 
 function copyEmbedCode() {

@@ -61,7 +61,7 @@
     </div>
     <div class="v-featured-grid">
       {% for v in featured[:6] %}
-      <div class="v-feat-card" onclick="copyAndGo('{{ v.code }}', '{{ v.affiliate_url or '' }}', this)" style="--card-color: {{ v.color }}">
+      <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color }}">
         <div class="v-feat-top">
           <span class="v-feat-discount">{{ v.get_discount_text() }}</span>
           <span class="v-feat-exp">HSD {{ v.valid_to.strftime('%d/%m') if v.valid_to else '—' }}</span>
@@ -69,8 +69,10 @@
         <div class="v-feat-merchant">{{ v.icon }} {{ v.merchant }}</div>
         <h3>{{ v.title[:65] }}{% if v.title|length > 65 %}...{% endif %}</h3>
         <div class="v-feat-bottom">
-          <code class="v-feat-code">{{ v.code }}</code>
-          <span class="v-feat-cta">Lấy mã</span>
+          <div class="vc-code-wrap">
+            <code class="v-feat-code vc-code-hidden">{{ v.code[:2] }}••••••</code>
+          </div>
+          <span class="v-feat-cta">🔓 Lấy mã</span>
         </div>
       </div>
       {% endfor %}
@@ -87,11 +89,13 @@
     </div>
     <div class="v-expiring-row">
       {% for v in expiring_soon %}
-      <div class="v-exp-card" onclick="copyAndGo('{{ v.code }}', '{{ v.affiliate_url or '' }}', this)">
+      <div class="v-exp-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
         <div class="v-exp-timer">{{ v.icon }} Còn {{ ((v.valid_to - now).days) if v.valid_to else '?' }} ngày</div>
         <div class="v-exp-discount" style="color:{{ v.color }}">{{ v.get_discount_text() }}</div>
         <div class="v-exp-merchant">{{ v.merchant }}</div>
-        <code class="v-exp-code">{{ v.code }}</code>
+        <div class="vc-code-wrap">
+          <code class="v-exp-code vc-code-hidden">{{ v.code[:2] }}••••••</code>
+        </div>
       </div>
       {% endfor %}
     </div>
@@ -190,7 +194,7 @@
       {% if vouchers %}
       <div class="voucher-grid">
         {% for v in vouchers %}
-        <div class="voucher-card" onclick="copyAndGo('{{ v.code }}', '{{ v.affiliate_url or '' }}', this)">
+        <div class="voucher-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
           <div class="vc-header" style="background:linear-gradient(135deg, {{ v.color }} 0%, {{ v.color }}cc 100%)">
             <div class="vc-discount">{{ v.get_discount_text() }}</div>
             <div class="vc-merchant">{{ v.icon }} {{ v.merchant }}</div>
@@ -206,8 +210,10 @@
             </div>
           </div>
           <div class="vc-footer">
-            <code class="vc-code">{{ v.code }}</code>
-            <span class="vc-action">📋 Lấy mã</span>
+            <div class="vc-code-wrap">
+              <code class="vc-code vc-code-hidden">{{ v.code[:2] }}••••••</code>
+            </div>
+            <span class="vc-action">🔓 Lấy mã</span>
           </div>
         </div>
         {% endfor %}
@@ -268,22 +274,45 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-function copyAndGo(code, url, el) {
+function revealCode(el) {
+  const code = el.dataset.code;
+  const url = el.dataset.url;
+  const codeEl = el.querySelector('.vc-code, .v-feat-code, .v-exp-code');
+
+  // If already revealed, just copy again
+  if (el.classList.contains('revealed')) {
+    navigator.clipboard.writeText(code).then(() => {
+      showToast('✓ Đã sao chép lại mã: ' + code);
+    });
+    return;
+  }
+
+  // Mark as revealed
+  el.classList.add('revealed');
+
+  // Show the real code
+  if (codeEl) {
+    codeEl.classList.remove('vc-code-hidden');
+    codeEl.textContent = code;
+    codeEl.classList.add('vc-code-revealed');
+  }
+
+  // Update CTA button
+  const action = el.querySelector('.vc-action, .v-feat-cta');
+  if (action) {
+    action.textContent = '✓ Đã copy!';
+    action.style.background = '#27ae60';
+  }
+
+  // Copy code to clipboard
   navigator.clipboard.writeText(code).then(() => {
     showToast('✓ Đã sao chép mã: ' + code);
-    // Visual feedback on card
-    const action = el.querySelector('.vc-action, .v-feat-cta, .v-exp-code');
-    if (action) {
-      const orig = action.textContent;
-      action.textContent = '✓ Đã copy!';
-      action.style.color = '#27ae60';
-      setTimeout(() => { action.textContent = orig; action.style.color = ''; }, 2000);
-    }
-    // Open affiliate link after short delay
-    if (url) {
-      setTimeout(() => window.open(url, '_blank'), 800);
-    }
   });
+
+  // Open affiliate link in new tab (registers commission)
+  if (url) {
+    setTimeout(() => window.open(url, '_blank'), 600);
+  }
 }
 </script>
 </body>
