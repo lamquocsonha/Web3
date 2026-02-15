@@ -67,17 +67,11 @@ Import CSV
         </div>
       </div>
 
-      <!-- Auto-detect options (shown when auto mode) -->
+      <!-- Auto-detect info (shown when auto mode) -->
       <div id="autoOptions">
-        <div class="form-group">
-          <label class="form-label">Chon Vertical dich <span style="color:#ef4444">*</span></label>
-          <select name="vertical_id" class="form-select" id="verticalSelect">
-            <option value="">-- Chon vertical de import san pham --</option>
-            {% for v in verticals %}
-            <option value="{{ v.id }}">{{ v.icon }} {{ v.name }}</option>
-            {% endfor %}
-          </select>
-          <p class="form-help">San pham se duoc phan loai vao danh muc cua vertical nay. Neu khong match → tu dong tao danh muc moi trong vertical.</p>
+        <div style="background:rgba(16,185,129,0.06);border-left:3px solid #10b981;padding:12px 16px;border-radius:4px;font-size:14px;color:var(--text-dim);line-height:1.7">
+          He thong tu dong match san pham voi danh muc co san trong tat ca verticals.<br>
+          San pham khong match → vao <strong>Hub</strong> (vertical "🛒 Hub"), phan loai theo CSV category. Co the chuyen sang vertical khac sau.
         </div>
       </div>
 
@@ -219,14 +213,14 @@ Import CSV
     <h3 style="font-size:15px;margin-bottom:12px">Cach import hoat dong</h3>
     <div style="font-size:14px;color:var(--text-dim);line-height:1.8">
       <ol style="padding-left:20px;margin:0">
-        <li><strong>Chon vertical</strong> — san pham se thuoc vertical nay</li>
         <li><strong>Upload CSV</strong> — he thong doc ten san pham + category</li>
-        <li><strong>Tu dong phan loai</strong> — so khop voi danh muc co san (keywords)</li>
-        <li><strong>Khong match?</strong> → Tu dong tao danh muc moi trong vertical tu CSV category</li>
+        <li><strong>Tu dong match</strong> — so khop voi danh muc co san trong tat ca verticals (Car, Pet, Beauty...)</li>
+        <li><strong>Match duoc?</strong> → San pham vao dung vertical + danh muc tuong ung</li>
+        <li><strong>Khong match?</strong> → San pham vao <strong>Hub</strong>, phan loai theo CSV category</li>
         <li><strong>Tat ca san pham deu duoc import</strong> — khong bo qua san pham nao</li>
       </ol>
       <div style="background:rgba(16,185,129,0.06);border:2px solid rgba(16,185,129,0.25);border-radius:8px;padding:16px;margin-top:16px">
-        <strong style="color:#10b981">Danh muc tu dong tao:</strong> Segment "San pham Import" > Zone theo CSV category > Part. Co the chinh sua lai trong admin sau khi import.
+        <strong style="color:#10b981">San pham trong Hub:</strong> Vertical "🛒 Hub" > Segment "San pham" > Zone theo CSV category. Co the chuyen sang vertical khac trong admin sau khi import.
       </div>
     </div>
   </div>
@@ -242,10 +236,11 @@ SP003,Serum Vitamin C The Ordinary,https://shopee.vn/product/234,320000,20,https
 SP004,Giay chay Nike Pegasus 41,https://shopee.vn/product/345,2890000,0,https://img.jpg,Giay chay bo,running
     </div>
     <p style="font-size:14px;color:var(--text-dim);margin-top:12px">
-      <strong>Ket qua (chon vertical Pet):</strong> Royal Canin → match <strong>Pet > Dinh duong</strong>,
-      Ma phanh → khong match → tao danh muc <strong>"phanh"</strong>,
-      Serum → khong match → tao danh muc <strong>"skincare"</strong>,
-      Giay chay → khong match → tao danh muc <strong>"running"</strong>
+      <strong>Ket qua:</strong> Royal Canin → match <strong>Pet > Dinh duong</strong>,
+      Ma phanh → match <strong>Car > Phanh</strong>,
+      Serum → match <strong>Beauty > Serum</strong>,
+      Giay chay → match <strong>Sport > Giay chay</strong>.
+      Neu khong match → vao <strong>Hub > [category]</strong>
     </p>
   </div>
 </div>

@@ -96,6 +96,22 @@
   </div>
 
   <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">Shop Display Mode</h3>
+    <p class="scard-desc">Cach hien thi trang Shop chinh (<code>/shop</code>).</p>
+    <div class="form-group">
+      <select class="form-select" name="shop_display_mode" style="max-width:400px">
+        {% set sdm = settings.get('shop_display_mode', 'hub') %}
+        <option value="hub" {% if sdm == 'hub' %}selected{% endif %}>Hub — Hien thi tat ca san pham, danh muc (mac dinh)</option>
+        <option value="vertical_only" {% if sdm == 'vertical_only' %}selected{% endif %}>Vertical only — Chi hien thi san pham thuoc cac vertical</option>
+      </select>
+      <p class="form-help" style="margin-top:8px;line-height:1.7">
+        <strong>Hub:</strong> Hien thi toan bo san pham trong hub, ke ca chua phan loai vao vertical nao.<br>
+        <strong>Vertical only:</strong> Chi hien thi san pham da duoc gan vao vertical dang hoat dong (published). San pham trong Hub chua phan loai se an.
+      </p>
+    </div>
+  </div>
+
+  <div class="scard" style="margin-top:20px">
     <h3 class="scard-title">Voucher Sidebar Widget</h3>
     <p class="scard-desc">Hiển thị voucher nổi bật trong sidebar của các trang bài viết và sản phẩm.</p>
     <div class="form-row" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">

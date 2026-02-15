@@ -733,7 +733,8 @@ def admin_settings():
         # Only save keys relevant to current tab (avoid wiping other tabs)
         tab_keys = {
             'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit', 'logo_url', 'favicon_url',
-                        'voucher_sidebar_enabled', 'voucher_sidebar_count', 'voucher_sidebar_position'],
+                        'voucher_sidebar_enabled', 'voucher_sidebar_count', 'voucher_sidebar_position',
+                        'shop_display_mode'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         keys_to_save = tab_keys.get(tab, [])
@@ -1985,10 +1986,10 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
     return None, ''
 
 
-def _get_or_create_part(vertical_id, category_name, product_name):
-    """Auto-create Zone + Part for unmatched products within a vertical.
-    Uses category_name from CSV to find/create a Zone, then creates a Part.
-    Returns part_id. Caches created zones/parts within the session."""
+def _get_or_create_hub_part(category_name):
+    """Auto-create Hub vertical + Zone + Part for unmatched products.
+    Products go into Hub first, can be reassigned to proper verticals later.
+    Uses category_name from CSV to create/find a Zone."""
     cat = (category_name or '').strip()
     if not cat:
         cat = 'Chua phan loai'
@@ -1996,11 +1997,19 @@ def _get_or_create_part(vertical_id, category_name, product_name):
     if not cat_slug:
         cat_slug = 'chua-phan-loai'
 
-    # Find or create a default segment for imported products
-    seg = Segment.query.filter_by(vertical_id=vertical_id, slug='san-pham-import').first()
+    # Find or create the Hub vertical
+    hub = Vertical.query.filter_by(slug='hub').first()
+    if not hub:
+        hub = Vertical(name='Hub', slug='hub', icon='🛒', color='#10b981',
+                        description='Kho san pham tong — chua phan loai vao vertical', status='published')
+        db.session.add(hub)
+        db.session.flush()
+
+    # Find or create default segment
+    seg = Segment.query.filter_by(vertical_id=hub.id, slug='san-pham').first()
     if not seg:
-        seg = Segment(vertical_id=vertical_id, name='San pham Import', slug='san-pham-import',
-                       icon='📦', description='Danh muc tu dong tao khi import', order=999)
+        seg = Segment(vertical_id=hub.id, name='San pham', slug='san-pham',
+                       icon='📦', description='San pham import tu CSV', order=0)
         db.session.add(seg)
         db.session.flush()
 
@@ -2049,19 +2058,12 @@ def admin_products_import_csv():
         # Get form data
         mapping_mode = request.form.get('mapping_mode', 'auto')  # auto or manual
         part_id = request.form.get('part_id')
-        target_vertical_id = request.form.get('vertical_id')
         network = request.form.get('network', 'shopee')
         apply_deeplink = 'apply_deeplink' in request.form
 
         if mapping_mode == 'manual' and not part_id:
             flash('Chưa chọn Part để gắn sản phẩm', 'error')
             return redirect(request.url)
-
-        if mapping_mode == 'auto' and not target_vertical_id:
-            flash('Chưa chọn Vertical đích để import', 'error')
-            return redirect(request.url)
-
-        target_vertical_id = int(target_vertical_id) if target_vertical_id else None
 
         # Build auto-mapping index
         part_index = None
@@ -2103,9 +2105,9 @@ def admin_products_import_csv():
                     target_part_id, detected_category = _match_product_to_part(
                         product_name, category, part_index, zone_kw, normalize_fn)
 
-                # Phase 2: no match → auto-create Zone/Part in target vertical
+                # Phase 2: no match → auto-create in Hub vertical
                 if not target_part_id:
-                    target_part_id = _get_or_create_part(target_vertical_id, category, product_name)
+                    target_part_id = _get_or_create_hub_part(category)
                     detected_category = slugify(category) if category else 'chua-phan-loai'
                     auto_created += 1
             else:
@@ -2154,21 +2156,19 @@ def admin_products_import_csv():
         return redirect(url_for('admin_products'))
 
     # GET request - show form
-    verticals = Vertical.query.order_by(Vertical.name).all()
     parts_tree = []
-    for v in verticals:
+    for v in Vertical.query.all():
         for s in v.segments:
             for z in s.zones:
                 for p in z.parts:
                     parts_tree.append({
                         'id': p.id,
-                        'vertical_id': v.id,
                         'label': f'{v.icon} {v.name} › {s.name} › {z.name} › {p.name_vi}'
                     })
 
     networks = AffiliateNetwork.query.all()
     return render_template('admin/products_import_csv.html',
-        verticals=verticals, parts_tree=parts_tree, networks=networks)
+        parts_tree=parts_tree, networks=networks)
 
 @app.route('/admin/scheduled-imports')
 def admin_scheduled_imports():
@@ -3933,7 +3933,10 @@ def vertical_part(vertical_slug, segment_slug, zone_slug, part_slug):
 # =============================================
 @app.route('/shop')
 def shop_index():
-    """UniShop — aggregated product listing across all verticals"""
+    """UniShop — aggregated product listing"""
+    # Shop display mode from settings
+    shop_mode = SiteSettings.get('shop_display_mode', 'hub')  # hub (default) or vertical_only
+
     # Filters
     f_vertical = request.args.get('vertical', '')
     f_zone = request.args.get('zone', '')
@@ -3952,6 +3955,10 @@ def shop_index():
     ).join(Segment, Zone.segment_id == Segment.id
     ).join(Vertical, Segment.vertical_id == Vertical.id
     ).filter(AffiliateLink.is_active == True)
+
+    # vertical_only mode: only show products from published verticals
+    if shop_mode == 'vertical_only':
+        q = q.filter(Vertical.status == 'published')
 
     # Apply filters
     if f_vertical:
@@ -3993,8 +4000,11 @@ def shop_index():
     products = pagination.items
     filtered_count = pagination.total
 
-    # All verticals for nav
-    verticals = Vertical.query.order_by(Vertical.name).all()
+    # All verticals for nav (in vertical_only mode, only published non-hub verticals)
+    if shop_mode == 'vertical_only':
+        verticals = Vertical.query.filter(Vertical.status == 'published', Vertical.slug != 'hub').order_by(Vertical.name).all()
+    else:
+        verticals = Vertical.query.order_by(Vertical.name).all()
 
     # Per-vertical counts + total in one query
     vc_rows = db.session.query(Vertical.slug, db.func.count(AffiliateLink.id)).join(
@@ -4068,6 +4078,7 @@ def shop_index():
         vertical_counts=vertical_counts,
         sidebar_segments=sidebar_segments,
         network_stats=network_stats,
+        shop_mode=shop_mode,
         f_vertical=f_vertical,
         f_zone=f_zone,
         f_network=f_network,
