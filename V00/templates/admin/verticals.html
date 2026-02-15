@@ -26,6 +26,25 @@
       </tr>
     </thead>
     <tbody>
+      <!-- Quick links -->
+      <tr style="background:var(--accent-bg,rgba(139,92,246,0.04))">
+        <td class="icon-cell">🏠</td>
+        <td>
+          <strong>Trang chủ</strong>
+          <div style="font-size:14px;color:var(--text-dim)"><a href="{{ url_for('unilab_home') }}" target="_blank" style="color:var(--accent);text-decoration:none;font-family:'DM Mono'">/</a></div>
+        </td>
+        <td colspan="5" style="font-size:13px;color:var(--text-dim)">Homepage — tổng hợp bài viết từ tất cả verticals</td>
+        <td><a href="{{ url_for('unilab_home') }}" target="_blank" class="btn btn-ghost btn-sm">Xem ↗</a></td>
+      </tr>
+      <tr style="background:var(--accent-bg,rgba(139,92,246,0.04))">
+        <td class="icon-cell">🎫</td>
+        <td>
+          <strong>Voucher</strong>
+          <div style="font-size:14px;color:var(--text-dim)"><a href="{{ url_for('voucher_index') }}" target="_blank" style="color:var(--accent);text-decoration:none;font-family:'DM Mono'">/voucher</a></div>
+        </td>
+        <td colspan="5" style="font-size:13px;color:var(--text-dim)">Mã giảm giá & voucher — AccessTrade auto-sync</td>
+        <td><a href="{{ url_for('voucher_index') }}" target="_blank" class="btn btn-ghost btn-sm">Xem ↗</a></td>
+      </tr>
       {% for data in verticals_data %}
       {% set v = data.vertical %}
       <tr>

@@ -27,12 +27,6 @@
       <a href="{{ url_for('admin_dashboard') }}" class="sb-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
         <span class="sb-icon">&#128202;</span> Dashboard
       </a>
-      <a href="{{ url_for('unilab_home') }}" class="sb-link" target="_blank">
-        <span class="sb-icon">&#127968;</span> Trang chủ
-      </a>
-      <a href="{{ url_for('voucher_index') }}" class="sb-link" target="_blank">
-        <span class="sb-icon">&#127915;</span> Voucher
-      </a>
       <a href="{{ url_for('admin_verticals') }}" class="sb-link {% if 'vertical' in (request.endpoint or '') or 'segment' in (request.endpoint or '') or 'zone' in (request.endpoint or '') or 'part' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#127760;</span> Verticals
       </a>
