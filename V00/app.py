@@ -3814,198 +3814,142 @@ def voucher_use(vid):
 # =============================================
 # INIT
 # =============================================
+def _get_table_columns(table_name):
+    """Get set of column names for a table using PRAGMA (single query)."""
+    try:
+        rows = db.session.execute(db.text(f"PRAGMA table_info({table_name})")).fetchall()
+        return {row[1] for row in rows}
+    except:
+        return set()
+
+def _table_exists(table_name):
+    """Check if a table exists."""
+    try:
+        rows = db.session.execute(db.text(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name=:t"
+        ), {'t': table_name}).fetchall()
+        return len(rows) > 0
+    except:
+        return False
+
+def _ensure_column(table_name, col_name, col_def, existing_cols):
+    """Add column if missing. Returns True if added."""
+    if col_name not in existing_cols:
+        print(f'  [+] Adding {table_name}.{col_name}')
+        db.session.execute(db.text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_def}"))
+        return True
+    return False
+
+def _run_schema_migration():
+    """Fast schema migration — uses PRAGMA to batch-check columns."""
+    import time
+    t0 = time.time()
+    print('[*] Checking database schema...')
+
+    changed = False
+
+    # --- Zone table ---
+    zone_cols = _get_table_columns('zone')
+    if _ensure_column('zone', 'seo_content', "TEXT DEFAULT ''", zone_cols):
+        changed = True
+
+    # --- Banner table ---
+    if not _table_exists('banner'):
+        print('  [+] Creating banner table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS banner (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(200) NOT NULL,
+                placement VARCHAR(50) DEFAULT 'sidebar',
+                vertical_slug VARCHAR(50) DEFAULT '',
+                image_url VARCHAR(500) DEFAULT '',
+                link_url VARCHAR(500) DEFAULT '',
+                html_code TEXT DEFAULT '',
+                position INTEGER DEFAULT 1,
+                is_active BOOLEAN DEFAULT 1,
+                impressions INTEGER DEFAULT 0,
+                clicks INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        changed = True
+
+    # --- Vertical table ---
+    vert_cols = _get_table_columns('vertical')
+    if _ensure_column('vertical', 'template', "VARCHAR(20) DEFAULT 'general'", vert_cols):
+        changed = True
+    if _ensure_column('vertical', 'style', "VARCHAR(20) DEFAULT 'classic'", vert_cols):
+        changed = True
+
+    # --- Affiliate Network table ---
+    an_cols = _get_table_columns('affiliate_network')
+    if _ensure_column('affiliate_network', 'deeplink_template', "VARCHAR(1000) DEFAULT ''", an_cols):
+        changed = True
+
+    # --- Voucher table ---
+    v_cols = _get_table_columns('voucher')
+    if _ensure_column('voucher', 'embed_code', "TEXT DEFAULT ''", v_cols):
+        changed = True
+    if _ensure_column('voucher', 'sync_mode', "VARCHAR(20) DEFAULT 'manual'", v_cols):
+        changed = True
+    if _ensure_column('voucher', 'accesstrade_offer_id', "VARCHAR(100) DEFAULT ''", v_cols):
+        changed = True
+
+    # --- Scheduled CSV Import table ---
+    if not _table_exists('scheduled_csv_import'):
+        print('  [+] Creating scheduled_csv_import table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS scheduled_csv_import (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(200) NOT NULL,
+                csv_url VARCHAR(1000) NOT NULL,
+                part_id INTEGER NOT NULL,
+                network VARCHAR(50) DEFAULT 'shopee',
+                apply_deeplink BOOLEAN DEFAULT 0,
+                update_interval_days INTEGER DEFAULT 7,
+                is_active BOOLEAN DEFAULT 1,
+                last_import_at DATETIME,
+                next_import_at DATETIME,
+                last_import_count INTEGER DEFAULT 0,
+                last_import_status VARCHAR(20) DEFAULT 'pending',
+                last_error TEXT DEFAULT '',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (part_id) REFERENCES part(id)
+            )
+        """))
+        changed = True
+
+    # --- Voucher Widget table ---
+    if not _table_exists('voucher_widget'):
+        print('  [+] Creating voucher_widget table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS voucher_widget (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(200) NOT NULL,
+                network VARCHAR(50) DEFAULT 'accesstrade',
+                embed_code TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                placement VARCHAR(50) DEFAULT 'voucher_page',
+                position INTEGER DEFAULT 1,
+                is_active BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        changed = True
+
+    if changed:
+        db.session.commit()
+
+    elapsed = round((time.time() - t0) * 1000)
+    print(f'[*] Schema check done ({elapsed}ms)')
+
+
 if __name__ == '__main__':
+    import os
+
     with app.app_context():
-        # Create any missing tables
         db.create_all()
-
-        # Auto-migrate: Add missing columns to existing tables
-        print('[*] Checking database schema...')
-        try:
-            # Check if seo_content column exists in zone table
-            db.session.execute(db.text("SELECT seo_content FROM zone LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Adding seo_content column to zone table...')
-            db.session.execute(db.text("ALTER TABLE zone ADD COLUMN seo_content TEXT DEFAULT ''"))
-            db.session.commit()
-
-        try:
-            # Check if banner table exists
-            db.session.execute(db.text("SELECT id FROM banner LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Creating banner table...')
-            db.session.execute(db.text("""
-                CREATE TABLE IF NOT EXISTS banner (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name VARCHAR(200) NOT NULL,
-                    placement VARCHAR(50) DEFAULT 'sidebar',
-                    vertical_slug VARCHAR(50) DEFAULT '',
-                    image_url VARCHAR(500) DEFAULT '',
-                    link_url VARCHAR(500) DEFAULT '',
-                    html_code TEXT DEFAULT '',
-                    position INTEGER DEFAULT 1,
-                    is_active BOOLEAN DEFAULT 1,
-                    impressions INTEGER DEFAULT 0,
-                    clicks INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """))
-            db.session.commit()
-
-        # Add template column to vertical table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT template FROM vertical LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Adding template column to vertical table...')
-            db.session.execute(db.text("ALTER TABLE vertical ADD COLUMN template VARCHAR(20) DEFAULT 'general'"))
-            db.session.commit()
-
-        # Add style column to vertical table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT style FROM vertical LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Adding style column to vertical table...')
-            db.session.execute(db.text("ALTER TABLE vertical ADD COLUMN style VARCHAR(20) DEFAULT 'classic'"))
-            db.session.commit()
-
-        # Set defaults for template/style on existing verticals
-        try:
-            template_mapping = {'car': 'general', 'pet': 'general', 'bike': 'general', 'travel': 'travel'}
-            style_mapping = {'car': 'car', 'pet': 'pet', 'bike': 'bike', 'travel': 'travel'}
-            verticals = Vertical.query.all()
-            changed = False
-            for v in verticals:
-                if not v.template or v.template == 'general':
-                    new_tmpl = template_mapping.get(v.slug, 'general')
-                    if v.template != new_tmpl:
-                        v.template = new_tmpl
-                        changed = True
-                if not v.style or v.style == 'classic':
-                    new_style = style_mapping.get(v.slug, 'classic')
-                    if v.style != new_style:
-                        v.style = new_style
-                        changed = True
-            if changed:
-                db.session.commit()
-                print('[+] Set template/style for existing verticals')
-        except:
-            db.session.rollback()
-
-        # Add deeplink_template column to affiliate_network table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT deeplink_template FROM affiliate_network LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Adding deeplink_template column to affiliate_network table...')
-            db.session.execute(db.text("ALTER TABLE affiliate_network ADD COLUMN deeplink_template VARCHAR(1000) DEFAULT ''"))
-            db.session.commit()
-
-        # Add embed_code column to voucher table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT embed_code FROM voucher LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Adding embed_code column to voucher table...')
-            db.session.execute(db.text("ALTER TABLE voucher ADD COLUMN embed_code TEXT DEFAULT ''"))
-            db.session.commit()
-
-        # Add sync_mode column to voucher table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT sync_mode FROM voucher LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Adding sync_mode column to voucher table...')
-            db.session.execute(db.text("ALTER TABLE voucher ADD COLUMN sync_mode VARCHAR(20) DEFAULT 'manual'"))
-            db.session.commit()
-
-        # Add accesstrade_offer_id column to voucher table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT accesstrade_offer_id FROM voucher LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Adding accesstrade_offer_id column to voucher table...')
-            db.session.execute(db.text("ALTER TABLE voucher ADD COLUMN accesstrade_offer_id VARCHAR(100) DEFAULT ''"))
-            db.session.commit()
-
-        # Create scheduled_csv_import table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT id FROM scheduled_csv_import LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Creating scheduled_csv_import table...')
-            db.session.execute(db.text("""
-                CREATE TABLE IF NOT EXISTS scheduled_csv_import (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name VARCHAR(200) NOT NULL,
-                    csv_url VARCHAR(1000) NOT NULL,
-                    part_id INTEGER NOT NULL,
-                    network VARCHAR(50) DEFAULT 'shopee',
-                    apply_deeplink BOOLEAN DEFAULT 0,
-                    update_interval_days INTEGER DEFAULT 7,
-                    is_active BOOLEAN DEFAULT 1,
-                    last_import_at DATETIME,
-                    next_import_at DATETIME,
-                    last_import_count INTEGER DEFAULT 0,
-                    last_import_status VARCHAR(20) DEFAULT 'pending',
-                    last_error TEXT DEFAULT '',
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (part_id) REFERENCES part(id)
-                )
-            """))
-            db.session.commit()
-
-        # Create voucher_widget table (if not exists)
-        try:
-            db.session.execute(db.text("SELECT id FROM voucher_widget LIMIT 1"))
-        except:
-            db.session.rollback()
-            print('[+] Creating voucher_widget table...')
-            db.session.execute(db.text("""
-                CREATE TABLE IF NOT EXISTS voucher_widget (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name VARCHAR(200) NOT NULL,
-                    network VARCHAR(50) DEFAULT 'accesstrade',
-                    embed_code TEXT NOT NULL,
-                    description TEXT DEFAULT '',
-                    placement VARCHAR(50) DEFAULT 'voucher_page',
-                    position INTEGER DEFAULT 1,
-                    is_active BOOLEAN DEFAULT 1,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            """))
-            db.session.commit()
-
-        # Auto-seeding disabled - use admin panel Seed Data page instead
-        # Manual seeding via: Admin → Tools → Seed Data
-        # print('[*] Checking seed data...')
-        # from seed_data import seed, seed_networks, seed_video, seed_articles, seed_pet, seed_pet_articles, seed_travel, seed_travel_articles, seed_products_pet_travel, seed_hotels, seed_attractions, seed_bike, seed_vouchers, seed_beauty, seed_tech
-        # seed()
-        # seed_networks()
-        # seed_video()
-        # seed_articles()
-        # seed_pet()
-        # seed_pet_articles()
-        # seed_travel()
-        # seed_travel_articles()
-        # seed_products_pet_travel()
-        # seed_hotels()
-        # seed_attractions()
-        # seed_bike()
-        # seed_vouchers()
-        # seed_beauty()
-        # seed_tech()
-        # print('[✓] Seed check complete!')
-
-        # Auto-generate content disabled - use AI Assistant or manual creation instead
-        # print('[*] Checking content generation...')
-        # from scripts.auto_generate_content import auto_generate_article_content, auto_generate_zone_seo
-        # auto_generate_article_content()
-        # auto_generate_zone_seo()
-        # print('[✓] Content check complete!')
+        _run_schema_migration()
 
     app.run(host='0.0.0.0', port=7000, debug=True)
