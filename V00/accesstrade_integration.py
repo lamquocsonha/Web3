@@ -146,6 +146,44 @@ class AccessTradeAPI:
 
         return all_coupons
 
+    def get_offers_detailed(self, limit=100):
+        """Get offers with full detail for voucher sync"""
+        offers = self.get_offers(limit=limit)
+        results = []
+        for offer in offers:
+            merchant_info = offer.get('merchant') or {}
+            merchant_name = merchant_info.get('name', '') or offer.get('advertiser_name', '') or 'N/A'
+            # Extract coupon list
+            coupons = offer.get('coupons') or []
+            # Parse discount from offer name/description
+            offer_name = offer.get('name', '')
+            offer_desc = offer.get('description', '') or offer.get('short_description', '') or ''
+            # Build result
+            item = {
+                'offer_id': str(offer.get('id', '')),
+                'offer_name': offer_name,
+                'description': offer_desc,
+                'merchant': merchant_name,
+                'merchant_logo': merchant_info.get('image', '') or merchant_info.get('logo', '') or '',
+                'category': offer.get('category', {}).get('name', '') if isinstance(offer.get('category'), dict) else str(offer.get('category', '')),
+                'aff_link': offer.get('aff_link', '') or offer.get('url', ''),
+                'start_date': offer.get('start_time', '') or offer.get('start_date', ''),
+                'end_date': offer.get('end_time', '') or offer.get('end_date', ''),
+                'status': offer.get('status', ''),
+                'coupons': [],
+            }
+            if coupons:
+                for c in coupons:
+                    item['coupons'].append({
+                        'code': c.get('coupon_code', '') or c.get('code', ''),
+                        'description': c.get('coupon_description', '') or c.get('description', ''),
+                        'discount': c.get('discount', '') or c.get('coupon_value', ''),
+                        'start_date': c.get('start_time', '') or c.get('start_date', ''),
+                        'end_date': c.get('end_time', '') or c.get('end_date', ''),
+                    })
+            results.append(item)
+        return results
+
 
 # Singleton instance
 _api_instance = None

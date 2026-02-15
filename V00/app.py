@@ -2626,6 +2626,363 @@ def admin_voucher_widget_delete(wid):
     return redirect(url_for('admin_voucher_widgets'))
 
 # =============================================
+# ADMIN — VOUCHER SYNC (AccessTrade Auto-Import)
+# =============================================
+
+# Merchant → category mapping for auto-categorization
+MERCHANT_CAT_MAP = {
+    'shopee': 'shopping', 'lazada': 'shopping', 'tiki': 'shopping', 'sendo': 'shopping',
+    'tiktok': 'shopping', 'yes24': 'shopping', 'jd': 'shopping',
+    'grab': 'food', 'grabfood': 'food', 'shopeefood': 'food', 'baemin': 'food',
+    'gojek': 'food', 'loship': 'food',
+    'traveloka': 'travel', 'agoda': 'travel', 'klook': 'travel', 'booking': 'travel',
+    'vietnam airlines': 'travel', 'vietjet': 'travel', 'trip.com': 'travel', 'vntrip': 'travel',
+    'fpt shop': 'tech', 'cellphones': 'tech', 'dien may xanh': 'tech', 'phong vu': 'tech',
+    'the gioi di dong': 'tech', 'gearvn': 'tech',
+    'guardian': 'health', 'hasaki': 'health', 'pharmacity': 'health',
+    'cgv': 'entertainment', 'galaxy': 'entertainment', 'lotte cinema': 'entertainment',
+}
+
+# Merchant → icon mapping
+MERCHANT_ICON_MAP = {
+    'shopee': '🟠', 'lazada': '🔵', 'tiki': '🔷', 'sendo': '🔴',
+    'grab': '🟢', 'grabfood': '🟢', 'traveloka': '🔵', 'agoda': '🏨',
+    'klook': '🟠', 'fpt shop': '💻', 'cellphones': '📱', 'dien may xanh': '💚',
+    'tiktok': '🎵', 'cgv': '🎬', 'momo': '💜',
+}
+
+# Merchant → color mapping
+MERCHANT_COLOR_MAP = {
+    'shopee': '#ee4d2d', 'lazada': '#0f146d', 'tiki': '#1a94ff', 'sendo': '#ee2624',
+    'grab': '#00b14f', 'traveloka': '#0064d2', 'agoda': '#5392f9', 'klook': '#ff5722',
+    'fpt shop': '#d70018', 'cellphones': '#d70018', 'tiktok': '#000000',
+}
+
+def _guess_category(merchant_name):
+    """Guess voucher category from merchant name"""
+    name_lower = (merchant_name or '').lower()
+    for key, cat in MERCHANT_CAT_MAP.items():
+        if key in name_lower:
+            return cat
+    return 'shopping'
+
+def _guess_icon(merchant_name):
+    name_lower = (merchant_name or '').lower()
+    for key, icon in MERCHANT_ICON_MAP.items():
+        if key in name_lower:
+            return icon
+    return '🎫'
+
+def _guess_color(merchant_name):
+    name_lower = (merchant_name or '').lower()
+    for key, color in MERCHANT_COLOR_MAP.items():
+        if key in name_lower:
+            return color
+    return '#e74c3c'
+
+def _parse_discount(text):
+    """Try to parse discount type & value from offer text"""
+    import re
+    text = (text or '').lower()
+    # Match "giảm 50%" or "50%" or "discount 30%"
+    m = re.search(r'(\d+)\s*%', text)
+    if m:
+        return 'percentage', float(m.group(1))
+    # Match "giảm 50k" or "giảm 50.000đ" or "50,000đ"
+    m = re.search(r'(\d[\d.,]*)\s*(k|đ|d|vnd)', text)
+    if m:
+        val_str = m.group(1).replace('.', '').replace(',', '')
+        val = float(val_str)
+        if m.group(2) == 'k':
+            val *= 1000
+        return 'fixed_amount', val
+    # Match "freeship" or "free ship"
+    if 'freeship' in text or 'free ship' in text or 'miễn phí' in text:
+        return 'free_shipping', 0
+    return 'percentage', 0
+
+def _parse_datetime(date_str):
+    """Parse various date formats from AccessTrade"""
+    if not date_str:
+        return None
+    from datetime import datetime as dt
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%d', '%d/%m/%Y', '%d-%m-%Y'):
+        try:
+            return dt.strptime(date_str.strip()[:19], fmt)
+        except:
+            continue
+    return None
+
+@app.route('/admin/voucher-sync')
+def admin_voucher_sync():
+    """Dashboard for AccessTrade voucher auto-sync"""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    api_connected = api is not None
+
+    # Stats
+    total_synced = Voucher.query.filter_by(sync_mode='api').count()
+    total_active = len([v for v in Voucher.query.filter_by(sync_mode='api').all() if v.is_valid()])
+    total_manual = Voucher.query.filter_by(sync_mode='manual').count()
+
+    # Sync settings from SiteSettings
+    auto_sync_enabled = SiteSettings.get('voucher_auto_sync', 'off') == 'on'
+    sync_interval = SiteSettings.get('voucher_sync_interval', '6')
+    last_sync = SiteSettings.get('voucher_last_sync', '')
+    last_sync_count = SiteSettings.get('voucher_last_sync_count', '0')
+    last_sync_error = SiteSettings.get('voucher_last_sync_error', '')
+
+    # Recent API-synced vouchers
+    recent = Voucher.query.filter_by(sync_mode='api').order_by(Voucher.created_at.desc()).limit(20).all()
+
+    return render_template('admin/voucher_sync.html',
+        api_connected=api_connected,
+        total_synced=total_synced, total_active=total_active, total_manual=total_manual,
+        auto_sync_enabled=auto_sync_enabled, sync_interval=sync_interval,
+        last_sync=last_sync, last_sync_count=last_sync_count, last_sync_error=last_sync_error,
+        recent=recent)
+
+@app.route('/admin/voucher-sync/fetch', methods=['POST'])
+def admin_voucher_sync_fetch():
+    """Fetch offers from AccessTrade API (preview before import)"""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return {'error': 'AccessTrade API chưa cấu hình. Vào Settings → API để nhập key.'}, 400
+
+    try:
+        offers = api.get_offers_detailed(limit=100)
+        # Count total coupons
+        total_coupons = sum(len(o.get('coupons', [])) for o in offers)
+        # Mark which ones already exist
+        existing_ids = set()
+        for v in Voucher.query.filter(Voucher.accesstrade_offer_id != '', Voucher.accesstrade_offer_id != None).all():
+            existing_ids.add(v.accesstrade_offer_id)
+        existing_codes = set(v.code for v in Voucher.query.all())
+
+        for o in offers:
+            oid = o['offer_id']
+            o['already_imported'] = oid in existing_ids
+            for c in o.get('coupons', []):
+                c['already_imported'] = (c.get('code', '') or '').upper() in existing_codes
+
+        return {
+            'offers': offers,
+            'total_offers': len(offers),
+            'total_coupons': total_coupons,
+            'existing_count': len(existing_ids)
+        }
+    except Exception as e:
+        return {'error': f'Lỗi khi lấy dữ liệu: {str(e)}'}, 500
+
+@app.route('/admin/voucher-sync/import', methods=['POST'])
+def admin_voucher_sync_import():
+    """Import selected offers as vouchers"""
+    from accesstrade_integration import get_accesstrade_api
+    data = request.get_json() or {}
+    selected = data.get('selected', [])  # list of {offer_id, code, merchant, ...}
+
+    if not selected:
+        return {'error': 'Chưa chọn voucher nào để import'}, 400
+
+    api = get_accesstrade_api()
+    if not api:
+        return {'error': 'AccessTrade API chưa cấu hình'}, 400
+
+    imported = 0
+    skipped = 0
+    errors = []
+
+    for item in selected:
+        try:
+            code = (item.get('code') or '').upper().strip()
+            if not code:
+                code = f"AT-{item.get('offer_id', 'X')}-{imported+1}"
+
+            # Check duplicate
+            existing = Voucher.query.filter(
+                db.or_(Voucher.code == code,
+                       db.and_(Voucher.accesstrade_offer_id == item.get('offer_id', ''),
+                               Voucher.accesstrade_offer_id != ''))
+            ).first()
+
+            if existing:
+                skipped += 1
+                continue
+
+            merchant = item.get('merchant', 'N/A')
+            title = item.get('title') or item.get('offer_name') or f'Ưu đãi {merchant}'
+            desc = item.get('description', '')
+
+            # Parse discount from title/description
+            d_type, d_val = _parse_discount(title + ' ' + desc)
+
+            # Parse dates
+            valid_from = _parse_datetime(item.get('start_date')) or datetime.utcnow()
+            valid_to = _parse_datetime(item.get('end_date'))
+            if not valid_to:
+                valid_to = datetime.utcnow() + timedelta(days=30)
+
+            v = Voucher(
+                code=code,
+                title=title[:300],
+                description=desc[:2000] if desc else '',
+                merchant=merchant,
+                category=_guess_category(merchant),
+                discount_type=d_type,
+                discount_value=d_val,
+                valid_from=valid_from,
+                valid_to=valid_to,
+                network='accesstrade',
+                affiliate_url=item.get('aff_link', ''),
+                icon=_guess_icon(merchant),
+                color=_guess_color(merchant),
+                is_active=True,
+                sync_mode='api',
+                accesstrade_offer_id=item.get('offer_id', ''),
+            )
+            db.session.add(v)
+            imported += 1
+        except Exception as e:
+            errors.append(f"{item.get('code','?')}: {str(e)}")
+
+    db.session.commit()
+
+    # Update sync stats
+    SiteSettings.set_val('voucher_last_sync', datetime.utcnow().strftime('%Y-%m-%d %H:%M'))
+    SiteSettings.set_val('voucher_last_sync_count', str(imported))
+
+    return {
+        'imported': imported,
+        'skipped': skipped,
+        'errors': errors,
+        'message': f'Đã import {imported} voucher, bỏ qua {skipped} trùng lặp'
+    }
+
+@app.route('/admin/voucher-sync/auto', methods=['POST'])
+def admin_voucher_sync_auto():
+    """Toggle auto-sync and save settings"""
+    data = request.get_json() or {}
+    enabled = data.get('enabled', False)
+    interval = data.get('interval', '6')
+
+    SiteSettings.set_val('voucher_auto_sync', 'on' if enabled else 'off')
+    SiteSettings.set_val('voucher_sync_interval', str(interval))
+    db.session.commit()
+
+    return {'status': 'ok', 'auto_sync': enabled, 'interval': interval}
+
+@app.route('/admin/voucher-sync/run', methods=['POST'])
+def admin_voucher_sync_run():
+    """Run sync now — fetch all offers and auto-import new ones"""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return {'error': 'AccessTrade API chưa cấu hình'}, 400
+
+    try:
+        offers = api.get_offers_detailed(limit=100)
+        existing_codes = set(v.code for v in Voucher.query.all())
+        existing_at_ids = set()
+        for v in Voucher.query.filter(Voucher.accesstrade_offer_id != '', Voucher.accesstrade_offer_id != None).all():
+            existing_at_ids.add(v.accesstrade_offer_id)
+
+        imported = 0
+        for offer in offers:
+            oid = offer['offer_id']
+            if oid in existing_at_ids:
+                continue
+            merchant = offer.get('merchant', 'N/A')
+            # Import offer-level voucher
+            coupons = offer.get('coupons', [])
+            if coupons:
+                for c in coupons:
+                    code = (c.get('code', '') or '').upper().strip()
+                    if not code or code in existing_codes:
+                        continue
+                    title = c.get('description') or offer.get('offer_name') or f'Ưu đãi {merchant}'
+                    d_type, d_val = _parse_discount(title)
+                    valid_from = _parse_datetime(c.get('start_date') or offer.get('start_date')) or datetime.utcnow()
+                    valid_to = _parse_datetime(c.get('end_date') or offer.get('end_date'))
+                    if not valid_to:
+                        valid_to = datetime.utcnow() + timedelta(days=30)
+
+                    v = Voucher(
+                        code=code, title=title[:300],
+                        description=offer.get('description', '')[:2000],
+                        merchant=merchant, category=_guess_category(merchant),
+                        discount_type=d_type, discount_value=d_val,
+                        valid_from=valid_from, valid_to=valid_to,
+                        network='accesstrade', affiliate_url=offer.get('aff_link', ''),
+                        icon=_guess_icon(merchant), color=_guess_color(merchant),
+                        is_active=True, sync_mode='api',
+                        accesstrade_offer_id=oid,
+                    )
+                    db.session.add(v)
+                    existing_codes.add(code)
+                    imported += 1
+            else:
+                # Offer without coupon codes — create as deal
+                code = f"AT-{oid}"
+                if code in existing_codes:
+                    continue
+                title = offer.get('offer_name') or f'Ưu đãi {merchant}'
+                d_type, d_val = _parse_discount(title + ' ' + offer.get('description', ''))
+                valid_from = _parse_datetime(offer.get('start_date')) or datetime.utcnow()
+                valid_to = _parse_datetime(offer.get('end_date'))
+                if not valid_to:
+                    valid_to = datetime.utcnow() + timedelta(days=30)
+                v = Voucher(
+                    code=code, title=title[:300],
+                    description=offer.get('description', '')[:2000],
+                    merchant=merchant, category=_guess_category(merchant),
+                    discount_type=d_type, discount_value=d_val,
+                    valid_from=valid_from, valid_to=valid_to,
+                    network='accesstrade', affiliate_url=offer.get('aff_link', ''),
+                    icon=_guess_icon(merchant), color=_guess_color(merchant),
+                    is_active=True, sync_mode='api',
+                    accesstrade_offer_id=oid,
+                )
+                db.session.add(v)
+                existing_codes.add(code)
+                imported += 1
+
+        # Auto-deactivate expired API vouchers
+        expired_count = 0
+        for v in Voucher.query.filter_by(sync_mode='api', is_active=True).all():
+            if v.valid_to and v.valid_to < datetime.utcnow():
+                v.is_active = False
+                expired_count += 1
+
+        db.session.commit()
+
+        SiteSettings.set_val('voucher_last_sync', datetime.utcnow().strftime('%Y-%m-%d %H:%M'))
+        SiteSettings.set_val('voucher_last_sync_count', str(imported))
+        SiteSettings.set_val('voucher_last_sync_error', '')
+
+        return {
+            'imported': imported, 'expired': expired_count,
+            'message': f'Đã import {imported} voucher mới, vô hiệu {expired_count} voucher hết hạn'
+        }
+    except Exception as e:
+        SiteSettings.set_val('voucher_last_sync_error', str(e))
+        db.session.commit()
+        return {'error': str(e)}, 500
+
+@app.route('/admin/voucher-sync/cleanup', methods=['POST'])
+def admin_voucher_sync_cleanup():
+    """Remove all expired API-synced vouchers"""
+    expired = Voucher.query.filter(
+        Voucher.sync_mode == 'api',
+        Voucher.valid_to < datetime.utcnow()
+    ).all()
+    count = len(expired)
+    for v in expired:
+        db.session.delete(v)
+    db.session.commit()
+    return {'deleted': count, 'message': f'Đã xóa {count} voucher hết hạn'}
+
+# =============================================
 # AI AUTO-CONTENT ENGINE
 # =============================================
 
@@ -3512,6 +3869,15 @@ if __name__ == '__main__':
             db.session.rollback()
             print('[+] Adding sync_mode column to voucher table...')
             db.session.execute(db.text("ALTER TABLE voucher ADD COLUMN sync_mode VARCHAR(20) DEFAULT 'manual'"))
+            db.session.commit()
+
+        # Add accesstrade_offer_id column to voucher table (if not exists)
+        try:
+            db.session.execute(db.text("SELECT accesstrade_offer_id FROM voucher LIMIT 1"))
+        except:
+            db.session.rollback()
+            print('[+] Adding accesstrade_offer_id column to voucher table...')
+            db.session.execute(db.text("ALTER TABLE voucher ADD COLUMN accesstrade_offer_id VARCHAR(100) DEFAULT ''"))
             db.session.commit()
 
         # Create scheduled_csv_import table (if not exists)

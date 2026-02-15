@@ -352,6 +352,7 @@ class Voucher(db.Model):
     conversions = db.Column(db.Integer, default=0)
     embed_code = db.Column(db.Text, default='')  # HTML/JavaScript embed code for displaying voucher on websites
     sync_mode = db.Column(db.String(20), default='manual')  # manual, api - Data entry mode: manual entry or API sync from AccessTrade
+    accesstrade_offer_id = db.Column(db.String(100), default='')  # AccessTrade offer ID for dedup during auto-sync
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
