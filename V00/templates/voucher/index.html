@@ -52,7 +52,7 @@
         <h3>{{ v.title }}</h3>
         <p>{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</p>
         <div class="vcf-meta">
-          <span>HSD: {{ v.valid_to.strftime('%d/%m') }}</span>
+          <span>HSD: {{ v.valid_to.strftime('%d/%m') if v.valid_to else '—' }}</span>
           {% if v.is_exclusive %}<span class="vcf-exclusive">✨ Độc quyền</span>{% endif %}
         </div>
       </a>
@@ -134,8 +134,8 @@
             <h4>{{ v.title[:50] }}{% if v.title|length > 50 %}...{% endif %}</h4>
             <p>{{ v.description[:70] }}{% if v.description|length > 70 %}...{% endif %}</p>
             <div class="vc-meta">
-              <span>📅 HSD: {{ v.valid_to.strftime('%d/%m/%Y') }}</span>
-              {% if v.min_order > 0 %}<span>💵 Đơn tối thiểu: {{ '{:,.0f}'.format(v.min_order) }}đ</span>{% endif %}
+              <span>📅 HSD: {{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</span>
+              {% if (v.min_order or 0) > 0 %}<span>💵 Đơn tối thiểu: {{ '{:,.0f}'.format(v.min_order) }}đ</span>{% endif %}
             </div>
             {% if v.is_exclusive %}<div class="vc-exclusive">✨ Độc quyền UniLab</div>{% endif %}
           </div>

@@ -71,13 +71,13 @@
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ v.title }}">{{ v.title[:35] }}{% if v.title|length > 35 %}...{% endif %}</td>
       <td style="white-space:nowrap">{{ v.merchant[:18] }}{% if v.merchant|length > 18 %}..{% endif %}</td>
       <td style="white-space:nowrap">
-        {% if v.discount_type == 'percentage' %}{{ v.discount_value|int }}%
-        {% elif v.discount_type == 'fixed_amount' %}{{ '{:,.0f}'.format(v.discount_value) }}đ
+        {% if v.discount_type == 'percentage' %}{{ (v.discount_value or 0)|int }}%
+        {% elif v.discount_type == 'fixed_amount' %}{{ '{:,.0f}'.format(v.discount_value or 0) }}đ
         {% else %}Freeship{% endif %}
       </td>
-      <td style="white-space:nowrap;font-size:14px">{{ v.valid_to.strftime('%d/%m/%Y') }}</td>
+      <td style="white-space:nowrap;font-size:14px">{{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</td>
       <td style="font-family:'DM Mono';font-size:14px">
-        {% if v.usage_limit > 0 %}{{ v.usage_count }}/{{ v.usage_limit }}{% else %}{{ v.usage_count }}{% endif %}
+        {% if (v.usage_limit or 0) > 0 %}{{ v.usage_count or 0 }}/{{ v.usage_limit }}{% else %}{{ v.usage_count or 0 }}{% endif %}
       </td>
       <td>
         {% if v.is_valid() %}<span class="status-badge live">Valid</span>

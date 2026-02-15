@@ -360,21 +360,24 @@ class Voucher(db.Model):
         now = datetime.utcnow()
         if not self.is_active:
             return False
-        if now < self.valid_from or now > self.valid_to:
+        if self.valid_from and now < self.valid_from:
             return False
-        if self.usage_limit > 0 and self.usage_count >= self.usage_limit:
+        if self.valid_to and now > self.valid_to:
+            return False
+        if (self.usage_limit or 0) > 0 and (self.usage_count or 0) >= self.usage_limit:
             return False
         return True
 
     def get_discount_text(self):
         """Get human-readable discount text"""
+        val = self.discount_value or 0
         if self.discount_type == 'percentage':
-            return f'Giảm {int(self.discount_value)}%'
+            return f'Giảm {int(val)}%'
         elif self.discount_type == 'fixed_amount':
-            return f'Giảm {int(self.discount_value):,}đ'
+            return f'Giảm {int(val):,}đ'
         elif self.discount_type == 'free_shipping':
             return 'Freeship'
-        return f'Giảm {int(self.discount_value)}%'
+        return f'Giảm {int(val)}%'
 class ArticleFeedback(db.Model):
     """User feedback on article accuracy"""
     id = db.Column(db.Integer, primary_key=True)
