@@ -3785,6 +3785,155 @@ def vertical_part(vertical_slug, segment_slug, zone_slug, part_slug):
         related_articles=related_articles, related_parts=related_parts, **config)
 
 # =============================================
+# SHOP ROUTES (Standalone e-commerce aggregator)
+# =============================================
+@app.route('/shop')
+def shop_index():
+    """UniShop — aggregated product listing across all verticals"""
+    # Filters
+    f_vertical = request.args.get('vertical', '')
+    f_zone = request.args.get('zone', '')
+    f_network = request.args.get('network', '')
+    f_q = request.args.get('q', '').strip()
+    f_sort = request.args.get('sort', 'popular')
+    f_price_min = request.args.get('price_min', '', type=str)
+    f_price_max = request.args.get('price_max', '', type=str)
+    page = request.args.get('page', 1, type=int)
+    per_page = 24
+
+    # Base query: join all the way to Vertical
+    q = db.session.query(AffiliateLink, Part, Zone, Segment, Vertical).join(
+        Part, AffiliateLink.part_id == Part.id
+    ).join(Zone, Part.zone_id == Zone.id
+    ).join(Segment, Zone.segment_id == Segment.id
+    ).join(Vertical, Segment.vertical_id == Vertical.id
+    ).filter(AffiliateLink.is_active == True)
+
+    # Apply filters
+    if f_vertical:
+        q = q.filter(Vertical.slug == f_vertical)
+    if f_zone:
+        q = q.filter(Zone.slug == f_zone)
+    if f_network:
+        q = q.filter(AffiliateLink.network == f_network)
+    if f_q:
+        search = f'%{f_q}%'
+        q = q.filter(db.or_(
+            AffiliateLink.product_name.ilike(search),
+            Part.name_vi.ilike(search),
+            Part.tags.ilike(search),
+        ))
+    if f_price_min:
+        try:
+            q = q.filter(AffiliateLink.price >= float(f_price_min))
+        except ValueError:
+            pass
+    if f_price_max:
+        try:
+            q = q.filter(AffiliateLink.price <= float(f_price_max))
+        except ValueError:
+            pass
+
+    # Sorting
+    if f_sort == 'price_asc':
+        q = q.order_by(AffiliateLink.price.asc())
+    elif f_sort == 'price_desc':
+        q = q.order_by(AffiliateLink.price.desc())
+    elif f_sort == 'newest':
+        q = q.order_by(AffiliateLink.id.desc())
+    else:  # popular
+        q = q.order_by(AffiliateLink.clicks.desc(), AffiliateLink.price.desc())
+
+    filtered_count = q.count()
+    pagination = q.paginate(page=page, per_page=per_page, error_out=False)
+    products = pagination.items
+
+    # All verticals for nav
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    # Total products (unfiltered)
+    total_products = db.session.query(db.func.count(AffiliateLink.id)).filter(
+        AffiliateLink.is_active == True).scalar() or 0
+
+    # Per-vertical counts
+    vertical_counts = dict(
+        db.session.query(Vertical.slug, db.func.count(AffiliateLink.id)).join(
+            Segment, Vertical.id == Segment.vertical_id
+        ).join(Zone, Segment.id == Zone.segment_id
+        ).join(Part, Zone.id == Part.zone_id
+        ).join(AffiliateLink, Part.id == AffiliateLink.part_id
+        ).filter(AffiliateLink.is_active == True
+        ).group_by(Vertical.slug).all()
+    )
+
+    # Sidebar segments/zones (filtered by vertical if selected)
+    sidebar_segments = []
+    seg_q = Segment.query
+    if f_vertical:
+        vt = Vertical.query.filter_by(slug=f_vertical).first()
+        if vt:
+            seg_q = seg_q.filter_by(vertical_id=vt.id)
+    else:
+        # Show all segments but limit to verticals that have products
+        active_vids = [vid for vid, in db.session.query(Vertical.id).join(
+            Segment).join(Zone).join(Part).join(AffiliateLink).filter(
+            AffiliateLink.is_active == True).distinct().all()]
+        seg_q = seg_q.filter(Segment.vertical_id.in_(active_vids))
+
+    for seg in seg_q.order_by(Segment.order).all():
+        zones_data = []
+        for z in sorted(seg.zones, key=lambda x: x.order):
+            zcount = db.session.query(db.func.count(AffiliateLink.id)).join(
+                Part).filter(Part.zone_id == z.id, AffiliateLink.is_active == True).scalar() or 0
+            if zcount > 0:
+                zones_data.append((z.slug, z.name, z.icon, z.color, zcount))
+        if zones_data:
+            sidebar_segments.append((seg.name, seg.icon, zones_data))
+
+    # Network stats
+    net_q = db.session.query(
+        AffiliateLink.network, db.func.count(AffiliateLink.id)
+    ).filter(AffiliateLink.is_active == True)
+    if f_vertical:
+        net_q = net_q.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == f_vertical)
+    network_stats = net_q.group_by(AffiliateLink.network).order_by(
+        db.func.count(AffiliateLink.id).desc()).all()
+
+    # Active names for display
+    active_vertical_name = ''
+    active_zone_name = ''
+    if f_vertical:
+        vt_obj = Vertical.query.filter_by(slug=f_vertical).first()
+        if vt_obj:
+            active_vertical_name = vt_obj.name
+    if f_zone:
+        z_obj = Zone.query.filter_by(slug=f_zone).first()
+        if z_obj:
+            active_zone_name = z_obj.name
+
+    return render_template('shop/index.html',
+        products=products,
+        pagination=pagination,
+        verticals=verticals,
+        total_products=total_products,
+        total_verticals=len(verticals),
+        filtered_count=filtered_count,
+        vertical_counts=vertical_counts,
+        sidebar_segments=sidebar_segments,
+        network_stats=network_stats,
+        f_vertical=f_vertical,
+        f_zone=f_zone,
+        f_network=f_network,
+        f_q=f_q,
+        f_sort=f_sort,
+        f_price_min=f_price_min,
+        f_price_max=f_price_max,
+        active_vertical_name=active_vertical_name,
+        active_zone_name=active_zone_name,
+    )
+
+
+# =============================================
 # VOUCHER ROUTES (Standalone feature)
 # =============================================
 @app.route('/voucher')

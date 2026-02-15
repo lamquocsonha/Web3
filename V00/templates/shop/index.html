@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniShop — {{ total_products }} san pham tu cac san TMDT</title>
+<meta name="description" content="So sanh gia va mua san pham tu Shopee, Lazada, Tiki. Tong hop {{ total_products }} san pham theo danh muc.">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+</head>
+<body data-mode="light">
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ url_for('shop_index') }}" class="site-logo">
+      <span class="logo-mark">🛒</span>
+      <span class="logo-name">UniShop</span>
+    </a>
+    <nav class="site-nav">
+      <a href="{{ url_for('shop_index') }}" class="{% if not f_vertical %}active{% endif %}">Tat ca</a>
+      {% for vt in verticals %}
+      <a href="{{ url_for('shop_index', vertical=vt.slug) }}" class="{% if f_vertical == vt.slug %}active{% endif %}">{{ vt.icon }} {{ vt.name }}</a>
+      {% endfor %}
+      <a href="{{ url_for('voucher_index') }}">🎫 Voucher</a>
+    </nav>
+    <div class="header-actions">
+      <button class="mode-toggle" onclick="toggleMode()" title="Sang/Toi">
+        <span class="mode-icon">☀️</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="site-main">
+
+  <!-- HERO + SEARCH -->
+  <section class="shop-hero">
+    <div class="shop-hero-inner">
+      <h1>San pham tu cac san TMDT</h1>
+      <p class="shop-hero-sub">So sanh gia tu Shopee, Lazada, Tiki — {{ total_products }} san pham, {{ total_verticals }} nganh hang</p>
+      <form class="shop-search-wrap" action="{{ url_for('shop_index') }}" method="GET">
+        {% if f_vertical %}<input type="hidden" name="vertical" value="{{ f_vertical }}">{% endif %}
+        <input type="text" name="q" value="{{ f_q or '' }}" placeholder="Tim san pham, thuong hieu, tu khoa..." class="shop-search-input" autocomplete="off">
+        <button type="submit" class="shop-search-btn">Tim kiem</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- VERTICAL TABS -->
+  <div class="shop-verticals">
+    <a href="{{ url_for('shop_index', q=f_q, network=f_network) }}" class="shop-vt-chip {% if not f_vertical %}active{% endif %}">
+      <span class="vt-icon">🏠</span> Tat ca <span class="vt-count">{{ total_products }}</span>
+    </a>
+    {% for vt in verticals %}
+    <a href="{{ url_for('shop_index', vertical=vt.slug, q=f_q, network=f_network) }}"
+       class="shop-vt-chip {% if f_vertical == vt.slug %}active{% endif %}"
+       style="{% if f_vertical == vt.slug %}--accent:{{ vt.color }}{% endif %}">
+      <span class="vt-icon">{{ vt.icon }}</span>
+      {{ vt.name }}
+      <span class="vt-count">{{ vertical_counts.get(vt.slug, 0) }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="shop-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="shop-sidebar" id="shopSidebar">
+      <button class="shop-mobile-close" onclick="closeSidebar()">&times; Dong</button>
+
+      <!-- Zone/Category filter -->
+      <div class="sf-section">
+        <div class="sf-title">📂 Danh muc</div>
+        <div class="sf-list">
+          <a href="{{ url_for('shop_index', vertical=f_vertical, q=f_q, network=f_network) }}"
+             class="sf-item {% if not f_zone %}active{% endif %}">
+            <span class="sf-icon">📦</span> Tat ca
+          </a>
+          {% for seg_name, seg_icon, zones in sidebar_segments %}
+          <div style="margin-top:8px">
+            <div style="font-size:12px;font-weight:700;color:var(--text-dim);padding:4px 10px">{{ seg_icon }} {{ seg_name }}</div>
+            {% for z_slug, z_name, z_icon, z_color, z_count in zones %}
+            <a href="{{ url_for('shop_index', vertical=f_vertical, zone=z_slug, q=f_q, network=f_network) }}"
+               class="sf-item {% if f_zone == z_slug %}active{% endif %}">
+              <span class="sf-icon" style="color:{{ z_color }}">{{ z_icon }}</span>
+              {{ z_name }}
+              <span class="sf-count">{{ z_count }}</span>
+            </a>
+            {% endfor %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Network filter -->
+      <div class="sf-section">
+        <div class="sf-title">🏪 San thuong mai</div>
+        <div class="sf-networks">
+          <a href="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, q=f_q) }}"
+             class="sf-net {% if not f_network %}active{% endif %}">Tat ca</a>
+          {% for net_name, net_count in network_stats %}
+          <a href="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, q=f_q, network=net_name) }}"
+             class="sf-net sf-net-{{ net_name }} {% if f_network == net_name %}active{% endif %}">
+            {{ net_name|title }} <small>({{ net_count }})</small>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Price filter -->
+      <div class="sf-section">
+        <div class="sf-title">💰 Khoang gia</div>
+        <form action="{{ url_for('shop_index') }}" method="GET">
+          {% if f_vertical %}<input type="hidden" name="vertical" value="{{ f_vertical }}">{% endif %}
+          {% if f_zone %}<input type="hidden" name="zone" value="{{ f_zone }}">{% endif %}
+          {% if f_network %}<input type="hidden" name="network" value="{{ f_network }}">{% endif %}
+          {% if f_q %}<input type="hidden" name="q" value="{{ f_q }}">{% endif %}
+          <div class="sf-price-row">
+            <input type="number" name="price_min" placeholder="Tu" value="{{ f_price_min or '' }}" class="sf-price-input">
+            <span class="sf-price-sep">—</span>
+            <input type="number" name="price_max" placeholder="Den" value="{{ f_price_max or '' }}" class="sf-price-input">
+          </div>
+          <button type="submit" class="sf-price-btn">Ap dung</button>
+        </form>
+      </div>
+
+      <!-- Voucher Sidebar Widget -->
+      {% include 'shared/_voucher_sidebar.html' %}
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="shop-main">
+
+      <!-- Mobile filter button -->
+      <button class="shop-mobile-filter" onclick="openSidebar()" style="margin-bottom:12px;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-size:13px;font-weight:600;cursor:pointer">
+        ☰ Bo loc
+      </button>
+
+      <!-- Toolbar -->
+      <div class="shop-toolbar">
+        <div class="shop-toolbar-left">
+          <div class="shop-count"><span>{{ filtered_count }}</span> san pham
+            {% if f_vertical %} trong <strong>{{ active_vertical_name }}</strong>{% endif %}
+            {% if f_zone %} / <strong>{{ active_zone_name }}</strong>{% endif %}
+          </div>
+          {% if f_vertical or f_zone or f_network or f_q or f_price_min or f_price_max %}
+          <a href="{{ url_for('shop_index') }}" class="shop-clear-filter">Xoa bo loc</a>
+          {% endif %}
+        </div>
+        <select onchange="location.href=this.value" class="shop-sort">
+          <option value="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, network=f_network, q=f_q, price_min=f_price_min, price_max=f_price_max, sort='popular') }}" {% if f_sort == 'popular' %}selected{% endif %}>Pho bien nhat</option>
+          <option value="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, network=f_network, q=f_q, price_min=f_price_min, price_max=f_price_max, sort='newest') }}" {% if f_sort == 'newest' %}selected{% endif %}>Moi nhat</option>
+          <option value="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, network=f_network, q=f_q, price_min=f_price_min, price_max=f_price_max, sort='price_asc') }}" {% if f_sort == 'price_asc' %}selected{% endif %}>Gia thap den cao</option>
+          <option value="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, network=f_network, q=f_q, price_min=f_price_min, price_max=f_price_max, sort='price_desc') }}" {% if f_sort == 'price_desc' %}selected{% endif %}>Gia cao den thap</option>
+        </select>
+      </div>
+
+      <!-- Product Grid -->
+      {% if products %}
+      <div class="shop-grid">
+        {% for al, part, zone, seg, vert in products %}
+        <div class="sp-card">
+          <div class="sp-thumb">
+            {% if al.image_url %}
+            <img src="{{ al.image_url }}" alt="{{ al.product_name or part.name_vi }}" loading="lazy">
+            {% else %}
+            <div class="sp-thumb-placeholder">{{ zone.icon or '📦' }}</div>
+            {% endif %}
+            <div class="sp-badges">
+              <span class="sp-badge sp-badge-network net-{{ al.network }}">{{ al.network }}</span>
+            </div>
+          </div>
+          <div class="sp-body">
+            <div class="sp-category">
+              <span class="sp-cat-dot" style="background:{{ vert.color }}"></span>
+              {{ vert.icon }} {{ vert.name }} &rsaquo; {{ zone.name }}
+            </div>
+            <div class="sp-name">{{ al.product_name or part.name_vi }}</div>
+            <div class="sp-meta">
+              <span class="sp-zone-tag" style="background:{{ zone.color }}15;color:{{ zone.color }}">{{ zone.icon }} {{ zone.name }}</span>
+            </div>
+            {% if al.price %}
+            <div class="sp-price-row">
+              <span class="sp-price">{{ "{:,.0f}".format(al.price) }}<small>d</small></span>
+            </div>
+            {% endif %}
+          </div>
+          <a href="{{ al.url }}" target="_blank" rel="nofollow" class="sp-buy buy-{{ al.network }}">
+            Mua tren {{ al.network|title }} &rarr;
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if pagination and pagination.pages > 1 %}
+      <nav class="shop-pagination">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, network=f_network, q=f_q, price_min=f_price_min, price_max=f_price_max, sort=f_sort, page=pagination.prev_num) }}"
+           class="sp-pg">&laquo;</a>
+        {% endif %}
+
+        {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+          {% if p %}
+          <a href="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, network=f_network, q=f_q, price_min=f_price_min, price_max=f_price_max, sort=f_sort, page=p) }}"
+             class="sp-pg {% if p == pagination.page %}active{% endif %}">{{ p }}</a>
+          {% else %}
+          <span class="sp-pg-dots">...</span>
+          {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+        <a href="{{ url_for('shop_index', vertical=f_vertical, zone=f_zone, network=f_network, q=f_q, price_min=f_price_min, price_max=f_price_max, sort=f_sort, page=pagination.next_num) }}"
+           class="sp-pg">&raquo;</a>
+        {% endif %}
+
+        <span class="sp-pg-info">Trang {{ pagination.page }}/{{ pagination.pages }} ({{ filtered_count }} san pham)</span>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="shop-empty">
+        <div class="shop-empty-icon">🔍</div>
+        <h3>Khong tim thay san pham</h3>
+        <p>Thu thay doi bo loc hoac <a href="{{ url_for('shop_index') }}">xem tat ca san pham</a></p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <span style="font-size:24px">🛒</span>
+        <strong>UniShop</strong>
+      </div>
+      <p>Tong hop san pham tu cac san thuong mai dien tu hang dau Viet Nam. So sanh gia, tim deal tot nhat.</p>
+    </div>
+    <div class="footer-platforms">
+      {% for vt in verticals %}
+      <span>{{ vt.icon }} {{ vt.name }}</span>
+      {% endfor %}
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile sidebar overlay -->
+<div class="shop-mobile-overlay" id="sidebarOverlay" onclick="closeSidebar()" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:999"></div>
+
+<script>
+function toggleMode() {
+  const body = document.body;
+  const mode = body.dataset.mode === 'light' ? 'dark' : 'light';
+  body.dataset.mode = mode;
+  document.querySelector('.mode-icon').textContent = mode === 'light' ? '☀️' : '🌙';
+  localStorage.setItem('shop-mode', mode);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const savedMode = localStorage.getItem('shop-mode') || 'light';
+  document.body.dataset.mode = savedMode;
+  const iconEl = document.querySelector('.mode-icon');
+  if (iconEl) iconEl.textContent = savedMode === 'light' ? '☀️' : '🌙';
+});
+
+function openSidebar() {
+  document.getElementById('shopSidebar').classList.add('mobile-open');
+  document.getElementById('sidebarOverlay').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('shopSidebar').classList.remove('mobile-open');
+  document.getElementById('sidebarOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>
