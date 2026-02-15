@@ -55,7 +55,7 @@
       <div class="vd-code-box" id="codeBox" data-code="{{ voucher.code }}" data-url="{{ voucher.affiliate_url or '' }}">
         <div class="vd-code-label">Mã giảm giá</div>
         <div class="vd-code-value vc-code-hidden" id="voucherCode">{{ voucher.code[:2] }}••••••••</div>
-        <button class="vd-copy-btn" onclick="revealAndCopy()">🔓 Bấm để lấy mã</button>
+        <button class="vd-copy-btn" onclick="revealAndCopy()">Bấm để lấy mã</button>
         {% if voucher.affiliate_url %}
         <a href="{{ voucher.affiliate_url }}" target="_blank" class="vd-use-btn" id="useBtn" style="display:none" onclick="trackUsage()">
           🛒 Đi đến {{ voucher.merchant }} →

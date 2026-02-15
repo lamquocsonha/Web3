@@ -240,15 +240,13 @@
 }
 
 .v-feat-code.vc-code-hidden {
-  filter: blur(4px);
   user-select: none;
-  color: var(--text-dim);
+  color: var(--text-tertiary);
   background: var(--bg-subtle);
   border: 1px dashed var(--border);
 }
 
 .v-feat-code.vc-code-revealed {
-  filter: none;
   color: var(--card-color, #e74c3c);
   background: var(--accent-bg);
   border: 1px solid var(--card-color, #e74c3c);
@@ -342,15 +340,13 @@
 }
 
 .v-exp-code.vc-code-hidden {
-  filter: blur(4px);
   user-select: none;
-  color: var(--text-dim);
+  color: var(--text-tertiary);
   background: var(--bg-subtle);
   border: 1px dashed var(--border);
 }
 
 .v-exp-code.vc-code-revealed {
-  filter: none;
   animation: codeReveal 0.4s ease;
 }
 
@@ -502,11 +498,10 @@
   letter-spacing: 0.5px;
 }
 
-/* Hidden code: blurred + dashed border hint */
+/* Hidden code: masked with dots, no blur */
 .vc-code-hidden {
-  filter: blur(4px);
   user-select: none;
-  color: var(--text-dim);
+  color: var(--text-tertiary);
   background: var(--bg-subtle);
   padding: 4px 12px;
   border-radius: 6px;
@@ -516,7 +511,6 @@
 
 /* Revealed code: clear, highlighted */
 .vc-code-revealed {
-  filter: none;
   color: var(--accent);
   background: var(--accent-bg);
   padding: 4px 12px;
@@ -527,9 +521,9 @@
 }
 
 @keyframes codeReveal {
-  0% { filter: blur(4px); transform: scale(0.95); }
-  50% { filter: blur(1px); transform: scale(1.02); }
-  100% { filter: blur(0); transform: scale(1); }
+  0% { opacity: 0; transform: scale(0.95); }
+  50% { opacity: 0.7; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
 /* Revealed card state */
@@ -881,16 +875,14 @@
 }
 
 .vd-code-value.vc-code-hidden {
-  filter: blur(6px);
   user-select: none;
-  color: var(--text-dim);
+  color: var(--text-tertiary);
   background: var(--bg-subtle);
   border: 2px dashed var(--border);
   cursor: pointer;
 }
 
 .vd-code-value.vc-code-revealed {
-  filter: none;
   color: var(--accent);
   background: var(--accent-bg);
   border: 2px solid var(--accent);
