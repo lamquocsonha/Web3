@@ -70,9 +70,9 @@
         <h3>{{ v.title[:65] }}{% if v.title|length > 65 %}...{% endif %}</h3>
         <div class="v-feat-bottom">
           <div class="vc-code-wrap">
-            <code class="v-feat-code vc-code-hidden">{{ v.code[:2] }}••••••</code>
+            <span class="vc-sticker">👍 COPY MÃ</span>
+            <code class="v-feat-code vc-code-hidden">{{ v.code[-2:] }}</code>
           </div>
-          <span class="v-feat-cta">Lấy mã</span>
         </div>
       </div>
       {% endfor %}
@@ -87,17 +87,20 @@
       <h2>⏰ Sắp hết hạn</h2>
       <p class="section-sub">Nhanh tay kẻo lỡ — hết hạn trong 3 ngày tới</p>
     </div>
-    <div class="v-expiring-row">
-      {% for v in expiring_soon %}
-      <div class="v-exp-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
-        <div class="v-exp-timer">{{ v.icon }} Còn {{ ((v.valid_to - now).days) if v.valid_to else '?' }} ngày</div>
-        <div class="v-exp-discount" style="color:{{ v.color }}">{{ v.get_discount_text() }}</div>
-        <div class="v-exp-merchant">{{ v.merchant }}</div>
-        <div class="vc-code-wrap">
-          <code class="v-exp-code vc-code-hidden">{{ v.code[:2] }}••••••</code>
+    <div class="v-expiring-slider" id="expiringSlider">
+      <div class="v-expiring-track" id="expiringTrack">
+        {% for v in expiring_soon %}
+        <div class="v-exp-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
+          <div class="v-exp-timer">{{ v.icon }} Còn {{ ((v.valid_to - now).days) if v.valid_to else '?' }} ngày</div>
+          <div class="v-exp-discount" style="color:{{ v.color }}">{{ v.get_discount_text() }}</div>
+          <div class="v-exp-merchant">{{ v.merchant }}</div>
+          <div class="vc-code-wrap">
+            <span class="vc-sticker">👍 COPY MÃ</span>
+            <code class="v-exp-code vc-code-hidden">{{ v.code[-2:] }}</code>
+          </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
     </div>
   </section>
   {% endif %}
@@ -211,9 +214,9 @@
           </div>
           <div class="vc-footer">
             <div class="vc-code-wrap">
-              <code class="vc-code vc-code-hidden">{{ v.code[:2] }}••••••</code>
+              <span class="vc-sticker">👍 COPY MÃ</span>
+              <code class="vc-code vc-code-hidden">{{ v.code[-2:] }}</code>
             </div>
-            <span class="vc-action">Lấy mã</span>
           </div>
         </div>
         {% endfor %}
@@ -290,18 +293,18 @@ function revealCode(el) {
   // Mark as revealed
   el.classList.add('revealed');
 
-  // Show the real code
+  // Show the real code — replace sticker + peek with full code
   if (codeEl) {
     codeEl.classList.remove('vc-code-hidden');
     codeEl.textContent = code;
     codeEl.classList.add('vc-code-revealed');
   }
 
-  // Update CTA button
-  const action = el.querySelector('.vc-action, .v-feat-cta');
-  if (action) {
-    action.textContent = '✓ Đã copy!';
-    action.style.background = '#27ae60';
+  // Hide sticker after reveal
+  const sticker = el.querySelector('.vc-sticker');
+  if (sticker) {
+    sticker.textContent = '✓ Đã copy';
+    sticker.classList.add('vc-sticker-done');
   }
 
   // Copy code to clipboard
@@ -314,6 +317,39 @@ function revealCode(el) {
     setTimeout(() => window.open(url, '_blank'), 600);
   }
 }
+
+// Auto-slide expiring vouchers
+(function() {
+  const track = document.getElementById('expiringTrack');
+  if (!track || track.children.length < 2) return;
+
+  // Duplicate cards for seamless loop
+  const cards = Array.from(track.children);
+  cards.forEach(c => track.appendChild(c.cloneNode(true)));
+
+  let pos = 0;
+  const speed = 0.5; // px per frame
+  let paused = false;
+  let raf;
+
+  function slide() {
+    if (!paused) {
+      pos += speed;
+      const halfWidth = track.scrollWidth / 2;
+      if (pos >= halfWidth) pos = 0;
+      track.style.transform = 'translateX(-' + pos + 'px)';
+    }
+    raf = requestAnimationFrame(slide);
+  }
+
+  const slider = document.getElementById('expiringSlider');
+  slider.addEventListener('mouseenter', () => paused = true);
+  slider.addEventListener('mouseleave', () => paused = false);
+  slider.addEventListener('touchstart', () => paused = true, {passive: true});
+  slider.addEventListener('touchend', () => { setTimeout(() => paused = false, 2000); });
+
+  raf = requestAnimationFrame(slide);
+})();
 </script>
 </body>
 </html>

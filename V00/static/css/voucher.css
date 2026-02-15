@@ -144,13 +144,22 @@
 }
 
 .v-featured-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  display: flex;
   gap: 16px;
   margin-top: 20px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 }
 
+.v-featured-grid::-webkit-scrollbar { height: 4px; }
+.v-featured-grid::-webkit-scrollbar-track { background: var(--bg-subtle); border-radius: 2px; }
+.v-featured-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
 .v-feat-card {
+  flex: 0 0 320px;
+  scroll-snap-align: start;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -231,42 +240,34 @@
 .v-feat-code {
   font-family: 'DM Mono', monospace;
   font-size: 14px;
-  font-weight: 600;
-  color: var(--card-color, #e74c3c);
-  background: var(--accent-bg);
-  padding: 4px 12px;
-  border-radius: 6px;
+  font-weight: 700;
   letter-spacing: 0.5px;
 }
 
 .v-feat-code.vc-code-hidden {
   user-select: none;
-  color: var(--text-tertiary);
-  background: var(--bg-subtle);
-  border: 1px dashed var(--border);
+  color: var(--text);
+  background: var(--surface);
+  padding: 6px 10px;
 }
 
 .v-feat-code.vc-code-revealed {
   color: var(--card-color, #e74c3c);
   background: var(--accent-bg);
-  border: 1px solid var(--card-color, #e74c3c);
+  padding: 6px 12px;
   animation: codeReveal 0.4s ease;
   letter-spacing: 1px;
 }
 
-.v-feat-cta {
-  font-family: 'Manrope', sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: white;
+/* Featured card — sticker & border follow card color */
+.v-feat-card .vc-sticker {
   background: var(--card-color, #e74c3c);
-  padding: 6px 16px;
-  border-radius: 6px;
-  transition: all 0.2s;
 }
-
-.v-feat-card:hover .v-feat-cta {
-  transform: scale(1.05);
+.v-feat-card .vc-code-wrap {
+  border-color: var(--card-color, #e74c3c);
+}
+.v-feat-card .vc-code-wrap:hover {
+  border-color: var(--card-color, #e74c3c);
 }
 
 /* ═══════════════════════════════════════
@@ -276,18 +277,39 @@
   margin-bottom: 32px;
 }
 
-.v-expiring-row {
-  display: flex;
-  gap: 14px;
-  overflow-x: auto;
+/* Auto-sliding expiring vouchers */
+.v-expiring-slider {
+  overflow: hidden;
   padding: 16px 0 8px;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
-.v-expiring-row::-webkit-scrollbar { height: 4px; }
-.v-expiring-row::-webkit-scrollbar-track { background: var(--bg-subtle); border-radius: 2px; }
-.v-expiring-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.v-expiring-slider::before,
+.v-expiring-slider::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.v-expiring-slider::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg), transparent);
+}
+
+.v-expiring-slider::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg), transparent);
+}
+
+.v-expiring-track {
+  display: flex;
+  gap: 14px;
+  will-change: transform;
+}
 
 .v-exp-card {
   flex: 0 0 200px;
@@ -332,22 +354,26 @@
 .v-exp-code {
   font-family: 'DM Mono', monospace;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-bg);
-  padding: 4px 10px;
-  border-radius: 4px;
+  font-weight: 700;
 }
 
 .v-exp-code.vc-code-hidden {
   user-select: none;
-  color: var(--text-tertiary);
-  background: var(--bg-subtle);
-  border: 1px dashed var(--border);
+  color: var(--text);
+  background: var(--surface);
+  padding: 6px 8px;
 }
 
 .v-exp-code.vc-code-revealed {
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 6px 10px;
   animation: codeReveal 0.4s ease;
+}
+
+.v-exp-card .vc-sticker {
+  font-size: 11px;
+  padding: 5px 8px;
 }
 
 /* ═══════════════════════════════════════
@@ -483,39 +509,76 @@
   align-items: center;
 }
 
-/* Code wrap for hidden/reveal pattern */
+/* Code wrap — sticker left, peek right, dashed border box */
 .vc-code-wrap {
-  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  border: 2px dashed var(--accent);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.vc-code-wrap:hover {
+  border-color: var(--accent-hover);
+  box-shadow: 0 2px 8px rgba(231,76,60,0.15);
+}
+
+/* Sticker button — left side */
+.vc-sticker {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
+  background: var(--accent);
+  color: white;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  transition: all 0.2s;
+}
+
+.vc-code-wrap:hover .vc-sticker {
+  background: var(--accent-hover);
+}
+
+/* After reveal — green sticker */
+.vc-sticker.vc-sticker-done {
+  background: #27ae60;
+  font-size: 11px;
+}
+
+/* Revealed state — full border green */
+.voucher-card.revealed .vc-code-wrap,
+.v-feat-card.revealed .vc-code-wrap,
+.v-exp-card.revealed .vc-code-wrap {
+  border-color: #27ae60;
 }
 
 .vc-code {
   font-family: 'DM Mono', monospace;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--accent);
+  font-weight: 700;
   letter-spacing: 0.5px;
 }
 
-/* Hidden code: masked with dots, no blur */
+/* Hidden peek — just last 2 chars visible */
 .vc-code-hidden {
   user-select: none;
-  color: var(--text-tertiary);
-  background: var(--bg-subtle);
-  padding: 4px 12px;
-  border-radius: 6px;
-  border: 1px dashed var(--border);
+  color: var(--text);
+  background: var(--surface);
+  padding: 6px 10px;
   transition: all 0.3s ease;
 }
 
-/* Revealed code: clear, highlighted */
+/* Revealed code: full code shown */
 .vc-code-revealed {
   color: var(--accent);
   background: var(--accent-bg);
-  padding: 4px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--accent);
+  padding: 6px 12px;
   animation: codeReveal 0.4s ease;
   letter-spacing: 1px;
 }
@@ -528,23 +591,8 @@
 
 /* Revealed card state */
 .voucher-card.revealed { border-color: #27ae60; }
-.voucher-card.revealed .vc-action { background: #27ae60 !important; }
 .v-feat-card.revealed { border-left-color: #27ae60; }
 .v-exp-card.revealed { border-color: #27ae60; }
-
-.vc-action {
-  font-size: 13px;
-  font-weight: 600;
-  color: white;
-  background: var(--accent);
-  padding: 5px 14px;
-  border-radius: 6px;
-  transition: all 0.2s;
-}
-
-.voucher-card:hover .vc-action {
-  background: var(--accent-hover);
-}
 
 /* ═══════════════════════════════════════
    LAYOUT & SIDEBAR
@@ -862,50 +910,64 @@
   margin-bottom: 12px;
 }
 
-.vd-code-value {
-  font-family: 'DM Mono', monospace;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: 2px;
-  margin-bottom: 20px;
-  padding: 16px;
-  background: var(--accent-bg);
+/* Detail page — sticker + peek layout */
+.vd-code-reveal-wrap {
+  display: inline-flex;
+  align-items: stretch;
+  border: 2px dashed var(--accent);
   border-radius: 8px;
-}
-
-.vd-code-value.vc-code-hidden {
-  user-select: none;
-  color: var(--text-tertiary);
-  background: var(--bg-subtle);
-  border: 2px dashed var(--border);
+  overflow: hidden;
+  margin-bottom: 20px;
   cursor: pointer;
+  transition: all 0.3s;
 }
 
-.vd-code-value.vc-code-revealed {
+.vd-code-reveal-wrap:hover {
+  border-color: var(--accent-hover);
+  box-shadow: 0 2px 12px rgba(231,76,60,0.15);
+}
+
+.vd-code-peek {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  letter-spacing: 2px;
+}
+
+/* After reveal — show full code */
+.vd-code-reveal-wrap.revealed {
+  border-color: #27ae60;
+}
+
+.vd-code-reveal-wrap.revealed .vd-code-peek {
   color: var(--accent);
   background: var(--accent-bg);
-  border: 2px solid var(--accent);
   animation: codeReveal 0.4s ease;
+  letter-spacing: 2px;
 }
 
 .vd-copy-btn, .vd-use-btn {
   font-family: 'Manrope', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 700;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
   text-decoration: none;
-  display: inline-block;
-  margin: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .vd-copy-btn {
   background: var(--accent);
   color: white;
+  padding: 12px 24px;
+  border-radius: 0;
 }
 
 .vd-copy-btn:hover {
@@ -917,6 +979,9 @@
   background: var(--surface);
   color: var(--text);
   border: 2px solid var(--border);
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 12px;
 }
 
 .vd-use-btn:hover {
@@ -1044,12 +1109,11 @@
   .voucher-sidebar { position: static; }
   .voucher-detail { grid-template-columns: 1fr; }
   .vd-sidebar { position: static; }
-  .v-featured-grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 768px) {
   .voucher-grid { grid-template-columns: 1fr; }
-  .v-featured-grid { grid-template-columns: 1fr; }
+  .v-feat-card { flex: 0 0 280px; }
   .v-hero h1 { font-size: 26px; }
   .v-hero { padding: 32px 0 28px; }
   .vd-hero { padding: 28px 20px; }
