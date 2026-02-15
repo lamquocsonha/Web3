@@ -2014,11 +2014,20 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
     return None, ''
 
 
+def _clean_csv_value(val):
+    """Clean CSV cell value — handle nan/null/None from pandas/Excel exports."""
+    if val is None:
+        return ''
+    s = str(val).strip()
+    if s.lower() in ('nan', 'null', 'none', 'n/a', 'na', '#n/a', ''):
+        return ''
+    return s
+
 def _get_or_create_hub_part(category_name):
     """Auto-create Hub vertical + Zone + Part for unmatched products.
     Products go into Hub first, can be reassigned to proper verticals later.
     Uses category_name from CSV to create/find a Zone."""
-    cat = (category_name or '').strip()
+    cat = _clean_csv_value(category_name)
     if not cat:
         cat = 'Chua phan loai'
     cat_slug = slugify(cat)
@@ -2115,9 +2124,10 @@ def admin_products_import_csv():
         hub_zones = {}  # Track auto-created hub categories
         for row in csv_reader:
             # CSV format: sku, name, url, price, discount, image, desc, category
-            product_name = row.get('name', '')[:200]
-            url = row.get('url', '')
-            category = row.get('category', '')
+            # Clean all values (handle nan/null from pandas exports)
+            product_name = _clean_csv_value(row.get('name', ''))[:200]
+            url = _clean_csv_value(row.get('url', ''))
+            category = _clean_csv_value(row.get('category', ''))
 
             if not product_name and not url:
                 skipped += 1
@@ -2129,11 +2139,12 @@ def admin_products_import_csv():
                 url = network_obj.deeplink_template.replace('{url}', urllib.parse.quote(url))
 
             price_val = 0
+            price_raw = _clean_csv_value(row.get('price', ''))
             try:
-                price_val = float(row.get('price', 0) or 0)
+                price_val = float(price_raw) if price_raw else 0
             except (ValueError, TypeError):
                 pass
-            image_url = row.get('image', '')
+            image_url = _clean_csv_value(row.get('image', ''))
 
             if mapping_mode == 'auto':
                 # Step 1: ALWAYS create in Hub (from CSV category)
