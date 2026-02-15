@@ -2,7 +2,7 @@
 {% block title %}Settings{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Settings{% endblock %}
 {% block content %}
-<h1 class="page-title">Settings</h1>
+<h1 class="page-title">⚙️ Settings</h1>
 
 <!-- ═══ TAB NAVIGATION ═══ -->
 <div class="stab-nav">
@@ -44,6 +44,39 @@
         <select class="form-select" name="default_mode"><option value="minimal" {% if settings.get('default_mode')=='minimal' %}selected{% endif %}>Minimal</option><option value="modern" {% if settings.get('default_mode')=='modern' %}selected{% endif %}>Modern</option></select>
       </div>
     </div>
+  </div>
+
+  <div class="scard">
+    <h3 class="scard-title">Logo & Favicon</h3>
+    <p class="scard-desc">Cai dat logo va favicon cho toan bo trang web. De trong de dung mac dinh (⚙ gear icon).</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Logo URL</label>
+        <input class="form-input" name="logo_url" value="{{ settings.get('logo_url','') }}" placeholder="https://example.com/logo.png">
+        <small>URL hinh anh logo (PNG, SVG). De trong = dung icon ⚙ mac dinh.</small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Favicon URL</label>
+        <input class="form-input" name="favicon_url" value="{{ settings.get('favicon_url','') }}" placeholder="https://example.com/favicon.ico">
+        <small>URL favicon (ICO, PNG 32x32). De trong = dung emoji ⚙ lam favicon.</small>
+      </div>
+    </div>
+    {% if settings.get('logo_url') or settings.get('favicon_url') %}
+    <div style="margin-top:12px;display:flex;gap:16px;align-items:center">
+      {% if settings.get('logo_url') %}
+      <div style="text-align:center">
+        <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Logo Preview</div>
+        <img src="{{ settings.get('logo_url') }}" style="max-height:40px;max-width:160px;border:1px solid var(--border);border-radius:6px;padding:4px" onerror="this.style.display='none'">
+      </div>
+      {% endif %}
+      {% if settings.get('favicon_url') %}
+      <div style="text-align:center">
+        <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Favicon Preview</div>
+        <img src="{{ settings.get('favicon_url') }}" style="width:32px;height:32px;border:1px solid var(--border);border-radius:4px;padding:2px" onerror="this.style.display='none'">
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
   </div>
 
   <div class="scard">

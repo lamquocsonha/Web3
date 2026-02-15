@@ -2,7 +2,7 @@
 {% block title %}{% if segment %}Edit {{ segment.name }}{% else %}New Segment{% endif %}{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_vertical_detail', vid=vertical.id) }}">{{ vertical.name }}</a><span class="sep">></span>{% if segment %}Edit{% else %}New Segment{% endif %}{% endblock %}
 {% block content %}
-<h1 class="page-title">{% if segment %}Edit: {{ segment.name }}{% else %}+ New Segment - {{ vertical.name }}{% endif %}</h1>
+<h1 class="page-title">📂 {% if segment %}Edit: {{ segment.name }}{% else %}New Segment — {{ vertical.name }}{% endif %}</h1>
 <form method="POST" style="max-width:700px">
   <div class="form-row">
     <div class="form-group"><label class="form-label">Name *</label><input class="form-input" name="name" value="{{ segment.name if segment else '' }}" required placeholder="CUV"></div>

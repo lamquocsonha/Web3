@@ -2,7 +2,7 @@
 {% block title %}Video Analytics{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_video') }}">Video</a><span class="sep">></span>Analytics{% endblock %}
 {% block content %}
-<h1 class="page-title">Video Analytics</h1>
+<h1 class="page-title">📊 Video Analytics</h1>
 
 <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px">
   <div class="stat-card" style="border-left:3px solid #ff0050"><div class="stat-label">Total Views</div><div class="stat-value" style="color:#ff0050">{{ "{:,}".format(total_views) }}</div></div>

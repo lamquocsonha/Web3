@@ -2,7 +2,7 @@
 {% block title %}{% if article %}Edit Article{% else %}New Article{% endif %}{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_articles') }}">Articles</a><span class="sep">></span>{% if article %}Edit{% else %}New{% endif %}{% endblock %}
 {% block content %}
-<h1 class="page-title">{% if article %}Edit: {{ article.title[:50] }}{% else %}+ New Knowledge Article{% endif %}</h1>
+<h1 class="page-title">📝 {% if article %}Edit: {{ article.title[:50] }}{% else %}New Article{% endif %}</h1>
 
 <form method="POST" style="max-width:900px">
   <div class="form-group"><label class="form-label">Title *</label><input class="form-input" name="title" value="{{ article.title if article else '' }}" required placeholder="Cao su chan phuoc — Tat ca kien thuc ban can biet"></div>

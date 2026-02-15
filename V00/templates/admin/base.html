@@ -6,12 +6,21 @@
 <title>{% block title %}Admin{% endblock %} | Unilab Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% if site_favicon_url %}
+<link rel="icon" href="{{ site_favicon_url }}" type="image/png">
+{% else %}
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>">
+{% endif %}
 </head>
 <body>
 <div class="layout">
   <aside class="sidebar">
     <div class="sb-logo">
-      <span class="logo-icon">&#9881;</span>
+      {% if site_logo_url %}
+      <img src="{{ site_logo_url }}" alt="Logo" style="height:28px;max-width:120px;object-fit:contain">
+      {% else %}
+      <span class="logo-icon">⚙</span>
+      {% endif %}
       <span class="logo-text">uni<span>lab</span></span>
     </div>
     <nav class="sb-nav">

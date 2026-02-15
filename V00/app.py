@@ -163,14 +163,18 @@ def get_theme_styles():
 def inject_globals():
     try:
         site_mode = SiteSettings.get('site_mode', 'demo')
+        logo_url = SiteSettings.get('logo_url', '')
+        favicon_url = SiteSettings.get('favicon_url', '')
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
             'now': datetime.utcnow(),
             'THEME_STYLES': get_theme_styles(),
             'site_mode': site_mode,
+            'site_logo_url': logo_url,
+            'site_favicon_url': favicon_url,
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo'}
+        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': ''}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -708,7 +712,7 @@ def admin_settings():
         tab = request.form.get('_tab', 'general')
         # Only save keys relevant to current tab (avoid wiping other tabs)
         tab_keys = {
-            'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit'],
+            'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit', 'logo_url', 'favicon_url'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         keys_to_save = tab_keys.get(tab, [])

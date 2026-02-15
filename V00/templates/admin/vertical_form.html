@@ -2,7 +2,7 @@
 {% block title %}{% if vertical %}Edit {{ vertical.name }}{% else %}New Vertical{% endif %}{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_verticals') }}">Verticals</a><span class="sep">></span>{% if vertical %}Edit{% else %}New{% endif %}{% endblock %}
 {% block content %}
-<h1 class="page-title">{% if vertical %}Edit: {{ vertical.icon }} {{ vertical.name }}{% else %}+ New Vertical{% endif %}</h1>
+<h1 class="page-title">{% if vertical %}{{ vertical.icon }} Edit: {{ vertical.name }}{% else %}📂 New Vertical{% endif %}</h1>
 <form method="POST" style="max-width:700px">
   <div class="form-row">
     <div class="form-group"><label class="form-label">Name *</label><input class="form-input" name="name" value="{{ vertical.name if vertical else '' }}" required placeholder="UniCar"></div>

@@ -3,7 +3,7 @@
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_zone_detail', zid=zone.id) }}">{{ zone.name }}</a><span class="sep">></span>{% if part %}{{ part.name_vi }}{% else %}New{% endif %}{% endblock %}
 
 {% block content %}
-<h1 class="page-title">{% if part %}Edit: {{ part.name_vi }}{% else %}+ New Part — {{ zone.name }}{% endif %}</h1>
+<h1 class="page-title">🔧 {% if part %}Edit: {{ part.name_vi }}{% else %}New Part — {{ zone.name }}{% endif %}</h1>
 
 <form method="POST" style="max-width:850px">
   <div class="form-row">
