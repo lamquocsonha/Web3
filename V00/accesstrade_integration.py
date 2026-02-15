@@ -132,12 +132,19 @@ class AccessTradeAPI:
         all_coupons = []
 
         for offer in offers:
+            # merchant is a string in real API (e.g. "shopee")
+            merchant_raw = offer.get('merchant', '')
+            if isinstance(merchant_raw, dict):
+                merchant_name = merchant_raw.get('name', 'N/A')
+            else:
+                merchant_name = str(merchant_raw) if merchant_raw else 'N/A'
+
             if offer.get('coupons'):
                 for coupon in offer['coupons']:
                     all_coupons.append({
                         'code': coupon.get('coupon_code', ''),
-                        'description': coupon.get('coupon_description', ''),
-                        'merchant': offer.get('merchant', {}).get('name', 'N/A'),
+                        'description': coupon.get('coupon_desc', '') or coupon.get('coupon_description', ''),
+                        'merchant': merchant_name,
                         'offer_name': offer.get('name', ''),
                         'start_date': offer.get('start_time', ''),
                         'end_date': offer.get('end_time', ''),
@@ -147,39 +154,62 @@ class AccessTradeAPI:
         return all_coupons
 
     def get_offers_detailed(self, limit=100):
-        """Get offers with full detail for voucher sync"""
+        """Get offers with full detail for voucher sync.
+
+        Real API response structure per offer:
+        {
+            "id": "shopee-1353279841800192",
+            "name": "[Store]-Giảm 15,000 VNĐ cho đơn tối thiểu 215,000 VNĐ",
+            "merchant": "shopee",  # string, not dict
+            "domain": "shopee.vn",
+            "content": "...",
+            "image": "https://...",
+            "aff_link": "https://go.isclix.com/...",
+            "start_time": "2026-02-14",
+            "end_time": "2026-02-17",
+            "coupons": [{"coupon_code": "GOOD21521", "coupon_desc": "Giảm 15,000 VNĐ..."}],
+            "categories": [{"category_name": "EC-29", "category_name_show": "Other"}],
+        }
+        """
         offers = self.get_offers(limit=limit)
         results = []
         for offer in offers:
-            merchant_info = offer.get('merchant') or {}
-            merchant_name = merchant_info.get('name', '') or offer.get('advertiser_name', '') or 'N/A'
-            # Extract coupon list
+            # merchant can be string ("shopee") or dict (older API versions)
+            merchant_raw = offer.get('merchant', '')
+            if isinstance(merchant_raw, dict):
+                merchant_name = merchant_raw.get('name', '') or 'N/A'
+                merchant_logo = merchant_raw.get('image', '') or merchant_raw.get('logo', '') or ''
+            else:
+                merchant_name = str(merchant_raw).capitalize() if merchant_raw else 'N/A'
+                merchant_logo = offer.get('image', '')
+
             coupons = offer.get('coupons') or []
-            # Parse discount from offer name/description
             offer_name = offer.get('name', '')
-            offer_desc = offer.get('description', '') or offer.get('short_description', '') or ''
-            # Build result
+            offer_desc = offer.get('content', '') or offer.get('description', '') or ''
+
+            # Extract category from categories list
+            cats = offer.get('categories') or []
+            cat_name = cats[0].get('category_name_show', '') if cats else ''
+
             item = {
                 'offer_id': str(offer.get('id', '')),
                 'offer_name': offer_name,
                 'description': offer_desc,
                 'merchant': merchant_name,
-                'merchant_logo': merchant_info.get('image', '') or merchant_info.get('logo', '') or '',
-                'category': offer.get('category', {}).get('name', '') if isinstance(offer.get('category'), dict) else str(offer.get('category', '')),
-                'aff_link': offer.get('aff_link', '') or offer.get('url', ''),
-                'start_date': offer.get('start_time', '') or offer.get('start_date', ''),
-                'end_date': offer.get('end_time', '') or offer.get('end_date', ''),
-                'status': offer.get('status', ''),
+                'merchant_logo': merchant_logo,
+                'domain': offer.get('domain', ''),
+                'category': cat_name,
+                'aff_link': offer.get('aff_link', '') or offer.get('link', ''),
+                'start_date': offer.get('start_time', ''),
+                'end_date': offer.get('end_time', ''),
                 'coupons': [],
             }
             if coupons:
                 for c in coupons:
                     item['coupons'].append({
-                        'code': c.get('coupon_code', '') or c.get('code', ''),
-                        'description': c.get('coupon_description', '') or c.get('description', ''),
+                        'code': c.get('coupon_code', ''),
+                        'description': c.get('coupon_desc', '') or c.get('coupon_description', ''),
                         'discount': c.get('discount', '') or c.get('coupon_value', ''),
-                        'start_date': c.get('start_time', '') or c.get('start_date', ''),
-                        'end_date': c.get('end_time', '') or c.get('end_date', ''),
                     })
             results.append(item)
         return results
@@ -194,9 +224,14 @@ def get_accesstrade_api(api_key=None):
 
     if api_key is None:
         # Try to get from database
-        from app import app, SiteSettings
+        from app import app, SiteSettings, AffiliateNetwork
         with app.app_context():
             api_key = SiteSettings.get('accesstrade_api_key', '')
+            # Fallback: check AffiliateNetwork table
+            if not api_key:
+                at = AffiliateNetwork.query.filter_by(slug='accesstrade').first()
+                if at and at.api_key:
+                    api_key = at.api_key
 
     if not api_key:
         return None
