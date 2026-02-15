@@ -2082,6 +2082,9 @@ def admin_products_import_csv():
 
         stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
         csv_reader = csv.DictReader(stream)
+        # Normalize fieldnames to lowercase for case-insensitive matching
+        if csv_reader.fieldnames:
+            csv_reader.fieldnames = [f.strip().lower() for f in csv_reader.fieldnames]
 
         # Get form data
         mapping_mode = request.form.get('mapping_mode', 'auto')  # auto or manual
@@ -2109,6 +2112,7 @@ def admin_products_import_csv():
         skipped = 0
         auto_created = 0
         mapped_zones = {}  # Track mapping stats: zone_name -> count
+        hub_zones = {}  # Track auto-created hub categories
         for row in csv_reader:
             # CSV format: sku, name, url, price, discount, image, desc, category
             product_name = row.get('name', '')[:200]
@@ -2124,45 +2128,76 @@ def admin_products_import_csv():
                 import urllib.parse
                 url = network_obj.deeplink_template.replace('{url}', urllib.parse.quote(url))
 
-            # Determine target part_id
-            target_part_id = None
-            detected_category = ''
-            if mapping_mode == 'auto':
-                # Phase 1: try matching existing Parts by keywords
-                if part_index:
-                    target_part_id, detected_category = _match_product_to_part(
-                        product_name, category, part_index, zone_kw, normalize_fn)
-
-                # Phase 2: no match → auto-create in Hub vertical
-                if not target_part_id:
-                    target_part_id = _get_or_create_hub_part(category)
-                    detected_category = slugify(category) if category else 'chua-phan-loai'
-                    auto_created += 1
-            else:
-                target_part_id = int(part_id)
-
-            # Track mapping stats
-            for entry in (part_index or []):
-                if entry['part_id'] == target_part_id:
-                    zone_label = f"{entry['vert_name']} › {entry['zone_name']} › {entry['part_name']}"
-                    mapped_zones[zone_label] = mapped_zones.get(zone_label, 0) + 1
-                    break
-
+            price_val = 0
             try:
-                al = AffiliateLink(
-                    part_id=target_part_id,
-                    network=network,
-                    product_name=product_name,
-                    url=url,
-                    price=float(row.get('price', 0) or 0),
-                    image_url=row.get('image', ''),
-                    is_active=True,
-                    category=detected_category or category[:100],
-                )
-                db.session.add(al)
-                count += 1
+                price_val = float(row.get('price', 0) or 0)
             except (ValueError, TypeError):
-                skipped += 1
+                pass
+            image_url = row.get('image', '')
+
+            if mapping_mode == 'auto':
+                # Step 1: ALWAYS create in Hub (from CSV category)
+                hub_part_id = _get_or_create_hub_part(category)
+                cat_label = category or 'Chua phan loai'
+                hub_zones[cat_label] = hub_zones.get(cat_label, 0) + 1
+
+                try:
+                    al_hub = AffiliateLink(
+                        part_id=hub_part_id,
+                        network=network,
+                        product_name=product_name,
+                        url=url,
+                        price=price_val,
+                        image_url=image_url,
+                        is_active=True,
+                        category=slugify(category) if category else 'chua-phan-loai',
+                    )
+                    db.session.add(al_hub)
+                    count += 1
+                except (ValueError, TypeError):
+                    skipped += 1
+                    continue
+
+                # Step 2: ALSO match to vertical (if keywords match)
+                if part_index:
+                    matched_part_id, detected_category = _match_product_to_part(
+                        product_name, category, part_index, zone_kw, normalize_fn)
+                    if matched_part_id:
+                        al_vert = AffiliateLink(
+                            part_id=matched_part_id,
+                            network=network,
+                            product_name=product_name,
+                            url=url,
+                            price=price_val,
+                            image_url=image_url,
+                            is_active=True,
+                            category=detected_category,
+                        )
+                        db.session.add(al_vert)
+                        auto_created += 1
+                        # Track vertical mapping stats
+                        for entry in (part_index or []):
+                            if entry['part_id'] == matched_part_id:
+                                zone_label = f"{entry['vert_name']} › {entry['zone_name']} › {entry['part_name']}"
+                                mapped_zones[zone_label] = mapped_zones.get(zone_label, 0) + 1
+                                break
+            else:
+                # Manual mode: single Part assignment
+                try:
+                    al = AffiliateLink(
+                        part_id=int(part_id),
+                        network=network,
+                        product_name=product_name,
+                        url=url,
+                        price=price_val,
+                        image_url=image_url,
+                        is_active=True,
+                        category=category[:100],
+                    )
+                    db.session.add(al)
+                    count += 1
+                except (ValueError, TypeError):
+                    skipped += 1
 
             # Batch commit every 500 rows for performance
             if count % 500 == 0:
@@ -2171,15 +2206,19 @@ def admin_products_import_csv():
         db.session.commit()
 
         # Build result message
-        msg = f'Import {count} sản phẩm thành công!'
+        msg = f'Import {count} sản phẩm vào Hub thành công!'
         if auto_created:
-            msg += f' ({auto_created} tự tạo danh mục mới)'
+            msg += f' + {auto_created} cũng match vào vertical'
         if skipped:
             msg += f' ({skipped} bỏ qua - thiếu tên/url)'
-        if mapping_mode == 'auto' and mapped_zones:
-            top_zones = sorted(mapped_zones.items(), key=lambda x: -x[1])[:5]
-            detail = ', '.join(f'{name}: {cnt}' for name, cnt in top_zones)
-            msg += f' | Phân bổ: {detail}'
+        if hub_zones:
+            top_hub = sorted(hub_zones.items(), key=lambda x: -x[1])[:5]
+            detail = ', '.join(f'{name}: {cnt}' for name, cnt in top_hub)
+            msg += f' | Hub categories: {detail}'
+        if mapped_zones:
+            top_vert = sorted(mapped_zones.items(), key=lambda x: -x[1])[:5]
+            detail = ', '.join(f'{name}: {cnt}' for name, cnt in top_vert)
+            msg += f' | Vertical match: {detail}'
         flash(msg, 'success')
         return redirect(url_for('admin_products'))
 
