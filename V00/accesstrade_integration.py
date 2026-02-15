@@ -1,6 +1,10 @@
 """
 AccessTrade API Integration
-Fetches campaigns, offers, and statistics from AccessTrade
+Fetches campaigns, offers, coupons, and statistics from AccessTrade.
+
+Docs:
+- Offers/Coupons: https://developers.accesstrade.vn/api-publisher-vietnamese/lay-thong-tin-vouchers-coupons-deals/tim-kiem-danh-sach-thong-tin-khuyen-mai
+- Active Promos:  https://developers.accesstrade.vn/api-publisher-vietnamese/lay-thong-tin-cac-khuyen-mai-dang-hoat-dong
 """
 import requests
 from datetime import datetime, timedelta
@@ -53,22 +57,285 @@ class AccessTradeAPI:
             pass
         return []
 
-    def get_offers(self, limit=100):
-        """Get available offers and coupons"""
+    # ═══════════════════════════════════════
+    # OFFERS / PROMOTIONS  (offers_informations)
+    # ═══════════════════════════════════════
+
+    def get_offers(self, limit=100, page=1, merchant=None, categories=None,
+                   domain=None, coupon=None, status=None, scope=None):
+        """Get active promotions with filters.
+
+        GET /v1/offers_informations
+
+        Args:
+            limit:      Records per page (default 100)
+            page:       Page number
+            merchant:   Filter by merchant owner name (e.g. "lazada", "shopee")
+            categories: Filter by category_name, comma-separated
+            domain:     Filter by domain (e.g. "lazada.vn")
+            coupon:     1 = only offers with codes, 0 = without codes, None = all
+            status:     1 = active, 0 = expired, None = all
+            scope:      "expiring" = ending soon, None = all
+        """
         try:
+            params = {"limit": limit, "page": page}
+            if merchant:
+                params['merchant'] = merchant
+            if categories:
+                params['categories'] = categories
+            if domain:
+                params['domain'] = domain
+            if coupon is not None:
+                params['coupon'] = coupon
+            if status is not None:
+                params['status'] = status
+            if scope:
+                params['scope'] = scope
+
             response = requests.get(
                 f"{self.base_url}/offers_informations",
                 headers=self.headers,
-                params={"limit": limit},
+                params=params,
                 timeout=15
             )
 
             if response.status_code == 200:
                 data = response.json()
                 return data.get('data', [])
-        except:
+        except Exception:
             pass
         return []
+
+    def get_offers_expiring(self, limit=50):
+        """Get promotions ending soon.
+
+        Shortcut for get_offers(scope='expiring')
+        """
+        return self.get_offers(limit=limit, scope='expiring')
+
+    def get_offers_with_coupons(self, limit=100, merchant=None):
+        """Get only offers that have coupon codes.
+
+        Shortcut for get_offers(coupon=1)
+        """
+        return self.get_offers(limit=limit, coupon=1, merchant=merchant)
+
+    # ═══════════════════════════════════════
+    # COUPONS / VOUCHERS  (offers_informations/coupon)
+    # ═══════════════════════════════════════
+
+    def get_coupons(self, keyword=None, merchant=None, is_next_day=None,
+                    limit=50, page=1):
+        """Search coupons with filters.
+
+        GET /v1/offers_informations/coupon
+
+        Args:
+            keyword:     Keyword UID from keyword_list
+            merchant:    Merchant UID from merchant_list
+            is_next_day: True = upcoming, False = active, None = all
+            limit:       Records per page
+            page:        Page number
+
+        Returns list of coupon offers, each containing:
+            id, name, merchant, content, image, link, prod_link,
+            start_date, end_date, time_left, percentage_used,
+            discount_value, discount_percentage, min_spend, max_value,
+            coin_cap, coin_percentage, categories, coupons[], banners[]
+        """
+        try:
+            params = {"limit": limit, "page": page}
+            if keyword:
+                params['keyword'] = keyword
+            if merchant:
+                params['merchant'] = merchant
+            if is_next_day is not None:
+                params['is_next_day_coupon'] = 'true' if is_next_day else 'false'
+
+            response = requests.get(
+                f"{self.base_url}/offers_informations/coupon",
+                headers=self.headers,
+                params=params,
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    def get_coupons_hot(self, limit=50, date=1):
+        """Get hot/priority coupons.
+
+        GET /v1/offers_informations/coupon_hot
+
+        Args:
+            limit: Records per page
+            date:  1 = weekly hot, 2 = monthly hot
+        """
+        try:
+            response = requests.get(
+                f"{self.base_url}/offers_informations/coupon_hot",
+                headers=self.headers,
+                params={"limit": limit, "date": date},
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    def search_coupons_by_url(self, product_url):
+        """Search applicable coupons for a product URL.
+
+        GET /v1/offers_informations/coupon?URL=...
+        Supports: Shopee & Tiki product links (including short links)
+
+        Returns list of coupons applicable to the product.
+        """
+        try:
+            response = requests.get(
+                f"{self.base_url}/offers_informations/coupon",
+                headers=self.headers,
+                params={"URL": product_url},
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    def search_coupons_by_urls(self, urls):
+        """Search coupons for multiple product URLs at once.
+
+        POST /v1/offers_informations/multi_link_2_coupons
+
+        Args:
+            urls: list of product URLs (max 5 per request)
+
+        Returns list of {origin_url, status, list_voucher[]}
+        Each voucher: {aff_link, coupon_code, coupon_desc, remain, time_left,
+                       start_time, end_time}
+
+        Rate limit: 30 requests/minute
+        """
+        try:
+            response = requests.post(
+                f"{self.base_url}/offers_informations/multi_link_2_coupons",
+                headers=self.headers,
+                json={"URLS": ",".join(urls[:5])},
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    # ═══════════════════════════════════════
+    # METADATA  (merchant list, keywords, categories)
+    # ═══════════════════════════════════════
+
+    def get_merchant_list(self):
+        """Get list of all merchants with logo and offer counts.
+
+        GET /v1/offers_informations/merchant_list
+
+        Returns list of {id, display_name, login_name, logo, total_offer}
+        """
+        try:
+            response = requests.get(
+                f"{self.base_url}/offers_informations/merchant_list",
+                headers=self.headers,
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    def get_keyword_list(self):
+        """Get campaign keyword list (e.g. ShopeePay, FlashSale...).
+
+        GET /v1/offers_informations/keyword_list
+
+        Returns list of {id, icon_text, total_offer}
+        """
+        try:
+            response = requests.get(
+                f"{self.base_url}/offers_informations/keyword_list",
+                headers=self.headers,
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    def get_merchant_keywords(self, merchant_id):
+        """Get category keywords for a specific merchant.
+
+        GET /v1/offers_informations/icontext_list?merchant=...
+
+        Returns list of {icon_text, merchant, total_offer}
+        """
+        try:
+            response = requests.get(
+                f"{self.base_url}/offers_informations/icontext_list",
+                headers=self.headers,
+                params={"merchant": merchant_id},
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    def get_category_list(self):
+        """Get coupon category/industry list.
+
+        GET /v1/offers_informations/list_category_coupons
+
+        Returns list of {category: [{category_name, category_name_show, category_no}],
+                         count, type}
+        Types: E-COMMERCE, BEAUTY, FINANCE, TRAVEL, etc.
+        """
+        try:
+            response = requests.get(
+                f"{self.base_url}/offers_informations/list_category_coupons",
+                headers=self.headers,
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', [])
+        except Exception:
+            pass
+        return []
+
+    # ═══════════════════════════════════════
+    # CAMPAIGNS & TRANSACTIONS
+    # ═══════════════════════════════════════
 
     def get_transactions(self, start_date=None, end_date=None):
         """
@@ -153,66 +420,100 @@ class AccessTradeAPI:
 
         return all_coupons
 
-    def get_offers_detailed(self, limit=100):
+    def get_offers_detailed(self, limit=100, merchant=None, scope=None):
         """Get offers with full detail for voucher sync.
 
-        Real API response structure per offer:
-        {
-            "id": "shopee-1353279841800192",
-            "name": "[Store]-Giảm 15,000 VNĐ cho đơn tối thiểu 215,000 VNĐ",
-            "merchant": "shopee",  # string, not dict
-            "domain": "shopee.vn",
-            "content": "...",
-            "image": "https://...",
-            "aff_link": "https://go.isclix.com/...",
-            "start_time": "2026-02-14",
-            "end_time": "2026-02-17",
-            "coupons": [{"coupon_code": "GOOD21521", "coupon_desc": "Giảm 15,000 VNĐ..."}],
-            "categories": [{"category_name": "EC-29", "category_name_show": "Other"}],
-        }
+        Combines data from both offers_informations and coupon endpoints.
+
+        Fields from offers_informations:
+            id, name, merchant, domain, content, image, aff_link,
+            start_time, end_time, coupons[], categories[]
+
+        Extra fields from coupon endpoint:
+            discount_value, discount_percentage, min_spend, max_value,
+            coin_cap, coin_percentage, percentage_used, time_left, prod_link
         """
-        offers = self.get_offers(limit=limit)
+        offers = self.get_offers(limit=limit, merchant=merchant, scope=scope)
         results = []
         for offer in offers:
-            # merchant can be string ("shopee") or dict (older API versions)
-            merchant_raw = offer.get('merchant', '')
-            if isinstance(merchant_raw, dict):
-                merchant_name = merchant_raw.get('name', '') or 'N/A'
-                merchant_logo = merchant_raw.get('image', '') or merchant_raw.get('logo', '') or ''
-            else:
-                merchant_name = str(merchant_raw).capitalize() if merchant_raw else 'N/A'
-                merchant_logo = offer.get('image', '')
-
-            coupons = offer.get('coupons') or []
-            offer_name = offer.get('name', '')
-            offer_desc = offer.get('content', '') or offer.get('description', '') or ''
-
-            # Extract category from categories list
-            cats = offer.get('categories') or []
-            cat_name = cats[0].get('category_name_show', '') if cats else ''
-
-            item = {
-                'offer_id': str(offer.get('id', '')),
-                'offer_name': offer_name,
-                'description': offer_desc,
-                'merchant': merchant_name,
-                'merchant_logo': merchant_logo,
-                'domain': offer.get('domain', ''),
-                'category': cat_name,
-                'aff_link': offer.get('aff_link', '') or offer.get('link', ''),
-                'start_date': offer.get('start_time', ''),
-                'end_date': offer.get('end_time', ''),
-                'coupons': [],
-            }
-            if coupons:
-                for c in coupons:
-                    item['coupons'].append({
-                        'code': c.get('coupon_code', ''),
-                        'description': c.get('coupon_desc', '') or c.get('coupon_description', ''),
-                        'discount': c.get('discount', '') or c.get('coupon_value', ''),
-                    })
+            item = self._parse_offer(offer)
             results.append(item)
         return results
+
+    def get_coupons_detailed(self, keyword=None, merchant=None, limit=100):
+        """Get coupons with full detail from the coupon endpoint.
+
+        Returns richer data than get_offers_detailed, including
+        discount_value, min_spend, max_value, time_left, percentage_used.
+        """
+        offers = self.get_coupons(
+            keyword=keyword, merchant=merchant, limit=limit
+        )
+        results = []
+        for offer in offers:
+            item = self._parse_offer(offer)
+            results.append(item)
+        return results
+
+    def _parse_offer(self, offer):
+        """Parse a single offer/coupon response into a normalized dict."""
+        # merchant can be string ("shopee") or dict (older API versions)
+        merchant_raw = offer.get('merchant', '')
+        if isinstance(merchant_raw, dict):
+            merchant_name = merchant_raw.get('name', '') or 'N/A'
+            merchant_logo = (merchant_raw.get('image', '') or
+                            merchant_raw.get('logo', '') or '')
+        else:
+            merchant_name = (str(merchant_raw).capitalize()
+                            if merchant_raw else 'N/A')
+            merchant_logo = offer.get('image', '')
+
+        coupons = offer.get('coupons') or []
+        offer_name = offer.get('name', '')
+        offer_desc = (offer.get('content', '') or
+                      offer.get('description', '') or '')
+
+        # Extract category from categories list
+        cats = offer.get('categories') or []
+        cat_name = cats[0].get('category_name_show', '') if cats else ''
+
+        item = {
+            'offer_id': str(offer.get('id', '')),
+            'offer_name': offer_name,
+            'description': offer_desc,
+            'merchant': merchant_name,
+            'merchant_logo': merchant_logo,
+            'domain': offer.get('domain', ''),
+            'category': cat_name,
+            'aff_link': (offer.get('aff_link', '') or
+                         offer.get('prod_link', '') or
+                         offer.get('link', '')),
+            'start_date': offer.get('start_time', '') or offer.get('start_date', ''),
+            'end_date': offer.get('end_time', '') or offer.get('end_date', ''),
+            # Coupon-endpoint extra fields
+            'discount_value': offer.get('discount_value'),
+            'discount_percentage': offer.get('discount_percentage'),
+            'min_spend': offer.get('min_spend'),
+            'max_value': offer.get('max_value'),
+            'coin_cap': offer.get('coin_cap'),
+            'coin_percentage': offer.get('coin_percentage'),
+            'percentage_used': offer.get('percentage_used'),
+            'time_left': offer.get('time_left', ''),
+            'coupons': [],
+        }
+
+        for c in coupons:
+            item['coupons'].append({
+                'code': c.get('coupon_code', ''),
+                'description': (c.get('coupon_desc', '') or
+                                c.get('coupon_description', '')),
+                'discount': (c.get('discount', '') or
+                             c.get('coupon_value', '')),
+                'remain': c.get('remain'),
+                'time_left': c.get('time_left', ''),
+            })
+
+        return item
 
 
 # Singleton instance
