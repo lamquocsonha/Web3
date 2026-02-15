@@ -1762,9 +1762,9 @@ def admin_products_ai_classify_apply():
     return admin_ai_center_bulk_action()
 
 
-def _build_part_keyword_index(vertical_id=None):
-    """Build keyword index from Parts for auto-mapping.
-    Returns list of {part_id, keywords: set(), zone_name, part_name, score_boost}
+def _build_part_keyword_index():
+    """Build keyword index from ALL Parts across ALL verticals for hub auto-mapping.
+    Returns list of {part_id, keywords: set(), zone_name, part_name, ...}
     """
     import unicodedata, re
     def normalize(text):
@@ -1777,23 +1777,18 @@ def _build_part_keyword_index(vertical_id=None):
         Zone, Part.zone_id == Zone.id
     ).join(Segment, Zone.segment_id == Segment.id
     ).join(Vertical, Segment.vertical_id == Vertical.id)
-    if vertical_id:
-        q = q.filter(Vertical.id == vertical_id)
 
     index = []
     for part, zone, seg, vert in q.all():
         keywords = set()
-        # Part name (highest signal)
         keywords.add(normalize(part.name_vi))
         if part.name_en:
             keywords.add(normalize(part.name_en))
-        # Tags (good signal)
         if part.tags:
             for tag in part.tags.split(','):
                 tag = tag.strip()
                 if len(tag) >= 2:
                     keywords.add(normalize(tag))
-        # OEM code fragments
         if part.oem_code:
             for code in re.findall(r'[A-Za-z0-9]+-[A-Za-z0-9]+', part.oem_code):
                 keywords.add(code.lower())
@@ -1806,43 +1801,132 @@ def _build_part_keyword_index(vertical_id=None):
             'part_name': part.name_vi,
             'seg_name': seg.name,
             'vert_name': vert.name,
+            'vert_slug': vert.slug,
         })
 
-    # Zone-level keyword map (fallback when no Part matches)
+    # Zone-level keyword map — ALL verticals (fallback when no Part matches)
     zone_keywords = {
+        # === CAR / OTO ===
         'he-thong-treo': ['phuoc', 'giam chan', 'lo xo', 'cao su', 'rotuy', 'rotuyn', 'thanh can bang',
                           'shock', 'absorber', 'spring', 'bushing', 'ball joint', 'suspension',
                           'giam xoc', 'nhun', 'stabilizer', 'sway bar'],
-        'he-thong-phanh': ['phanh', 'brake', 'ma phanh', 'dia phanh', 'bau tro luc', 'abs',
-                           'caliper', 'brake pad', 'brake disc', 'dau phanh', 'tang bua'],
+        'he-thong-phanh': ['ma phanh', 'dia phanh', 'bau tro luc', 'abs', 'caliper',
+                           'brake pad', 'brake disc', 'dau phanh', 'tang bua'],
         'dong-co': ['dong co', 'engine', 'bugi', 'spark plug', 'kim phun', 'turbo', 'block may',
                     'loc gio', 'loc dau', 'loc nhien lieu', 'dau may', 'oil filter', 'air filter',
-                    'piston', 'xi lanh', 'truc khuyu', 'crankshaft', 'cam', 'van', 'gasket',
-                    'gioang', 'day curoa', 'belt', 'bom nuoc', 'water pump', 'bom xang',
-                    'injector', 'throttle', 'sen', 'chain', 'xich', 'nhong'],
-        'he-thong-dien': ['dien', 'electric', 'ac quy', 'battery', 'may phat', 'alternator',
-                          'den', 'light', 'lamp', 'led', 'bulb', 'bong den', 'day dien', 'wire',
-                          'cau chi', 'fuse', 'cam bien', 'sensor', 'ecu', 'relay', 'coi', 'horn',
-                          'gat mua', 'wiper', 'motor', 'starter', 'khoi dong'],
-        'he-thong-lai': ['lai', 'steering', 'thuoc lai', 'ro tuyn', 'tro luc', 'vo lang',
+                    'piston', 'xi lanh', 'truc khuyu', 'crankshaft', 'gasket',
+                    'gioang', 'day curoa', 'bom nuoc', 'water pump', 'bom xang',
+                    'injector', 'throttle'],
+        'he-thong-dien': ['ac quy', 'battery oto', 'may phat', 'alternator',
+                          'bong den oto', 'day dien oto',
+                          'cau chi', 'fuse', 'cam bien', 'sensor', 'ecu', 'relay',
+                          'gat mua', 'wiper', 'starter', 'khoi dong'],
+        'he-thong-lai': ['thuoc lai', 'tro luc lai', 'vo lang',
                          'power steering', 'rack', 'tie rod', 'tay lai'],
-        'gam-xe': ['gam', 'khung', 'chassis', 'chan bun', 'underbody', 'che gam',
-                   'lop', 'tire', 'mam', 'wheel', 'rim', 'bac dan', 'bearing', 'moay o', 'hub'],
-        'noi-that': ['noi that', 'interior', 'ghe', 'seat', 'taplo', 'dashboard', 'tham',
-                     'mat', 'floor', 'dieu hoa', 'ac', 'air con', 'guong chieu hau', 'kinh'],
-        'ngoai-that': ['ngoai that', 'exterior', 'can', 'bumper', 'guong', 'mirror',
-                       'kinh', 'glass', 'windshield', 'mui', 'roof', 'capo', 'hood', 'cop',
-                       'trunk', 'tem', 'decal', 'logo', 'ong xa', 'exhaust', 'po'],
+        'gam-xe': ['gam xe', 'khung gam', 'chassis', 'chan bun', 'underbody', 'che gam',
+                   'lop oto', 'mam oto', 'bac dan', 'bearing', 'moay o', 'hub'],
+        'noi-that': ['noi that oto', 'ghe oto', 'taplo', 'dashboard', 'tham oto',
+                     'dieu hoa oto', 'guong chieu hau'],
+        'ngoai-that': ['ngoai that oto', 'can oto', 'bumper', 'guong oto',
+                       'kinh oto', 'windshield', 'capo', 'hood', 'cop xe',
+                       'tem xe', 'decal', 'ong xa', 'exhaust'],
+        # === PET ===
+        'dinh-duong': ['thuc an cho', 'thuc an meo', 'dog food', 'cat food', 'hat cho', 'hat meo',
+                       'royal canin', 'pedigree', 'whiskas', 'taste of the wild', 'nutrience',
+                       'me-o', 'smartheart', 'ganador', 'natural core', 'snack cho', 'snack meo',
+                       'pate cho', 'pate meo', 'sua cho', 'sua meo', 'canin', 'puppy food',
+                       'kitten food', 'dinh duong thu cung', 'pet food'],
+        'y-te': ['vaccine cho', 'vaccine meo', 'tay giun', 'thuoc ve', 'thuoc ran',
+                 'frontline', 'nexgard', 'heartgard', 'revolution', 'thuoc nho gay',
+                 'thuoc tri nam', 'thuoc tri ve', 'bang ve sinh', 'y te thu cung',
+                 'thuoc cho', 'thuoc meo', 'vet', 'veterinary'],
+        'huan-luyen': ['huan luyen cho', 'day cho', 'training', 'treat huan luyen',
+                       'clicker', 'harness', 'muzzle', 'rom', 'day dan cho'],
+        'do-dung': ['chuong cho', 'chuong meo', 'long cho', 'long meo', 'bat an', 'binh nuoc',
+                    'vong co', 'day dat', 'leash', 'collar', 'ao cho', 'ao meo',
+                    'nem cho', 'giuong cho', 'nha meo', 'cat tree', 'cay leo meo',
+                    'do choi cho', 'do choi meo', 'balo thu cung', 'tui van chuyen',
+                    'xe day thu cung', 'pet carrier', 'khay ve sinh', 'cat ve sinh',
+                    'cat toan', 'bentonite', 'tofu cat', 'crystal cat',
+                    'may loc nuoc', 'pet fountain', 'phu kien thu cung'],
+        'hamster': ['hamster', 'chuot hamster', 'long hamster', 'thuc an hamster',
+                    'banh xe hamster', 'cat lot hamster'],
+        'ca-canh': ['ca canh', 'be ca', 'aquarium', 'loc nuoc be ca', 'thuc an ca',
+                    'den be ca', 'co thuy sinh', 'nen be ca', 'ca betta', 'ca vang'],
+        # === BEAUTY ===
+        'lam-sach': ['sua rua mat', 'tay trang', 'dau tay trang', 'nuoc tay trang', 'cleansing',
+                     'micellar', 'foam rua mat', 'gel rua mat', 'oil cleanser', 'lam sach da'],
+        'toner-essence': ['toner', 'nuoc hoa hong', 'essence', 'tinh chat lot', 'lotion',
+                          'nuoc can bang', 'first treatment'],
+        'serum': ['serum', 'tinh chat', 'ampoule', 'vitamin c serum', 'retinol', 'niacinamide',
+                  'hyaluronic', 'aha', 'bha', 'peptide', 'serum duong'],
+        'kem-duong': ['kem duong', 'moisturizer', 'cream', 'kem duong am', 'night cream',
+                      'day cream', 'gel duong', 'emulsion', 'kem mat'],
+        'chong-nang': ['chong nang', 'sunscreen', 'spf', 'kem chong nang', 'sun cream',
+                       'uv protection', 'nang', 'sunblock'],
+        'mat-na': ['mat na', 'mask', 'sheet mask', 'sleeping mask', 'clay mask',
+                   'mat na giay', 'mat na dat set', 'mat na ngu', 'peel off'],
+        # === TECH ===
+        'man-hinh': ['man hinh', 'screen', 'display', 'oled', 'amoled', 'lcd', 'ips',
+                     'man hinh dien thoai', 'cuong luc', 'dan man hinh', 'tempered glass'],
+        'chip-xu-ly': ['chip', 'cpu', 'processor', 'snapdragon', 'dimensity', 'exynos',
+                       'apple silicon', 'bionic', 'mediatek', 'qualcomm'],
+        'camera': ['camera', 'ong kinh', 'lens', 'chup anh', 'quay phim',
+                   'camera dien thoai', 'selfie', 'wide angle', 'macro', 'gimbal'],
+        'pin-sac': ['pin', 'sac', 'charger', 'power bank', 'sac nhanh', 'sac khong day',
+                    'wireless charging', 'cap sac', 'adapter', 'magsafe', 'pin du phong'],
+        'bo-nho': ['bo nho', 'ram', 'rom', 'storage', 'the nho', 'sd card', 'usb',
+                   'ssd', 'hdd', 'o cung', 'memory card'],
+        'thiet-ke': ['op lung', 'case', 'bao da', 'skin', 'mieng dan', 'decal dien thoai'],
+        # === BIKE ===
+        'khung-xe': ['khung xe dap', 'frame', 'suon xe dap', 'carbon frame', 'nhom frame'],
+        'he-thong-truyen-dong': ['truyen dong', 'shimano', 'sram', 'lip', 'xich xe dap',
+                                  'bat dia', 'tay de', 'shifter', 'derailleur', 'groupset',
+                                  'cassette', 'pedal', 'ban dap'],
+        'banh-xe': ['banh xe dap', 'lop xe dap', 'vanh xe dap', 'nan hoa', 'hub xe dap',
+                    'sam xe dap', 'tire bike', 'wheelset', 'tubeless'],
+        'yen-va-tay-lai': ['yen xe dap', 'tay lai xe dap', 'ghi dong', 'stem', 'saddle',
+                           'handlebar', 'bar tape', 'grip'],
+        'phu-kien': ['mu bao hiem xe dap', 'helmet bike', 'gang tay dap xe', 'kinh dap xe',
+                     'den xe dap', 'binh nuoc xe dap', 'bom xe dap', 'dong ho xe dap',
+                     'garmin', 'wahoo', 'khoa xe dap'],
+        # === SPORT ===
+        'giay-chay': ['giay chay', 'running shoes', 'nike running', 'adidas running',
+                      'asics', 'hoka', 'new balance running', 'saucony', 'brooks',
+                      'giay chay bo', 'giay the thao'],
+        'do-chay': ['do chay bo', 'quan chay', 'ao chay', 'running wear',
+                    'shorts chay', 'tights', 'compression'],
+        'dong-ho-gps': ['dong ho gps', 'garmin forerunner', 'garmin fenix', 'coros',
+                        'apple watch', 'suunto', 'polar', 'dong ho the thao'],
+        'phu-kien-chay': ['dai deo dien thoai', 'running belt', 'ba lo chay',
+                          'vo chay', 'running socks', 'headband', 'arm sleeve'],
+        'dinh-duong-chay': ['gel nang luong', 'energy gel', 'nuoc uong the thao',
+                            'electrolyte', 'bcaa', 'whey protein', 'energy bar'],
+        # === TRAVEL ===
+        'mien-bac': ['ha noi', 'sa pa', 'ha long', 'ninh binh', 'ha giang', 'cao bang',
+                     'moc chau', 'mai chau', 'tam dao', 'cat ba', 'du lich mien bac'],
+        'mien-trung': ['da nang', 'hoi an', 'hue', 'nha trang', 'da lat', 'quy nhon',
+                       'phu yen', 'quang binh', 'phong nha', 'du lich mien trung'],
+        'mien-nam': ['sai gon', 'ho chi minh', 'vung tau', 'can tho', 'phu quoc',
+                     'con dao', 'mekong', 'du lich mien nam'],
+        'dong-nam-a': ['thai lan', 'singapore', 'malaysia', 'bali', 'indonesia',
+                       'philippines', 'cambodia', 'myanmar', 'lao'],
+        'dong-a': ['nhat ban', 'han quoc', 'dai loan', 'trung quoc', 'hong kong'],
+        'budget': ['hostel', 'homestay', 'nha nghi', 'budget hotel', 'backpacker'],
+        'resort': ['resort', 'khach san', 'hotel 5 sao', 'hotel 4 sao', 'villa',
+                   'spa resort', 'beach resort'],
     }
     return index, zone_keywords, normalize
 
-def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn, vertical_id=None):
-    """Match a product name+category to best Part. Returns part_id or None."""
+def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn):
+    """Match a product to best Part across all verticals (hub approach).
+    Returns (part_id, detected_category) tuple. part_id can be None."""
     text = normalize_fn(f"{product_name} {category}")
     words = set(text.split())
 
     best_part_id = None
     best_score = 0
+    best_entry = None
 
     # Phase 1: match against Part keywords (exact substring in normalized text)
     for entry in part_index:
@@ -1851,9 +1935,8 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
             if len(kw) < 2:
                 continue
             if kw in text:
-                score += len(kw) + 3  # bonus for exact substring match
+                score += len(kw) + 3
             else:
-                # Word-level overlap for multi-word keywords
                 kw_words = set(kw.split())
                 matched = words & kw_words
                 if matched:
@@ -1861,9 +1944,11 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
         if score > best_score:
             best_score = score
             best_part_id = entry['part_id']
+            best_entry = entry
 
     if best_score >= 5:
-        return best_part_id
+        cat = best_entry['zone_slug'] if best_entry else ''
+        return best_part_id, cat
 
     # Phase 2: fallback to Zone-level keywords (broader matching)
     best_zone_slug = None
@@ -1874,7 +1959,6 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
             if len(kw) >= 3 and kw in text:
                 score += len(kw) + 2
             elif len(kw) < 3:
-                # Short keywords: only match as whole word
                 if kw in words:
                     score += 3
         if score > best_zone_score:
@@ -1882,15 +1966,23 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
             best_zone_slug = zone_slug
 
     if best_zone_slug and best_zone_score >= 4:
-        # Find first Part in this zone (within the vertical if specified)
-        q = Part.query.join(Zone).join(Segment)
-        if vertical_id:
-            q = q.filter(Segment.vertical_id == vertical_id)
-        first_part = q.filter(Zone.slug == best_zone_slug).first()
+        first_part = Part.query.join(Zone).filter(Zone.slug == best_zone_slug).first()
         if first_part:
-            return first_part.id
+            return first_part.id, best_zone_slug
+        return None, best_zone_slug
 
-    return None
+    # Phase 3: use CSV category directly as fallback
+    if category:
+        cat_norm = normalize_fn(category)
+        for zone_slug, kws in zone_keywords.items():
+            for kw in kws:
+                if kw in cat_norm or cat_norm in kw:
+                    first_part = Part.query.join(Zone).filter(Zone.slug == zone_slug).first()
+                    if first_part:
+                        return first_part.id, zone_slug
+                    return None, zone_slug
+
+    return None, ''
 
 
 @app.route('/admin/products/import-csv', methods=['GET', 'POST'])
@@ -1921,7 +2013,6 @@ def admin_products_import_csv():
         mapping_mode = request.form.get('mapping_mode', 'manual')  # manual or auto
         part_id = request.form.get('part_id')
         fallback_part_id = request.form.get('fallback_part_id')
-        vertical_id = request.form.get('vertical_id', type=int)
         network = request.form.get('network', 'shopee')
         apply_deeplink = 'apply_deeplink' in request.form
 
@@ -1929,12 +2020,12 @@ def admin_products_import_csv():
             flash('Chưa chọn Part để gắn sản phẩm', 'error')
             return redirect(request.url)
 
-        # Build auto-mapping index if auto mode
+        # Build auto-mapping index — hub approach: search ALL verticals
         part_index = None
         zone_kw = None
         normalize_fn = None
         if mapping_mode == 'auto':
-            part_index, zone_kw, normalize_fn = _build_part_keyword_index(vertical_id)
+            part_index, zone_kw, normalize_fn = _build_part_keyword_index()
             if not part_index:
                 flash('Không tìm thấy Part nào để auto-map. Hãy tạo Part trước.', 'error')
                 return redirect(request.url)
@@ -1958,11 +2049,12 @@ def admin_products_import_csv():
                 import urllib.parse
                 url = network_obj.deeplink_template.replace('{url}', urllib.parse.quote(url))
 
-            # Determine target part_id
+            # Determine target part_id — hub approach: match across all verticals
             target_part_id = None
+            detected_category = ''
             if mapping_mode == 'auto':
-                target_part_id = _match_product_to_part(
-                    product_name, category, part_index, zone_kw, normalize_fn, vertical_id)
+                target_part_id, detected_category = _match_product_to_part(
+                    product_name, category, part_index, zone_kw, normalize_fn)
                 if not target_part_id and fallback_part_id:
                     target_part_id = int(fallback_part_id)
             else:
@@ -1975,7 +2067,7 @@ def admin_products_import_csv():
             # Track mapping stats
             for entry in (part_index or []):
                 if entry['part_id'] == target_part_id:
-                    zone_label = f"{entry['zone_name']} › {entry['part_name']}"
+                    zone_label = f"{entry['vert_name']} › {entry['zone_name']} › {entry['part_name']}"
                     mapped_zones[zone_label] = mapped_zones.get(zone_label, 0) + 1
                     break
 
@@ -1987,7 +2079,8 @@ def admin_products_import_csv():
                     url=url,
                     price=float(row.get('price', 0) or 0),
                     image_url=row.get('image', ''),
-                    is_active=True
+                    is_active=True,
+                    category=detected_category or category[:100],
                 )
                 db.session.add(al)
                 count += 1
@@ -2013,9 +2106,7 @@ def admin_products_import_csv():
 
     # GET request - show form
     parts_tree = []
-    verticals_list = []
     for v in Vertical.query.all():
-        verticals_list.append({'id': v.id, 'name': v.name, 'icon': v.icon})
         for s in v.segments:
             for z in s.zones:
                 for p in z.parts:
@@ -2026,7 +2117,7 @@ def admin_products_import_csv():
 
     networks = AffiliateNetwork.query.all()
     return render_template('admin/products_import_csv.html',
-        parts_tree=parts_tree, networks=networks, verticals=verticals_list)
+        parts_tree=parts_tree, networks=networks)
 
 @app.route('/admin/scheduled-imports')
 def admin_scheduled_imports():
@@ -4142,6 +4233,11 @@ def _run_schema_migration():
         db.session.execute(db.text("CREATE INDEX IF NOT EXISTS ix_segment_vertical_id ON segment (vertical_id)"))
     except Exception:
         pass
+
+    # --- AffiliateLink table ---
+    al_cols = _get_table_columns('affiliate_link')
+    if _ensure_column('affiliate_link', 'category', "VARCHAR(100) DEFAULT ''", al_cols):
+        changed = True
 
     # --- Affiliate Network table ---
     an_cols = _get_table_columns('affiliate_network')

@@ -99,6 +99,7 @@ class AffiliateLink(db.Model):
     is_active = db.Column(db.Boolean, default=True, index=True)
     clicks = db.Column(db.Integer, default=0)
     conversions = db.Column(db.Integer, default=0)
+    category = db.Column(db.String(100), default='', index=True)  # Hub category (auto-detected)
 
 class AffiliateStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
