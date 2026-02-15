@@ -1762,9 +1762,8 @@ def admin_products_ai_classify_apply():
     return admin_ai_center_bulk_action()
 
 
-def _build_part_keyword_index(vertical_id=None):
-    """Build keyword index from Parts for auto-mapping.
-    If vertical_id is provided, only index Parts belonging to that vertical.
+def _build_part_keyword_index():
+    """Build keyword index from ALL Parts across ALL verticals for auto-mapping.
     Returns list of {part_id, keywords: set(), zone_name, part_name, ...}
     """
     import unicodedata, re
@@ -1778,8 +1777,6 @@ def _build_part_keyword_index(vertical_id=None):
         Zone, Part.zone_id == Zone.id
     ).join(Segment, Zone.segment_id == Segment.id
     ).join(Vertical, Segment.vertical_id == Vertical.id)
-    if vertical_id:
-        q = q.filter(Vertical.id == vertical_id)
 
     index = []
     for part, zone, seg, vert in q.all():
@@ -1921,8 +1918,8 @@ def _build_part_keyword_index(vertical_id=None):
     }
     return index, zone_keywords, normalize
 
-def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn, vertical_id=None):
-    """Match a product to best Part within vertical (or all if vertical_id is None).
+def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn):
+    """Match a product to best Part across all verticals.
     Returns (part_id, detected_category) tuple. part_id can be None."""
     text = normalize_fn(f"{product_name} {category}")
     words = set(text.split())
@@ -1988,9 +1985,46 @@ def _match_product_to_part(product_name, category, part_index, zone_keywords, no
     return None, ''
 
 
+def _get_or_create_part(vertical_id, category_name, product_name):
+    """Auto-create Zone + Part for unmatched products within a vertical.
+    Uses category_name from CSV to find/create a Zone, then creates a Part.
+    Returns part_id. Caches created zones/parts within the session."""
+    cat = (category_name or '').strip()
+    if not cat:
+        cat = 'Chua phan loai'
+    cat_slug = slugify(cat)
+    if not cat_slug:
+        cat_slug = 'chua-phan-loai'
+
+    # Find or create a default segment for imported products
+    seg = Segment.query.filter_by(vertical_id=vertical_id, slug='san-pham-import').first()
+    if not seg:
+        seg = Segment(vertical_id=vertical_id, name='San pham Import', slug='san-pham-import',
+                       icon='📦', description='Danh muc tu dong tao khi import', order=999)
+        db.session.add(seg)
+        db.session.flush()
+
+    # Find or create Zone from category
+    zone = Zone.query.filter_by(segment_id=seg.id, slug=cat_slug).first()
+    if not zone:
+        zone = Zone(segment_id=seg.id, name=cat[:100], slug=cat_slug,
+                     icon='📁', description=f'Tu dong tao tu CSV category: {cat}', order=0)
+        db.session.add(zone)
+        db.session.flush()
+
+    # Find or create a generic Part in this Zone
+    part = Part.query.filter_by(zone_id=zone.id).first()
+    if not part:
+        part = Part(zone_id=zone.id, name_vi=cat[:200], slug=cat_slug,
+                     description=f'San pham {cat}', status='published')
+        db.session.add(part)
+        db.session.flush()
+
+    return part.id
+
 @app.route('/admin/products/import-csv', methods=['GET', 'POST'])
 def admin_products_import_csv():
-    """Import products from CSV file with auto-mapping support"""
+    """Import products from CSV — all products go into hub, auto-create categories if needed"""
     if request.method == 'POST':
         if 'csv_file' not in request.files:
             flash('Không có file CSV', 'error')
@@ -2013,9 +2047,9 @@ def admin_products_import_csv():
         csv_reader = csv.DictReader(stream)
 
         # Get form data
-        mapping_mode = request.form.get('mapping_mode', 'manual')  # manual or auto
+        mapping_mode = request.form.get('mapping_mode', 'auto')  # auto or manual
         part_id = request.form.get('part_id')
-        fallback_part_id = request.form.get('fallback_part_id')
+        target_vertical_id = request.form.get('vertical_id')
         network = request.form.get('network', 'shopee')
         apply_deeplink = 'apply_deeplink' in request.form
 
@@ -2023,15 +2057,18 @@ def admin_products_import_csv():
             flash('Chưa chọn Part để gắn sản phẩm', 'error')
             return redirect(request.url)
 
-        # Build auto-mapping index — hub approach: search ALL verticals
+        if mapping_mode == 'auto' and not target_vertical_id:
+            flash('Chưa chọn Vertical đích để import', 'error')
+            return redirect(request.url)
+
+        target_vertical_id = int(target_vertical_id) if target_vertical_id else None
+
+        # Build auto-mapping index
         part_index = None
         zone_kw = None
         normalize_fn = None
         if mapping_mode == 'auto':
             part_index, zone_kw, normalize_fn = _build_part_keyword_index()
-            if not part_index:
-                flash('Không tìm thấy Part nào để auto-map. Hãy tạo Part trước.', 'error')
-                return redirect(request.url)
 
         # Get network for deeplink
         network_obj = None
@@ -2040,6 +2077,7 @@ def admin_products_import_csv():
 
         count = 0
         skipped = 0
+        auto_created = 0
         mapped_zones = {}  # Track mapping stats: zone_name -> count
         for row in csv_reader:
             # CSV format: sku, name, url, price, discount, image, desc, category
@@ -2047,25 +2085,31 @@ def admin_products_import_csv():
             url = row.get('url', '')
             category = row.get('category', '')
 
+            if not product_name and not url:
+                skipped += 1
+                continue
+
             # Apply deeplink if enabled and template exists
             if apply_deeplink and network_obj and network_obj.deeplink_template and url:
                 import urllib.parse
                 url = network_obj.deeplink_template.replace('{url}', urllib.parse.quote(url))
 
-            # Determine target part_id — hub approach: match across all verticals
+            # Determine target part_id
             target_part_id = None
             detected_category = ''
             if mapping_mode == 'auto':
-                target_part_id, detected_category = _match_product_to_part(
-                    product_name, category, part_index, zone_kw, normalize_fn)
-                if not target_part_id and fallback_part_id:
-                    target_part_id = int(fallback_part_id)
+                # Phase 1: try matching existing Parts by keywords
+                if part_index:
+                    target_part_id, detected_category = _match_product_to_part(
+                        product_name, category, part_index, zone_kw, normalize_fn)
+
+                # Phase 2: no match → auto-create Zone/Part in target vertical
+                if not target_part_id:
+                    target_part_id = _get_or_create_part(target_vertical_id, category, product_name)
+                    detected_category = slugify(category) if category else 'chua-phan-loai'
+                    auto_created += 1
             else:
                 target_part_id = int(part_id)
-
-            if not target_part_id:
-                skipped += 1
-                continue
 
             # Track mapping stats
             for entry in (part_index or []):
@@ -2098,8 +2142,10 @@ def admin_products_import_csv():
 
         # Build result message
         msg = f'Import {count} sản phẩm thành công!'
+        if auto_created:
+            msg += f' ({auto_created} tự tạo danh mục mới)'
         if skipped:
-            msg += f' ({skipped} bỏ qua - không match được Part)'
+            msg += f' ({skipped} bỏ qua - thiếu tên/url)'
         if mapping_mode == 'auto' and mapped_zones:
             top_zones = sorted(mapped_zones.items(), key=lambda x: -x[1])[:5]
             detail = ', '.join(f'{name}: {cnt}' for name, cnt in top_zones)
@@ -2108,19 +2154,21 @@ def admin_products_import_csv():
         return redirect(url_for('admin_products'))
 
     # GET request - show form
+    verticals = Vertical.query.order_by(Vertical.name).all()
     parts_tree = []
-    for v in Vertical.query.all():
+    for v in verticals:
         for s in v.segments:
             for z in s.zones:
                 for p in z.parts:
                     parts_tree.append({
                         'id': p.id,
+                        'vertical_id': v.id,
                         'label': f'{v.icon} {v.name} › {s.name} › {z.name} › {p.name_vi}'
                     })
 
     networks = AffiliateNetwork.query.all()
     return render_template('admin/products_import_csv.html',
-        parts_tree=parts_tree, networks=networks)
+        verticals=verticals, parts_tree=parts_tree, networks=networks)
 
 @app.route('/admin/scheduled-imports')
 def admin_scheduled_imports():
