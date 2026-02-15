@@ -125,6 +125,14 @@ body {
   line-height: 1.2;
   letter-spacing: -0.5px;
   margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-hero h1 .hero-icon {
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .page-hero .subtitle {
