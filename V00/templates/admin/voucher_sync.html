@@ -68,17 +68,68 @@
   </p>
 </div>
 
-<!-- ACTION BUTTONS -->
-<div style="display:flex;gap:10px;margin:24px 0;flex-wrap:wrap">
-  <button class="btn btn-primary" onclick="fetchOffers()" id="btnFetch" {{ 'disabled' if not api_connected }}>
-    🔍 Xem Offers từ AccessTrade
-  </button>
-  <button class="btn btn-primary" onclick="runSyncNow()" id="btnRunSync" {{ 'disabled' if not api_connected }} style="background:#27ae60">
-    ⚡ Sync ngay (tự động import)
-  </button>
-  <button class="btn btn-danger" onclick="cleanupExpired()" id="btnCleanup">
-    🗑️ Xóa voucher hết hạn
-  </button>
+<!-- SOURCE TABS + FILTERS -->
+<div style="margin:24px 0">
+  <div class="sync-tabs" style="display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:16px">
+    <button class="sync-tab active" data-tab="all" onclick="switchTab('all')">📦 Tất cả Offers</button>
+    <button class="sync-tab" data-tab="hot" onclick="switchTab('hot')">🔥 Hot Coupons</button>
+    <button class="sync-tab" data-tab="expiring" onclick="switchTab('expiring')">⏰ Sắp hết hạn</button>
+    <button class="sync-tab" data-tab="url" onclick="switchTab('url')">🔗 Tìm theo URL</button>
+  </div>
+
+  <!-- Tab: ALL OFFERS (with merchant filter) -->
+  <div class="sync-tab-content active" id="tabAll">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <select id="merchantFilter" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);min-width:180px">
+        <option value="">🏪 Tất cả Merchant</option>
+      </select>
+      <button class="btn btn-primary" onclick="fetchOffers()" id="btnFetch" {{ 'disabled' if not api_connected }}>
+        🔍 Xem Offers
+      </button>
+      <button class="btn btn-primary" onclick="runSyncNow()" id="btnRunSync" {{ 'disabled' if not api_connected }} style="background:#27ae60">
+        ⚡ Sync ngay
+      </button>
+      <button class="btn btn-danger" onclick="cleanupExpired()" id="btnCleanup">
+        🗑️ Xóa hết hạn
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab: HOT COUPONS -->
+  <div class="sync-tab-content" id="tabHot" style="display:none">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <select id="hotPeriod" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)">
+        <option value="1">🔥 Hot tuần này</option>
+        <option value="2">📅 Hot tháng này</option>
+      </select>
+      <button class="btn btn-primary" onclick="fetchHotCoupons()" id="btnFetchHot" {{ 'disabled' if not api_connected }}>
+        🔍 Xem Hot Coupons
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab: EXPIRING SOON -->
+  <div class="sync-tab-content" id="tabExpiring" style="display:none">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-primary" onclick="fetchExpiring()" id="btnFetchExpiring" {{ 'disabled' if not api_connected }}>
+        🔍 Xem KM sắp hết hạn
+      </button>
+      <span style="font-size:13px;color:var(--text-dim)">Lấy các khuyến mãi sắp hết hạn từ AccessTrade</span>
+    </div>
+  </div>
+
+  <!-- Tab: URL SEARCH -->
+  <div class="sync-tab-content" id="tabUrl" style="display:none">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="searchUrl" placeholder="Dán link sản phẩm Shopee/Tiki..." style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);flex:1;min-width:300px">
+      <button class="btn btn-primary" onclick="searchByUrl()" id="btnSearchUrl" {{ 'disabled' if not api_connected }}>
+        🔍 Tìm mã giảm giá
+      </button>
+    </div>
+    <p style="font-size:13px;color:var(--text-dim);margin-top:8px">
+      Hỗ trợ link Shopee & Tiki (bao gồm short link). Tìm mã giảm giá áp dụng cho sản phẩm cụ thể.
+    </p>
+  </div>
 </div>
 
 <!-- FETCH RESULTS (hidden by default) -->
@@ -113,6 +164,7 @@
       <th>Title</th>
       <th>Merchant</th>
       <th>Discount</th>
+      <th>Min Order</th>
       <th>Valid To</th>
       <th>Status</th>
       <th></th>
@@ -125,6 +177,7 @@
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ v.title }}">{{ v.title[:35] }}{% if v.title|length > 35 %}..{% endif %}</td>
       <td style="white-space:nowrap">{{ v.icon }} {{ v.merchant[:15] }}</td>
       <td>{{ v.get_discount_text() }}</td>
+      <td style="font-size:13px">{% if v.min_order and v.min_order > 0 %}{{ '{:,.0f}'.format(v.min_order) }}đ{% else %}—{% endif %}</td>
       <td style="font-size:13px">{{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</td>
       <td>
         {% if v.is_valid() %}<span class="status-badge live">Active</span>
@@ -141,22 +194,34 @@
 <style>
 .offer-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:12px; }
 .offer-card.imported { opacity:0.5; }
-.offer-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.offer-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
 .offer-merchant { font-weight:700; font-size:15px; }
-.offer-name { font-size:14px; color:var(--text-dim); flex:1; }
+.offer-name { font-size:14px; color:var(--text-dim); flex:1; min-width:150px; }
 .offer-dates { font-size:12px; color:var(--text-dim); }
 .offer-status { font-size:12px; padding:3px 8px; border-radius:6px; font-weight:600; }
 .offer-status.new { background:rgba(39,174,96,0.1); color:#27ae60; }
 .offer-status.exists { background:rgba(231,76,60,0.1); color:#e74c3c; }
+.offer-meta { display:flex; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--text-dim); margin-bottom:8px; }
+.offer-meta-tag { padding:2px 8px; border-radius:4px; background:var(--bg); font-weight:500; }
+.offer-meta-tag.discount { color:#27ae60; background:rgba(39,174,96,0.1); }
+.offer-meta-tag.spend { color:#e67e22; background:rgba(230,126,34,0.1); }
+.offer-meta-tag.usage { color:#3498db; background:rgba(52,152,219,0.1); }
+.offer-meta-tag.time { color:#9b59b6; background:rgba(155,89,182,0.1); }
 .coupon-row { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--bg); border-radius:6px; margin-top:6px; font-size:14px; }
 .coupon-row code { font-family:'DM Mono',monospace; font-weight:600; font-size:13px; padding:2px 8px; background:var(--surface); border:1px dashed var(--border); border-radius:4px; }
 .coupon-row .coupon-desc { flex:1; color:var(--text-dim); font-size:13px; }
 .coupon-check { width:18px; height:18px; accent-color:var(--accent,#e74c3c); }
 .notice-warn { background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); }
+.sync-tabs { }
+.sync-tab { padding:10px 18px; border:none; background:none; cursor:pointer; font-size:14px; font-weight:600; color:var(--text-dim); border-bottom:3px solid transparent; transition:all .2s; }
+.sync-tab:hover { color:var(--text); }
+.sync-tab.active { color:var(--accent,#e74c3c); border-bottom-color:var(--accent,#e74c3c); }
+.sync-tab-content { padding:16px 0; }
 </style>
 
 <script>
 let fetchedOffers = [];
+let merchantsLoaded = false;
 
 function showStatus(msg, type) {
   const el = document.getElementById('syncStatus');
@@ -167,13 +232,44 @@ function showStatus(msg, type) {
   if (type !== 'loading') setTimeout(() => el.style.display = 'none', 8000);
 }
 
+function switchTab(tab) {
+  document.querySelectorAll('.sync-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sync-tab-content').forEach(t => t.style.display = 'none');
+  document.querySelector(`.sync-tab[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+}
+
+// Load merchant dropdown on page load
+async function loadMerchants() {
+  if (merchantsLoaded) return;
+  try {
+    const resp = await fetch('/admin/voucher-sync/merchants');
+    const data = await resp.json();
+    const sel = document.getElementById('merchantFilter');
+    (data.merchants || []).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.login_name || m.id;
+      opt.textContent = `${m.display_name} (${m.total_offer})`;
+      sel.appendChild(opt);
+    });
+    merchantsLoaded = true;
+  } catch(e) { /* silently fail */ }
+}
+
 async function fetchOffers() {
   const btn = document.getElementById('btnFetch');
+  const merchant = document.getElementById('merchantFilter').value;
   btn.disabled = true; btn.textContent = '⏳ Đang lấy dữ liệu...';
   showStatus('🔄 Đang kết nối AccessTrade API...', 'loading');
 
   try {
-    const resp = await fetch('/admin/voucher-sync/fetch', { method: 'POST' });
+    const body = { source: 'all' };
+    if (merchant) body.merchant = merchant;
+    const resp = await fetch('/admin/voucher-sync/fetch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
     const data = await resp.json();
     if (data.error) { showStatus('❌ ' + data.error, 'error'); return; }
 
@@ -187,8 +283,101 @@ async function fetchOffers() {
   } catch (e) {
     showStatus('❌ Lỗi kết nối: ' + e.message, 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '🔍 Xem Offers từ AccessTrade';
+    btn.disabled = false; btn.textContent = '🔍 Xem Offers';
   }
+}
+
+async function fetchHotCoupons() {
+  const btn = document.getElementById('btnFetchHot');
+  const period = document.getElementById('hotPeriod').value;
+  btn.disabled = true; btn.textContent = '⏳ Đang lấy hot coupons...';
+  showStatus('🔄 Đang lấy hot coupons từ AccessTrade...', 'loading');
+
+  try {
+    const resp = await fetch('/admin/voucher-sync/fetch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ source: 'hot', period: parseInt(period) })
+    });
+    const data = await resp.json();
+    if (data.error) { showStatus('❌ ' + data.error, 'error'); return; }
+
+    fetchedOffers = data.offers || [];
+    document.getElementById('fetchTitle').textContent =
+      `🔥 ${data.total_offers} Hot Coupons — ${data.total_coupons} mã (${data.existing_count} đã import)`;
+
+    renderOffers(fetchedOffers);
+    document.getElementById('fetchResults').style.display = 'block';
+    showStatus(`✅ Đã tìm thấy ${data.total_offers} hot coupons`, 'success');
+  } catch (e) {
+    showStatus('❌ Lỗi: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Xem Hot Coupons';
+  }
+}
+
+async function fetchExpiring() {
+  const btn = document.getElementById('btnFetchExpiring');
+  btn.disabled = true; btn.textContent = '⏳ Đang lấy KM sắp hết hạn...';
+  showStatus('🔄 Đang lấy khuyến mãi sắp hết hạn...', 'loading');
+
+  try {
+    const resp = await fetch('/admin/voucher-sync/fetch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ source: 'expiring' })
+    });
+    const data = await resp.json();
+    if (data.error) { showStatus('❌ ' + data.error, 'error'); return; }
+
+    fetchedOffers = data.offers || [];
+    document.getElementById('fetchTitle').textContent =
+      `⏰ ${data.total_offers} KM sắp hết hạn — ${data.total_coupons} mã (${data.existing_count} đã import)`;
+
+    renderOffers(fetchedOffers);
+    document.getElementById('fetchResults').style.display = 'block';
+    showStatus(`✅ Đã tìm thấy ${data.total_offers} KM sắp hết hạn`, 'success');
+  } catch (e) {
+    showStatus('❌ Lỗi: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Xem KM sắp hết hạn';
+  }
+}
+
+async function searchByUrl() {
+  const url = document.getElementById('searchUrl').value.trim();
+  if (!url) { showStatus('⚠️ Vui lòng nhập link sản phẩm', 'error'); return; }
+
+  const btn = document.getElementById('btnSearchUrl');
+  btn.disabled = true; btn.textContent = '⏳ Đang tìm mã...';
+  showStatus('🔄 Đang tìm mã giảm giá cho sản phẩm...', 'loading');
+
+  try {
+    const resp = await fetch('/admin/voucher-sync/fetch', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ source: 'url', product_url: url })
+    });
+    const data = await resp.json();
+    if (data.error) { showStatus('❌ ' + data.error, 'error'); return; }
+
+    fetchedOffers = data.offers || [];
+    document.getElementById('fetchTitle').textContent =
+      `🔗 ${data.total_offers} mã giảm giá cho sản phẩm (${data.existing_count} đã import)`;
+
+    renderOffers(fetchedOffers);
+    document.getElementById('fetchResults').style.display = 'block';
+    showStatus(`✅ Tìm thấy ${data.total_offers} coupons cho sản phẩm`, 'success');
+  } catch (e) {
+    showStatus('❌ Lỗi: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 Tìm mã giảm giá';
+  }
+}
+
+function fmtNum(n) {
+  if (n === null || n === undefined) return '';
+  return Number(n).toLocaleString('vi-VN');
 }
 
 function renderOffers(offers) {
@@ -206,6 +395,20 @@ function renderOffers(offers) {
         <span class="offer-dates">${o.start_date ? o.start_date.substring(0,10) : ''} → ${o.end_date ? o.end_date.substring(0,10) : ''}</span>
       </div>`;
 
+    // Rich meta tags from new API fields
+    const metaTags = [];
+    if (o.discount_value) metaTags.push(`<span class="offer-meta-tag discount">Giảm ${fmtNum(o.discount_value)}đ</span>`);
+    if (o.discount_percentage) metaTags.push(`<span class="offer-meta-tag discount">Giảm ${o.discount_percentage}%</span>`);
+    if (o.min_spend) metaTags.push(`<span class="offer-meta-tag spend">Đơn tối thiểu ${fmtNum(o.min_spend)}đ</span>`);
+    if (o.max_value) metaTags.push(`<span class="offer-meta-tag spend">Giảm tối đa ${fmtNum(o.max_value)}đ</span>`);
+    if (o.percentage_used !== null && o.percentage_used !== undefined) metaTags.push(`<span class="offer-meta-tag usage">Đã dùng ${o.percentage_used}%</span>`);
+    if (o.time_left) metaTags.push(`<span class="offer-meta-tag time">${o.time_left}</span>`);
+    if (o.category) metaTags.push(`<span class="offer-meta-tag">${o.category}</span>`);
+
+    if (metaTags.length) {
+      html += `<div class="offer-meta">${metaTags.join('')}</div>`;
+    }
+
     if (o.description) {
       html += `<div style="font-size:13px;color:var(--text-dim);margin-bottom:8px">${o.description.substring(0,150)}${o.description.length > 150 ? '...' : ''}</div>`;
     }
@@ -217,11 +420,15 @@ function renderOffers(offers) {
           <input type="checkbox" class="coupon-check" data-offer='${JSON.stringify({
             offer_id: o.offer_id, code: c.code, merchant: o.merchant,
             title: c.description || o.offer_name, description: o.description,
-            aff_link: o.aff_link, start_date: c.start_date || o.start_date, end_date: c.end_date || o.end_date
+            aff_link: o.aff_link, start_date: c.start_date || o.start_date, end_date: c.end_date || o.end_date,
+            discount_value: o.discount_value, discount_percentage: o.discount_percentage,
+            min_spend: o.min_spend, max_value: o.max_value
           }).replace(/'/g, "&#39;")}' ${cImported ? 'disabled' : ''} onchange="updateCount()">
           <code>${c.code || '—'}</code>
           <span class="coupon-desc">${c.description || o.offer_name}</span>
           ${c.discount ? '<span style="font-weight:600;font-size:13px">'+c.discount+'</span>' : ''}
+          ${c.remain !== null && c.remain !== undefined ? '<span style="font-size:11px;color:#3498db">còn '+c.remain+'</span>' : ''}
+          ${c.time_left ? '<span style="font-size:11px;color:#9b59b6">'+c.time_left+'</span>' : ''}
           ${cImported ? '<span style="font-size:12px;color:#e74c3c">đã có</span>' : ''}
         </div>`;
       }
@@ -231,7 +438,9 @@ function renderOffers(offers) {
         <input type="checkbox" class="coupon-check" data-offer='${JSON.stringify({
           offer_id: o.offer_id, code: '', merchant: o.merchant,
           title: o.offer_name, description: o.description,
-          aff_link: o.aff_link, start_date: o.start_date, end_date: o.end_date
+          aff_link: o.aff_link, start_date: o.start_date, end_date: o.end_date,
+          discount_value: o.discount_value, discount_percentage: o.discount_percentage,
+          min_spend: o.min_spend, max_value: o.max_value
         }).replace(/'/g, "&#39;")}' ${isImported ? 'disabled' : ''} onchange="updateCount()">
         <span class="coupon-desc">Deal: ${o.offer_name}</span>
         ${isImported ? '<span style="font-size:12px;color:#e74c3c">đã có</span>' : ''}
@@ -298,7 +507,7 @@ async function runSyncNow() {
   } catch (e) {
     showStatus('❌ Lỗi: ' + e.message, 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '⚡ Sync ngay (tự động import)';
+    btn.disabled = false; btn.textContent = '⚡ Sync ngay';
   }
 }
 
@@ -331,5 +540,8 @@ async function saveAutoSync() {
     s.style.display = 'inline'; setTimeout(() => s.style.display = 'none', 3000);
   } catch(e) { alert('Lỗi: ' + e.message); }
 }
+
+// Load merchants on page load
+document.addEventListener('DOMContentLoaded', loadMerchants);
 </script>
 {% endblock %}

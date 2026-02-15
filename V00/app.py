@@ -2742,23 +2742,61 @@ def admin_voucher_sync():
         last_sync=last_sync, last_sync_count=last_sync_count, last_sync_error=last_sync_error,
         recent=recent)
 
+@app.route('/admin/voucher-sync/merchants')
+def admin_voucher_sync_merchants():
+    """Get merchant list from AccessTrade API for dropdown filter"""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return {'merchants': []}
+    try:
+        merchants = api.get_merchant_list()
+        return {'merchants': merchants}
+    except Exception:
+        return {'merchants': []}
+
 @app.route('/admin/voucher-sync/fetch', methods=['POST'])
 def admin_voucher_sync_fetch():
-    """Fetch offers from AccessTrade API (preview before import)"""
+    """Fetch offers from AccessTrade API (preview before import).
+
+    Supports multiple sources via JSON body:
+      source: 'all' (default) | 'hot' | 'expiring' | 'url'
+      merchant: filter by merchant (for source='all')
+      period: 1=weekly, 2=monthly (for source='hot')
+      product_url: product link (for source='url')
+    """
     from accesstrade_integration import get_accesstrade_api
     api = get_accesstrade_api()
     if not api:
         return {'error': 'AccessTrade API chưa cấu hình. Vào Settings → API để nhập key.'}, 400
 
     try:
-        offers = api.get_offers_detailed(limit=100)
+        data = request.get_json(silent=True) or {}
+        source = data.get('source', 'all')
+        merchant = data.get('merchant', '')
+
+        if source == 'hot':
+            period = data.get('period', 1)
+            raw = api.get_coupons_hot(limit=50, date=period)
+            offers = [api._parse_offer(o) for o in raw]
+        elif source == 'expiring':
+            offers = api.get_offers_detailed(limit=50, scope='expiring')
+        elif source == 'url':
+            product_url = data.get('product_url', '').strip()
+            if not product_url:
+                return {'error': 'Vui lòng nhập link sản phẩm'}, 400
+            raw = api.search_coupons_by_url(product_url)
+            offers = [api._parse_offer(o) for o in raw]
+        else:
+            offers = api.get_offers_detailed(limit=100, merchant=merchant or None)
+
         # Count total coupons
         total_coupons = sum(len(o.get('coupons', [])) for o in offers)
         # Mark which ones already exist
         existing_ids = set()
         for v in Voucher.query.filter(Voucher.accesstrade_offer_id != '', Voucher.accesstrade_offer_id != None).all():
             existing_ids.add(v.accesstrade_offer_id)
-        existing_codes = set(v.code for v in Voucher.query.all())
+        existing_codes = set(v.code.upper() for v in Voucher.query.all())
 
         for o in offers:
             oid = o['offer_id']
@@ -2814,8 +2852,20 @@ def admin_voucher_sync_import():
             title = item.get('title') or item.get('offer_name') or f'Ưu đãi {merchant}'
             desc = item.get('description', '')
 
-            # Parse discount from title/description
-            d_type, d_val = _parse_discount(title + ' ' + desc)
+            # Use API discount fields if available, fallback to parsing title
+            api_disc_val = item.get('discount_value')
+            api_disc_pct = item.get('discount_percentage')
+            api_min_spend = item.get('min_spend')
+            api_max_value = item.get('max_value')
+
+            if api_disc_pct and float(api_disc_pct) > 0:
+                d_type = 'percentage'
+                d_val = float(api_disc_pct)
+            elif api_disc_val and float(api_disc_val) > 0:
+                d_type = 'fixed_amount'
+                d_val = float(api_disc_val)
+            else:
+                d_type, d_val = _parse_discount(title + ' ' + desc)
 
             # Parse dates
             valid_from = _parse_datetime(item.get('start_date')) or datetime.utcnow()
@@ -2831,6 +2881,8 @@ def admin_voucher_sync_import():
                 category=_guess_category(merchant),
                 discount_type=d_type,
                 discount_value=d_val,
+                min_order=float(api_min_spend) if api_min_spend else 0,
+                max_discount=float(api_max_value) if api_max_value else 0,
                 valid_from=valid_from,
                 valid_to=valid_to,
                 network='accesstrade',
@@ -2895,13 +2947,26 @@ def admin_voucher_sync_run():
             merchant = offer.get('merchant', 'N/A')
             # Import offer-level voucher
             coupons = offer.get('coupons', [])
+            # Extract API discount fields
+            api_disc_pct = offer.get('discount_percentage')
+            api_disc_val = offer.get('discount_value')
+            api_min_spend = offer.get('min_spend')
+            api_max_value = offer.get('max_value')
+
             if coupons:
                 for c in coupons:
                     code = (c.get('code', '') or '').upper().strip()
                     if not code or code in existing_codes:
                         continue
                     title = c.get('description') or offer.get('offer_name') or f'Ưu đãi {merchant}'
-                    d_type, d_val = _parse_discount(title)
+
+                    if api_disc_pct and float(api_disc_pct) > 0:
+                        d_type, d_val = 'percentage', float(api_disc_pct)
+                    elif api_disc_val and float(api_disc_val) > 0:
+                        d_type, d_val = 'fixed_amount', float(api_disc_val)
+                    else:
+                        d_type, d_val = _parse_discount(title)
+
                     valid_from = _parse_datetime(c.get('start_date') or offer.get('start_date')) or datetime.utcnow()
                     valid_to = _parse_datetime(c.get('end_date') or offer.get('end_date'))
                     if not valid_to:
@@ -2912,6 +2977,8 @@ def admin_voucher_sync_run():
                         description=offer.get('description', '')[:2000],
                         merchant=merchant, category=_guess_category(merchant),
                         discount_type=d_type, discount_value=d_val,
+                        min_order=float(api_min_spend) if api_min_spend else 0,
+                        max_discount=float(api_max_value) if api_max_value else 0,
                         valid_from=valid_from, valid_to=valid_to,
                         network='accesstrade', affiliate_url=offer.get('aff_link', ''),
                         icon=_guess_icon(merchant), color=_guess_color(merchant),
@@ -2927,7 +2994,14 @@ def admin_voucher_sync_run():
                 if code in existing_codes:
                     continue
                 title = offer.get('offer_name') or f'Ưu đãi {merchant}'
-                d_type, d_val = _parse_discount(title + ' ' + offer.get('description', ''))
+
+                if api_disc_pct and float(api_disc_pct) > 0:
+                    d_type, d_val = 'percentage', float(api_disc_pct)
+                elif api_disc_val and float(api_disc_val) > 0:
+                    d_type, d_val = 'fixed_amount', float(api_disc_val)
+                else:
+                    d_type, d_val = _parse_discount(title + ' ' + offer.get('description', ''))
+
                 valid_from = _parse_datetime(offer.get('start_date')) or datetime.utcnow()
                 valid_to = _parse_datetime(offer.get('end_date'))
                 if not valid_to:
@@ -2937,6 +3011,8 @@ def admin_voucher_sync_run():
                     description=offer.get('description', '')[:2000],
                     merchant=merchant, category=_guess_category(merchant),
                     discount_type=d_type, discount_value=d_val,
+                    min_order=float(api_min_spend) if api_min_spend else 0,
+                    max_discount=float(api_max_value) if api_max_value else 0,
                     valid_from=valid_from, valid_to=valid_to,
                     network='accesstrade', affiliate_url=offer.get('aff_link', ''),
                     icon=_guess_icon(merchant), color=_guess_color(merchant),
