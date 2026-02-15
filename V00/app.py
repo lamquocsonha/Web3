@@ -1762,8 +1762,9 @@ def admin_products_ai_classify_apply():
     return admin_ai_center_bulk_action()
 
 
-def _build_part_keyword_index():
-    """Build keyword index from ALL Parts across ALL verticals for hub auto-mapping.
+def _build_part_keyword_index(vertical_id=None):
+    """Build keyword index from Parts for auto-mapping.
+    If vertical_id is provided, only index Parts belonging to that vertical.
     Returns list of {part_id, keywords: set(), zone_name, part_name, ...}
     """
     import unicodedata, re
@@ -1777,6 +1778,8 @@ def _build_part_keyword_index():
         Zone, Part.zone_id == Zone.id
     ).join(Segment, Zone.segment_id == Segment.id
     ).join(Vertical, Segment.vertical_id == Vertical.id)
+    if vertical_id:
+        q = q.filter(Vertical.id == vertical_id)
 
     index = []
     for part, zone, seg, vert in q.all():
@@ -1918,8 +1921,8 @@ def _build_part_keyword_index():
     }
     return index, zone_keywords, normalize
 
-def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn):
-    """Match a product to best Part across all verticals (hub approach).
+def _match_product_to_part(product_name, category, part_index, zone_keywords, normalize_fn, vertical_id=None):
+    """Match a product to best Part within vertical (or all if vertical_id is None).
     Returns (part_id, detected_category) tuple. part_id can be None."""
     text = normalize_fn(f"{product_name} {category}")
     words = set(text.split())
