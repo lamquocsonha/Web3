@@ -15,6 +15,7 @@ class Vertical(db.Model):
     default_mode = db.Column(db.String(10), default='minimal')
     template = db.Column(db.String(20), default='general')  # Layout: general, blog, newspaper
     style = db.Column(db.String(20), default='classic')  # Theme: classic, modern, tech, beauty, car, pet
+    shop_link = db.Column(db.String(500), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     segments = db.relationship('Segment', backref='vertical', cascade='all,delete-orphan', lazy=True)
 
@@ -89,13 +90,13 @@ class AffiliateCampaign(db.Model):
 
 class AffiliateLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    part_id = db.Column(db.Integer, db.ForeignKey('part.id'), nullable=False)
-    network = db.Column(db.String(50), nullable=False)
+    part_id = db.Column(db.Integer, db.ForeignKey('part.id'), nullable=False, index=True)
+    network = db.Column(db.String(50), nullable=False, index=True)
     product_name = db.Column(db.String(300), default='')
     url = db.Column(db.String(1000), nullable=False)
     price = db.Column(db.Float, default=0)
     image_url = db.Column(db.String(500), default='')
-    is_active = db.Column(db.Boolean, default=True)
+    is_active = db.Column(db.Boolean, default=True, index=True)
     clicks = db.Column(db.Integer, default=0)
     conversions = db.Column(db.Integer, default=0)
 

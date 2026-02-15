@@ -41,6 +41,11 @@
       <small style="display:block;margin-top:4px;font-size:14px;color:var(--text-dim)">Font, colors, buttons via CSS variables</small>
     </div>
   </div>
+  <div class="form-group">
+    <label class="form-label">Shop Link</label>
+    <input class="form-input" name="shop_link" value="{{ vertical.shop_link if vertical else '' }}" placeholder="https://shopee.vn/shop/...">
+    <small style="display:block;margin-top:4px;font-size:14px;color:var(--text-dim)">Link shop affiliate (Shopee, Lazada...)</small>
+  </div>
   <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" name="description" style="min-height:100px">{{ vertical.description if vertical else '' }}</textarea></div>
   <div class="form-actions">
     <button type="submit" class="btn btn-primary">{% if vertical %}Save{% else %}Create{% endif %}</button>

@@ -21,6 +21,7 @@
         <th style="text-align:center">SP</th>
         <th style="text-align:center">Bài</th>
         <th>Style</th>
+        <th>Shop</th>
         <th>Status</th>
         <th>Actions</th>
       </tr>
@@ -33,7 +34,7 @@
           <strong>Trang chủ</strong>
           <div style="font-size:14px;color:var(--text-dim)"><a href="{{ url_for('unilab_home') }}" target="_blank" style="color:var(--accent);text-decoration:none;font-family:'DM Mono'">/</a></div>
         </td>
-        <td colspan="5" style="font-size:13px;color:var(--text-dim)">Homepage — tổng hợp bài viết từ tất cả verticals</td>
+        <td colspan="6" style="font-size:13px;color:var(--text-dim)">Homepage — tổng hợp bài viết từ tất cả verticals</td>
         <td><a href="{{ url_for('unilab_home') }}" target="_blank" class="btn btn-ghost btn-sm">Xem ↗</a></td>
       </tr>
       <tr style="background:var(--accent-bg,rgba(139,92,246,0.04))">
@@ -42,7 +43,7 @@
           <strong>Voucher</strong>
           <div style="font-size:14px;color:var(--text-dim)"><a href="{{ url_for('voucher_index') }}" target="_blank" style="color:var(--accent);text-decoration:none;font-family:'DM Mono'">/voucher</a></div>
         </td>
-        <td colspan="5" style="font-size:13px;color:var(--text-dim)">Mã giảm giá & voucher — AccessTrade auto-sync</td>
+        <td colspan="6" style="font-size:13px;color:var(--text-dim)">Mã giảm giá & voucher — AccessTrade auto-sync</td>
         <td><a href="{{ url_for('voucher_index') }}" target="_blank" class="btn btn-ghost btn-sm">Xem ↗</a></td>
       </tr>
       {% for data in verticals_data %}
@@ -57,6 +58,7 @@
         <td style="font-family:'DM Mono';text-align:center">{{ data.products }}</td>
         <td style="font-family:'DM Mono';text-align:center">{{ data.articles }}</td>
         <td><span style="font-family:'DM Mono';font-size:14px;padding:2px 6px;background:rgba(139,92,246,0.1);border-radius:4px;color:#8b5cf6">{{ v.style or 'classic' }}</span></td>
+        <td>{% if v.shop_link %}<a href="{{ v.shop_link }}" target="_blank" style="color:var(--accent);font-size:13px;text-decoration:none" title="{{ v.shop_link }}">🔗 Link</a>{% else %}<span style="color:var(--text-dim);font-size:13px">—</span>{% endif %}</td>
         <td><span class="status-badge {% if v.status == 'live' %}live{% else %}draft{% endif %}">{{ v.status }}</span></td>
         <td style="white-space:nowrap">
           <a href="{{ url_for('admin_vertical_detail', vid=v.id) }}" class="btn btn-ghost btn-sm">Chi tiết</a>

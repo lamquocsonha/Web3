@@ -310,7 +310,8 @@ def admin_vertical_new():
             icon=request.form.get('icon',''), color=request.form.get('color','#6c5ce7'),
             description=request.form.get('description',''), status='draft',
             template=request.form.get('template','general'),
-            style=request.form.get('style','classic')
+            style=request.form.get('style','classic'),
+            shop_link=request.form.get('shop_link','')
         )
         db.session.add(v)
         db.session.commit()
@@ -334,6 +335,7 @@ def admin_vertical_edit(vid):
         v.default_mode = request.form.get('default_mode','minimal')
         v.template = request.form.get('template','general')
         v.style = request.form.get('style','classic')
+        v.shop_link = request.form.get('shop_link','')
         db.session.commit()
         flash(f'Da cap nhat: {v.name}', 'success')
         return redirect(url_for('admin_vertical_detail', vid=v.id))
@@ -3844,51 +3846,54 @@ def shop_index():
     else:  # popular
         q = q.order_by(AffiliateLink.clicks.desc(), AffiliateLink.price.desc())
 
-    filtered_count = q.count()
+    # Paginate (already includes total count internally)
     pagination = q.paginate(page=page, per_page=per_page, error_out=False)
     products = pagination.items
+    filtered_count = pagination.total
 
     # All verticals for nav
     verticals = Vertical.query.order_by(Vertical.name).all()
 
-    # Total products (unfiltered)
-    total_products = db.session.query(db.func.count(AffiliateLink.id)).filter(
-        AffiliateLink.is_active == True).scalar() or 0
+    # Per-vertical counts + total in one query
+    vc_rows = db.session.query(Vertical.slug, db.func.count(AffiliateLink.id)).join(
+        Segment, Vertical.id == Segment.vertical_id
+    ).join(Zone, Segment.id == Zone.segment_id
+    ).join(Part, Zone.id == Part.zone_id
+    ).join(AffiliateLink, Part.id == AffiliateLink.part_id
+    ).filter(AffiliateLink.is_active == True
+    ).group_by(Vertical.slug).all()
+    vertical_counts = dict(vc_rows)
+    total_products = sum(c for _, c in vc_rows)
 
-    # Per-vertical counts
-    vertical_counts = dict(
-        db.session.query(Vertical.slug, db.func.count(AffiliateLink.id)).join(
-            Segment, Vertical.id == Segment.vertical_id
-        ).join(Zone, Segment.id == Zone.segment_id
-        ).join(Part, Zone.id == Part.zone_id
-        ).join(AffiliateLink, Part.id == AffiliateLink.part_id
-        ).filter(AffiliateLink.is_active == True
-        ).group_by(Vertical.slug).all()
-    )
-
-    # Sidebar segments/zones (filtered by vertical if selected)
-    sidebar_segments = []
-    seg_q = Segment.query
+    # Sidebar: single query for all zone counts (replaces N+1)
+    zone_count_q = db.session.query(
+        Zone.id, Zone.slug, Zone.name, Zone.icon, Zone.color, Zone.segment_id, Zone.order,
+        db.func.count(AffiliateLink.id).label('cnt')
+    ).join(Part, Zone.id == Part.zone_id
+    ).join(AffiliateLink, Part.id == AffiliateLink.part_id
+    ).filter(AffiliateLink.is_active == True)
     if f_vertical:
-        vt = Vertical.query.filter_by(slug=f_vertical).first()
-        if vt:
-            seg_q = seg_q.filter_by(vertical_id=vt.id)
-    else:
-        # Show all segments but limit to verticals that have products
-        active_vids = [vid for vid, in db.session.query(Vertical.id).join(
-            Segment).join(Zone).join(Part).join(AffiliateLink).filter(
-            AffiliateLink.is_active == True).distinct().all()]
-        seg_q = seg_q.filter(Segment.vertical_id.in_(active_vids))
+        zone_count_q = zone_count_q.join(Segment, Zone.segment_id == Segment.id
+        ).join(Vertical, Segment.vertical_id == Vertical.id
+        ).filter(Vertical.slug == f_vertical)
+    zone_count_q = zone_count_q.group_by(Zone.id).all()
 
-    for seg in seg_q.order_by(Segment.order).all():
-        zones_data = []
-        for z in sorted(seg.zones, key=lambda x: x.order):
-            zcount = db.session.query(db.func.count(AffiliateLink.id)).join(
-                Part).filter(Part.zone_id == z.id, AffiliateLink.is_active == True).scalar() or 0
-            if zcount > 0:
-                zones_data.append((z.slug, z.name, z.icon, z.color, zcount))
-        if zones_data:
-            sidebar_segments.append((seg.name, seg.icon, zones_data))
+    # Build zone lookup: segment_id -> [(slug, name, icon, color, count)]
+    zone_by_seg = {}
+    active_seg_ids = set()
+    for zid, zslug, zname, zicon, zcolor, zsid, zorder, zcnt in zone_count_q:
+        if zcnt > 0:
+            zone_by_seg.setdefault(zsid, []).append((zorder, zslug, zname, zicon, zcolor, zcnt))
+            active_seg_ids.add(zsid)
+
+    # Get segments that have active zones
+    sidebar_segments = []
+    if active_seg_ids:
+        seg_q = Segment.query.filter(Segment.id.in_(active_seg_ids)).order_by(Segment.order)
+        for seg in seg_q.all():
+            zones_data = [(s, n, i, c, cnt) for _, s, n, i, c, cnt in sorted(zone_by_seg.get(seg.id, []))]
+            if zones_data:
+                sidebar_segments.append((seg.name, seg.icon, zones_data))
 
     # Network stats
     net_q = db.session.query(
@@ -4124,6 +4129,19 @@ def _run_schema_migration():
         changed = True
     if _ensure_column('vertical', 'style', "VARCHAR(20) DEFAULT 'classic'", vert_cols):
         changed = True
+    if _ensure_column('vertical', 'shop_link', "VARCHAR(500) DEFAULT ''", vert_cols):
+        changed = True
+
+    # --- Performance indexes for shop page ---
+    try:
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS ix_affiliate_link_part_id ON affiliate_link (part_id)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS ix_affiliate_link_is_active ON affiliate_link (is_active)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS ix_affiliate_link_network ON affiliate_link (network)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS ix_part_zone_id ON part (zone_id)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS ix_zone_segment_id ON zone (segment_id)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS ix_segment_vertical_id ON segment (vertical_id)"))
+    except Exception:
+        pass
 
     # --- Affiliate Network table ---
     an_cols = _get_table_columns('affiliate_network')
