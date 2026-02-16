@@ -1,10 +1,52 @@
 """
 AccessTrade API Integration
-Fetches campaigns, offers, coupons, and statistics from AccessTrade.
+Full integration of AccessTrade Publisher API for affiliate marketing.
 
-Docs:
-- Offers/Coupons: https://developers.accesstrade.vn/api-publisher-vietnamese/lay-thong-tin-vouchers-coupons-deals/tim-kiem-danh-sach-thong-tin-khuyen-mai
-- Active Promos:  https://developers.accesstrade.vn/api-publisher-vietnamese/lay-thong-tin-cac-khuyen-mai-dang-hoat-dong
+API Reference: https://developers.accesstrade.vn/api-publisher-vietnamese
+
+Implemented endpoints:
+  ──── PRODUCTS & CATALOG ────
+  GET  /v1/datafeeds             → get_datafeeds()          — Search products from Shopee/Lazada/Tiki
+  GET  /v1/top_products          → get_top_products()       — Bestselling products
+  GET  /v1/product_detail        → get_product_detail()     — Single product detail (brand, shop, desc)
+
+  ──── LINK GENERATION ────
+  POST /v1/product_link/create   → create_tracking_link()   — Convert URLs → affiliate links
+
+  ──── TIKTOK SHOP ────
+  GET  /v2/tiktokshop_product_feeds           → tiktok_search_products() — Search TikTok products
+  POST /v2/tiktokshop_product_feeds/create_link → tiktok_create_link()  — TikTok affiliate link
+
+  ──── OFFERS & COUPONS ────
+  GET  /v1/offers_informations               → get_offers()              — Promotions list
+  GET  /v1/offers_informations (scope=expiring) → get_offers_expiring()  — Ending soon
+  GET  /v1/offers_informations (coupon=1)    → get_offers_with_coupons() — Offers with codes
+  GET  /v1/offers_informations/coupon        → get_coupons()             — Search coupons
+  GET  /v1/offers_informations/coupon_hot    → get_coupons_hot()         — Hot coupons
+  GET  /v1/offers_informations/coupon?URL=   → search_coupons_by_url()   — Coupons for product URL
+  POST /v1/offers_informations/multi_link_2_coupons → search_coupons_by_urls() — Bulk URL→coupons
+
+  ──── METADATA ────
+  GET  /v1/offers_informations/merchant_list     → get_merchant_list()     — Merchant list
+  GET  /v1/offers_informations/keyword_list      → get_keyword_list()      — Campaign keywords
+  GET  /v1/offers_informations/icontext_list     → get_merchant_keywords() — Merchant keywords
+  GET  /v1/offers_informations/list_category_coupons → get_category_list() — Industry categories
+
+  ──── CAMPAIGNS & ORDERS ────
+  GET  /v1/campaigns             → get_campaigns()          — Campaign list
+  GET  /v1/campaigns (by id)     → get_campaign_by_id()     — Single campaign
+  GET  /v1/transactions          → get_transactions()       — Transaction stats
+  GET  /v1/order-list            → get_order_list()         — Detailed orders v2
+  GET  /v1/me                    → get_account_info()       — Account info
+
+Integration points in the project:
+  - Admin Dashboard  (/admin)                → stats, campaigns, offers, order list widget
+  - Admin Products   (/admin/products)       → tracking link tool, TikTok search tool
+  - Admin Datafeeds  (/admin/products/datafeeds) → datafeeds product import
+  - Admin Voucher    (/admin/vouchers/sync)  → offers/coupons sync
+  - Shop page        (/shop)                 → hot products carousel
+  - All sidebar      (shared partials)       → hot products sidebar widget
+  - API endpoints    (/admin/api/*)          → AJAX order-list, tracking-link, tiktok
 """
 import requests
 from datetime import datetime, timedelta
