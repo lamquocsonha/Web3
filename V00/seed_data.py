@@ -974,6 +974,507 @@ def seed_pet_articles():
     print(f'[OK] {len(articles)} pet articles seeded!')
 
 
+def seed_pet_v2():
+    """Expand Pet vertical with more zones, parts, articles, products.
+    Safe to run multiple times — skips existing slugs."""
+    from models import db, Vertical, Segment, Zone, Part, AffiliateLink, Article
+    import random
+
+    pet = Vertical.query.filter_by(slug='pet').first()
+    if not pet:
+        print('[SKIP] Pet vertical not found — run seed_pet() first')
+        return
+
+    print('[+] Expanding Pet content (v2)...')
+    added_parts = 0
+    added_articles = 0
+    added_products = 0
+
+    # ── Helper: get or create zone under a segment ──
+    def get_or_create_zone(segment, zd):
+        z = Zone.query.filter_by(segment_id=segment.id, slug=zd['slug']).first()
+        if not z:
+            z = Zone(segment_id=segment.id, name=zd['name'], slug=zd['slug'],
+                     icon=zd['icon'], color=zd['color'], description=zd['desc'])
+            db.session.add(z)
+            db.session.flush()
+        return z
+
+    def add_part_if_new(zone, pd, order=0):
+        nonlocal added_parts
+        existing = Part.query.filter_by(zone_id=zone.id, slug=pd['slug']).first()
+        if existing:
+            return existing
+        p = Part(zone_id=zone.id, name_vi=pd['vi'], name_en=pd.get('en',''), slug=pd['slug'],
+                 description=pd['desc'], content=pd.get('content',''), oem_code=pd.get('oem',''),
+                 tags=pd.get('tags',''), auto_category='san-pham', order=order)
+        db.session.add(p)
+        db.session.flush()
+        added_parts += 1
+        return p
+
+    # ── Build segment lookup ──
+    seg_map = {s.slug: s for s in pet.segments}
+
+    # ================================================================
+    # SEGMENT: CHÓ — thêm parts mới
+    # ================================================================
+    cho = seg_map.get('cho')
+    if cho:
+        # ── Zone: Dinh dưỡng — thêm parts ──
+        z_dd = Zone.query.filter_by(segment_id=cho.id, slug='dinh-duong').first()
+        if z_dd:
+            new_parts_dd = [
+                {'vi':'Thức ăn theo giống','en':'Breed-Specific Food','slug':'thuc-an-theo-giong',
+                 'desc':'Thức ăn chuyên biệt cho từng giống: Poodle, Golden, Corgi, Husky, Phốc sóc',
+                 'tags':'thức ăn theo giống,breed,poodle,golden,corgi,husky,phoc soc',
+                 'content':'<h2>Tại sao cần ăn theo giống?</h2><p>Mỗi giống chó có nhu cầu dinh dưỡng riêng. Chó nhỏ (Poodle, Phốc) cần hạt nhỏ, năng lượng cao. Chó lớn (Golden, Husky) cần glucosamine cho khớp, ít calo tránh béo phì.</p><h2>Top sản phẩm</h2><p><strong>Royal Canin Breed:</strong> Có riêng cho Poodle, Golden, Chihuahua, French Bulldog — 350-500k/1.5kg. <strong>Nutrience Subzero:</strong> Công thức vùng miền (Canadian Pacific, Prairie Red) — 450-650k/2.27kg.</p>'},
+                {'vi':'Snack & Treat thưởng','en':'Dog Treats','slug':'snack-treat-cho',
+                 'desc':'Bánh thưởng, snack huấn luyện, xương gặm, thịt sấy cho chó',
+                 'tags':'snack,treat,bánh thưởng,xương gặm,thịt sấy,jerky,dental stick',
+                 'content':'<h2>Khi nào dùng treat?</h2><p><strong>Huấn luyện:</strong> Treat nhỏ, ít calo. Dùng khi chó làm đúng lệnh. <strong>Dental stick:</strong> Xương gặm giúp sạch răng, giảm mảng bám. Dùng 1-2 cái/ngày. <strong>Giải trí:</strong> Xương da bò, tai heo sấy — giữ chó bận rộn.</p><h2>Lưu ý</h2><p>Treat không quá <strong>10% lượng calo/ngày</strong>. Tránh: xương gà (gãy sắc), sô-cô-la, nho khô.</p>'},
+                {'vi':'Thức ăn chó con (Puppy)','en':'Puppy Food','slug':'thuc-an-cho-con',
+                 'desc':'Thức ăn chuyên dụng cho chó con 2 tháng - 12 tháng tuổi',
+                 'tags':'puppy,chó con,sữa chó,weaning,bổ sung canxi',
+                 'content':'<h2>Giai đoạn cai sữa (2-4 tháng)</h2><p>Ngâm hạt trong nước ấm 10-15 phút cho mềm. Cho ăn 4 bữa/ngày, mỗi bữa 1/4 khẩu phần. Bổ sung sữa chuyên dụng (KHÔNG dùng sữa bò).</p><h2>4-12 tháng</h2><p>Chuyển sang hạt khô dần. Giảm còn 3 bữa/ngày (4-6 tháng), rồi 2 bữa (6-12 tháng). Chọn sản phẩm ghi <strong>\"Puppy\"</strong> hoặc <strong>\"Growth\"</strong>.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_dd):
+                add_part_if_new(z_dd, pd, order=10+i)
+
+        # ── Zone: Y tế — thêm parts ──
+        z_yt = Zone.query.filter_by(segment_id=cho.id, slug='y-te').first()
+        if z_yt:
+            new_parts_yt = [
+                {'vi':'Nấm da & Viêm da','en':'Skin Disease','slug':'nam-da-viem-da',
+                 'desc':'Bệnh da liễu phổ biến ở chó: nấm, ghẻ, viêm da dị ứng, rụng lông',
+                 'tags':'nấm da,viêm da,ghẻ,rụng lông,dị ứng,ngứa,dermatitis',
+                 'content':'<h2>Dấu hiệu bệnh da</h2><p><strong>Nấm:</strong> Vùng tròn rụng lông, vảy trắng, ngứa nhẹ. <strong>Ghẻ:</strong> Ngứa dữ dội, gãi liên tục, da đỏ sần. <strong>Dị ứng:</strong> Ngứa toàn thân, liếm chân, viêm tai tái phát.</p><h2>Điều trị</h2><p>Nấm: tắm thuốc (Malaseb, Nizoral vet) + uống kháng nấm 4-6 tuần. Ghẻ: nhỏ thuốc (Advocate, Revolution). Dị ứng: tìm nguyên nhân (thức ăn/môi trường), dùng thuốc theo bác sĩ.</p>'},
+                {'vi':'Bệnh đường ruột','en':'Digestive Issues','slug':'benh-duong-ruot',
+                 'desc':'Tiêu chảy, nôn mửa, viêm dạ dày ruột ở chó — nguyên nhân và xử lý',
+                 'tags':'tiêu chảy,nôn,viêm ruột,đường ruột,probiotic',
+                 'content':'<h2>Nguyên nhân phổ biến</h2><p><strong>Ăn bậy:</strong> Xương gà, thức ăn thừa, rác. <strong>Thay đổi thức ăn đột ngột:</strong> Phải chuyển dần trong 7-10 ngày. <strong>Nhiễm khuẩn/virus:</strong> Parvo, viêm ruột. <strong>Ký sinh trùng:</strong> Giun, sán.</p><h2>Khi nào cần đi bác sĩ?</h2><p>Tiêu chảy > 2 ngày. Nôn > 3 lần/ngày. Phân có máu. Bỏ ăn + lờ đờ. Chó con < 6 tháng — đi NGAY.</p>'},
+                {'vi':'Chăm sóc răng miệng','en':'Dental Care','slug':'cham-soc-rang',
+                 'desc':'Đánh răng, cao răng, viêm nướu ở chó — phòng ngừa và điều trị',
+                 'tags':'răng miệng,đánh răng,cao răng,viêm nướu,dental,oral care',
+                 'content':'<h2>80% chó > 3 tuổi bị bệnh nha chu</h2><p>Mảng bám → cao răng → viêm nướu → rụng răng → nhiễm trùng máu. <strong>Phòng ngừa:</strong> Đánh răng 2-3 lần/tuần bằng kem đánh răng chuyên dụng cho chó. Cho gặm dental stick (Pedigree Dentastix, Greenies).</p>'},
+            ]
+            for i, pd in enumerate(new_parts_yt):
+                add_part_if_new(z_yt, pd, order=10+i)
+
+        # ── Zone: Huấn luyện — thêm parts ──
+        z_hl = Zone.query.filter_by(segment_id=cho.id, slug='huan-luyen').first()
+        if z_hl:
+            new_parts_hl = [
+                {'vi':'Xã hội hóa chó con','en':'Puppy Socialization','slug':'xa-hoi-hoa',
+                 'desc':'Kỹ năng xã hội hóa chó con 3-14 tuần tuổi — giai đoạn vàng',
+                 'tags':'xã hội hóa,socialization,chó con,puppy,giai đoạn vàng',
+                 'content':'<h2>Giai đoạn vàng: 3-14 tuần</h2><p>Đây là thời kỳ chó con hình thành tính cách. Cần tiếp xúc với: <strong>nhiều người</strong> (già, trẻ, đàn ông, phụ nữ), <strong>nhiều chó</strong> (size khác nhau), <strong>nhiều môi trường</strong> (công viên, phố, quán cafe). Mỗi trải nghiệm phải <strong>tích cực</strong> — kèm treat và khen.</p>'},
+                {'vi':'Chống sủa vô cớ','en':'Stop Excessive Barking','slug':'chong-sua-vo-co',
+                 'desc':'Nguyên nhân và cách huấn luyện chó giảm sủa, phù hợp chung cư',
+                 'tags':'sủa,barking,chung cư,tiếng ồn,huấn luyện',
+                 'content':'<h2>Tại sao chó sủa?</h2><p><strong>Bảo vệ lãnh thổ:</strong> Sủa khi có người lạ → Dạy lệnh "Quiet". <strong>Lo âu chia cách:</strong> Sủa khi chủ đi vắng → Tập quen dần, để đồ chơi. <strong>Thiếu vận động:</strong> Năng lượng dư thừa → Tăng thời gian dạo chơi.</p><h2>Phương pháp</h2><p>1. KHÔNG quát chó khi sủa (chó tưởng bạn sủa cùng). 2. Thưởng khi chó im lặng. 3. Dùng lệnh "Quiet" + treat ngay khi chó ngừng sủa.</p>'},
+                {'vi':'Đi dạo & Kéo dây','en':'Leash Training','slug':'di-dao-keo-day',
+                 'desc':'Dạy chó đi dạo đúng cách, không kéo dây dắt — loose leash walking',
+                 'tags':'đi dạo,kéo dây,leash walking,dây dắt,dạo phố',
+                 'content':'<h2>Chó kéo dây — sai lầm phổ biến</h2><p>Chó kéo → bạn đi theo → chó học: "kéo = được đi tiếp". <strong>Phương pháp:</strong> Khi chó kéo → ĐỨNG IM → đợi chó quay lại → khen + đi tiếp. Kiên nhẫn, lặp lại. 2-4 tuần sẽ cải thiện rõ.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_hl):
+                add_part_if_new(z_hl, pd, order=10+i)
+
+        # ── Zone: Đồ dùng — thêm parts ──
+        z_dd2 = Zone.query.filter_by(segment_id=cho.id, slug='do-dung').first()
+        if z_dd2:
+            new_parts_dd2 = [
+                {'vi':'Đồ chơi cho chó','en':'Dog Toys','slug':'do-choi-cho',
+                 'desc':'Đồ chơi gặm, bóng, kéo co, đồ chơi trí tuệ (puzzle) cho chó',
+                 'tags':'đồ chơi,bóng,kéo co,puzzle,Kong,gặm,nhai',
+                 'content':'<h2>3 loại đồ chơi cần có</h2><p><strong>Đồ gặm (chew toy):</strong> Kong Classic, xương cao su — giữ chó bận, giảm stress. <strong>Bóng/Frisbee:</strong> Vận động ngoài trời. <strong>Puzzle toy:</strong> Đồ chơi trí tuệ — cho treat vào, chó tìm cách lấy ra. Kích thích trí não.</p>'},
+                {'vi':'Quần áo & Phụ kiện','en':'Dog Clothes','slug':'quan-ao-phu-kien',
+                 'desc':'Quần áo, áo mưa, giày, kính cho chó — thời trang và bảo vệ',
+                 'tags':'quần áo chó,áo mưa,giày chó,thời trang pet,mùa đông',
+                 'content':'<h2>Khi nào chó cần mặc áo?</h2><p><strong>Giống lông ngắn</strong> (Chihuahua, Pug, French Bulldog) cần áo ấm khi < 15°C. <strong>Áo mưa</strong> cho chó đi dạo mùa mưa. <strong>Giày:</strong> Bảo vệ chân trên đường nóng (> 35°C) hoặc terrain gồ ghề.</p>'},
+                {'vi':'Bát ăn & Bình nước','en':'Food & Water Bowl','slug':'bat-an-binh-nuoc',
+                 'desc':'Chọn bát ăn, bình nước tự động, đế chống lật cho chó',
+                 'tags':'bát ăn,bình nước,tự động,chống lật,inox,ceramic',
+                 'content':'<h2>Chất liệu bát ăn</h2><p><strong>Inox:</strong> Bền, dễ rửa, an toàn. Khuyên dùng nhất. <strong>Ceramic:</strong> Nặng (không lật), đẹp. <strong>Nhựa:</strong> Rẻ nhưng dễ xước → vi khuẩn. Nên thay thường xuyên.</p><h2>Bình nước tự động</h2><p>Pet fountain (200-500k) giữ nước chảy liên tục, lọc sạch. Chó thích uống nước chảy hơn nước đứng.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_dd2):
+                add_part_if_new(z_dd2, pd, order=10+i)
+
+        # ── Zone MỚI: Làm đẹp & Grooming ──
+        z_grooming = get_or_create_zone(cho, {
+            'name':'Làm đẹp & Grooming','slug':'lam-dep','icon':'✂️','color':'#e84393',
+            'desc':'Tắm, cắt lông, chăm sóc móng, tai, mắt cho chó'})
+        grooming_parts = [
+            {'vi':'Sữa tắm & Dầu xả','en':'Dog Shampoo','slug':'sua-tam-cho',
+             'desc':'Sữa tắm chuyên dụng cho chó: chống ngứa, dưỡng lông, khử mùi',
+             'tags':'sữa tắm,dầu gội,shampoo,dưỡng lông,khử mùi,chống ngứa',
+             'content':'<h2>Tại sao không dùng sữa tắm người?</h2><p>Da chó pH 6.5-7.5, da người pH 5.5. Dùng sữa tắm người → phá hủy lớp bảo vệ da → viêm da, ngứa, rụng lông.</p><h2>Top sản phẩm</h2><p><strong>Lông trắng:</strong> Bio-Groom Super White. <strong>Chống ngứa:</strong> Malaseb (thuốc), Hartz. <strong>Dưỡng lông dài:</strong> Isle of Dogs, Chris Christensen.</p>'},
+            {'vi':'Cắt lông & Tạo kiểu','en':'Dog Grooming','slug':'cat-long-tao-kieu',
+             'desc':'Cắt lông, tạo kiểu cho chó: tại nhà và spa chuyên nghiệp',
+             'tags':'cắt lông,grooming,tỉa lông,spa chó,tông đơ,kéo cắt',
+             'content':'<h2>Tần suất cắt lông</h2><p><strong>Poodle, Bichon:</strong> Mỗi 4-6 tuần (lông không ngừng mọc). <strong>Golden, Husky:</strong> KHÔNG cạo trọc — lông 2 lớp bảo vệ khỏi nóng/lạnh. Chỉ tỉa gọn. <strong>Lông ngắn (Pug, Beagle):</strong> Chải lông tuần 1-2 lần, không cần cắt.</p>'},
+            {'vi':'Cắt móng & Vệ sinh tai','en':'Nail & Ear Care','slug':'cat-mong-ve-sinh-tai',
+             'desc':'Cắt móng đúng cách, vệ sinh tai, mắt cho chó tại nhà',
+             'tags':'cắt móng,vệ sinh tai,viêm tai,tai chó,mắt chó',
+             'content':'<h2>Cắt móng</h2><p>Mỗi 2-4 tuần. Chỉ cắt phần trong suốt, TRÁNH phần hồng (mạch máu). Dùng kềm chuyên dụng. Nếu cắt trúng mạch máu → dùng bột cầm máu (styptic powder).</p><h2>Vệ sinh tai</h2><p>Tuần 1 lần cho giống tai cụp (Cocker, Basset). Dùng dung dịch vệ sinh tai (Epiotic, Virbac). Nhỏ vào tai → massage → lau bông.</p>'},
+        ]
+        for i, pd in enumerate(grooming_parts):
+            add_part_if_new(z_grooming, pd, order=i)
+
+    # ================================================================
+    # SEGMENT: MÈO — thêm zones và parts
+    # ================================================================
+    meo = seg_map.get('meo')
+    if meo:
+        # ── Zone: Dinh dưỡng — thêm parts ──
+        z_dd_meo = Zone.query.filter_by(segment_id=meo.id, slug='dinh-duong').first()
+        if z_dd_meo:
+            new_parts_meo_dd = [
+                {'vi':'Snack & Treat mèo','en':'Cat Treats','slug':'snack-treat-meo',
+                 'desc':'Bánh thưởng, snack lỏng (Ciao Churu), thịt sấy cho mèo',
+                 'tags':'snack mèo,treat,Ciao Churu,thưởng mèo,súp thưởng,inaba',
+                 'content':'<h2>Ciao Churu — hiện tượng</h2><p>Snack lỏng Ciao Churu (Inaba, Nhật) là treat mèo bán chạy nhất VN. Dạng kem lỏng, mèo liếm trực tiếp. Giá 8-15k/thanh. Hương: cá ngừ, gà, sò điệp.</p><h2>Loại treat khác</h2><p><strong>Thịt sấy:</strong> Cá ngừ sấy, gà sấy — 30-60k/gói. <strong>Dental treat:</strong> Greenies for Cats — sạch răng. <strong>Catnip treat:</strong> Có catnip — mèo phê.</p>'},
+                {'vi':'Thức ăn mèo con (Kitten)','en':'Kitten Food','slug':'thuc-an-meo-con',
+                 'desc':'Thức ăn chuyên dụng cho mèo con 1-12 tháng, sữa thay thế',
+                 'tags':'kitten,mèo con,sữa mèo,cai sữa,Royal Canin Kitten',
+                 'content':'<h2>Sữa cho mèo con mồ côi</h2><p>KHÔNG cho uống sữa bò (gây tiêu chảy). Dùng sữa chuyên dụng: KMR, Royal Canin Babycat Milk. Cho bú bình mỗi 2-3 giờ (mèo < 2 tuần).</p><h2>Cai sữa (4-8 tuần)</h2><p>Trộn pate với sữa → giảm sữa dần → chuyển sang pate → hạt ngâm → hạt khô. Chọn sản phẩm "Kitten" (protein > 35%).</p>'},
+            ]
+            for i, pd in enumerate(new_parts_meo_dd):
+                add_part_if_new(z_dd_meo, pd, order=10+i)
+
+        # ── Zone: Y tế — thêm parts ──
+        z_yt_meo = Zone.query.filter_by(segment_id=meo.id, slug='y-te').first()
+        if z_yt_meo:
+            new_parts_meo_yt = [
+                {'vi':'Bệnh thận & Tiết niệu','en':'Kidney & Urinary','slug':'benh-than-tiet-nieu',
+                 'desc':'Bệnh thận mãn, sỏi bàng quang, viêm đường tiết niệu ở mèo',
+                 'tags':'bệnh thận,thận mãn,sỏi,tiết niệu,FLUTD,CKD,uống nước',
+                 'content':'<h2>Bệnh thận — "kẻ giết thầm lặng"</h2><p>50% mèo > 10 tuổi bị bệnh thận mãn (CKD). Dấu hiệu: uống nhiều nước, tiểu nhiều, gầy dần, nôn. <strong>Phòng:</strong> Cho ăn thức ăn ướt, đặt nhiều bát nước/pet fountain, xét nghiệm máu hàng năm sau 7 tuổi.</p><h2>FLUTD (Hội chứng tiết niệu)</h2><p>Mèo đực hay gặp. Triệu chứng: rặn tiểu, tiểu ra máu, tiểu ngoài khay. <strong>Tắc niệu = CẤP CỨU</strong> — mèo không tiểu được > 24h có thể tử vong.</p>'},
+                {'vi':'Nấm da mèo','en':'Cat Ringworm','slug':'nam-da-meo',
+                 'desc':'Nấm da (ringworm) ở mèo: triệu chứng, điều trị, phòng lây sang người',
+                 'tags':'nấm da mèo,ringworm,rụng lông,lây người,antifungal',
+                 'content':'<h2>Nấm mèo LÂY SANG NGƯỜI</h2><p>Nấm da mèo (dermatophytosis) do nấm Microsporum canis — <strong>lây sang người</strong> qua tiếp xúc. Triệu chứng mèo: mảng tròn rụng lông, vảy, ngứa nhẹ. Một số mèo mang nấm không triệu chứng.</p><h2>Điều trị</h2><p><strong>Tắm thuốc:</strong> Malaseb, miconazole 2 lần/tuần. <strong>Uống:</strong> Itraconazole 6-8 tuần. <strong>Môi trường:</strong> Hút bụi nhà, giặt chăn nệm 60°C, sát trùng lồng. Điều trị đến khi cấy nấm âm tính 2 lần liên tiếp.</p>'},
+                {'vi':'Tẩy giun & Ve mèo','en':'Cat Deworming','slug':'tay-giun-ve-meo',
+                 'desc':'Lịch tẩy giun, phòng ve bọ chét cho mèo trong nhà và ngoài trời',
+                 'tags':'tẩy giun mèo,ve mèo,bọ chét,Broadline,Revolution,nhỏ gáy',
+                 'content':'<h2>Tẩy giun</h2><p>Mèo con: 2 tuần/lần từ 2-12 tuần. Mèo lớn: 3-6 tháng/lần. Thuốc: Drontal Cat (50-80k/viên), Milbemax Cat.</p><h2>Phòng ve & bọ chét</h2><p><strong>Mèo trong nhà:</strong> Vẫn cần phòng! Ve có thể vào nhà qua giày, quần áo. <strong>Nhỏ gáy hàng tháng:</strong> Revolution (trị ve + giun tim + giun tròn), Broadline (all-in-one), Frontline.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_meo_yt):
+                add_part_if_new(z_yt_meo, pd, order=10+i)
+
+        # ── Zone MỚI: Hành vi mèo ──
+        z_hv = get_or_create_zone(meo, {
+            'name':'Hành vi','slug':'hanh-vi','icon':'🧠','color':'#6c5ce7',
+            'desc':'Hiểu tâm lý, hành vi mèo: cào, cắn, rên gừ, dấu hiệu stress'})
+        hanh_vi_parts = [
+            {'vi':'Mèo cào đồ — Xử lý đúng','en':'Cat Scratching','slug':'meo-cao-do',
+             'desc':'Tại sao mèo cào, cách bảo vệ nội thất và hướng mèo cào đúng chỗ',
+             'tags':'cào đồ,cào sofa,trụ cào,scratcher,hành vi mèo',
+             'content':'<h2>Mèo cào là BẢN NĂNG</h2><p>Cào để: đánh dấu lãnh thổ (tuyến mùi ở chân), mài móng, kéo giãn cơ. <strong>KHÔNG cắt bỏ móng</strong> (declawing) — bị cấm ở nhiều nước, gây đau đớn suốt đời.</p><h2>Giải pháp</h2><p>1. Đặt trụ cào <strong>cạnh nơi mèo hay cào</strong>. 2. Dán mèo catnip lên trụ cào. 3. Dùng băng keo 2 mặt lên sofa (mèo ghét dính). 4. Cắt đầu móng 2 tuần/lần.</p>'},
+            {'vi':'Mèo đi vệ sinh ngoài khay','en':'Litter Box Problems','slug':'di-ve-sinh-ngoai-khay',
+             'desc':'Nguyên nhân và cách xử lý khi mèo bỏ khay, tiểu bậy',
+             'tags':'tiểu bậy,bỏ khay,litter box,vệ sinh,stress mèo',
+             'content':'<h2>Nguyên nhân #1: Y tế</h2><p>FLUTD, viêm bàng quang, tiểu đường → mèo đau khi tiểu → liên kết khay = đau → né khay. Đi khám trước!</p><h2>Nguyên nhân #2: Khay không OK</h2><p><strong>Bẩn:</strong> Xúc phân mỗi ngày, thay cát mỗi tuần. <strong>Vị trí:</strong> Yên tĩnh, dễ tiếp cận. <strong>Số lượng:</strong> N mèo + 1 khay. <strong>Loại cát:</strong> Mèo ghét cát mới → thay dần.</p>'},
+            {'vi':'Stress & Lo âu ở mèo','en':'Cat Stress & Anxiety','slug':'stress-meo',
+             'desc':'Dấu hiệu stress, nguyên nhân, cách giảm stress cho mèo',
+             'tags':'stress mèo,lo âu,Feliway,giấu mình,bỏ ăn,liếm lông',
+             'content':'<h2>Dấu hiệu stress</h2><p>Giấu mình liên tục, bỏ ăn, liếm lông quá mức (hói cả mảng), hung hăng bất thường, tiểu bậy, tiêu chảy mãn.</p><h2>Nguyên nhân phổ biến</h2><p>Nhà mới, thêm thú cưng mới, tiếng ồn, thay đổi nội thất, chủ đi vắng lâu.</p><h2>Giải pháp</h2><p><strong>Feliway:</strong> Pheromone nhân tạo, cắm điện — mèo bình tĩnh hơn (300-500k). <strong>Không gian riêng:</strong> Mỗi mèo cần 1 nơi trú ẩn cao (kệ, cat tree). <strong>Routine:</strong> Giữ lịch ăn, chơi cố định.</p>'},
+        ]
+        for i, pd in enumerate(hanh_vi_parts):
+            add_part_if_new(z_hv, pd, order=i)
+
+        # ── Zone: Đồ dùng — thêm parts ──
+        z_dd_meo = Zone.query.filter_by(segment_id=meo.id, slug='do-dung').first()
+        if z_dd_meo:
+            new_parts_meo_dd = [
+                {'vi':'Đồ chơi mèo','en':'Cat Toys','slug':'do-choi-meo',
+                 'desc':'Cần câu, bóng, chuột giả, đồ chơi tương tác, catnip',
+                 'tags':'đồ chơi mèo,cần câu,chuột giả,catnip,laser,tương tác',
+                 'content':'<h2>Mèo CẦN chơi mỗi ngày</h2><p>Mèo trong nhà thiếu kích thích → béo phì, trầm cảm, phá phách. Cần tối thiểu <strong>15-30 phút chơi/ngày</strong>.</p><h2>Top đồ chơi</h2><p><strong>Cần câu lông:</strong> Kích thích bản năng săn mồi — hiệu quả nhất. <strong>Bóng lăn:</strong> Tự chơi khi chủ bận. <strong>Chuột giả catnip:</strong> 70% mèo phê catnip. <strong>Laser pointer:</strong> Cẩn thận — luôn kết thúc bằng treat (mèo cần "bắt được" gì đó).</p>'},
+                {'vi':'Balo & Túi vận chuyển mèo','en':'Cat Carrier','slug':'balo-tui-van-chuyen',
+                 'desc':'Balo mèo, túi vận chuyển, chuồng vận chuyển — đi bác sĩ, đi chơi',
+                 'tags':'balo mèo,túi vận chuyển,carrier,đi máy bay,đi bác sĩ',
+                 'content':'<h2>3 loại phổ biến</h2><p><strong>Chuồng nhựa cứng:</strong> An toàn nhất, bền, dễ rửa. Chuẩn IATA cho đi máy bay (nếu đúng size). 200-500k. <strong>Túi vải:</strong> Nhẹ, gọn, phù hợp mèo nhỏ. 150-350k. <strong>Balo phi hành gia:</strong> Có cửa sổ tròn, trendy. 300-600k. Mèo có thể ngắm cảnh.</p>'},
+                {'vi':'Bát ăn & Vòi nước mèo','en':'Cat Bowl & Fountain','slug':'bat-an-voi-nuoc-meo',
+                 'desc':'Bát ăn nghiêng, vòi nước (pet fountain) khuyến khích mèo uống nước',
+                 'tags':'bát ăn mèo,pet fountain,vòi nước,uống nước,phòng thận',
+                 'content':'<h2>Tại sao cần pet fountain?</h2><p>Mèo bản năng thích nước chảy (nước đọng trong tự nhiên = nguy hiểm). Pet fountain giúp mèo uống nhiều nước hơn 30-50% → <strong>phòng bệnh thận và sỏi tiết niệu</strong>.</p><h2>Top sản phẩm</h2><p><strong>Catit Flower:</strong> 350-500k, lọc carbon, yên. <strong>PetKit Eversweet:</strong> 600-900k, thép inox, app điều khiển. <strong>Bát ăn nghiêng 15°:</strong> Giảm nôn, bảo vệ cổ mèo.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_meo_dd):
+                add_part_if_new(z_dd_meo, pd, order=10+i)
+
+        # ── Zone MỚI: Làm đẹp mèo ──
+        z_groom_meo = get_or_create_zone(meo, {
+            'name':'Làm đẹp','slug':'lam-dep','icon':'✨','color':'#fd79a8',
+            'desc':'Tắm, chải lông, cắt móng, vệ sinh tai mắt cho mèo'})
+        groom_meo_parts = [
+            {'vi':'Chải lông & Chống rụng','en':'Cat Brushing','slug':'chai-long-meo',
+             'desc':'Chải lông mèo đúng cách, giảm rụng lông, phòng búi lông (hairball)',
+             'tags':'chải lông,rụng lông,hairball,búi lông,Furminator,lông mèo',
+             'content':'<h2>Tại sao mèo rụng lông nhiều?</h2><p>Mèo thay lông theo mùa (xuân, thu). Mèo trong nhà (điều hòa) có thể rụng quanh năm. Chải lông 3-5 lần/tuần giảm rụng lông 80%.</p><h2>Dụng cụ</h2><p><strong>Furminator:</strong> "Vua" chải lông mèo. Loại bỏ lớp lông chết bên trong. <strong>Lược răng thưa:</strong> Cho mèo lông dài (Ba Tư, Maine Coon). <strong>Găng tay chải:</strong> Cho mèo sợ lược.</p>'},
+            {'vi':'Sữa tắm mèo','en':'Cat Shampoo','slug':'sua-tam-meo',
+             'desc':'Sữa tắm cho mèo: khi nào cần tắm, sản phẩm an toàn, tắm khô',
+             'tags':'sữa tắm mèo,tắm mèo,tắm khô,shampoo cat,grooming',
+             'content':'<h2>Mèo có cần tắm không?</h2><p>Hầu hết mèo <strong>tự làm sạch rất tốt</strong>. Chỉ cần tắm khi: dính bẩn nặng, có nấm/ve, mèo béo không liếm tới. Tần suất: 1-3 tháng/lần.</p><h2>Mẹo tắm mèo</h2><p>Cắt móng trước (tránh bị cào). Nước ấm 37°C. Sữa tắm chuyên mèo (Bioline, Hartz Cat). <strong>Tắm khô:</strong> Bọt/spray tắm khô — giải pháp cho mèo sợ nước.</p>'},
+        ]
+        for i, pd in enumerate(groom_meo_parts):
+            add_part_if_new(z_groom_meo, pd, order=i)
+
+    # ================================================================
+    # SEGMENT: THÚ NHỎ — thêm zones mới
+    # ================================================================
+    thu_nho = seg_map.get('thu-nho')
+    if thu_nho:
+        # ── Zone MỚI: Thỏ ──
+        z_tho = get_or_create_zone(thu_nho, {
+            'name':'Thỏ','slug':'tho','icon':'🐰','color':'#e17055',
+            'desc':'Chăm sóc thỏ cảnh: chuồng, thức ăn, bệnh lý, hành vi'})
+        tho_parts = [
+            {'vi':'Chuồng & Lót chuồng thỏ','en':'Rabbit Housing','slug':'chuong-tho',
+             'desc':'Chọn chuồng, lót chuồng an toàn cho thỏ — kích thước, vật liệu',
+             'tags':'chuồng thỏ,lót chuồng,cỏ khô,hay,rabbit cage,playpen',
+             'content':'<h2>Kích thước tối thiểu</h2><p>Chuồng phải ít nhất <strong>4 lần kích thước thỏ</strong> khi nằm duỗi. Thỏ cần thời gian ngoài chuồng mỗi ngày (tối thiểu 3-4 giờ). <strong>Lót chuồng:</strong> Cỏ Timothy hay, giấy xé. KHÔNG dùng mùn cưa thông/tuyết tùng (độc với phổi thỏ).</p>'},
+            {'vi':'Thức ăn thỏ','en':'Rabbit Diet','slug':'thuc-an-tho',
+             'desc':'Chế độ ăn đúng cho thỏ: cỏ, rau, viên nén, trái cây',
+             'tags':'thức ăn thỏ,cỏ Timothy,rau,hay,pellet,thỏ ăn gì',
+             'content':'<h2>80% là cỏ khô (Hay)</h2><p>Cỏ Timothy (thỏ > 7 tháng) hoặc Alfalfa (thỏ con < 7 tháng). Cỏ phải có SẴN 24/7. Cỏ giúp mài răng (răng thỏ mọc suốt đời) và tốt cho đường ruột.</p><h2>Phần còn lại</h2><p><strong>Rau xanh (10%):</strong> Rau muống, cải xoăn, rau thơm. <strong>Viên nén (5%):</strong> 1/4 cup/ngày. <strong>Trái cây:</strong> Treat hiếm (1-2 lần/tuần) — dâu, chuối (ít thôi, nhiều đường).</p>'},
+            {'vi':'Bệnh thường gặp ở thỏ','en':'Rabbit Health','slug':'benh-tho',
+             'desc':'GI Stasis, quá nóng, bệnh răng, lông bết — nhận biết và phòng tránh',
+             'tags':'bệnh thỏ,GI Stasis,tắc ruột,quá nóng,răng thỏ,bác sĩ thú y',
+             'content':'<h2>GI Stasis — NGUY HIỂM</h2><p>Hệ tiêu hóa thỏ ngừng hoạt động. Triệu chứng: bỏ ăn, không đi phân, nằm một chỗ, bụng căng. <strong>Cấp cứu</strong> — cần đi bác sĩ NGAY trong vài giờ. Phòng: cho ăn nhiều cỏ, vận động hàng ngày.</p><h2>Quá nóng</h2><p>Thỏ KHÔNG CHỊU được nóng > 30°C. Dấu hiệu: thở nhanh, tai nóng đỏ, nằm ngả. Phòng: điều hòa/quạt, chai nước đá trong chuồng, KHÔNG để ngoài trời.</p>'},
+        ]
+        for i, pd in enumerate(tho_parts):
+            add_part_if_new(z_tho, pd, order=i)
+
+        # ── Zone MỚI: Chim cảnh ──
+        z_chim = get_or_create_zone(thu_nho, {
+            'name':'Chim cảnh','slug':'chim-canh','icon':'🦜','color':'#00b894',
+            'desc':'Chăm sóc chim cảnh: vẹt, yến phụng, chào mào, chích chòe'})
+        chim_parts = [
+            {'vi':'Lồng & Phụ kiện chim','en':'Bird Cage','slug':'long-chim',
+             'desc':'Chọn lồng, cầu đậu, đồ chơi, bát ăn cho chim cảnh',
+             'tags':'lồng chim,cầu đậu,bird cage,phụ kiện chim,vẹt',
+             'content':'<h2>Chọn lồng</h2><p>Lồng phải đủ rộng để chim <strong>xòe cánh không chạm thanh</strong>. Vẹt nhỏ (yến phụng): tối thiểu 45x45x60cm. Vẹt lớn (Cockatiel, Conure): 60x60x90cm. <strong>Khoảng cách thanh:</strong> Chim nhỏ: 1cm. Chim lớn: 1.5-2cm (tránh kẹt đầu).</p>'},
+            {'vi':'Thức ăn chim cảnh','en':'Bird Food','slug':'thuc-an-chim',
+             'desc':'Hạt, trái cây, rau, thức ăn viên cho các loại chim cảnh',
+             'tags':'thức ăn chim,hạt kê,hạt hướng dương,pellet bird,rau quả chim',
+             'content':'<h2>Chim cần ăn đa dạng</h2><p>Chỉ cho ăn hạt hướng dương = như người chỉ ăn khoai chiên — béo, thiếu dinh dưỡng. <strong>Chế độ đúng:</strong> Pellet (thức ăn viên cân bằng) 60%, rau quả tươi 30%, hạt/treat 10%.</p><h2>Thức ăn ĐỘC cho chim</h2><p>Bơ (CHẾT), sô-cô-la, hành tỏi, rượu, caffeine, hạt táo/lê (cyanide).</p>'},
+        ]
+        for i, pd in enumerate(chim_parts):
+            add_part_if_new(z_chim, pd, order=i)
+
+        # ── Zone: Hamster — thêm parts ──
+        z_hamster = Zone.query.filter_by(segment_id=thu_nho.id, slug='hamster').first()
+        if z_hamster:
+            new_hamster = [
+                {'vi':'Bệnh thường gặp ở hamster','en':'Hamster Health','slug':'benh-hamster',
+                 'desc':'Wet tail, cảm lạnh, u bướu, bệnh da — nhận biết và phòng tránh',
+                 'tags':'bệnh hamster,wet tail,u bướu,ướt đuôi,tiêu chảy',
+                 'content':'<h2>Wet Tail (Ướt đuôi)</h2><p>Tiêu chảy nặng, đuôi ướt bẩn, bỏ ăn, lờ đờ. Tỷ lệ tử vong cao nếu không điều trị trong 24-48h. Thường gặp ở hamster con (3-8 tuần) khi stress (mới mua về).</p><h2>Phòng tránh</h2><p>Giảm stress khi mới về: để yên 3-5 ngày không bế. Chuồng sạch, lót khô. Thức ăn tươi rửa sạch.</p>'},
+                {'vi':'Đồ chơi & Vận động hamster','en':'Hamster Toys','slug':'do-choi-hamster',
+                 'desc':'Bánh xe chạy, đường ống, cầu, xích đu cho hamster',
+                 'tags':'đồ chơi hamster,bánh xe,running wheel,ống chui,hamster ball',
+                 'content':'<h2>Bánh xe — BẮT BUỘC</h2><p>Hamster chạy 5-8 km/đêm trong tự nhiên. Bánh xe giúp vận động, tránh béo phì, stress. Size: hamster lùn ≥ 20cm đường kính, hamster Syria ≥ 28cm. <strong>KHÔNG dùng bánh xe thanh nan</strong> (kẹt chân gãy).</p>'},
+            ]
+            for i, pd in enumerate(new_hamster):
+                add_part_if_new(z_hamster, pd, order=10+i)
+
+        # ── Zone: Cá cảnh — thêm parts ──
+        z_ca = Zone.query.filter_by(segment_id=thu_nho.id, slug='ca-canh').first()
+        if z_ca:
+            new_ca = [
+                {'vi':'Cá Betta (cá xiêm)','en':'Betta Fish','slug':'ca-betta',
+                 'desc':'Chăm sóc cá Betta: bể, nhiệt độ, thức ăn, bệnh thường gặp',
+                 'tags':'cá Betta,cá xiêm,cá lia thia,betta fish,cá cảnh dễ nuôi',
+                 'content':'<h2>Cá Betta — dễ nuôi nhất?</h2><p>Đúng, nhưng không phải "bỏ bể nhỏ không cần chăm". Bể tối thiểu <strong>5 lít</strong> (lý tưởng 15-20 lít). Nhiệt độ 24-28°C. Thay nước 25% mỗi tuần. <strong>KHÔNG nuôi 2 Betta đực chung</strong> — chúng đánh nhau chết.</p>'},
+                {'vi':'Hồ thủy sinh','en':'Aquascaping','slug':'ho-thuy-sinh',
+                 'desc':'Setup hồ thủy sinh: cây, đá, nền, CO2, đèn — hướng dẫn cho người mới',
+                 'tags':'thủy sinh,aquascape,cây thủy sinh,CO2,đá,nền thủy sinh',
+                 'content':'<h2>Setup hồ thủy sinh đầu tiên</h2><p><strong>Bể:</strong> 40-60 lít (dễ quản lý nước). <strong>Nền:</strong> ADA Amazonia hoặc Tropica (dinh dưỡng cho cây). <strong>Cây dễ:</strong> Rêu Java, Anubias, Bucephalandra — không cần CO2. <strong>Đèn:</strong> LED 6500K, 8-10 giờ/ngày.</p><h2>Chi phí</h2><p>Setup cơ bản: 500k-2 triệu. Bể cao cấp (CO2, lọc canister): 3-10 triệu.</p>'},
+            ]
+            for i, pd in enumerate(new_ca):
+                add_part_if_new(z_ca, pd, order=10+i)
+
+    # ================================================================
+    # ARTICLES MỚI
+    # ================================================================
+    new_articles = [
+        # T1: NGANH
+        {'title':'Top 10 giống chó phù hợp chung cư Việt Nam 2025','slug':'top-10-giong-cho-chung-cu',
+         'tier':'nganh','category':'chon-giong',
+         'tags':'giống chó,chung cư,apartment,ít sủa,nhỏ gọn',
+         'excerpt':'Chung cư hẹp, hàng xóm gần — giống chó nào phù hợp? Xếp hạng theo kích thước, mức sủa, năng lượng, và tính cách.',
+         'reading_time':12,
+         'content':'<h2>Tiêu chí đánh giá</h2><p>Kích thước (< 10kg ưu tiên), mức sủa (ít = tốt), năng lượng (trung bình), khả năng ở một mình.</p><h2>Top 5</h2><p><strong>1. Poodle (Toy/Mini):</strong> 3-6kg, thông minh, ít rụng lông, dễ huấn luyện. <strong>2. Shih Tzu:</strong> 4-7kg, hiền, ít sủa, phù hợp gia đình có trẻ nhỏ. <strong>3. French Bulldog:</strong> 8-13kg, ít sủa, không cần vận động nhiều. <strong>4. Corgi:</strong> 10-14kg, vui vẻ, lông đẹp, nhưng hơi năng lượng. <strong>5. Cavalier King Charles:</strong> 5-8kg, cực hiền, "chó sofa" hoàn hảo.</p>'},
+        {'title':'Top 8 giống mèo được yêu thích nhất Việt Nam','slug':'top-giong-meo-yeu-thich-vn',
+         'tier':'nganh','category':'chon-giong',
+         'tags':'giống mèo,mèo Anh,mèo Ba Tư,mèo ta,Munchkin,Scottish Fold',
+         'excerpt':'8 giống mèo phổ biến nhất VN: đặc điểm, giá mua, chi phí nuôi, và tính cách từng giống.',
+         'reading_time':10,
+         'content':'<h2>1. Mèo Anh lông ngắn (British Shorthair)</h2><p>Mặt tròn, lông dày, hiền. Giá: 3-15 triệu. Màu phổ biến: xanh xám (blue).</p><h2>2. Mèo ta (mèo mướp)</h2><p>Khỏe mạnh nhất, dễ nuôi, ít bệnh. Giá: miễn phí - 500k. Ai nói mèo ta không đẹp?</p><h2>3. Scottish Fold</h2><p>Tai cụp đặc trưng, dễ thương. Giá: 5-20 triệu. LƯU Ý: Gen tai cụp liên quan bệnh xương khớp — chọn nhà lai uy tín.</p><h2>4. Munchkin</h2><p>Chân ngắn, đi lạch bạch. Giá: 8-25 triệu. Khỏe mạnh bất chấp chân ngắn.</p>'},
+
+        # T2: CHUNG
+        {'title':'Hướng dẫn nhận nuôi chó mèo tại VN — Adopt Don\'t Shop','slug':'huong-dan-nhan-nuoi-adopt',
+         'tier':'chung','category':'nhan-nuoi',
+         'tags':'nhận nuôi,adopt,cứu hộ,trại chó,trại mèo,volunteer',
+         'excerpt':'Quy trình nhận nuôi chó mèo từ trạm cứu hộ, điều kiện, chi phí, và danh sách trạm uy tín tại Việt Nam.',
+         'reading_time':8,
+         'content':'<h2>Tại sao nên nhận nuôi?</h2><p>Hàng nghìn chó mèo bị bỏ rơi mỗi năm. Nhận nuôi = cứu 1 mạng sống + giảm tải trạm cứu hộ. Chó mèo cứu hộ thường đã tiêm vaccine, triệt sản, tẩy giun.</p><h2>Quy trình</h2><p>1. Liên hệ trạm cứu hộ. 2. Phỏng vấn (điều kiện sống, kinh nghiệm). 3. Thử nuôi 1-2 tuần. 4. Ký giấy nhận nuôi. Chi phí: miễn phí hoặc phí hỗ trợ 200-500k (vaccine, triệt sản).</p><h2>Trạm cứu hộ uy tín</h2><p>HN: Hanoi Pet Rescue, VAPA. SG: ARC, Saigon Pet Adoption.</p>'},
+        {'title':'Mèo ăn gì — Thực phẩm AN TOÀN và ĐỘC HẠI','slug':'meo-an-gi-an-toan-doc-hai',
+         'tier':'chung','category':'dinh-duong',
+         'related_segment_slug':'meo','related_zone_slug':'dinh-duong',
+         'tags':'mèo ăn gì,thực phẩm độc,thực phẩm an toàn,hành,tỏi,sô-cô-la',
+         'excerpt':'Danh sách đầy đủ thực phẩm mèo ăn được và KHÔNG được ăn. Một số thực phẩm tưởng an toàn nhưng cực kỳ nguy hiểm.',
+         'reading_time':7,
+         'content':'<h2>NGUY HIỂM — KHÔNG CHO MÈO ĂN</h2><p><strong>Hành, tỏi, hẹ:</strong> Phá hủy hồng cầu → thiếu máu → chết. <strong>Sô-cô-la:</strong> Theobromine độc. <strong>Nho, nho khô:</strong> Gây suy thận cấp. <strong>Xương gà nấu:</strong> Gãy sắc, đâm thủng ruột.</p><h2>AN TOÀN (ăn vừa phải)</h2><p><strong>Gà luộc:</strong> Protein tốt, không gia vị. <strong>Cá hồi nấu chín:</strong> Omega-3 tốt cho lông. <strong>Bí đỏ:</strong> Chất xơ, tốt cho tiêu hóa. <strong>Dưa hấu (bỏ hạt):</strong> Bổ sung nước.</p>'},
+        {'title':'Cách chăm sóc chó mèo mùa nóng — Phòng sốc nhiệt','slug':'cham-soc-mua-nong-soc-nhiet',
+         'tier':'chung','category':'cham-soc',
+         'tags':'mùa nóng,sốc nhiệt,heatstroke,quạt,điều hòa,nước',
+         'excerpt':'Mùa hè VN nóng 35-40°C — chó mèo rất dễ sốc nhiệt. Hướng dẫn phòng ngừa và sơ cứu kịp thời.',
+         'reading_time':6,
+         'content':'<h2>Dấu hiệu sốc nhiệt</h2><p>Thở hổn hển, lưỡi đỏ/tím, nôn, lảo đảo, co giật. <strong>Giống nguy cơ cao:</strong> Mặt ngắn (Pug, Bulldog, Ba Tư), béo phì, già, lông dày.</p><h2>Sơ cứu</h2><p>1. Đưa vào nơi mát, máy lạnh. 2. Đắp khăn ướt (nước MÁT, không lạnh) lên bụng, nách, bẹn. 3. Cho uống ít nước mát. 4. ĐI BÁC SĨ NGAY — sốc nhiệt có thể gây tổn thương nội tạng không hồi phục.</p>'},
+
+        # T3: CHI TIET
+        {'title':'So sánh 5 loại cát vệ sinh mèo phổ biến nhất 2025','slug':'so-sanh-5-loai-cat-meo-2025',
+         'tier':'chi-tiet','category':'do-dung',
+         'related_segment_slug':'meo','related_zone_slug':'do-dung',
+         'tags':'cát mèo,bentonite,tofu,crystal,đậu nành,so sánh',
+         'excerpt':'So sánh chi tiết 5 loại cát mèo: Bentonite, Tofu, Crystal, Giấy, Gỗ thông — giá, ưu nhược điểm, và loại nào phù hợp.',
+         'reading_time':8,
+         'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="cat ve sinh meo" data-limit="6"></div>',
+         'content':'<h2>Bảng so sánh nhanh</h2><p><strong>Bentonite:</strong> ⭐ Vón cục tốt nhất. 30-60k/5L. Nặng, bụi. <strong>Tofu:</strong> ⭐ Ít bụi, nhẹ, xả bồn cầu OK. 80-150k/6L. <strong>Crystal:</strong> ⭐ Hút mùi cực tốt. 60-120k/3.8L. Không vón. <strong>Giấy:</strong> Ít bụi nhất, cho mèo dị ứng. 100-180k/10L. Vón kém. <strong>Gỗ thông:</strong> Tự nhiên, rẻ. 40-80k/5L. Mùi gỗ mèo có thể ghét.</p><h2>Kết luận</h2><p><strong>Mèo 1 con, budget:</strong> Bentonite. <strong>Nhà chung cư, sạch sẽ:</strong> Tofu. <strong>Đi vắng nhiều:</strong> Crystal (ít phải xúc). <strong>Mèo dị ứng:</strong> Giấy hoặc gỗ.</p>'},
+        {'title':'Review Nexgard vs Frontline vs Bravecto — Thuốc phòng ve chó','slug':'review-nexgard-frontline-bravecto',
+         'tier':'chi-tiet','category':'y-te',
+         'related_segment_slug':'cho','related_zone_slug':'y-te',
+         'tags':'Nexgard,Frontline,Bravecto,ve,bọ chét,so sánh,review',
+         'excerpt':'So sánh 3 sản phẩm phòng ve chó bán chạy nhất: cách dùng, hiệu quả, giá, và tác dụng phụ.',
+         'reading_time':9,
+         'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="nexgard cho" data-limit="6"></div>',
+         'content':'<h2>Frontline Plus (nhỏ gáy)</h2><p>Hiệu quả 1 tháng. Diệt ve + bọ chét. Giá 150-250k/tuýp. Ưu: rẻ, quen thuộc. Nhược: cần 48h mới tác dụng, ẩm có thể giảm hiệu quả.</p><h2>Nexgard (viên uống)</h2><p>Hiệu quả 1 tháng. Viên nhai vị thịt bò. Giá 200-350k/viên. Ưu: tắm thoải mái, không dính lông. Nhược: không dùng cho chó < 2kg hoặc < 8 tuần.</p><h2>Bravecto (viên uống)</h2><p>Hiệu quả <strong>3 tháng</strong> — tiện nhất. Giá 400-650k/viên. Ưu: 1 viên/quý. Nhược: giá cao, không dùng cho chó bệnh.</p>'},
+        {'title':'Ciao Churu, Inaba, JerHigh — Review top snack mèo 2025','slug':'review-top-snack-meo-2025',
+         'tier':'chi-tiet','category':'dinh-duong',
+         'related_segment_slug':'meo','related_zone_slug':'dinh-duong',
+         'tags':'Ciao Churu,Inaba,JerHigh,snack mèo,treat,súp thưởng',
+         'excerpt':'So sánh 3 dòng snack mèo hot nhất: Ciao Churu, Inaba, JerHigh — thành phần, giá, mèo thích loại nào nhất?',
+         'reading_time':6,
+         'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="ciao churu meo" data-limit="6"></div>',
+         'content':'<h2>Ciao Churu (INABA - Nhật)</h2><p>Snack lỏng dạng tuýp. Mèo liếm trực tiếp — tương tác cực cute. 8-15k/thanh. Hương: cá ngừ, gà, sò điệp. Thành phần sạch, ít phụ gia. <strong>Vua snack mèo VN.</strong></p><h2>Inaba Grilled</h2><p>Cùng hãng Ciao nhưng dạng fillet nướng. 20-35k/miếng. Mèo gặm trực tiếp, giữ bận lâu hơn.</p><h2>JerHigh (Thái)</h2><p>Dạng stick, nhiều hương vị. 15-25k/gói. Giá rẻ hơn nhưng thành phần kém sạch hơn.</p>'},
+        {'title':'Hướng dẫn setup hồ thủy sinh đầu tiên — Budget 1 triệu','slug':'setup-ho-thuy-sinh-budget-1-trieu',
+         'tier':'chi-tiet','category':'ca-canh',
+         'related_segment_slug':'thu-nho','related_zone_slug':'ca-canh',
+         'tags':'thủy sinh,aquascape,setup,người mới,budget,cây thủy sinh',
+         'excerpt':'Setup hồ thủy sinh đẹp với chỉ 1 triệu đồng. Hướng dẫn từng bước cho người mới: bể, nền, cây, lọc, đèn.',
+         'reading_time':10,
+         'content':'<h2>Danh sách mua sắm (~1 triệu)</h2><p><strong>Bể 40cm:</strong> 100-150k. <strong>Lọc thác:</strong> 80-120k. <strong>Đèn LED:</strong> 100-200k. <strong>Nền:</strong> Sỏi + phân nền cơ bản: 100-150k. <strong>Cây:</strong> Rêu Java, Anubias, Bucephalandra: 100-200k. <strong>Cá:</strong> Neon, Guppy, tôm: 50-100k.</p><h2>Tuần 1: Cycle bể</h2><p>Setup bể + nền + cây + lọc. Chạy lọc 1 tuần KHÔNG thả cá. Vi khuẩn có lợi cần thời gian phát triển. <strong>Thả cá sớm = cá chết.</strong></p>'},
+    ]
+
+    for ad in new_articles:
+        existing = Article.query.filter_by(vertical_slug='pet', slug=ad['slug']).first()
+        if existing:
+            continue
+        img = f"https://placehold.co/800x450/e17055/fff?text={ad['slug'][:30]}"
+        a = Article(vertical_slug='pet', title=ad['title'], slug=ad['slug'],
+            excerpt=ad.get('excerpt',''), content=ad.get('content',''),
+            tier=ad.get('tier','chung'), category=ad.get('category',''),
+            tags=ad.get('tags',''), related_segment_slug=ad.get('related_segment_slug',''),
+            related_zone_slug=ad.get('related_zone_slug',''), embed_code=ad.get('embed_code',''),
+            ai_generated=True, reading_time=ad.get('reading_time',5),
+            views=random.randint(80, 5000), image_url=img)
+        db.session.add(a)
+        added_articles += 1
+
+    # ================================================================
+    # PRODUCTS MỚI — affiliate links
+    # ================================================================
+    new_products = {
+        # Chó
+        'thuc-an-theo-giong': [
+            ('shopee', 'Royal Canin Poodle Adult 1.5kg', 'https://shope.ee/petv2-001', 355000),
+            ('lazada', 'Royal Canin Golden Retriever Adult 12kg', 'https://s.lazada.vn/petv2-002', 1250000),
+            ('tiki', 'Nutrience Subzero Canadian Pacific 5kg', 'https://tiki.vn/petv2-003', 850000),
+        ],
+        'snack-treat-cho': [
+            ('shopee', 'Pedigree Dentastix Medium 7 thanh', 'https://shope.ee/petv2-010', 89000),
+            ('lazada', 'JerHigh Stick Gà 420g', 'https://s.lazada.vn/petv2-011', 65000),
+            ('shopee', 'Xương da bò cuộn 10cm x10 cái', 'https://shope.ee/petv2-012', 120000),
+        ],
+        'thuc-an-cho-con': [
+            ('shopee', 'Royal Canin Medium Puppy 4kg', 'https://shope.ee/petv2-020', 520000),
+            ('lazada', 'Taste of the Wild Puppy Pacific Stream 2.27kg', 'https://s.lazada.vn/petv2-021', 420000),
+            ('shopee', 'Sữa bột chó con KMR PetAg 340g', 'https://shope.ee/petv2-022', 450000),
+        ],
+        'do-choi-cho': [
+            ('shopee', 'Kong Classic Medium (đỏ)', 'https://shope.ee/petv2-030', 280000),
+            ('lazada', 'Bóng tennis cho chó 3 quả', 'https://s.lazada.vn/petv2-031', 45000),
+            ('tiki', 'Đồ chơi trí tuệ Nina Ottosson', 'https://tiki.vn/petv2-032', 520000),
+        ],
+        'sua-tam-cho': [
+            ('shopee', 'Bio-Groom Super White Shampoo 355ml', 'https://shope.ee/petv2-040', 320000),
+            ('lazada', 'Hartz Groomer Best Oatmeal 532ml', 'https://s.lazada.vn/petv2-041', 185000),
+        ],
+        # Mèo
+        'snack-treat-meo': [
+            ('shopee', 'Ciao Churu Cá Ngừ 14g x20 thanh', 'https://shope.ee/petv2-050', 195000),
+            ('lazada', 'Inaba Grilled Tuna Fillet 25g x5', 'https://s.lazada.vn/petv2-051', 135000),
+            ('shopee', 'Greenies Dental Cat Treat 60g', 'https://shope.ee/petv2-052', 110000),
+        ],
+        'thuc-an-meo-con': [
+            ('shopee', 'Royal Canin Kitten 2kg', 'https://shope.ee/petv2-060', 380000),
+            ('lazada', 'Royal Canin Babycat Milk 300g', 'https://s.lazada.vn/petv2-061', 420000),
+        ],
+        'do-choi-meo': [
+            ('shopee', 'Cần câu lông gà cho mèo', 'https://shope.ee/petv2-070', 35000),
+            ('lazada', 'Chuột giả catnip 3 con', 'https://s.lazada.vn/petv2-071', 49000),
+            ('tiki', 'Đường hầm mèo 3 ngả', 'https://tiki.vn/petv2-072', 165000),
+        ],
+        'bat-an-voi-nuoc-meo': [
+            ('shopee', 'Catit Flower Fountain 3L', 'https://shope.ee/petv2-080', 450000),
+            ('lazada', 'PetKit Eversweet Solo 2 1.8L', 'https://s.lazada.vn/petv2-081', 680000),
+            ('shopee', 'Bát ăn nghiêng 15° ceramic mèo', 'https://shope.ee/petv2-082', 89000),
+        ],
+        'balo-tui-van-chuyen': [
+            ('shopee', 'Balo phi hành gia mèo', 'https://shope.ee/petv2-090', 350000),
+            ('lazada', 'Chuồng vận chuyển nhựa IATA size M', 'https://s.lazada.vn/petv2-091', 280000),
+        ],
+        # Thú nhỏ
+        'thuc-an-tho': [
+            ('shopee', 'Cỏ Timothy hay 1kg', 'https://shope.ee/petv2-100', 75000),
+            ('lazada', 'Viên nén Oxbow Adult Rabbit 2.27kg', 'https://s.lazada.vn/petv2-101', 350000),
+        ],
+        'long-chim': [
+            ('shopee', 'Lồng vẹt yến phụng 45x45x60cm', 'https://shope.ee/petv2-110', 450000),
+            ('lazada', 'Bộ phụ kiện lồng chim (cầu + bát + xích đu)', 'https://s.lazada.vn/petv2-111', 120000),
+        ],
+        'ca-betta': [
+            ('shopee', 'Bể cá Betta mini kèm đèn LED', 'https://shope.ee/petv2-120', 120000),
+            ('lazada', 'Thức ăn cá Betta Hikari 5g', 'https://s.lazada.vn/petv2-121', 55000),
+        ],
+        'ho-thuy-sinh': [
+            ('shopee', 'Combo setup thủy sinh 40cm (bể+lọc+đèn+nền)', 'https://shope.ee/petv2-130', 850000),
+            ('lazada', 'Rêu Java + Anubias Nana combo 5 bụi', 'https://s.lazada.vn/petv2-131', 95000),
+        ],
+    }
+
+    for part_slug, products in new_products.items():
+        part = Part.query.filter_by(slug=part_slug).first()
+        if not part:
+            continue
+        for net, pname, url, price in products:
+            existing = AffiliateLink.query.filter_by(part_id=part.id, url=url).first()
+            if existing:
+                continue
+            al = AffiliateLink(part_id=part.id, network=net, product_name=pname,
+                url=url, price=price, clicks=random.randint(10, 500),
+                conversions=random.randint(0, 30),
+                image_url=f"https://placehold.co/400x300/e17055/fff?text={pname.replace(' ','+')[:25]}")
+            db.session.add(al)
+            added_products += 1
+
+    db.session.commit()
+    print(f'[OK] Pet v2 expanded: +{added_parts} parts, +{added_articles} articles, +{added_products} products')
+
+
 # =============================================
 # TRAVEL VERTICAL
 # =============================================

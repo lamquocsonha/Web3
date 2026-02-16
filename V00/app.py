@@ -7,7 +7,23 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///unilab.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'unilab-secret-2026'
+# SQLite concurrency: WAL mode allows reads during writes, busy_timeout waits instead of failing
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'connect_args': {'timeout': 30},  # sqlite3 connect timeout (seconds)
+}
 db.init_app(app)
+
+# Set SQLite pragmas for better concurrency (WAL + busy_timeout)
+def _set_sqlite_pragmas(dbapi_conn, connection_record):
+    cursor = dbapi_conn.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA busy_timeout=30000")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
+
+from sqlalchemy import event
+with app.app_context():
+    event.listen(db.engine, "connect", _set_sqlite_pragmas)
 
 # ═══════════════════════════════════════════
 # THEME STYLES CONFIG
@@ -826,11 +842,12 @@ def admin_seed_data():
                 flash(f'❌ Error seeding Car: {str(e)}', 'error')
 
         elif action == 'seed_pet':
-            from seed_data import seed_pet, seed_pet_articles, seed_products_pet_travel
+            from seed_data import seed_pet, seed_pet_articles, seed_products_pet_travel, seed_pet_v2
             try:
                 seed_pet()
                 seed_pet_articles()
-                flash('✅ Pet vertical seeded successfully!', 'success')
+                seed_pet_v2()
+                flash('✅ Pet vertical seeded successfully! (v2 included)', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding Pet: {str(e)}', 'error')
 
@@ -885,7 +902,7 @@ def admin_seed_data():
 
         elif action == 'seed_all':
             from seed_data import (seed, seed_articles, seed_networks, seed_video,
-                seed_pet, seed_pet_articles, seed_travel, seed_travel_articles,
+                seed_pet, seed_pet_articles, seed_pet_v2, seed_travel, seed_travel_articles,
                 seed_products_pet_travel, seed_hotels, seed_attractions,
                 seed_bike, seed_vouchers, seed_beauty, seed_beauty_articles,
                 seed_tech, seed_tech_articles, seed_products_beauty_tech,
@@ -896,6 +913,7 @@ def admin_seed_data():
                 seed_networks()
                 seed_pet()
                 seed_pet_articles()
+                seed_pet_v2()
                 seed_travel()
                 seed_travel_articles()
                 seed_products_pet_travel()
@@ -2526,9 +2544,9 @@ def admin_products_import_csv():
                 except (ValueError, TypeError):
                     skipped += 1
 
-            # Batch commit every 500 rows for performance
-            if count % 500 == 0:
-                db.session.flush()
+            # Batch commit every 200 rows to reduce lock duration
+            if (count + skipped) % 200 == 0:
+                db.session.commit()
 
         db.session.commit()
 
