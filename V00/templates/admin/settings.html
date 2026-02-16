@@ -144,6 +144,19 @@
     </div>
   </div>
 
+  <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">Custom Head Code</h3>
+    <p class="scard-desc">Chen code vao the <code>&lt;head&gt;</code> cua tat ca trang frontend. Dung de them tracking code (AccessTrade, Google Analytics, Facebook Pixel...).</p>
+    <div class="form-group">
+      <label class="form-label">Code (HTML/JS)</label>
+      <textarea class="form-input" name="custom_head_code" rows="6" style="font-family:'DM Mono',monospace;font-size:14px;line-height:1.6" placeholder="<script>...</script>">{{ settings.get('custom_head_code', '') }}</textarea>
+      <p class="form-help" style="margin-top:8px;line-height:1.7">
+        Paste nguyen doan code vao day. Vi du: AccessTrade Smart Tag, Google Analytics, Facebook Pixel...<br>
+        Code se duoc chen truoc the <code>&lt;/head&gt;</code> cua moi trang.
+      </p>
+    </div>
+  </div>
+
   <div class="form-actions"><button type="submit" class="btn btn-primary">Save General</button></div>
 </form>
 </div>

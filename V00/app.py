@@ -206,9 +206,10 @@ def inject_globals():
             'site_favicon_url': favicon_url,
             'sidebar_vouchers': sidebar_vouchers,
             'voucher_sidebar_position': SiteSettings.get('voucher_sidebar_position', 'after_popular'),
+            'custom_head_code': SiteSettings.get('custom_head_code', ''),
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular'}
+        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': ''}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -750,7 +751,7 @@ def admin_settings():
         tab_keys = {
             'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit', 'logo_url', 'favicon_url',
                         'voucher_sidebar_enabled', 'voucher_sidebar_count', 'voucher_sidebar_position',
-                        'shop_display_mode'],
+                        'shop_display_mode', 'custom_head_code'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         keys_to_save = tab_keys.get(tab, [])

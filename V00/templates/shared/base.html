@@ -54,6 +54,7 @@
 }
 </style>
 {% endautoescape %}
+{% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}
 </head>
 <body data-mode="{{ vertical.default_mode or 'light' }}">
 
