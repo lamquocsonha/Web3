@@ -1,0 +1,95 @@
+{% if hotdeals_active %}
+<section class="hotdeal-section">
+  <div class="hotdeal-header">
+    <h2 class="hotdeal-title">🔥 Hot Deals</h2>
+    <p class="hotdeal-sub">Uu dai dang dien ra — Tu dong an khi het han</p>
+  </div>
+  <div class="hotdeal-scroll-wrapper">
+    <button class="hotdeal-arrow hotdeal-arrow-left" onclick="scrollHotDeals(-1)" aria-label="Truoc">&#8249;</button>
+    <div class="hotdeal-grid" id="hotdealGrid">
+      {% for deal in hotdeals_active %}
+      <a href="{{ deal.product_link or '#' }}" target="_blank" rel="nofollow noopener" class="hotdeal-card" data-end="{{ deal.end_date.isoformat() }}">
+        {% set banners = deal.get_banner_urls() %}
+        {% if banners %}
+        <div class="hotdeal-banner">
+          <img src="{{ banners[0] }}" alt="{{ deal.campaign }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'hotdeal-fallback\'>🔥</div>'">
+        </div>
+        {% else %}
+        <div class="hotdeal-banner"><div class="hotdeal-fallback">🔥</div></div>
+        {% endif %}
+        <div class="hotdeal-info">
+          <div class="hotdeal-campaign">{{ deal.campaign }}</div>
+          <div class="hotdeal-name">{{ deal.name[:80] }}{% if deal.name|length > 80 %}...{% endif %}</div>
+          <div class="hotdeal-meta">
+            <span class="hotdeal-date">{{ deal.end_date.strftime('%d/%m') if deal.end_date else '' }}</span>
+            <span class="hotdeal-countdown" data-end="{{ deal.end_date.isoformat() }}"></span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <button class="hotdeal-arrow hotdeal-arrow-right" onclick="scrollHotDeals(1)" aria-label="Sau">&#8250;</button>
+  </div>
+</section>
+
+<style>
+.hotdeal-section{margin:0 0 24px;padding:0}
+.hotdeal-header{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.hotdeal-title{font-size:18px;font-weight:800;margin:0;color:var(--text,#1a1a1a)}
+.hotdeal-sub{font-size:13px;color:var(--text-dim,#6c757d);margin:0}
+.hotdeal-scroll-wrapper{position:relative}
+.hotdeal-grid{display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:4px 0}
+.hotdeal-grid::-webkit-scrollbar{display:none}
+.hotdeal-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:32px;height:32px;border-radius:50%;border:1px solid var(--border,#dee2e6);background:var(--surface,#fff);color:var(--text,#333);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:all .15s}
+.hotdeal-arrow:hover{background:var(--accent,#007bff);color:#fff;border-color:var(--accent,#007bff)}
+.hotdeal-arrow-left{left:-12px}
+.hotdeal-arrow-right{right:-12px}
+.hotdeal-card{flex:0 0 220px;background:var(--surface,#fff);border:1px solid var(--border,#dee2e6);border-radius:10px;overflow:hidden;text-decoration:none;color:var(--text,#1a1a1a);transition:transform .2s,box-shadow .2s}
+.hotdeal-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,0.1);border-color:var(--accent,#007bff)}
+.hotdeal-banner{width:100%;height:120px;overflow:hidden;background:linear-gradient(135deg,#ff6b35,#f7c948)}
+.hotdeal-banner img{width:100%;height:100%;object-fit:cover}
+.hotdeal-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px}
+.hotdeal-info{padding:10px 12px}
+.hotdeal-campaign{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--accent,#007bff);letter-spacing:0.3px;margin-bottom:4px}
+.hotdeal-name{font-size:13px;font-weight:600;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:36px}
+.hotdeal-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:var(--text-dim,#6c757d)}
+.hotdeal-date{font-weight:600}
+.hotdeal-countdown{font-weight:700;color:#ef4444}
+@media(max-width:768px){
+  .hotdeal-card{flex:0 0 180px}
+  .hotdeal-banner{height:100px}
+  .hotdeal-arrow{display:none}
+}
+</style>
+
+<script>
+function scrollHotDeals(dir){
+  var g=document.getElementById('hotdealGrid');
+  if(g) g.scrollBy({left:dir*240,behavior:'smooth'});
+}
+// Countdown timer for hotdeals
+(function(){
+  function updateCountdowns(){
+    document.querySelectorAll('.hotdeal-countdown[data-end]').forEach(function(el){
+      var end=new Date(el.dataset.end);
+      var now=new Date();
+      var diff=end-now;
+      if(diff<=0){
+        el.textContent='Het han';
+        var card=el.closest('.hotdeal-card');
+        if(card) card.style.opacity='0.4';
+        return;
+      }
+      var d=Math.floor(diff/86400000);
+      var h=Math.floor((diff%86400000)/3600000);
+      var m=Math.floor((diff%3600000)/60000);
+      if(d>0) el.textContent='Con '+d+'d '+h+'h';
+      else if(h>0) el.textContent='Con '+h+'h '+m+'m';
+      else el.textContent='Con '+m+'m';
+    });
+  }
+  updateCountdowns();
+  setInterval(updateCountdowns,60000);
+})();
+</script>
+{% endif %}

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue
+from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal
 from datetime import datetime, date, timedelta
 import os, random, json
 
@@ -213,6 +213,18 @@ def inject_globals():
             except Exception:
                 pass
 
+        # Hot deals banner (uploaded from Excel)
+        hotdeals_active = []
+        hd_enabled = SiteSettings.get('hotdeal_enabled', '1')
+        hd_show_shop = SiteSettings.get('hotdeal_show_shop', '1')
+        hd_show_voucher = SiteSettings.get('hotdeal_show_voucher', '1')
+        if hd_enabled == '1':
+            now_utc = datetime.utcnow()
+            hotdeals_active = HotDeal.query.filter(
+                HotDeal.is_active == True,
+                HotDeal.end_date > now_utc
+            ).order_by(HotDeal.end_date.asc()).all()
+
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
             'now': datetime.utcnow(),
@@ -226,9 +238,12 @@ def inject_globals():
             'hot_products': hot_products,
             'hot_products_show_shop': hp_show_shop,
             'hot_products_show_sidebar': hp_show_sidebar,
+            'hotdeals_active': hotdeals_active,
+            'hotdeal_show_shop': hd_show_shop,
+            'hotdeal_show_voucher': hd_show_voucher,
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1'}
+        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1', 'hotdeals_active': [], 'hotdeal_show_shop': '1', 'hotdeal_show_voucher': '1'}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -783,7 +798,8 @@ def admin_settings():
                         'voucher_sidebar_enabled', 'voucher_sidebar_count', 'voucher_sidebar_position',
                         'shop_display_mode', 'custom_head_code',
                         'hot_products_enabled', 'hot_products_count',
-                        'hot_products_show_shop', 'hot_products_show_sidebar'],
+                        'hot_products_show_shop', 'hot_products_show_sidebar',
+                        'hotdeal_enabled', 'hotdeal_show_shop', 'hotdeal_show_voucher'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         keys_to_save = tab_keys.get(tab, [])
@@ -3797,6 +3813,150 @@ def admin_voucher_widget_delete(wid):
     return redirect(url_for('admin_voucher_widgets'))
 
 # =============================================
+# ADMIN — HOT DEALS (Upload Excel)
+# =============================================
+@app.route('/admin/hotdeals')
+def admin_hotdeals():
+    """Manage hot deal campaigns uploaded from Excel"""
+    deals = HotDeal.query.order_by(HotDeal.end_date.desc()).all()
+    now = datetime.utcnow()
+    return render_template('admin/hotdeals.html', deals=deals, now=now)
+
+@app.route('/admin/hotdeals/upload', methods=['POST'])
+def admin_hotdeals_upload():
+    """Upload Hot_deal.xlsx and import data into HotDeal table"""
+    file = request.files.get('file')
+    if not file or not file.filename.endswith(('.xlsx', '.xls')):
+        flash('Vui long chon file Excel (.xlsx)', 'error')
+        return redirect(url_for('admin_hotdeals'))
+
+    try:
+        import openpyxl
+        from io import BytesIO
+
+        wb = openpyxl.load_workbook(BytesIO(file.read()))
+        ws = wb.active
+
+        # Read header row
+        headers = [str(cell.value or '').strip() for cell in ws[1]]
+        col_map = {}
+        for i, h in enumerate(headers):
+            hl = h.lower()
+            if 'name' in hl: col_map['name'] = i
+            elif 'campaign' in hl: col_map['campaign'] = i
+            elif 'product' in hl and 'link' in hl: col_map['product_link'] = i
+            elif 'start' in hl: col_map['start_date'] = i
+            elif 'end' in hl: col_map['end_date'] = i
+            elif hl == 'status': col_map['status'] = i
+            elif 'hot' in hl and 'day' in hl: col_map['hot_day'] = i
+            elif 'banner' in hl: col_map['banner'] = i
+            elif 'detail' in hl: col_map['detail'] = i
+
+        if 'name' not in col_map:
+            flash('Khong tim thay cot "Name" trong file Excel', 'error')
+            return redirect(url_for('admin_hotdeals'))
+
+        imported = 0
+        skipped = 0
+        for row in ws.iter_rows(min_row=2, values_only=False):
+            vals = [cell.value for cell in row]
+            name = vals[col_map.get('name', 0)]
+            if not name:
+                continue
+
+            # Parse dates
+            start_date = vals[col_map.get('start_date', 3)] if 'start_date' in col_map else None
+            end_date = vals[col_map.get('end_date', 4)] if 'end_date' in col_map else None
+
+            if isinstance(start_date, str):
+                try:
+                    start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00').replace('+00:00', ''))
+                except:
+                    start_date = datetime.utcnow()
+            elif not isinstance(start_date, datetime):
+                start_date = datetime.utcnow()
+
+            if isinstance(end_date, str):
+                try:
+                    end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00').replace('+00:00', ''))
+                except:
+                    end_date = datetime.utcnow() + timedelta(days=30)
+            elif not isinstance(end_date, datetime):
+                end_date = datetime.utcnow() + timedelta(days=30)
+
+            campaign = str(vals[col_map.get('campaign', 1)] or '') if 'campaign' in col_map else ''
+            product_link = str(vals[col_map.get('product_link', 2)] or '') if 'product_link' in col_map else ''
+            status_val = str(vals[col_map.get('status', 5)] or '') if 'status' in col_map else ''
+            hot_day = str(vals[col_map.get('hot_day', 6)] or '') if 'hot_day' in col_map else ''
+            banner = str(vals[col_map.get('banner', 7)] or '') if 'banner' in col_map else ''
+            detail = str(vals[col_map.get('detail', 8)] or '') if 'detail' in col_map else ''
+
+            # Check for duplicate by name + campaign
+            existing = HotDeal.query.filter_by(name=str(name), campaign=campaign).first()
+            if existing:
+                # Update existing
+                existing.product_link = product_link
+                existing.start_date = start_date
+                existing.end_date = end_date
+                existing.status = status_val
+                existing.hot_day = hot_day
+                existing.banner = banner
+                existing.detail = detail
+                existing.is_active = True
+                existing.uploaded_at = datetime.utcnow()
+                skipped += 1
+            else:
+                deal = HotDeal(
+                    name=str(name),
+                    campaign=campaign,
+                    product_link=product_link,
+                    start_date=start_date,
+                    end_date=end_date,
+                    status=status_val,
+                    hot_day=hot_day,
+                    banner=banner,
+                    detail=detail,
+                    is_active=True,
+                )
+                db.session.add(deal)
+                imported += 1
+
+        db.session.commit()
+        flash(f'Import thanh cong: {imported} deal moi, {skipped} deal cap nhat', 'success')
+    except Exception as e:
+        flash(f'Loi import: {str(e)}', 'error')
+
+    return redirect(url_for('admin_hotdeals'))
+
+@app.route('/admin/hotdeals/<int:deal_id>/toggle', methods=['POST'])
+def admin_hotdeal_toggle(deal_id):
+    """Toggle hotdeal active status"""
+    deal = HotDeal.query.get_or_404(deal_id)
+    deal.is_active = not deal.is_active
+    db.session.commit()
+    flash(f'{"Bat" if deal.is_active else "Tat"} deal: {deal.campaign}', 'success')
+    return redirect(url_for('admin_hotdeals'))
+
+@app.route('/admin/hotdeals/<int:deal_id>/delete', methods=['POST'])
+def admin_hotdeal_delete(deal_id):
+    """Delete a hotdeal"""
+    deal = HotDeal.query.get_or_404(deal_id)
+    name = deal.campaign or deal.name[:30]
+    db.session.delete(deal)
+    db.session.commit()
+    flash(f'Da xoa deal: {name}', 'success')
+    return redirect(url_for('admin_hotdeals'))
+
+@app.route('/admin/hotdeals/delete-all', methods=['POST'])
+def admin_hotdeals_delete_all():
+    """Delete all hotdeals"""
+    count = HotDeal.query.count()
+    HotDeal.query.delete()
+    db.session.commit()
+    flash(f'Da xoa {count} deal', 'success')
+    return redirect(url_for('admin_hotdeals'))
+
+# =============================================
 # ADMIN — VOUCHER SYNC (AccessTrade Auto-Import)
 # =============================================
 
@@ -5377,6 +5537,28 @@ def _run_schema_migration():
                 is_active BOOLEAN DEFAULT 1,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        changed = True
+
+    # --- Hot Deal table ---
+    if not _table_exists('hot_deal'):
+        print('  [+] Creating hot_deal table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS hot_deal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(500) NOT NULL,
+                campaign VARCHAR(200) DEFAULT '',
+                product_link VARCHAR(1000) DEFAULT '',
+                start_date DATETIME NOT NULL,
+                end_date DATETIME NOT NULL,
+                status VARCHAR(50) DEFAULT '',
+                hot_day VARCHAR(100) DEFAULT '',
+                banner TEXT DEFAULT '',
+                detail TEXT DEFAULT '',
+                is_active BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """))
         changed = True

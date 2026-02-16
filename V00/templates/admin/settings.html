@@ -152,6 +152,40 @@
   </div>
 
   <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">🔥 Hot Deals Banner</h3>
+    <p class="scard-desc">Hien thi banner Hot Deal (upload tu Excel) o dau trang Shop va Voucher. Deal het han se tu dong an.</p>
+    <div class="form-row" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div class="form-group">
+        <label class="form-label">Hien thi</label>
+        <select class="form-select" name="hotdeal_enabled" style="max-width:140px">
+          {% set hd_enabled = settings.get('hotdeal_enabled', '1') %}
+          <option value="1" {% if hd_enabled == '1' %}selected{% endif %}>Bat</option>
+          <option value="0" {% if hd_enabled == '0' %}selected{% endif %}>Tat</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trang Shop</label>
+        <select class="form-select" name="hotdeal_show_shop" style="max-width:140px">
+          {% set hd_shop = settings.get('hotdeal_show_shop', '1') %}
+          <option value="1" {% if hd_shop == '1' %}selected{% endif %}>Hien thi</option>
+          <option value="0" {% if hd_shop == '0' %}selected{% endif %}>An</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trang Voucher</label>
+        <select class="form-select" name="hotdeal_show_voucher" style="max-width:140px">
+          {% set hd_voucher = settings.get('hotdeal_show_voucher', '1') %}
+          <option value="1" {% if hd_voucher == '1' %}selected{% endif %}>Hien thi</option>
+          <option value="0" {% if hd_voucher == '0' %}selected{% endif %}>An</option>
+        </select>
+      </div>
+    </div>
+    <p class="form-help" style="margin-top:8px">
+      <a href="{{ url_for('admin_hotdeals') }}" style="color:var(--accent)">Quan ly Hot Deals →</a>
+    </p>
+  </div>
+
+  <div class="scard" style="margin-top:20px">
     <h3 class="scard-title">Voucher Sidebar Widget</h3>
     <p class="scard-desc">Hiển thị voucher nổi bật trong sidebar của các trang bài viết và sản phẩm.</p>
     <div class="form-row" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">

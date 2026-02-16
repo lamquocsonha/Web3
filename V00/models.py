@@ -417,6 +417,44 @@ class ScheduledCSVImport(db.Model):
     # Relationship
     part = db.relationship('Part', backref=db.backref('scheduled_imports', lazy=True))
 
+class HotDeal(db.Model):
+    """Hot deal campaigns uploaded from Excel (Hot_deal.xlsx)"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(500), nullable=False)
+    campaign = db.Column(db.String(200), default='')
+    product_link = db.Column(db.String(1000), default='')
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(50), default='')
+    hot_day = db.Column(db.String(100), default='')
+    banner = db.Column(db.Text, default='')  # JSON array of banner image URLs
+    detail = db.Column(db.Text, default='')
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def is_valid(self):
+        """Check if deal is currently active and not expired"""
+        now = datetime.utcnow()
+        if not self.is_active:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
+
+    def get_banner_urls(self):
+        """Parse banner JSON to get list of image URLs"""
+        if not self.banner:
+            return []
+        try:
+            import json
+            data = json.loads(self.banner)
+            if isinstance(data, list):
+                return [item.get('link', '') for item in data if item.get('link')]
+            return []
+        except:
+            return []
+
 class VoucherWidget(db.Model):
     """Voucher embed widgets from affiliate networks (AccessTrade, etc.)"""
     id = db.Column(db.Integer, primary_key=True)

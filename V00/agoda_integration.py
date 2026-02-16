@@ -1,12 +1,13 @@
 """
-Agoda Demand API Integration
-Partner API for hotel search, content, and affiliate link generation.
+Agoda Affiliate Long Tail Search API Integration
+Partner API for hotel search and affiliate link generation.
 
-API Reference: https://developer.agoda.com/demand/docs/getting-started
+API Reference: Affiliate_Lite_API_V2.0.pdf (Agoda Partnership Guideline)
 
 Implemented:
-  ──── SEARCH ────
-  POST /api/v2/search         → search_hotels()       — Availability & pricing for property IDs
+  ──── LONG TAIL SEARCH API ────
+  POST /affiliateservice/lt_v1 → search_city()         — City search with availability & pricing
+  POST /affiliateservice/lt_v1 → search_hotels()       — Hotel list search by IDs
 
   ──── CONTENT FEEDS ────
   GET  /datafeeds/feed/getfeed → get_feed()            — Static hotel data (details, images, cities)
@@ -21,6 +22,7 @@ Implemented:
 
 import requests
 import logging
+import json
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
@@ -74,42 +76,89 @@ AGODA_CITY_NAMES = {
 
 
 class AgodaAPI:
-    """Agoda Demand API client for affiliate partners."""
+    """Agoda Affiliate Long Tail Search API client.
 
-    # Configurable endpoints (can be overridden via SiteSettings)
-    SEARCH_URL = "https://affiliateapi7643.agoda.com/api/v2/search"
+    Based on Affiliate_Lite_API_V2.0.pdf documentation.
+    Endpoint: POST /affiliateservice/lt_v1
+    Auth: Authorization header with siteId:apiKey
+    """
+
+    # Long Tail Search API endpoint (per PDF documentation)
+    SEARCH_URL = "http://affiliateapi7643.agoda.com/affiliateservice/lt_v1"
     CONTENT_FEED_URL = "https://affiliatefeed.agoda.com/datafeeds/feed/getfeed"
 
     def __init__(self, site_id, api_key):
         """
         Args:
-            site_id: Agoda CID (e.g. '1959245')
-            api_key: Full API key (e.g. '1959245:5669c3b3-...')
+            site_id: Agoda CID / Site ID (e.g. '1959245')
+            api_key: API key UUID (e.g. '5669c3b3-...')
+                     Auth header format: siteId:apiKey
         """
         self.site_id = str(site_id)
         self.api_key = api_key
-        self.auth_header = api_key  # format: siteId:secretKey
+        # Authorization header: siteId:apiKey (per PDF spec)
+        if ':' in api_key:
+            self.auth_header = api_key
+        else:
+            self.auth_header = f"{self.site_id}:{api_key}"
 
-    # ─── SEARCH API (real-time availability & pricing) ───
+    # ─── LONG TAIL SEARCH API (per Affiliate_Lite_API_V2.0.pdf) ───
 
-    def search_hotels(self, property_ids, checkin=None, checkout=None,
-                      rooms=1, adults=2, children=0, currency='VND',
-                      language='vi', user_country='VN'):
-        """Search for hotel availability and pricing.
+    def _lt_search(self, payload):
+        """Execute a Long Tail Search API request.
 
-        POST to Search API with property IDs.
-        Returns rates and room availability.
+        POST to /affiliateservice/lt_v1 with criteria body.
+        Returns parsed JSON response.
+        """
+        try:
+            logger.info(f"Agoda LT search request: {json.dumps(payload)[:200]}")
+            resp = requests.post(
+                self.SEARCH_URL,
+                json=payload,
+                headers={
+                    "Authorization": self.auth_header,
+                    "Accept-Encoding": "gzip,deflate",
+                    "Content-Type": "application/json"
+                },
+                timeout=30
+            )
+            logger.info(f"Agoda LT search response: status={resp.status_code}")
+            if resp.status_code == 200:
+                data = resp.json()
+                if 'error' in data:
+                    logger.warning(f"Agoda LT error: {data['error']}")
+                    return {"results": []}
+                return data
+            else:
+                logger.warning(f"Agoda LT error: status={resp.status_code}, body={resp.text[:500]}")
+        except Exception as e:
+            logger.error(f"Agoda LT search exception: {e}")
+        return {"results": []}
+
+    def search_city(self, city_id, checkin=None, checkout=None,
+                    adults=2, children=0, currency='VND', language='vi-vn',
+                    sort_by='Recommended', max_result=10,
+                    min_star=0, min_review=0, discount_only=False,
+                    price_min=0, price_max=100000):
+        """City search — find hotels in a city with availability & pricing.
+
+        Per PDF: uses cityId in criteria body.
 
         Args:
-            property_ids: list of Agoda hotel IDs (max 100)
-            checkin: YYYY-MM-DD (defaults to tomorrow)
-            checkout: YYYY-MM-DD (defaults to day after tomorrow)
-            rooms/adults/children: occupancy
+            city_id: Agoda city ID (integer)
+            checkin/checkout: YYYY-MM-DD dates
+            adults/children: occupancy
             currency: VND, USD, etc.
-            language: vi, en-us, etc.
+            language: vi-vn, en-us, etc.
+            sort_by: Recommended, PriceAsc, PriceDesc, StarRatingDesc, etc.
+            max_result: 1-30 (default 10)
+            min_star: 0-5
+            min_review: 0-10
+            discount_only: true = only discounted hotels
+            price_min/price_max: daily rate range
 
         Returns:
-            dict with 'properties' list containing availability data
+            dict with 'results' list of hotel availability data
         """
         if not checkin:
             checkin = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
@@ -118,41 +167,69 @@ class AgodaAPI:
 
         payload = {
             "criteria": {
-                "propertyIds": property_ids[:100],
-                "checkIn": checkin,
-                "checkOut": checkout,
-                "rooms": rooms,
-                "adults": adults,
-                "children": children,
-                "language": language,
-                "currency": currency,
-                "userCountry": user_country
-            },
-            "features": {
-                "ratesPerProperty": 3 if len(property_ids) <= 30 else 1,
-                "extra": ["content"]
+                "cityId": int(city_id),
+                "checkInDate": checkin,
+                "checkOutDate": checkout,
+                "additional": {
+                    "currency": currency,
+                    "language": language,
+                    "sortBy": sort_by,
+                    "maxResult": min(max(1, max_result), 30),
+                    "discountOnly": discount_only,
+                    "minimumStarRating": min_star,
+                    "minimumReviewScore": min_review,
+                    "dailyRate": {
+                        "minimum": price_min,
+                        "maximum": price_max,
+                    },
+                    "occupancy": {
+                        "numberOfAdult": adults,
+                        "numberOfChildren": children,
+                    }
+                }
             }
         }
+        return self._lt_search(payload)
 
-        try:
-            logger.info(f"Agoda search request: {len(property_ids)} properties")
-            resp = requests.post(
-                self.SEARCH_URL,
-                json=payload,
-                headers={
-                    "Authorization": self.auth_header,
-                    "Content-Type": "application/json"
-                },
-                timeout=30
-            )
-            logger.info(f"Agoda search response: status={resp.status_code}")
-            if resp.status_code == 200:
-                return resp.json()
-            else:
-                logger.warning(f"Agoda search error: status={resp.status_code}, body={resp.text[:500]}")
-        except Exception as e:
-            logger.error(f"Agoda search exception: {e}")
-        return {"properties": []}
+    def search_hotels(self, hotel_ids, checkin=None, checkout=None,
+                      adults=2, children=0, currency='VND', language='vi-vn',
+                      discount_only=False):
+        """Hotel list search — get availability & pricing for specific hotels.
+
+        Per PDF: uses hotelId array in criteria body.
+
+        Args:
+            hotel_ids: list of Agoda hotel IDs
+            checkin/checkout: YYYY-MM-DD dates
+            adults/children: occupancy
+            currency: VND, USD, etc.
+            language: vi-vn, en-us, etc.
+
+        Returns:
+            dict with 'results' list of hotel data
+        """
+        if not checkin:
+            checkin = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+        if not checkout:
+            checkout = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
+
+        payload = {
+            "criteria": {
+                "hotelId": [int(h) for h in hotel_ids],
+                "checkInDate": checkin,
+                "checkOutDate": checkout,
+                "additional": {
+                    "currency": currency,
+                    "language": language,
+                    "discountOnly": discount_only,
+                    "occupancy": {
+                        "numberOfAdult": adults,
+                        "numberOfChildren": children,
+                    }
+                }
+            }
+        }
+        return self._lt_search(payload)
 
     # ─── CONTENT FEED API (static hotel data) ───
 
@@ -268,7 +345,8 @@ class AgodaAPI:
                            adults=2, rooms=1, currency='VND'):
         """High-level: search hotels by Vietnamese destination slug.
 
-        Combines city ID lookup → content feed → pricing → affiliate links.
+        Uses Long Tail Search API (city search) for real-time availability.
+        Falls back to content feed + hotel list search, then seed data.
 
         Returns:
             list of hotel dicts ready to display
@@ -277,62 +355,114 @@ class AgodaAPI:
         if not city_id:
             return []
 
-        # Get hotel list from content feed
-        raw_hotels = self.get_hotels_by_city(city_id)
+        if not checkin:
+            checkin = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+        if not checkout:
+            checkout = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
 
         results = []
-        for h in raw_hotels[:50]:  # limit processing
-            hotel_id = h.get('hotelId') or h.get('propertyId') or h.get('id')
-            if not hotel_id:
-                continue
 
-            results.append({
-                'agoda_id': hotel_id,
-                'name': h.get('hotelName') or h.get('propertyName') or h.get('name', ''),
-                'stars': h.get('starRating') or h.get('star_rating', 0),
-                'rating': h.get('reviewScore') or h.get('rating', 0),
-                'reviews_count': h.get('numberOfReviews') or h.get('reviews_count', 0),
-                'latitude': h.get('latitude') or h.get('lat', 0),
-                'longitude': h.get('longitude') or h.get('lng', 0),
-                'address': h.get('address') or h.get('addressLine1', ''),
-                'district': h.get('area') or h.get('district', ''),
-                'image_url': h.get('hotelImage') or h.get('imageUrl') or h.get('image', ''),
-                'price_from': h.get('dailyRate') or h.get('price') or h.get('price_from', 0),
-                'amenities': h.get('facilities') or h.get('amenities', ''),
-                'description': h.get('overview') or h.get('description', ''),
-                'accommodation_type': h.get('accommodationType') or h.get('type', ''),
-                'agoda_url': self.build_affiliate_url(hotel_id, checkin, checkout, adults, 0, rooms, currency),
-                'destination': destination_slug,
-                'destination_name': AGODA_CITY_NAMES.get(destination_slug, destination_slug),
-            })
+        # Strategy 1: Use Long Tail Search API (city search) — real-time pricing
+        lt_response = self.search_city(
+            city_id, checkin, checkout,
+            adults=adults, children=0, currency=currency,
+            language='vi-vn', sort_by='Recommended', max_result=30
+        )
+        lt_results = lt_response.get('results', [])
 
-        # Try to get pricing if we have property IDs
-        if results:
-            property_ids = [r['agoda_id'] for r in results[:30]]
-            pricing = self.search_hotels(property_ids, checkin, checkout, rooms, adults,
-                                         currency=currency)
-            price_map = {}
-            for prop in pricing.get('properties', []):
-                pid = prop.get('propertyId')
-                rooms_data = prop.get('rooms', [])
-                if rooms_data and pid:
-                    cheapest = min(rooms_data, key=lambda r: r.get('totalPayment', {}).get('inclusive', 999999999))
-                    price_map[pid] = {
-                        'price': cheapest.get('totalPayment', {}).get('inclusive', 0),
-                        'free_breakfast': cheapest.get('freeBreakfast', False),
-                        'free_cancel': cheapest.get('freeCancellation', False),
-                        'room_name': cheapest.get('roomName', ''),
-                    }
+        if lt_results:
+            for h in lt_results:
+                hotel_id = h.get('hotelId')
+                if not hotel_id:
+                    continue
+                # landingURL from API already has affiliate CID
+                landing_url = h.get('landingURL', '')
+                if not landing_url:
+                    landing_url = self.build_affiliate_url(hotel_id, checkin, checkout, adults, 0, rooms, currency)
 
-            for r in results:
-                p = price_map.get(r['agoda_id'], {})
-                if p.get('price'):
-                    r['price_from'] = p['price']
-                r['free_breakfast'] = p.get('free_breakfast', False)
-                r['free_cancel'] = p.get('free_cancel', False)
-                r['room_name'] = p.get('room_name', '')
+                results.append({
+                    'agoda_id': hotel_id,
+                    'name': h.get('hotelName', ''),
+                    'stars': h.get('starRating', 0),
+                    'rating': h.get('reviewScore', 0),
+                    'reviews_count': h.get('reviewCount', 0),
+                    'latitude': 0,
+                    'longitude': 0,
+                    'address': '',
+                    'district': '',
+                    'image_url': h.get('imageURL', ''),
+                    'price_from': h.get('dailyRate', 0),
+                    'price_original': h.get('crossedOutRate', 0),
+                    'discount_pct': h.get('discountPercentage', 0),
+                    'amenities': '',
+                    'free_breakfast': h.get('includeBreakfast', False),
+                    'free_wifi': h.get('freeWifi', False),
+                    'free_cancel': False,
+                    'room_name': h.get('roomtypeName', ''),
+                    'description': '',
+                    'accommodation_type': 'Hotel',
+                    'agoda_url': landing_url,
+                    'destination': destination_slug,
+                    'destination_name': AGODA_CITY_NAMES.get(destination_slug, destination_slug),
+                })
 
-        # Fallback: use seed data when API returns nothing
+        # Strategy 2: Use content feed + hotel list search as fallback
+        if not results:
+            raw_hotels = self.get_hotels_by_city(city_id)
+            for h in raw_hotels[:50]:
+                hotel_id = h.get('hotelId') or h.get('propertyId') or h.get('id')
+                if not hotel_id:
+                    continue
+                results.append({
+                    'agoda_id': hotel_id,
+                    'name': h.get('hotelName') or h.get('propertyName') or h.get('name', ''),
+                    'stars': h.get('starRating') or h.get('star_rating', 0),
+                    'rating': h.get('reviewScore') or h.get('rating', 0),
+                    'reviews_count': h.get('numberOfReviews') or h.get('reviews_count', 0),
+                    'latitude': h.get('latitude') or h.get('lat', 0),
+                    'longitude': h.get('longitude') or h.get('lng', 0),
+                    'address': h.get('address') or h.get('addressLine1', ''),
+                    'district': h.get('area') or h.get('district', ''),
+                    'image_url': h.get('hotelImage') or h.get('imageUrl') or h.get('image', ''),
+                    'price_from': h.get('dailyRate') or h.get('price') or h.get('price_from', 0),
+                    'amenities': h.get('facilities') or h.get('amenities', ''),
+                    'description': h.get('overview') or h.get('description', ''),
+                    'accommodation_type': h.get('accommodationType') or h.get('type', ''),
+                    'agoda_url': self.build_affiliate_url(hotel_id, checkin, checkout, adults, 0, rooms, currency),
+                    'destination': destination_slug,
+                    'destination_name': AGODA_CITY_NAMES.get(destination_slug, destination_slug),
+                })
+
+            # Enrich with pricing from hotel list search
+            if results:
+                hotel_ids = [r['agoda_id'] for r in results[:30]]
+                pricing = self.search_hotels(hotel_ids, checkin, checkout, adults, 0, currency)
+                price_map = {}
+                for h in pricing.get('results', []):
+                    hid = h.get('hotelId')
+                    if hid:
+                        price_map[hid] = {
+                            'price': h.get('dailyRate', 0),
+                            'price_original': h.get('crossedOutRate', 0),
+                            'discount_pct': h.get('discountPercentage', 0),
+                            'free_breakfast': h.get('includeBreakfast', False),
+                            'free_wifi': h.get('freeWifi', False),
+                            'room_name': h.get('roomtypeName', ''),
+                            'landing_url': h.get('landingURL', ''),
+                        }
+                for r in results:
+                    p = price_map.get(r['agoda_id'], {})
+                    if p.get('price'):
+                        r['price_from'] = p['price']
+                    if p.get('price_original'):
+                        r['price_original'] = p['price_original']
+                    r['free_breakfast'] = p.get('free_breakfast', False)
+                    r['free_wifi'] = p.get('free_wifi', False)
+                    r['room_name'] = p.get('room_name', '')
+                    if p.get('landing_url'):
+                        r['agoda_url'] = p['landing_url']
+
+        # Strategy 3: Seed data fallback when API returns nothing
         if not results:
             logger.info(f"API returned 0 hotels for {destination_slug}, using seed data")
             results = _get_seed_hotels(self, destination_slug, city_id, checkin, checkout, adults, rooms, currency)
@@ -342,7 +472,7 @@ class AgodaAPI:
     def test_connection(self):
         """Test if API credentials are working.
 
-        Tries a minimal search to verify auth.
+        Tries content feed first (lighter), then Long Tail Search API.
         Returns dict with connection status.
         """
         try:
@@ -350,7 +480,7 @@ class AgodaAPI:
             resp = requests.get(
                 self.CONTENT_FEED_URL,
                 params={
-                    "token": self.api_key,
+                    "token": self.api_key if ':' not in self.api_key else self.api_key.split(':')[1],
                     "site_id": self.site_id,
                     "feed_id": 1,  # continents (smallest feed)
                 },
@@ -360,26 +490,36 @@ class AgodaAPI:
             if resp.status_code == 200:
                 return {'connected': True, 'method': 'content_feed', 'status': resp.status_code}
 
-            # Fallback: try search endpoint
+            # Fallback: try Long Tail Search API (per PDF spec)
+            checkin = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+            checkout = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d')
             resp2 = requests.post(
                 self.SEARCH_URL,
                 json={
                     "criteria": {
-                        "propertyIds": [12157],
-                        "checkIn": (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d'),
-                        "checkOut": (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d'),
-                        "rooms": 1, "adults": 2, "children": 0,
-                        "language": "en-us", "currency": "USD", "userCountry": "VN"
+                        "hotelId": [407854],
+                        "checkInDate": checkin,
+                        "checkOutDate": checkout,
+                        "additional": {
+                            "currency": "USD",
+                            "language": "en-us",
+                            "discountOnly": False,
+                            "occupancy": {
+                                "numberOfAdult": 2,
+                                "numberOfChildren": 0
+                            }
+                        }
                     }
                 },
                 headers={
                     "Authorization": self.auth_header,
+                    "Accept-Encoding": "gzip,deflate",
                     "Content-Type": "application/json"
                 },
                 timeout=10
             )
-            return {'connected': resp2.status_code in (200, 201),
-                    'method': 'search', 'status': resp2.status_code}
+            return {'connected': resp2.status_code in (200, 201, 202, 204),
+                    'method': 'lt_search', 'status': resp2.status_code}
         except Exception as e:
             return {'connected': False, 'error': str(e)}
 

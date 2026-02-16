@@ -81,6 +81,9 @@
           <a href="{{ url_for('admin_voucher_sync') }}" class="sb-link sb-sub {% if 'voucher_sync' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
             <span class="sb-icon">&#128260;</span> Voucher Sync
           </a>
+          <a href="{{ url_for('admin_hotdeals') }}" class="sb-link sb-sub {% if 'hotdeal' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600;color:#ef4444">
+            <span class="sb-icon">🔥</span> Hot Deals
+          </a>
         </div>
       </div>
 

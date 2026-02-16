@@ -34,6 +34,11 @@
 
 <main class="site-main">
 
+  <!-- HOT DEALS BANNER -->
+  {% if hotdeal_show_shop == '1' %}
+  {% include 'shared/_hotdeal_banner.html' %}
+  {% endif %}
+
   <!-- HERO + SEARCH -->
   <section class="shop-hero">
     <div class="shop-hero-inner">
