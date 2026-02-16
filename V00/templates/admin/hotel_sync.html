@@ -1,0 +1,250 @@
+{% extends "admin/base.html" %}
+{% block title %}Hotel Sync — Agoda{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_hotels') }}">Hotels</a><span class="sep">></span>Agoda Sync{% endblock %}
+{% block content %}
+<div class="section-header">
+  <h1 class="page-title" style="margin-bottom:0">🏨 Agoda Hotel Sync</h1>
+  <a href="{{ url_for('admin_hotels') }}" class="btn btn-ghost btn-sm">← Hotels</a>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin:20px 0">
+  <div class="stat-card"><div class="stat-label">Total Hotels</div><div class="stat-value">{{ total_hotels }}</div></div>
+  <div class="stat-card"><div class="stat-label">From Agoda</div><div class="stat-value" style="color:#e74c3c">{{ total_agoda }}</div></div>
+  <div class="stat-card"><div class="stat-label">Manual</div><div class="stat-value" style="color:#3498db">{{ total_manual }}</div></div>
+  <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value" style="color:#2ecc71">{{ total_active }}</div></div>
+</div>
+
+<!-- API Credentials -->
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <h3 style="margin:0;font-size:15px">🔑 Agoda API Credentials</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      {% if api_connected %}
+      <span style="font-size:13px;padding:4px 10px;background:rgba(46,204,113,0.1);color:#2ecc71;border-radius:4px;font-weight:600">Connected</span>
+      {% else %}
+      <span style="font-size:13px;padding:4px 10px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">Not configured</span>
+      {% endif %}
+      <button class="btn btn-ghost btn-sm" onclick="testConnection()" id="testBtn">Test</button>
+    </div>
+  </div>
+  <form method="POST" action="{{ url_for('admin_hotel_sync_save_credentials') }}">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">CID (Site ID)</label>
+        <input class="form-input" name="cid" value="{{ cid }}" placeholder="1959245" style="font-family:'DM Mono';font-size:13px">
+      </div>
+      <div class="form-group" style="flex:2">
+        <label class="form-label">API Key</label>
+        <input class="form-input" name="api_key" value="{{ 'configured' if has_key else '' }}" placeholder="1959245:5669c3b3-2865-4591-ba56-..." style="font-family:'DM Mono';font-size:13px" {% if has_key %}onfocus="if(this.value==='configured')this.value=''"{% endif %}>
+      </div>
+      <div class="form-group" style="align-self:flex-end">
+        <button class="btn btn-primary" type="submit">Save</button>
+      </div>
+    </div>
+  </form>
+  <div id="testResult" style="margin-top:8px;font-size:13px;display:none"></div>
+</div>
+
+<!-- Search Hotels from Agoda -->
+{% if api_connected %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+  <h3 style="margin:0 0 16px;font-size:15px">🔍 Tim khach san tu Agoda</h3>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Destination</label>
+      <select id="syncDest" class="form-select" style="width:180px;padding:8px;font-size:13px">
+        <option value="">Chon tinh thanh...</option>
+        {% for d in destinations %}
+        <option value="{{ d.slug }}">{{ d.name }} ({{ d.city_id }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Check-in</label>
+      <input type="date" id="syncCheckin" class="form-input" style="width:150px;padding:8px;font-size:13px">
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Check-out</label>
+      <input type="date" id="syncCheckout" class="form-input" style="width:150px;padding:8px;font-size:13px">
+    </div>
+    <button class="btn btn-primary" onclick="searchAgoda()" id="searchBtn">🔍 Search</button>
+    <button class="btn btn-ghost btn-sm" onclick="importSelected()" id="importBtn" style="display:none">📥 Import selected</button>
+  </div>
+
+  <!-- Results -->
+  <div id="searchLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);font-size:14px">
+    ⏳ Dang tai du lieu tu Agoda API...
+  </div>
+  <div id="searchResults" style="margin-top:16px"></div>
+  <div id="searchCount" style="margin-top:8px;font-size:13px;color:var(--text-dim);display:none"></div>
+</div>
+{% endif %}
+
+<!-- Recent Agoda Imports -->
+{% if recent %}
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+  <h3 style="margin:0 0 16px;font-size:15px">📋 Hotels da import tu Agoda</h3>
+  <div class="table-wrap">
+    <table class="data-table" style="font-size:13px">
+      <thead><tr><th>#</th><th>Hotel</th><th>Destination</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for h in recent %}
+        <tr>
+          <td style="font-family:'DM Mono';color:var(--text-dim)">{{ h.id }}</td>
+          <td>
+            <strong>{{ h.name[:50] }}{% if h.name|length > 50 %}...{% endif %}</strong>
+            <div style="font-size:12px;color:var(--text-dim)">{{ h.district }}</div>
+          </td>
+          <td>{{ h.destination_name }}</td>
+          <td>{% for i in range(h.stars) %}⭐{% endfor %}</td>
+          <td><span style="background:#004fac;color:#fff;padding:1px 5px;border-radius:3px;font-size:12px;font-weight:700">{{ h.rating }}</span></td>
+          <td style="font-family:'DM Mono'">{{ "{:,.0f}".format(h.price_from) }}d</td>
+          <td><span class="status-badge {% if h.is_active %}live{% else %}draft{% endif %}">{{ 'Active' if h.is_active else 'Off' }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<script>
+function testConnection() {
+  var btn = document.getElementById('testBtn');
+  var result = document.getElementById('testResult');
+  btn.textContent = '...';
+  btn.disabled = true;
+  result.style.display = 'none';
+
+  fetch('/admin/hotel-sync/test', {method:'POST'})
+    .then(r => r.json())
+    .then(data => {
+      result.style.display = 'block';
+      if (data.connected) {
+        result.innerHTML = '<span style="color:#2ecc71;font-weight:600">✓ Ket noi thanh cong</span> (method: ' + (data.method||'') + ', status: ' + (data.status||'') + ')';
+      } else {
+        result.innerHTML = '<span style="color:#e74c3c;font-weight:600">✗ Ket noi that bai</span> ' + (data.error||'');
+      }
+      btn.textContent = 'Test';
+      btn.disabled = false;
+    })
+    .catch(() => {
+      result.style.display = 'block';
+      result.innerHTML = '<span style="color:#e74c3c">Loi network</span>';
+      btn.textContent = 'Test';
+      btn.disabled = false;
+    });
+}
+
+var searchResultsData = [];
+
+function searchAgoda() {
+  var dest = document.getElementById('syncDest').value;
+  if (!dest) { alert('Chon destination truoc'); return; }
+
+  var btn = document.getElementById('searchBtn');
+  btn.textContent = '...';
+  btn.disabled = true;
+  document.getElementById('searchLoading').style.display = 'block';
+  document.getElementById('searchResults').innerHTML = '';
+  document.getElementById('searchCount').style.display = 'none';
+  document.getElementById('importBtn').style.display = 'none';
+
+  fetch('/admin/hotel-sync/search', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      destination: dest,
+      checkin: document.getElementById('syncCheckin').value,
+      checkout: document.getElementById('syncCheckout').value
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('searchLoading').style.display = 'none';
+    btn.textContent = '🔍 Search';
+    btn.disabled = false;
+    searchResultsData = data.hotels || [];
+
+    if (data.error) {
+      document.getElementById('searchResults').innerHTML = '<div style="padding:16px;color:#e74c3c">' + data.error + '</div>';
+      return;
+    }
+
+    if (searchResultsData.length === 0) {
+      document.getElementById('searchResults').innerHTML = '<div style="padding:16px;color:var(--text-dim)">Khong tim thay hotel nao</div>';
+      return;
+    }
+
+    document.getElementById('importBtn').style.display = 'inline-flex';
+    document.getElementById('searchCount').style.display = 'block';
+    document.getElementById('searchCount').textContent = data.total + ' hotels found';
+
+    var html = '<table class="data-table" style="font-size:13px"><thead><tr><th style="width:30px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th><th>Hotel</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead><tbody>';
+    searchResultsData.forEach(function(h, i) {
+      var imported = h.already_imported;
+      html += '<tr style="' + (imported ? 'opacity:0.5' : '') + '">'
+        + '<td><input type="checkbox" class="hCheck" data-idx="' + i + '" ' + (imported ? 'disabled' : 'checked') + '></td>'
+        + '<td><div style="display:flex;gap:10px;align-items:center">'
+        + (h.image_url ? '<img src="'+h.image_url+'" style="width:60px;height:40px;border-radius:4px;object-fit:cover" onerror="this.style.display=\'none\'">' : '')
+        + '<div><strong>' + (h.name||'').substring(0,50) + '</strong>'
+        + '<div style="font-size:12px;color:var(--text-dim)">' + (h.district||h.address||'') + '</div></div></div></td>'
+        + '<td>' + '⭐'.repeat(h.stars||0) + '</td>'
+        + '<td>' + (h.rating||0) + '</td>'
+        + '<td style="font-family:DM Mono">' + Number(h.price_from||0).toLocaleString() + 'd</td>'
+        + '<td>' + (imported ? '<span style="color:var(--text-dim)">Da import</span>' : '<span style="color:#2ecc71">Moi</span>') + '</td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('searchResults').innerHTML = html;
+  })
+  .catch(function() {
+    document.getElementById('searchLoading').style.display = 'none';
+    document.getElementById('searchResults').innerHTML = '<div style="padding:16px;color:#e74c3c">Loi ket noi API</div>';
+    btn.textContent = '🔍 Search';
+    btn.disabled = false;
+  });
+}
+
+function toggleAll(el) {
+  document.querySelectorAll('.hCheck:not(:disabled)').forEach(function(cb) { cb.checked = el.checked; });
+}
+
+function importSelected() {
+  var selected = [];
+  document.querySelectorAll('.hCheck:checked').forEach(function(cb) {
+    var idx = parseInt(cb.dataset.idx);
+    if (searchResultsData[idx]) selected.push(searchResultsData[idx]);
+  });
+
+  if (selected.length === 0) { alert('Chon it nhat 1 hotel'); return; }
+
+  var btn = document.getElementById('importBtn');
+  btn.textContent = 'Importing...';
+  btn.disabled = true;
+
+  fetch('/admin/hotel-sync/import', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({hotels: selected})
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.textContent = '📥 Import selected';
+    btn.disabled = false;
+    if (data.error) {
+      alert(data.error);
+    } else {
+      alert('Da import ' + data.imported + ' khach san!');
+      location.reload();
+    }
+  })
+  .catch(function() {
+    btn.textContent = '📥 Import selected';
+    btn.disabled = false;
+    alert('Loi import');
+  });
+}
+</script>
+{% endblock %}

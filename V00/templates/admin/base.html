@@ -63,8 +63,11 @@
           <a href="{{ url_for('admin_products') }}" class="sb-link sb-sub {% if 'product' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#128230;</span> Products
           </a>
-          <a href="{{ url_for('admin_hotels') }}" class="sb-link sb-sub {% if 'hotel' in (request.endpoint or '') %}active{% endif %}">
+          <a href="{{ url_for('admin_hotels') }}" class="sb-link sb-sub {% if request.endpoint == 'admin_hotels' or request.endpoint == 'admin_hotel_new' or request.endpoint == 'admin_hotel_edit' %}active{% endif %}">
             <span class="sb-icon">&#127976;</span> Hotels
+          </a>
+          <a href="{{ url_for('admin_hotel_sync') }}" class="sb-link sb-sub {% if 'hotel_sync' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
+            <span class="sb-icon">&#128260;</span> Hotel Sync
           </a>
           <a href="{{ url_for('admin_attractions') }}" class="sb-link sb-sub {% if 'attraction' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#127903;</span> Attractions

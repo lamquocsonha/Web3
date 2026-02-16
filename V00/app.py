@@ -3247,6 +3247,174 @@ def admin_hotel_delete(hid):
     return redirect(url_for('admin_hotels'))
 
 # =============================================
+# ADMIN — HOTEL SYNC (Agoda API)
+# =============================================
+
+@app.route('/admin/hotel-sync')
+def admin_hotel_sync():
+    """Dashboard for Agoda hotel sync"""
+    from agoda_integration import get_agoda_api, AGODA_CITY_IDS, AGODA_CITY_NAMES
+    api = get_agoda_api()
+    api_connected = api is not None
+
+    total_hotels = Hotel.query.count()
+    total_agoda = Hotel.query.filter_by(source='agoda_api').count()
+    total_manual = Hotel.query.filter(Hotel.source != 'agoda_api').count()
+    total_active = Hotel.query.filter_by(is_active=True).count()
+
+    # Credentials info
+    cid = SiteSettings.get('agoda_cid', '')
+    has_key = bool(SiteSettings.get('agoda_api_key', ''))
+
+    destinations = [
+        {'slug': slug, 'name': AGODA_CITY_NAMES.get(slug, slug), 'city_id': cid_val}
+        for slug, cid_val in AGODA_CITY_IDS.items()
+    ]
+
+    recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()
+
+    return render_template('admin/hotel_sync.html',
+        api_connected=api_connected, cid=cid, has_key=has_key,
+        total_hotels=total_hotels, total_agoda=total_agoda,
+        total_manual=total_manual, total_active=total_active,
+        destinations=destinations, recent=recent)
+
+
+@app.route('/admin/hotel-sync/save-credentials', methods=['POST'])
+def admin_hotel_sync_save_credentials():
+    """Save Agoda API credentials"""
+    cid = request.form.get('cid', '').strip()
+    api_key = request.form.get('api_key', '').strip()
+    SiteSettings.set_val('agoda_cid', cid, 'api')
+    SiteSettings.set_val('agoda_api_key', api_key, 'api')
+    SiteSettings.set_val('agoda_enabled', '1' if cid and api_key else '0', 'general')
+    # Update AffiliateNetwork table too
+    net = AffiliateNetwork.query.filter_by(slug='agoda').first()
+    if net:
+        net.api_key = api_key
+        net.status = 'connected' if cid and api_key else 'disconnected'
+    db.session.commit()
+    # Reset singleton
+    import agoda_integration
+    agoda_integration._api_instance = None
+    flash(f'Da luu Agoda credentials (CID: {cid})', 'success')
+    return redirect(url_for('admin_hotel_sync'))
+
+
+@app.route('/admin/hotel-sync/test', methods=['POST'])
+def admin_hotel_sync_test():
+    """Test Agoda API connection"""
+    from agoda_integration import get_agoda_api
+    api = get_agoda_api()
+    if not api:
+        return jsonify({'connected': False, 'error': 'Chua cau hinh API credentials'})
+    result = api.test_connection()
+    return jsonify(result)
+
+
+@app.route('/admin/hotel-sync/search', methods=['POST'])
+def admin_hotel_sync_search():
+    """Search hotels from Agoda API for a destination"""
+    from agoda_integration import get_agoda_api
+    api = get_agoda_api()
+    if not api:
+        return jsonify({'error': 'Agoda API chua cau hinh', 'hotels': []})
+
+    data = request.get_json() or {}
+    destination = data.get('destination', '')
+    checkin = data.get('checkin', '')
+    checkout = data.get('checkout', '')
+
+    if not destination:
+        return jsonify({'error': 'Chua chon destination', 'hotels': []})
+
+    hotels = api.search_city_hotels(destination, checkin or None, checkout or None)
+
+    # Mark which ones are already in DB
+    existing_ids = set()
+    for h in Hotel.query.filter_by(source='agoda_api').all():
+        if h.agoda_url:
+            # Extract hotel ID from agoda_url
+            for part in h.agoda_url.split('&'):
+                if part.startswith('hid='):
+                    existing_ids.add(part.split('=')[1])
+
+    for h in hotels:
+        h['already_imported'] = str(h.get('agoda_id', '')) in existing_ids
+
+    return jsonify({'hotels': hotels, 'total': len(hotels)})
+
+
+@app.route('/admin/hotel-sync/import', methods=['POST'])
+def admin_hotel_sync_import():
+    """Import selected hotels from Agoda search results into DB"""
+    data = request.get_json() or {}
+    hotels_data = data.get('hotels', [])
+
+    if not hotels_data:
+        return jsonify({'error': 'Khong co hotel nao de import', 'imported': 0})
+
+    imported = 0
+    for h in hotels_data:
+        agoda_id = str(h.get('agoda_id', ''))
+        name = h.get('name', '').strip()
+        if not name:
+            continue
+
+        # Check duplicate by agoda_url containing the hotel ID
+        existing = Hotel.query.filter(Hotel.agoda_url.contains(f'hid={agoda_id}')).first()
+        if existing:
+            continue
+
+        amenities_raw = h.get('amenities', '')
+        if isinstance(amenities_raw, list):
+            amenities_raw = ', '.join(str(a) for a in amenities_raw)
+
+        hotel = Hotel(
+            name=name,
+            slug=slugify(name)[:60],
+            destination=h.get('destination', ''),
+            destination_name=h.get('destination_name', ''),
+            stars=int(h.get('stars', 0)) or 4,
+            district=h.get('district', '') or h.get('address', ''),
+            description=h.get('description', ''),
+            amenities=str(amenities_raw)[:500],
+            rating=float(h.get('rating', 0)) or 8.0,
+            reviews_count=int(h.get('reviews_count', 0)),
+            price_from=float(h.get('price_from', 0)),
+            image_url=h.get('image_url', ''),
+            agoda_url=h.get('agoda_url', ''),
+            source='agoda_api',
+            is_active=True,
+            is_featured=False
+        )
+        db.session.add(hotel)
+        imported += 1
+
+    db.session.commit()
+    return jsonify({'imported': imported, 'message': f'Da import {imported} khach san'})
+
+
+@app.route('/admin/api/agoda-search')
+def admin_api_agoda_search_public():
+    """Public API: search Agoda hotels for a destination (used by travel page)"""
+    from agoda_integration import get_agoda_api
+    api = get_agoda_api()
+    if not api:
+        return jsonify({'hotels': [], 'source': 'unavailable'})
+
+    destination = request.args.get('destination', '')
+    checkin = request.args.get('checkin', '')
+    checkout = request.args.get('checkout', '')
+
+    if not destination:
+        return jsonify({'hotels': [], 'source': 'no_destination'})
+
+    hotels = api.search_city_hotels(destination, checkin or None, checkout or None)
+    return jsonify({'hotels': hotels, 'total': len(hotels), 'source': 'agoda_api'})
+
+
+# =============================================
 # ADMIN — ATTRACTIONS (Vé tham quan)
 # =============================================
 ATTRACTION_CATS = [
@@ -4338,17 +4506,32 @@ def travel_hotels():
     api_status = 'configured' if agoda_enabled else 'local_db'
 
     hotels = []
+    agoda_hotels = []
     if destination:
+        # Always get local DB hotels
         q = Hotel.query.filter_by(is_active=True, destination=destination)
         if stars:
             q = q.filter(Hotel.stars == int(stars))
         hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).all()
 
-    # Popular destinations from DB
+    # Popular destinations from DB + Agoda city list
     dest_counts = db.session.query(Hotel.destination, Hotel.destination_name, db.func.count(Hotel.id)
         ).filter(Hotel.is_active == True).group_by(Hotel.destination, Hotel.destination_name).all()
-    dest_icons = {'da-nang':'🏖️','phu-quoc':'🌴','nha-trang':'🌊','ha-noi':'🏯','ho-chi-minh':'🏙️','da-lat':'🌸','hoi-an':'🏮','sa-pa':'🏔️'}
+    dest_icons = {'da-nang':'🏖️','phu-quoc':'🌴','nha-trang':'🌊','ha-noi':'🏯','ho-chi-minh':'🏙️','da-lat':'🌸','hoi-an':'🏮','sa-pa':'🏔️','vung-tau':'🏖️','quy-nhon':'🏖️','hue':'🏯','hai-phong':'⚓','can-tho':'🌾','ninh-binh':'🏯'}
     popular = [{'slug': d[0], 'name': d[1], 'icon': dest_icons.get(d[0],'📍'), 'count': d[2]} for d in dest_counts]
+
+    # Add Agoda cities that aren't in DB yet
+    if agoda_enabled:
+        from agoda_integration import AGODA_CITY_IDS, AGODA_CITY_NAMES
+        db_slugs = set(d[0] for d in dest_counts)
+        for slug, city_id in AGODA_CITY_IDS.items():
+            if slug not in db_slugs:
+                popular.append({
+                    'slug': slug,
+                    'name': AGODA_CITY_NAMES.get(slug, slug),
+                    'icon': dest_icons.get(slug, '📍'),
+                    'count': 0
+                })
 
     return render_template('travel/hotels.html', vertical=v, hotels=hotels,
         destination=destination, checkin=checkin, checkout=checkout, guests=guests,
