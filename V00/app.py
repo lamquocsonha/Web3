@@ -3832,6 +3832,11 @@ def admin_hotdeals_upload():
 
     try:
         import openpyxl
+    except ImportError:
+        flash('Thieu thu vien openpyxl. Chay: pip install openpyxl', 'error')
+        return redirect(url_for('admin_hotdeals'))
+
+    try:
         from io import BytesIO
 
         wb = openpyxl.load_workbook(BytesIO(file.read()))
