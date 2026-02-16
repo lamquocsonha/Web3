@@ -3254,6 +3254,18 @@ def admin_hotel_delete(hid):
 def admin_hotel_sync():
     """Dashboard for Agoda hotel sync"""
     from agoda_integration import get_agoda_api, AGODA_CITY_IDS, AGODA_CITY_NAMES
+
+    # Auto-populate default Agoda credentials if not saved yet
+    _default_cid = '1959245'
+    _default_key = '1959245:5669c3b3-2865-4591-ba56-1b02a3c04082'
+    if not SiteSettings.get('agoda_cid', ''):
+        SiteSettings.set_val('agoda_cid', _default_cid, 'api')
+        SiteSettings.set_val('agoda_api_key', _default_key, 'api')
+        SiteSettings.set_val('agoda_enabled', '1', 'general')
+        import agoda_integration
+        agoda_integration._api_instance = None
+        db.session.commit()
+
     api = get_agoda_api()
     api_connected = api is not None
 
