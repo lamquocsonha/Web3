@@ -224,6 +224,9 @@
     </div>
     {% endfor %}
 
+    <!-- Hot Products Sidebar Widget -->
+    {% include 'shared/_hot_products_sidebar.html' %}
+
     <!-- Voucher Sidebar Widget (position: bottom) -->
     {% if voucher_sidebar_position == 'bottom' %}
       {% include 'shared/_voucher_sidebar.html' %}

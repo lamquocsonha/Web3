@@ -1,0 +1,51 @@
+{# Hot Products sidebar widget — compact vertical list #}
+{# Required context: hot_products (list from AccessTrade API), hot_products_show_sidebar #}
+
+{% if hot_products and hot_products_show_sidebar == '1' %}
+<div class="sidebar-widget sidebar-hot-products">
+  <h3 class="widget-title">🔥 San pham ban chay</h3>
+  <div class="shp-list">
+    {% for p in hot_products[:6] %}
+    <a href="{{ p.aff_link or p.link or '#' }}" target="_blank" rel="nofollow" class="shp-card">
+      <div class="shp-thumb">
+        {% if p.image %}
+        <img src="{{ p.image }}" alt="{{ p.name }}" loading="lazy" onerror="this.style.display='none'">
+        {% else %}
+        <span>🔥</span>
+        {% endif %}
+      </div>
+      <div class="shp-info">
+        <div class="shp-name">{{ p.name }}</div>
+        <div class="shp-price-row">
+          {% if p.discount and p.discount != p.price %}
+          <span class="shp-price-sale">{{ "{:,.0f}".format(p.discount|float) }}d</span>
+          <span class="shp-price-old">{{ "{:,.0f}".format(p.price|float) }}d</span>
+          {% elif p.price %}
+          <span class="shp-price">{{ "{:,.0f}".format(p.price|float) }}d</span>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  <a href="{{ url_for('shop_index') }}" class="shp-viewall">Xem tat ca san pham &rarr;</a>
+</div>
+
+<style>
+.sidebar-hot-products { margin-top:20px; }
+.shp-list { display:flex; flex-direction:column; gap:8px; }
+.shp-card { display:flex; gap:10px; padding:8px; border:1px solid var(--border); border-radius:8px; background:var(--surface); text-decoration:none; color:var(--text); transition:all .15s; align-items:center; }
+.shp-card:hover { border-color:var(--accent,#f59e0b); transform:translateX(2px); }
+.shp-thumb { flex:0 0 48px; width:48px; height:48px; border-radius:6px; overflow:hidden; background:var(--bg); display:flex; align-items:center; justify-content:center; }
+.shp-thumb img { width:100%; height:100%; object-fit:contain; }
+.shp-thumb span { font-size:20px; }
+.shp-info { flex:1; min-width:0; }
+.shp-name { font-size:12px; font-weight:600; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.shp-price-row { margin-top:3px; display:flex; align-items:center; gap:4px; }
+.shp-price { font-size:13px; font-weight:700; color:var(--accent,#f59e0b); }
+.shp-price-sale { font-size:13px; font-weight:700; color:#ef4444; }
+.shp-price-old { font-size:11px; color:var(--text-dim); text-decoration:line-through; }
+.shp-viewall { display:block; text-align:center; margin-top:10px; font-size:13px; font-weight:600; color:var(--accent,#f59e0b); text-decoration:none; padding:8px; border-radius:8px; background:var(--bg); transition:background .2s; }
+.shp-viewall:hover { background:var(--surface); }
+</style>
+{% endif %}

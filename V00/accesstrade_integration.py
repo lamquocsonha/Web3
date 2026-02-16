@@ -127,6 +127,52 @@ class AccessTradeAPI:
         return {'data': [], 'total': 0}
 
     # ═══════════════════════════════════════
+    # TOP PRODUCTS  (bestselling products)
+    # Docs: https://developers.accesstrade.vn/api-publisher-vietnamese/top-cac-san-pham-ban-chay-nhat
+    # ═══════════════════════════════════════
+
+    def get_top_products(self, merchant=None, date_from=None, date_to=None):
+        """Get top bestselling products from AccessTrade merchants.
+
+        GET /v1/top_products
+
+        Args:
+            merchant:   Filter by merchant (e.g. 'lazada', 'shopee')
+            date_from:  Start date (DD-MM-YYYY)
+            date_to:    End date (DD-MM-YYYY)
+
+        Returns dict with:
+            'data': list of up to 50 product dicts (product_id, name, price,
+                    discount, image, link, aff_link, brand, category_name, desc)
+            'total': number of products
+        """
+        try:
+            params = {}
+            if merchant:
+                params['merchant'] = merchant
+            if date_from:
+                params['date_from'] = date_from
+            if date_to:
+                params['date_to'] = date_to
+
+            response = requests.get(
+                f"{self.base_url}/top_products",
+                headers=self.headers,
+                params=params,
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'data': data.get('data', []),
+                    'total': data.get('total', 0)
+                }
+        except Exception:
+            pass
+        return {'data': [], 'total': 0}
+
+    # ═══════════════════════════════════════
     # OFFERS / PROMOTIONS  (offers_informations)
     # ═══════════════════════════════════════
 

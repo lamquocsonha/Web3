@@ -197,6 +197,22 @@ def inject_globals():
                 Voucher.created_at.desc()
             ).limit(vs_count).all()
 
+        # Hot products widget (AccessTrade top products)
+        hot_products = []
+        hp_enabled = SiteSettings.get('hot_products_enabled', '0')
+        hp_show_shop = SiteSettings.get('hot_products_show_shop', '1')
+        hp_show_sidebar = SiteSettings.get('hot_products_show_sidebar', '1')
+        if hp_enabled == '1':
+            try:
+                from accesstrade_integration import get_accesstrade_api
+                hp_api = get_accesstrade_api()
+                if hp_api:
+                    hp_count = int(SiteSettings.get('hot_products_count', '8'))
+                    result = hp_api.get_top_products()
+                    hot_products = (result.get('data') or [])[:hp_count]
+            except Exception:
+                pass
+
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
             'now': datetime.utcnow(),
@@ -207,9 +223,12 @@ def inject_globals():
             'sidebar_vouchers': sidebar_vouchers,
             'voucher_sidebar_position': SiteSettings.get('voucher_sidebar_position', 'after_popular'),
             'custom_head_code': SiteSettings.get('custom_head_code', ''),
+            'hot_products': hot_products,
+            'hot_products_show_shop': hp_show_shop,
+            'hot_products_show_sidebar': hp_show_sidebar,
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': ''}
+        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1'}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -751,7 +770,9 @@ def admin_settings():
         tab_keys = {
             'general': ['site_mode', 'site_name', 'default_mode', 'carousel_product_limit', 'logo_url', 'favicon_url',
                         'voucher_sidebar_enabled', 'voucher_sidebar_count', 'voucher_sidebar_position',
-                        'shop_display_mode', 'custom_head_code'],
+                        'shop_display_mode', 'custom_head_code',
+                        'hot_products_enabled', 'hot_products_count',
+                        'hot_products_show_shop', 'hot_products_show_sidebar'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         keys_to_save = tab_keys.get(tab, [])

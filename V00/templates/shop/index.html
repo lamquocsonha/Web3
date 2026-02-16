@@ -7,6 +7,7 @@
 <meta name="description" content="So sanh gia va mua san pham tu Shopee, Lazada, Tiki. Tong hop {{ total_products }} san pham theo danh muc.">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+{% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}
 </head>
 <body data-mode="light">
 
@@ -61,6 +62,9 @@
     </a>
     {% endfor %}
   </div>
+
+  <!-- HOT PRODUCTS -->
+  {% include 'shared/_hot_products_shop.html' %}
 
   <!-- MAIN LAYOUT -->
   <div class="shop-layout">
@@ -127,6 +131,9 @@
 
       <!-- Voucher Sidebar Widget -->
       {% include 'shared/_voucher_sidebar.html' %}
+
+      <!-- Hot Products Sidebar Widget -->
+      {% include 'shared/_hot_products_sidebar.html' %}
     </aside>
 
     <!-- MAIN CONTENT -->
