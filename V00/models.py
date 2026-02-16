@@ -15,6 +15,7 @@ class Vertical(db.Model):
     default_mode = db.Column(db.String(10), default='minimal')
     template = db.Column(db.String(20), default='general')  # Layout: general, blog, newspaper
     style = db.Column(db.String(20), default='classic')  # Theme: classic, modern, tech, beauty, car, pet
+    shop_link = db.Column(db.String(500), default='')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     segments = db.relationship('Segment', backref='vertical', cascade='all,delete-orphan', lazy=True)
 
@@ -89,15 +90,16 @@ class AffiliateCampaign(db.Model):
 
 class AffiliateLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    part_id = db.Column(db.Integer, db.ForeignKey('part.id'), nullable=False)
-    network = db.Column(db.String(50), nullable=False)
+    part_id = db.Column(db.Integer, db.ForeignKey('part.id'), nullable=False, index=True)
+    network = db.Column(db.String(50), nullable=False, index=True)
     product_name = db.Column(db.String(300), default='')
     url = db.Column(db.String(1000), nullable=False)
     price = db.Column(db.Float, default=0)
     image_url = db.Column(db.String(500), default='')
-    is_active = db.Column(db.Boolean, default=True)
+    is_active = db.Column(db.Boolean, default=True, index=True)
     clicks = db.Column(db.Integer, default=0)
     conversions = db.Column(db.Integer, default=0)
+    category = db.Column(db.String(100), default='', index=True)  # Hub category (auto-detected)
 
 class AffiliateStats(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -144,6 +146,56 @@ class SiteSettings(db.Model):
             s = SiteSettings(key=key, value=value, category=category)
             db.session.add(s)
         db.session.commit()
+
+# === AI AUTO-CONTENT ENGINE ===
+class ContentEvent(db.Model):
+    """Calendar events: holidays, seasons, trending topics"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    event_type = db.Column(db.String(20), default='holiday')  # holiday / seasonal / trending / custom
+    start_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date)
+    keywords = db.Column(db.Text, default='')
+    verticals = db.Column(db.String(500), default='all')  # comma-separated slugs or 'all'
+    icon = db.Column(db.String(10), default='')
+    recurrence = db.Column(db.String(20), default='yearly')  # yearly / one-time
+    auto_generate = db.Column(db.Boolean, default=True)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+class AutoContentRule(db.Model):
+    """Rules for automatic content generation per vertical"""
+    id = db.Column(db.Integer, primary_key=True)
+    vertical_id = db.Column(db.Integer, db.ForeignKey('vertical.id'), nullable=False)
+    vertical = db.relationship('Vertical', backref='content_rules')
+    frequency = db.Column(db.String(20), default='daily')  # daily / 3x_week / weekly
+    articles_per_day = db.Column(db.Integer, default=1)
+    knowledge_layer = db.Column(db.String(10), default='auto')  # L1 / L2 / L3 / L4 / auto
+    tone = db.Column(db.String(20), default='seo')  # casual / professional / seo
+    auto_publish = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
+    topics_to_avoid = db.Column(db.Text, default='')
+    focus_keywords = db.Column(db.Text, default='')
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+class ContentQueue(db.Model):
+    """Queue of AI-generated content items"""
+    id = db.Column(db.Integer, primary_key=True)
+    vertical_id = db.Column(db.Integer, db.ForeignKey('vertical.id'), nullable=False)
+    vertical = db.relationship('Vertical', backref='content_queue')
+    topic = db.Column(db.String(500), nullable=False)
+    keywords = db.Column(db.Text, default='')
+    knowledge_layer = db.Column(db.String(5), default='L1')  # L1-L4
+    source_type = db.Column(db.String(20), default='ai')  # ai / manual / event
+    source_event_id = db.Column(db.Integer, db.ForeignKey('content_event.id'), nullable=True)
+    source_event = db.relationship('ContentEvent')
+    status = db.Column(db.String(20), default='pending')  # pending / generating / review / published / skipped
+    generated_content = db.Column(db.Text, default='')
+    word_count = db.Column(db.Integer, default=0)
+    seo_score = db.Column(db.Integer, default=0)
+    scheduled_at = db.Column(db.DateTime)
+    published_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=db.func.now())
 
 # === VIDEO PRODUCTION ===
 class SocialChannel(db.Model):
@@ -240,6 +292,7 @@ class Hotel(db.Model):
     rating = db.Column(db.Float, default=8.0)
     reviews_count = db.Column(db.Integer, default=0)
     price_from = db.Column(db.Float, default=0)
+    price_original = db.Column(db.Float, default=0)
     image_url = db.Column(db.String(500), default='')
     agoda_url = db.Column(db.String(1000), default='')
     booking_url = db.Column(db.String(1000), default='')
@@ -302,6 +355,7 @@ class Voucher(db.Model):
     conversions = db.Column(db.Integer, default=0)
     embed_code = db.Column(db.Text, default='')  # HTML/JavaScript embed code for displaying voucher on websites
     sync_mode = db.Column(db.String(20), default='manual')  # manual, api - Data entry mode: manual entry or API sync from AccessTrade
+    accesstrade_offer_id = db.Column(db.String(100), default='')  # AccessTrade offer ID for dedup during auto-sync
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -310,21 +364,24 @@ class Voucher(db.Model):
         now = datetime.utcnow()
         if not self.is_active:
             return False
-        if now < self.valid_from or now > self.valid_to:
+        if self.valid_from and now < self.valid_from:
             return False
-        if self.usage_limit > 0 and self.usage_count >= self.usage_limit:
+        if self.valid_to and now > self.valid_to:
+            return False
+        if (self.usage_limit or 0) > 0 and (self.usage_count or 0) >= self.usage_limit:
             return False
         return True
 
     def get_discount_text(self):
         """Get human-readable discount text"""
+        val = self.discount_value or 0
         if self.discount_type == 'percentage':
-            return f'Giảm {int(self.discount_value)}%'
+            return f'Giảm {int(val)}%'
         elif self.discount_type == 'fixed_amount':
-            return f'Giảm {int(self.discount_value):,}đ'
+            return f'Giảm {int(val):,}đ'
         elif self.discount_type == 'free_shipping':
             return 'Freeship'
-        return f'Giảm {int(self.discount_value)}%'
+        return f'Giảm {int(val)}%'
 class ArticleFeedback(db.Model):
     """User feedback on article accuracy"""
     id = db.Column(db.Integer, primary_key=True)

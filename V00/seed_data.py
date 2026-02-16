@@ -11,9 +11,9 @@ def seed():
     print('[+] Seeding Car vertical...')
     # Vertical: Car
     car = Vertical(
-        name='Car', slug='car', icon='🚗', color='#fdcb6e',
+        name='Car', slug='car', icon='🚗', color='#f39c12',
         description='Kiến thức chi tiết về ô tô — từ tổng thể đến từng bu-lông. Tìm hiểu, sửa chữa, nâng cấp.',
-        status='live'
+        status='live', style='car', template='general', default_mode='light'
     )
     db.session.add(car)
     db.session.flush()
@@ -166,7 +166,8 @@ def seed():
             ('tiki', f'{p_data["name_vi"]} cao cấp', 'https://tiki.vn/search?q=' + p_data['slug'], 200000 + i*30000),
         ]
         for net, pname, url, price in links:
-            al = AffiliateLink(part_id=p.id, network=net, product_name=pname, url=url, price=price)
+            al = AffiliateLink(part_id=p.id, network=net, product_name=pname, url=url, price=price,
+                image_url=f"https://placehold.co/400x300/f39c12/fff?text={p_data['slug'][:25]}")
             db.session.add(al)
 
     # Parts cho Hệ thống phanh
@@ -207,7 +208,8 @@ def seed():
         db.session.flush()
         for net, price in [('shopee', 250000), ('lazada', 280000), ('tiki', 300000)]:
             al = AffiliateLink(part_id=p.id, network=net, product_name=f'{p_data["name_vi"]} chính hãng',
-                             url=f'https://{net}.vn/search?q={p_data["slug"]}', price=price + i*100000)
+                             url=f'https://{net}.vn/search?q={p_data["slug"]}', price=price + i*100000,
+                             image_url=f"https://placehold.co/400x300/f39c12/fff?text={p_data['slug'][:25]}")
             db.session.add(al)
 
     # Zones cho các segment khác (chỉ tạo zones, chưa có parts)
@@ -400,32 +402,6 @@ def seed_articles():
 </ul>'''
         },
         {
-            'title': 'Chi phí bảo dưỡng ô tô theo từng mốc km — Bảng tính chi tiết',
-            'slug': 'chi-phi-bao-duong-oto-theo-km',
-            'tier': 'nganh',
-            'category': 'bao-duong',
-            'tags': 'bảo dưỡng,chi phí,mốc km,lịch bảo dưỡng,tiết kiệm',
-            'excerpt': 'Bảng tính chi phí bảo dưỡng chi tiết theo từng mốc 5,000km đến 100,000km. Biết trước để chuẩn bị ngân sách và không bị "chém" tại garage.',
-            'reading_time': 7,
-            'content': '''<h2>Lịch bảo dưỡng theo mốc km</h2>
-<p>Mỗi chiếc xe đều cần bảo dưỡng định kỳ. Dưới đây là các mốc quan trọng nhất:</p>
-
-<h3>5,000 — 10,000 km: Thay dầu máy</h3>
-<p>Chi phí: <strong>500,000 — 1,200,000đ</strong> (tùy loại dầu). Đây là bảo dưỡng cơ bản nhất, nên làm đúng hạn để bảo vệ động cơ.</p>
-
-<h3>20,000 km: Thay lọc gió + lọc điều hòa</h3>
-<p>Chi phí: <strong>200,000 — 500,000đ</strong>. Lọc bẩn khiến xe yếu, tốn xăng. Đây là phụ tùng bạn hoàn toàn có thể tự thay tại nhà.</p>
-
-<h3>40,000 km: Thay má phanh + dầu phanh</h3>
-<p>Chi phí: <strong>800,000 — 2,500,000đ</strong>. Má phanh mòn ảnh hưởng trực tiếp đến an toàn. Kiểm tra mỗi 20,000km, thay khi còn dưới 3mm.</p>
-
-<h3>60,000 — 80,000 km: Thay cao su hệ thống treo</h3>
-<p>Chi phí: <strong>2,000,000 — 8,000,000đ</strong> (tùy số lượng). Cao su chân phuộc, cao su cân bằng, rotuyn... đều cần kiểm tra và thay ở mốc này.</p>
-
-<h3>100,000 km: Đại tu lớn</h3>
-<p>Chi phí: <strong>10,000,000 — 25,000,000đ</strong>. Thay dây curoa, bugi, bơm nước, thermostat, và tổng kiểm tra toàn bộ hệ thống.</p>'''
-        },
-        {
             'title': 'Top 10 lỗi ô tô thường gặp và cách xử lý tại chỗ',
             'slug': 'top-10-loi-oto-thuong-gap',
             'tier': 'nganh',
@@ -489,73 +465,6 @@ def seed_articles():
 <li>Tay lái bị rung ở tốc độ cao</li>
 </ul>'''
         },
-        {
-            'title': 'Hệ thống phanh — Từ đĩa phanh đến ABS, EBD hoạt động ra sao?',
-            'slug': 'he-thong-phanh-tu-dia-den-abs',
-            'tier': 'chung',
-            'category': 'he-thong-phanh',
-            'related_segment_slug': 'cuv',
-            'related_zone_slug': 'he-thong-phanh',
-            'tags': 'phanh,ABS,EBD,đĩa phanh,má phanh,dầu phanh,an toàn',
-            'excerpt': 'Giải thích chi tiết hệ thống phanh từ cơ bản đến nâng cao: phanh đĩa vs phanh tang trống, ABS, EBD, BA và cách bảo dưỡng.',
-            'reading_time': 9,
-            'content': '''<h2>Nguyên lý phanh ô tô</h2>
-<p>Khi nhấn bàn đạp phanh → xy-lanh chính tạo áp suất dầu → dầu truyền qua đường ống → đẩy má phanh ép vào đĩa phanh → ma sát tạo lực hãm → xe giảm tốc.</p>
-
-<h2>Phanh đĩa vs Phanh tang trống</h2>
-<p><strong>Phanh đĩa:</strong> Hiệu quả cao, tản nhiệt tốt, dùng phổ biến ở bánh trước và cả 4 bánh xe đời mới.</p>
-<p><strong>Phanh tang trống:</strong> Rẻ hơn, dùng ở bánh sau xe phổ thông. Tản nhiệt kém hơn nhưng đủ cho xe nhỏ.</p>
-
-<h2>ABS, EBD, BA — Công nghệ phanh hiện đại</h2>
-<p><strong>ABS (Anti-lock Braking System):</strong> Chống bó cứng phanh. Khi phanh gấp, ABS nhả-đạp liên tục 15 lần/giây, giúp xe không bị trượt.</p>
-<p><strong>EBD (Electronic Brakeforce Distribution):</strong> Phân phối lực phanh thông minh giữa 4 bánh tùy theo tải trọng và tốc độ.</p>
-<p><strong>BA (Brake Assist):</strong> Hỗ trợ lực phanh. Khi phát hiện phanh gấp nhưng lực đạp không đủ, BA tự động tăng áp suất phanh.</p>'''
-        },
-        {
-            'title': 'Hệ thống điện ô tô — Ắc-quy, máy phát, và mạng CAN Bus',
-            'slug': 'he-thong-dien-oto-ac-quy-can-bus',
-            'tier': 'chung',
-            'category': 'he-thong-dien',
-            'tags': 'điện ô tô,ắc-quy,máy phát,CAN Bus,cảm biến,ECU',
-            'excerpt': 'Tổng quan hệ thống điện trên xe hơi hiện đại: từ ắc-quy 12V, máy phát điện, đến mạng CAN Bus kết nối hàng chục ECU.',
-            'reading_time': 8,
-            'content': '''<h2>Ắc-quy — Trái tim điện của xe</h2>
-<p>Ắc-quy 12V cung cấp điện cho hệ thống khởi động, đèn, và các thiết bị điện tử khi xe chưa nổ máy. Tuổi thọ trung bình: 2-4 năm.</p>
-
-<h2>CAN Bus — Hệ thần kinh của xe hiện đại</h2>
-<p>Xe đời mới có tới <strong>50-100 ECU</strong> (bộ điều khiển điện tử) giao tiếp qua mạng CAN Bus. Mỗi ECU quản lý một chức năng: động cơ, phanh, túi khí, điều hòa...</p>'''
-        },
-        {
-            'title': 'Động cơ ô tô — Xăng vs Diesel vs Hybrid: nên chọn loại nào?',
-            'slug': 'dong-co-xang-diesel-hybrid-so-sanh',
-            'tier': 'chung',
-            'category': 'dong-co',
-            'tags': 'động cơ,xăng,diesel,hybrid,so sánh,tiết kiệm nhiên liệu',
-            'excerpt': 'So sánh chi tiết 3 loại động cơ phổ biến: xăng, diesel, hybrid. Ưu nhược điểm, chi phí vận hành, và lời khuyên chọn xe.',
-            'reading_time': 9,
-            'content': '''<h2>Động cơ xăng</h2>
-<p>Phổ biến nhất tại VN. Ưu điểm: êm, mạnh ở vòng tua cao, chi phí bảo dưỡng thấp. Nhược: tốn nhiên liệu hơn diesel 15-20%.</p>
-
-<h2>Động cơ diesel</h2>
-<p>Mạnh ở vòng tua thấp, tiết kiệm nhiên liệu. Phù hợp xe bán tải, SUV. Nhược: ồn hơn, chi phí sửa chữa cao, ít lựa chọn xe tại VN.</p>
-
-<h2>Hybrid</h2>
-<p>Kết hợp xăng + điện. Tiết kiệm 30-50% nhiên liệu trong thành phố. Xu hướng tương lai nhưng giá cao hơn 100-200 triệu so với bản xăng.</p>'''
-        },
-        {
-            'title': 'Hệ thống lái — Trợ lực điện EPS vs thủy lực: khác biệt gì?',
-            'slug': 'he-thong-lai-eps-vs-thuy-luc',
-            'tier': 'chung',
-            'category': 'he-thong-lai',
-            'tags': 'hệ thống lái,EPS,trợ lực,thủy lực,tay lái,vô-lăng',
-            'excerpt': 'So sánh 2 loại trợ lực lái phổ biến: EPS (điện) và trợ lực thủy lực. Cách nhận biết hỏng trợ lực lái.',
-            'reading_time': 6,
-            'content': '''<h2>Trợ lực thủy lực</h2>
-<p>Dùng bơm dầu trợ lực lấy công suất từ động cơ → tạo áp suất hỗ trợ xoay vô-lăng. Cảm giác lái tốt nhưng tốn nhiên liệu và nặng hơn EPS.</p>
-
-<h2>Trợ lực điện EPS</h2>
-<p>Motor điện hỗ trợ trực tiếp trên trục lái. Tiết kiệm nhiên liệu, nhẹ, và có thể tùy chỉnh độ nặng nhẹ tay lái theo tốc độ. Phổ biến trên hầu hết xe đời mới.</p>'''
-        },
 
         # === TIER 3: CHI-TIET (Detailed part knowledge) ===
         {
@@ -591,117 +500,6 @@ def seed_articles():
 <p>Với cao su chân phuộc <strong>đầu dưới</strong>: Có thể tự thay nếu có cầu nâng hoặc kích xe. Cần dụng cụ: kích, cờ-lê, búa cao su.</p>
 <p>Với cao su <strong>đầu trên</strong>: Khó hơn, cần tháo cụm phuộc. Nên mang ra garage.</p>'''
         },
-        {
-            'title': 'Má phanh — Khi nào thay, chọn loại nào, và mẹo tiết kiệm',
-            'slug': 'ma-phanh-khi-nao-thay-chon-loai-nao',
-            'tier': 'chi-tiet',
-            'category': 'he-thong-phanh',
-            'related_zone_slug': 'he-thong-phanh',
-            'tags': 'má phanh,brake pad,ceramic,semi-metallic,thay má phanh,an toàn',
-            'excerpt': 'Tất tần tật về má phanh: 3 loại phổ biến, cách kiểm tra độ mòn, thời điểm thay, và bí quyết chọn má phanh tốt giá rẻ.',
-            'reading_time': 8,
-            'embed_code': '<div class="at-carousel" data-network="accesstrade" data-keyword="ma phanh oto" data-limit="6"></div>',
-            'content': '''<h2>3 loại má phanh phổ biến</h2>
-<p><strong>Organic:</strong> Mềm, êm, rẻ. Phù hợp xe đi phố. Mòn nhanh.</p>
-<p><strong>Semi-metallic:</strong> Pha kim loại 30-65%. Bền, phanh tốt ở nhiệt độ cao. Hơi ồn. Phổ biến nhất.</p>
-<p><strong>Ceramic:</strong> Bền nhất, êm nhất, ít bụi. Giá cao gấp 2-3x. Phù hợp xe cao cấp.</p>
-
-<h2>Kiểm tra độ mòn</h2>
-<p>Má phanh mới dày 10-12mm. Cần thay khi còn <strong>dưới 3mm</strong>. Nhiều xe có cảm biến cảnh báo tự động.</p>'''
-        },
-        {
-            'title': 'Rotuyn — Bộ phận nhỏ nhưng cực kỳ quan trọng cho an toàn',
-            'slug': 'rotuy-bo-phan-quan-trong-an-toan',
-            'tier': 'chi-tiet',
-            'category': 'he-thong-treo',
-            'related_zone_slug': 'he-thong-treo',
-            'tags': 'rotuyn,ball joint,lái,an toàn,hệ thống treo,thay thế',
-            'excerpt': 'Rotuyn là gì, nằm ở đâu, hỏng thì nguy hiểm ra sao? Hướng dẫn kiểm tra rotuyn tại nhà và chi phí thay thế.',
-            'reading_time': 7,
-            'content': '''<h2>Rotuyn là gì?</h2>
-<p>Rotuyn (Ball Joint) là khớp cầu kết nối các bộ phận di động trong hệ thống treo và hệ thống lái. Cho phép xoay và di chuyển đa hướng.</p>
-
-<h2>Hỏng rotuyn có nguy hiểm không?</h2>
-<p><strong>Rất nguy hiểm!</strong> Rotuyn hỏng nặng có thể khiến bánh xe tách khỏi hệ thống treo khi đang chạy → mất lái hoàn toàn. Đây là lỗi CẦN sửa ngay.</p>
-
-<h2>Chi phí thay</h2>
-<p>Rotuyn lái: 200,000-500,000đ/cái. Rotuyn treo: 300,000-800,000đ/cái. Công thay: 150,000-300,000đ.</p>'''
-        },
-        {
-            'title': 'Lọc gió động cơ — Phụ tùng rẻ nhất nhưng hay bị quên',
-            'slug': 'loc-gio-dong-co-phu-tung-re-nhat',
-            'tier': 'chi-tiet',
-            'category': 'dong-co',
-            'tags': 'lọc gió,air filter,thay lọc gió,DIY,tiết kiệm xăng',
-            'excerpt': 'Lọc gió bẩn khiến xe yếu, tốn xăng 10-15%. Hướng dẫn tự thay lọc gió trong 5 phút, không cần dụng cụ.',
-            'reading_time': 5,
-            'content': '''<h2>Tại sao lọc gió quan trọng?</h2>
-<p>Động cơ cần hút không khí sạch để đốt nhiên liệu hiệu quả. Lọc gió bẩn = ít không khí = đốt không hết = <strong>yếu máy + tốn xăng 10-15%</strong>.</p>
-
-<h2>Tự thay trong 5 phút</h2>
-<p>Lọc gió là phụ tùng <strong>dễ thay nhất</strong> trên ô tô. Chỉ cần mở nắp hộp lọc (thường dùng 2-4 kẹp), lấy lọc cũ ra, lắp lọc mới vào. Không cần bất kỳ dụng cụ nào.</p>
-
-<h2>Chi phí</h2>
-<p>Lọc gió OEM: 150,000-300,000đ. Aftermarket: 50,000-150,000đ. Thay mỗi 15,000-20,000km.</p>'''
-        },
-        {
-            'title': 'Bugi — Linh hồn đánh lửa, chọn sai bugi xe yếu hẳn',
-            'slug': 'bugi-linh-hon-danh-lua',
-            'tier': 'chi-tiet',
-            'category': 'dong-co',
-            'tags': 'bugi,spark plug,đánh lửa,iridium,platinum,nguyên lý',
-            'excerpt': 'Bugi Iridium vs Platinum vs thường: khác biệt gì? Khi nào cần thay và cách đọc nhiệt trị bugi.',
-            'reading_time': 7,
-            'content': '''<h2>3 loại bugi</h2>
-<p><strong>Bugi thường (Nickel):</strong> Rẻ (30,000-50,000đ/cái). Thay mỗi 20,000-30,000km.</p>
-<p><strong>Bugi Platinum:</strong> Bền hơn 2x (80,000-120,000đ/cái). Thay mỗi 60,000km.</p>
-<p><strong>Bugi Iridium:</strong> Bền nhất, đánh lửa mạnh nhất (150,000-250,000đ/cái). Thay mỗi 100,000km. Tiết kiệm xăng 2-3%.</p>
-
-<h2>Nhiệt trị bugi</h2>
-<p>Nhiệt trị thể hiện khả năng tản nhiệt. Số cao = bugi "lạnh" (tản nhiệt nhanh, cho xe turbo). Số thấp = bugi "nóng" (cho xe phổ thông).</p>'''
-        },
-        {
-            'title': 'Dầu động cơ — 5W30 hay 5W40? Synthetic hay mineral?',
-            'slug': 'dau-dong-co-5w30-5w40-synthetic',
-            'tier': 'chi-tiet',
-            'category': 'dong-co',
-            'tags': 'dầu máy,5W30,5W40,synthetic,mineral,thay dầu,viscosity',
-            'excerpt': 'Giải mã ký hiệu dầu nhớt: 5W-30 nghĩa là gì? Synthetic (tổng hợp) khác gì mineral (khoáng)? Chọn loại nào cho xe bạn?',
-            'reading_time': 8,
-            'content': '''<h2>Đọc hiểu ký hiệu dầu nhớt</h2>
-<p><strong>5W-30:</strong> Số 5W = độ nhớt ở nhiệt độ thấp (W = Winter). Số 30 = độ nhớt ở nhiệt độ hoạt động. Số càng nhỏ = dầu càng loãng.</p>
-
-<h2>5W-30 vs 5W-40</h2>
-<p><strong>5W-30:</strong> Phù hợp xe đời mới, tiết kiệm nhiên liệu hơn. Toyota, Honda khuyến cáo dùng 5W-30.</p>
-<p><strong>5W-40:</strong> Bảo vệ tốt hơn ở nhiệt độ cao, phù hợp xe turbo hoặc xe cũ có khe hở lớn.</p>
-
-<h2>Synthetic vs Mineral</h2>
-<p><strong>Mineral (khoáng):</strong> Rẻ, thay mỗi 5,000km. Giá 150,000-300,000đ/lít.</p>
-<p><strong>Semi-synthetic:</strong> Cân bằng, thay mỗi 7,500km. Giá 250,000-400,000đ/lít.</p>
-<p><strong>Full synthetic (tổng hợp):</strong> Tốt nhất, thay mỗi 10,000km. Giá 400,000-800,000đ/lít. Tiết kiệm dài hạn.</p>'''
-        },
-        {
-            'title': 'Lốp ô tô — Đọc thông số, chọn đúng loại, và khi nào cần thay',
-            'slug': 'lop-oto-doc-thong-so-chon-dung',
-            'tier': 'chi-tiet',
-            'category': 'lop-xe',
-            'tags': 'lốp xe,tire,195/65R15,chọn lốp,thay lốp,mòn lốp,DOT',
-            'excerpt': 'Cách đọc thông số lốp 195/65R15 91H, kiểm tra DOT (ngày sản xuất), và 4 dấu hiệu cần thay lốp ngay.',
-            'reading_time': 9,
-            'content': '''<h2>Đọc thông số lốp: 195/65R15 91H</h2>
-<p><strong>195</strong> = chiều rộng mặt lốp (mm). <strong>65</strong> = tỉ lệ chiều cao/chiều rộng (%). <strong>R</strong> = Radial. <strong>15</strong> = đường kính lazang (inch). <strong>91</strong> = chỉ số tải. <strong>H</strong> = tốc độ tối đa (210km/h).</p>
-
-<h2>Kiểm tra tuổi lốp (mã DOT)</h2>
-<p>Trên thành lốp có 4 số cuối mã DOT. VD: <strong>2523</strong> = sản xuất tuần 25, năm 2023. Lốp nên dùng trong <strong>5 năm</strong> kể từ ngày sản xuất.</p>
-
-<h2>4 dấu hiệu cần thay</h2>
-<ul>
-<li>Gai lốp mòn dưới 1.6mm (dùng đồng xu kiểm tra)</li>
-<li>Nứt thành lốp, phồng rộp</li>
-<li>Lốp quá 5 năm tuổi</li>
-<li>Xe bị lệch lái, rung tay lái</li>
-</ul>'''
-        },
     ]
 
     for a_data in articles:
@@ -736,7 +534,7 @@ def seed_pet():
         return
 
     print('[+] Seeding Pet vertical...')
-    v = Vertical(name='Pet', slug='pet', description='Kiến thức chăm sóc thú cưng — chó, mèo, và thú nhỏ', icon='🐾', status='active')
+    v = Vertical(name='Pet', slug='pet', description='Kiến thức chăm sóc thú cưng — chó, mèo, và thú nhỏ', icon='🐾', color='#e17055', status='active', style='pet', template='general', default_mode='light')
     db.session.add(v)
     db.session.flush()
 
@@ -960,14 +758,517 @@ def seed_pet_articles():
     ]
 
     for ad in articles:
+        img = ad.get('image_url', f"https://placehold.co/800x450/e17055/fff?text={ad['slug'][:30]}")
         a = Article(vertical_slug='pet', title=ad['title'], slug=ad['slug'], excerpt=ad.get('excerpt',''),
             content=ad.get('content',''), tier=ad.get('tier','chung'), category=ad.get('category',''),
             tags=ad.get('tags',''), related_segment_slug=ad.get('related_segment_slug',''),
             related_zone_slug=ad.get('related_zone_slug',''), embed_code=ad.get('embed_code',''),
-            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(80,5000))
+            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(80,5000),
+            image_url=img)
         db.session.add(a)
     db.session.commit()
     print(f'[OK] {len(articles)} pet articles seeded!')
+
+
+def seed_pet_v2():
+    """Expand Pet vertical with more zones, parts, articles, products.
+    Safe to run multiple times — skips existing slugs."""
+    from models import db, Vertical, Segment, Zone, Part, AffiliateLink, Article
+    import random
+
+    pet = Vertical.query.filter_by(slug='pet').first()
+    if not pet:
+        print('[SKIP] Pet vertical not found — run seed_pet() first')
+        return
+
+    print('[+] Expanding Pet content (v2)...')
+    added_parts = 0
+    added_articles = 0
+    added_products = 0
+
+    # ── Helper: get or create zone under a segment ──
+    def get_or_create_zone(segment, zd):
+        z = Zone.query.filter_by(segment_id=segment.id, slug=zd['slug']).first()
+        if not z:
+            z = Zone(segment_id=segment.id, name=zd['name'], slug=zd['slug'],
+                     icon=zd['icon'], color=zd['color'], description=zd['desc'])
+            db.session.add(z)
+            db.session.flush()
+        return z
+
+    def add_part_if_new(zone, pd, order=0):
+        nonlocal added_parts
+        existing = Part.query.filter_by(zone_id=zone.id, slug=pd['slug']).first()
+        if existing:
+            return existing
+        p = Part(zone_id=zone.id, name_vi=pd['vi'], name_en=pd.get('en',''), slug=pd['slug'],
+                 description=pd['desc'], content=pd.get('content',''), oem_code=pd.get('oem',''),
+                 tags=pd.get('tags',''), auto_category='san-pham', order=order)
+        db.session.add(p)
+        db.session.flush()
+        added_parts += 1
+        return p
+
+    # ── Build segment lookup ──
+    seg_map = {s.slug: s for s in pet.segments}
+
+    # ================================================================
+    # SEGMENT: CHÓ — thêm parts mới
+    # ================================================================
+    cho = seg_map.get('cho')
+    if cho:
+        # ── Zone: Dinh dưỡng — thêm parts ──
+        z_dd = Zone.query.filter_by(segment_id=cho.id, slug='dinh-duong').first()
+        if z_dd:
+            new_parts_dd = [
+                {'vi':'Thức ăn theo giống','en':'Breed-Specific Food','slug':'thuc-an-theo-giong',
+                 'desc':'Thức ăn chuyên biệt cho từng giống: Poodle, Golden, Corgi, Husky, Phốc sóc',
+                 'tags':'thức ăn theo giống,breed,poodle,golden,corgi,husky,phoc soc',
+                 'content':'<h2>Tại sao cần ăn theo giống?</h2><p>Mỗi giống chó có nhu cầu dinh dưỡng riêng. Chó nhỏ (Poodle, Phốc) cần hạt nhỏ, năng lượng cao. Chó lớn (Golden, Husky) cần glucosamine cho khớp, ít calo tránh béo phì.</p><h2>Top sản phẩm</h2><p><strong>Royal Canin Breed:</strong> Có riêng cho Poodle, Golden, Chihuahua, French Bulldog — 350-500k/1.5kg. <strong>Nutrience Subzero:</strong> Công thức vùng miền (Canadian Pacific, Prairie Red) — 450-650k/2.27kg.</p>'},
+                {'vi':'Snack & Treat thưởng','en':'Dog Treats','slug':'snack-treat-cho',
+                 'desc':'Bánh thưởng, snack huấn luyện, xương gặm, thịt sấy cho chó',
+                 'tags':'snack,treat,bánh thưởng,xương gặm,thịt sấy,jerky,dental stick',
+                 'content':'<h2>Khi nào dùng treat?</h2><p><strong>Huấn luyện:</strong> Treat nhỏ, ít calo. Dùng khi chó làm đúng lệnh. <strong>Dental stick:</strong> Xương gặm giúp sạch răng, giảm mảng bám. Dùng 1-2 cái/ngày. <strong>Giải trí:</strong> Xương da bò, tai heo sấy — giữ chó bận rộn.</p><h2>Lưu ý</h2><p>Treat không quá <strong>10% lượng calo/ngày</strong>. Tránh: xương gà (gãy sắc), sô-cô-la, nho khô.</p>'},
+                {'vi':'Thức ăn chó con (Puppy)','en':'Puppy Food','slug':'thuc-an-cho-con',
+                 'desc':'Thức ăn chuyên dụng cho chó con 2 tháng - 12 tháng tuổi',
+                 'tags':'puppy,chó con,sữa chó,weaning,bổ sung canxi',
+                 'content':'<h2>Giai đoạn cai sữa (2-4 tháng)</h2><p>Ngâm hạt trong nước ấm 10-15 phút cho mềm. Cho ăn 4 bữa/ngày, mỗi bữa 1/4 khẩu phần. Bổ sung sữa chuyên dụng (KHÔNG dùng sữa bò).</p><h2>4-12 tháng</h2><p>Chuyển sang hạt khô dần. Giảm còn 3 bữa/ngày (4-6 tháng), rồi 2 bữa (6-12 tháng). Chọn sản phẩm ghi <strong>\"Puppy\"</strong> hoặc <strong>\"Growth\"</strong>.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_dd):
+                add_part_if_new(z_dd, pd, order=10+i)
+
+        # ── Zone: Y tế — thêm parts ──
+        z_yt = Zone.query.filter_by(segment_id=cho.id, slug='y-te').first()
+        if z_yt:
+            new_parts_yt = [
+                {'vi':'Nấm da & Viêm da','en':'Skin Disease','slug':'nam-da-viem-da',
+                 'desc':'Bệnh da liễu phổ biến ở chó: nấm, ghẻ, viêm da dị ứng, rụng lông',
+                 'tags':'nấm da,viêm da,ghẻ,rụng lông,dị ứng,ngứa,dermatitis',
+                 'content':'<h2>Dấu hiệu bệnh da</h2><p><strong>Nấm:</strong> Vùng tròn rụng lông, vảy trắng, ngứa nhẹ. <strong>Ghẻ:</strong> Ngứa dữ dội, gãi liên tục, da đỏ sần. <strong>Dị ứng:</strong> Ngứa toàn thân, liếm chân, viêm tai tái phát.</p><h2>Điều trị</h2><p>Nấm: tắm thuốc (Malaseb, Nizoral vet) + uống kháng nấm 4-6 tuần. Ghẻ: nhỏ thuốc (Advocate, Revolution). Dị ứng: tìm nguyên nhân (thức ăn/môi trường), dùng thuốc theo bác sĩ.</p>'},
+                {'vi':'Bệnh đường ruột','en':'Digestive Issues','slug':'benh-duong-ruot',
+                 'desc':'Tiêu chảy, nôn mửa, viêm dạ dày ruột ở chó — nguyên nhân và xử lý',
+                 'tags':'tiêu chảy,nôn,viêm ruột,đường ruột,probiotic',
+                 'content':'<h2>Nguyên nhân phổ biến</h2><p><strong>Ăn bậy:</strong> Xương gà, thức ăn thừa, rác. <strong>Thay đổi thức ăn đột ngột:</strong> Phải chuyển dần trong 7-10 ngày. <strong>Nhiễm khuẩn/virus:</strong> Parvo, viêm ruột. <strong>Ký sinh trùng:</strong> Giun, sán.</p><h2>Khi nào cần đi bác sĩ?</h2><p>Tiêu chảy > 2 ngày. Nôn > 3 lần/ngày. Phân có máu. Bỏ ăn + lờ đờ. Chó con < 6 tháng — đi NGAY.</p>'},
+                {'vi':'Chăm sóc răng miệng','en':'Dental Care','slug':'cham-soc-rang',
+                 'desc':'Đánh răng, cao răng, viêm nướu ở chó — phòng ngừa và điều trị',
+                 'tags':'răng miệng,đánh răng,cao răng,viêm nướu,dental,oral care',
+                 'content':'<h2>80% chó > 3 tuổi bị bệnh nha chu</h2><p>Mảng bám → cao răng → viêm nướu → rụng răng → nhiễm trùng máu. <strong>Phòng ngừa:</strong> Đánh răng 2-3 lần/tuần bằng kem đánh răng chuyên dụng cho chó. Cho gặm dental stick (Pedigree Dentastix, Greenies).</p>'},
+            ]
+            for i, pd in enumerate(new_parts_yt):
+                add_part_if_new(z_yt, pd, order=10+i)
+
+        # ── Zone: Huấn luyện — thêm parts ──
+        z_hl = Zone.query.filter_by(segment_id=cho.id, slug='huan-luyen').first()
+        if z_hl:
+            new_parts_hl = [
+                {'vi':'Xã hội hóa chó con','en':'Puppy Socialization','slug':'xa-hoi-hoa',
+                 'desc':'Kỹ năng xã hội hóa chó con 3-14 tuần tuổi — giai đoạn vàng',
+                 'tags':'xã hội hóa,socialization,chó con,puppy,giai đoạn vàng',
+                 'content':'<h2>Giai đoạn vàng: 3-14 tuần</h2><p>Đây là thời kỳ chó con hình thành tính cách. Cần tiếp xúc với: <strong>nhiều người</strong> (già, trẻ, đàn ông, phụ nữ), <strong>nhiều chó</strong> (size khác nhau), <strong>nhiều môi trường</strong> (công viên, phố, quán cafe). Mỗi trải nghiệm phải <strong>tích cực</strong> — kèm treat và khen.</p>'},
+                {'vi':'Chống sủa vô cớ','en':'Stop Excessive Barking','slug':'chong-sua-vo-co',
+                 'desc':'Nguyên nhân và cách huấn luyện chó giảm sủa, phù hợp chung cư',
+                 'tags':'sủa,barking,chung cư,tiếng ồn,huấn luyện',
+                 'content':'<h2>Tại sao chó sủa?</h2><p><strong>Bảo vệ lãnh thổ:</strong> Sủa khi có người lạ → Dạy lệnh "Quiet". <strong>Lo âu chia cách:</strong> Sủa khi chủ đi vắng → Tập quen dần, để đồ chơi. <strong>Thiếu vận động:</strong> Năng lượng dư thừa → Tăng thời gian dạo chơi.</p><h2>Phương pháp</h2><p>1. KHÔNG quát chó khi sủa (chó tưởng bạn sủa cùng). 2. Thưởng khi chó im lặng. 3. Dùng lệnh "Quiet" + treat ngay khi chó ngừng sủa.</p>'},
+                {'vi':'Đi dạo & Kéo dây','en':'Leash Training','slug':'di-dao-keo-day',
+                 'desc':'Dạy chó đi dạo đúng cách, không kéo dây dắt — loose leash walking',
+                 'tags':'đi dạo,kéo dây,leash walking,dây dắt,dạo phố',
+                 'content':'<h2>Chó kéo dây — sai lầm phổ biến</h2><p>Chó kéo → bạn đi theo → chó học: "kéo = được đi tiếp". <strong>Phương pháp:</strong> Khi chó kéo → ĐỨNG IM → đợi chó quay lại → khen + đi tiếp. Kiên nhẫn, lặp lại. 2-4 tuần sẽ cải thiện rõ.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_hl):
+                add_part_if_new(z_hl, pd, order=10+i)
+
+        # ── Zone: Đồ dùng — thêm parts ──
+        z_dd2 = Zone.query.filter_by(segment_id=cho.id, slug='do-dung').first()
+        if z_dd2:
+            new_parts_dd2 = [
+                {'vi':'Đồ chơi cho chó','en':'Dog Toys','slug':'do-choi-cho',
+                 'desc':'Đồ chơi gặm, bóng, kéo co, đồ chơi trí tuệ (puzzle) cho chó',
+                 'tags':'đồ chơi,bóng,kéo co,puzzle,Kong,gặm,nhai',
+                 'content':'<h2>3 loại đồ chơi cần có</h2><p><strong>Đồ gặm (chew toy):</strong> Kong Classic, xương cao su — giữ chó bận, giảm stress. <strong>Bóng/Frisbee:</strong> Vận động ngoài trời. <strong>Puzzle toy:</strong> Đồ chơi trí tuệ — cho treat vào, chó tìm cách lấy ra. Kích thích trí não.</p>'},
+                {'vi':'Quần áo & Phụ kiện','en':'Dog Clothes','slug':'quan-ao-phu-kien',
+                 'desc':'Quần áo, áo mưa, giày, kính cho chó — thời trang và bảo vệ',
+                 'tags':'quần áo chó,áo mưa,giày chó,thời trang pet,mùa đông',
+                 'content':'<h2>Khi nào chó cần mặc áo?</h2><p><strong>Giống lông ngắn</strong> (Chihuahua, Pug, French Bulldog) cần áo ấm khi < 15°C. <strong>Áo mưa</strong> cho chó đi dạo mùa mưa. <strong>Giày:</strong> Bảo vệ chân trên đường nóng (> 35°C) hoặc terrain gồ ghề.</p>'},
+                {'vi':'Bát ăn & Bình nước','en':'Food & Water Bowl','slug':'bat-an-binh-nuoc',
+                 'desc':'Chọn bát ăn, bình nước tự động, đế chống lật cho chó',
+                 'tags':'bát ăn,bình nước,tự động,chống lật,inox,ceramic',
+                 'content':'<h2>Chất liệu bát ăn</h2><p><strong>Inox:</strong> Bền, dễ rửa, an toàn. Khuyên dùng nhất. <strong>Ceramic:</strong> Nặng (không lật), đẹp. <strong>Nhựa:</strong> Rẻ nhưng dễ xước → vi khuẩn. Nên thay thường xuyên.</p><h2>Bình nước tự động</h2><p>Pet fountain (200-500k) giữ nước chảy liên tục, lọc sạch. Chó thích uống nước chảy hơn nước đứng.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_dd2):
+                add_part_if_new(z_dd2, pd, order=10+i)
+
+        # ── Zone MỚI: Làm đẹp & Grooming ──
+        z_grooming = get_or_create_zone(cho, {
+            'name':'Làm đẹp & Grooming','slug':'lam-dep','icon':'✂️','color':'#e84393',
+            'desc':'Tắm, cắt lông, chăm sóc móng, tai, mắt cho chó'})
+        grooming_parts = [
+            {'vi':'Sữa tắm & Dầu xả','en':'Dog Shampoo','slug':'sua-tam-cho',
+             'desc':'Sữa tắm chuyên dụng cho chó: chống ngứa, dưỡng lông, khử mùi',
+             'tags':'sữa tắm,dầu gội,shampoo,dưỡng lông,khử mùi,chống ngứa',
+             'content':'<h2>Tại sao không dùng sữa tắm người?</h2><p>Da chó pH 6.5-7.5, da người pH 5.5. Dùng sữa tắm người → phá hủy lớp bảo vệ da → viêm da, ngứa, rụng lông.</p><h2>Top sản phẩm</h2><p><strong>Lông trắng:</strong> Bio-Groom Super White. <strong>Chống ngứa:</strong> Malaseb (thuốc), Hartz. <strong>Dưỡng lông dài:</strong> Isle of Dogs, Chris Christensen.</p>'},
+            {'vi':'Cắt lông & Tạo kiểu','en':'Dog Grooming','slug':'cat-long-tao-kieu',
+             'desc':'Cắt lông, tạo kiểu cho chó: tại nhà và spa chuyên nghiệp',
+             'tags':'cắt lông,grooming,tỉa lông,spa chó,tông đơ,kéo cắt',
+             'content':'<h2>Tần suất cắt lông</h2><p><strong>Poodle, Bichon:</strong> Mỗi 4-6 tuần (lông không ngừng mọc). <strong>Golden, Husky:</strong> KHÔNG cạo trọc — lông 2 lớp bảo vệ khỏi nóng/lạnh. Chỉ tỉa gọn. <strong>Lông ngắn (Pug, Beagle):</strong> Chải lông tuần 1-2 lần, không cần cắt.</p>'},
+            {'vi':'Cắt móng & Vệ sinh tai','en':'Nail & Ear Care','slug':'cat-mong-ve-sinh-tai',
+             'desc':'Cắt móng đúng cách, vệ sinh tai, mắt cho chó tại nhà',
+             'tags':'cắt móng,vệ sinh tai,viêm tai,tai chó,mắt chó',
+             'content':'<h2>Cắt móng</h2><p>Mỗi 2-4 tuần. Chỉ cắt phần trong suốt, TRÁNH phần hồng (mạch máu). Dùng kềm chuyên dụng. Nếu cắt trúng mạch máu → dùng bột cầm máu (styptic powder).</p><h2>Vệ sinh tai</h2><p>Tuần 1 lần cho giống tai cụp (Cocker, Basset). Dùng dung dịch vệ sinh tai (Epiotic, Virbac). Nhỏ vào tai → massage → lau bông.</p>'},
+        ]
+        for i, pd in enumerate(grooming_parts):
+            add_part_if_new(z_grooming, pd, order=i)
+
+    # ================================================================
+    # SEGMENT: MÈO — thêm zones và parts
+    # ================================================================
+    meo = seg_map.get('meo')
+    if meo:
+        # ── Zone: Dinh dưỡng — thêm parts ──
+        z_dd_meo = Zone.query.filter_by(segment_id=meo.id, slug='dinh-duong').first()
+        if z_dd_meo:
+            new_parts_meo_dd = [
+                {'vi':'Snack & Treat mèo','en':'Cat Treats','slug':'snack-treat-meo',
+                 'desc':'Bánh thưởng, snack lỏng (Ciao Churu), thịt sấy cho mèo',
+                 'tags':'snack mèo,treat,Ciao Churu,thưởng mèo,súp thưởng,inaba',
+                 'content':'<h2>Ciao Churu — hiện tượng</h2><p>Snack lỏng Ciao Churu (Inaba, Nhật) là treat mèo bán chạy nhất VN. Dạng kem lỏng, mèo liếm trực tiếp. Giá 8-15k/thanh. Hương: cá ngừ, gà, sò điệp.</p><h2>Loại treat khác</h2><p><strong>Thịt sấy:</strong> Cá ngừ sấy, gà sấy — 30-60k/gói. <strong>Dental treat:</strong> Greenies for Cats — sạch răng. <strong>Catnip treat:</strong> Có catnip — mèo phê.</p>'},
+                {'vi':'Thức ăn mèo con (Kitten)','en':'Kitten Food','slug':'thuc-an-meo-con',
+                 'desc':'Thức ăn chuyên dụng cho mèo con 1-12 tháng, sữa thay thế',
+                 'tags':'kitten,mèo con,sữa mèo,cai sữa,Royal Canin Kitten',
+                 'content':'<h2>Sữa cho mèo con mồ côi</h2><p>KHÔNG cho uống sữa bò (gây tiêu chảy). Dùng sữa chuyên dụng: KMR, Royal Canin Babycat Milk. Cho bú bình mỗi 2-3 giờ (mèo < 2 tuần).</p><h2>Cai sữa (4-8 tuần)</h2><p>Trộn pate với sữa → giảm sữa dần → chuyển sang pate → hạt ngâm → hạt khô. Chọn sản phẩm "Kitten" (protein > 35%).</p>'},
+            ]
+            for i, pd in enumerate(new_parts_meo_dd):
+                add_part_if_new(z_dd_meo, pd, order=10+i)
+
+        # ── Zone: Y tế — thêm parts ──
+        z_yt_meo = Zone.query.filter_by(segment_id=meo.id, slug='y-te').first()
+        if z_yt_meo:
+            new_parts_meo_yt = [
+                {'vi':'Bệnh thận & Tiết niệu','en':'Kidney & Urinary','slug':'benh-than-tiet-nieu',
+                 'desc':'Bệnh thận mãn, sỏi bàng quang, viêm đường tiết niệu ở mèo',
+                 'tags':'bệnh thận,thận mãn,sỏi,tiết niệu,FLUTD,CKD,uống nước',
+                 'content':'<h2>Bệnh thận — "kẻ giết thầm lặng"</h2><p>50% mèo > 10 tuổi bị bệnh thận mãn (CKD). Dấu hiệu: uống nhiều nước, tiểu nhiều, gầy dần, nôn. <strong>Phòng:</strong> Cho ăn thức ăn ướt, đặt nhiều bát nước/pet fountain, xét nghiệm máu hàng năm sau 7 tuổi.</p><h2>FLUTD (Hội chứng tiết niệu)</h2><p>Mèo đực hay gặp. Triệu chứng: rặn tiểu, tiểu ra máu, tiểu ngoài khay. <strong>Tắc niệu = CẤP CỨU</strong> — mèo không tiểu được > 24h có thể tử vong.</p>'},
+                {'vi':'Nấm da mèo','en':'Cat Ringworm','slug':'nam-da-meo',
+                 'desc':'Nấm da (ringworm) ở mèo: triệu chứng, điều trị, phòng lây sang người',
+                 'tags':'nấm da mèo,ringworm,rụng lông,lây người,antifungal',
+                 'content':'<h2>Nấm mèo LÂY SANG NGƯỜI</h2><p>Nấm da mèo (dermatophytosis) do nấm Microsporum canis — <strong>lây sang người</strong> qua tiếp xúc. Triệu chứng mèo: mảng tròn rụng lông, vảy, ngứa nhẹ. Một số mèo mang nấm không triệu chứng.</p><h2>Điều trị</h2><p><strong>Tắm thuốc:</strong> Malaseb, miconazole 2 lần/tuần. <strong>Uống:</strong> Itraconazole 6-8 tuần. <strong>Môi trường:</strong> Hút bụi nhà, giặt chăn nệm 60°C, sát trùng lồng. Điều trị đến khi cấy nấm âm tính 2 lần liên tiếp.</p>'},
+                {'vi':'Tẩy giun & Ve mèo','en':'Cat Deworming','slug':'tay-giun-ve-meo',
+                 'desc':'Lịch tẩy giun, phòng ve bọ chét cho mèo trong nhà và ngoài trời',
+                 'tags':'tẩy giun mèo,ve mèo,bọ chét,Broadline,Revolution,nhỏ gáy',
+                 'content':'<h2>Tẩy giun</h2><p>Mèo con: 2 tuần/lần từ 2-12 tuần. Mèo lớn: 3-6 tháng/lần. Thuốc: Drontal Cat (50-80k/viên), Milbemax Cat.</p><h2>Phòng ve & bọ chét</h2><p><strong>Mèo trong nhà:</strong> Vẫn cần phòng! Ve có thể vào nhà qua giày, quần áo. <strong>Nhỏ gáy hàng tháng:</strong> Revolution (trị ve + giun tim + giun tròn), Broadline (all-in-one), Frontline.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_meo_yt):
+                add_part_if_new(z_yt_meo, pd, order=10+i)
+
+        # ── Zone MỚI: Hành vi mèo ──
+        z_hv = get_or_create_zone(meo, {
+            'name':'Hành vi','slug':'hanh-vi','icon':'🧠','color':'#6c5ce7',
+            'desc':'Hiểu tâm lý, hành vi mèo: cào, cắn, rên gừ, dấu hiệu stress'})
+        hanh_vi_parts = [
+            {'vi':'Mèo cào đồ — Xử lý đúng','en':'Cat Scratching','slug':'meo-cao-do',
+             'desc':'Tại sao mèo cào, cách bảo vệ nội thất và hướng mèo cào đúng chỗ',
+             'tags':'cào đồ,cào sofa,trụ cào,scratcher,hành vi mèo',
+             'content':'<h2>Mèo cào là BẢN NĂNG</h2><p>Cào để: đánh dấu lãnh thổ (tuyến mùi ở chân), mài móng, kéo giãn cơ. <strong>KHÔNG cắt bỏ móng</strong> (declawing) — bị cấm ở nhiều nước, gây đau đớn suốt đời.</p><h2>Giải pháp</h2><p>1. Đặt trụ cào <strong>cạnh nơi mèo hay cào</strong>. 2. Dán mèo catnip lên trụ cào. 3. Dùng băng keo 2 mặt lên sofa (mèo ghét dính). 4. Cắt đầu móng 2 tuần/lần.</p>'},
+            {'vi':'Mèo đi vệ sinh ngoài khay','en':'Litter Box Problems','slug':'di-ve-sinh-ngoai-khay',
+             'desc':'Nguyên nhân và cách xử lý khi mèo bỏ khay, tiểu bậy',
+             'tags':'tiểu bậy,bỏ khay,litter box,vệ sinh,stress mèo',
+             'content':'<h2>Nguyên nhân #1: Y tế</h2><p>FLUTD, viêm bàng quang, tiểu đường → mèo đau khi tiểu → liên kết khay = đau → né khay. Đi khám trước!</p><h2>Nguyên nhân #2: Khay không OK</h2><p><strong>Bẩn:</strong> Xúc phân mỗi ngày, thay cát mỗi tuần. <strong>Vị trí:</strong> Yên tĩnh, dễ tiếp cận. <strong>Số lượng:</strong> N mèo + 1 khay. <strong>Loại cát:</strong> Mèo ghét cát mới → thay dần.</p>'},
+            {'vi':'Stress & Lo âu ở mèo','en':'Cat Stress & Anxiety','slug':'stress-meo',
+             'desc':'Dấu hiệu stress, nguyên nhân, cách giảm stress cho mèo',
+             'tags':'stress mèo,lo âu,Feliway,giấu mình,bỏ ăn,liếm lông',
+             'content':'<h2>Dấu hiệu stress</h2><p>Giấu mình liên tục, bỏ ăn, liếm lông quá mức (hói cả mảng), hung hăng bất thường, tiểu bậy, tiêu chảy mãn.</p><h2>Nguyên nhân phổ biến</h2><p>Nhà mới, thêm thú cưng mới, tiếng ồn, thay đổi nội thất, chủ đi vắng lâu.</p><h2>Giải pháp</h2><p><strong>Feliway:</strong> Pheromone nhân tạo, cắm điện — mèo bình tĩnh hơn (300-500k). <strong>Không gian riêng:</strong> Mỗi mèo cần 1 nơi trú ẩn cao (kệ, cat tree). <strong>Routine:</strong> Giữ lịch ăn, chơi cố định.</p>'},
+        ]
+        for i, pd in enumerate(hanh_vi_parts):
+            add_part_if_new(z_hv, pd, order=i)
+
+        # ── Zone: Đồ dùng — thêm parts ──
+        z_dd_meo = Zone.query.filter_by(segment_id=meo.id, slug='do-dung').first()
+        if z_dd_meo:
+            new_parts_meo_dd = [
+                {'vi':'Đồ chơi mèo','en':'Cat Toys','slug':'do-choi-meo',
+                 'desc':'Cần câu, bóng, chuột giả, đồ chơi tương tác, catnip',
+                 'tags':'đồ chơi mèo,cần câu,chuột giả,catnip,laser,tương tác',
+                 'content':'<h2>Mèo CẦN chơi mỗi ngày</h2><p>Mèo trong nhà thiếu kích thích → béo phì, trầm cảm, phá phách. Cần tối thiểu <strong>15-30 phút chơi/ngày</strong>.</p><h2>Top đồ chơi</h2><p><strong>Cần câu lông:</strong> Kích thích bản năng săn mồi — hiệu quả nhất. <strong>Bóng lăn:</strong> Tự chơi khi chủ bận. <strong>Chuột giả catnip:</strong> 70% mèo phê catnip. <strong>Laser pointer:</strong> Cẩn thận — luôn kết thúc bằng treat (mèo cần "bắt được" gì đó).</p>'},
+                {'vi':'Balo & Túi vận chuyển mèo','en':'Cat Carrier','slug':'balo-tui-van-chuyen',
+                 'desc':'Balo mèo, túi vận chuyển, chuồng vận chuyển — đi bác sĩ, đi chơi',
+                 'tags':'balo mèo,túi vận chuyển,carrier,đi máy bay,đi bác sĩ',
+                 'content':'<h2>3 loại phổ biến</h2><p><strong>Chuồng nhựa cứng:</strong> An toàn nhất, bền, dễ rửa. Chuẩn IATA cho đi máy bay (nếu đúng size). 200-500k. <strong>Túi vải:</strong> Nhẹ, gọn, phù hợp mèo nhỏ. 150-350k. <strong>Balo phi hành gia:</strong> Có cửa sổ tròn, trendy. 300-600k. Mèo có thể ngắm cảnh.</p>'},
+                {'vi':'Bát ăn & Vòi nước mèo','en':'Cat Bowl & Fountain','slug':'bat-an-voi-nuoc-meo',
+                 'desc':'Bát ăn nghiêng, vòi nước (pet fountain) khuyến khích mèo uống nước',
+                 'tags':'bát ăn mèo,pet fountain,vòi nước,uống nước,phòng thận',
+                 'content':'<h2>Tại sao cần pet fountain?</h2><p>Mèo bản năng thích nước chảy (nước đọng trong tự nhiên = nguy hiểm). Pet fountain giúp mèo uống nhiều nước hơn 30-50% → <strong>phòng bệnh thận và sỏi tiết niệu</strong>.</p><h2>Top sản phẩm</h2><p><strong>Catit Flower:</strong> 350-500k, lọc carbon, yên. <strong>PetKit Eversweet:</strong> 600-900k, thép inox, app điều khiển. <strong>Bát ăn nghiêng 15°:</strong> Giảm nôn, bảo vệ cổ mèo.</p>'},
+            ]
+            for i, pd in enumerate(new_parts_meo_dd):
+                add_part_if_new(z_dd_meo, pd, order=10+i)
+
+        # ── Zone MỚI: Làm đẹp mèo ──
+        z_groom_meo = get_or_create_zone(meo, {
+            'name':'Làm đẹp','slug':'lam-dep','icon':'✨','color':'#fd79a8',
+            'desc':'Tắm, chải lông, cắt móng, vệ sinh tai mắt cho mèo'})
+        groom_meo_parts = [
+            {'vi':'Chải lông & Chống rụng','en':'Cat Brushing','slug':'chai-long-meo',
+             'desc':'Chải lông mèo đúng cách, giảm rụng lông, phòng búi lông (hairball)',
+             'tags':'chải lông,rụng lông,hairball,búi lông,Furminator,lông mèo',
+             'content':'<h2>Tại sao mèo rụng lông nhiều?</h2><p>Mèo thay lông theo mùa (xuân, thu). Mèo trong nhà (điều hòa) có thể rụng quanh năm. Chải lông 3-5 lần/tuần giảm rụng lông 80%.</p><h2>Dụng cụ</h2><p><strong>Furminator:</strong> "Vua" chải lông mèo. Loại bỏ lớp lông chết bên trong. <strong>Lược răng thưa:</strong> Cho mèo lông dài (Ba Tư, Maine Coon). <strong>Găng tay chải:</strong> Cho mèo sợ lược.</p>'},
+            {'vi':'Sữa tắm mèo','en':'Cat Shampoo','slug':'sua-tam-meo',
+             'desc':'Sữa tắm cho mèo: khi nào cần tắm, sản phẩm an toàn, tắm khô',
+             'tags':'sữa tắm mèo,tắm mèo,tắm khô,shampoo cat,grooming',
+             'content':'<h2>Mèo có cần tắm không?</h2><p>Hầu hết mèo <strong>tự làm sạch rất tốt</strong>. Chỉ cần tắm khi: dính bẩn nặng, có nấm/ve, mèo béo không liếm tới. Tần suất: 1-3 tháng/lần.</p><h2>Mẹo tắm mèo</h2><p>Cắt móng trước (tránh bị cào). Nước ấm 37°C. Sữa tắm chuyên mèo (Bioline, Hartz Cat). <strong>Tắm khô:</strong> Bọt/spray tắm khô — giải pháp cho mèo sợ nước.</p>'},
+        ]
+        for i, pd in enumerate(groom_meo_parts):
+            add_part_if_new(z_groom_meo, pd, order=i)
+
+    # ================================================================
+    # SEGMENT: THÚ NHỎ — thêm zones mới
+    # ================================================================
+    thu_nho = seg_map.get('thu-nho')
+    if thu_nho:
+        # ── Zone MỚI: Thỏ ──
+        z_tho = get_or_create_zone(thu_nho, {
+            'name':'Thỏ','slug':'tho','icon':'🐰','color':'#e17055',
+            'desc':'Chăm sóc thỏ cảnh: chuồng, thức ăn, bệnh lý, hành vi'})
+        tho_parts = [
+            {'vi':'Chuồng & Lót chuồng thỏ','en':'Rabbit Housing','slug':'chuong-tho',
+             'desc':'Chọn chuồng, lót chuồng an toàn cho thỏ — kích thước, vật liệu',
+             'tags':'chuồng thỏ,lót chuồng,cỏ khô,hay,rabbit cage,playpen',
+             'content':'<h2>Kích thước tối thiểu</h2><p>Chuồng phải ít nhất <strong>4 lần kích thước thỏ</strong> khi nằm duỗi. Thỏ cần thời gian ngoài chuồng mỗi ngày (tối thiểu 3-4 giờ). <strong>Lót chuồng:</strong> Cỏ Timothy hay, giấy xé. KHÔNG dùng mùn cưa thông/tuyết tùng (độc với phổi thỏ).</p>'},
+            {'vi':'Thức ăn thỏ','en':'Rabbit Diet','slug':'thuc-an-tho',
+             'desc':'Chế độ ăn đúng cho thỏ: cỏ, rau, viên nén, trái cây',
+             'tags':'thức ăn thỏ,cỏ Timothy,rau,hay,pellet,thỏ ăn gì',
+             'content':'<h2>80% là cỏ khô (Hay)</h2><p>Cỏ Timothy (thỏ > 7 tháng) hoặc Alfalfa (thỏ con < 7 tháng). Cỏ phải có SẴN 24/7. Cỏ giúp mài răng (răng thỏ mọc suốt đời) và tốt cho đường ruột.</p><h2>Phần còn lại</h2><p><strong>Rau xanh (10%):</strong> Rau muống, cải xoăn, rau thơm. <strong>Viên nén (5%):</strong> 1/4 cup/ngày. <strong>Trái cây:</strong> Treat hiếm (1-2 lần/tuần) — dâu, chuối (ít thôi, nhiều đường).</p>'},
+            {'vi':'Bệnh thường gặp ở thỏ','en':'Rabbit Health','slug':'benh-tho',
+             'desc':'GI Stasis, quá nóng, bệnh răng, lông bết — nhận biết và phòng tránh',
+             'tags':'bệnh thỏ,GI Stasis,tắc ruột,quá nóng,răng thỏ,bác sĩ thú y',
+             'content':'<h2>GI Stasis — NGUY HIỂM</h2><p>Hệ tiêu hóa thỏ ngừng hoạt động. Triệu chứng: bỏ ăn, không đi phân, nằm một chỗ, bụng căng. <strong>Cấp cứu</strong> — cần đi bác sĩ NGAY trong vài giờ. Phòng: cho ăn nhiều cỏ, vận động hàng ngày.</p><h2>Quá nóng</h2><p>Thỏ KHÔNG CHỊU được nóng > 30°C. Dấu hiệu: thở nhanh, tai nóng đỏ, nằm ngả. Phòng: điều hòa/quạt, chai nước đá trong chuồng, KHÔNG để ngoài trời.</p>'},
+        ]
+        for i, pd in enumerate(tho_parts):
+            add_part_if_new(z_tho, pd, order=i)
+
+        # ── Zone MỚI: Chim cảnh ──
+        z_chim = get_or_create_zone(thu_nho, {
+            'name':'Chim cảnh','slug':'chim-canh','icon':'🦜','color':'#00b894',
+            'desc':'Chăm sóc chim cảnh: vẹt, yến phụng, chào mào, chích chòe'})
+        chim_parts = [
+            {'vi':'Lồng & Phụ kiện chim','en':'Bird Cage','slug':'long-chim',
+             'desc':'Chọn lồng, cầu đậu, đồ chơi, bát ăn cho chim cảnh',
+             'tags':'lồng chim,cầu đậu,bird cage,phụ kiện chim,vẹt',
+             'content':'<h2>Chọn lồng</h2><p>Lồng phải đủ rộng để chim <strong>xòe cánh không chạm thanh</strong>. Vẹt nhỏ (yến phụng): tối thiểu 45x45x60cm. Vẹt lớn (Cockatiel, Conure): 60x60x90cm. <strong>Khoảng cách thanh:</strong> Chim nhỏ: 1cm. Chim lớn: 1.5-2cm (tránh kẹt đầu).</p>'},
+            {'vi':'Thức ăn chim cảnh','en':'Bird Food','slug':'thuc-an-chim',
+             'desc':'Hạt, trái cây, rau, thức ăn viên cho các loại chim cảnh',
+             'tags':'thức ăn chim,hạt kê,hạt hướng dương,pellet bird,rau quả chim',
+             'content':'<h2>Chim cần ăn đa dạng</h2><p>Chỉ cho ăn hạt hướng dương = như người chỉ ăn khoai chiên — béo, thiếu dinh dưỡng. <strong>Chế độ đúng:</strong> Pellet (thức ăn viên cân bằng) 60%, rau quả tươi 30%, hạt/treat 10%.</p><h2>Thức ăn ĐỘC cho chim</h2><p>Bơ (CHẾT), sô-cô-la, hành tỏi, rượu, caffeine, hạt táo/lê (cyanide).</p>'},
+        ]
+        for i, pd in enumerate(chim_parts):
+            add_part_if_new(z_chim, pd, order=i)
+
+        # ── Zone: Hamster — thêm parts ──
+        z_hamster = Zone.query.filter_by(segment_id=thu_nho.id, slug='hamster').first()
+        if z_hamster:
+            new_hamster = [
+                {'vi':'Bệnh thường gặp ở hamster','en':'Hamster Health','slug':'benh-hamster',
+                 'desc':'Wet tail, cảm lạnh, u bướu, bệnh da — nhận biết và phòng tránh',
+                 'tags':'bệnh hamster,wet tail,u bướu,ướt đuôi,tiêu chảy',
+                 'content':'<h2>Wet Tail (Ướt đuôi)</h2><p>Tiêu chảy nặng, đuôi ướt bẩn, bỏ ăn, lờ đờ. Tỷ lệ tử vong cao nếu không điều trị trong 24-48h. Thường gặp ở hamster con (3-8 tuần) khi stress (mới mua về).</p><h2>Phòng tránh</h2><p>Giảm stress khi mới về: để yên 3-5 ngày không bế. Chuồng sạch, lót khô. Thức ăn tươi rửa sạch.</p>'},
+                {'vi':'Đồ chơi & Vận động hamster','en':'Hamster Toys','slug':'do-choi-hamster',
+                 'desc':'Bánh xe chạy, đường ống, cầu, xích đu cho hamster',
+                 'tags':'đồ chơi hamster,bánh xe,running wheel,ống chui,hamster ball',
+                 'content':'<h2>Bánh xe — BẮT BUỘC</h2><p>Hamster chạy 5-8 km/đêm trong tự nhiên. Bánh xe giúp vận động, tránh béo phì, stress. Size: hamster lùn ≥ 20cm đường kính, hamster Syria ≥ 28cm. <strong>KHÔNG dùng bánh xe thanh nan</strong> (kẹt chân gãy).</p>'},
+            ]
+            for i, pd in enumerate(new_hamster):
+                add_part_if_new(z_hamster, pd, order=10+i)
+
+        # ── Zone: Cá cảnh — thêm parts ──
+        z_ca = Zone.query.filter_by(segment_id=thu_nho.id, slug='ca-canh').first()
+        if z_ca:
+            new_ca = [
+                {'vi':'Cá Betta (cá xiêm)','en':'Betta Fish','slug':'ca-betta',
+                 'desc':'Chăm sóc cá Betta: bể, nhiệt độ, thức ăn, bệnh thường gặp',
+                 'tags':'cá Betta,cá xiêm,cá lia thia,betta fish,cá cảnh dễ nuôi',
+                 'content':'<h2>Cá Betta — dễ nuôi nhất?</h2><p>Đúng, nhưng không phải "bỏ bể nhỏ không cần chăm". Bể tối thiểu <strong>5 lít</strong> (lý tưởng 15-20 lít). Nhiệt độ 24-28°C. Thay nước 25% mỗi tuần. <strong>KHÔNG nuôi 2 Betta đực chung</strong> — chúng đánh nhau chết.</p>'},
+                {'vi':'Hồ thủy sinh','en':'Aquascaping','slug':'ho-thuy-sinh',
+                 'desc':'Setup hồ thủy sinh: cây, đá, nền, CO2, đèn — hướng dẫn cho người mới',
+                 'tags':'thủy sinh,aquascape,cây thủy sinh,CO2,đá,nền thủy sinh',
+                 'content':'<h2>Setup hồ thủy sinh đầu tiên</h2><p><strong>Bể:</strong> 40-60 lít (dễ quản lý nước). <strong>Nền:</strong> ADA Amazonia hoặc Tropica (dinh dưỡng cho cây). <strong>Cây dễ:</strong> Rêu Java, Anubias, Bucephalandra — không cần CO2. <strong>Đèn:</strong> LED 6500K, 8-10 giờ/ngày.</p><h2>Chi phí</h2><p>Setup cơ bản: 500k-2 triệu. Bể cao cấp (CO2, lọc canister): 3-10 triệu.</p>'},
+            ]
+            for i, pd in enumerate(new_ca):
+                add_part_if_new(z_ca, pd, order=10+i)
+
+    # ================================================================
+    # ARTICLES MỚI
+    # ================================================================
+    new_articles = [
+        # T1: NGANH
+        {'title':'Top 10 giống chó phù hợp chung cư Việt Nam 2025','slug':'top-10-giong-cho-chung-cu',
+         'tier':'nganh','category':'chon-giong',
+         'tags':'giống chó,chung cư,apartment,ít sủa,nhỏ gọn',
+         'excerpt':'Chung cư hẹp, hàng xóm gần — giống chó nào phù hợp? Xếp hạng theo kích thước, mức sủa, năng lượng, và tính cách.',
+         'reading_time':12,
+         'content':'<h2>Tiêu chí đánh giá</h2><p>Kích thước (< 10kg ưu tiên), mức sủa (ít = tốt), năng lượng (trung bình), khả năng ở một mình.</p><h2>Top 5</h2><p><strong>1. Poodle (Toy/Mini):</strong> 3-6kg, thông minh, ít rụng lông, dễ huấn luyện. <strong>2. Shih Tzu:</strong> 4-7kg, hiền, ít sủa, phù hợp gia đình có trẻ nhỏ. <strong>3. French Bulldog:</strong> 8-13kg, ít sủa, không cần vận động nhiều. <strong>4. Corgi:</strong> 10-14kg, vui vẻ, lông đẹp, nhưng hơi năng lượng. <strong>5. Cavalier King Charles:</strong> 5-8kg, cực hiền, "chó sofa" hoàn hảo.</p>'},
+        {'title':'Top 8 giống mèo được yêu thích nhất Việt Nam','slug':'top-giong-meo-yeu-thich-vn',
+         'tier':'nganh','category':'chon-giong',
+         'tags':'giống mèo,mèo Anh,mèo Ba Tư,mèo ta,Munchkin,Scottish Fold',
+         'excerpt':'8 giống mèo phổ biến nhất VN: đặc điểm, giá mua, chi phí nuôi, và tính cách từng giống.',
+         'reading_time':10,
+         'content':'<h2>1. Mèo Anh lông ngắn (British Shorthair)</h2><p>Mặt tròn, lông dày, hiền. Giá: 3-15 triệu. Màu phổ biến: xanh xám (blue).</p><h2>2. Mèo ta (mèo mướp)</h2><p>Khỏe mạnh nhất, dễ nuôi, ít bệnh. Giá: miễn phí - 500k. Ai nói mèo ta không đẹp?</p><h2>3. Scottish Fold</h2><p>Tai cụp đặc trưng, dễ thương. Giá: 5-20 triệu. LƯU Ý: Gen tai cụp liên quan bệnh xương khớp — chọn nhà lai uy tín.</p><h2>4. Munchkin</h2><p>Chân ngắn, đi lạch bạch. Giá: 8-25 triệu. Khỏe mạnh bất chấp chân ngắn.</p>'},
+
+        # T2: CHUNG
+        {'title':'Hướng dẫn nhận nuôi chó mèo tại VN — Adopt Don\'t Shop','slug':'huong-dan-nhan-nuoi-adopt',
+         'tier':'chung','category':'nhan-nuoi',
+         'tags':'nhận nuôi,adopt,cứu hộ,trại chó,trại mèo,volunteer',
+         'excerpt':'Quy trình nhận nuôi chó mèo từ trạm cứu hộ, điều kiện, chi phí, và danh sách trạm uy tín tại Việt Nam.',
+         'reading_time':8,
+         'content':'<h2>Tại sao nên nhận nuôi?</h2><p>Hàng nghìn chó mèo bị bỏ rơi mỗi năm. Nhận nuôi = cứu 1 mạng sống + giảm tải trạm cứu hộ. Chó mèo cứu hộ thường đã tiêm vaccine, triệt sản, tẩy giun.</p><h2>Quy trình</h2><p>1. Liên hệ trạm cứu hộ. 2. Phỏng vấn (điều kiện sống, kinh nghiệm). 3. Thử nuôi 1-2 tuần. 4. Ký giấy nhận nuôi. Chi phí: miễn phí hoặc phí hỗ trợ 200-500k (vaccine, triệt sản).</p><h2>Trạm cứu hộ uy tín</h2><p>HN: Hanoi Pet Rescue, VAPA. SG: ARC, Saigon Pet Adoption.</p>'},
+        {'title':'Mèo ăn gì — Thực phẩm AN TOÀN và ĐỘC HẠI','slug':'meo-an-gi-an-toan-doc-hai',
+         'tier':'chung','category':'dinh-duong',
+         'related_segment_slug':'meo','related_zone_slug':'dinh-duong',
+         'tags':'mèo ăn gì,thực phẩm độc,thực phẩm an toàn,hành,tỏi,sô-cô-la',
+         'excerpt':'Danh sách đầy đủ thực phẩm mèo ăn được và KHÔNG được ăn. Một số thực phẩm tưởng an toàn nhưng cực kỳ nguy hiểm.',
+         'reading_time':7,
+         'content':'<h2>NGUY HIỂM — KHÔNG CHO MÈO ĂN</h2><p><strong>Hành, tỏi, hẹ:</strong> Phá hủy hồng cầu → thiếu máu → chết. <strong>Sô-cô-la:</strong> Theobromine độc. <strong>Nho, nho khô:</strong> Gây suy thận cấp. <strong>Xương gà nấu:</strong> Gãy sắc, đâm thủng ruột.</p><h2>AN TOÀN (ăn vừa phải)</h2><p><strong>Gà luộc:</strong> Protein tốt, không gia vị. <strong>Cá hồi nấu chín:</strong> Omega-3 tốt cho lông. <strong>Bí đỏ:</strong> Chất xơ, tốt cho tiêu hóa. <strong>Dưa hấu (bỏ hạt):</strong> Bổ sung nước.</p>'},
+        {'title':'Cách chăm sóc chó mèo mùa nóng — Phòng sốc nhiệt','slug':'cham-soc-mua-nong-soc-nhiet',
+         'tier':'chung','category':'cham-soc',
+         'tags':'mùa nóng,sốc nhiệt,heatstroke,quạt,điều hòa,nước',
+         'excerpt':'Mùa hè VN nóng 35-40°C — chó mèo rất dễ sốc nhiệt. Hướng dẫn phòng ngừa và sơ cứu kịp thời.',
+         'reading_time':6,
+         'content':'<h2>Dấu hiệu sốc nhiệt</h2><p>Thở hổn hển, lưỡi đỏ/tím, nôn, lảo đảo, co giật. <strong>Giống nguy cơ cao:</strong> Mặt ngắn (Pug, Bulldog, Ba Tư), béo phì, già, lông dày.</p><h2>Sơ cứu</h2><p>1. Đưa vào nơi mát, máy lạnh. 2. Đắp khăn ướt (nước MÁT, không lạnh) lên bụng, nách, bẹn. 3. Cho uống ít nước mát. 4. ĐI BÁC SĨ NGAY — sốc nhiệt có thể gây tổn thương nội tạng không hồi phục.</p>'},
+
+        # T3: CHI TIET
+        {'title':'So sánh 5 loại cát vệ sinh mèo phổ biến nhất 2025','slug':'so-sanh-5-loai-cat-meo-2025',
+         'tier':'chi-tiet','category':'do-dung',
+         'related_segment_slug':'meo','related_zone_slug':'do-dung',
+         'tags':'cát mèo,bentonite,tofu,crystal,đậu nành,so sánh',
+         'excerpt':'So sánh chi tiết 5 loại cát mèo: Bentonite, Tofu, Crystal, Giấy, Gỗ thông — giá, ưu nhược điểm, và loại nào phù hợp.',
+         'reading_time':8,
+         'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="cat ve sinh meo" data-limit="6"></div>',
+         'content':'<h2>Bảng so sánh nhanh</h2><p><strong>Bentonite:</strong> ⭐ Vón cục tốt nhất. 30-60k/5L. Nặng, bụi. <strong>Tofu:</strong> ⭐ Ít bụi, nhẹ, xả bồn cầu OK. 80-150k/6L. <strong>Crystal:</strong> ⭐ Hút mùi cực tốt. 60-120k/3.8L. Không vón. <strong>Giấy:</strong> Ít bụi nhất, cho mèo dị ứng. 100-180k/10L. Vón kém. <strong>Gỗ thông:</strong> Tự nhiên, rẻ. 40-80k/5L. Mùi gỗ mèo có thể ghét.</p><h2>Kết luận</h2><p><strong>Mèo 1 con, budget:</strong> Bentonite. <strong>Nhà chung cư, sạch sẽ:</strong> Tofu. <strong>Đi vắng nhiều:</strong> Crystal (ít phải xúc). <strong>Mèo dị ứng:</strong> Giấy hoặc gỗ.</p>'},
+        {'title':'Review Nexgard vs Frontline vs Bravecto — Thuốc phòng ve chó','slug':'review-nexgard-frontline-bravecto',
+         'tier':'chi-tiet','category':'y-te',
+         'related_segment_slug':'cho','related_zone_slug':'y-te',
+         'tags':'Nexgard,Frontline,Bravecto,ve,bọ chét,so sánh,review',
+         'excerpt':'So sánh 3 sản phẩm phòng ve chó bán chạy nhất: cách dùng, hiệu quả, giá, và tác dụng phụ.',
+         'reading_time':9,
+         'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="nexgard cho" data-limit="6"></div>',
+         'content':'<h2>Frontline Plus (nhỏ gáy)</h2><p>Hiệu quả 1 tháng. Diệt ve + bọ chét. Giá 150-250k/tuýp. Ưu: rẻ, quen thuộc. Nhược: cần 48h mới tác dụng, ẩm có thể giảm hiệu quả.</p><h2>Nexgard (viên uống)</h2><p>Hiệu quả 1 tháng. Viên nhai vị thịt bò. Giá 200-350k/viên. Ưu: tắm thoải mái, không dính lông. Nhược: không dùng cho chó < 2kg hoặc < 8 tuần.</p><h2>Bravecto (viên uống)</h2><p>Hiệu quả <strong>3 tháng</strong> — tiện nhất. Giá 400-650k/viên. Ưu: 1 viên/quý. Nhược: giá cao, không dùng cho chó bệnh.</p>'},
+        {'title':'Ciao Churu, Inaba, JerHigh — Review top snack mèo 2025','slug':'review-top-snack-meo-2025',
+         'tier':'chi-tiet','category':'dinh-duong',
+         'related_segment_slug':'meo','related_zone_slug':'dinh-duong',
+         'tags':'Ciao Churu,Inaba,JerHigh,snack mèo,treat,súp thưởng',
+         'excerpt':'So sánh 3 dòng snack mèo hot nhất: Ciao Churu, Inaba, JerHigh — thành phần, giá, mèo thích loại nào nhất?',
+         'reading_time':6,
+         'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="ciao churu meo" data-limit="6"></div>',
+         'content':'<h2>Ciao Churu (INABA - Nhật)</h2><p>Snack lỏng dạng tuýp. Mèo liếm trực tiếp — tương tác cực cute. 8-15k/thanh. Hương: cá ngừ, gà, sò điệp. Thành phần sạch, ít phụ gia. <strong>Vua snack mèo VN.</strong></p><h2>Inaba Grilled</h2><p>Cùng hãng Ciao nhưng dạng fillet nướng. 20-35k/miếng. Mèo gặm trực tiếp, giữ bận lâu hơn.</p><h2>JerHigh (Thái)</h2><p>Dạng stick, nhiều hương vị. 15-25k/gói. Giá rẻ hơn nhưng thành phần kém sạch hơn.</p>'},
+        {'title':'Hướng dẫn setup hồ thủy sinh đầu tiên — Budget 1 triệu','slug':'setup-ho-thuy-sinh-budget-1-trieu',
+         'tier':'chi-tiet','category':'ca-canh',
+         'related_segment_slug':'thu-nho','related_zone_slug':'ca-canh',
+         'tags':'thủy sinh,aquascape,setup,người mới,budget,cây thủy sinh',
+         'excerpt':'Setup hồ thủy sinh đẹp với chỉ 1 triệu đồng. Hướng dẫn từng bước cho người mới: bể, nền, cây, lọc, đèn.',
+         'reading_time':10,
+         'content':'<h2>Danh sách mua sắm (~1 triệu)</h2><p><strong>Bể 40cm:</strong> 100-150k. <strong>Lọc thác:</strong> 80-120k. <strong>Đèn LED:</strong> 100-200k. <strong>Nền:</strong> Sỏi + phân nền cơ bản: 100-150k. <strong>Cây:</strong> Rêu Java, Anubias, Bucephalandra: 100-200k. <strong>Cá:</strong> Neon, Guppy, tôm: 50-100k.</p><h2>Tuần 1: Cycle bể</h2><p>Setup bể + nền + cây + lọc. Chạy lọc 1 tuần KHÔNG thả cá. Vi khuẩn có lợi cần thời gian phát triển. <strong>Thả cá sớm = cá chết.</strong></p>'},
+    ]
+
+    for ad in new_articles:
+        existing = Article.query.filter_by(vertical_slug='pet', slug=ad['slug']).first()
+        if existing:
+            continue
+        img = f"https://placehold.co/800x450/e17055/fff?text={ad['slug'][:30]}"
+        a = Article(vertical_slug='pet', title=ad['title'], slug=ad['slug'],
+            excerpt=ad.get('excerpt',''), content=ad.get('content',''),
+            tier=ad.get('tier','chung'), category=ad.get('category',''),
+            tags=ad.get('tags',''), related_segment_slug=ad.get('related_segment_slug',''),
+            related_zone_slug=ad.get('related_zone_slug',''), embed_code=ad.get('embed_code',''),
+            ai_generated=True, reading_time=ad.get('reading_time',5),
+            views=random.randint(80, 5000), image_url=img)
+        db.session.add(a)
+        added_articles += 1
+
+    # ================================================================
+    # PRODUCTS MỚI — affiliate links
+    # ================================================================
+    new_products = {
+        # Chó
+        'thuc-an-theo-giong': [
+            ('shopee', 'Royal Canin Poodle Adult 1.5kg', 'https://shope.ee/petv2-001', 355000),
+            ('lazada', 'Royal Canin Golden Retriever Adult 12kg', 'https://s.lazada.vn/petv2-002', 1250000),
+            ('tiki', 'Nutrience Subzero Canadian Pacific 5kg', 'https://tiki.vn/petv2-003', 850000),
+        ],
+        'snack-treat-cho': [
+            ('shopee', 'Pedigree Dentastix Medium 7 thanh', 'https://shope.ee/petv2-010', 89000),
+            ('lazada', 'JerHigh Stick Gà 420g', 'https://s.lazada.vn/petv2-011', 65000),
+            ('shopee', 'Xương da bò cuộn 10cm x10 cái', 'https://shope.ee/petv2-012', 120000),
+        ],
+        'thuc-an-cho-con': [
+            ('shopee', 'Royal Canin Medium Puppy 4kg', 'https://shope.ee/petv2-020', 520000),
+            ('lazada', 'Taste of the Wild Puppy Pacific Stream 2.27kg', 'https://s.lazada.vn/petv2-021', 420000),
+            ('shopee', 'Sữa bột chó con KMR PetAg 340g', 'https://shope.ee/petv2-022', 450000),
+        ],
+        'do-choi-cho': [
+            ('shopee', 'Kong Classic Medium (đỏ)', 'https://shope.ee/petv2-030', 280000),
+            ('lazada', 'Bóng tennis cho chó 3 quả', 'https://s.lazada.vn/petv2-031', 45000),
+            ('tiki', 'Đồ chơi trí tuệ Nina Ottosson', 'https://tiki.vn/petv2-032', 520000),
+        ],
+        'sua-tam-cho': [
+            ('shopee', 'Bio-Groom Super White Shampoo 355ml', 'https://shope.ee/petv2-040', 320000),
+            ('lazada', 'Hartz Groomer Best Oatmeal 532ml', 'https://s.lazada.vn/petv2-041', 185000),
+        ],
+        # Mèo
+        'snack-treat-meo': [
+            ('shopee', 'Ciao Churu Cá Ngừ 14g x20 thanh', 'https://shope.ee/petv2-050', 195000),
+            ('lazada', 'Inaba Grilled Tuna Fillet 25g x5', 'https://s.lazada.vn/petv2-051', 135000),
+            ('shopee', 'Greenies Dental Cat Treat 60g', 'https://shope.ee/petv2-052', 110000),
+        ],
+        'thuc-an-meo-con': [
+            ('shopee', 'Royal Canin Kitten 2kg', 'https://shope.ee/petv2-060', 380000),
+            ('lazada', 'Royal Canin Babycat Milk 300g', 'https://s.lazada.vn/petv2-061', 420000),
+        ],
+        'do-choi-meo': [
+            ('shopee', 'Cần câu lông gà cho mèo', 'https://shope.ee/petv2-070', 35000),
+            ('lazada', 'Chuột giả catnip 3 con', 'https://s.lazada.vn/petv2-071', 49000),
+            ('tiki', 'Đường hầm mèo 3 ngả', 'https://tiki.vn/petv2-072', 165000),
+        ],
+        'bat-an-voi-nuoc-meo': [
+            ('shopee', 'Catit Flower Fountain 3L', 'https://shope.ee/petv2-080', 450000),
+            ('lazada', 'PetKit Eversweet Solo 2 1.8L', 'https://s.lazada.vn/petv2-081', 680000),
+            ('shopee', 'Bát ăn nghiêng 15° ceramic mèo', 'https://shope.ee/petv2-082', 89000),
+        ],
+        'balo-tui-van-chuyen': [
+            ('shopee', 'Balo phi hành gia mèo', 'https://shope.ee/petv2-090', 350000),
+            ('lazada', 'Chuồng vận chuyển nhựa IATA size M', 'https://s.lazada.vn/petv2-091', 280000),
+        ],
+        # Thú nhỏ
+        'thuc-an-tho': [
+            ('shopee', 'Cỏ Timothy hay 1kg', 'https://shope.ee/petv2-100', 75000),
+            ('lazada', 'Viên nén Oxbow Adult Rabbit 2.27kg', 'https://s.lazada.vn/petv2-101', 350000),
+        ],
+        'long-chim': [
+            ('shopee', 'Lồng vẹt yến phụng 45x45x60cm', 'https://shope.ee/petv2-110', 450000),
+            ('lazada', 'Bộ phụ kiện lồng chim (cầu + bát + xích đu)', 'https://s.lazada.vn/petv2-111', 120000),
+        ],
+        'ca-betta': [
+            ('shopee', 'Bể cá Betta mini kèm đèn LED', 'https://shope.ee/petv2-120', 120000),
+            ('lazada', 'Thức ăn cá Betta Hikari 5g', 'https://s.lazada.vn/petv2-121', 55000),
+        ],
+        'ho-thuy-sinh': [
+            ('shopee', 'Combo setup thủy sinh 40cm (bể+lọc+đèn+nền)', 'https://shope.ee/petv2-130', 850000),
+            ('lazada', 'Rêu Java + Anubias Nana combo 5 bụi', 'https://s.lazada.vn/petv2-131', 95000),
+        ],
+    }
+
+    for part_slug, products in new_products.items():
+        part = Part.query.filter_by(slug=part_slug).first()
+        if not part:
+            continue
+        for net, pname, url, price in products:
+            existing = AffiliateLink.query.filter_by(part_id=part.id, url=url).first()
+            if existing:
+                continue
+            al = AffiliateLink(part_id=part.id, network=net, product_name=pname,
+                url=url, price=price, clicks=random.randint(10, 500),
+                conversions=random.randint(0, 30),
+                image_url=f"https://placehold.co/400x300/e17055/fff?text={pname.replace(' ','+')[:25]}")
+            db.session.add(al)
+            added_products += 1
+
+    db.session.commit()
+    print(f'[OK] Pet v2 expanded: +{added_parts} parts, +{added_articles} articles, +{added_products} products')
 
 
 # =============================================
@@ -984,7 +1285,7 @@ def seed_travel():
         return
 
     print('[+] Seeding Travel vertical...')
-    v = Vertical(name='Travel', slug='travel', description='Du lịch & Khách sạn — Khám phá, đặt phòng, trải nghiệm', icon='✈️', status='active')
+    v = Vertical(name='Travel', slug='travel', description='Du lịch & Khách sạn — Khám phá, đặt phòng, trải nghiệm', icon='✈️', color='#0984e3', status='active', style='travel', template='general', default_mode='light')
     db.session.add(v)
     db.session.flush()
 
@@ -1182,11 +1483,13 @@ def seed_travel_articles():
     ]
 
     for ad in articles:
+        img = ad.get('image_url', f"https://placehold.co/800x450/0984e3/fff?text={ad['slug'][:30]}")
         a = Article(vertical_slug='travel', title=ad['title'], slug=ad['slug'], excerpt=ad.get('excerpt',''),
             content=ad.get('content',''), tier=ad.get('tier','chung'), category=ad.get('category',''),
             tags=ad.get('tags',''), related_segment_slug=ad.get('related_segment_slug',''),
             related_zone_slug=ad.get('related_zone_slug',''), embed_code=ad.get('embed_code',''),
-            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(100,8000))
+            ai_generated=True, reading_time=ad.get('reading_time',5), views=random.randint(100,8000),
+            image_url=img)
         db.session.add(a)
     db.session.commit()
     print(f'[OK] {len(articles)} travel articles seeded!')
@@ -1251,7 +1554,8 @@ def seed_products_pet_travel():
                         for net, pname, url, price in pet_products[p.slug]:
                             al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
                                 url=url, price=price, clicks=random.randint(10, 500),
-                                conversions=random.randint(0, 30))
+                                conversions=random.randint(0, 30),
+                                image_url=f"https://placehold.co/400x300/e17055/fff?text={pname.replace(' ','+')[:25]}")
                             db.session.add(al)
 
     # Travel products
@@ -1298,7 +1602,8 @@ def seed_products_pet_travel():
                         for net, pname, url, price in travel_products[p.slug]:
                             al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
                                 url=url, price=price, clicks=random.randint(20, 800),
-                                conversions=random.randint(0, 40))
+                                conversions=random.randint(0, 40),
+                                image_url=f"https://placehold.co/400x300/0984e3/fff?text={pname.replace(' ','+')[:25]}")
                             db.session.add(al)
 
     db.session.commit()
@@ -1423,9 +1728,9 @@ def seed_bike():
         name='Bike',
         slug='bike',
         icon='🚴',
-        color='#00b894',
+        color='#00cec9',
         description='Kiến thức về xe đạp và phụ kiện đạp xe — từ chọn xe phù hợp đến nâng cấp chi tiết.',
-        status='live'
+        status='live', style='bike', template='general', default_mode='light'
     )
     db.session.add(bike)
     db.session.flush()
@@ -1566,7 +1871,8 @@ def seed_bike():
                 product_name=f'{p_data["name_vi"]} chính hãng',
                 url=f'https://{net}.vn/search?q={p_data["slug"]}',
                 price=base_price,
-                is_active=True
+                is_active=True,
+                image_url=f"https://placehold.co/400x300/00cec9/fff?text={p_data['slug'][:25]}"
             )
             db.session.add(al)
 
@@ -1628,7 +1934,8 @@ def seed_bike():
                 product_name=f'{p_data["name_vi"]} chính hãng',
                 url=f'https://{net}.vn/search?q={p_data["slug"]}',
                 price=base_price,
-                is_active=True
+                is_active=True,
+                image_url=f"https://placehold.co/400x300/00cec9/fff?text={p_data['slug'][:25]}"
             )
             db.session.add(al)
 
@@ -1756,9 +2063,11 @@ def seed_bike():
         },
     ]
     for a_data in articles_data:
+        slug = a_data['title'].lower().replace(' ','-').replace(':','').replace(',','')[:60]
+        a_data.setdefault('image_url', f"https://placehold.co/800x450/00cec9/fff?text={slug[:30]}")
         a = Article(
             vertical_slug='bike',
-            slug=a_data['title'].lower().replace(' ','-').replace(':','').replace(',','')[:60],
+            slug=slug,
             status='published',
             ai_generated=False,
             **a_data
@@ -2031,11 +2340,9 @@ def seed_beauty():
         name='Beauty',
         slug='beauty',
         icon='💄',
-        color='#e91e63',
+        color='#e84393',
         description='Làm đẹp & Chăm sóc — Mỹ phẩm, skincare, makeup từ cơ bản đến nâng cao',
-        status='live',
-        template='beauty',  # Use beauty.css theme
-        default_mode='light'
+        status='live', style='beauty', template='general', default_mode='light'
     )
     db.session.add(beauty)
     db.session.flush()
@@ -2135,6 +2442,347 @@ def seed_beauty():
         db.session.add(p)
         db.session.flush()
 
+    # --- Parts for Làm sạch zone (4 products) ---
+    lam_sach_zone = zones['lam-sach']
+    parts_lam_sach = [
+        {
+            'name_vi': 'Sữa rửa mặt CeraVe', 'name_en': 'CeraVe Foaming Cleanser',
+            'slug': 'sua-rua-mat-cerave',
+            'description': 'Sữa rửa mặt CeraVe dịu nhẹ, chứa ceramide phục hồi hàng rào da, pH 5.5.',
+            'content': '''<h2>CeraVe — Sữa rửa mặt bác sĩ da liễu khuyên dùng</h2>
+<p>CeraVe Foaming Facial Cleanser là sữa rửa mặt dạng gel tạo bọt nhẹ, làm sạch sâu mà không gây khô da nhờ 3 ceramide thiết yếu.</p>
+<h2>Thành phần nổi bật</h2>
+<ul>
+<li><strong>3 Ceramide</strong> — Phục hồi hàng rào bảo vệ da</li>
+<li><strong>Niacinamide</strong> — Làm dịu, giảm mẩn đỏ</li>
+<li><strong>Hyaluronic Acid</strong> — Giữ ẩm, không gây khô căng</li>
+</ul>
+<h2>Phù hợp ai?</h2>
+<p>Da dầu, da hỗn hợp, da mụn. Người mới bắt đầu skincare nên chọn CeraVe vì an toàn, ít kích ứng.</p>''',
+            'tags': 'CeraVe,sữa rửa mặt,làm sạch,ceramide,da dầu,skincare',
+        },
+        {
+            'name_vi': 'Tẩy trang dầu DHC', 'name_en': 'DHC Deep Cleansing Oil',
+            'slug': 'tay-trang-dau-dhc',
+            'description': 'Dầu tẩy trang DHC olive, làm sạch makeup chống nước, không gây mụn.',
+            'content': '''<h2>Double Cleanse — Bước 1 quan trọng nhất</h2>
+<p>Dầu tẩy trang là bước đầu tiên trong quy trình double cleanse (rửa mặt 2 bước). DHC Deep Cleansing Oil chứa dầu olive tinh khiết, hòa tan makeup, kem chống nắng và bã nhờn.</p>
+<h2>Cách dùng</h2>
+<ul>
+<li><strong>Bước 1</strong> — Thoa dầu lên da khô, massage 1-2 phút</li>
+<li><strong>Bước 2</strong> — Thêm nước, nhũ hóa thành sữa trắng</li>
+<li><strong>Bước 3</strong> — Rửa sạch bằng nước, tiếp tục sữa rửa mặt</li>
+</ul>''',
+            'tags': 'DHC,tẩy trang,dầu tẩy trang,double cleanse,skincare',
+        },
+        {
+            'name_vi': 'Gel rửa mặt La Roche-Posay', 'name_en': 'La Roche-Posay Effaclar Gel',
+            'slug': 'gel-rua-mat-la-roche-posay',
+            'description': 'Gel rửa mặt cho da dầu mụn, chứa zinc PCA kiểm soát bã nhờn, pH 5.5.',
+            'content': '''<h2>La Roche-Posay Effaclar</h2>
+<p>Dòng sản phẩm chuyên biệt cho da dầu mụn từ thương hiệu dược mỹ phẩm Pháp. Gel rửa mặt Effaclar Purifying Foaming Gel không chứa xà phòng, không paraben.</p>
+<h2>Công dụng</h2>
+<ul>
+<li><strong>Zinc PCA</strong> — Kiểm soát bã nhờn, giảm bóng nhờn</li>
+<li><strong>Thermal Water</strong> — Làm dịu, chống kích ứng</li>
+<li><strong>pH 5.5</strong> — Không phá hủy hàng rào da</li>
+</ul>''',
+            'tags': 'La Roche-Posay,Effaclar,gel rửa mặt,da dầu mụn,skincare',
+        },
+        {
+            'name_vi': 'Nước tẩy trang Bioderma', 'name_en': 'Bioderma Sensibio H2O',
+            'slug': 'nuoc-tay-trang-bioderma',
+            'description': 'Nước tẩy trang micellar Bioderma Sensibio, dịu nhẹ cho da nhạy cảm.',
+            'content': '''<h2>Bioderma Sensibio H2O</h2>
+<p>Nước tẩy trang micellar nổi tiếng nhất thế giới, dùng công nghệ micelle bắt giữ bụi bẩn và makeup mà không cần rửa lại.</p>
+<h2>Vì sao nổi tiếng?</h2>
+<ul>
+<li><strong>Không cần rửa lại</strong> — Tiện lợi, nhanh gọn</li>
+<li><strong>Da nhạy cảm</strong> — Không cồn, không mùi, không paraben</li>
+<li><strong>Cân bằng pH</strong> — Tôn trọng độ pH tự nhiên của da</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Thấm bông tẩy trang, lau nhẹ khắp mặt đến khi bông sạch. Buổi tối dùng trước sữa rửa mặt.</p>''',
+            'tags': 'Bioderma,nước tẩy trang,micellar,da nhạy cảm,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_lam_sach):
+        p = Part(
+            zone_id=lam_sach_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Toner & Essence zone (3 products) ---
+    toner_zone = zones['toner-essence']
+    parts_toner = [
+        {
+            'name_vi': 'Toner Klairs Supple Preparation', 'name_en': 'Klairs Supple Preparation Toner',
+            'slug': 'toner-klairs',
+            'description': 'Toner dưỡng ẩm Klairs không cồn, dịu nhẹ, cấp nước sâu cho da khô.',
+            'content': '''<h2>Klairs Supple Preparation</h2>
+<p>Toner dưỡng ẩm best-seller từ Hàn Quốc, phù hợp mọi loại da kể cả da nhạy cảm. Không cồn, không mùi, pH 5.0.</p>
+<h2>Thành phần</h2>
+<ul>
+<li><strong>Hyaluronic Acid</strong> — Cấp nước sâu, giữ ẩm 24h</li>
+<li><strong>Beta-glucan</strong> — Làm dịu, phục hồi da</li>
+<li><strong>Centella Asiatica</strong> — Chống viêm, làm lành</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Sau rửa mặt, đổ toner ra tay hoặc bông, vỗ nhẹ lên mặt. Có thể dùng 2-3 lớp (7-skin method) cho da khô.</p>''',
+            'tags': 'Klairs,toner,dưỡng ẩm,K-beauty,da nhạy cảm,skincare',
+        },
+        {
+            'name_vi': 'Essence SK-II Facial Treatment', 'name_en': 'SK-II Facial Treatment Essence',
+            'slug': 'essence-sk-ii',
+            'description': 'Nước thần SK-II chứa 90% Pitera, trẻ hóa da, cải thiện kết cấu da rõ rệt.',
+            'content': '''<h2>SK-II Facial Treatment Essence — "Nước thần"</h2>
+<p>Sản phẩm iconic của SK-II với 90% Pitera (men tự nhiên) giúp cải thiện 5 yếu tố: độ mịn, săn chắc, giảm nếp nhăn, giảm đốm nâu, rạng rỡ.</p>
+<h2>Pitera là gì?</h2>
+<ul>
+<li><strong>Nguồn gốc</strong> — Chiết xuất từ quá trình lên men nấm men tự nhiên</li>
+<li><strong>Thành phần</strong> — Vitamin, axit amin, khoáng chất, axit hữu cơ</li>
+<li><strong>Tác dụng</strong> — Tái tạo tế bào, làm sáng da, chống lão hóa</li>
+</ul>
+<h2>Giá & Cách dùng</h2>
+<p>Giá khoảng 2-4 triệu/chai 230ml. Đổ ra bông, vỗ nhẹ lên mặt sau bước toner, trước serum.</p>''',
+            'tags': 'SK-II,nước thần,Pitera,essence,chống lão hóa,skincare',
+        },
+        {
+            'name_vi': 'Toner Some By Mi AHA-BHA-PHA', 'name_en': 'Some By Mi AHA BHA PHA Toner',
+            'slug': 'toner-some-by-mi',
+            'description': 'Toner tẩy da chết hóa học 3 trong 1, cải thiện da mụn trong 30 ngày.',
+            'content': '''<h2>Some By Mi Miracle Toner</h2>
+<p>Toner viral nhất K-beauty với công thức 3 acid tẩy da chết: AHA (glycolic), BHA (salicylic), PHA (gluconolactone). Cam kết cải thiện da trong 30 ngày.</p>
+<h2>Cơ chế hoạt động</h2>
+<ul>
+<li><strong>AHA 10000ppm</strong> — Tẩy tế bào chết bề mặt, sáng da</li>
+<li><strong>BHA</strong> — Thông thoáng lỗ chân lông, giảm mụn</li>
+<li><strong>PHA</strong> — Tẩy da chết nhẹ nhàng, cấp ẩm</li>
+<li><strong>Tràm trà</strong> — Kháng khuẩn, giảm viêm</li>
+</ul>
+<h2>Lưu ý</h2>
+<p>Không dùng cùng retinol hoặc vitamin C. Bắt đầu 2-3 lần/tuần, tăng dần.</p>''',
+            'tags': 'Some By Mi,toner,AHA,BHA,PHA,tẩy da chết,da mụn,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_toner):
+        p = Part(
+            zone_id=toner_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Kem dưỡng zone (4 products) ---
+    kem_duong_zone = zones['kem-duong']
+    parts_kem_duong = [
+        {
+            'name_vi': 'Kem dưỡng ẩm CeraVe', 'name_en': 'CeraVe Moisturizing Cream',
+            'slug': 'kem-duong-am-cerave',
+            'description': 'Kem dưỡng ẩm CeraVe chứa 3 ceramide, phục hồi hàng rào da, dùng cả mặt và body.',
+            'content': '''<h2>CeraVe Moisturizing Cream</h2>
+<p>Kem dưỡng ẩm "quốc dân" được bác sĩ da liễu toàn cầu khuyên dùng. Công nghệ MVE giải phóng dưỡng chất suốt 24h.</p>
+<h2>Thành phần chính</h2>
+<ul>
+<li><strong>3 Ceramide (1, 3, 6-II)</strong> — Phục hồi hàng rào bảo vệ da</li>
+<li><strong>Hyaluronic Acid</strong> — Giữ ẩm, da căng mọng</li>
+<li><strong>MVE Technology</strong> — Giải phóng dưỡng chất từ từ 24h</li>
+</ul>
+<h2>Phù hợp ai?</h2>
+<p>Da khô, da nhạy cảm, da vừa peel/laser cần phục hồi. Texture đặc nhưng không bí, thấm nhanh.</p>''',
+            'tags': 'CeraVe,kem dưỡng ẩm,ceramide,moisturizer,skincare',
+        },
+        {
+            'name_vi': 'Kem dưỡng Laneige Water Bank', 'name_en': 'Laneige Water Bank Cream',
+            'slug': 'kem-duong-laneige',
+            'description': 'Kem dưỡng cấp nước Laneige, công nghệ Blue Hyaluronic Acid, da căng bóng.',
+            'content': '''<h2>Laneige Water Bank Blue Hyaluronic</h2>
+<p>Dòng kem dưỡng cấp nước best-seller từ Laneige (Hàn Quốc), nay nâng cấp với Blue Hyaluronic Acid mạnh hơn HA thường.</p>
+<h2>Công nghệ Blue HA</h2>
+<ul>
+<li><strong>Blue Hyaluronic Acid</strong> — Phân tử nhỏ, thấm sâu hơn HA thường</li>
+<li><strong>Cấp nước 100h</strong> — Da luôn căng mọng, không bị khô</li>
+<li><strong>Texture mỏng nhẹ</strong> — Phù hợp khí hậu nóng ẩm Việt Nam</li>
+</ul>''',
+            'tags': 'Laneige,kem dưỡng,cấp nước,Blue HA,K-beauty,skincare',
+        },
+        {
+            'name_vi': 'Kem dưỡng trắng Pond\'s', 'name_en': 'Pond\'s White Beauty Cream',
+            'slug': 'kem-duong-trang-ponds',
+            'description': 'Kem dưỡng trắng da Pond\'s chứa niacinamide, giá bình dân, hiệu quả rõ.',
+            'content': '''<h2>Pond\'s White Beauty</h2>
+<p>Dòng kem dưỡng trắng da "quốc dân" với giá bình dân nhất thị trường, chứa niacinamide và vitamin B3 giúp da sáng hơn từ bên trong.</p>
+<h2>Các phiên bản</h2>
+<ul>
+<li><strong>Pond\'s White Beauty</strong> — Dưỡng trắng cơ bản, giá ~80K</li>
+<li><strong>Pond\'s Age Miracle</strong> — Chống lão hóa, giá ~200K</li>
+<li><strong>Pond\'s Bright Beauty</strong> — Sáng da nhanh, SPF 15</li>
+</ul>
+<h2>Review thực tế</h2>
+<p>Hiệu quả sáng da nhẹ sau 2-4 tuần, giá tốt cho sinh viên và người mới bắt đầu skincare.</p>''',
+            'tags': 'Pond\'s,kem dưỡng trắng,niacinamide,bình dân,skincare',
+        },
+        {
+            'name_vi': 'Kem dưỡng Innisfree Green Tea', 'name_en': 'Innisfree Green Tea Cream',
+            'slug': 'kem-duong-innisfree',
+            'description': 'Kem dưỡng trà xanh Innisfree, cấp ẩm sâu, thành phần tự nhiên từ đảo Jeju.',
+            'content': '''<h2>Innisfree Green Tea Seed Cream</h2>
+<p>Kem dưỡng chiết xuất trà xanh hữu cơ từ đảo Jeju (Hàn Quốc), cấp ẩm sâu và bảo vệ da khỏi tác hại môi trường.</p>
+<h2>Thành phần</h2>
+<ul>
+<li><strong>Trà xanh Jeju</strong> — Chống oxy hóa, bảo vệ da</li>
+<li><strong>Green Tea Seed Oil</strong> — Khóa ẩm, nuôi dưỡng</li>
+<li><strong>Amino Acid</strong> — Tăng cường hàng rào da</li>
+</ul>
+<h2>Phù hợp ai?</h2>
+<p>Da thường, da hỗn hợp. Texture nhẹ, thấm nhanh, không bí. Mùi trà xanh tự nhiên dễ chịu.</p>''',
+            'tags': 'Innisfree,trà xanh,green tea,Jeju,kem dưỡng,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_kem_duong):
+        p = Part(
+            zone_id=kem_duong_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Chống nắng zone (3 products) ---
+    chong_nang_zone = zones['chong-nang']
+    parts_chong_nang = [
+        {
+            'name_vi': 'Kem chống nắng Anessa', 'name_en': 'Anessa Perfect UV Sunscreen',
+            'slug': 'kem-chong-nang-anessa',
+            'description': 'Kem chống nắng Anessa SPF50+ PA++++ vàng, chống nước, bền bỉ ngoài trời.',
+            'content': '''<h2>Anessa Perfect UV — "Vua" chống nắng</h2>
+<p>Anessa của Shiseido (Nhật) là kem chống nắng #1 tại Nhật 21 năm liên tiếp. SPF50+ PA++++ với công nghệ Auto Booster bền bỉ khi tiếp xúc mồ hôi và nước.</p>
+<h2>Công nghệ đặc biệt</h2>
+<ul>
+<li><strong>Auto Booster</strong> — Càng tiếp xúc nhiệt/mồ hôi, màng chống nắng càng bền</li>
+<li><strong>Smooth Protect</strong> — Texture mỏng nhẹ như sữa, không bết</li>
+<li><strong>Chống nước</strong> — Super Waterproof, phù hợp đi biển</li>
+</ul>
+<h2>Giá</h2>
+<p>Khoảng 350-550K/chai 60ml tùy nơi mua. Nên mua ở Shopee Mall hoặc store chính hãng.</p>''',
+            'tags': 'Anessa,chống nắng,SPF50,Shiseido,chống nước,skincare',
+        },
+        {
+            'name_vi': 'Kem chống nắng Skin Aqua Tone Up', 'name_en': 'Skin Aqua Tone Up UV Essence',
+            'slug': 'kem-chong-nang-skin-aqua',
+            'description': 'Kem chống nắng Skin Aqua nâng tông, giá bình dân, texture nhẹ không bết.',
+            'content': '''<h2>Skin Aqua Tone Up UV Essence</h2>
+<p>Kem chống nắng "quốc dân" của Rohto (Nhật), giá chỉ ~150K nhưng SPF50+ PA++++, có hiệu ứng nâng tông da sáng hồng.</p>
+<h2>Vì sao viral?</h2>
+<ul>
+<li><strong>Giá rẻ</strong> — 150K/chai 80g, dùng được 2-3 tháng</li>
+<li><strong>Nâng tông</strong> — Da trắng hồng tự nhiên không cần makeup</li>
+<li><strong>Texture</strong> — Nhẹ như nước, không bết dính, có mùi hoa lavender</li>
+<li><strong>Hyaluronic Acid</strong> — Cấp ẩm, không gây khô da</li>
+</ul>''',
+            'tags': 'Skin Aqua,chống nắng,nâng tông,bình dân,Rohto,skincare',
+        },
+        {
+            'name_vi': 'Xịt chống nắng Neutrogena', 'name_en': 'Neutrogena Ultra Sheer Spray',
+            'slug': 'xit-chong-nang-neutrogena',
+            'description': 'Xịt chống nắng Neutrogena tiện lợi, dễ bôi lại, không để lại vệt trắng.',
+            'content': '''<h2>Xịt chống nắng — Tiện lợi bôi lại</h2>
+<p>Neutrogena Ultra Sheer Body Mist SPF70 dạng xịt, tiện lợi bôi lại trong ngày mà không cần rửa tay. Phun đều, khô nhanh.</p>
+<h2>Khi nào dùng xịt?</h2>
+<ul>
+<li><strong>Bôi lại</strong> — Xịt qua lớp makeup mà không bị hỏng</li>
+<li><strong>Cơ thể</strong> — Tay, chân, cổ — xịt nhanh hơn thoa kem</li>
+<li><strong>Đi chơi</strong> — Tiện mang theo, bôi lại mỗi 2h</li>
+</ul>
+<h2>Lưu ý</h2>
+<p>Xịt không thay thế kem cho mặt. Mặt nên dùng kem, xịt chỉ dùng bôi lại hoặc cho body.</p>''',
+            'tags': 'Neutrogena,xịt chống nắng,spray,SPF70,bôi lại,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_chong_nang):
+        p = Part(
+            zone_id=chong_nang_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Mặt nạ zone (3 products) ---
+    mat_na_zone = zones['mat-na']
+    parts_mat_na = [
+        {
+            'name_vi': 'Mặt nạ giấy Mediheal', 'name_en': 'Mediheal Sheet Mask',
+            'slug': 'mat-na-giay-mediheal',
+            'description': 'Mặt nạ giấy Mediheal N.M.F Aquaring, cấp ẩm sâu, best-seller Hàn Quốc.',
+            'content': '''<h2>Mediheal N.M.F Aquaring</h2>
+<p>Mặt nạ giấy bán chạy #1 Hàn Quốc với hơn 1 tỷ miếng bán ra. N.M.F (Natural Moisturizing Factor) cấp ẩm sâu, phù hợp mọi loại da.</p>
+<h2>Cách dùng hiệu quả</h2>
+<ul>
+<li><strong>Thời gian</strong> — Đắp 15-20 phút, KHÔNG đắp qua đêm</li>
+<li><strong>Tần suất</strong> — 2-3 lần/tuần</li>
+<li><strong>Sau khi đắp</strong> — Vỗ nhẹ cho thấm, thoa kem dưỡng khóa ẩm</li>
+</ul>
+<h2>Giá</h2>
+<p>Khoảng 15-25K/miếng, mua hộp 10 miếng ~150K. Mua Shopee Mall để tránh hàng giả.</p>''',
+            'tags': 'Mediheal,mặt nạ giấy,N.M.F,cấp ẩm,K-beauty,skincare',
+        },
+        {
+            'name_vi': 'Mặt nạ ngủ Laneige', 'name_en': 'Laneige Water Sleeping Mask',
+            'slug': 'mat-na-ngu-laneige',
+            'description': 'Mặt nạ ngủ Laneige cấp ẩm qua đêm, thức dậy da căng mọng, rạng rỡ.',
+            'content': '''<h2>Laneige Water Sleeping Mask</h2>
+<p>Mặt nạ ngủ iconic từ Laneige, thoa trước khi ngủ và để qua đêm. Sáng dậy da căng bóng, mềm mịn.</p>
+<h2>Thành phần</h2>
+<ul>
+<li><strong>SLEEP-TOX</strong> — Công nghệ thải độc khi ngủ</li>
+<li><strong>Hydro Ionized Mineral Water</strong> — Cấp ẩm sâu suốt đêm</li>
+<li><strong>Apricot & Evening Primrose</strong> — Làm sáng, đều màu da</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Bước cuối skincare tối. Thoa 1 lớp mỏng, để qua đêm, sáng rửa sạch. Dùng 2-3 lần/tuần.</p>''',
+            'tags': 'Laneige,mặt nạ ngủ,sleeping mask,cấp ẩm,K-beauty,skincare',
+        },
+        {
+            'name_vi': 'Mặt nạ đất sét Innisfree', 'name_en': 'Innisfree Volcanic Clay Mask',
+            'slug': 'mat-na-dat-set-innisfree',
+            'description': 'Mặt nạ đất sét núi lửa Jeju, hút bã nhờn, se lỗ chân lông, sạch sâu.',
+            'content': '''<h2>Innisfree Super Volcanic Pore Clay Mask</h2>
+<p>Mặt nạ đất sét từ tro núi lửa đảo Jeju, hút sạch bã nhờn và bụi bẩn trong lỗ chân lông. Best-seller cho da dầu.</p>
+<h2>Công dụng</h2>
+<ul>
+<li><strong>Hút bã nhờn</strong> — Đất sét núi lửa hấp thụ dầu thừa</li>
+<li><strong>Se lỗ chân lông</strong> — Lỗ chân lông nhỏ hơn sau khi đắp</li>
+<li><strong>Sạch sâu</strong> — Loại bỏ bụi bẩn, tế bào chết</li>
+</ul>
+<h2>Cách dùng</h2>
+<p>Thoa lớp dày lên da sạch, đợi 10-15 phút đến khi khô, rửa sạch bằng nước ấm. Dùng 1-2 lần/tuần.</p>''',
+            'tags': 'Innisfree,mặt nạ đất sét,volcanic clay,da dầu,se lỗ chân lông,skincare',
+        },
+    ]
+    for i, p_data in enumerate(parts_mat_na):
+        p = Part(
+            zone_id=mat_na_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
     # Create zones for other segments (makeup, haircare, bodycare, perfume, tools)
     for seg_slug in ['makeup', 'haircare', 'bodycare', 'perfume', 'tools']:
         seg = segments[seg_slug]
@@ -2159,11 +2807,9 @@ def seed_tech():
         name='Tech',
         slug='tech',
         icon='📱',
-        color='#0071e3',
+        color='#6c5ce7',
         description='Công nghệ & Thiết bị — Điện thoại, tai nghe, âm thanh, gadgets từ cơ bản đến cao cấp',
-        status='live',
-        template='tech',  # Use tech.css theme
-        default_mode='light'
+        status='live', style='tech', template='general', default_mode='light'
     )
     db.session.add(tech)
     db.session.flush()
@@ -2257,6 +2903,330 @@ def seed_tech():
     for i, p_data in enumerate(parts_camera):
         p = Part(
             zone_id=camera_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Màn hình zone (4 products) ---
+    man_hinh_zone = zones['man-hinh']
+    parts_man_hinh = [
+        {
+            'name_vi': 'Màn hình OLED', 'name_en': 'OLED Display',
+            'slug': 'man-hinh-oled',
+            'description': 'Công nghệ OLED cho màu sắc rực rỡ, đen tuyệt đối, tiết kiệm pin.',
+            'content': '''<h2>Màn hình OLED là gì?</h2>
+<p>OLED (Organic Light-Emitting Diode) là công nghệ mỗi pixel tự phát sáng, không cần đèn nền. Cho màu đen tuyệt đối, tỷ lệ tương phản vô hạn.</p>
+<h2>Ưu điểm</h2>
+<ul>
+<li><strong>Màu đen sâu</strong> — Pixel tắt hoàn toàn khi hiển thị màu đen</li>
+<li><strong>Tiết kiệm pin</strong> — Always-On Display không tốn nhiều pin</li>
+<li><strong>Góc nhìn rộng</strong> — Màu sắc không đổi khi nghiêng</li>
+</ul>''',
+            'tags': 'OLED,màn hình,smartphone,display,tech',
+        },
+        {
+            'name_vi': 'Màn hình AMOLED', 'name_en': 'AMOLED Display',
+            'slug': 'man-hinh-amoled',
+            'description': 'Super AMOLED của Samsung — sáng hơn, tiết kiệm pin hơn OLED truyền thống.',
+            'content': '''<h2>AMOLED vs OLED</h2>
+<p>AMOLED (Active-Matrix OLED) là phiên bản nâng cấp của OLED, tích hợp lớp cảm ứng vào màn hình giúp mỏng hơn và tiết kiệm pin hơn.</p>
+<h2>So sánh các loại</h2>
+<ul>
+<li><strong>Super AMOLED</strong> — Samsung, độ sáng cao, sắc nét ngoài trời</li>
+<li><strong>Dynamic AMOLED 2X</strong> — Flagship Samsung, 120Hz, HDR10+</li>
+<li><strong>LTPO AMOLED</strong> — Thay đổi tần số 1-120Hz linh hoạt</li>
+</ul>''',
+            'tags': 'AMOLED,Super AMOLED,Samsung,màn hình,tech',
+        },
+        {
+            'name_vi': 'Kính cường lực', 'name_en': 'Tempered Glass',
+            'slug': 'kinh-cuong-luc',
+            'description': 'Kính bảo vệ màn hình Gorilla Glass, chống xước, chống vỡ hiệu quả.',
+            'content': '''<h2>Kính cường lực phổ biến</h2>
+<ul>
+<li><strong>Gorilla Glass Victus 2</strong> — Chống rơi 1m trên bê tông, chống xước cát</li>
+<li><strong>Ceramic Shield</strong> — iPhone 15 series, cứng hơn mọi kính smartphone</li>
+<li><strong>Dragontrail</strong> — Nhẹ hơn Gorilla Glass, dùng trên nhiều Android tầm trung</li>
+</ul>
+<h2>Nên dán thêm kính?</h2>
+<p>Dù có Gorilla Glass, vẫn nên dán kính cường lực thêm. Giá chỉ 30-100K nhưng bảo vệ màn hình triệu đồng.</p>''',
+            'tags': 'kính cường lực,Gorilla Glass,bảo vệ màn hình,tech',
+        },
+        {
+            'name_vi': 'Tần số quét 120Hz', 'name_en': '120Hz Refresh Rate',
+            'slug': 'tan-so-quet-120hz',
+            'description': 'Màn hình 120Hz cho thao tác mượt mà, cuộn trang siêu mịn, chơi game đỉnh.',
+            'content': '''<h2>120Hz là gì?</h2>
+<p>Tần số quét 120Hz nghĩa là màn hình cập nhật 120 lần/giây, gấp đôi 60Hz tiêu chuẩn. Mọi thao tác cuộn, vuốt đều mượt hơn rõ rệt.</p>
+<h2>60Hz vs 90Hz vs 120Hz</h2>
+<ul>
+<li><strong>60Hz</strong> — Tiêu chuẩn, đủ dùng cơ bản</li>
+<li><strong>90Hz</strong> — Mượt hơn đáng kể, phổ biến tầm trung</li>
+<li><strong>120Hz</strong> — Flagship, game thủ, cuộn mạng xã hội cực mịn</li>
+</ul>
+<h2>LTPO — Tiết kiệm pin</h2>
+<p>LTPO cho phép tần số thay đổi linh hoạt 1-120Hz, xem ảnh tĩnh chỉ 1Hz, cuộn trang lên 120Hz.</p>''',
+            'tags': '120Hz,tần số quét,LTPO,màn hình mượt,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_man_hinh):
+        p = Part(
+            zone_id=man_hinh_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Chip xử lý zone (3 products) ---
+    chip_zone = zones['chip-xu-ly']
+    parts_chip = [
+        {
+            'name_vi': 'Snapdragon 8 Gen 3', 'name_en': 'Snapdragon 8 Gen 3',
+            'slug': 'snapdragon-8-gen-3',
+            'description': 'Chip flagship Qualcomm mạnh nhất, AI on-device, GPU Adreno 750 cho game đỉnh.',
+            'content': '''<h2>Snapdragon 8 Gen 3</h2>
+<p>Chip flagship mới nhất của Qualcomm, sản xuất trên tiến trình 4nm TSMC. Dùng trên Galaxy S24 Ultra, OnePlus 12, Xiaomi 14 Pro.</p>
+<h2>Thông số</h2>
+<ul>
+<li><strong>CPU</strong> — 1x Cortex-X4 (3.3GHz) + 3x A720 + 4x A520</li>
+<li><strong>GPU</strong> — Adreno 750, mạnh hơn 25% so với Gen 2</li>
+<li><strong>AI</strong> — NPU Hexagon, chạy AI model on-device</li>
+</ul>''',
+            'tags': 'Snapdragon,Qualcomm,chip,processor,flagship,tech',
+        },
+        {
+            'name_vi': 'Apple A17 Pro', 'name_en': 'Apple A17 Pro',
+            'slug': 'apple-a17-pro',
+            'description': 'Chip 3nm đầu tiên trên smartphone, ray tracing hardware, hiệu năng vượt trội.',
+            'content': '''<h2>Apple A17 Pro</h2>
+<p>Chip đầu tiên sản xuất trên tiến trình 3nm, dùng trên iPhone 15 Pro & Pro Max. Hiệu năng đơn nhân mạnh nhất thế giới smartphone.</p>
+<h2>Điểm nổi bật</h2>
+<ul>
+<li><strong>3nm TSMC</strong> — Tiết kiệm pin, mát hơn</li>
+<li><strong>Ray Tracing</strong> — GPU hỗ trợ ray tracing phần cứng</li>
+<li><strong>USB-C 3.0</strong> — Truyền dữ liệu 10Gbps</li>
+</ul>''',
+            'tags': 'Apple,A17 Pro,chip,3nm,iPhone,tech',
+        },
+        {
+            'name_vi': 'Dimensity 9300', 'name_en': 'Dimensity 9300',
+            'slug': 'dimensity-9300',
+            'description': 'Chip MediaTek all big-core, hiệu năng ngang Snapdragon, giá tốt hơn.',
+            'content': '''<h2>Dimensity 9300</h2>
+<p>Chip flagship MediaTek với kiến trúc all big-core (không có nhân tiết kiệm), hiệu năng đa nhân cực mạnh.</p>
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>All big-core</strong> — 4x Cortex-X4 + 4x A720, không nhân nhỏ</li>
+<li><strong>GPU Immortalis-G720</strong> — Chơi game nặng mượt</li>
+<li><strong>Giá tốt</strong> — Giá OEM rẻ hơn Snapdragon, điện thoại rẻ hơn</li>
+</ul>''',
+            'tags': 'Dimensity,MediaTek,chip,processor,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_chip):
+        p = Part(
+            zone_id=chip_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Pin & Sạc zone (4 products) ---
+    pin_zone = zones['pin-sac']
+    parts_pin = [
+        {
+            'name_vi': 'Pin lithium-polymer', 'name_en': 'Lithium-Polymer Battery',
+            'slug': 'pin-lithium-polymer',
+            'description': 'Pin Li-Po mỏng, nhẹ, dung lượng 4500-6000mAh cho smartphone hiện đại.',
+            'content': '''<h2>Pin Li-Po trên smartphone</h2>
+<p>Pin Lithium-Polymer (Li-Po) là loại pin phổ biến nhất trên smartphone hiện nay, mỏng và có thể uốn cong theo thiết kế.</p>
+<h2>Dung lượng phổ biến</h2>
+<ul>
+<li><strong>4500mAh</strong> — Flagship nhỏ gọn, dùng 1 ngày</li>
+<li><strong>5000mAh</strong> — Phổ biến nhất, dùng cả ngày thoải mái</li>
+<li><strong>6000mAh</strong> — Pin trâu, dùng 2 ngày nhẹ nhàng</li>
+</ul>''',
+            'tags': 'pin,lithium,battery,smartphone,tech',
+        },
+        {
+            'name_vi': 'Sạc nhanh 120W', 'name_en': '120W Fast Charging',
+            'slug': 'sac-nhanh-120w',
+            'description': 'Công nghệ sạc nhanh 120W — đầy pin trong 15 phút, an toàn với bảo vệ đa lớp.',
+            'content': '''<h2>Sạc nhanh 120W</h2>
+<p>Sạc siêu nhanh 120W cho phép sạc đầy pin 4500mAh chỉ trong 15 phút. Phổ biến trên Xiaomi, OPPO, realme.</p>
+<h2>So sánh tốc độ sạc</h2>
+<ul>
+<li><strong>25W (Samsung)</strong> — 60 phút đầy, an toàn nhất</li>
+<li><strong>67W (Xiaomi)</strong> — 35 phút đầy</li>
+<li><strong>100W (OPPO)</strong> — 20 phút đầy</li>
+<li><strong>120W (Xiaomi)</strong> — 15 phút đầy</li>
+</ul>
+<h2>Có hại pin không?</h2>
+<p>Sạc nhanh hiện đại có bảo vệ đa lớp: giảm tốc khi nóng, giảm tốc khi gần đầy. Pin vẫn giữ 80% sau 800 chu kỳ.</p>''',
+            'tags': 'sạc nhanh,120W,fast charging,smartphone,tech',
+        },
+        {
+            'name_vi': 'Sạc không dây Qi2', 'name_en': 'Qi2 Wireless Charging',
+            'slug': 'sac-khong-day-qi2',
+            'description': 'Sạc không dây chuẩn Qi2 với nam châm MagSafe, tốc độ 15W, tiện lợi.',
+            'content': '''<h2>Qi2 — Tương lai sạc không dây</h2>
+<p>Qi2 là chuẩn sạc không dây mới, tích hợp nam châm (giống MagSafe của Apple) giúp căn chỉnh chính xác, sạc nhanh hơn.</p>
+<h2>Ưu điểm Qi2</h2>
+<ul>
+<li><strong>Nam châm</strong> — Tự căn chỉnh, không lệch cuộn sạc</li>
+<li><strong>15W</strong> — Nhanh gấp đôi Qi 7.5W cũ</li>
+<li><strong>Tương thích</strong> — Cả iPhone lẫn Android flagship 2024+</li>
+</ul>''',
+            'tags': 'sạc không dây,Qi2,MagSafe,wireless charging,tech',
+        },
+        {
+            'name_vi': 'Pin dự phòng 20000mAh', 'name_en': 'Power Bank 20000mAh',
+            'slug': 'pin-du-phong-20000mah',
+            'description': 'Pin sạc dự phòng 20000mAh, sạc nhanh 65W, mang lên máy bay được.',
+            'content': '''<h2>Chọn pin dự phòng</h2>
+<p>Pin dự phòng 20000mAh sạc được 4-5 lần cho smartphone thông thường, vừa đủ cho chuyến đi 2-3 ngày.</p>
+<h2>Tiêu chí chọn</h2>
+<ul>
+<li><strong>Dung lượng</strong> — 10000mAh (nhẹ), 20000mAh (đủ dùng), 30000mAh (nặng)</li>
+<li><strong>Công suất</strong> — Tối thiểu 22.5W, tốt nhất 65W để sạc nhanh</li>
+<li><strong>Mang lên máy bay</strong> — Dưới 100Wh (≈27000mAh) được mang lên</li>
+</ul>''',
+            'tags': 'pin dự phòng,power bank,sạc dự phòng,20000mAh,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_pin):
+        p = Part(
+            zone_id=pin_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Bộ nhớ zone (3 products) ---
+    bo_nho_zone = zones['bo-nho']
+    parts_bo_nho = [
+        {
+            'name_vi': 'RAM LPDDR5X', 'name_en': 'LPDDR5X RAM',
+            'slug': 'ram-lpddr5x',
+            'description': 'RAM LPDDR5X 8-16GB, tốc độ 8533Mbps, đa nhiệm mượt mà.',
+            'content': '''<h2>LPDDR5X là gì?</h2>
+<p>LPDDR5X là chuẩn RAM nhanh nhất trên smartphone, tốc độ lên đến 8533Mbps, gấp đôi LPDDR5.</p>
+<h2>Bao nhiêu RAM là đủ?</h2>
+<ul>
+<li><strong>6GB</strong> — Dùng cơ bản, mạng xã hội</li>
+<li><strong>8GB</strong> — Đa nhiệm tốt, chơi game vừa</li>
+<li><strong>12GB</strong> — Flagship, đa nhiệm nặng</li>
+<li><strong>16GB</strong> — Thừa cho hầu hết người dùng</li>
+</ul>''',
+            'tags': 'RAM,LPDDR5X,bộ nhớ,đa nhiệm,tech',
+        },
+        {
+            'name_vi': 'Bộ nhớ UFS 4.0', 'name_en': 'UFS 4.0 Storage',
+            'slug': 'bo-nho-ufs-4',
+            'description': 'Bộ nhớ trong UFS 4.0, tốc độ đọc 4200MB/s, mở app cực nhanh.',
+            'content': '''<h2>UFS 4.0 vs UFS 3.1</h2>
+<p>UFS 4.0 nhanh gấp đôi UFS 3.1, mở app gần như tức thì, copy file lớn trong vài giây.</p>
+<h2>Dung lượng nên chọn</h2>
+<ul>
+<li><strong>128GB</strong> — Dùng cơ bản, hay xóa ảnh/video</li>
+<li><strong>256GB</strong> — An toàn cho hầu hết người dùng</li>
+<li><strong>512GB</strong> — Quay video 4K nhiều, tải game nặng</li>
+<li><strong>1TB</strong> — Cho người không muốn lo nghĩ dung lượng</li>
+</ul>''',
+            'tags': 'UFS 4.0,bộ nhớ trong,storage,tốc độ,tech',
+        },
+        {
+            'name_vi': 'Thẻ nhớ microSD', 'name_en': 'microSD Card',
+            'slug': 'the-nho-microsd',
+            'description': 'Thẻ nhớ mở rộng microSD A2 U3, tốc độ đọc 160MB/s, mở rộng lưu trữ.',
+            'content': '''<h2>Chọn thẻ nhớ microSD</h2>
+<p>Nhiều điện thoại Android tầm trung vẫn hỗ trợ thẻ nhớ mở rộng, giúp tăng dung lượng với chi phí thấp.</p>
+<h2>Phân loại tốc độ</h2>
+<ul>
+<li><strong>A1/U1</strong> — Đủ lưu ảnh, nhạc, tài liệu</li>
+<li><strong>A2/U3</strong> — Chạy app từ thẻ nhớ, quay 4K</li>
+<li><strong>V30/V60</strong> — Quay video chuyên nghiệp</li>
+</ul>
+<h2>Thương hiệu uy tín</h2>
+<p>Samsung EVO Plus, SanDisk Extreme, Kingston Canvas Go — tránh hàng giá rẻ không rõ nguồn gốc.</p>''',
+            'tags': 'thẻ nhớ,microSD,mở rộng,lưu trữ,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_bo_nho):
+        p = Part(
+            zone_id=bo_nho_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Thiết kế zone (3 products) ---
+    thiet_ke_zone = zones['thiet-ke']
+    parts_thiet_ke = [
+        {
+            'name_vi': 'Ốp lưng silicon', 'name_en': 'Silicone Case',
+            'slug': 'op-lung-silicon',
+            'description': 'Ốp lưng silicon mềm, chống sốc, bám tay, nhiều màu sắc thời trang.',
+            'content': '''<h2>Ốp silicon — Lựa chọn phổ biến nhất</h2>
+<p>Ốp silicon mềm dẻo, chống sốc tốt, giá rẻ và có hàng ngàn mẫu mã.</p>
+<h2>Các loại ốp phổ biến</h2>
+<ul>
+<li><strong>Silicon trong suốt</strong> — Giữ nguyên thiết kế điện thoại, dễ ố vàng</li>
+<li><strong>Silicon màu</strong> — Nhiều màu sắc, bám tay tốt</li>
+<li><strong>MagSafe silicon</strong> — Có nam châm, tương thích sạc không dây</li>
+</ul>''',
+            'tags': 'ốp lưng,silicon,case,bảo vệ,thời trang,tech',
+        },
+        {
+            'name_vi': 'Khung viền titanium', 'name_en': 'Titanium Frame',
+            'slug': 'khung-vien-titanium',
+            'description': 'Khung viền titanium cao cấp — nhẹ hơn thép, cứng hơn nhôm, sang trọng.',
+            'content': '''<h2>Titanium — Vật liệu flagship 2024</h2>
+<p>iPhone 15 Pro và Galaxy S24 Ultra đều chuyển sang khung titanium. Nhẹ hơn thép không gỉ 15%, cứng hơn nhôm 3 lần.</p>
+<h2>So sánh vật liệu khung</h2>
+<ul>
+<li><strong>Nhựa</strong> — Nhẹ, rẻ, dễ xước (tầm thấp)</li>
+<li><strong>Nhôm</strong> — Nhẹ, bền, truyền nhiệt tốt (tầm trung)</li>
+<li><strong>Thép không gỉ</strong> — Sang trọng, nặng (flagship cũ)</li>
+<li><strong>Titanium</strong> — Nhẹ + bền + sang (flagship mới)</li>
+</ul>''',
+            'tags': 'titanium,khung viền,vật liệu,flagship,thiết kế,tech',
+        },
+        {
+            'name_vi': 'Kính lưng Ceramic', 'name_en': 'Ceramic Back Glass',
+            'slug': 'kinh-lung-ceramic',
+            'description': 'Mặt lưng kính ceramic shield — chống xước, chống vỡ, hỗ trợ sạc không dây.',
+            'content': '''<h2>Mặt lưng kính vs Nhựa</h2>
+<p>Flagship đều dùng mặt lưng kính để hỗ trợ sạc không dây và tạo cảm giác cao cấp.</p>
+<h2>Các loại kính lưng</h2>
+<ul>
+<li><strong>Gorilla Glass 5</strong> — Phổ biến, chống rơi tốt</li>
+<li><strong>Gorilla Glass Victus 2</strong> — Flagship, siêu bền</li>
+<li><strong>Ceramic Shield</strong> — Apple, cứng nhất hiện tại</li>
+<li><strong>Kính nhám (Frosted)</strong> — Chống bám vân tay, sang trọng</li>
+</ul>''',
+            'tags': 'kính lưng,ceramic,Gorilla Glass,thiết kế,tech',
+        },
+    ]
+    for i, p_data in enumerate(parts_thiet_ke):
+        p = Part(
+            zone_id=thiet_ke_zone.id,
             name_vi=p_data['name_vi'], name_en=p_data['name_en'],
             slug=p_data['slug'], description=p_data['description'],
             content=p_data['content'], tags=p_data.get('tags', ''),
@@ -2362,6 +3332,7 @@ def seed_beauty_articles():
     ]
     
     for a_data in articles:
+        img = a_data.get('image_url', f"https://placehold.co/800x450/e84393/fff?text={a_data['slug'][:30]}")
         a = Article(
             title=a_data['title'],
             slug=a_data['slug'],
@@ -2373,10 +3344,11 @@ def seed_beauty_articles():
             vertical_slug=a_data['vertical_slug'],
             content=a_data['content'],
             status='published',
-            ai_generated=False
+            ai_generated=False,
+            image_url=img
         )
         db.session.add(a)
-    
+
     db.session.commit()
     print(f'✅ Beauty articles seeded: {len(articles)} articles')
 
@@ -2478,6 +3450,7 @@ def seed_tech_articles():
     ]
     
     for a_data in articles:
+        img = a_data.get('image_url', f"https://placehold.co/800x450/6c5ce7/fff?text={a_data['slug'][:30]}")
         a = Article(
             title=a_data['title'],
             slug=a_data['slug'],
@@ -2489,9 +3462,1321 @@ def seed_tech_articles():
             vertical_slug=a_data['vertical_slug'],
             content=a_data['content'],
             status='published',
+            ai_generated=False,
+            image_url=img
+        )
+        db.session.add(a)
+
+    db.session.commit()
+    print(f'✅ Tech articles seeded: {len(articles)} articles')
+
+
+def seed_products_beauty_tech():
+    """Seed affiliate product links for Beauty and Tech verticals"""
+    from models import db, Vertical, Segment, Zone, Part, AffiliateLink
+    import random
+
+    seeded = 0
+
+    # ── Beauty products ──
+    beauty = Vertical.query.filter_by(slug='beauty').first()
+    if beauty:
+        existing = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'beauty').count()
+        if existing:
+            print(f'[SKIP] Beauty already has {existing} affiliate links')
+        else:
+            print('[+] Seeding Beauty affiliate links...')
+            beauty_products = {
+                'serum-vitamin-c': [
+                    ('shopee', 'Serum Vitamin C Melano CC Rohto 20ml', 'https://shope.ee/beauty001', 185000),
+                    ('lazada', 'Serum Obagi Vitamin C 15% 30ml', 'https://s.lazada.vn/beauty002', 1250000),
+                    ('tiki', 'Serum Klairs Vitamin C 35ml', 'https://tiki.vn/beauty003', 350000),
+                ],
+                'serum-niacinamide': [
+                    ('shopee', "The Ordinary Niacinamide 10% 30ml", 'https://shope.ee/beauty010', 195000),
+                    ('lazada', 'Paula\'s Choice 10% Niacinamide Booster', 'https://s.lazada.vn/beauty011', 780000),
+                ],
+                'serum-retinol': [
+                    ('shopee', 'The Ordinary Retinol 0.5% 30ml', 'https://shope.ee/beauty020', 220000),
+                    ('lazada', 'CeraVe Resurfacing Retinol Serum', 'https://s.lazada.vn/beauty021', 450000),
+                ],
+                'sua-rua-mat-cerave': [
+                    ('shopee', 'CeraVe Foaming Cleanser 236ml', 'https://shope.ee/beauty030', 285000),
+                    ('lazada', 'CeraVe Hydrating Cleanser 473ml', 'https://s.lazada.vn/beauty031', 380000),
+                    ('tiki', 'CeraVe SA Smoothing Cleanser 236ml', 'https://tiki.vn/beauty032', 320000),
+                ],
+                'tay-trang-dau-dhc': [
+                    ('shopee', 'DHC Deep Cleansing Oil 200ml', 'https://shope.ee/beauty040', 520000),
+                    ('lazada', 'DHC Deep Cleansing Oil 70ml', 'https://s.lazada.vn/beauty041', 250000),
+                ],
+                'gel-rua-mat-la-roche-posay': [
+                    ('shopee', 'La Roche-Posay Effaclar Gel 400ml', 'https://shope.ee/beauty050', 485000),
+                    ('tiki', 'La Roche-Posay Effaclar Duo+ 40ml', 'https://tiki.vn/beauty051', 520000),
+                ],
+                'nuoc-tay-trang-bioderma': [
+                    ('shopee', 'Bioderma Sensibio H2O 500ml', 'https://shope.ee/beauty060', 385000),
+                    ('lazada', 'Bioderma Sensibio H2O 250ml', 'https://s.lazada.vn/beauty061', 250000),
+                ],
+                'toner-klairs': [
+                    ('shopee', 'Klairs Supple Preparation Toner 180ml', 'https://shope.ee/beauty070', 320000),
+                    ('lazada', 'Klairs Supple Preparation Unscented 180ml', 'https://s.lazada.vn/beauty071', 335000),
+                ],
+                'essence-sk-ii': [
+                    ('shopee', 'SK-II Facial Treatment Essence 230ml', 'https://shope.ee/beauty080', 3800000),
+                    ('tiki', 'SK-II Facial Treatment Essence 75ml', 'https://tiki.vn/beauty081', 1650000),
+                ],
+                'toner-some-by-mi': [
+                    ('shopee', 'Some By Mi AHA-BHA-PHA Toner 150ml', 'https://shope.ee/beauty090', 265000),
+                    ('lazada', 'Some By Mi AHA-BHA-PHA Serum 50ml', 'https://s.lazada.vn/beauty091', 280000),
+                ],
+                'kem-duong-am-cerave': [
+                    ('shopee', 'CeraVe Moisturizing Cream 340g', 'https://shope.ee/beauty100', 385000),
+                    ('lazada', 'CeraVe PM Facial Moisturizing Lotion 52ml', 'https://s.lazada.vn/beauty101', 350000),
+                ],
+                'kem-duong-laneige': [
+                    ('shopee', 'Laneige Water Bank Blue HA Cream 50ml', 'https://shope.ee/beauty110', 750000),
+                    ('tiki', 'Laneige Water Bank Gel Cream 50ml', 'https://tiki.vn/beauty111', 680000),
+                ],
+                'kem-duong-trang-ponds': [
+                    ('shopee', 'Pond\'s White Beauty 50g', 'https://shope.ee/beauty120', 89000),
+                    ('lazada', 'Pond\'s Age Miracle Night Cream 50g', 'https://s.lazada.vn/beauty121', 210000),
+                ],
+                'kem-duong-innisfree': [
+                    ('shopee', 'Innisfree Green Tea Seed Cream 50ml', 'https://shope.ee/beauty130', 420000),
+                    ('lazada', 'Innisfree Green Tea Seed Serum 80ml', 'https://s.lazada.vn/beauty131', 380000),
+                ],
+                'kem-chong-nang-anessa': [
+                    ('shopee', 'Anessa Perfect UV Milk SPF50+ 60ml', 'https://shope.ee/beauty140', 450000),
+                    ('lazada', 'Anessa Perfect UV Gel SPF50+ 90g', 'https://s.lazada.vn/beauty141', 520000),
+                    ('tiki', 'Anessa Whitening UV Gel SPF50+ 90g', 'https://tiki.vn/beauty142', 480000),
+                ],
+                'kem-chong-nang-skin-aqua': [
+                    ('shopee', 'Skin Aqua Tone Up UV Essence 80g', 'https://shope.ee/beauty150', 155000),
+                    ('lazada', 'Skin Aqua Super Moisture Milk SPF50 40ml', 'https://s.lazada.vn/beauty151', 125000),
+                ],
+                'xit-chong-nang-neutrogena': [
+                    ('shopee', 'Neutrogena Ultra Sheer Spray SPF70 141g', 'https://shope.ee/beauty160', 280000),
+                    ('tiki', 'Neutrogena Ultra Sheer Dry-Touch SPF55 88ml', 'https://tiki.vn/beauty161', 245000),
+                ],
+                'mat-na-giay-mediheal': [
+                    ('shopee', 'Mediheal N.M.F Aquaring Ampoule Mask 10 miếng', 'https://shope.ee/beauty170', 155000),
+                    ('lazada', 'Mediheal Tea Tree Mask 10 miếng', 'https://s.lazada.vn/beauty171', 160000),
+                ],
+                'mat-na-ngu-laneige': [
+                    ('shopee', 'Laneige Water Sleeping Mask 70ml', 'https://shope.ee/beauty180', 580000),
+                    ('lazada', 'Laneige Lip Sleeping Mask 20g', 'https://s.lazada.vn/beauty181', 350000),
+                ],
+                'mat-na-dat-set-innisfree': [
+                    ('shopee', 'Innisfree Super Volcanic Pore Clay Mask 100ml', 'https://shope.ee/beauty190', 280000),
+                    ('tiki', 'Innisfree Volcanic Color Clay Mask 70ml', 'https://tiki.vn/beauty191', 250000),
+                ],
+            }
+            for seg in beauty.segments:
+                for z in seg.zones:
+                    for p in z.parts:
+                        if p.slug in beauty_products:
+                            for net, pname, url, price in beauty_products[p.slug]:
+                                al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
+                                    url=url, price=price, clicks=random.randint(20, 800),
+                                    conversions=random.randint(1, 40),
+                                    image_url=f"https://placehold.co/400x300/e84393/fff?text={pname.replace(' ','+')[:25]}")
+                                db.session.add(al)
+                                seeded += 1
+
+    # ── Tech products ──
+    tech = Vertical.query.filter_by(slug='tech').first()
+    if tech:
+        existing = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'tech').count()
+        if existing:
+            print(f'[SKIP] Tech already has {existing} affiliate links')
+        else:
+            print('[+] Seeding Tech affiliate links...')
+            tech_products = {
+                'camera-chinh': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra 200MP', 'https://shope.ee/tech001', 31990000),
+                    ('lazada', 'iPhone 15 Pro Max 48MP', 'https://s.lazada.vn/tech002', 34990000),
+                    ('tiki', 'Xiaomi 14 Ultra Leica 50MP', 'https://tiki.vn/tech003', 23990000),
+                ],
+                'camera-goc-rong': [
+                    ('shopee', 'Google Pixel 8 Pro Ultrawide', 'https://shope.ee/tech010', 22990000),
+                    ('lazada', 'Samsung Galaxy S24+ Ultrawide 12MP', 'https://s.lazada.vn/tech011', 25990000),
+                ],
+                'camera-zoom': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Zoom 5x', 'https://shope.ee/tech020', 31990000),
+                    ('tiki', 'iPhone 15 Pro Max Telephoto 5x', 'https://tiki.vn/tech021', 34990000),
+                ],
+                'man-hinh-oled': [
+                    ('shopee', 'Samsung Galaxy A55 OLED 120Hz', 'https://shope.ee/tech030', 9990000),
+                    ('lazada', 'OPPO Reno 11 OLED 120Hz', 'https://s.lazada.vn/tech031', 10490000),
+                ],
+                'man-hinh-amoled': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Dynamic AMOLED 2X', 'https://shope.ee/tech040', 31990000),
+                    ('lazada', 'OnePlus 12 LTPO AMOLED 120Hz', 'https://s.lazada.vn/tech041', 19990000),
+                ],
+                'kinh-cuong-luc': [
+                    ('shopee', 'Kính cường lực Nillkin iPhone 15 Pro Max', 'https://shope.ee/tech050', 89000),
+                    ('lazada', 'Kính cường lực Spigen Samsung S24 Ultra', 'https://s.lazada.vn/tech051', 120000),
+                    ('tiki', 'Kính cường lực ZAGG Glass XTR3 iPhone', 'https://tiki.vn/tech052', 350000),
+                ],
+                'tan-so-quet-120hz': [
+                    ('shopee', 'Redmi Note 13 Pro 120Hz AMOLED', 'https://shope.ee/tech060', 6990000),
+                    ('lazada', 'Samsung Galaxy A35 120Hz Super AMOLED', 'https://s.lazada.vn/tech061', 8490000),
+                ],
+                'snapdragon-8-gen-3': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Snapdragon 8 Gen 3', 'https://shope.ee/tech070', 31990000),
+                    ('lazada', 'OnePlus 12 Snapdragon 8 Gen 3', 'https://s.lazada.vn/tech071', 19990000),
+                    ('tiki', 'Xiaomi 14 Pro Snapdragon 8 Gen 3', 'https://tiki.vn/tech072', 18990000),
+                ],
+                'apple-a17-pro': [
+                    ('shopee', 'iPhone 15 Pro 256GB', 'https://shope.ee/tech080', 28990000),
+                    ('tiki', 'iPhone 15 Pro Max 256GB', 'https://tiki.vn/tech081', 34990000),
+                ],
+                'dimensity-9300': [
+                    ('shopee', 'vivo X100 Pro Dimensity 9300', 'https://shope.ee/tech090', 19990000),
+                    ('lazada', 'OPPO Find X7 Ultra Dimensity 9300', 'https://s.lazada.vn/tech091', 24990000),
+                ],
+                'pin-lithium-polymer': [
+                    ('shopee', 'Samsung Galaxy M55 5000mAh', 'https://shope.ee/tech100', 8990000),
+                    ('lazada', 'Xiaomi Redmi Note 13 5000mAh', 'https://s.lazada.vn/tech101', 4990000),
+                ],
+                'sac-nhanh-120w': [
+                    ('shopee', 'Xiaomi 14 120W HyperCharge', 'https://shope.ee/tech110', 17990000),
+                    ('lazada', 'Bộ sạc nhanh Xiaomi 120W GaN chính hãng', 'https://s.lazada.vn/tech111', 450000),
+                    ('tiki', 'Bộ sạc OPPO SuperVOOC 100W', 'https://tiki.vn/tech112', 380000),
+                ],
+                'sac-khong-day-qi2': [
+                    ('shopee', 'Apple MagSafe Charger 15W', 'https://shope.ee/tech120', 950000),
+                    ('lazada', 'Anker MagGo Qi2 15W', 'https://s.lazada.vn/tech121', 650000),
+                    ('tiki', 'Belkin BoostCharge Qi2 15W', 'https://tiki.vn/tech122', 750000),
+                ],
+                'pin-du-phong-20000mah': [
+                    ('shopee', 'Anker PowerCore 20000mAh 65W', 'https://shope.ee/tech130', 890000),
+                    ('lazada', 'Xiaomi Power Bank 20000mAh 50W', 'https://s.lazada.vn/tech131', 450000),
+                    ('tiki', 'Baseus Blade 20000mAh 100W', 'https://tiki.vn/tech132', 1250000),
+                ],
+                'ram-lpddr5x': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra 12GB LPDDR5X', 'https://shope.ee/tech140', 31990000),
+                    ('lazada', 'OnePlus 12 16GB LPDDR5X', 'https://s.lazada.vn/tech141', 22990000),
+                ],
+                'bo-nho-ufs-4': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra 512GB UFS 4.0', 'https://shope.ee/tech150', 37990000),
+                    ('tiki', 'iPhone 15 Pro Max 1TB', 'https://tiki.vn/tech151', 46990000),
+                ],
+                'the-nho-microsd': [
+                    ('shopee', 'Samsung EVO Plus 256GB A2 U3', 'https://shope.ee/tech160', 350000),
+                    ('lazada', 'SanDisk Extreme 256GB A2 U3', 'https://s.lazada.vn/tech161', 380000),
+                    ('tiki', 'Kingston Canvas Go Plus 128GB A2', 'https://tiki.vn/tech162', 250000),
+                ],
+                'op-lung-silicon': [
+                    ('shopee', 'Ốp silicon Apple MagSafe iPhone 15 Pro', 'https://shope.ee/tech170', 1290000),
+                    ('lazada', 'Ốp Spigen Liquid Air Samsung S24 Ultra', 'https://s.lazada.vn/tech171', 350000),
+                    ('tiki', 'Ốp UAG Civilian iPhone 15 Pro Max', 'https://tiki.vn/tech172', 890000),
+                ],
+                'khung-vien-titanium': [
+                    ('shopee', 'iPhone 15 Pro Max Titanium 256GB', 'https://shope.ee/tech180', 34990000),
+                    ('tiki', 'Samsung Galaxy S24 Ultra Titanium 256GB', 'https://tiki.vn/tech181', 31990000),
+                ],
+                'kinh-lung-ceramic': [
+                    ('shopee', 'Samsung Galaxy S24 Ultra Gorilla Armor', 'https://shope.ee/tech190', 31990000),
+                    ('lazada', 'iPhone 15 Pro Ceramic Shield', 'https://s.lazada.vn/tech191', 28990000),
+                ],
+            }
+            for seg in tech.segments:
+                for z in seg.zones:
+                    for p in z.parts:
+                        if p.slug in tech_products:
+                            for net, pname, url, price in tech_products[p.slug]:
+                                al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
+                                    url=url, price=price, clicks=random.randint(30, 1200),
+                                    conversions=random.randint(2, 60),
+                                    image_url=f"https://placehold.co/400x300/6c5ce7/fff?text={pname.replace(' ','+')[:25]}")
+                                db.session.add(al)
+                                seeded += 1
+
+    db.session.commit()
+    beauty_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'beauty').count() if beauty else 0
+    tech_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'tech').count() if tech else 0
+    print(f'✅ Beauty+Tech products seeded: Beauty={beauty_count}, Tech={tech_count}')
+
+
+# =============================================
+# SPORT VERTICAL
+# =============================================
+
+def seed_sport():
+    """Seed Sport vertical data for running, gym, football, cycling, swimming, nutrition"""
+
+    # Check if Sport already exists
+    sport_vertical = Vertical.query.filter_by(slug='sport').first()
+    if sport_vertical:
+        print('[SKIP] Sport vertical already exists')
+        return
+
+    print('[+] Seeding Sport vertical...')
+    sport = Vertical(
+        name='Sport',
+        slug='sport',
+        icon='⚽',
+        color='#00b894',
+        description='Thể thao & Fitness — Giày chạy, đồ gym, dinh dưỡng thể thao, thiết bị tập luyện',
+        status='live',
+        style='sport',
+        template='general',
+        default_mode='light'
+    )
+    db.session.add(sport)
+    db.session.flush()
+
+    # Segments (6 bộ môn)
+    segments_data = [
+        ('Running', 'running', '🏃', 'Chạy bộ — Giày chạy, đồ chạy, đồng hồ GPS, dinh dưỡng marathon'),
+        ('Gym & Fitness', 'gym-fitness', '💪', 'Tập gym — Máy tập, quần áo, whey protein, phụ kiện'),
+        ('Football', 'football', '⚽', 'Bóng đá — Giày đá bóng, quần áo, bóng, phụ kiện sân cỏ'),
+        ('Cycling', 'cycling', '🚴', 'Đạp xe thể thao — Xe đạp road/MTB, mũ bảo hiểm, phụ kiện'),
+        ('Swimming', 'swimming', '🏊', 'Bơi lội — Đồ bơi, kính bơi, mũ bơi, phụ kiện bể bơi'),
+        ('Nutrition', 'nutrition', '🥗', 'Dinh dưỡng thể thao — Whey, BCAA, creatine, pre-workout'),
+    ]
+
+    segments = {}
+    for i, (name, slug, icon, desc) in enumerate(segments_data):
+        s = Segment(vertical_id=sport.id, name=name, slug=slug, icon=icon, description=desc, order=i)
+        db.session.add(s)
+        db.session.flush()
+        segments[slug] = s
+
+    # ── Zones for Running segment (6 zones) ──
+    running = segments['running']
+    running_zones_data = [
+        ('Giày chạy', 'giay-chay', '👟', '#4fc3f7', 'Giày chạy bộ — Nike, Adidas, ASICS, Hoka, New Balance'),
+        ('Đồ chạy', 'do-chay', '🩳', '#81c784', 'Quần áo chạy bộ — Áo singlet, quần short, compression'),
+        ('Đồng hồ GPS', 'dong-ho-gps', '⌚', '#ba68c8', 'Đồng hồ GPS — Garmin, COROS, Apple Watch, Suunto'),
+        ('Phụ kiện chạy', 'phu-kien-chay', '🎧', '#ffb74d', 'Đai chạy, bình nước, tai nghe, arm band'),
+        ('Dinh dưỡng chạy', 'dinh-duong-chay', '🥤', '#ff8a65', 'Gel năng lượng, electrolyte, energy bar'),
+        ('Sự kiện & Giải', 'su-kien-giai', '🏅', '#4db6ac', 'Marathon, half marathon, fun run, trail running'),
+    ]
+
+    running_zones = {}
+    for i, (name, slug, icon, color, desc) in enumerate(running_zones_data):
+        z = Zone(segment_id=running.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+        running_zones[slug] = z
+
+    # --- Parts for Giày chạy zone (4 products) ---
+    giay_chay_zone = running_zones['giay-chay']
+    parts_giay_chay = [
+        {
+            'name_vi': 'Nike Pegasus 41', 'name_en': 'Nike Pegasus 41',
+            'slug': 'nike-pegasus-41',
+            'description': 'Giày chạy bộ đa năng hàng đầu Nike, đệm React foam + Zoom Air, phù hợp mọi cự ly.',
+            'content': '''<h2>Nike Pegasus 41 — Giày chạy "quốc dân"</h2>
+<p>Pegasus là dòng giày chạy bán chạy nhất lịch sử Nike, đã qua 41 phiên bản. Phù hợp từ người mới chạy đến runner 42km.</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>React Foam</strong> — Đệm mềm, bật nảy tốt, bền bỉ qua 800km</li>
+<li><strong>Zoom Air</strong> — Túi khí ở gót và mũi, tăng phản hồi năng lượng</li>
+<li><strong>Flywire</strong> — Dây cáp ôm chân, cố định bàn chân khi chạy</li>
+</ul>
+
+<h2>Phù hợp ai?</h2>
+<p>Người mới bắt đầu chạy bộ. Runner chạy daily training 5-21km. Chạy đường nhựa, track. Drop 10mm phù hợp đa số foot type.</p>''',
+            'tags': 'Nike,Pegasus,giày chạy,running,React,Zoom Air',
+        },
+        {
+            'name_vi': 'ASICS Gel-Nimbus 26', 'name_en': 'ASICS Gel-Nimbus 26',
+            'slug': 'asics-gel-nimbus-26',
+            'description': 'Giày chạy êm nhất của ASICS, công nghệ FF BLAST PLUS ECO + PureGEL, lý tưởng cho long run.',
+            'content': '''<h2>ASICS Gel-Nimbus 26 — Êm nhất phân khúc</h2>
+<p>Nimbus là dòng giày chạy max-cushion huyền thoại của ASICS, được runner long-distance yêu thích nhờ độ êm vượt trội.</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>FF BLAST PLUS ECO</strong> — Foam nhẹ hơn 20%, êm hơn thế hệ trước</li>
+<li><strong>PureGEL</strong> — Gel mới nhẹ hơn GEL truyền thống, hấp thụ chấn động tốt</li>
+<li><strong>AHARPLUS</strong> — Đế ngoài siêu bền, chạy được 1000km+</li>
+</ul>
+
+<h2>Phù hợp ai?</h2>
+<p>Runner chạy long run 21-42km. Người cần giày êm chân (khớp gối yếu). Chạy đường nhựa, recovery run.</p>''',
+            'tags': 'ASICS,Gel-Nimbus,giày chạy,running,cushion,marathon',
+        },
+        {
+            'name_vi': 'Hoka Clifton 9', 'name_en': 'Hoka Clifton 9',
+            'slug': 'hoka-clifton-9',
+            'description': 'Giày chạy siêu nhẹ Hoka, đệm dày max-cushion nhưng chỉ nặng 248g, meta-rocker êm ái.',
+            'content': '''<h2>Hoka Clifton 9 — Nhẹ + Êm = Hoàn hảo</h2>
+<p>Hoka Clifton là giày chạy "phá vỡ quy luật" — đệm dày 33mm mà chỉ nặng 248g (size 42). Runner gọi là "chạy trên mây".</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>Compression EVA</strong> — Foam êm, nhẹ, phản hồi tốt</li>
+<li><strong>Meta-Rocker</strong> — Đế cong giúp chuyển tiếp bước chạy mượt mà</li>
+<li><strong>Early Stage</strong> — Thiết kế giúp chân tiếp đất tự nhiên</li>
+</ul>
+
+<h2>So sánh với đối thủ</h2>
+<p>Nhẹ hơn Nimbus 26 (284g) nhưng êm tương đương. Phù hợp người mới chuyển sang Hoka lần đầu.</p>''',
+            'tags': 'Hoka,Clifton,giày chạy,running,max-cushion,nhẹ',
+        },
+        {
+            'name_vi': 'Nike Vaporfly 3', 'name_en': 'Nike Vaporfly 3',
+            'slug': 'nike-vaporfly-3',
+            'description': 'Giày chạy thi đấu carbon plate, ZoomX foam, phá kỷ lục marathon, dành cho race day.',
+            'content': '''<h2>Nike Vaporfly 3 — Giày phá kỷ lục</h2>
+<p>Vaporfly là giày racing đã giúp Eliud Kipchoge phá kỷ lục marathon sub-2h. Carbon plate + ZoomX foam cho tốc độ tối đa.</p>
+
+<h2>Công nghệ</h2>
+<ul>
+<li><strong>ZoomX Foam</strong> — Foam nhẹ nhất, phản hồi năng lượng 85%+</li>
+<li><strong>Carbon Plate</strong> — Tấm carbon đẩy chân về phía trước mỗi bước</li>
+<li><strong>Drop 8mm</strong> — Tối ưu cho chạy forefoot/midfoot strike</li>
+</ul>
+
+<h2>Lưu ý</h2>
+<p>Chỉ dùng cho race day và tempo run. Tuổi thọ ngắn (~250km). Giá cao (~5-6 triệu). Không phù hợp daily training.</p>''',
+            'tags': 'Nike,Vaporfly,carbon plate,giày đua,marathon,racing',
+        },
+    ]
+    for i, p_data in enumerate(parts_giay_chay):
+        p = Part(
+            zone_id=giay_chay_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Đồng hồ GPS zone (3 products) ---
+    gps_zone = running_zones['dong-ho-gps']
+    parts_gps = [
+        {
+            'name_vi': 'Garmin Forerunner 265', 'name_en': 'Garmin Forerunner 265',
+            'slug': 'garmin-forerunner-265',
+            'description': 'Đồng hồ GPS chạy bộ AMOLED, Training Readiness, Race Predictor, pin 13 ngày.',
+            'content': '''<h2>Garmin Forerunner 265 — Best for Runners</h2>
+<p>Forerunner 265 là đồng hồ chạy bộ tốt nhất tầm giá 10 triệu, màn hình AMOLED sắc nét, GPS multi-band chính xác.</p>
+
+<h2>Tính năng nổi bật</h2>
+<ul>
+<li><strong>Training Readiness</strong> — Đánh giá mức sẵn sàng tập luyện mỗi ngày</li>
+<li><strong>Race Predictor</strong> — Dự đoán thời gian hoàn thành 5K, 10K, HM, FM</li>
+<li><strong>Morning Report</strong> — Tổng hợp giấc ngủ, HRV, thời tiết mỗi sáng</li>
+<li><strong>Pin 13 ngày</strong> — Smartwatch mode, 20h GPS liên tục</li>
+</ul>
+
+<h2>So sánh</h2>
+<p>Tốt hơn Apple Watch về GPS accuracy và pin. Rẻ hơn Garmin Fenix 7 nhưng đầy đủ tính năng running.</p>''',
+            'tags': 'Garmin,Forerunner,GPS,đồng hồ,chạy bộ,running',
+        },
+        {
+            'name_vi': 'COROS PACE 3', 'name_en': 'COROS PACE 3',
+            'slug': 'coros-pace-3',
+            'description': 'Đồng hồ GPS siêu nhẹ 39g, pin 24 ngày, GPS dual-frequency, giá tốt nhất phân khúc.',
+            'content': '''<h2>COROS PACE 3 — Nhẹ nhất, pin trâu nhất</h2>
+<p>COROS PACE 3 chỉ nặng 39g (nhẹ nhất thế giới GPS watch), pin 24 ngày smartwatch, 38h GPS liên tục — lý tưởng cho ultra runner.</p>
+
+<h2>Tính năng</h2>
+<ul>
+<li><strong>39g siêu nhẹ</strong> — Đeo quên luôn, không vướng khi chạy</li>
+<li><strong>GPS Dual-frequency</strong> — Chính xác cao, không bị lệch trong thành phố</li>
+<li><strong>EvoLab</strong> — Training Load, Threshold Pace, Base Fitness</li>
+<li><strong>Pin 24 ngày</strong> — Gấp đôi Garmin 265, sạc 1 lần/tháng</li>
+</ul>
+
+<h2>Giá</h2>
+<p>Khoảng 5-6 triệu, rẻ hơn Garmin 265 gần một nửa mà tính năng running tương đương.</p>''',
+            'tags': 'COROS,PACE 3,GPS,đồng hồ,running,siêu nhẹ',
+        },
+        {
+            'name_vi': 'Apple Watch Ultra 2', 'name_en': 'Apple Watch Ultra 2',
+            'slug': 'apple-watch-ultra-2',
+            'description': 'Smartwatch cao cấp nhất Apple, GPS dual-frequency, Precision Finding, 36h pin.',
+            'content': '''<h2>Apple Watch Ultra 2 — Premium cho iPhone user</h2>
+<p>Apple Watch Ultra 2 là smartwatch thể thao cao cấp nhất của Apple, titanium 49mm, GPS cực chính xác.</p>
+
+<h2>Tính năng thể thao</h2>
+<ul>
+<li><strong>GPS L1+L5</strong> — Dual-frequency, chính xác nhất trong Apple Watch</li>
+<li><strong>Workout Views</strong> — Hiển thị pace, HR zone, elevation real-time</li>
+<li><strong>Depth Gauge</strong> — Đo độ sâu khi bơi/lặn đến 40m</li>
+<li><strong>Action Button</strong> — Nút vật lý bấm nhanh khi chạy</li>
+</ul>
+
+<h2>Hạn chế</h2>
+<p>Pin chỉ 36h (kém xa Garmin/COROS). Chỉ dùng với iPhone. Giá ~19 triệu. Không có Training Load nâng cao.</p>''',
+            'tags': 'Apple Watch,Ultra,GPS,smartwatch,chạy bộ,bơi lội',
+        },
+    ]
+    for i, p_data in enumerate(parts_gps):
+        p = Part(
+            zone_id=gps_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Đồ chạy zone (3 products) ---
+    do_chay_zone = running_zones['do-chay']
+    parts_do_chay = [
+        {
+            'name_vi': 'Áo chạy Nike Dri-FIT', 'name_en': 'Nike Dri-FIT Running Singlet',
+            'slug': 'ao-chay-nike-dri-fit',
+            'description': 'Áo singlet chạy bộ Nike Dri-FIT, thoáng khí, nhanh khô, nhẹ chỉ 90g.',
+            'content': '''<h2>Nike Dri-FIT — Công nghệ thoáng khí hàng đầu</h2>
+<p>Dri-FIT là công nghệ vải độc quyền Nike, hút ẩm mồ hôi và bay hơi nhanh, giữ cơ thể khô ráo khi chạy.</p>
+
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>Dri-FIT</strong> — Hút mồ hôi, bay hơi nhanh gấp 3 lần cotton</li>
+<li><strong>Flatlock seams</strong> — Đường may phẳng, không gây cọ xát</li>
+<li><strong>90g</strong> — Siêu nhẹ, như không mặc gì</li>
+</ul>''',
+            'tags': 'Nike,Dri-FIT,áo chạy,singlet,running,thoáng khí',
+        },
+        {
+            'name_vi': 'Quần short chạy 2-in-1', 'name_en': '2-in-1 Running Shorts',
+            'slug': 'quan-short-chay-2-in-1',
+            'description': 'Quần short chạy 2 lớp, lớp ngoài nhẹ + lớp compression bên trong, túi đựng điện thoại.',
+            'content': '''<h2>Quần 2-in-1 — Tiện lợi nhất cho runner</h2>
+<p>Quần 2-in-1 kết hợp lớp short bên ngoài thoáng mát và lớp compression tight bên trong giữ cơ, chống cọ xát đùi.</p>
+
+<h2>Vì sao runner chọn 2-in-1?</h2>
+<ul>
+<li><strong>Chống cọ xát</strong> — Lớp compression bảo vệ đùi trong</li>
+<li><strong>Túi đựng</strong> — Lớp trong có túi đựng điện thoại, gel, chìa khóa</li>
+<li><strong>Thoáng khí</strong> — Lớp ngoài nhẹ, gió lùa thoải mái</li>
+</ul>''',
+            'tags': 'quần short,2-in-1,running,compression,chạy bộ',
+        },
+        {
+            'name_vi': 'Tất chạy Balega Hidden Comfort', 'name_en': 'Balega Hidden Comfort Socks',
+            'slug': 'tat-chay-balega',
+            'description': 'Tất chạy bộ Balega chống phồng rộp, đệm gót, thoáng khí, best-seller #1 running socks.',
+            'content': '''<h2>Balega Hidden Comfort — Tất chạy tốt nhất</h2>
+<p>Balega Hidden Comfort là tất chạy bán chạy nhất thế giới, được hàng triệu runner tin dùng nhờ khả năng chống phồng rộp tuyệt đối.</p>
+
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>Drynamix</strong> — Sợi hút ẩm, chân luôn khô</li>
+<li><strong>Đệm gót dày</strong> — Giảm chấn động khi tiếp đất</li>
+<li><strong>Hand-linked toe</strong> — Đường may mũi chân phẳng, không cọ xát</li>
+</ul>
+
+<h2>Giá</h2>
+<p>Khoảng 350-400K/đôi. Đắt nhưng bền (chạy 1000km+ vẫn tốt), chống phồng rộp 100%.</p>''',
+            'tags': 'Balega,tất chạy,running socks,chống phồng rộp,marathon',
+        },
+    ]
+    for i, p_data in enumerate(parts_do_chay):
+        p = Part(
+            zone_id=do_chay_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Dinh dưỡng chạy zone (3 products) ---
+    dd_chay_zone = running_zones['dinh-duong-chay']
+    parts_dd_chay = [
+        {
+            'name_vi': 'Gel năng lượng GU', 'name_en': 'GU Energy Gel',
+            'slug': 'gel-nang-luong-gu',
+            'description': 'Gel năng lượng GU chứa 100 calo + caffeine + electrolyte, tiếp năng lượng nhanh khi chạy.',
+            'content': '''<h2>GU Energy Gel — Tiêu chuẩn marathon</h2>
+<p>GU là thương hiệu gel năng lượng phổ biến nhất thế giới, được dùng trong mọi giải marathon lớn.</p>
+
+<h2>Thành phần</h2>
+<ul>
+<li><strong>100 calo</strong> — Maltodextrin + fructose, hấp thụ nhanh</li>
+<li><strong>Caffeine</strong> — 20-40mg tùy vị, tăng tỉnh táo</li>
+<li><strong>Sodium + BCAAs</strong> — Bù điện giải, giảm chuột rút</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>Dùng 1 gel mỗi 45-60 phút khi chạy trên 60 phút. Uống kèm 100-200ml nước. Tập dùng gel khi training, đừng thử lần đầu khi race.</p>''',
+            'tags': 'GU,gel năng lượng,energy gel,marathon,running,dinh dưỡng',
+        },
+        {
+            'name_vi': 'Viên muối điện giải SaltStick', 'name_en': 'SaltStick Electrolyte Caps',
+            'slug': 'vien-muoi-dien-giai-saltstick',
+            'description': 'Viên bù điện giải SaltStick chứa Na, K, Mg, Ca — chống chuột rút khi chạy dài.',
+            'content': '''<h2>SaltStick — Chống chuột rút hiệu quả</h2>
+<p>SaltStick Caps là viên bù điện giải được runner ultra-marathon tin dùng. Công thức cân bằng 4 loại muối khoáng theo tỷ lệ mồ hôi.</p>
+
+<h2>Thành phần mỗi viên</h2>
+<ul>
+<li><strong>Sodium</strong> — 215mg (bù lượng muối mất qua mồ hôi)</li>
+<li><strong>Potassium</strong> — 63mg (chống chuột rút)</li>
+<li><strong>Magnesium</strong> — 11mg (thư giãn cơ)</li>
+<li><strong>Calcium</strong> — 22mg (co cơ bình thường)</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>Uống 1 viên mỗi 30-60 phút khi chạy trên 1 tiếng, đặc biệt trời nóng >30°C. Uống kèm nước.</p>''',
+            'tags': 'SaltStick,điện giải,electrolyte,chuột rút,marathon,running',
+        },
+        {
+            'name_vi': 'Bột điện giải Nuun Sport', 'name_en': 'Nuun Sport Electrolyte Tablets',
+            'slug': 'bot-dien-giai-nuun',
+            'description': 'Viên sủi điện giải Nuun Sport không đường, bù nước nhanh, nhiều vị trái cây.',
+            'content': '''<h2>Nuun Sport — Bù nước không đường</h2>
+<p>Nuun Sport là viên sủi bù điện giải không đường, chỉ 15 calo/viên, hòa tan nhanh trong nước. Vị ngon, dễ uống.</p>
+
+<h2>Đặc điểm</h2>
+<ul>
+<li><strong>Không đường</strong> — Chỉ 1g carb, phù hợp keto/low-carb</li>
+<li><strong>4 electrolyte</strong> — Na, K, Mg, Ca cân bằng</li>
+<li><strong>Tiện lợi</strong> — Ống 10 viên nhỏ gọn, bỏ túi chạy</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>Thả 1 viên vào 500ml nước, chờ sủi hết (2 phút), uống trước/trong/sau khi chạy.</p>''',
+            'tags': 'Nuun,điện giải,electrolyte,hydration,running,không đường',
+        },
+    ]
+    for i, p_data in enumerate(parts_dd_chay):
+        p = Part(
+            zone_id=dd_chay_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # ── Zones for Gym & Fitness segment (6 zones) ──
+    gym = segments['gym-fitness']
+    gym_zones_data = [
+        ('Whey Protein', 'whey-protein', '🥛', '#4fc3f7', 'Whey concentrate, isolate, hydrolyzed, plant-based'),
+        ('Creatine', 'creatine', '💊', '#ba68c8', 'Creatine monohydrate, HCL, buffered, micronized'),
+        ('Máy tập', 'may-tap', '🏋️', '#81c784', 'Máy chạy, xe đạp tập, tạ, bench press, dây kháng lực'),
+        ('Quần áo gym', 'quan-ao-gym', '👕', '#ffb74d', 'Quần short, áo tank, legging, găng tay, đai lưng'),
+        ('Pre-Workout', 'pre-workout', '⚡', '#ff8a65', 'Pre-workout, caffeine, beta-alanine, citrulline'),
+        ('Phụ kiện gym', 'phu-kien-gym', '🧤', '#4db6ac', 'Găng tay, đai lưng, dây kéo, bình lắc, foam roller'),
+    ]
+
+    gym_zones = {}
+    for i, (name, slug, icon, color, desc) in enumerate(gym_zones_data):
+        z = Zone(segment_id=gym.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+        gym_zones[slug] = z
+
+    # --- Parts for Whey Protein zone (3 products) ---
+    whey_zone = gym_zones['whey-protein']
+    parts_whey = [
+        {
+            'name_vi': 'Whey Protein Isolate', 'name_en': 'Whey Protein Isolate',
+            'slug': 'whey-protein-isolate',
+            'description': 'Whey Isolate 90%+ protein, ít lactose, ít fat, hấp thụ nhanh, phù hợp giảm cân.',
+            'content': '''<h2>Whey Isolate là gì?</h2>
+<p>Whey Protein Isolate (WPI) là dạng whey tinh khiết nhất, chứa 90-95% protein, gần như không có lactose và chất béo.</p>
+
+<h2>So sánh các loại Whey</h2>
+<ul>
+<li><strong>Whey Concentrate (WPC)</strong> — 70-80% protein, rẻ, có lactose → dễ đầy bụng</li>
+<li><strong>Whey Isolate (WPI)</strong> — 90%+ protein, ít lactose → hấp thụ nhanh, ít bloat</li>
+<li><strong>Whey Hydrolyzed (WPH)</strong> — Đã thủy phân, hấp thụ nhanh nhất, đắt nhất</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>1 scoop (25-30g) pha 200-300ml nước/sữa, uống sau tập 30 phút. Ngày tập: 1-2 scoop. Ngày nghỉ: 1 scoop.</p>''',
+            'tags': 'whey,protein,isolate,WPI,tập gym,tăng cơ',
+        },
+        {
+            'name_vi': 'Optimum Nutrition Gold Standard', 'name_en': 'ON Gold Standard Whey',
+            'slug': 'on-gold-standard-whey',
+            'description': 'Whey protein bán chạy nhất thế giới, blend WPI + WPC, 24g protein/scoop, 120+ calo.',
+            'content': '''<h2>ON Gold Standard — Whey #1 thế giới</h2>
+<p>Optimum Nutrition Gold Standard 100% Whey là sản phẩm whey bán chạy nhất toàn cầu suốt 20+ năm, được gym-goer tin dùng.</p>
+
+<h2>Thành phần mỗi scoop</h2>
+<ul>
+<li><strong>24g Protein</strong> — Blend WPI (chính) + WPC + WPH</li>
+<li><strong>5.5g BCAAs</strong> — Leucine, Isoleucine, Valine tự nhiên</li>
+<li><strong>120 calo</strong> — Ít carb, ít fat, phù hợp cutting</li>
+<li><strong>1g đường</strong> — Gần như không đường</li>
+</ul>
+
+<h2>Vị phổ biến</h2>
+<p>Double Rich Chocolate (best-seller), Vanilla Ice Cream, Cookies & Cream. Chai 2lbs (~30 servings) giá ~800K-1.2 triệu.</p>''',
+            'tags': 'Optimum Nutrition,Gold Standard,whey,protein,gym,tăng cơ',
+        },
+        {
+            'name_vi': 'Mass Gainer tăng cân', 'name_en': 'Serious Mass Gainer',
+            'slug': 'mass-gainer-tang-can',
+            'description': 'Mass Gainer 1200+ calo/serving, dành cho người gầy muốn tăng cân tăng cơ nhanh.',
+            'content': '''<h2>Mass Gainer — Dành cho người gầy khó tăng cân</h2>
+<p>Mass Gainer (hay Weight Gainer) là bột protein cao calo, chứa 1000-1300 calo/serving, giúp người ectomorph (gầy) tăng cân nhanh.</p>
+
+<h2>Khi nào dùng Mass Gainer?</h2>
+<ul>
+<li><strong>Người gầy</strong> — BMI dưới 18.5, ăn nhiều không lên cân</li>
+<li><strong>Bulking</strong> — Giai đoạn tăng cơ cần thặng dư calo</li>
+<li><strong>Không nên</strong> — Người thừa cân, giảm mỡ → dùng Whey Isolate thay thế</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>1 serving pha 500-600ml nước/sữa. Uống giữa các bữa ăn hoặc sau tập. Bắt đầu nửa serving để dạ dày quen.</p>''',
+            'tags': 'mass gainer,tăng cân,tăng cơ,bulking,protein,gym',
+        },
+    ]
+    for i, p_data in enumerate(parts_whey):
+        p = Part(
+            zone_id=whey_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Creatine zone (3 products) ---
+    creatine_zone = gym_zones['creatine']
+    parts_creatine = [
+        {
+            'name_vi': 'Creatine Monohydrate', 'name_en': 'Creatine Monohydrate',
+            'slug': 'creatine-monohydrate',
+            'description': 'Creatine dạng cơ bản nhất, nghiên cứu nhiều nhất, hiệu quả tăng sức mạnh đã chứng minh.',
+            'content': '''<h2>Creatine Monohydrate — Supplement hiệu quả nhất</h2>
+<p>Creatine là supplement được nghiên cứu khoa học nhiều nhất (500+ studies), chứng minh tăng sức mạnh 5-10%, tăng cơ nhanh hơn.</p>
+
+<h2>Cơ chế hoạt động</h2>
+<ul>
+<li><strong>Tái tạo ATP</strong> — Cung cấp năng lượng cho co cơ mạnh</li>
+<li><strong>Giữ nước trong cơ</strong> — Cơ bắp đầy hơn, to hơn</li>
+<li><strong>Tăng sức mạnh</strong> — Nâng nặng hơn → kích thích cơ phát triển</li>
+</ul>
+
+<h2>Cách dùng</h2>
+<p>5g/ngày, mỗi ngày, bất kể tập hay nghỉ. Pha nước hoặc trộn protein shake. Không cần loading phase. Uống đều đặn 8+ tuần để thấy hiệu quả.</p>''',
+            'tags': 'creatine,monohydrate,tăng sức mạnh,supplement,gym',
+        },
+        {
+            'name_vi': 'Creatine HCL', 'name_en': 'Creatine HCL',
+            'slug': 'creatine-hcl',
+            'description': 'Creatine HCL tan nhanh, hấp thụ tốt hơn, liều thấp hơn monohydrate, ít đầy bụng.',
+            'content': '''<h2>Creatine HCL vs Monohydrate</h2>
+<p>Creatine HCL (Hydrochloride) hòa tan tốt hơn monohydrate 38 lần, nên chỉ cần liều nhỏ hơn (1-2g vs 5g).</p>
+
+<h2>Ưu nhược điểm</h2>
+<ul>
+<li><strong>Ưu</strong> — Tan nhanh, ít bloat, ít đầy bụng, liều nhỏ</li>
+<li><strong>Nhược</strong> — Đắt hơn 3-4 lần, ít nghiên cứu hơn monohydrate</li>
+</ul>
+
+<h2>Nên chọn loại nào?</h2>
+<p>Monohydrate nếu không bị bloat (rẻ + hiệu quả đã chứng minh). HCL nếu dạ dày nhạy cảm, dễ đầy bụng.</p>''',
+            'tags': 'creatine,HCL,supplement,tập gym,tăng sức mạnh',
+        },
+    ]
+    for i, p_data in enumerate(parts_creatine):
+        p = Part(
+            zone_id=creatine_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # --- Parts for Máy tập zone (3 products) ---
+    may_tap_zone = gym_zones['may-tap']
+    parts_may_tap = [
+        {
+            'name_vi': 'Máy chạy bộ điện', 'name_en': 'Electric Treadmill',
+            'slug': 'may-chay-bo-dien',
+            'description': 'Máy chạy bộ điện tại nhà, tốc độ 0-16km/h, nghiêng tự động, đo nhịp tim.',
+            'content': '''<h2>Chọn máy chạy bộ tại nhà</h2>
+<p>Máy chạy bộ (treadmill) là thiết bị tập cardio phổ biến nhất tại nhà. Chạy bất kể thời tiết, kiểm soát pace chính xác.</p>
+
+<h2>Tiêu chí chọn mua</h2>
+<ul>
+<li><strong>Motor</strong> — Tối thiểu 2.0 HP (chạy bộ), 3.0 HP (chạy nhanh)</li>
+<li><strong>Mặt chạy</strong> — Tối thiểu 120x40cm (người cao cần 140x50cm)</li>
+<li><strong>Độ nghiêng</strong> — Tự động 0-15% giúp tăng cường độ</li>
+<li><strong>Giảm chấn</strong> — Quan trọng để bảo vệ khớp gối</li>
+</ul>
+
+<h2>Giá tham khảo</h2>
+<p>Tầm trung: 8-15 triệu (Kingsport, Elip). Cao cấp: 20-50 triệu (NordicTrack, Life Fitness).</p>''',
+            'tags': 'máy chạy bộ,treadmill,cardio,tập tại nhà,gym',
+        },
+        {
+            'name_vi': 'Tạ đơn điều chỉnh', 'name_en': 'Adjustable Dumbbell',
+            'slug': 'ta-don-dieu-chinh',
+            'description': 'Tạ đơn điều chỉnh 2-24kg, thay đổi trọng lượng nhanh, tiết kiệm không gian.',
+            'content': '''<h2>Tạ điều chỉnh — Tối ưu cho home gym</h2>
+<p>Tạ đơn điều chỉnh (adjustable dumbbell) cho phép thay đổi trọng lượng từ 2-24kg chỉ với 1 quả tạ, thay thế 10+ quả tạ cố định.</p>
+
+<h2>Ưu điểm</h2>
+<ul>
+<li><strong>Tiết kiệm không gian</strong> — 1 quả = 10+ quả tạ cố định</li>
+<li><strong>Đa năng</strong> — Tập mọi nhóm cơ: vai, tay, ngực, lưng, chân</li>
+<li><strong>Thay đổi nhanh</strong> — Xoay dial/kéo pin, 3 giây đổi mức tạ</li>
+</ul>
+
+<h2>Brands phổ biến</h2>
+<p>Bowflex SelectTech (cao cấp ~8-12 triệu). PowerBlock (bền ~6-10 triệu). Sportslink/Elip (Việt Nam ~2-4 triệu).</p>''',
+            'tags': 'tạ đơn,dumbbell,adjustable,home gym,tập tại nhà',
+        },
+        {
+            'name_vi': 'Dây kháng lực', 'name_en': 'Resistance Bands Set',
+            'slug': 'day-khang-luc',
+            'description': 'Bộ dây kháng lực 5 mức độ, tập toàn thân tại nhà, gọn nhẹ mang đi du lịch.',
+            'content': '''<h2>Dây kháng lực — Gym gọn trong túi</h2>
+<p>Dây kháng lực (resistance bands) là dụng cụ tập gym nhỏ gọn nhất, tập được hầu hết bài tập cơ bản mà không cần máy tập.</p>
+
+<h2>Phân loại</h2>
+<ul>
+<li><strong>Loop bands</strong> — Dạng vòng, tập mông đùi, warm-up</li>
+<li><strong>Tube bands</strong> — Dạng ống có tay cầm, thay thế tạ</li>
+<li><strong>Pull-up bands</strong> — Dây dày, hỗ trợ pull-up, tập lưng</li>
+</ul>
+
+<h2>Set cơ bản</h2>
+<p>Bộ 5 dây: 5lbs, 10lbs, 15lbs, 20lbs, 25lbs. Có thể kết hợp 2-3 dây cho sức kháng cao hơn. Giá ~150K-500K/bộ.</p>''',
+            'tags': 'dây kháng lực,resistance bands,home gym,tập tại nhà,gọn nhẹ',
+        },
+    ]
+    for i, p_data in enumerate(parts_may_tap):
+        p = Part(
+            zone_id=may_tap_zone.id,
+            name_vi=p_data['name_vi'], name_en=p_data['name_en'],
+            slug=p_data['slug'], description=p_data['description'],
+            content=p_data['content'], tags=p_data.get('tags', ''),
+            order=i
+        )
+        db.session.add(p)
+        db.session.flush()
+
+    # ── Zones for Football segment (4 zones) ──
+    football = segments['football']
+    football_zones_data = [
+        ('Giày đá bóng', 'giay-da-bong', '👟', '#4fc3f7', 'Giày đá bóng — Nike, Adidas, Puma, sân cỏ nhân tạo/tự nhiên'),
+        ('Quần áo bóng đá', 'quan-ao-bong-da', '👕', '#81c784', 'Áo đấu, quần short, tất, găng tay thủ môn'),
+        ('Bóng thi đấu', 'bong-thi-dau', '⚽', '#ffb74d', 'Bóng FIFA Quality, bóng tập, bóng mini'),
+        ('Phụ kiện bóng đá', 'phu-kien-bong-da', '🧤', '#ff8a65', 'Bảo vệ ống đồng, băng keo, bình nước, túi đựng'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(football_zones_data):
+        z = Zone(segment_id=football.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    # ── Zones for Cycling segment (4 zones) ──
+    cycling = segments['cycling']
+    cycling_zones_data = [
+        ('Xe đạp thể thao', 'xe-dap-the-thao', '🚲', '#4fc3f7', 'Road bike, MTB, gravel, touring, fixie'),
+        ('Mũ bảo hiểm', 'mu-bao-hiem', '⛑️', '#ba68c8', 'Mũ road, MTB, aero, MIPS, full-face'),
+        ('Quần áo đạp xe', 'quan-ao-dap-xe', '🩱', '#81c784', 'Jersey, bib short, áo gió, găng tay'),
+        ('Phụ kiện đạp xe', 'phu-kien-dap-xe', '🔧', '#ffb74d', 'Đèn, bơm, khóa, túi yên, đồng hồ cycling'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(cycling_zones_data):
+        z = Zone(segment_id=cycling.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    # ── Zones for Swimming segment (4 zones) ──
+    swimming = segments['swimming']
+    swimming_zones_data = [
+        ('Đồ bơi', 'do-boi', '🩱', '#4fc3f7', 'Quần bơi, áo bơi, bikini, đồ bơi thi đấu'),
+        ('Kính bơi', 'kinh-boi', '🥽', '#ba68c8', 'Kính bơi tập, thi đấu, open water, cận'),
+        ('Mũ bơi', 'mu-boi', '🧢', '#81c784', 'Mũ bơi silicone, latex, vải, mũ thi đấu'),
+        ('Phụ kiện bơi', 'phu-kien-boi', '🏊', '#ffb74d', 'Phao tập, paddle, chân vịt, pull buoy'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(swimming_zones_data):
+        z = Zone(segment_id=swimming.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    # ── Zones for Nutrition segment (4 zones) ──
+    nutrition = segments['nutrition']
+    nutrition_zones_data = [
+        ('Protein', 'protein', '🥛', '#4fc3f7', 'Whey, casein, plant-based, protein bar'),
+        ('BCAA & EAA', 'bcaa-eaa', '💧', '#ba68c8', 'BCAA 2:1:1, EAA, recovery drink'),
+        ('Vitamin & Khoáng', 'vitamin-khoang', '💊', '#81c784', 'Multivitamin, omega-3, vitamin D, ZMA'),
+        ('Thực phẩm healthy', 'thuc-pham-healthy', '🥑', '#ffb74d', 'Granola, yến mạch, hạt mix, protein snack'),
+    ]
+    for i, (name, slug, icon, color, desc) in enumerate(nutrition_zones_data):
+        z = Zone(segment_id=nutrition.id, name=name, slug=slug, icon=icon, color=color, description=desc, order=i)
+        db.session.add(z)
+        db.session.flush()
+
+    db.session.commit()
+    print('✅ Sport vertical seeded with zones and parts!')
+
+
+def seed_sport_articles():
+    """Seed Sport articles - 3-tier content"""
+    from models import Article
+
+    # Check if Sport articles exist
+    if Article.query.filter_by(vertical_slug='sport', tier='nganh').first():
+        print('[SKIP] Sport articles already exist')
+        return
+
+    print('[+] Seeding Sport articles...')
+    articles = [
+        # === TIER 1: NGANH (Industry - Sport market) ===
+        {
+            'title': 'Thị trường thể thao Việt Nam 2025 — Running, Gym & Fitness bùng nổ',
+            'slug': 'thi-truong-the-thao-viet-nam-2025',
+            'tier': 'nganh',
+            'category': 'thi-truong',
+            'tags': 'thị trường,thể thao,running,gym,fitness,Việt Nam,2025',
+            'excerpt': 'Phân tích toàn cảnh thị trường thể thao Việt Nam: running community tăng 300%, chuỗi gym mở rộng, chi tiêu trung bình 5-15 triệu/năm.',
+            'reading_time': 8,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/00b894/ffffff?text=Sport+Market+2025',
+            'content': '''<h2>Thể thao Việt Nam đang bùng nổ</h2>
+<p>Thị trường fitness & thể thao Việt Nam đạt giá trị <strong>1.5 tỷ USD</strong> năm 2024, tăng trưởng 25%/năm. Running trở thành phong trào quốc dân với hàng trăm giải chạy mỗi năm.</p>
+
+<h2>3 xu hướng lớn 2025</h2>
+<p><strong>1. Running community bùng nổ</strong> — Hơn 200 giải marathon/năm tại Việt Nam. Các running club ở mỗi quận huyện. VnExpress Marathon, Techcombank HCMC Marathon thu hút 15,000+ VĐV.</p>
+<p><strong>2. Gym & Fitness phổ cập</strong> — Chuỗi gym California, CitiGym, Elite mở rộng mạnh. Phòng gym mini, home gym trend tăng 200%.</p>
+<p><strong>3. Dinh dưỡng thể thao</strong> — Whey protein, creatine từ "niche" trở thành mainstream. Doanh số supplement online tăng 150% YoY trên Shopee.</p>
+
+<h2>Chi tiêu trung bình</h2>
+<ul>
+<li>Runner nghiêm túc: 10-20 triệu/năm (giày, gear, giải chạy)</li>
+<li>Gym-goer: 5-15 triệu/năm (phí gym, supplement, đồ tập)</li>
+<li>Casual: 2-5 triệu/năm (giày, quần áo thể thao)</li>
+</ul>'''
+        },
+        {
+            'title': 'Hướng dẫn chọn giày chạy bộ — Từ A đến Z cho người mới',
+            'slug': 'huong-dan-chon-giay-chay-bo',
+            'tier': 'nganh',
+            'category': 'kien-thuc-chung',
+            'tags': 'giày chạy,running,chọn giày,foot type,pronation,Nike,ASICS',
+            'excerpt': 'Cách chọn giày chạy phù hợp: phân biệt neutral vs stability, đo foot type, chọn đệm mỏng hay dày, budget hợp lý.',
+            'reading_time': 10,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/2d3436/ffffff?text=Running+Shoes+Guide',
+            'content': '''<h2>3 bước chọn giày chạy bộ</h2>
+
+<h3>Bước 1: Xác định Foot Type</h3>
+<p><strong>Neutral (bàn chân bình thường)</strong> — 60% runner. Chọn giày neutral: Nike Pegasus, ASICS Nimbus, Hoka Clifton.</p>
+<p><strong>Overpronation (bàn chân bẹt)</strong> — 30% runner. Cần giày stability: ASICS Kayano, Brooks Adrenaline, New Balance 860.</p>
+<p><strong>Supination (vòm cao)</strong> — 10% runner. Chọn giày cushion cao: Hoka Bondi, ASICS Nimbus, New Balance Fresh Foam.</p>
+
+<h3>Bước 2: Chọn mức đệm</h3>
+<p><strong>Max cushion (32-38mm)</strong> — Hoka Bondi, ASICS Nimbus. Cho long run, recovery, runner nặng cân.</p>
+<p><strong>Moderate (28-32mm)</strong> — Nike Pegasus, Adidas Supernova. Đa năng, daily training.</p>
+<p><strong>Minimal (20-28mm)</strong> — Nike Vaporfly, Adidas Adizero. Cho race day, tempo run.</p>
+
+<h3>Bước 3: Thử giày đúng cách</h3>
+<ul>
+<li>Thử giày buổi chiều (chân sưng nhẹ, giống khi chạy)</li>
+<li>Mang tất chạy bộ khi thử, không mang tất cotton</li>
+<li>Chạy thử 5-10 phút trên treadmill tại shop</li>
+<li>Chọn size lớn hơn giày thường 0.5-1 size</li>
+</ul>'''
+        },
+        {
+            'title': 'Dinh dưỡng thể thao cơ bản — Protein, Carb, Fat cho người tập',
+            'slug': 'dinh-duong-the-thao-co-ban',
+            'tier': 'nganh',
+            'category': 'dinh-duong',
+            'tags': 'dinh dưỡng,protein,carb,fat,macro,TDEE,tập gym,chạy bộ',
+            'excerpt': 'Hướng dẫn dinh dưỡng cho người tập thể thao: tính TDEE, chia macro, timing ăn uống trước/sau tập.',
+            'reading_time': 9,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/6c5ce7/ffffff?text=Sport+Nutrition',
+            'content': '''<h2>Dinh dưỡng cơ bản cho người tập</h2>
+
+<h3>Bước 1: Tính TDEE (Total Daily Energy Expenditure)</h3>
+<p>TDEE = BMR × Activity Factor. Ví dụ: nam 70kg, cao 175cm, 25 tuổi, tập 4 lần/tuần → TDEE ≈ 2,500 calo/ngày.</p>
+<ul>
+<li><strong>Tăng cơ (Bulk)</strong> — TDEE + 300-500 calo = 2,800-3,000 calo</li>
+<li><strong>Giảm mỡ (Cut)</strong> — TDEE − 300-500 calo = 2,000-2,200 calo</li>
+<li><strong>Duy trì</strong> — Ăn đúng TDEE</li>
+</ul>
+
+<h3>Bước 2: Chia Macro</h3>
+<p><strong>Protein</strong> — 1.6-2.2g/kg thể trọng. 70kg → 112-154g protein/ngày.</p>
+<p><strong>Fat</strong> — 0.8-1g/kg. 70kg → 56-70g fat/ngày.</p>
+<p><strong>Carb</strong> — Phần còn lại từ calo. Carb = (Tổng calo − protein×4 − fat×9) ÷ 4.</p>
+
+<h3>Bước 3: Timing</h3>
+<ul>
+<li><strong>Trước tập 1-2h</strong> — Carb + protein nhẹ (chuối + whey)</li>
+<li><strong>Sau tập 30-60 phút</strong> — Protein + carb (whey + cơm/khoai)</li>
+<li><strong>Trước ngủ</strong> — Casein protein hoặc sữa chua Greek</li>
+</ul>'''
+        },
+
+        # === TIER 2: CHUNG (General - Systems/Methods) ===
+        {
+            'title': 'Chương trình tập gym cho người mới — 12 tuần từ zero đến hero',
+            'slug': 'chuong-trinh-tap-gym-nguoi-moi-12-tuan',
+            'tier': 'chung',
+            'category': 'chuong-trinh-tap',
+            'tags': 'gym,người mới,chương trình tập,12 tuần,full body,PPL',
+            'excerpt': 'Lộ trình tập gym 12 tuần cho người mới: 4 tuần full body → 4 tuần upper/lower → 4 tuần PPL. Bài tập, số set, rep chi tiết.',
+            'reading_time': 12,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/e17055/ffffff?text=Gym+12+Weeks',
+            'content': '''<h2>Lộ trình 12 tuần cho người mới tập gym</h2>
+
+<h3>Tuần 1-4: Full Body (3 ngày/tuần)</h3>
+<p>Tập toàn thân mỗi buổi, 3 buổi/tuần (T2-T4-T6). Mục tiêu: học form đúng, làm quen các bài compound.</p>
+<ul>
+<li>Squat 3×10 — Chân, mông, core</li>
+<li>Bench Press 3×10 — Ngực, vai trước, tay sau</li>
+<li>Barbell Row 3×10 — Lưng, tay trước</li>
+<li>Overhead Press 3×8 — Vai, tay sau</li>
+<li>Deadlift 3×8 — Lưng dưới, chân sau, mông</li>
+<li>Plank 3×30s — Core</li>
+</ul>
+
+<h3>Tuần 5-8: Upper/Lower Split (4 ngày/tuần)</h3>
+<p>Chia thân trên/dưới, tập 4 buổi/tuần. Tăng khối lượng tạ 2.5kg/tuần nếu form đúng.</p>
+
+<h3>Tuần 9-12: Push/Pull/Legs (6 ngày/tuần)</h3>
+<p>PPL split cho phép tập mỗi nhóm cơ 2 lần/tuần, phù hợp khi đã có nền tảng.</p>
+
+<h2>Lưu ý quan trọng</h2>
+<ul>
+<li>Form quan trọng hơn trọng lượng — sai form = chấn thương</li>
+<li>Nghỉ giữa set: 60-90s (hypertrophy), 2-3 phút (strength)</li>
+<li>Progressive overload: tăng tạ/rep mỗi tuần</li>
+<li>Ngủ 7-8 tiếng, uống 2-3 lít nước/ngày</li>
+</ul>'''
+        },
+        {
+            'title': 'Kế hoạch chạy Half Marathon (21km) cho người mới — 16 tuần',
+            'slug': 'ke-hoach-chay-half-marathon-16-tuan',
+            'tier': 'chung',
+            'category': 'ke-hoach-tap',
+            'tags': 'half marathon,21km,kế hoạch chạy,training plan,running,16 tuần',
+            'excerpt': 'Training plan chạy Half Marathon 16 tuần cho người mới: từ chạy 3km đến hoàn thành 21km. Phân bổ easy run, tempo, long run.',
+            'reading_time': 11,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/0984e3/ffffff?text=Half+Marathon+Plan',
+            'content': '''<h2>16 tuần chinh phục Half Marathon</h2>
+
+<h3>Yêu cầu đầu vào</h3>
+<p>Có thể chạy liên tục 3-5km không dừng. Sức khỏe bình thường, không chấn thương. Cam kết tập 4 buổi/tuần.</p>
+
+<h3>Cấu trúc tuần</h3>
+<ul>
+<li><strong>Thứ 2</strong> — Easy Run (pace thoải mái, nói chuyện được)</li>
+<li><strong>Thứ 4</strong> — Tempo Run (pace nhanh hơn easy 30-45s/km)</li>
+<li><strong>Thứ 6</strong> — Easy Run / Cross-training (bơi, đạp xe)</li>
+<li><strong>Chủ nhật</strong> — Long Run (chạy dài, pace easy)</li>
+</ul>
+
+<h3>Progression</h3>
+<p><strong>Tuần 1-4</strong> — Long Run tăng từ 6km → 10km</p>
+<p><strong>Tuần 5-8</strong> — Long Run tăng từ 10km → 14km</p>
+<p><strong>Tuần 9-12</strong> — Long Run tăng từ 14km → 18km</p>
+<p><strong>Tuần 13-14</strong> — Peak: Long Run 19-20km</p>
+<p><strong>Tuần 15-16</strong> — Taper: giảm 40% volume, giữ intensity. Race day!</p>
+
+<h2>Nguyên tắc 10%</h2>
+<p>Không tăng tổng km/tuần quá 10% so với tuần trước để tránh chấn thương.</p>'''
+        },
+        {
+            'title': 'Phòng chống chấn thương thể thao — Warm-up, Cool-down & Recovery',
+            'slug': 'phong-chong-chan-thuong-the-thao',
+            'tier': 'chung',
+            'category': 'suc-khoe',
+            'tags': 'chấn thương,warm-up,cool-down,recovery,stretching,foam roller',
+            'excerpt': 'Hướng dẫn phòng chống chấn thương: quy trình warm-up 10 phút, cool-down, stretching, foam rolling, khi nào cần nghỉ.',
+            'reading_time': 8,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/00cec9/ffffff?text=Injury+Prevention',
+            'content': '''<h2>Phòng chống chấn thương thể thao</h2>
+
+<h3>1. Warm-up đúng cách (10 phút)</h3>
+<ul>
+<li><strong>Phút 1-3</strong> — Cardio nhẹ: đi bộ nhanh, chạy chậm</li>
+<li><strong>Phút 4-7</strong> — Dynamic stretching: leg swing, arm circle, lunge walk</li>
+<li><strong>Phút 8-10</strong> — Activation: glute bridge, band walk, bodyweight squat</li>
+</ul>
+
+<h3>2. Cool-down (5-10 phút)</h3>
+<ul>
+<li>Giảm tốc dần dần, không dừng đột ngột</li>
+<li>Static stretching: giữ mỗi tư thế 20-30 giây</li>
+<li>Foam rolling các nhóm cơ chính 1-2 phút mỗi nhóm</li>
+</ul>
+
+<h3>3. Recovery</h3>
+<p><strong>Ngủ</strong> — 7-9 tiếng/đêm, cơ phục hồi trong giấc ngủ sâu.</p>
+<p><strong>Dinh dưỡng</strong> — Protein sau tập 30-60 phút. Uống đủ nước.</p>
+<p><strong>Rest day</strong> — Tối thiểu 1-2 ngày/tuần. Active recovery (đi bộ, yoga).</p>
+
+<h3>4. Dấu hiệu cần nghỉ</h3>
+<ul>
+<li>Đau nhức kéo dài >3 ngày (không phải soreness bình thường)</li>
+<li>Sưng, bầm tím vùng khớp</li>
+<li>Mệt mỏi liên tục, không phục hồi dù nghỉ</li>
+</ul>'''
+        },
+
+        # === TIER 3: CHI-TIET (Detailed product reviews) ===
+        {
+            'title': 'Nike Pegasus 41 vs ASICS Nimbus 26 vs Hoka Clifton 9 — So sánh chi tiết',
+            'slug': 'nike-pegasus-vs-asics-nimbus-vs-hoka-clifton',
+            'tier': 'chi-tiet',
+            'category': 'so-sanh',
+            'tags': 'Nike Pegasus,ASICS Nimbus,Hoka Clifton,so sánh,giày chạy,review',
+            'excerpt': 'So sánh 3 giày chạy bộ phổ biến nhất: Pegasus (đa năng), Nimbus (êm nhất), Clifton (nhẹ nhất). Nên chọn đôi nào?',
+            'reading_time': 10,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/2d3436/00b894?text=Pegasus+vs+Nimbus+vs+Clifton',
+            'content': '''<h2>So sánh 3 giày chạy bộ best-seller</h2>
+
+<h3>Nike Pegasus 41</h3>
+<p><strong>Giá:</strong> 3.2-3.8 triệu | <strong>Trọng lượng:</strong> 271g | <strong>Drop:</strong> 10mm | <strong>Stack:</strong> 33/23mm</p>
+<p>Đa năng nhất, phù hợp mọi cự ly từ 5K đến marathon. React foam + Zoom Air cho cảm giác bouncy. Bền trên 800km.</p>
+
+<h3>ASICS Gel-Nimbus 26</h3>
+<p><strong>Giá:</strong> 4.0-4.5 triệu | <strong>Trọng lượng:</strong> 284g | <strong>Drop:</strong> 8mm | <strong>Stack:</strong> 40/32mm</p>
+<p>Êm nhất trong 3 đôi, lý tưởng cho long run và recovery. FF BLAST PLUS + PureGEL hấp thụ chấn động cực tốt.</p>
+
+<h3>Hoka Clifton 9</h3>
+<p><strong>Giá:</strong> 3.5-4.0 triệu | <strong>Trọng lượng:</strong> 248g | <strong>Drop:</strong> 5mm | <strong>Stack:</strong> 33/28mm</p>
+<p>Nhẹ nhất mà vẫn max-cushion. Meta-rocker cho cảm giác "lăn" mượt. Phù hợp runner muốn nhẹ + êm.</p>
+
+<h2>Nên chọn đôi nào?</h2>
+<ul>
+<li><strong>Người mới</strong> → Nike Pegasus 41 (đa năng, dễ chạy, giá tốt)</li>
+<li><strong>Long run</strong> → ASICS Nimbus 26 (êm nhất, bảo vệ khớp)</li>
+<li><strong>Runner nhẹ cân</strong> → Hoka Clifton 9 (nhẹ, meta-rocker mượt)</li>
+<li><strong>Thi đấu</strong> → Không đôi nào ở trên — cần Nike Vaporfly hoặc ASICS Metaspeed</li>
+</ul>'''
+        },
+        {
+            'title': 'Review Garmin Forerunner 265 — Đồng hồ chạy bộ tốt nhất 2025',
+            'slug': 'review-garmin-forerunner-265',
+            'tier': 'chi-tiet',
+            'category': 'review',
+            'tags': 'Garmin,Forerunner 265,đồng hồ GPS,review,running,AMOLED',
+            'excerpt': 'Review chi tiết Garmin Forerunner 265 sau 6 tháng sử dụng: GPS chính xác, AMOLED đẹp, Training Readiness hữu ích, pin 13 ngày.',
+            'reading_time': 9,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/636e72/00b894?text=Garmin+FR265+Review',
+            'content': '''<h2>Garmin Forerunner 265 — Review sau 6 tháng</h2>
+
+<h3>Thiết kế & Màn hình</h3>
+<p>Màn hình AMOLED 1.3" sắc nét, đọc dễ dàng dưới nắng. Bezel polymer nhẹ, ôm tay thoải mái. Nút bấm vật lý — tốt hơn touchscreen khi chạy mưa/mồ hôi.</p>
+
+<h3>GPS & Tracking</h3>
+<p>GPS multi-band (L1+L5), chính xác cả trong thành phố cao tầng. Optical HR Gen 4 đo nhịp tim khá chính xác khi chạy easy-tempo. Kém hơn chest strap khi interval.</p>
+
+<h3>Training Features</h3>
+<ul>
+<li><strong>Training Readiness</strong> — Tổng hợp HRV, giấc ngủ, stress → cho điểm 0-100 → biết nên tập nặng hay nhẹ</li>
+<li><strong>Race Predictor</strong> — Dự đoán finish time khá chính xác (sai lệch ±3%)</li>
+<li><strong>Suggested Workouts</strong> — Gợi ý bài tập hàng ngày dựa trên training load</li>
+<li><strong>PacePro</strong> — Chiến thuật pace cho race day, tính cả elevation</li>
+</ul>
+
+<h3>Pin</h3>
+<p>Smartwatch mode: 13 ngày thực tế (sạc 1 lần/2 tuần). GPS mode: 18-20h liên tục (đủ cho ultra 100km).</p>
+
+<h3>Kết luận</h3>
+<p>Đồng hồ chạy bộ tốt nhất tầm giá 10-12 triệu. Tốt hơn Apple Watch về GPS accuracy, pin, training metrics. Yếu hơn về smartwatch features (không reply tin nhắn, app store hạn chế).</p>'''
+        },
+        {
+            'title': 'Review Optimum Nutrition Gold Standard Whey — Whey #1 thế giới có xứng đáng?',
+            'slug': 'review-on-gold-standard-whey',
+            'tier': 'chi-tiet',
+            'category': 'review',
+            'tags': 'ON,Gold Standard,whey protein,review,gym,supplement,tăng cơ',
+            'excerpt': 'Review chi tiết ON Gold Standard Whey: 24g protein/scoop, vị ngon, tan tốt, giá hợp lý. So sánh với MuscleTech, MyProtein.',
+            'reading_time': 7,
+            'vertical_slug': 'sport',
+            'image_url': 'https://placehold.co/800x450/fdcb6e/2d3436?text=ON+Gold+Standard+Review',
+            'content': '''<h2>ON Gold Standard 100% Whey — Có xứng #1?</h2>
+
+<h3>Thành phần</h3>
+<p>Mỗi scoop (31g): <strong>24g protein</strong>, 3g carb, 1g fat, 1g sugar, 120 calo. Blend WPI (chính) + WPC + WPH. 5.5g BCAAs tự nhiên.</p>
+
+<h3>Độ tan & Vị</h3>
+<p>Tan rất tốt trong nước lạnh, không vón cục. Double Rich Chocolate — vị chocolate đậm, ngọt vừa, uống ngon cả khi pha nước. Vanilla Ice Cream — ngọt hơn, pha sữa ngon.</p>
+
+<h3>Hiệu quả</h3>
+<p>Dùng 4 tháng, kết hợp tập 5 buổi/tuần: tăng 3kg lean mass, strength tăng rõ rệt. Không bloat, không đau bụng (ít lactose nhờ WPI là thành phần chính).</p>
+
+<h3>So sánh</h3>
+<ul>
+<li><strong>vs MuscleTech NitroTech</strong> — ON ngon hơn, tan tốt hơn. NitroTech protein cao hơn (30g) nhưng đắt hơn.</li>
+<li><strong>vs MyProtein Impact Whey</strong> — MyProtein rẻ hơn 30% nhưng vị kém hơn, tan không bằng ON.</li>
+<li><strong>vs Rule 1 R1</strong> — R1 Isolate thuần WPI, protein cao hơn (25g) nhưng giá đắt hơn 20%.</li>
+</ul>
+
+<h3>Giá & Mua ở đâu</h3>
+<p>2lbs (~30 servings): 800K-1.2 triệu. 5lbs (~74 servings): 1.5-2.2 triệu. Mua trên Shopee (GymStore, SupplementVN) hoặc Lazada chính hãng.</p>'''
+        },
+    ]
+
+    for a_data in articles:
+        a = Article(
+            title=a_data['title'],
+            slug=a_data['slug'],
+            tier=a_data['tier'],
+            category=a_data['category'],
+            tags=a_data['tags'],
+            excerpt=a_data['excerpt'],
+            reading_time=a_data['reading_time'],
+            vertical_slug=a_data['vertical_slug'],
+            content=a_data['content'],
+            image_url=a_data.get('image_url', ''),
+            status='published',
             ai_generated=False
         )
         db.session.add(a)
-    
+
     db.session.commit()
-    print(f'✅ Tech articles seeded: {len(articles)} articles')
+    print(f'✅ Sport articles seeded: {len(articles)} articles')
+
+
+def seed_products_sport():
+    """Seed affiliate product links for Sport vertical"""
+    from models import db, Vertical, Segment, Zone, Part, AffiliateLink
+    import random
+
+    sport = Vertical.query.filter_by(slug='sport').first()
+    if not sport:
+        print('[SKIP] Sport vertical not found — run seed_sport() first')
+        return
+
+    existing = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'sport').count()
+    if existing:
+        print(f'[SKIP] Sport already has {existing} affiliate links')
+        return
+
+    print('[+] Seeding Sport affiliate links...')
+    sport_products = {
+        # Running — Giày chạy
+        'nike-pegasus-41': [
+            ('shopee', 'Nike Pegasus 41 Nam — Black/White', 'https://shope.ee/sport001', 3290000, 'https://placehold.co/400x300/2d3436/ffffff?text=Pegasus+41'),
+            ('lazada', 'Nike Pegasus 41 Nữ — Pink/White', 'https://s.lazada.vn/sport002', 3290000, 'https://placehold.co/400x300/e84393/ffffff?text=Pegasus+41+W'),
+            ('tiki', 'Nike Pegasus 41 — Thunder Blue', 'https://tiki.vn/sport003', 3490000, 'https://placehold.co/400x300/0984e3/ffffff?text=Pegasus+41'),
+        ],
+        'asics-gel-nimbus-26': [
+            ('shopee', 'ASICS Gel-Nimbus 26 Nam — Black/Blue', 'https://shope.ee/sport010', 4190000, 'https://placehold.co/400x300/2d3436/4fc3f7?text=Nimbus+26'),
+            ('lazada', 'ASICS Gel-Nimbus 26 Nữ — Lavender', 'https://s.lazada.vn/sport011', 4190000, 'https://placehold.co/400x300/a29bfe/ffffff?text=Nimbus+26+W'),
+        ],
+        'hoka-clifton-9': [
+            ('shopee', 'Hoka Clifton 9 Nam — Black/White', 'https://shope.ee/sport020', 3690000, 'https://placehold.co/400x300/2d3436/ffffff?text=Clifton+9'),
+            ('lazada', 'Hoka Clifton 9 Nữ — Airy Blue', 'https://s.lazada.vn/sport021', 3690000, 'https://placehold.co/400x300/74b9ff/ffffff?text=Clifton+9+W'),
+            ('tiki', 'Hoka Clifton 9 Wide — All Black', 'https://tiki.vn/sport022', 3890000, 'https://placehold.co/400x300/636e72/ffffff?text=Clifton+9+Wide'),
+        ],
+        'nike-vaporfly-3': [
+            ('shopee', 'Nike Vaporfly 3 — Volt/Black', 'https://shope.ee/sport030', 5690000, 'https://placehold.co/400x300/00b894/2d3436?text=Vaporfly+3'),
+            ('lazada', 'Nike Vaporfly 3 — White/Bright Crimson', 'https://s.lazada.vn/sport031', 5890000, 'https://placehold.co/400x300/e17055/ffffff?text=Vaporfly+3'),
+        ],
+        # Running — Đồng hồ GPS
+        'garmin-forerunner-265': [
+            ('shopee', 'Garmin Forerunner 265 Black', 'https://shope.ee/sport040', 10990000, 'https://placehold.co/400x300/2d3436/00b894?text=FR265'),
+            ('lazada', 'Garmin Forerunner 265S Whitestone', 'https://s.lazada.vn/sport041', 10990000, 'https://placehold.co/400x300/dfe6e9/2d3436?text=FR265S'),
+            ('tiki', 'Garmin Forerunner 265 Aqua', 'https://tiki.vn/sport042', 10990000, 'https://placehold.co/400x300/00cec9/ffffff?text=FR265+Aqua'),
+        ],
+        'coros-pace-3': [
+            ('shopee', 'COROS PACE 3 GPS — Black Silicone', 'https://shope.ee/sport050', 5990000, 'https://placehold.co/400x300/2d3436/ffffff?text=COROS+PACE+3'),
+            ('lazada', 'COROS PACE 3 GPS — White Nylon', 'https://s.lazada.vn/sport051', 5990000, 'https://placehold.co/400x300/dfe6e9/2d3436?text=COROS+PACE+3'),
+        ],
+        'apple-watch-ultra-2': [
+            ('shopee', 'Apple Watch Ultra 2 Titanium 49mm', 'https://shope.ee/sport060', 18990000, 'https://placehold.co/400x300/636e72/ff7f50?text=AW+Ultra+2'),
+            ('tiki', 'Apple Watch Ultra 2 + Alpine Loop', 'https://tiki.vn/sport061', 19990000, 'https://placehold.co/400x300/e17055/ffffff?text=AW+Ultra+2'),
+        ],
+        # Running — Đồ chạy
+        'ao-chay-nike-dri-fit': [
+            ('shopee', 'Nike Dri-FIT Miler Singlet Nam', 'https://shope.ee/sport070', 790000, 'https://placehold.co/400x300/2d3436/ffffff?text=Dri-FIT+Singlet'),
+            ('lazada', 'Nike Dri-FIT ADV AeroSwift Singlet', 'https://s.lazada.vn/sport071', 1290000, 'https://placehold.co/400x300/00b894/ffffff?text=AeroSwift'),
+        ],
+        'quan-short-chay-2-in-1': [
+            ('shopee', 'Quần short 2-in-1 Under Armour Launch', 'https://shope.ee/sport080', 890000, 'https://placehold.co/400x300/636e72/ffffff?text=UA+2in1'),
+            ('lazada', 'Nike Dri-FIT Stride 2-in-1 Short', 'https://s.lazada.vn/sport081', 990000, 'https://placehold.co/400x300/2d3436/ffffff?text=Stride+2in1'),
+        ],
+        'tat-chay-balega': [
+            ('shopee', 'Balega Hidden Comfort No Show', 'https://shope.ee/sport090', 380000, 'https://placehold.co/400x300/dfe6e9/2d3436?text=Balega+HC'),
+            ('tiki', 'Balega Blister Resist No Show', 'https://tiki.vn/sport091', 350000, 'https://placehold.co/400x300/b2bec3/2d3436?text=Balega+BR'),
+        ],
+        # Running — Dinh dưỡng chạy
+        'gel-nang-luong-gu': [
+            ('shopee', 'GU Energy Gel Tri-Berry x24 gói', 'https://shope.ee/sport100', 720000, 'https://placehold.co/400x300/6c5ce7/ffffff?text=GU+Gel+x24'),
+            ('lazada', 'GU Energy Gel Salted Caramel x8 gói', 'https://s.lazada.vn/sport101', 280000, 'https://placehold.co/400x300/fdcb6e/2d3436?text=GU+Caramel'),
+        ],
+        'vien-muoi-dien-giai-saltstick': [
+            ('shopee', 'SaltStick Caps 100 viên', 'https://shope.ee/sport110', 550000, 'https://placehold.co/400x300/dfe6e9/e17055?text=SaltStick+100'),
+            ('lazada', 'SaltStick Fastchews 60 viên', 'https://s.lazada.vn/sport111', 380000, 'https://placehold.co/400x300/ffeaa7/2d3436?text=SaltStick+FC'),
+        ],
+        'bot-dien-giai-nuun': [
+            ('shopee', 'Nuun Sport Mixed Pack 4 ống', 'https://shope.ee/sport120', 450000, 'https://placehold.co/400x300/00b894/ffffff?text=Nuun+Mix'),
+            ('tiki', 'Nuun Sport Citrus Fruit 10 viên', 'https://tiki.vn/sport121', 150000, 'https://placehold.co/400x300/ffeaa7/e17055?text=Nuun+Citrus'),
+        ],
+        # Gym — Whey Protein
+        'whey-protein-isolate': [
+            ('shopee', 'Rule 1 R1 Whey Isolate 5lbs', 'https://shope.ee/sport130', 1890000, 'https://placehold.co/400x300/0984e3/ffffff?text=R1+Isolate'),
+            ('lazada', 'Dymatize ISO100 Hydrolyzed 5lbs', 'https://s.lazada.vn/sport131', 2290000, 'https://placehold.co/400x300/6c5ce7/ffffff?text=ISO100'),
+        ],
+        'on-gold-standard-whey': [
+            ('shopee', 'ON Gold Standard 100% Whey 5lbs Chocolate', 'https://shope.ee/sport140', 1790000, 'https://placehold.co/400x300/fdcb6e/2d3436?text=ON+Gold+5lbs'),
+            ('lazada', 'ON Gold Standard Whey 2lbs Vanilla', 'https://s.lazada.vn/sport141', 890000, 'https://placehold.co/400x300/ffeaa7/2d3436?text=ON+Gold+2lbs'),
+            ('tiki', 'ON Gold Standard Whey 5lbs Cookies & Cream', 'https://tiki.vn/sport142', 1850000, 'https://placehold.co/400x300/636e72/ffffff?text=ON+Gold+C%26C'),
+        ],
+        'mass-gainer-tang-can': [
+            ('shopee', 'ON Serious Mass 12lbs Chocolate', 'https://shope.ee/sport150', 1490000, 'https://placehold.co/400x300/e17055/ffffff?text=Serious+Mass'),
+            ('lazada', 'MuscleTech Mass Tech 7lbs', 'https://s.lazada.vn/sport151', 1190000, 'https://placehold.co/400x300/d63031/ffffff?text=Mass+Tech'),
+        ],
+        # Gym — Creatine
+        'creatine-monohydrate': [
+            ('shopee', 'ON Micronized Creatine 300g', 'https://shope.ee/sport160', 350000, 'https://placehold.co/400x300/2d3436/fdcb6e?text=ON+Creatine'),
+            ('lazada', 'MuscleTech Platinum Creatine 400g', 'https://s.lazada.vn/sport161', 320000, 'https://placehold.co/400x300/636e72/ffffff?text=MT+Creatine'),
+            ('tiki', 'MyProtein Creatine Monohydrate 500g', 'https://tiki.vn/sport162', 380000, 'https://placehold.co/400x300/0984e3/ffffff?text=MP+Creatine'),
+        ],
+        'creatine-hcl': [
+            ('shopee', 'Kaged Muscle C-HCl 75 servings', 'https://shope.ee/sport170', 650000, 'https://placehold.co/400x300/00b894/ffffff?text=Kaged+C-HCl'),
+            ('lazada', 'MuscleTech Creactor HCl 120 servings', 'https://s.lazada.vn/sport171', 590000, 'https://placehold.co/400x300/e17055/ffffff?text=Creactor'),
+        ],
+        # Gym — Máy tập
+        'may-chay-bo-dien': [
+            ('shopee', 'Kingsport MAX-08 3.0HP', 'https://shope.ee/sport180', 12900000, 'https://placehold.co/400x300/2d3436/ffffff?text=Kingsport+MAX'),
+            ('lazada', 'Elip Marathon Pro 3.5HP', 'https://s.lazada.vn/sport181', 18900000, 'https://placehold.co/400x300/636e72/ffffff?text=Elip+Pro'),
+            ('tiki', 'Máy chạy Xiaomi WalkingPad R2', 'https://tiki.vn/sport182', 8900000, 'https://placehold.co/400x300/e17055/ffffff?text=WalkingPad'),
+        ],
+        'ta-don-dieu-chinh': [
+            ('shopee', 'Bowflex SelectTech 552 Adjustable 2-24kg', 'https://shope.ee/sport190', 8900000, 'https://placehold.co/400x300/2d3436/e17055?text=Bowflex+552'),
+            ('lazada', 'PowerBlock Elite 2.5-22kg', 'https://s.lazada.vn/sport191', 6900000, 'https://placehold.co/400x300/636e72/fdcb6e?text=PowerBlock'),
+        ],
+        'day-khang-luc': [
+            ('shopee', 'Bộ dây kháng lực 5 mức Aolikes', 'https://shope.ee/sport200', 189000, 'https://placehold.co/400x300/00b894/ffffff?text=Bands+5pc'),
+            ('lazada', 'Theraband CLX Resistance Band', 'https://s.lazada.vn/sport201', 450000, 'https://placehold.co/400x300/fdcb6e/2d3436?text=Theraband'),
+            ('tiki', 'Bộ tube bands 11 món có tay cầm', 'https://tiki.vn/sport202', 250000, 'https://placehold.co/400x300/6c5ce7/ffffff?text=Tube+Bands'),
+        ],
+    }
+
+    seeded = 0
+    for seg in sport.segments:
+        for z in seg.zones:
+            for p in z.parts:
+                if p.slug in sport_products:
+                    for net, pname, url, price, img in sport_products[p.slug]:
+                        al = AffiliateLink(part_id=p.id, network=net, product_name=pname,
+                            url=url, price=price, image_url=img,
+                            clicks=random.randint(20, 1000),
+                            conversions=random.randint(1, 50))
+                        db.session.add(al)
+                        seeded += 1
+
+    db.session.commit()
+    sport_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'sport').count()
+    print(f'✅ Sport products seeded: {sport_count} affiliate links')
