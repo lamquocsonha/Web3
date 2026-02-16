@@ -47,12 +47,12 @@
 </div>
 
 <!-- Fast Sync -->
-{% if api_connected %}
 <div style="background:linear-gradient(135deg,rgba(231,76,60,0.04),rgba(231,76,60,0.08));border:2px solid rgba(231,76,60,0.2);border-radius:var(--radius);padding:20px;margin-bottom:20px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
     <div>
       <h3 style="margin:0;font-size:15px">⚡ Fast Sync — Tu dong phan bo tat ca tinh thanh</h3>
       <p style="margin:4px 0 0;font-size:13px;color:var(--text-dim)">Tim & import khach san tu Agoda cho {{ destinations|length }} tinh thanh. Chay tuan tu, tu dong bo qua hotel da import.</p>
+      {% if not api_connected %}<p style="margin:6px 0 0;font-size:13px;color:#e74c3c;font-weight:600">⚠ Luu credentials truoc khi sync</p>{% endif %}
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <div class="form-group" style="margin-bottom:0">
@@ -63,7 +63,7 @@
           <option value="50">50 hotels/tinh</option>
         </select>
       </div>
-      <button class="btn btn-primary" onclick="startFastSync()" id="fsSyncBtn">⚡ Fast Sync</button>
+      <button class="btn btn-primary" onclick="startFastSync()" id="fsSyncBtn" {% if not api_connected %}disabled title="Luu credentials truoc"{% endif %}>⚡ Fast Sync</button>
       <button class="btn btn-ghost btn-sm" onclick="stopFastSync()" id="fsStopBtn" style="display:none;color:#e74c3c">Stop</button>
     </div>
   </div>
@@ -86,6 +86,7 @@
 <!-- Search Hotels from Agoda -->
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
   <h3 style="margin:0 0 16px;font-size:15px">🔍 Tim thu cong theo tinh thanh</h3>
+  {% if not api_connected %}<p style="margin:-8px 0 12px;font-size:13px;color:#e74c3c;font-weight:600">⚠ Luu credentials truoc khi search</p>{% endif %}
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
     <div class="form-group" style="margin-bottom:0">
       <label class="form-label">Destination</label>
@@ -104,7 +105,7 @@
       <label class="form-label">Check-out</label>
       <input type="date" id="syncCheckout" class="form-input" style="width:150px;padding:8px;font-size:13px">
     </div>
-    <button class="btn btn-primary" onclick="searchAgoda()" id="searchBtn">🔍 Search</button>
+    <button class="btn btn-primary" onclick="searchAgoda()" id="searchBtn" {% if not api_connected %}disabled{% endif %}>🔍 Search</button>
     <button class="btn btn-ghost btn-sm" onclick="importSelected()" id="importBtn" style="display:none">📥 Import selected</button>
   </div>
 
@@ -115,7 +116,6 @@
   <div id="searchResults" style="margin-top:16px"></div>
   <div id="searchCount" style="margin-top:8px;font-size:13px;color:var(--text-dim);display:none"></div>
 </div>
-{% endif %}
 
 <!-- Recent Agoda Imports -->
 {% if recent %}

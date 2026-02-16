@@ -3285,6 +3285,9 @@ def admin_hotel_sync_save_credentials():
     """Save Agoda API credentials"""
     cid = request.form.get('cid', '').strip()
     api_key = request.form.get('api_key', '').strip()
+    # Don't overwrite API key with the masked placeholder
+    if api_key == 'configured':
+        api_key = SiteSettings.get('agoda_api_key', '')
     SiteSettings.set_val('agoda_cid', cid, 'api')
     SiteSettings.set_val('agoda_api_key', api_key, 'api')
     SiteSettings.set_val('agoda_enabled', '1' if cid and api_key else '0', 'general')
