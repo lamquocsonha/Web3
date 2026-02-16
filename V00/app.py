@@ -297,21 +297,10 @@ def admin_dashboard():
     demo_traffic = random.randint(1200, 5800)
     demo_revenue = random.randint(500000, 3500000)
 
-    # AccessTrade integration
+    # Check if AccessTrade API is configured (no API calls here)
     from accesstrade_integration import get_accesstrade_api
-    accesstrade_data = {}
     api = get_accesstrade_api()
-    if api:
-        try:
-            accesstrade_data = {
-                'account': api.get_account_info(),
-                'stats': api.get_statistics_summary(days=30),
-                'campaigns': api.get_campaigns(limit=10),
-                'offers': api.get_offers(limit=10),
-                'connected': True
-            }
-        except:
-            accesstrade_data['connected'] = False
+    accesstrade_data = {'connected': api is not None}
 
     return render_template('admin/dashboard.html',
         verticals=verticals,
@@ -320,6 +309,28 @@ def admin_dashboard():
         total_ai=total_ai, networks=networks,
         demo_traffic=demo_traffic, demo_revenue=demo_revenue,
         accesstrade=accesstrade_data)
+
+@app.route('/admin/api/accesstrade-data')
+def admin_api_accesstrade_data():
+    """Load AccessTrade data async — called via AJAX from dashboard"""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return jsonify({'connected': False})
+    try:
+        account = api.get_account_info()
+        stats = api.get_statistics_summary(days=30)
+        campaigns = api.get_campaigns(limit=10)
+        offers = api.get_offers(limit=10)
+        return jsonify({
+            'connected': True,
+            'account': account,
+            'stats': stats,
+            'campaigns': campaigns,
+            'offers': offers
+        })
+    except Exception:
+        return jsonify({'connected': False})
 
 # =============================================
 # ADMIN — VERTICALS CRUD
@@ -3344,6 +3355,19 @@ VOUCHER_TYPES = [
 ]
 VOUCHER_TYPE_MAP = dict(VOUCHER_TYPES)
 
+def _voucher_valid_filter(q):
+    """Apply SQL-level is_valid() filter: active, within date range, usage not exceeded"""
+    now = datetime.utcnow()
+    q = q.filter(Voucher.is_active == True)
+    q = q.filter(db.or_(Voucher.valid_from == None, Voucher.valid_from <= now))
+    q = q.filter(db.or_(Voucher.valid_to == None, Voucher.valid_to >= now))
+    q = q.filter(db.or_(
+        Voucher.usage_limit == None,
+        Voucher.usage_limit == 0,
+        Voucher.usage_count < Voucher.usage_limit
+    ))
+    return q
+
 @app.route('/admin/vouchers')
 def admin_vouchers():
     f_cat = request.args.get('category', '')
@@ -3355,20 +3379,23 @@ def admin_vouchers():
     if f_merchant:
         q = q.filter(Voucher.merchant.ilike(f'%{f_merchant}%'))
 
-    all_vouchers = q.order_by(Voucher.created_at.desc()).all()
-
-    # Filter by status
+    # Filter by status in SQL instead of Python
     if f_status == 'valid':
-        items = [v for v in all_vouchers if v.is_valid()]
+        q = _voucher_valid_filter(q)
     elif f_status == 'expired':
-        items = [v for v in all_vouchers if not v.is_valid()]
-    else:
-        items = all_vouchers
+        now = datetime.utcnow()
+        q = q.filter(db.or_(
+            Voucher.is_active == False,
+            db.and_(Voucher.valid_to != None, Voucher.valid_to < now),
+            db.and_(Voucher.usage_limit != None, Voucher.usage_limit > 0, Voucher.usage_count >= Voucher.usage_limit)
+        ))
+
+    items = q.order_by(Voucher.created_at.desc()).all()
 
     merchants = db.session.query(Voucher.merchant).distinct().all()
     merchants = sorted([m[0] for m in merchants])
     total = Voucher.query.count()
-    active = len([v for v in Voucher.query.all() if v.is_valid()])
+    active = _voucher_valid_filter(Voucher.query).count()
     total_clicks = db.session.query(db.func.sum(Voucher.clicks)).scalar() or 0
     total_conv = db.session.query(db.func.sum(Voucher.conversions)).scalar() or 0
     return render_template('admin/vouchers.html', items=items, merchants=merchants,
@@ -3610,7 +3637,7 @@ def admin_voucher_sync():
 
     # Stats
     total_synced = Voucher.query.filter_by(sync_mode='api').count()
-    total_active = len([v for v in Voucher.query.filter_by(sync_mode='api').all() if v.is_valid()])
+    total_active = _voucher_valid_filter(Voucher.query.filter_by(sync_mode='api')).count()
     total_manual = Voucher.query.filter_by(sync_mode='manual').count()
 
     # Sync settings from SiteSettings
