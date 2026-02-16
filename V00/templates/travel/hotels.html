@@ -214,7 +214,90 @@
   </aside>
 </div>
 
+<!-- ═══ SEO CONTENT — dynamic by province ═══ -->
+{% set prov_names = {
+  'ha-noi':'Hà Nội','cao-bang':'Cao Bằng','lang-son':'Lạng Sơn','lai-chau':'Lai Châu',
+  'dien-bien':'Điện Biên','son-la':'Sơn La','tuyen-quang':'Tuyên Quang','lao-cai':'Lào Cai',
+  'thai-nguyen':'Thái Nguyên','phu-tho':'Phú Thọ','bac-ninh':'Bắc Ninh','hung-yen':'Hưng Yên',
+  'hai-phong':'Hải Phòng','quang-ninh':'Quảng Ninh','ninh-binh':'Ninh Bình',
+  'thanh-hoa':'Thanh Hóa','nghe-an':'Nghệ An','ha-tinh':'Hà Tĩnh','quang-tri':'Quảng Trị',
+  'hue':'Huế','da-nang':'Đà Nẵng','quang-ngai':'Quảng Ngãi','gia-lai':'Gia Lai',
+  'khanh-hoa':'Khánh Hòa','dak-lak':'Đắk Lắk','lam-dong':'Lâm Đồng',
+  'ho-chi-minh':'TP. Hồ Chí Minh','dong-nai':'Đồng Nai','tay-ninh':'Tây Ninh',
+  'can-tho':'Cần Thơ','an-giang':'An Giang','dong-thap':'Đồng Tháp',
+  'vinh-long':'Vĩnh Long','ca-mau':'Cà Mau'
+} %}
+{% set prov_highlights = {
+  'ha-noi':'phố cổ 36 phố phường, Hồ Hoàn Kiếm, Văn Miếu, Lăng Bác và khu vực Tây Hồ sầm uất',
+  'ho-chi-minh':'Quận 1 trung tâm, Bến Thành, Phố đi bộ Nguyễn Huệ, Thảo Cầm Viên và khu Phú Mỹ Hưng hiện đại',
+  'da-nang':'bãi biển Mỹ Khê, cầu Rồng, Bà Nà Hills và bán đảo Sơn Trà hoang sơ',
+  'hue':'Đại Nội, sông Hương thơ mộng, chùa Thiên Mụ và các lăng tẩm vua Nguyễn',
+  'khanh-hoa':'vịnh Nha Trang tuyệt đẹp, Vinpearl Land, tháp Bà Ponagar và các đảo hoang sơ',
+  'quang-ninh':'vịnh Hạ Long — di sản thiên nhiên thế giới, đảo Tuần Châu và Bãi Cháy sôi động',
+  'lam-dong':'thành phố Đà Lạt mộng mơ, Hồ Xuân Hương, Thung Lũng Tình Yêu và rừng thông bạt ngàn',
+  'lao-cai':'đỉnh Fansipan — nóc nhà Đông Dương, bản Cát Cát, ruộng bậc thang Sapa tuyệt đẹp',
+  'ninh-binh':'quần thể Tràng An — di sản thế giới, Tam Cốc, chùa Bái Đính và cố đô Hoa Lư',
+  'hai-phong':'đảo Cát Bà hoang sơ, bãi biển Đồ Sơn, nhà hát lớn và ẩm thực bánh đa cua nổi tiếng',
+  'can-tho':'chợ nổi Cái Răng đặc trưng miền Tây, bến Ninh Kiều thơ mộng và vườn trái cây xanh mướt',
+  'thanh-hoa':'biển Sầm Sơn sôi động, thành nhà Hồ — di sản thế giới và Vườn quốc gia Bến En',
+  'nghe-an':'biển Cửa Lò, quê Bác Hồ tại Kim Liên và Vườn quốc gia Pù Mát nguyên sinh',
+  'an-giang':'núi Sam linh thiêng, miếu Bà Chúa Xứ, rừng tràm Trà Sư và mùa nước nổi độc đáo',
+  'ca-mau':'Mũi Cà Mau — cực Nam Tổ quốc, rừng đước ngập mặn và Vườn quốc gia U Minh Hạ',
+  'dak-lak':'Buôn Ma Thuột — thủ phủ cà phê, hồ Lắk thơ mộng và Vườn quốc gia Yok Đôn',
+  'gia-lai':'Biển Hồ (T\'Nưng) huyền bí, thác Phú Cường hùng vĩ và văn hóa cồng chiêng Tây Nguyên'
+} %}
+{% set dest_name = prov_names.get(destination, destination) if destination else '' %}
+{% set dest_hl = prov_highlights.get(destination, '') if destination else '' %}
+
+<section class="seo-section">
+  <div class="seo-inner">
+    {% if destination %}
+    <h2 class="seo-title">Khách sạn {{ dest_name }} — Đặt phòng giá rẻ, uy tín 2025</h2>
+    <div class="seo-content collapsed" id="seoContent">
+      <p><strong>UniTravel</strong> tổng hợp danh sách <strong>khách sạn tại {{ dest_name }}</strong> với giá phòng cập nhật trực tiếp từ Agoda, giúp bạn dễ dàng so sánh và đặt phòng nhanh chóng. Từ khách sạn bình dân 2-3 sao đến resort cao cấp 5 sao, tất cả đều được hiển thị minh bạch về giá, đánh giá và tiện nghi — đảm bảo bạn luôn tìm được lựa chọn phù hợp nhất với ngân sách.</p>
+
+      <h3>{{ dest_name }} có gì hấp dẫn?</h3>
+      <p>{{ dest_name }} là một trong những điểm đến du lịch nổi bật tại Việt Nam{% if dest_hl %}, nổi tiếng với {{ dest_hl }}{% endif %}. Du khách đến {{ dest_name }} không chỉ được trải nghiệm cảnh quan thiên nhiên tuyệt đẹp mà còn thưởng thức nền ẩm thực địa phương đặc sắc và khám phá văn hóa bản địa phong phú.</p>
+
+      <h3>Mẹo đặt khách sạn {{ dest_name }} giá tốt</h3>
+      <p><strong>Đặt sớm:</strong> Nên đặt phòng trước 2-4 tuần, đặc biệt vào mùa cao điểm (tháng 6-8, lễ Tết) để có giá tốt nhất. <strong>So sánh giá:</strong> UniTravel tổng hợp giá từ nhiều nguồn — hãy so sánh giữa các khách sạn cùng khu vực trước khi quyết định. <strong>Đọc đánh giá:</strong> Ưu tiên khách sạn có điểm đánh giá từ 7.5 trở lên và nhiều nhận xét tích cực từ khách đã ở. <strong>Chọn vị trí:</strong> Khách sạn gần trung tâm hoặc các điểm tham quan chính sẽ giúp bạn tiết kiệm chi phí di chuyển đáng kể.</p>
+
+      <h3>Các loại lưu trú phổ biến tại {{ dest_name }}</h3>
+      <p>Tại {{ dest_name }}, bạn có thể lựa chọn đa dạng loại hình lưu trú: <strong>Khách sạn</strong> từ 2 đến 5 sao với đầy đủ tiện nghi, <strong>homestay</strong> gần gũi thiên nhiên và văn hóa địa phương, <strong>resort & villa</strong> sang trọng dành cho kỳ nghỉ dưỡng, hoặc <strong>nhà nghỉ/hostel</strong> tiết kiệm dành cho khách du lịch bụi. UniTravel giúp bạn lọc nhanh theo số sao, mức giá và khu vực để tìm đúng nơi ở mong muốn.</p>
+    </div>
+    <button class="seo-toggle" onclick="toggleSeoContent()" id="seoToggle">Xem thêm ▾</button>
+
+    {% else %}
+    <h2 class="seo-title">Đặt khách sạn Việt Nam — So sánh giá tốt nhất 2025</h2>
+    <div class="seo-content collapsed" id="seoContent">
+      <p><strong>UniTravel</strong> là nền tảng tổng hợp và so sánh giá <strong>khách sạn trên toàn Việt Nam</strong>, với dữ liệu cập nhật trực tiếp từ Agoda — một trong những nền tảng đặt phòng lớn nhất châu Á. Hệ thống bao phủ <strong>34 tỉnh thành</strong> từ Hà Nội, Đà Nẵng, TP.HCM đến các điểm đến mới nổi như Cao Bằng, Gia Lai, Cà Mau, giúp bạn dễ dàng lên kế hoạch cho mọi chuyến đi.</p>
+
+      <h3>Tại sao nên dùng UniTravel?</h3>
+      <p>UniTravel tập trung tất cả thông tin khách sạn vào một nơi duy nhất — giá phòng cập nhật theo thời gian thực, ảnh thực tế, đánh giá từ khách đã ở và bản đồ vị trí trực quan. Thay vì truy cập từng trang đặt phòng riêng lẻ, bạn chỉ cần chọn tỉnh thành trên <strong>bản đồ Việt Nam</strong> tương tác hoặc danh sách bên trái, toàn bộ khách sạn sẽ hiển thị ngay lập tức với đầy đủ thông tin để so sánh.</p>
+
+      <h3>Điểm đến phổ biến nhất</h3>
+      <p>Những tỉnh thành được du khách tìm kiếm nhiều nhất trên UniTravel bao gồm: <a href="{{ url_for('travel_hotels', destination='ha-noi') }}">Hà Nội</a> với phố cổ và ẩm thực phong phú, <a href="{{ url_for('travel_hotels', destination='da-nang') }}">Đà Nẵng</a> với bãi biển Mỹ Khê và Bà Nà Hills, <a href="{{ url_for('travel_hotels', destination='ho-chi-minh') }}">TP. Hồ Chí Minh</a> sầm uất nhộn nhịp, <a href="{{ url_for('travel_hotels', destination='khanh-hoa') }}">Khánh Hòa (Nha Trang)</a> với vịnh biển tuyệt đẹp, <a href="{{ url_for('travel_hotels', destination='lam-dong') }}">Lâm Đồng (Đà Lạt)</a> mát mẻ quanh năm, và <a href="{{ url_for('travel_hotels', destination='quang-ninh') }}">Quảng Ninh</a> với vịnh Hạ Long huyền thoại.</p>
+
+      <h3>Hướng dẫn tìm khách sạn trên UniTravel</h3>
+      <p><strong>Bước 1:</strong> Chọn tỉnh thành trên bản đồ hoặc sidebar 34 tỉnh thành bên trái. <strong>Bước 2:</strong> Lọc theo số sao (3-5 sao), ngày check-in/check-out và số khách. <strong>Bước 3:</strong> So sánh giá, đọc đánh giá và nhấn vào khách sạn ưng ý để đặt phòng trực tiếp trên Agoda với giá tốt nhất. Toàn bộ quy trình nhanh chóng, minh bạch và hoàn toàn miễn phí.</p>
+    </div>
+    <button class="seo-toggle" onclick="toggleSeoContent()" id="seoToggle">Xem thêm ▾</button>
+    {% endif %}
+  </div>
+</section>
+
 <script>
+function toggleSeoContent() {
+  var el = document.getElementById('seoContent');
+  var btn = document.getElementById('seoToggle');
+  if (el.classList.contains('collapsed')) {
+    el.classList.remove('collapsed');
+    btn.textContent = 'Thu gọn ▴';
+  } else {
+    el.classList.add('collapsed');
+    btn.textContent = 'Xem thêm ▾';
+  }
+}
 document.getElementById('provSearch')?.addEventListener('input', function(e) {
   const q = e.target.value.toLowerCase();
   document.querySelectorAll('.hps-prov').forEach(p => {

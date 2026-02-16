@@ -2331,6 +2331,78 @@ small:hover {
   color: var(--accent);
 }
 
+/* ═══════════════════════════════════════
+   SEO SECTION (Hotels)
+   ═══════════════════════════════════════ */
+.seo-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.seo-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px 28px;
+  margin: 32px 0;
+}
+
+.seo-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.seo-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-dim);
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.seo-content.collapsed {
+  max-height: 60px;
+}
+
+.seo-content h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 14px 0 6px;
+}
+
+.seo-content p {
+  margin-bottom: 8px;
+}
+
+.seo-content a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.seo-content a:hover {
+  text-decoration: underline;
+}
+
+.seo-toggle {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 0 0;
+  font-family: inherit;
+}
+
+.seo-toggle:hover {
+  text-decoration: underline;
+}
+
 /* Print Styles */
 @media print {
   body {
