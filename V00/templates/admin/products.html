@@ -90,6 +90,139 @@
   </form>
 </div>
 
+<!-- ═══ Tracking Link Tool (collapsible) ═══ -->
+<details style="margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+  <summary style="padding:14px 20px;font-size:15px;font-weight:700;cursor:pointer;user-select:none">🔗 Tao Link Affiliate (AccessTrade)</summary>
+  <div style="padding:0 20px 20px;border-top:1px solid var(--border)">
+    <p style="font-size:13px;color:var(--text-dim);margin:12px 0 16px">Dan URL san pham tu Shopee/Lazada/Tiki → tu dong chuyen thanh affiliate link</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:200px">
+        <label class="form-label">Campaign ID</label>
+        <input type="text" id="tlCampaignId" class="form-input" placeholder="VD: 1234" style="padding:8px 10px">
+      </div>
+      <div style="flex:3;min-width:300px">
+        <label class="form-label">URLs (moi dong 1 URL)</label>
+        <textarea id="tlUrls" class="form-input" rows="3" placeholder="https://shopee.vn/product-123&#10;https://www.lazada.vn/product-456" style="padding:8px 10px;font-size:13px"></textarea>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="createTrackingLinks()" id="tlBtn" style="padding:8px 20px">Tao Link</button>
+      </div>
+    </div>
+    <div id="tlResults" style="display:none;margin-top:16px">
+      <table class="data-table" style="font-size:13px">
+        <thead><tr><th>URL goc</th><th>Affiliate Link</th><th>Short Link</th><th></th></tr></thead>
+        <tbody id="tlBody"></tbody>
+      </table>
+    </div>
+  </div>
+</details>
+
+<!-- ═══ TikTok Shop Search (collapsible) ═══ -->
+<details style="margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+  <summary style="padding:14px 20px;font-size:15px;font-weight:700;cursor:pointer;user-select:none">🎵 TikTok Shop — Tim san pham</summary>
+  <div style="padding:0 20px 20px;border-top:1px solid var(--border)">
+    <p style="font-size:13px;color:var(--text-dim);margin:12px 0 16px">Tim san pham tren TikTok Shop va tao link affiliate</p>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <div style="flex:2;min-width:200px">
+        <label class="form-label">Tu khoa</label>
+        <input type="text" id="ttKeyword" class="form-input" placeholder="VD: ao thun nam, my pham..." style="padding:8px 10px">
+      </div>
+      <div style="flex:1;min-width:140px">
+        <label class="form-label">Sap xep</label>
+        <select id="ttSort" class="form-select" style="padding:8px 10px">
+          <option value="RECOMMENDED">De xuat</option>
+          <option value="BEST_SELLERS">Ban chay</option>
+          <option value="HIGH_COMMISSION_RATE">Hoa hong cao</option>
+          <option value="LOW_PRICE">Gia thap</option>
+          <option value="HIGH_PRICE">Gia cao</option>
+          <option value="NEWLY_RELEASED">Moi nhat</option>
+        </select>
+      </div>
+      <div>
+        <button class="btn btn-primary" onclick="tiktokSearch()" id="ttBtn" style="padding:8px 20px;background:#000;border-color:#000">Tim</button>
+      </div>
+    </div>
+    <div id="ttResults" style="display:none;margin-top:16px">
+      <div id="ttGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px"></div>
+    </div>
+  </div>
+</details>
+
+<script>
+async function createTrackingLinks() {
+  var btn = document.getElementById('tlBtn');
+  var campaignId = document.getElementById('tlCampaignId').value.trim();
+  var urlsRaw = document.getElementById('tlUrls').value.trim();
+  if (!campaignId || !urlsRaw) return alert('Nhap Campaign ID va URLs');
+  var urls = urlsRaw.split('\n').map(u => u.trim()).filter(u => u);
+  btn.disabled = true; btn.textContent = 'Dang tao...';
+  try {
+    var resp = await fetch('/admin/api/create-tracking-link', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({campaign_id: campaignId, urls: urls})
+    });
+    var data = await resp.json();
+    var tbody = document.getElementById('tlBody');
+    tbody.innerHTML = '';
+    (data.success_link || []).forEach(function(lk) {
+      tbody.innerHTML += '<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+lk.url_origin+'">'+lk.url_origin+'</td><td><input type="text" value="'+lk.aff_link+'" style="width:100%;font-size:12px;padding:4px;border:1px solid var(--border);border-radius:4px" readonly onclick="this.select()"></td><td><input type="text" value="'+(lk.short_link||'')+'" style="width:140px;font-size:12px;padding:4px;border:1px solid var(--border);border-radius:4px" readonly onclick="this.select()"></td><td><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(\''+lk.aff_link+'\')">Copy</button></td></tr>';
+    });
+    (data.error_link || []).forEach(function(url) {
+      tbody.innerHTML += '<tr style="color:#ef4444"><td colspan="4">Loi: '+url+'</td></tr>';
+    });
+    document.getElementById('tlResults').style.display = 'block';
+  } catch(e) { alert('Loi: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Tao Link';
+}
+
+async function tiktokSearch() {
+  var btn = document.getElementById('ttBtn');
+  var kw = document.getElementById('ttKeyword').value.trim();
+  var sort = document.getElementById('ttSort').value;
+  if (!kw) return alert('Nhap tu khoa');
+  btn.disabled = true; btn.textContent = 'Dang tim...';
+  try {
+    var resp = await fetch('/admin/api/tiktok-search?q='+encodeURIComponent(kw)+'&sort='+sort+'&limit=20');
+    var data = await resp.json();
+    var grid = document.getElementById('ttGrid');
+    grid.innerHTML = '';
+    (data.products || []).forEach(function(p) {
+      var price = p.sales_price ? p.sales_price.minimum_amount : (p.original_price ? p.original_price.minimum_amount : '');
+      var origPrice = p.original_price ? p.original_price.minimum_amount : '';
+      var commission = p.commission ? (p.commission.rate || 0) : 0;
+      grid.innerHTML += '<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg)">' +
+        '<div style="height:140px;display:flex;align-items:center;justify-content:center;background:var(--code-bg);overflow:hidden">' +
+        (p.main_image_url ? '<img src="'+p.main_image_url+'" style="max-width:100%;max-height:100%;object-fit:contain" loading="lazy">' : '<span style="font-size:32px">🎵</span>') +
+        '</div><div style="padding:10px">' +
+        '<div style="font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px">'+p.title+'</div>' +
+        '<div style="margin-top:6px;font-size:14px;font-weight:700;color:#ef4444">'+(price ? Number(price).toLocaleString()+'d' : '')+'</div>' +
+        '<div style="font-size:11px;color:var(--text-dim)">Hoa hong: '+commission+'% · '+(p.units_sold||0)+' da ban</div>' +
+        (p.shop ? '<div style="font-size:11px;color:var(--text-dim);margin-top:2px">Shop: '+p.shop.name+'</div>' : '') +
+        '<button class="btn btn-sm btn-primary" style="width:100%;margin-top:8px;font-size:12px;background:#000;border-color:#000" onclick="tiktokCreateLink(\''+p.detail_link+'\')">Tao aff link</button>' +
+        '</div></div>';
+    });
+    if (!data.products || data.products.length === 0) grid.innerHTML = '<p style="color:var(--text-dim);grid-column:1/-1;text-align:center;padding:20px">Khong tim thay san pham</p>';
+    document.getElementById('ttResults').style.display = 'block';
+  } catch(e) { alert('Loi: ' + e.message); }
+  btn.disabled = false; btn.textContent = 'Tim';
+}
+
+async function tiktokCreateLink(url) {
+  try {
+    var resp = await fetch('/admin/api/tiktok-create-link', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({product_url: url})
+    });
+    var data = await resp.json();
+    if (data.status && data.aff_url) {
+      prompt('Affiliate Link (Ctrl+C de copy):', data.aff_short_url || data.aff_url);
+    } else {
+      alert('Loi: ' + (data.message || 'Khong tao duoc link'));
+    }
+  } catch(e) { alert('Loi: ' + e.message); }
+}
+</script>
+
 {% if products %}
 <div class="table-wrap">
   <table class="data-table">

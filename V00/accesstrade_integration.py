@@ -173,6 +173,307 @@ class AccessTradeAPI:
         return {'data': [], 'total': 0}
 
     # ═══════════════════════════════════════
+    # CREATE TRACKING LINK  (affiliate link generator)
+    # Docs: https://developers.accesstrade.vn/api-publisher-vietnamese/tao-tracking-link
+    # ═══════════════════════════════════════
+
+    def create_tracking_link(self, campaign_id, urls=None, utm_source=None,
+                             utm_medium=None, utm_campaign=None, utm_content=None,
+                             sub1=None, sub2=None, sub3=None, sub4=None):
+        """Create affiliate tracking links from product URLs.
+
+        POST /v1/product_link/create
+
+        Args:
+            campaign_id: Campaign ID (required)
+            urls:        List of product URLs (uses campaign URL if omitted)
+            utm_source:  Custom tracking param
+            utm_medium:  Custom tracking param
+            utm_campaign: Custom tracking param
+            utm_content: Custom tracking param
+            sub1-sub4:   Custom sub-tracking params
+
+        Returns dict with:
+            'success': bool
+            'success_link': list of {aff_link, short_link, first_link, url_origin}
+            'error_link': list of failed URLs
+            'suspend_url': list of suspended URLs
+        """
+        try:
+            payload = {'campaign_id': str(campaign_id)}
+            if urls:
+                payload['urls'] = ','.join(urls) if isinstance(urls, list) else urls
+            if utm_source:
+                payload['utm_source'] = utm_source
+            if utm_medium:
+                payload['utm_medium'] = utm_medium
+            if utm_campaign:
+                payload['utm_campaign'] = utm_campaign
+            if utm_content:
+                payload['utm_content'] = utm_content
+            if sub1:
+                payload['sub1'] = sub1
+            if sub2:
+                payload['sub2'] = sub2
+            if sub3:
+                payload['sub3'] = sub3
+            if sub4:
+                payload['sub4'] = sub4
+
+            response = requests.post(
+                f"{self.base_url}/product_link/create",
+                headers=self.headers,
+                json=payload,
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                result = data.get('data', {})
+                return {
+                    'success': data.get('success', False),
+                    'success_link': result.get('success_link', []),
+                    'error_link': result.get('error_link', []),
+                    'suspend_url': result.get('suspend_url', []),
+                }
+        except Exception:
+            pass
+        return {'success': False, 'success_link': [], 'error_link': [], 'suspend_url': []}
+
+    # ═══════════════════════════════════════
+    # ORDER LIST v2  (detailed order tracking)
+    # Docs: https://developers.accesstrade.vn/api-publisher-vietnamese/lay-danh-sach-don-hang-v2
+    # ═══════════════════════════════════════
+
+    def get_order_list(self, since, until, page=1, limit=30, status=None,
+                       merchant=None, utm_source=None, utm_campaign=None,
+                       utm_medium=None, utm_content=None):
+        """Get detailed order list (v2 — richer than transactions).
+
+        GET /v1/order-list
+        Rate limit: 10 req/min, cache 1 min
+
+        Args:
+            since:        Start time ISO 8601 (e.g. '2024-01-01T00:00:00Z') REQUIRED
+            until:        End time ISO 8601 REQUIRED
+            page:         Page number (default 1)
+            limit:        Results per page (default 30, max 300)
+            status:       0=pending, 1=approved, 2=rejected
+            merchant:     Filter by merchant (e.g. 'shopee')
+            utm_source:   Filter by UTM source
+            utm_campaign: Filter by UTM campaign
+            utm_medium:   Filter by UTM medium
+            utm_content:  Filter by UTM content
+
+        Returns dict with:
+            'data': list of order dicts (order_id, billing, pub_commission,
+                    merchant, click_time, sales_time, products_count, ...)
+            'total': total orders
+        """
+        try:
+            params = {
+                'since': since,
+                'until': until,
+                'page': page,
+                'limit': min(limit, 300),
+            }
+            if status is not None:
+                params['status'] = status
+            if merchant:
+                params['merchant'] = merchant
+            if utm_source:
+                params['utm_source'] = utm_source
+            if utm_campaign:
+                params['utm_campaign'] = utm_campaign
+            if utm_medium:
+                params['utm_medium'] = utm_medium
+            if utm_content:
+                params['utm_content'] = utm_content
+
+            response = requests.get(
+                f"{self.base_url}/order-list",
+                headers=self.headers,
+                params=params,
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'data': data.get('data', []),
+                    'total': data.get('total', 0)
+                }
+        except Exception:
+            pass
+        return {'data': [], 'total': 0}
+
+    # ═══════════════════════════════════════
+    # PRODUCT DETAIL  (single product info)
+    # Docs: https://developers.accesstrade.vn/api-publisher-vietnamese/lay-thong-tin-chi-tiet-san-pham
+    # ═══════════════════════════════════════
+
+    def get_product_detail(self, merchant, product_id, transaction_id):
+        """Get detailed information about a specific product.
+
+        GET /v1/product_detail
+
+        Args:
+            merchant:       Merchant name (e.g. 'lazada', 'shopee')
+            product_id:     Product identifier
+            transaction_id: Transaction code
+
+        Returns dict with:
+            name, price, discount, link, image, desc, short_desc,
+            brand, shop_name, shop_id, category_id, category_name
+        """
+        try:
+            params = {
+                'merchant': merchant,
+                'product_id': product_id,
+                'transaction_id': transaction_id,
+            }
+
+            response = requests.get(
+                f"{self.base_url}/product_detail",
+                headers=self.headers,
+                params=params,
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('data', {}) if isinstance(data.get('data'), dict) else data
+        except Exception:
+            pass
+        return {}
+
+    # ═══════════════════════════════════════
+    # TIKTOK SHOP  (product search + link creation)
+    # Docs: https://developers.accesstrade.vn/api-publisher-vietnamese/tich-hop-api-publisher-at-cho-chien-dich-tiktok-shop
+    # ═══════════════════════════════════════
+
+    def tiktok_search_products(self, title_keywords, sort_field='RECOMMENDED',
+                               limit=20, page_token=None, product_ids=None):
+        """Search TikTok Shop products.
+
+        GET /v2/tiktokshop_product_feeds
+
+        Args:
+            title_keywords: Search keywords (required)
+            sort_field:     RECOMMENDED, BEST_SELLERS, LOW_PRICE, HIGH_PRICE,
+                           NEWLY_RELEASED, HIGH_COMMISSION_RATE
+            limit:          Results per page
+            page_token:     Pagination token from previous response
+            product_ids:    Specific product IDs to retrieve
+
+        Returns dict with:
+            'products': list of product dicts (id, title, units_sold,
+                       main_image_url, detail_link, shop, original_price,
+                       sales_price, commission, category_chains)
+            'total_count': total matching products
+            'next_page_token': token for next page
+        """
+        try:
+            params = {
+                'title_keywords': title_keywords,
+                'sort_field': sort_field,
+                'limit': limit,
+            }
+            if page_token:
+                params['page_token'] = page_token
+            if product_ids:
+                params['product_ids'] = product_ids
+
+            response = requests.get(
+                f"https://api.accesstrade.vn/v2/tiktokshop_product_feeds",
+                headers=self.headers,
+                params=params,
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                result = data.get('data', {})
+                return {
+                    'products': result.get('products', []),
+                    'total_count': result.get('total_count', 0),
+                    'next_page_token': result.get('next_page_token', ''),
+                }
+        except Exception:
+            pass
+        return {'products': [], 'total_count': 0, 'next_page_token': ''}
+
+    def tiktok_create_link(self, product_url, product_id=None,
+                           utm_source=None, utm_medium=None,
+                           utm_campaign=None, utm_content=None,
+                           sub_1=None, sub_2=None, sub_3=None, sub_4=None):
+        """Create TikTok Shop affiliate tracking link.
+
+        POST /v2/tiktokshop_product_feeds/create_link
+
+        Args:
+            product_url: TikTok product URL (required)
+            product_id:  Product identifier (optional)
+            utm_*:       Tracking params
+            sub_1-4:     Custom tracking params
+
+        Returns dict with:
+            'status': bool
+            'aff_url': full affiliate link
+            'aff_short_url': shortened affiliate link
+            'product_id': product ID
+            'product_name': product name
+            'product_image': image URL
+            'product_price': {amount, currency}
+            'product_commission': {amount, currency, rate}
+        """
+        try:
+            payload = {'product_url': product_url}
+            if product_id:
+                payload['product_id'] = product_id
+            if utm_source:
+                payload['utm_source'] = utm_source
+            if utm_medium:
+                payload['utm_medium'] = utm_medium
+            if utm_campaign:
+                payload['utm_campaign'] = utm_campaign
+            if utm_content:
+                payload['utm_content'] = utm_content
+            if sub_1:
+                payload['sub_1'] = sub_1
+            if sub_2:
+                payload['sub_2'] = sub_2
+            if sub_3:
+                payload['sub_3'] = sub_3
+            if sub_4:
+                payload['sub_4'] = sub_4
+
+            response = requests.post(
+                f"https://api.accesstrade.vn/v2/tiktokshop_product_feeds/create_link",
+                headers=self.headers,
+                json=payload,
+                timeout=15
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                result = data.get('data', {})
+                return {
+                    'status': data.get('status', False),
+                    'message': data.get('message', ''),
+                    'aff_url': result.get('aff_url', ''),
+                    'aff_short_url': result.get('aff_short_url', ''),
+                    'product_id': result.get('product_id', ''),
+                    'product_name': result.get('product_name', ''),
+                    'product_image': result.get('product_image', ''),
+                    'product_price': result.get('product_price', {}),
+                    'product_commission': result.get('product_commission', {}),
+                }
+        except Exception:
+            pass
+        return {'status': False, 'message': 'Request failed', 'aff_url': '', 'aff_short_url': ''}
+
+    # ═══════════════════════════════════════
     # OFFERS / PROMOTIONS  (offers_informations)
     # ═══════════════════════════════════════
 

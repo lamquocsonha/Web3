@@ -2730,6 +2730,97 @@ def admin_products_datafeeds():
         page=page, total_pages=total_pages)
 
 
+@app.route('/admin/api/create-tracking-link', methods=['POST'])
+def admin_api_create_tracking_link():
+    """API endpoint: convert product URLs to affiliate tracking links."""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return jsonify({'success': False, 'error': 'AccessTrade API not configured'}), 400
+
+    data = request.get_json() or {}
+    campaign_id = data.get('campaign_id', '')
+    urls = data.get('urls', [])
+    if not campaign_id:
+        return jsonify({'success': False, 'error': 'campaign_id is required'}), 400
+    if not urls:
+        return jsonify({'success': False, 'error': 'urls list is required'}), 400
+
+    result = api.create_tracking_link(
+        campaign_id=campaign_id,
+        urls=urls,
+        utm_source=data.get('utm_source'),
+        utm_campaign=data.get('utm_campaign'),
+    )
+    return jsonify(result)
+
+
+@app.route('/admin/api/order-list')
+def admin_api_order_list():
+    """API endpoint: get AccessTrade order list v2."""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return jsonify({'data': [], 'total': 0, 'error': 'AccessTrade API not configured'}), 400
+
+    since = request.args.get('since', '')
+    until = request.args.get('until', '')
+    if not since or not until:
+        return jsonify({'data': [], 'total': 0, 'error': 'since and until are required'}), 400
+
+    result = api.get_order_list(
+        since=since,
+        until=until,
+        page=request.args.get('page', 1, type=int),
+        limit=request.args.get('limit', 30, type=int),
+        status=request.args.get('status', None, type=int),
+        merchant=request.args.get('merchant', None),
+    )
+    return jsonify(result)
+
+
+@app.route('/admin/api/tiktok-search')
+def admin_api_tiktok_search():
+    """API endpoint: search TikTok Shop products."""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return jsonify({'products': [], 'total_count': 0, 'error': 'API not configured'}), 400
+
+    keywords = request.args.get('q', '')
+    if not keywords:
+        return jsonify({'products': [], 'total_count': 0, 'error': 'q is required'}), 400
+
+    result = api.tiktok_search_products(
+        title_keywords=keywords,
+        sort_field=request.args.get('sort', 'RECOMMENDED'),
+        limit=request.args.get('limit', 20, type=int),
+        page_token=request.args.get('page_token', None),
+    )
+    return jsonify(result)
+
+
+@app.route('/admin/api/tiktok-create-link', methods=['POST'])
+def admin_api_tiktok_create_link():
+    """API endpoint: create TikTok Shop affiliate link."""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return jsonify({'status': False, 'error': 'API not configured'}), 400
+
+    data = request.get_json() or {}
+    product_url = data.get('product_url', '')
+    if not product_url:
+        return jsonify({'status': False, 'error': 'product_url is required'}), 400
+
+    result = api.tiktok_create_link(
+        product_url=product_url,
+        product_id=data.get('product_id'),
+        utm_source=data.get('utm_source'),
+    )
+    return jsonify(result)
+
+
 @app.route('/admin/products/reclassify-hub', methods=['POST'])
 def admin_products_reclassify_hub():
     """Re-run matching on Hub products → move matched ones to verticals.

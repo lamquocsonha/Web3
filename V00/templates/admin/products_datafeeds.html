@@ -82,10 +82,10 @@ Datafeeds
         {% for p in products %}
         <label class="df-card" style="display:block;border:2px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative" data-idx="{{ loop.index0 }}">
           <input type="checkbox" name="selected_products" class="product-cb" style="position:absolute;top:12px;left:12px;width:18px;height:18px;z-index:2"
-                 value='{{ {"name": p.name or p.product_name, "url": p.product_url or p.url, "deep_link": p.deep_link or "", "image": p.image or p.image_url, "price": p.price or p.original_price, "promotion_price": p.promotion_price, "category": p.category or ""}|tojson }}'>
+                 value='{{ {"name": p.name|default(p.product_name|default("", true), true), "url": p.product_url|default(p.url|default("", true), true), "deep_link": p.deep_link|default(p.aff_link|default("", true), true), "image": p.image|default(p.image_url|default("", true), true), "price": p.price|default(p.original_price|default(0, true), true), "promotion_price": p.promotion_price|default(p.discount|default(0, true), true), "category": p.category|default(p.cate|default("", true), true)}|tojson }}'>
           <div style="height:160px;background:var(--code-bg);display:flex;align-items:center;justify-content:center;overflow:hidden">
-            {% if p.image or p.image_url %}
-            <img src="{{ p.image or p.image_url }}" alt="" style="max-width:100%;max-height:100%;object-fit:contain" loading="lazy"
+            {% if p.image|default('', true) or p.image_url|default('', true) %}
+            <img src="{{ p.image|default(p.image_url|default('', true), true) }}" alt="" style="max-width:100%;max-height:100%;object-fit:contain" loading="lazy"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
             <div style="display:none;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-dim);font-size:40px">📦</div>
             {% else %}
@@ -94,24 +94,27 @@ Datafeeds
           </div>
           <div style="padding:12px">
             <div style="font-size:14px;font-weight:600;line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:40px">
-              {{ p.name or p.product_name or 'N/A' }}
+              {{ p.name|default(p.product_name|default('N/A', true), true) }}
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-              {% if p.promotion_price and p.promotion_price != p.price and p.promotion_price != p.original_price %}
+              {% set promo = p.promotion_price|default(p.discount|default(0, true), true)|float %}
+              {% set orig = p.price|default(p.original_price|default(0, true), true)|float %}
+              {% if promo and promo != orig %}
               <div>
-                <span style="font-size:16px;font-weight:700;color:#ef4444">{{ "{:,.0f}".format(p.promotion_price|float) }}đ</span>
-                <span style="font-size:12px;color:var(--text-dim);text-decoration:line-through;margin-left:4px">{{ "{:,.0f}".format((p.price or p.original_price)|float) }}đ</span>
+                <span style="font-size:16px;font-weight:700;color:#ef4444">{{ "{:,.0f}".format(promo) }}đ</span>
+                <span style="font-size:12px;color:var(--text-dim);text-decoration:line-through;margin-left:4px">{{ "{:,.0f}".format(orig) }}đ</span>
               </div>
               {% else %}
-              <span style="font-size:16px;font-weight:700">{{ "{:,.0f}".format((p.price or p.original_price or 0)|float) }}đ</span>
+              <span style="font-size:16px;font-weight:700">{{ "{:,.0f}".format(orig) }}đ</span>
               {% endif %}
-              {% if p.discount_percent or p.discount %}
-              <span style="background:#fef2f2;color:#ef4444;font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px">-{{ p.discount_percent or p.discount }}%</span>
+              {% set disc_rate = p.discount_percent|default(p.discount_rate|default(0, true), true)|float %}
+              {% if disc_rate %}
+              <span style="background:#fef2f2;color:#ef4444;font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px">-{{ disc_rate|int }}%</span>
               {% endif %}
             </div>
             <div style="font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between">
-              <span>{{ p.domain or '' }}</span>
-              <span>{{ p.category or '' }}</span>
+              <span>{{ p.domain|default('', true) }}</span>
+              <span>{{ p.category|default(p.cate|default('', true), true) }}</span>
             </div>
           </div>
         </label>
