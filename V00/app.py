@@ -5291,6 +5291,8 @@ def voucher_index():
     f_type = request.args.get('type', '')  # percentage, fixed_amount, free_shipping
     f_platform = request.args.get('platform', '')  # shopee, lazada, grab...
     f_sort = request.args.get('sort', 'newest')  # newest, discount, expiring
+    page = request.args.get('page', 1, type=int)
+    per_page = 24
 
     # Build query
     q = Voucher.query.filter_by(is_active=True)
@@ -5317,6 +5319,12 @@ def voucher_index():
         vouchers.sort(key=lambda v: v.valid_to or datetime.max)
     else:
         vouchers.sort(key=lambda v: v.created_at or datetime.min, reverse=True)
+
+    # Pagination
+    total_vouchers = len(vouchers)
+    total_pages = max(1, (total_vouchers + per_page - 1) // per_page)
+    page = min(page, total_pages)
+    vouchers_paginated = vouchers[(page - 1) * per_page : page * per_page]
 
     # Featured: top discount vouchers as featured if none marked
     featured = Voucher.query.filter_by(is_active=True, is_featured=True).limit(6).all()
@@ -5366,7 +5374,9 @@ def voucher_index():
     widgets = VoucherWidget.query.filter_by(is_active=True, placement='voucher_page').order_by(VoucherWidget.position).all()
 
     return render_template('voucher/index.html',
-        vouchers=vouchers, featured=featured, categories=categories,
+        vouchers=vouchers_paginated, total_vouchers=total_vouchers,
+        page=page, total_pages=total_pages, per_page=per_page,
+        featured=featured, categories=categories,
         merchants=merchants, merchant_count_map=merchant_count_map,
         platform_stats=platform_stats, expiring_soon=expiring_soon,
         widgets=widgets, f_category=f_category, f_merchant=f_merchant,

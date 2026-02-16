@@ -44,7 +44,7 @@
   <section class="v-hero">
     <div class="v-hero-inner">
       <h1>Mã giảm giá & Voucher</h1>
-      <p class="v-hero-sub">{{ vouchers|length }} voucher đang hoạt động — Cập nhật tự động từ AccessTrade</p>
+      <p class="v-hero-sub">{{ total_vouchers }} voucher đang hoạt động — Cập nhật tự động từ AccessTrade</p>
       <div class="v-hero-platforms">
         {% for pname, pcount in platform_stats.items() %}
         <a href="{{ url_for('voucher_index', platform=pname.lower()) }}" class="v-platform-chip {% if f_platform == pname.lower() %}active{% endif %}">
@@ -204,6 +204,12 @@
     <!-- GRID -->
     <div class="voucher-main">
       {% if vouchers %}
+      <!-- Info bar -->
+      <div class="v-info-bar">
+        <span>{{ total_vouchers }} voucher{% if f_category or f_merchant or f_type or f_platform %} (đã lọc){% endif %}</span>
+        <span>Trang {{ page }}/{{ total_pages }}</span>
+      </div>
+
       <div class="voucher-grid">
         {% for v in vouchers %}
         <div class="voucher-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
@@ -230,6 +236,37 @@
         </div>
         {% endfor %}
       </div>
+
+      <!-- PAGINATION -->
+      {% if total_pages > 1 %}
+      <nav class="v-pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('voucher_index', page=page-1, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-btn">&laquo; Trước</a>
+        {% endif %}
+
+        {% set start_page = [1, page - 2]|max %}
+        {% set end_page = [total_pages, page + 2]|min %}
+
+        {% if start_page > 1 %}
+        <a href="{{ url_for('voucher_index', page=1, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-num">1</a>
+        {% if start_page > 2 %}<span class="v-pg-dots">...</span>{% endif %}
+        {% endif %}
+
+        {% for p in range(start_page, end_page + 1) %}
+        <a href="{{ url_for('voucher_index', page=p, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-num {% if p == page %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+
+        {% if end_page < total_pages %}
+        {% if end_page < total_pages - 1 %}<span class="v-pg-dots">...</span>{% endif %}
+        <a href="{{ url_for('voucher_index', page=total_pages, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-num">{{ total_pages }}</a>
+        {% endif %}
+
+        {% if page < total_pages %}
+        <a href="{{ url_for('voucher_index', page=page+1, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-btn">Sau &raquo;</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+
       {% else %}
       <div class="empty-state">
         <span style="font-size:64px">🔍</span>
