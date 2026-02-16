@@ -17,7 +17,7 @@
   <div class="stat-card"><div class="stat-label">Bookings</div><div class="stat-value" style="color:#8b5cf6">{{ "{:,}".format(total_conv) }}</div></div>
 </div>
 
-<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between">
   <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap">
     <select name="destination" class="form-select" style="width:150px;padding:8px;font-size:14px">
       <option value="">All Destinations</option>
@@ -38,17 +38,28 @@
 </div>
 
 {% if hotels %}
+<!-- Bulk action bar -->
+<div id="bulkBar" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;position:sticky;top:60px;z-index:10">
+  <span id="bulkCount" style="font-size:14px;font-weight:600">0 selected</span>
+  <form method="POST" action="{{ url_for('admin_hotels_bulk_delete') }}" id="bulkForm" style="display:inline">
+    <div id="bulkInputs"></div>
+    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xoa ' + document.querySelectorAll('.hotel-cb:checked').length + ' khach san?')">🗑 Xoa da chon</button>
+  </form>
+  <button type="button" class="btn btn-ghost btn-sm" onclick="toggleAll(false)" style="font-size:13px">Bo chon</button>
+</div>
+
 <div class="table-wrap">
   <table class="data-table">
     <thead><tr>
-      <th style="width:35px">#</th><th style="width:60px">Image</th><th>Hotel</th><th>Destination</th><th>Stars</th>
+      <th style="width:32px"><input type="checkbox" id="selectAll" title="Chon tat ca" style="width:16px;height:16px;cursor:pointer"></th>
+      <th style="width:60px">Image</th><th>Hotel</th><th>Destination</th><th>Stars</th>
       <th style="text-align:center">Rating</th><th style="text-align:right">Price/đêm</th>
       <th style="text-align:center">Clicks</th><th>Status</th><th>Actions</th>
     </tr></thead>
     <tbody>
       {% for h in hotels %}
       <tr>
-        <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ h.id }}</td>
+        <td><input type="checkbox" class="hotel-cb" value="{{ h.id }}" style="width:16px;height:16px;cursor:pointer"></td>
         <td>
           {% if h.image_url %}
           <img src="{{ h.image_url }}" alt="{{ h.name }}" style="width:56px;height:40px;object-fit:cover;border-radius:4px;display:block" onerror="this.outerHTML='<div style=\'width:56px;height:40px;background:var(--bg-hover);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px\'>🏨</div>'" loading="lazy">
@@ -87,6 +98,42 @@
   </table>
 </div>
 <div style="margin-top:12px;font-size:14px;color:var(--text-dim)">{{ hotels|length }} hotels</div>
+
+<script>
+var selectAll = document.getElementById('selectAll');
+var bulkBar = document.getElementById('bulkBar');
+var bulkCount = document.getElementById('bulkCount');
+var bulkInputs = document.getElementById('bulkInputs');
+var checkboxes = document.querySelectorAll('.hotel-cb');
+
+function updateBulkBar() {
+  var checked = document.querySelectorAll('.hotel-cb:checked');
+  var n = checked.length;
+  if (n > 0) {
+    bulkBar.style.display = 'flex';
+    bulkCount.textContent = n + ' selected';
+    bulkInputs.innerHTML = '';
+    checked.forEach(function(cb) {
+      var inp = document.createElement('input');
+      inp.type = 'hidden'; inp.name = 'hotel_ids'; inp.value = cb.value;
+      bulkInputs.appendChild(inp);
+    });
+  } else {
+    bulkBar.style.display = 'none';
+  }
+  selectAll.checked = n === checkboxes.length && n > 0;
+  selectAll.indeterminate = n > 0 && n < checkboxes.length;
+}
+
+function toggleAll(state) {
+  checkboxes.forEach(function(cb) { cb.checked = state; });
+  updateBulkBar();
+}
+
+selectAll.addEventListener('change', function() { toggleAll(this.checked); });
+checkboxes.forEach(function(cb) { cb.addEventListener('change', updateBulkBar); });
+</script>
+
 {% else %}
 <div class="empty-state"><div class="empty-icon">🏨</div><p>No hotels yet</p><a href="{{ url_for('admin_hotel_new') }}" class="btn btn-primary" style="margin-top:12px">Add first hotel</a></div>
 {% endif %}

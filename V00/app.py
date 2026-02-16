@@ -3262,6 +3262,17 @@ def admin_hotel_delete(hid):
     flash('Da xoa khach san', 'success')
     return redirect(url_for('admin_hotels'))
 
+@app.route('/admin/hotels/bulk-delete', methods=['POST'])
+def admin_hotels_bulk_delete():
+    ids = request.form.getlist('hotel_ids')
+    if not ids:
+        flash('Chua chon khach san nao', 'warning')
+        return redirect(url_for('admin_hotels'))
+    count = Hotel.query.filter(Hotel.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    flash(f'Da xoa {count} khach san', 'success')
+    return redirect(url_for('admin_hotels'))
+
 # =============================================
 # ADMIN — HOTEL SYNC (Agoda API)
 # =============================================
@@ -3440,7 +3451,7 @@ def admin_hotel_sync_fast():
 
     data = request.get_json() or {}
     destination = data.get('destination', '')
-    max_per_city = int(data.get('max_per_city', 10))
+    max_per_city = int(data.get('max_per_city', 30))
 
     if not destination:
         return jsonify({'error': 'Thieu destination', 'imported': 0})
