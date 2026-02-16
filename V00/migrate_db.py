@@ -199,6 +199,32 @@ def migrate():
             db.session.commit()
             print("✅ voucher_widget table created")
 
+        # Add price_original column to hotel table (if not exists)
+        try:
+            db.session.execute(db.text("SELECT price_original FROM hotel LIMIT 1"))
+            print("✅ hotel.price_original column exists")
+        except:
+            db.session.rollback()
+            print("📝 Adding price_original column to hotel table...")
+            db.session.execute(db.text("""
+                ALTER TABLE hotel ADD COLUMN price_original FLOAT DEFAULT 0
+            """))
+            db.session.commit()
+            print("✅ hotel.price_original column added")
+
+        # Add price_original column to attraction table (if not exists)
+        try:
+            db.session.execute(db.text("SELECT price_original FROM attraction LIMIT 1"))
+            print("✅ attraction.price_original column exists")
+        except:
+            db.session.rollback()
+            print("📝 Adding price_original column to attraction table...")
+            db.session.execute(db.text("""
+                ALTER TABLE attraction ADD COLUMN price_original FLOAT DEFAULT 0
+            """))
+            db.session.commit()
+            print("✅ attraction.price_original column added")
+
         print("\n🎉 Database migration complete!")
 
 if __name__ == '__main__':

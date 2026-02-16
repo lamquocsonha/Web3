@@ -5381,6 +5381,18 @@ def _run_schema_migration():
         """))
         changed = True
 
+    # --- Hotel table ---
+    hotel_cols = _get_table_columns('hotel')
+    if hotel_cols:
+        if _ensure_column('hotel', 'price_original', "FLOAT DEFAULT 0", hotel_cols):
+            changed = True
+
+    # --- Attraction table ---
+    attraction_cols = _get_table_columns('attraction')
+    if attraction_cols:
+        if _ensure_column('attraction', 'price_original', "FLOAT DEFAULT 0", attraction_cols):
+            changed = True
+
     if changed:
         db.session.commit()
 
