@@ -3,12 +3,10 @@ chcp 65001 >nul 2>&1
 title Unilab - Running on port 7000
 
 REM Kill any existing process using port 7000
-echo [*] Checking for existing processes on port 7000...
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":7000 " ^| findstr "LISTENING"') do (
     echo [*] Killing PID %%a on port 7000...
     taskkill /F /PID %%a >nul 2>&1
 )
-timeout /t 1 /nobreak >nul
 
 if not exist venv (
     echo [ERROR] Run install.bat first!
@@ -34,7 +32,6 @@ echo   Press Ctrl+C to stop
 echo ==========================================
 echo.
 
-start http://localhost:7000/admin
 python app.py
 
 REM Pause if app exits with error

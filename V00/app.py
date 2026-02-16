@@ -5093,8 +5093,14 @@ def _run_schema_migration():
 if __name__ == '__main__':
     import os
 
-    with app.app_context():
-        db.create_all()
-        _run_schema_migration()
+    # Only init DB once (skip on Werkzeug reloader child process)
+    if not os.environ.get('WERKZEUG_RUN_MAIN'):
+        with app.app_context():
+            db.create_all()
+            _run_schema_migration()
+
+        # Auto-open browser after server is ready (only once, not on reload)
+        import threading, webbrowser
+        threading.Timer(1.5, webbrowser.open, args=['http://localhost:7000/admin']).start()
 
     app.run(host='0.0.0.0', port=7000, debug=True)
