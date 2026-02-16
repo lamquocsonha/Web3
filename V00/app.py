@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal, WardCommune
+from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal, WardCommune, AccessTradeBanner
 from datetime import datetime, date, timedelta
 import os, random, json
 
@@ -225,6 +225,24 @@ def inject_globals():
                 HotDeal.end_date > now_utc
             ).order_by(HotDeal.end_date.asc()).all()
 
+        # AccessTrade auto-pull banners
+        at_banners_hotdeal = []
+        at_banners_sidebar = []
+        try:
+            now_utc2 = datetime.utcnow()
+            at_all = AccessTradeBanner.query.filter(
+                AccessTradeBanner.is_active == True
+            ).order_by(AccessTradeBanner.synced_at.desc()).all()
+            for ab in at_all:
+                if ab.end_date and ab.end_date < now_utc2:
+                    continue
+                if ab.placement in ('hotdeal', 'both'):
+                    at_banners_hotdeal.append(ab)
+                if ab.placement in ('sidebar', 'both'):
+                    at_banners_sidebar.append(ab)
+        except Exception:
+            pass
+
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
             'now': datetime.utcnow(),
@@ -241,9 +259,11 @@ def inject_globals():
             'hotdeals_active': hotdeals_active,
             'hotdeal_show_shop': hd_show_shop,
             'hotdeal_show_voucher': hd_show_voucher,
+            'at_banners_hotdeal': at_banners_hotdeal,
+            'at_banners_sidebar': at_banners_sidebar,
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1', 'hotdeals_active': [], 'hotdeal_show_shop': '1', 'hotdeal_show_voucher': '1'}
+        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1', 'hotdeals_active': [], 'hotdeal_show_shop': '1', 'hotdeal_show_voucher': '1', 'at_banners_hotdeal': [], 'at_banners_sidebar': []}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -3975,6 +3995,187 @@ def admin_hotdeals_delete_all():
     db.session.commit()
     flash(f'Da xoa {count} deal', 'success')
     return redirect(url_for('admin_hotdeals'))
+
+# =============================================
+# ADMIN — ACCESSTRADE BANNERS (Auto-pull)
+# =============================================
+
+@app.route('/admin/at-banners')
+def admin_at_banners():
+    """Manage auto-pulled AccessTrade banners"""
+    banners = AccessTradeBanner.query.order_by(AccessTradeBanner.synced_at.desc()).all()
+    now = datetime.utcnow()
+    return render_template('admin/at_banners.html', banners=banners, now=now)
+
+@app.route('/admin/at-banners/sync', methods=['POST'])
+def admin_at_banners_sync():
+    """Pull offers/coupons from AccessTrade API and save as banners"""
+    try:
+        from accesstrade_integration import get_accesstrade_api
+        api = get_accesstrade_api()
+        if not api:
+            flash('Chua cau hinh AccessTrade API key. Vao Settings de thiet lap.', 'error')
+            return redirect(url_for('admin_at_banners'))
+
+        # Pull offers (active only)
+        offers = api.get_offers(limit=100, status=1)
+        # Also pull hot coupons
+        coupons = api.get_coupons_hot(limit=50)
+
+        imported = 0
+        updated = 0
+        all_items = []
+
+        # Parse offers
+        for raw in offers:
+            item = api._parse_offer(raw)
+            item['_source'] = 'offer'
+            all_items.append(item)
+
+        # Parse coupons
+        for raw in coupons:
+            item = api._parse_offer(raw)
+            item['_source'] = 'coupon'
+            all_items.append(item)
+
+        for item in all_items:
+            offer_id = item.get('offer_id', '')
+            if not offer_id:
+                continue
+
+            # Build discount text
+            discount_parts = []
+            if item.get('discount_percentage'):
+                discount_parts.append(str(item['discount_percentage']) + '%')
+            if item.get('discount_value'):
+                val = item['discount_value']
+                if isinstance(val, (int, float)) and val >= 1000:
+                    discount_parts.append(str(int(val / 1000)) + 'K')
+                elif val:
+                    discount_parts.append(str(val))
+            discount_text = ' | '.join(discount_parts) if discount_parts else ''
+
+            # Parse dates
+            start_dt = None
+            end_dt = None
+            for date_str in [item.get('start_date', '')]:
+                if date_str:
+                    try:
+                        start_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
+                    except Exception:
+                        pass
+            for date_str in [item.get('end_date', '')]:
+                if date_str:
+                    try:
+                        end_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
+                    except Exception:
+                        pass
+
+            # Image: prefer offer image, then merchant logo
+            image_url = ''
+            raw_img = item.get('merchant_logo', '')
+            if raw_img and isinstance(raw_img, str) and raw_img.startswith('http'):
+                image_url = raw_img
+            # Override with direct offer image if available from raw data
+            for raw in offers + coupons:
+                if str(raw.get('id', '')) == offer_id:
+                    direct_img = raw.get('image', '') or ''
+                    if direct_img and isinstance(direct_img, str) and direct_img.startswith('http'):
+                        image_url = direct_img
+                    break
+
+            # Upsert
+            existing = AccessTradeBanner.query.filter_by(offer_id=offer_id).first()
+            if existing:
+                existing.offer_name = item.get('offer_name', existing.offer_name)
+                existing.description = item.get('description', '')[:500]
+                existing.merchant = item.get('merchant', '')
+                existing.merchant_logo = item.get('merchant_logo', '')
+                existing.category = item.get('category', '')
+                existing.aff_link = item.get('aff_link', '')
+                existing.discount_text = discount_text
+                if image_url:
+                    existing.image_url = image_url
+                if start_dt:
+                    existing.start_date = start_dt
+                if end_dt:
+                    existing.end_date = end_dt
+                existing.synced_at = datetime.utcnow()
+                updated += 1
+            else:
+                banner = AccessTradeBanner(
+                    offer_id=offer_id,
+                    offer_name=item.get('offer_name', 'Unknown'),
+                    description=item.get('description', '')[:500],
+                    merchant=item.get('merchant', ''),
+                    merchant_logo=item.get('merchant_logo', ''),
+                    category=item.get('category', ''),
+                    image_url=image_url,
+                    aff_link=item.get('aff_link', ''),
+                    start_date=start_dt,
+                    end_date=end_dt,
+                    discount_text=discount_text,
+                    placement='hotdeal',
+                    is_active=True,
+                )
+                db.session.add(banner)
+                imported += 1
+
+        db.session.commit()
+        flash(f'Sync thanh cong: {imported} banner moi, {updated} cap nhat. Tong {len(all_items)} offers/coupons.', 'success')
+    except Exception as e:
+        flash(f'Loi sync: {str(e)}', 'error')
+
+    return redirect(url_for('admin_at_banners'))
+
+@app.route('/admin/at-banners/<int:banner_id>/toggle', methods=['POST'])
+def admin_at_banner_toggle(banner_id):
+    """Toggle banner active status"""
+    b = AccessTradeBanner.query.get_or_404(banner_id)
+    b.is_active = not b.is_active
+    db.session.commit()
+    flash(f'{"Bat" if b.is_active else "Tat"} banner: {b.merchant}', 'success')
+    return redirect(url_for('admin_at_banners'))
+
+@app.route('/admin/at-banners/<int:banner_id>/placement', methods=['POST'])
+def admin_at_banner_placement(banner_id):
+    """Change banner placement"""
+    b = AccessTradeBanner.query.get_or_404(banner_id)
+    new_placement = request.form.get('placement', 'hotdeal')
+    if new_placement in ('hotdeal', 'sidebar', 'both'):
+        b.placement = new_placement
+        db.session.commit()
+        flash(f'Da doi vi tri: {b.merchant} → {new_placement}', 'success')
+    return redirect(url_for('admin_at_banners'))
+
+@app.route('/admin/at-banners/<int:banner_id>/delete', methods=['POST'])
+def admin_at_banner_delete(banner_id):
+    """Delete a banner"""
+    b = AccessTradeBanner.query.get_or_404(banner_id)
+    name = b.merchant or b.offer_name[:30]
+    db.session.delete(b)
+    db.session.commit()
+    flash(f'Da xoa banner: {name}', 'success')
+    return redirect(url_for('admin_at_banners'))
+
+@app.route('/admin/at-banners/delete-all', methods=['POST'])
+def admin_at_banners_delete_all():
+    """Delete all banners"""
+    count = AccessTradeBanner.query.count()
+    AccessTradeBanner.query.delete()
+    db.session.commit()
+    flash(f'Da xoa {count} banner', 'success')
+    return redirect(url_for('admin_at_banners'))
+
+@app.route('/admin/at-banners/click/<int:banner_id>')
+def admin_at_banner_click(banner_id):
+    """Track banner click and redirect to affiliate link"""
+    b = AccessTradeBanner.query.get(banner_id)
+    if b and b.aff_link:
+        b.clicks = (b.clicks or 0) + 1
+        db.session.commit()
+        return redirect(b.aff_link)
+    return redirect(url_for('index'))
 
 # =============================================
 # ADMIN — WARD/COMMUNE (Phường/Xã)

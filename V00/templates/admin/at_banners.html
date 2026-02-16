@@ -1,0 +1,167 @@
+{% extends "admin/base.html" %}
+{% block title %}AT Banners{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>AccessTrade Banners{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <h1 class="page-title" style="margin:0">&#127912; AccessTrade Banners</h1>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <form method="POST" action="{{ url_for('admin_at_banners_sync') }}">
+      <button type="submit" class="btn btn-primary">&#128260; Sync tu AccessTrade</button>
+    </form>
+    {% if banners %}
+    <form method="POST" action="{{ url_for('admin_at_banners_delete_all') }}" onsubmit="return confirm('Xoa tat ca banner?')">
+      <button type="submit" class="btn btn-ghost" style="color:var(--red)">Xoa tat ca</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Stats -->
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+  {% set active_banners = banners|selectattr('is_active')|list %}
+  {% set valid_list = [] %}
+  {% for b in active_banners %}
+    {% if not b.end_date or b.end_date > now %}
+      {% if valid_list.append(b) %}{% endif %}
+    {% endif %}
+  {% endfor %}
+  {% set hotdeal_count = banners|selectattr('placement','in',['hotdeal','both'])|list|length %}
+  {% set sidebar_count = banners|selectattr('placement','in',['sidebar','both'])|list|length %}
+  <div class="stat-chip">Tong: <strong>{{ banners|length }}</strong></div>
+  <div class="stat-chip" style="color:#22c55e">Dang hoat dong: <strong>{{ valid_list|length }}</strong></div>
+  <div class="stat-chip" style="color:#3b82f6">HotDeal: <strong>{{ hotdeal_count }}</strong></div>
+  <div class="stat-chip" style="color:#f59e0b">Sidebar: <strong>{{ sidebar_count }}</strong></div>
+  {% set total_clicks = banners|map(attribute='clicks')|sum %}
+  <div class="stat-chip" style="color:#8b5cf6">Clicks: <strong>{{ total_clicks }}</strong></div>
+</div>
+
+<p style="color:var(--text-dim);margin-bottom:16px">
+  Bam <strong>Sync tu AccessTrade</strong> de tu dong pull offers/coupons tu API. Banner se hien thi tren trang Shop (HotDeal carousel) va Sidebar.<br>
+  Vi tri: <strong>hotdeal</strong> = carousel, <strong>sidebar</strong> = sidebar widget, <strong>both</strong> = ca hai.
+</p>
+
+{% if banners %}
+<div class="table-wrap" style="max-height:600px;overflow-y:auto">
+  <table class="data-table">
+    <thead style="position:sticky;top:0;z-index:2">
+      <tr>
+        <th style="width:40px">#</th>
+        <th style="width:70px">Anh</th>
+        <th>Merchant</th>
+        <th>Ten offer</th>
+        <th style="width:80px">Giam gia</th>
+        <th style="width:80px">Vi tri</th>
+        <th style="width:90px">Het han</th>
+        <th style="width:50px">Clicks</th>
+        <th style="width:80px">Trang thai</th>
+        <th style="width:140px">Thao tac</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in banners %}
+      <tr style="{% if (b.end_date and b.end_date < now) or not b.is_active %}opacity:0.5{% endif %}">
+        <td>{{ loop.index }}</td>
+        <td>
+          {% if b.image_url %}
+          <img src="{{ b.image_url }}" style="width:60px;height:40px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#f9f9f9" onerror="this.style.display='none'" loading="lazy">
+          {% elif b.merchant_logo %}
+          <img src="{{ b.merchant_logo }}" style="width:40px;height:40px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'" loading="lazy">
+          {% else %}
+          <span style="color:var(--text-dim)">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <strong>{{ b.merchant or '—' }}</strong>
+          {% if b.category %}
+          <br><span style="font-size:11px;color:var(--text-dim)">{{ b.category }}</span>
+          {% endif %}
+        </td>
+        <td style="max-width:250px">
+          <div style="font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
+            {{ b.offer_name }}
+          </div>
+          {% if b.aff_link %}
+          <a href="{{ b.aff_link }}" target="_blank" rel="nofollow noopener" style="font-size:11px;color:var(--accent)">Link &#8599;</a>
+          {% endif %}
+        </td>
+        <td>
+          {% if b.discount_text %}
+          <span class="badge badge-orange">{{ b.discount_text }}</span>
+          {% else %}
+          <span style="color:var(--text-dim)">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('admin_at_banner_placement', banner_id=b.id) }}" style="margin:0">
+            <select name="placement" onchange="this.form.submit()" style="font-size:12px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer">
+              <option value="hotdeal" {% if b.placement == 'hotdeal' %}selected{% endif %}>HotDeal</option>
+              <option value="sidebar" {% if b.placement == 'sidebar' %}selected{% endif %}>Sidebar</option>
+              <option value="both" {% if b.placement == 'both' %}selected{% endif %}>Both</option>
+            </select>
+          </form>
+        </td>
+        <td style="white-space:nowrap;font-size:12px">
+          {% if b.end_date %}
+            {{ b.end_date.strftime('%d/%m/%Y') }}
+            {% if b.end_date < now %}
+            <br><span style="color:#ef4444;font-size:11px;font-weight:600">HET HAN</span>
+            {% else %}
+            <br><span style="color:#22c55e;font-size:11px;font-weight:600">CON HAN</span>
+            {% endif %}
+          {% else %}
+          <span style="color:var(--text-dim)">—</span>
+          {% endif %}
+        </td>
+        <td style="text-align:center;font-weight:600">{{ b.clicks or 0 }}</td>
+        <td>
+          {% if b.is_active and (not b.end_date or b.end_date > now) %}
+          <span class="badge badge-green">Hien thi</span>
+          {% elif not b.is_active %}
+          <span class="badge badge-gray">An</span>
+          {% else %}
+          <span class="badge badge-red">Het han</span>
+          {% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <form method="POST" action="{{ url_for('admin_at_banner_toggle', banner_id=b.id) }}">
+              <button type="submit" class="btn btn-ghost btn-sm" title="{{ 'Tat' if b.is_active else 'Bat' }}">
+                {% if b.is_active %}&#128065;{% else %}&#128064;{% endif %}
+              </button>
+            </form>
+            <form method="POST" action="{{ url_for('admin_at_banner_delete', banner_id=b.id) }}" onsubmit="return confirm('Xoa banner nay?')">
+              <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)" title="Xoa">&#128465;</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p style="margin-top:8px;color:var(--text-dim);font-size:13px">
+  Hien thi {{ banners|length }} banner.
+  {% if banners[0].synced_at %}
+  Lan sync cuoi: {{ banners[0].synced_at.strftime('%d/%m/%Y %H:%M') }}
+  {% endif %}
+</p>
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;margin-bottom:12px">&#127912;</div>
+  <h3>Chua co banner nao</h3>
+  <p>Bam <strong>Sync tu AccessTrade</strong> de tu dong pull offers va coupons tu API.</p>
+</div>
+{% endif %}
+
+<style>
+.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 16px;font-size:14px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-green{background:rgba(34,197,94,0.1);color:#22c55e}
+.badge-red{background:rgba(239,68,68,0.1);color:#ef4444}
+.badge-gray{background:rgba(107,114,128,0.1);color:#6b7280}
+.badge-orange{background:rgba(249,115,22,0.1);color:#f97316}
+.btn-sm{padding:4px 8px;font-size:13px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.empty-state h3{margin-bottom:8px;color:var(--text)}
+</style>
+{% endblock %}

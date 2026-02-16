@@ -467,6 +467,34 @@ class WardCommune(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class AccessTradeBanner(db.Model):
+    """Auto-pulled banners/offers from AccessTrade API"""
+    id = db.Column(db.Integer, primary_key=True)
+    offer_id = db.Column(db.String(50), nullable=False, index=True)
+    offer_name = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.Text, default='')
+    merchant = db.Column(db.String(200), default='')
+    merchant_logo = db.Column(db.String(500), default='')
+    category = db.Column(db.String(200), default='')
+    image_url = db.Column(db.String(1000), default='')
+    aff_link = db.Column(db.String(1000), default='')
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    discount_text = db.Column(db.String(200), default='')  # e.g. "50%" or "100K"
+    placement = db.Column(db.String(50), default='hotdeal')  # hotdeal / sidebar / both
+    is_active = db.Column(db.Boolean, default=True)
+    clicks = db.Column(db.Integer, default=0)
+    synced_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def is_valid(self):
+        now = datetime.utcnow()
+        if not self.is_active:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
+
 class VoucherWidget(db.Model):
     """Voucher embed widgets from affiliate networks (AccessTrade, etc.)"""
     id = db.Column(db.Integer, primary_key=True)
