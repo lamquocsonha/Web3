@@ -4115,7 +4115,7 @@ def admin_at_banners_sync():
                     start_date=start_dt,
                     end_date=end_dt,
                     discount_text=discount_text,
-                    placement='hotdeal',
+                    placement='both',
                     is_active=True,
                 )
                 db.session.add(banner)
