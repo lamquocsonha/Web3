@@ -4,8 +4,9 @@ API Documentation: https://developers.accesstrade.vn/
 """
 import requests
 import json
+import os
 
-API_KEY = "byMkvHrygyW5bZCaP3O2AZDv4P4DY34F"
+API_KEY = os.environ.get("ACCESSTRADE_API_KEY", "")
 BASE_URL = "https://api.accesstrade.vn/v1"
 
 headers = {
