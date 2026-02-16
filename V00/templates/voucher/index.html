@@ -59,23 +59,27 @@
       <h2>🔥 Ưu đãi tốt nhất</h2>
       <p class="section-sub">Voucher giảm giá cao nhất hôm nay</p>
     </div>
-    <div class="v-featured-grid">
-      {% for v in featured[:6] %}
-      <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color }}">
-        <div class="v-feat-top">
-          <span class="v-feat-discount">{{ v.get_discount_text() }}</span>
-          <span class="v-feat-exp">HSD {{ v.valid_to.strftime('%d/%m') if v.valid_to else '—' }}</span>
-        </div>
-        <div class="v-feat-merchant">{{ v.icon }} {{ v.merchant }}</div>
-        <h3>{{ v.title[:65] }}{% if v.title|length > 65 %}...{% endif %}</h3>
-        <div class="v-feat-bottom">
-          <div class="vc-code-wrap">
-            <span class="vc-sticker">👍 COPY MÃ</span>
-            <code class="v-feat-code vc-code-hidden">{{ v.code[-2:] }}</code>
+    <div class="v-featured-wrapper">
+      <button class="v-feat-arrow v-feat-arrow-left" id="featPrev" aria-label="Trước">&#8249;</button>
+      <div class="v-featured-grid" id="featuredGrid">
+        {% for v in featured[:6] %}
+        <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color }}">
+          <div class="v-feat-top">
+            <span class="v-feat-discount">{{ v.get_discount_text() }}</span>
+            <span class="v-feat-exp">HSD {{ v.valid_to.strftime('%d/%m') if v.valid_to else '—' }}</span>
+          </div>
+          <div class="v-feat-merchant">{{ v.icon }} {{ v.merchant }}</div>
+          <h3>{{ v.title[:65] }}{% if v.title|length > 65 %}...{% endif %}</h3>
+          <div class="v-feat-bottom">
+            <div class="vc-code-wrap">
+              <span class="vc-sticker">👍 COPY MÃ</span>
+              <code class="v-feat-code vc-code-hidden">{{ v.code[-2:] }}</code>
+            </div>
           </div>
         </div>
+        {% endfor %}
       </div>
-      {% endfor %}
+      <button class="v-feat-arrow v-feat-arrow-right" id="featNext" aria-label="Sau">&#8250;</button>
     </div>
   </section>
   {% endif %}
@@ -317,6 +321,33 @@ function revealCode(el) {
     setTimeout(() => window.open(url, '_blank'), 600);
   }
 }
+
+// Featured deals — arrow navigation
+(function() {
+  const grid = document.getElementById('featuredGrid');
+  const prev = document.getElementById('featPrev');
+  const next = document.getElementById('featNext');
+  if (!grid || !prev || !next) return;
+
+  const scrollAmt = 340; // card width + gap
+
+  function updateArrows() {
+    prev.classList.toggle('hidden', grid.scrollLeft <= 0);
+    next.classList.toggle('hidden', grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 2);
+  }
+
+  prev.addEventListener('click', function(e) {
+    e.stopPropagation();
+    grid.scrollBy({ left: -scrollAmt, behavior: 'smooth' });
+  });
+  next.addEventListener('click', function(e) {
+    e.stopPropagation();
+    grid.scrollBy({ left: scrollAmt, behavior: 'smooth' });
+  });
+
+  grid.addEventListener('scroll', updateArrows);
+  updateArrows();
+})();
 
 // Auto-slide expiring vouchers
 (function() {
