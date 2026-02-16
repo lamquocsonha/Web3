@@ -4014,6 +4014,19 @@ PROVINCE_COORDS = {
     '96': {'lat': 9.1770, 'lng': 105.1500, 'name': 'Cà Mau'},
 }
 
+# Map province_code → destination slug (used on hotel page)
+PROVINCE_TO_SLUG = {
+    '01': 'ha-noi', '04': 'cao-bang', '08': 'tuyen-quang', '11': 'dien-bien',
+    '12': 'lai-chau', '14': 'son-la', '15': 'lao-cai', '19': 'thai-nguyen',
+    '20': 'lang-son', '22': 'quang-ninh', '24': 'bac-ninh', '25': 'phu-tho',
+    '31': 'hai-phong', '33': 'hung-yen', '37': 'ninh-binh', '38': 'thanh-hoa',
+    '40': 'nghe-an', '42': 'ha-tinh', '44': 'quang-tri', '46': 'hue',
+    '48': 'da-nang', '51': 'quang-ngai', '52': 'gia-lai', '56': 'khanh-hoa',
+    '66': 'dak-lak', '68': 'lam-dong', '75': 'dong-nai', '79': 'ho-chi-minh',
+    '80': 'tay-ninh', '82': 'dong-thap', '86': 'vinh-long', '91': 'an-giang',
+    '92': 'can-tho', '96': 'ca-mau',
+}
+
 @app.route('/admin/wards')
 def admin_wards():
     """Manage ward/commune data"""
@@ -4156,10 +4169,52 @@ def api_wards():
             'name': w.name,
             'level': w.level,
             'province_code': w.province_code,
-            'province_name': w.province_name
+            'province_name': w.province_name,
+            'destination_slug': PROVINCE_TO_SLUG.get(w.province_code, '')
         } for w in wards],
         'total': len(wards)
     })
+
+@app.route('/api/wards/search')
+def api_wards_search():
+    """Search wards + provinces for hotel page autocomplete. Returns destination slugs."""
+    q = request.args.get('q', '').strip()
+    if not q or len(q) < 2:
+        return jsonify({'results': []})
+
+    results = []
+    # 1. Search province names first
+    for code, slug in PROVINCE_TO_SLUG.items():
+        info = PROVINCE_COORDS.get(code, {})
+        pname = info.get('name', '')
+        if pname and q.lower() in pname.lower():
+            results.append({
+                'type': 'province',
+                'name': pname,
+                'destination_slug': slug,
+                'province_code': code,
+                'province_name': pname
+            })
+
+    # 2. Search wards (limit 20)
+    wards = WardCommune.query.filter(
+        WardCommune.name.ilike(f'%{q}%')
+    ).order_by(WardCommune.name).limit(20).all()
+
+    seen_provinces = set()
+    for w in wards:
+        slug = PROVINCE_TO_SLUG.get(w.province_code, '')
+        results.append({
+            'type': 'ward',
+            'name': w.name,
+            'level': w.level,
+            'destination_slug': slug,
+            'province_code': w.province_code,
+            'province_name': w.province_name
+        })
+        seen_provinces.add(w.province_code)
+
+    return jsonify({'results': results})
 
 @app.route('/api/province-coords')
 def api_province_coords():

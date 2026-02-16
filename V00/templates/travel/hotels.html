@@ -58,8 +58,9 @@
   <!-- COL 1: Sidebar -->
   <aside class="hp-sidebar">
     <div class="hps-title">📍 34 Tỉnh thành</div>
-    <div class="hps-search-wrap">
-      <input type="text" class="hps-search" placeholder="Tìm tỉnh thành..." id="provSearch">
+    <div class="hps-search-wrap" style="position:relative">
+      <input type="text" class="hps-search" placeholder="Tìm tỉnh, phường, xã..." id="provSearch" autocomplete="off">
+      <div class="ward-autocomplete" id="wardAutocomplete" style="display:none"></div>
     </div>
     <div class="hps-region">
       <div class="hps-region-head" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -298,13 +299,59 @@ function toggleSeoContent() {
     btn.textContent = 'Xem thêm ▾';
   }
 }
-document.getElementById('provSearch')?.addEventListener('input', function(e) {
-  const q = e.target.value.toLowerCase();
-  document.querySelectorAll('.hps-prov').forEach(p => {
-    p.style.display = p.dataset.name.toLowerCase().includes(q) ? '' : 'none';
+/* ── Ward/Commune autocomplete search ── */
+(function() {
+  var input = document.getElementById('provSearch');
+  var dropdown = document.getElementById('wardAutocomplete');
+  if (!input || !dropdown) return;
+  var debounceTimer = null;
+
+  input.addEventListener('input', function(e) {
+    var q = e.target.value.trim();
+
+    // Filter sidebar provinces locally
+    var qLower = q.toLowerCase();
+    document.querySelectorAll('.hps-prov').forEach(function(p) {
+      p.style.display = p.dataset.name.toLowerCase().includes(qLower) ? '' : 'none';
+    });
+    if (qLower) document.querySelectorAll('.hps-region').forEach(function(r) { r.classList.remove('collapsed'); });
+
+    // API search for wards (debounce 300ms)
+    clearTimeout(debounceTimer);
+    if (q.length < 2) { dropdown.style.display = 'none'; return; }
+
+    debounceTimer = setTimeout(function() {
+      fetch('/api/wards/search?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var results = data.results || [];
+          if (results.length === 0) { dropdown.style.display = 'none'; return; }
+
+          var html = '';
+          results.forEach(function(r) {
+            if (!r.destination_slug) return;
+            var icon = r.type === 'province' ? '🏙️' : '📍';
+            var sub = r.type === 'ward' ? '<span class="wa-sub">' + r.level + ' — ' + r.province_name + '</span>' : '<span class="wa-sub">Tỉnh/TP</span>';
+            html += '<a href="/travel/hotels?destination=' + r.destination_slug + '" class="wa-item" data-slug="' + r.destination_slug + '">'
+              + '<span class="wa-icon">' + icon + '</span>'
+              + '<span class="wa-info"><span class="wa-name">' + r.name + '</span>' + sub + '</span>'
+              + '</a>';
+          });
+          dropdown.innerHTML = html;
+          dropdown.style.display = html ? 'block' : 'none';
+        })
+        .catch(function() { dropdown.style.display = 'none'; });
+    }, 300);
   });
-  if (q) document.querySelectorAll('.hps-region').forEach(r => r.classList.remove('collapsed'));
-});
+
+  // Hide dropdown on blur (with delay for click)
+  input.addEventListener('blur', function() {
+    setTimeout(function() { dropdown.style.display = 'none'; }, 200);
+  });
+  input.addEventListener('focus', function() {
+    if (dropdown.innerHTML && input.value.length >= 2) dropdown.style.display = 'block';
+  });
+})();
 document.querySelectorAll('.hps-prov').forEach(el => {
   el.addEventListener('mouseenter', function() {
     const g = document.querySelector('.prov-shape[data-slug="'+this.dataset.prov+'"]');
