@@ -2582,6 +2582,132 @@ def admin_products_import_csv():
     return render_template('admin/products_import_csv.html',
         parts_tree=parts_tree, networks=networks)
 
+@app.route('/admin/products/datafeeds', methods=['GET', 'POST'])
+def admin_products_datafeeds():
+    """Browse & import products from AccessTrade Datafeeds API"""
+    from accesstrade_integration import get_accesstrade_api
+
+    api = get_accesstrade_api()
+    if not api:
+        flash('Chua cau hinh AccessTrade API key. Vao Affiliate Network de thiet lap.', 'error')
+        return redirect(url_for('admin_products'))
+
+    # ── POST: Import selected products ──
+    if request.method == 'POST':
+        selected = request.form.getlist('selected_products')
+        if not selected:
+            flash('Chua chon san pham nao de import', 'warning')
+            return redirect(request.url)
+
+        import json as _json
+        network = 'accesstrade'
+        apply_deeplink = 'apply_deeplink' in request.form
+        network_obj = AffiliateNetwork.query.filter_by(slug='accesstrade').first()
+
+        # Build auto-mapping index
+        part_index, zone_kw, power_kw, normalize_fn = _build_part_keyword_index()
+
+        count = 0
+        matched = 0
+        for item_json in selected:
+            try:
+                item = _json.loads(item_json)
+            except (ValueError, TypeError):
+                continue
+
+            product_name = (item.get('name') or '')[:200]
+            url = item.get('url') or item.get('deep_link') or ''
+            image_url = item.get('image') or ''
+            category = item.get('category') or ''
+
+            if not product_name and not url:
+                continue
+
+            # Use deep_link (affiliate link) if available, else apply deeplink template
+            aff_url = item.get('deep_link') or url
+            if apply_deeplink and network_obj and network_obj.deeplink_template and url and not item.get('deep_link'):
+                import urllib.parse
+                aff_url = network_obj.deeplink_template.replace('{url}', urllib.parse.quote(url))
+
+            price_val = 0
+            try:
+                price_val = float(item.get('price') or item.get('promotion_price') or 0)
+            except (ValueError, TypeError):
+                pass
+
+            # Always create in Hub
+            hub_part_id = _get_or_create_hub_part(category)
+            al_hub = AffiliateLink(
+                part_id=hub_part_id,
+                network=network,
+                product_name=product_name,
+                url=aff_url,
+                price=price_val,
+                image_url=image_url,
+                is_active=True,
+                category=slugify(category) if category else 'chua-phan-loai',
+            )
+            db.session.add(al_hub)
+            count += 1
+
+            # Also match to vertical
+            if part_index:
+                matched_part_id, detected_cat = _match_product_to_part(
+                    product_name, category, part_index, zone_kw, normalize_fn, power_kw)
+                if matched_part_id:
+                    al_vert = AffiliateLink(
+                        part_id=matched_part_id,
+                        network=network,
+                        product_name=product_name,
+                        url=aff_url,
+                        price=price_val,
+                        image_url=image_url,
+                        is_active=True,
+                        category=detected_cat,
+                    )
+                    db.session.add(al_vert)
+                    matched += 1
+
+        db.session.commit()
+        msg = f'Import {count} san pham tu Datafeeds thanh cong!'
+        if matched:
+            msg += f' + {matched} match vao vertical'
+        flash(msg, 'success')
+        return redirect(url_for('admin_products'))
+
+    # ── GET: Browse datafeeds ──
+    keyword = request.args.get('keyword', '')
+    domain = request.args.get('domain', '')
+    campaign = request.args.get('campaign', '')
+    page = request.args.get('page', 1, type=int)
+    limit = 50
+
+    products = []
+    total = 0
+
+    # Only call API if there's a search query
+    if keyword or domain or campaign:
+        result = api.get_datafeeds(
+            keyword=keyword or None,
+            domain=domain or None,
+            campaign=campaign or None,
+            page=page,
+            limit=limit,
+        )
+        products = result.get('data', [])
+        total = result.get('total', 0)
+
+    # Get campaigns for dropdown filter
+    campaigns = api.get_campaigns(limit=100, status=1)
+
+    total_pages = (total + limit - 1) // limit if total > 0 else 0
+
+    return render_template('admin/products_datafeeds.html',
+        products=products, total=total, campaigns=campaigns,
+        keyword=keyword, domain=domain, campaign=campaign,
+        page=page, total_pages=total_pages)
+
+
 @app.route('/admin/products/reclassify-hub', methods=['POST'])
 def admin_products_reclassify_hub():
     """Re-run matching on Hub products → move matched ones to verticals.

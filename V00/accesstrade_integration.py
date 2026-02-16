@@ -58,6 +58,75 @@ class AccessTradeAPI:
         return []
 
     # ═══════════════════════════════════════
+    # DATAFEEDS  (product catalog from merchants)
+    # Docs: https://developers.accesstrade.vn/api-publisher-vietnamese/lay-thong-tin-datafeeds
+    # ═══════════════════════════════════════
+
+    def get_datafeeds(self, campaign=None, domain=None, keyword=None,
+                      price_from=None, price_to=None,
+                      discount_from=None, discount_to=None,
+                      discount=None, page=1, limit=50,
+                      update_from=None, update_to=None):
+        """Get product datafeeds from AccessTrade merchants.
+
+        GET /v1/datafeeds
+
+        Args:
+            campaign:       Filter by campaign ID
+            domain:         Filter by merchant domain (e.g. "shopee.vn")
+            keyword:        Search product name
+            price_from/to:  Price range filter
+            discount_from/to: Discount percentage range
+            discount:       1 = only discounted, 0 = no discount, None = all
+            page:           Page number (1-based)
+            limit:          Products per page (max 200)
+            update_from/to: Date range filter (dd/mm/yyyy)
+
+        Returns dict with:
+            'data': list of product dicts
+            'total': total matching products
+        """
+        try:
+            params = {"page": page, "limit": min(limit, 200)}
+            if campaign:
+                params['campaign'] = campaign
+            if domain:
+                params['domain'] = domain
+            if keyword:
+                params['keyword'] = keyword
+            if price_from is not None:
+                params['price_from'] = price_from
+            if price_to is not None:
+                params['price_to'] = price_to
+            if discount_from is not None:
+                params['discount_from'] = discount_from
+            if discount_to is not None:
+                params['discount_to'] = discount_to
+            if discount is not None:
+                params['discount'] = discount
+            if update_from:
+                params['update_from'] = update_from
+            if update_to:
+                params['update_to'] = update_to
+
+            response = requests.get(
+                f"{self.base_url}/datafeeds",
+                headers=self.headers,
+                params=params,
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    'data': data.get('data', []),
+                    'total': data.get('total', 0)
+                }
+        except Exception:
+            pass
+        return {'data': [], 'total': 0}
+
+    # ═══════════════════════════════════════
     # OFFERS / PROMOTIONS  (offers_informations)
     # ═══════════════════════════════════════
 
