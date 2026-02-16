@@ -138,7 +138,7 @@
       {% for h in hotels %}
       <div class="tz-hotel-card">
         <div class="tz-hc-img">
-          {% if h.image_url %}<img src="{{ h.image_url }}" alt="{{ h.name }}" loading="lazy">
+          {% if h.image_url %}<img src="{{ h.image_url }}" alt="{{ h.name }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=tz-hc-img-ph><span>🏨</span></div>'">
           {% else %}<div class="tz-hc-img-ph"><span>🏨</span></div>{% endif %}
           <span class="tz-hc-cat-badge">Khách sạn</span>
         </div>

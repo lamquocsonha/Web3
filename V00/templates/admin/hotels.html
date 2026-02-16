@@ -51,7 +51,7 @@
         <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ h.id }}</td>
         <td>
           {% if h.image_url %}
-          <img src="{{ h.image_url }}" alt="{{ h.name }}" style="width:56px;height:40px;object-fit:cover;border-radius:4px;display:block">
+          <img src="{{ h.image_url }}" alt="{{ h.name }}" style="width:56px;height:40px;object-fit:cover;border-radius:4px;display:block" onerror="this.outerHTML='<div style=\'width:56px;height:40px;background:var(--bg-hover);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px\'>🏨</div>'" loading="lazy">
           {% else %}
           <div style="width:56px;height:40px;background:var(--bg-hover);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px">🏨</div>
           {% endif %}
