@@ -214,24 +214,24 @@
         {% for v in vouchers %}
         <div class="voucher-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
           <div class="vc-header" style="background:linear-gradient(135deg, {{ v.color }} 0%, {{ v.color }}cc 100%)">
-            <div class="vc-discount">{{ v.get_discount_text() }}</div>
-            <div class="vc-merchant">{{ v.icon }} {{ v.merchant }}</div>
+            <div class="vc-row-top">
+              <div class="vc-discount">{{ v.get_discount_text() }}</div>
+              <div class="vc-code-wrap">
+                <span class="vc-sticker">👍 COPY MÃ</span>
+                <code class="vc-code vc-code-hidden">{{ v.code[-2:] }}</code>
+              </div>
+            </div>
+            <div class="vc-row-bot">
+              <span class="vc-merchant">{{ v.icon }} {{ v.merchant }}</span>
+              <span class="vc-date">📅 {{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</span>
+            </div>
           </div>
           <div class="vc-body">
             <h4>{{ v.title[:55] }}{% if v.title|length > 55 %}...{% endif %}</h4>
             {% if v.description and v.description != v.title %}
             <p>{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</p>
             {% endif %}
-            <div class="vc-meta">
-              <span>📅 {{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</span>
-              {% if (v.min_order or 0) > 0 %}<span>💵 Từ {{ '{:,.0f}'.format(v.min_order) }}đ</span>{% endif %}
-            </div>
-          </div>
-          <div class="vc-footer">
-            <div class="vc-code-wrap">
-              <span class="vc-sticker">👍 COPY MÃ</span>
-              <code class="vc-code vc-code-hidden">{{ v.code[-2:] }}</code>
-            </div>
+            {% if (v.min_order or 0) > 0 %}<div class="vc-meta"><span>💵 Từ {{ '{:,.0f}'.format(v.min_order) }}đ</span></div>{% endif %}
           </div>
         </div>
         {% endfor %}
@@ -277,6 +277,26 @@
     </div>
   </div>
 </main>
+
+<!-- SEO Content Section -->
+<section class="seo-section">
+  <div class="seo-inner">
+    <h2 class="seo-title">Mã giảm giá & Voucher khuyến mãi mới nhất 2025</h2>
+    <div class="seo-content collapsed" id="seoContent">
+      <p><strong>UniVoucher</strong> là nền tảng tổng hợp <strong>mã giảm giá</strong>, voucher khuyến mãi từ các sàn thương mại điện tử hàng đầu Việt Nam như <a href="{{ url_for('voucher_index', platform='shopee') }}">Shopee</a>, <a href="{{ url_for('voucher_index', platform='lazada') }}">Lazada</a>, <a href="{{ url_for('voucher_index', platform='tiki') }}">Tiki</a>, <a href="{{ url_for('voucher_index', platform='grab') }}">Grab</a> và nhiều thương hiệu uy tín khác. Hệ thống cập nhật tự động theo thời gian thực thông qua AccessTrade API, đảm bảo bạn luôn nhận được mã còn hiệu lực và tỷ lệ giảm giá tốt nhất.</p>
+
+      <h3>Cách sử dụng mã giảm giá trên UniVoucher</h3>
+      <p>Việc sử dụng voucher rất đơn giản chỉ với 3 bước. <strong>Bước 1:</strong> Tìm mã giảm giá phù hợp — bạn có thể lọc theo sàn (<a href="{{ url_for('voucher_index', platform='shopee') }}">Shopee</a>, <a href="{{ url_for('voucher_index', platform='lazada') }}">Lazada</a>...), theo danh mục sản phẩm hoặc theo mức giảm mong muốn. <strong>Bước 2:</strong> Nhấn vào nút <em>"COPY MÃ"</em> trên voucher, mã sẽ được sao chép tự động vào clipboard và trang mua sắm sẽ mở trong tab mới. <strong>Bước 3:</strong> Dán mã vào ô "Mã giảm giá" khi thanh toán trên sàn TMĐT để được áp dụng ưu đãi ngay lập tức.</p>
+
+      <h3>Các loại voucher phổ biến</h3>
+      <p>Trên UniVoucher, bạn sẽ tìm thấy đa dạng loại mã giảm giá: <strong>Voucher freeship</strong> miễn phí vận chuyển toàn quốc, <strong>mã giảm theo phần trăm</strong> từ 5% đến 50% cho đơn hàng, <strong>voucher giảm trực tiếp</strong> từ 10K đến 500K trên tổng giá trị đơn, và <strong>mã ưu đãi độc quyền</strong> dành riêng cho khách hàng mới hoặc các dịp đặc biệt như Flash Sale, ngày đôi (6.6, 7.7, 11.11, 12.12), Tết, Black Friday. Ngoài ra còn có voucher <a href="{{ url_for('voucher_index', platform='grab') }}">Grab</a> giảm giá đồ ăn, di chuyển và các dịch vụ tiện ích hàng ngày.</p>
+
+      <h3>Tại sao nên dùng UniVoucher?</h3>
+      <p>UniVoucher giúp bạn tiết kiệm thời gian tìm kiếm mã giảm giá bằng cách tập trung tất cả voucher từ nhiều sàn TMĐT vào một nơi duy nhất. Tất cả mã được xác minh tự động, loại bỏ voucher hết hạn, đảm bảo tỷ lệ áp dụng thành công cao nhất. Hệ thống cập nhật liên tục 24/7, bạn không cần phải kiểm tra từng sàn — chỉ cần truy cập UniVoucher là đã có đầy đủ ưu đãi mới nhất từ <a href="{{ url_for('voucher_index', platform='shopee') }}">Shopee</a>, <a href="{{ url_for('voucher_index', platform='lazada') }}">Lazada</a>, <a href="{{ url_for('voucher_index', platform='tiki') }}">Tiki</a> và hơn thế nữa.</p>
+    </div>
+    <button class="seo-toggle" onclick="toggleSeoContent()" id="seoToggle">Xem thêm ▾</button>
+  </div>
+</section>
 
 <footer class="site-footer">
   <div class="footer-inner">
@@ -423,6 +443,18 @@ function revealCode(el) {
 
   raf = requestAnimationFrame(slide);
 })();
+
+function toggleSeoContent() {
+  var el = document.getElementById('seoContent');
+  var btn = document.getElementById('seoToggle');
+  if (el.classList.contains('collapsed')) {
+    el.classList.remove('collapsed');
+    btn.textContent = 'Thu gọn ▴';
+  } else {
+    el.classList.add('collapsed');
+    btn.textContent = 'Xem thêm ▾';
+  }
+}
 </script>
 </body>
 </html>
