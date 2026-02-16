@@ -3525,7 +3525,11 @@ def admin_api_agoda_search_public():
     if not destination:
         return jsonify({'hotels': [], 'source': 'no_destination'})
 
-    hotels = api.search_city_hotels(destination, checkin or None, checkout or None)
+    # Resolve province slug → city slug (e.g. lam-dong → da-lat)
+    from agoda_integration import PROVINCE_TO_CITY_SLUG
+    city_slug = PROVINCE_TO_CITY_SLUG.get(destination, destination)
+
+    hotels = api.search_city_hotels(city_slug, checkin or None, checkout or None)
     return jsonify({'hotels': hotels, 'total': len(hotels), 'source': 'agoda_api'})
 
 
@@ -5021,11 +5025,19 @@ def travel_hotels():
     agoda_enabled = SiteSettings.get('agoda_enabled', '0') == '1'
     api_status = 'configured' if agoda_enabled else 'local_db'
 
+    # Resolve province slug (sidebar) → city slug (DB/Agoda)
+    # e.g. 'lam-dong' → 'da-lat', 'khanh-hoa' → 'nha-trang'
+    from agoda_integration import PROVINCE_TO_CITY_SLUG
+    city_slug = PROVINCE_TO_CITY_SLUG.get(destination, destination)
+
     hotels = []
     agoda_hotels = []
     if destination:
-        # Always get local DB hotels
-        q = Hotel.query.filter_by(is_active=True, destination=destination)
+        # Always get local DB hotels (try both province and city slug)
+        q = Hotel.query.filter(
+            Hotel.is_active == True,
+            Hotel.destination.in_([destination, city_slug])
+        )
         if stars:
             q = q.filter(Hotel.stars == int(stars))
         hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).all()
@@ -5050,7 +5062,8 @@ def travel_hotels():
                 })
 
     return render_template('travel/hotels.html', vertical=v, hotels=hotels,
-        destination=destination, checkin=checkin, checkout=checkout, guests=guests,
+        destination=destination, city_slug=city_slug,
+        checkin=checkin, checkout=checkout, guests=guests,
         stars=stars, api_status=api_status, agoda_enabled=agoda_enabled, popular=popular)
 
 

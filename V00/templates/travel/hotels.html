@@ -374,7 +374,7 @@ document.querySelectorAll('.prov-shape').forEach(g => {
 // Agoda API live search
 {% if agoda_enabled and destination %}
 (function() {
-  var dest = '{{ destination }}';
+  var dest = '{{ city_slug|default(destination) }}';
   var checkin = '{{ checkin }}';
   var checkout = '{{ checkout }}';
   var url = '/admin/api/agoda-search?destination=' + encodeURIComponent(dest);

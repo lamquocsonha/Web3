@@ -74,6 +74,21 @@ AGODA_CITY_NAMES = {
     'cat-ba': 'Cát Bà',
 }
 
+# Map province-level slugs (from hotel sidebar 34 tỉnh) to Agoda city slugs
+# e.g. sidebar uses 'lam-dong' but Agoda uses 'da-lat'
+PROVINCE_TO_CITY_SLUG = {
+    'lam-dong': 'da-lat',
+    'khanh-hoa': 'nha-trang',
+    'quang-ninh': 'quang-ninh',  # same
+    'ha-noi': 'ha-noi',
+    'ho-chi-minh': 'ho-chi-minh',
+    'da-nang': 'da-nang',
+    'hue': 'hue',
+    'hai-phong': 'hai-phong',
+    'can-tho': 'can-tho',
+    'ninh-binh': 'ninh-binh',
+}
+
 
 class AgodaAPI:
     """Agoda Affiliate Long Tail Search API client.
