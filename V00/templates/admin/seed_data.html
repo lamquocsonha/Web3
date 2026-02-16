@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="section-header">
-  <h1 class="page-title">Seed Data Management</h1>
+  <h1 class="page-title">🌱 Seed Data Management</h1>
 </div>
 
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px">
@@ -37,6 +37,7 @@
         <th>Segments</th>
         <th>Zones</th>
         <th>Parts</th>
+        <th>Products</th>
         <th>Articles</th>
         <th>Actions</th>
       </tr>
@@ -49,6 +50,7 @@
         <td style="font-family:'DM Mono'">{{ data.segments }}</td>
         <td style="font-family:'DM Mono'">{{ data.zones }}</td>
         <td style="font-family:'DM Mono'">{{ data.parts }}</td>
+        <td style="font-family:'DM Mono'">{{ data.products }}</td>
         <td style="font-family:'DM Mono'">{{ data.articles }}</td>
         <td>
           <form method="POST" style="display:inline">
@@ -71,7 +73,7 @@
 
 <div style="margin-top:32px;padding:20px;background:var(--bg-subtle);border-radius:var(--radius)">
   <h3 style="margin:0 0 12px 0;font-size:14px;font-weight:600">What does seeding do?</h3>
-  <ul style="margin:0;padding-left:20px;color:var(--text-secondary);font-size:13px;line-height:1.8">
+  <ul style="margin:0;padding-left:20px;color:var(--text-secondary);font-size:14px;line-height:1.8">
     <li><strong>Car:</strong> Creates 6 segments (Sedan, CUV, SUV, etc.), zones (suspension, brakes, engine), sample parts, and articles</li>
     <li><strong>Pet:</strong> Creates pet care segments, zones, and knowledge articles</li>
     <li><strong>Travel:</strong> Creates travel segments, zones, hotels, attractions, and articles</li>

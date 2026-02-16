@@ -6,12 +6,21 @@
 <title>{% block title %}Admin{% endblock %} | Unilab Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+{% if site_favicon_url %}
+<link rel="icon" href="{{ site_favicon_url }}" type="image/png">
+{% else %}
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>">
+{% endif %}
 </head>
 <body>
 <div class="layout">
   <aside class="sidebar">
     <div class="sb-logo">
-      <span class="logo-icon">&#9881;</span>
+      {% if site_logo_url %}
+      <img src="{{ site_logo_url }}" alt="Logo" style="height:28px;max-width:120px;object-fit:contain">
+      {% else %}
+      <span class="logo-icon">⚙</span>
+      {% endif %}
       <span class="logo-text">uni<span>lab</span></span>
     </div>
     <nav class="sb-nav">
@@ -54,8 +63,11 @@
           <a href="{{ url_for('admin_products') }}" class="sb-link sb-sub {% if 'product' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#128230;</span> Products
           </a>
-          <a href="{{ url_for('admin_hotels') }}" class="sb-link sb-sub {% if 'hotel' in (request.endpoint or '') %}active{% endif %}">
+          <a href="{{ url_for('admin_hotels') }}" class="sb-link sb-sub {% if request.endpoint == 'admin_hotels' or request.endpoint == 'admin_hotel_new' or request.endpoint == 'admin_hotel_edit' %}active{% endif %}">
             <span class="sb-icon">&#127976;</span> Hotels
+          </a>
+          <a href="{{ url_for('admin_hotel_sync') }}" class="sb-link sb-sub {% if 'hotel_sync' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
+            <span class="sb-icon">&#128260;</span> Hotel Sync
           </a>
           <a href="{{ url_for('admin_attractions') }}" class="sb-link sb-sub {% if 'attraction' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#127903;</span> Attractions
@@ -65,6 +77,34 @@
           </a>
           <a href="{{ url_for('admin_voucher_widgets') }}" class="sb-link sb-sub {% if 'voucher_widget' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#127873;</span> Voucher Widgets
+          </a>
+          <a href="{{ url_for('admin_voucher_sync') }}" class="sb-link sb-sub {% if 'voucher_sync' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
+            <span class="sb-icon">&#128260;</span> Voucher Sync
+          </a>
+        </div>
+      </div>
+
+      <!-- AI Engine Dropdown -->
+      <div class="sb-dropdown">
+        <div class="sb-dropdown-header">
+          <span class="sb-icon">&#9889;</span> AI Engine
+          <span class="sb-arrow">›</span>
+        </div>
+        <div class="sb-dropdown-content">
+          <a href="{{ url_for('admin_ai_center') }}" class="sb-link sb-sub {% if 'ai_center' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
+            <span class="sb-icon">&#129302;</span> AI Control Center
+          </a>
+          <a href="{{ url_for('admin_content_calendar') }}" class="sb-link sb-sub {% if 'content_calendar' in (request.endpoint or '') or 'content_event' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128197;</span> Calendar
+          </a>
+          <a href="{{ url_for('admin_auto_rules') }}" class="sb-link sb-sub {% if 'auto_rules' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#9881;</span> Auto Rules
+          </a>
+          <a href="{{ url_for('admin_content_queue') }}" class="sb-link sb-sub {% if 'content_queue' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128203;</span> Queue
+          </a>
+          <a href="{{ url_for('admin_gap_analysis') }}" class="sb-link sb-sub {% if 'gap_analysis' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128200;</span> Gap Analysis
           </a>
         </div>
       </div>
@@ -109,6 +149,17 @@
     <header class="topbar">
       <div class="breadcrumb">{% block breadcrumb %}Dashboard{% endblock %}</div>
       <div class="topbar-actions">
+        <form method="POST" action="{{ url_for('admin_toggle_mode') }}" style="display:inline">
+          {% if site_mode == 'live' %}
+          <button type="submit" class="site-mode-badge site-mode-live" title="Click to switch to Demo mode">
+            <span class="mode-dot"></span> LIVE
+          </button>
+          {% else %}
+          <button type="submit" class="site-mode-badge site-mode-demo" title="Click to switch to Live mode">
+            <span class="mode-dot"></span> DEMO
+          </button>
+          {% endif %}
+        </form>
         <button class="theme-toggle" id="themeToggle" title="Toggle theme">
           <span class="theme-icon light">☀️</span>
           <span class="theme-icon dark">🌙</span>

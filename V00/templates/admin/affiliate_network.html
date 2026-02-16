@@ -3,7 +3,7 @@
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_affiliate') }}">Affiliate Hub</a><span class="sep">></span>{{ network.name }}{% endblock %}
 {% block content %}
 <div class="section-header">
-  <h1 class="page-title" style="margin-bottom:0;color:{{ network.color }}">{{ network.name }}</h1>
+  <h1 class="page-title" style="margin-bottom:0;color:{{ network.color }}">{{ network.icon }} {{ network.name }}</h1>
   <span>{% if network.status == 'connected' %}<span class="status-badge live">Connected</span>{% else %}<span class="status-badge draft">Disconnected</span>{% endif %}</span>
 </div>
 
@@ -20,31 +20,90 @@
   <form method="POST" action="{{ url_for('admin_affiliate_connect', nid=network.id) }}">
     <div class="form-group"><label class="form-label">API Endpoint</label><input class="form-input" value="{{ network.api_url }}" disabled></div>
     <div class="form-group"><label class="form-label">API Key</label><input class="form-input" name="api_key" type="password" value="{{ network.api_key }}" placeholder="Paste API key here..."></div>
-    <button class="btn btn-primary">{% if network.status == 'connected' %}Update{% else %}Connect{% endif %}</button>
-    {% if network.last_sync %}<span style="font-size:11px;color:var(--text-dim);margin-left:12px">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
+
+    {% if network.slug == 'agoda' %}
+    <!-- Agoda Extra Fields -->
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Site ID</label><input class="form-input" name="site_id" value="{{ extra.site_id }}" placeholder="123456"></div>
+        <div class="form-group"><label class="form-label">CID (Affiliate)</label><input class="form-input" name="cid" value="{{ extra.cid }}" placeholder="1234567"></div>
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" name="enabled" value="1" {% if extra.enabled %}checked{% endif %}> Enable Agoda integration on Travel pages
+        </label>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:14px;background:rgba(0,79,172,0.05);border-radius:8px;border:1px solid rgba(0,79,172,0.1)">
+      <div style="line-height:1.8;color:var(--text-dim)">
+        <strong style="color:#004fac">Agoda API features:</strong><br>
+        - Hotel search by destination, dates, price range<br>
+        - Real-time pricing & availability<br>
+        - Property details, photos, reviews<br>
+        - Auto-update hotel prices via scheduled sync<br><br>
+        <strong>Setup:</strong> <code>partners.agoda.com</code> > API Access > Generate Key > Copy Site ID & CID
+      </div>
+    </div>
+    {% endif %}
+
+    <div style="margin-top:16px;display:flex;align-items:center;gap:12px">
+      <button class="btn btn-primary">{% if network.status == 'connected' %}Update{% else %}Connect{% endif %}</button>
+      {% if network.status == 'connected' and network.slug in ['accesstrade'] %}
+      <button type="button" class="btn btn-secondary" onclick="document.getElementById('sync-form').submit()">Sync Campaigns</button>
+      {% endif %}
+      {% if network.last_sync %}<span style="font-size:14px;color:var(--text-dim)">Last sync: {{ network.last_sync.strftime('%Y-%m-%d %H:%M') }}</span>{% endif %}
+    </div>
   </form>
+  {% if network.status == 'connected' and network.slug in ['accesstrade'] %}
+  <form id="sync-form" method="POST" action="{{ url_for('admin_affiliate_sync', nid=network.id) }}" style="display:none"></form>
+  {% endif %}
 </div>
 
 <!-- Campaigns -->
-<div class="section-header"><h2>Campaigns ({{ network.campaigns|length }})</h2></div>
+<div class="section-header">
+  <h2>Campaigns ({{ network.campaigns|length }})</h2>
+  {% if network.campaigns %}
+  <div style="display:flex;gap:8px;align-items:center">
+    <input type="text" id="camp-search" class="form-input" placeholder="Search campaigns..." style="width:240px;padding:6px 12px" oninput="filterCampaigns()">
+    <select id="camp-cat" class="form-input" style="width:180px;padding:6px 12px" onchange="filterCampaigns()">
+      <option value="">All Categories</option>
+      {% set cats = network.campaigns|map(attribute='category')|unique|sort %}
+      {% for cat in cats %}{% if cat %}<option value="{{ cat }}">{{ cat }}</option>{% endif %}{% endfor %}
+    </select>
+  </div>
+  {% endif %}
+</div>
 {% if network.campaigns %}
 <div class="table-wrap">
-  <table class="data-table">
-    <thead><tr><th>Campaign</th><th>ID</th><th>Commission</th><th>Category</th><th>Status</th></tr></thead>
+  <table class="data-table" id="camp-table">
+    <thead><tr><th>Campaign</th><th>Commission</th><th>Category</th><th>Status</th><th>URL</th></tr></thead>
     <tbody>
       {% for c in network.campaigns %}
-      <tr>
-        <td><strong>{{ c.name }}</strong></td>
-        <td style="font-family:'DM Mono';font-size:11px">{{ c.campaign_id_ext }}</td>
-        <td>{{ c.commission }}</td>
-        <td>{{ c.category }}</td>
+      <tr data-name="{{ c.name|lower }}" data-cat="{{ c.category }}">
+        <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ c.name }}"><strong>{{ c.name[:50] }}{% if c.name|length > 50 %}...{% endif %}</strong></td>
+        <td style="white-space:nowrap;font-family:'DM Mono';font-size:14px">{{ c.commission }}</td>
+        <td style="white-space:nowrap"><span style="font-size:14px;padding:2px 6px;background:var(--bg);border-radius:4px">{{ c.category[:20] }}</span></td>
         <td><span class="status-badge {% if c.status=='active' %}live{% else %}draft{% endif %}">{{ c.status }}</span></td>
+        <td>{% if c.url %}<a href="{{ c.url }}" target="_blank" style="font-size:14px">Visit</a>{% endif %}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
+<script>
+function filterCampaigns(){
+  var q=(document.getElementById('camp-search').value||'').toLowerCase();
+  var cat=document.getElementById('camp-cat').value;
+  var rows=document.querySelectorAll('#camp-table tbody tr');
+  rows.forEach(function(r){
+    var nameOk=!q||r.getAttribute('data-name').indexOf(q)>=0;
+    var catOk=!cat||r.getAttribute('data-cat')===cat;
+    r.style.display=(nameOk&&catOk)?'':'none';
+  });
+}
+</script>
 {% else %}
-<div class="empty-state"><p>Connect API to sync campaigns</p></div>
+<div class="empty-state"><p>{% if network.status == 'connected' %}Click "Sync Campaigns" to load campaigns from API{% else %}Connect API to sync campaigns{% endif %}</p></div>
 {% endif %}
 {% endblock %}

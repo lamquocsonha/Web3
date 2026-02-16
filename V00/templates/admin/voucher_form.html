@@ -144,13 +144,13 @@
     {% if voucher %}
     <div class="form-section">
       <h3>🔗 Embed Code</h3>
-      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px">
+      <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">
         Nhúng mã này vào website để hiển thị voucher. Phù hợp cho AccessTrade và các affiliate network khác.
       </p>
 
       <div class="form-group">
         <label>HTML Embed Code</label>
-        <textarea name="embed_code" rows="6" placeholder="<!-- Embed code will be generated here -->" style="font-family:'DM Mono',monospace;font-size:12px">{{ voucher.embed_code if voucher }}</textarea>
+        <textarea name="embed_code" rows="6" placeholder="<!-- Embed code will be generated here -->" style="font-family:'DM Mono',monospace;font-size:14px">{{ voucher.embed_code if voucher }}</textarea>
         <small>Copy và paste vào website để hiển thị voucher widget</small>
       </div>
 
@@ -160,7 +160,7 @@
 
       {% if voucher.embed_code %}
       <div style="margin-top:16px;padding:12px;background:var(--bg-subtle);border-radius:8px">
-        <strong style="font-size:12px;color:var(--text-dim)">Preview:</strong>
+        <strong style="font-size:14px;color:var(--text-dim)">Preview:</strong>
         <div id="embedPreview" style="margin-top:8px">
           {{ voucher.embed_code|safe }}
         </div>
@@ -239,7 +239,7 @@ function generateEmbedCode() {
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
     <span style="font-size:32px">${icon}</span>
     <div style="flex:1">
-      <div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px">${merchant}</div>
+      <div style="font-size:14px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px">${merchant}</div>
       <div style="font-size:16px;font-weight:700;color:#222;margin-top:2px">${discountText}</div>
     </div>
   </div>
@@ -248,7 +248,7 @@ function generateEmbedCode() {
 
   <div style="display:flex;align-items:center;gap:12px">
     <div style="flex:1;background:#fff;border:2px dashed ${color};border-radius:8px;padding:10px 12px;text-align:center;font-family:monospace;font-size:15px;font-weight:700;color:${color}">${code}</div>
-    <button onclick="navigator.clipboard.writeText('${code}');this.textContent='✓ Copied'" style="background:${color};color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Copy mã</button>
+    <button onclick="navigator.clipboard.writeText('${code}');this.textContent='✓ Copied'" style="background:${color};color:#fff;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap">Copy mã</button>
   </div>
 
   <a href="${affiliateUrl}" target="_blank" rel="nofollow" style="display:block;margin-top:12px;text-align:center;background:${color};color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700">

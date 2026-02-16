@@ -7,6 +7,11 @@
 <meta name="description" content="{{ article.excerpt }}">
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/newspaper.css') }}">
+{% if site_favicon_url %}
+<link rel="icon" href="{{ site_favicon_url }}" type="image/png">
+{% else %}
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>">
+{% endif %}
 </head>
 <body>
 
@@ -73,23 +78,23 @@
         <header class="article-header">
           <div class="article-meta-top">
             {% if vertical %}
-            <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="article-vertical-badge" style="background: {{ vertical.color }}; color: white; padding: 6px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+            <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="article-vertical-badge" style="background: {{ vertical.color }}; color: white; padding: 6px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
               {{ vertical.icon }} {{ vertical.name }}
             </a>
             {% endif %}
             {% if article.category %}
-            <span class="article-category-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            <span class="article-category-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 600;">
               {{ article.category|replace('-', ' ')|title }}
             </span>
             {% endif %}
             {% if article.tier %}
-            <span class="article-tier-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            <span class="article-tier-tag" style="background: var(--bg-subtle); color: var(--text-dim); padding: 6px 14px; border-radius: 6px; font-size: 14px; font-weight: 600;">
               {{ article.tier|title }}
             </span>
             {% endif %}
           </div>
 
-          <h1 class="article-title" style="font-family: 'Newsreader', serif; font-size: 48px; font-weight: 700; line-height: 1.2; margin: 24px 0; color: var(--text);">
+          <h1 class="article-title" style="font-family: var(--font-primary); font-size: 48px; font-weight: 700; line-height: 1.2; margin: 24px 0; color: var(--text);">
             {{ article.title }}
           </h1>
 
@@ -104,7 +109,7 @@
             <span>⏱️ {{ article.reading_time }} phút đọc</span>
             <span>👁️ {{ "{:,}".format(article.views) }} lượt xem</span>
             {% if article.ai_generated %}
-            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 12px;">
+            <span style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4px 12px; border-radius: 6px; font-weight: 600; font-size: 14px;">
               ✨ AI Generated
             </span>
             {% endif %}
@@ -150,7 +155,7 @@
         <!-- Related Articles -->
         {% if related_articles %}
         <div class="related-articles" style="margin-top: 64px;">
-          <h3 style="font-family: 'Newsreader', serif; font-size: 28px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--accent);">
+          <h3 style="font-family: var(--font-primary); font-size: 28px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--accent);">
             Bài viết liên quan
           </h3>
           <div class="articles-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
@@ -160,10 +165,10 @@
               <div style="width: 100%; height: 150px; background-image: url('{{ rel_article.image_url }}'); background-size: cover; background-position: center; background-color: var(--bg-subtle);"></div>
               {% endif %}
               <div style="padding: 20px; display: flex; flex-direction: column; gap: 10px; flex: 1;">
-                <h4 style="font-family: 'Newsreader', serif; font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--text); margin: 0;">
+                <h4 style="font-family: var(--font-primary); font-size: 16px; font-weight: 700; line-height: 1.4; color: var(--text); margin: 0;">
                   {{ rel_article.title }}
                 </h4>
-                <div style="display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-light);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); font-size: 14px; color: var(--text-light);">
                   <span>{{ rel_article.reading_time }} phút</span>
                   <span>{{ "{:,}".format(rel_article.views) }} views</span>
                 </div>
@@ -268,7 +273,7 @@
 <style>
 /* Article content styling */
 .article-content {
-  font-family: 'Newsreader', serif;
+  font-family: var(--font-primary);
 }
 
 .article-content h2 {
@@ -340,7 +345,7 @@
   background: var(--bg-subtle);
   padding: 3px 8px;
   border-radius: 4px;
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-secondary);
   font-size: 16px;
 }
 

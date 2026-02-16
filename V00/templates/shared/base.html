@@ -4,17 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Uni{{ vertical.name }}{% endblock %} — {{ vertical.slug }}.unilab.vn</title>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Quicksand:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Archivo:wght@400;500;600;700;800&family=Archivo+Narrow:wght@400;500;600;700&family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% if site_favicon_url %}
+<link rel="icon" href="{{ site_favicon_url }}" type="image/png">
+{% else %}
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙</text></svg>">
+{% endif %}
 
 <!-- Shared CSS for all verticals -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}?v=20250213">
 
 <!-- Theme variables injected per vertical.style -->
 {% set theme = THEME_STYLES.get(vertical.style or 'classic', THEME_STYLES['classic']) %}
+{% autoescape false %}
 <style>
 :root {
   --max-w: 1400px;
   --radius: {{ theme.radius }};
+  --font-primary: {{ theme.font_primary }};
+  --font-secondary: {{ theme.font_secondary }};
 }
 
 [data-mode="light"] {
@@ -45,8 +53,16 @@
   --font-secondary: {{ theme.font_secondary }};
 }
 </style>
+{% endautoescape %}
+{% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}
 </head>
 <body data-mode="{{ vertical.default_mode or 'light' }}">
+
+{% if site_mode == 'demo' %}
+<div style="background:#f1c40f;color:#1a1400;text-align:center;padding:4px 0;font-size:14px;font-weight:700;letter-spacing:1px;position:relative;z-index:9999">
+  DEMO MODE — Data mẫu, chưa kết nối API
+</div>
+{% endif %}
 
 <header class="site-header">
   <div class="header-inner">
@@ -59,7 +75,7 @@
       <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}">Kiến thức</a>
       <a href="{{ url_for('vertical_products', vertical_slug=vertical.slug) }}">Sản phẩm</a>
       <a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}#segments">{% block nav_segments %}Phân khúc{% endblock %}</a>
-      {% block extra_nav %}{% endblock %}
+      {% block extra_nav %}{% if vertical.slug == 'travel' %}<a href="{{ url_for('travel_hotels') }}">🏨 Khách sạn</a><a href="{{ url_for('travel_attractions') }}">📍 Vé tham quan</a>{% endif %}{% endblock %}
     </nav>
     <div class="header-actions">
       <button class="mode-toggle" onclick="toggleMode()" title="Chuyển chế độ sáng/tối">

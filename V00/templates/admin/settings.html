@@ -2,12 +2,42 @@
 {% block title %}Settings{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Settings{% endblock %}
 {% block content %}
-<h1 class="page-title">Settings</h1>
+<h1 class="page-title">⚙️ Settings</h1>
 
-<form method="POST" style="max-width:800px">
-  <!-- General -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <h3 style="font-size:15px;margin-bottom:16px">General</h3>
+<!-- ═══ TAB NAVIGATION ═══ -->
+<div class="stab-nav">
+  <button class="stab-btn {% if active_tab=='general' %}active{% endif %}" data-tab="general">General</button>
+  <button class="stab-btn {% if active_tab=='api' %}active{% endif %}" data-tab="api">API Keys</button>
+  <button class="stab-btn {% if active_tab=='styles' %}active{% endif %}" data-tab="styles">Styles</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: GENERAL                                -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="stab-panel {% if active_tab=='general' %}active{% endif %}" id="tab-general">
+<form method="POST" style="max-width:700px">
+  <input type="hidden" name="_tab" value="general">
+
+  <div class="scard">
+    <div class="scard-head">
+      <h3>Site Mode</h3>
+      {% if site_mode == 'live' %}
+      <span class="site-mode-badge site-mode-live"><span class="mode-dot"></span> LIVE</span>
+      {% else %}
+      <span class="site-mode-badge site-mode-demo"><span class="mode-dot"></span> DEMO</span>
+      {% endif %}
+    </div>
+    <p class="scard-desc"><strong>Demo:</strong> Data mau tu seed, placeholder images. Chuyen Live se dung data that tu API.</p>
+    <div class="form-group">
+      <select class="form-select" name="site_mode" style="max-width:200px">
+        <option value="demo" {% if settings.get('site_mode','demo')=='demo' %}selected{% endif %}>Demo</option>
+        <option value="live" {% if settings.get('site_mode')=='live' %}selected{% endif %}>Live</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="scard">
+    <h3 class="scard-title">General</h3>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Site Name</label><input class="form-input" name="site_name" value="{{ settings.get('site_name','Unilab') }}"></div>
       <div class="form-group"><label class="form-label">Default UI Mode</label>
@@ -16,70 +46,527 @@
     </div>
   </div>
 
-  <!-- AI API Keys -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <h3 style="font-size:15px;margin-bottom:6px">AI API Keys</h3>
-    <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">Add API keys to enable AI content generation. Keys are stored securely.</p>
+  <div class="scard">
+    <h3 class="scard-title">Logo & Favicon</h3>
+    <p class="scard-desc">Cai dat logo va favicon cho toan bo trang web. De trong de dung mac dinh (⚙ gear icon).</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Logo URL</label>
+        <input class="form-input" name="logo_url" value="{{ settings.get('logo_url','') }}" placeholder="https://example.com/logo.png">
+        <small>URL hinh anh logo (PNG, SVG). De trong = dung icon ⚙ mac dinh.</small>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Favicon URL</label>
+        <input class="form-input" name="favicon_url" value="{{ settings.get('favicon_url','') }}" placeholder="https://example.com/favicon.ico">
+        <small>URL favicon (ICO, PNG 32x32). De trong = dung emoji ⚙ lam favicon.</small>
+      </div>
+    </div>
+    {% if settings.get('logo_url') or settings.get('favicon_url') %}
+    <div style="margin-top:12px;display:flex;gap:16px;align-items:center">
+      {% if settings.get('logo_url') %}
+      <div style="text-align:center">
+        <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Logo Preview</div>
+        <img src="{{ settings.get('logo_url') }}" style="max-height:40px;max-width:160px;border:1px solid var(--border);border-radius:6px;padding:4px" onerror="this.style.display='none'">
+      </div>
+      {% endif %}
+      {% if settings.get('favicon_url') %}
+      <div style="text-align:center">
+        <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Favicon Preview</div>
+        <img src="{{ settings.get('favicon_url') }}" style="width:32px;height:32px;border:1px solid var(--border);border-radius:4px;padding:2px" onerror="this.style.display='none'">
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="scard">
+    <h3 class="scard-title">Article Carousel</h3>
+    <p class="scard-desc">So luong san pham hien thi trong carousel "San pham lien quan" nhung trong bai viet.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">So luong san pham</label>
+        <select class="form-select" name="carousel_product_limit" style="max-width:120px">
+          {% set cur_limit = settings.get('carousel_product_limit', '3') %}
+          {% for n in range(1, 13) %}
+          <option value="{{ n }}" {% if cur_limit|string == n|string %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">Shop Display Mode</h3>
+    <p class="scard-desc">Cach hien thi trang Shop chinh (<code>/shop</code>).</p>
+    <div class="form-group">
+      <select class="form-select" name="shop_display_mode" style="max-width:400px">
+        {% set sdm = settings.get('shop_display_mode', 'hub') %}
+        <option value="hub" {% if sdm == 'hub' %}selected{% endif %}>Hub — Hien thi tat ca san pham, danh muc (mac dinh)</option>
+        <option value="vertical_only" {% if sdm == 'vertical_only' %}selected{% endif %}>Vertical only — Chi hien thi san pham thuoc cac vertical</option>
+      </select>
+      <p class="form-help" style="margin-top:8px;line-height:1.7">
+        <strong>Hub:</strong> Hien thi toan bo san pham trong hub, ke ca chua phan loai vao vertical nao.<br>
+        <strong>Vertical only:</strong> Chi hien thi san pham da duoc gan vao vertical dang hoat dong (published). San pham trong Hub chua phan loai se an.
+      </p>
+    </div>
+  </div>
+
+  <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">Hot Products (AccessTrade Top Products)</h3>
+    <p class="scard-desc">Hien thi san pham ban chay nhat tu Shopee, Lazada, Tiki qua AccessTrade API. Can co API key AccessTrade.</p>
+    <div class="form-row" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div class="form-group">
+        <label class="form-label">Hien thi</label>
+        <select class="form-select" name="hot_products_enabled" style="max-width:140px">
+          {% set hp_enabled = settings.get('hot_products_enabled', '0') %}
+          <option value="1" {% if hp_enabled == '1' %}selected{% endif %}>Bat</option>
+          <option value="0" {% if hp_enabled == '0' %}selected{% endif %}>Tat</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">So luong san pham</label>
+        <select class="form-select" name="hot_products_count" style="max-width:100px">
+          {% set hp_count = settings.get('hot_products_count', '8') %}
+          {% for n in [4, 6, 8, 10, 12, 16, 20] %}
+          <option value="{{ n }}" {% if hp_count|string == n|string %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Trang Shop</label>
+        <select class="form-select" name="hot_products_show_shop" style="max-width:140px">
+          {% set hp_shop = settings.get('hot_products_show_shop', '1') %}
+          <option value="1" {% if hp_shop == '1' %}selected{% endif %}>Hien thi</option>
+          <option value="0" {% if hp_shop == '0' %}selected{% endif %}>An</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sidebar cac trang khac</label>
+        <select class="form-select" name="hot_products_show_sidebar" style="max-width:140px">
+          {% set hp_sidebar = settings.get('hot_products_show_sidebar', '1') %}
+          <option value="1" {% if hp_sidebar == '1' %}selected{% endif %}>Hien thi</option>
+          <option value="0" {% if hp_sidebar == '0' %}selected{% endif %}>An</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">Voucher Sidebar Widget</h3>
+    <p class="scard-desc">Hiển thị voucher nổi bật trong sidebar của các trang bài viết và sản phẩm.</p>
+    <div class="form-row" style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div class="form-group">
+        <label class="form-label">Hiển thị</label>
+        <select class="form-select" name="voucher_sidebar_enabled" style="max-width:140px">
+          {% set vs_enabled = settings.get('voucher_sidebar_enabled', '1') %}
+          <option value="1" {% if vs_enabled == '1' %}selected{% endif %}>Bật</option>
+          <option value="0" {% if vs_enabled == '0' %}selected{% endif %}>Tắt</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Số lượng voucher</label>
+        <select class="form-select" name="voucher_sidebar_count" style="max-width:100px">
+          {% set vs_count = settings.get('voucher_sidebar_count', '4') %}
+          {% for n in range(2, 9) %}
+          <option value="{{ n }}" {% if vs_count|string == n|string %}selected{% endif %}>{{ n }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Vị trí</label>
+        <select class="form-select" name="voucher_sidebar_position" style="max-width:180px">
+          {% set vs_pos = settings.get('voucher_sidebar_position', 'after_popular') %}
+          <option value="after_popular" {% if vs_pos == 'after_popular' %}selected{% endif %}>Sau bài phổ biến</option>
+          <option value="after_related" {% if vs_pos == 'after_related' %}selected{% endif %}>Sau bài liên quan</option>
+          <option value="bottom" {% if vs_pos == 'bottom' %}selected{% endif %}>Cuối sidebar</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">Custom Head Code</h3>
+    <p class="scard-desc">Chen code vao the <code>&lt;head&gt;</code> cua tat ca trang frontend. Dung de them tracking code (AccessTrade, Google Analytics, Facebook Pixel...).</p>
+    <div class="form-group">
+      <label class="form-label">Code (HTML/JS)</label>
+      <textarea class="form-input" name="custom_head_code" rows="6" style="font-family:'DM Mono',monospace;font-size:14px;line-height:1.6" placeholder="<script>...</script>">{{ settings.get('custom_head_code', '') }}</textarea>
+      <p class="form-help" style="margin-top:8px;line-height:1.7">
+        Paste nguyen doan code vao day. Vi du: AccessTrade Smart Tag, Google Analytics, Facebook Pixel...<br>
+        Code se duoc chen truoc the <code>&lt;/head&gt;</code> cua moi trang.
+      </p>
+    </div>
+  </div>
+
+  <div class="form-actions"><button type="submit" class="btn btn-primary">Save General</button></div>
+</form>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: API KEYS                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="stab-panel {% if active_tab=='api' %}active{% endif %}" id="tab-api">
+<form method="POST" style="max-width:700px">
+  <input type="hidden" name="_tab" value="api">
+
+  <div class="scard">
+    <h3 class="scard-title">AI API Keys</h3>
+    <p class="scard-desc">Add API keys to enable AI content generation. Keys are stored securely.</p>
     <div class="form-group"><label class="form-label">OpenAI API Key (GPT-4o, DALL-E)</label><input class="form-input" name="openai_key" type="password" value="{{ settings.get('openai_key','') }}" placeholder="sk-..."></div>
     <div class="form-group"><label class="form-label">Anthropic API Key (Claude)</label><input class="form-input" name="claude_key" type="password" value="{{ settings.get('claude_key','') }}" placeholder="sk-ant-..."></div>
     <div class="form-group"><label class="form-label">DALL-E API Key (if separate)</label><input class="form-input" name="dalle_key" type="password" value="{{ settings.get('dalle_key','') }}" placeholder="sk-..."></div>
     <div class="form-group"><label class="form-label">DeepL API Key (translations)</label><input class="form-input" name="deepl_key" type="password" value="{{ settings.get('deepl_key','') }}" placeholder="..."></div>
   </div>
 
-  <!-- Agoda Hotel API -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <h3 style="font-size:15px;margin:0">🏨 Agoda Hotel API</h3>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer">
-        <input type="checkbox" name="agoda_enabled" value="1" {% if settings.get('agoda_enabled')=='1' %}checked{% endif %}> Enabled
-      </label>
-    </div>
-    <p style="font-size:12px;color:var(--text-dim);margin-bottom:16px">Kết nối Agoda Affiliate API để hiển thị khách sạn trực tiếp trên travel.unilab.vn. User đặt phòng → bạn nhận hoa hồng 5-7%.</p>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">API Key</label><input class="form-input" name="agoda_api_key" type="password" value="{{ settings.get('agoda_api_key','') }}" placeholder="Agoda API key..."></div>
-      <div class="form-group"><label class="form-label">Site ID</label><input class="form-input" name="agoda_site_id" value="{{ settings.get('agoda_site_id','') }}" placeholder="123456"></div>
-      <div class="form-group"><label class="form-label">CID (Affiliate)</label><input class="form-input" name="agoda_cid" value="{{ settings.get('agoda_cid','') }}" placeholder="1234567"></div>
-    </div>
-    <div style="margin-top:12px;padding:14px;background:rgba(0,79,172,0.05);border-radius:8px;border:1px solid rgba(0,79,172,0.1)">
-      <div style="font-size:12px;line-height:1.8;color:var(--text-dim)">
-        <strong style="color:#004fac">Cách lấy API Key:</strong><br>
-        1. Đăng ký <span style="font-family:'DM Mono';font-size:11px">partners.agoda.com</span> → Agoda Partner Program<br>
-        2. Vào Dashboard → API Access → Generate API Key<br>
-        3. Copy Site ID & CID từ trang Account Settings<br>
-        4. Paste vào đây → Save → Trang Khách sạn sẽ hiển thị data realtime<br><br>
-        <strong>Hoa hồng:</strong> 5-7% mỗi booking | <strong>Cookie:</strong> 30 ngày | <strong>Thanh toán:</strong> hàng tháng qua bank transfer
-      </div>
-    </div>
-  </div>
-
-  <!-- Pricing Reference -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <h3 style="font-size:15px;margin-bottom:12px">API Pricing Reference</h3>
+  <div class="scard">
+    <h3 class="scard-title">API Pricing Reference</h3>
     <div class="table-wrap">
       <table class="data-table">
         <thead><tr><th>Provider</th><th>Model</th><th>Usage</th><th>Est. Cost</th></tr></thead>
         <tbody>
-          <tr><td>OpenAI</td><td style="font-family:'DM Mono';font-size:11px">gpt-4o</td><td>800-word article</td><td style="color:#22c55e">~1,500d</td></tr>
-          <tr><td>Anthropic</td><td style="font-family:'DM Mono';font-size:11px">claude-sonnet</td><td>800-word article</td><td style="color:#22c55e">~1,000d</td></tr>
-          <tr><td>OpenAI</td><td style="font-family:'DM Mono';font-size:11px">dall-e-3</td><td>1 image</td><td style="color:#22c55e">~1,000d</td></tr>
-          <tr><td>DeepL</td><td style="font-family:'DM Mono';font-size:11px">api-free</td><td>500k chars/month</td><td style="color:#22c55e">Free</td></tr>
-          <tr style="background:rgba(139,92,246,0.05)"><td colspan="2"><strong>100 articles + 100 images / month</strong></td><td></td><td style="color:#8b5cf6"><strong>~250,000d</strong></td></tr>
+          <tr><td>OpenAI</td><td><code>gpt-4o</code></td><td>800-word article</td><td style="color:#22c55e">~1,500d</td></tr>
+          <tr><td>Anthropic</td><td><code>claude-sonnet</code></td><td>800-word article</td><td style="color:#22c55e">~1,000d</td></tr>
+          <tr><td>OpenAI</td><td><code>dall-e-3</code></td><td>1 image</td><td style="color:#22c55e">~1,000d</td></tr>
+          <tr><td>DeepL</td><td><code>api-free</code></td><td>500k chars/month</td><td style="color:#22c55e">Free</td></tr>
+          <tr style="background:rgba(139,92,246,0.05)"><td colspan="2"><strong>100 articles + 100 images</strong></td><td></td><td style="color:#8b5cf6"><strong>~250,000d</strong></td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- How to get API keys -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <h3 style="font-size:15px;margin-bottom:12px">How to Get API Keys</h3>
-    <div style="font-size:13px;color:var(--text-dim);line-height:1.8">
-      <strong>OpenAI:</strong> Go to <span style="font-family:'DM Mono';font-size:11px;color:var(--accent)">platform.openai.com</span> > API Keys > Create new key<br>
-      <strong>Anthropic:</strong> Go to <span style="font-family:'DM Mono';font-size:11px;color:var(--accent)">console.anthropic.com</span> > API Keys > Create key<br>
-      <strong>DeepL:</strong> Go to <span style="font-family:'DM Mono';font-size:11px;color:var(--accent)">deepl.com/pro-api</span> > Sign up > Get key<br><br>
-      After getting keys, paste them above and click Save. The system will automatically use them when generating content.
+  <div class="scard">
+    <h3 class="scard-title">How to Get API Keys</h3>
+    <div style="color:var(--text-dim);line-height:1.8">
+      <strong>OpenAI:</strong> <code>platform.openai.com</code> > API Keys > Create new key<br>
+      <strong>Anthropic:</strong> <code>console.anthropic.com</code> > API Keys > Create key<br>
+      <strong>DeepL:</strong> <code>deepl.com/pro-api</code> > Sign up > Get key<br><br>
+      After getting keys, paste them above and click Save.
     </div>
   </div>
 
-  <div class="form-actions"><button type="submit" class="btn btn-primary">Save Settings</button></div>
+  <div class="form-actions"><button type="submit" class="btn btn-primary">Save API Keys</button></div>
 </form>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB: STYLES                                 -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="stab-panel {% if active_tab=='styles' %}active{% endif %}" id="tab-styles">
+
+  <!-- Add New Style -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <p style="color:var(--text-dim);margin:0">Manage theme styles for verticals. Each vertical can use a different style.</p>
+    <button class="btn btn-primary" onclick="openStyleEditor('__new__')">+ Add New Style</button>
+  </div>
+
+  <!-- Style Cards Grid -->
+  <div class="style-grid">
+    {% for name, s in styles|dictsort %}
+    <div class="style-card" id="sc-{{ name }}">
+      <div class="sc-header">
+        <div class="sc-color-bar" style="background:{{ s.accent }}"></div>
+        <div class="sc-name">{{ name }}</div>
+        {% if name in custom_names %}
+        <span class="sc-badge sc-badge-custom">Custom</span>
+        {% else %}
+        <span class="sc-badge sc-badge-default">Default</span>
+        {% endif %}
+      </div>
+      <div class="sc-body">
+        <!-- Font preview -->
+        <div class="sc-section">
+          <div class="sc-label">Fonts</div>
+          <div class="sc-font-preview" style="font-family:{{ s.font_primary }}">Primary: Aa Bb Cc 123</div>
+          <div class="sc-font-preview" style="font-family:{{ s.font_secondary }};font-size:14px">Secondary: Aa Bb Cc 123</div>
+        </div>
+        <!-- Color swatches -->
+        <div class="sc-section">
+          <div class="sc-label">Colors</div>
+          <div class="sc-swatches">
+            <div class="sc-swatch" style="background:{{ s.accent }}" title="Accent: {{ s.accent }}"></div>
+            <div class="sc-swatch" style="background:{{ s.bg_light }};border:1px solid {{ s.border_light }}" title="BG Light: {{ s.bg_light }}"></div>
+            <div class="sc-swatch" style="background:{{ s.bg_dark }}" title="BG Dark: {{ s.bg_dark }}"></div>
+            <div class="sc-swatch" style="background:{{ s.text_light }}" title="Text Light: {{ s.text_light }}"></div>
+            <div class="sc-swatch" style="background:{{ s.surface_light }};border:1px solid {{ s.border_light }}" title="Surface Light: {{ s.surface_light }}"></div>
+            <div class="sc-swatch" style="background:{{ s.surface_dark }}" title="Surface Dark: {{ s.surface_dark }}"></div>
+          </div>
+        </div>
+        <!-- Radius -->
+        <div class="sc-section">
+          <div class="sc-label">Radius: <code>{{ s.radius }}</code></div>
+        </div>
+      </div>
+      <div class="sc-actions">
+        <button class="btn btn-ghost" onclick="openStyleEditor('{{ name }}')">Edit</button>
+        {% if name in custom_names %}
+        <form method="POST" action="{{ url_for('admin_settings_styles') }}" style="display:inline" onsubmit="return confirm('Delete style {{ name }}?')">
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="style_name" value="{{ name }}">
+          <button type="submit" class="btn btn-ghost" style="color:var(--red)">Delete</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- STYLE EDITOR MODAL                          -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="styleModal" style="display:none">
+  <div class="modal-box" style="max-width:780px">
+    <div class="modal-head">
+      <h3 id="modalTitle">Edit Style</h3>
+      <button class="modal-close" onclick="closeStyleEditor()">&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('admin_settings_styles') }}" id="styleForm">
+      <input type="hidden" name="action" value="save">
+      <div class="modal-body">
+        <!-- Style Name -->
+        <div class="form-group">
+          <label class="form-label">Style Name (slug)</label>
+          <input class="form-input" name="style_name" id="sf-name" required placeholder="e.g. food, fashion, music...">
+        </div>
+
+        <!-- Fonts -->
+        <div class="se-section">
+          <h4 class="se-section-title">Fonts</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Primary Font</label>
+              <select class="form-select" name="font_primary" id="sf-font-primary">
+                {% for val, label in available_fonts %}
+                <option value="{{ val }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Secondary Font</label>
+              <select class="form-select" name="font_secondary" id="sf-font-secondary">
+                {% for val, label in available_fonts %}
+                <option value="{{ val }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Light Mode Colors -->
+        <div class="se-section">
+          <h4 class="se-section-title">Light Mode</h4>
+          <div class="se-color-grid">
+            <div class="se-color-item"><label>Background</label><input type="color" name="bg_light" id="sf-bg-light" value="#ffffff"><span class="se-color-val" id="sv-bg-light"></span></div>
+            <div class="se-color-item"><label>Surface</label><input type="color" name="surface_light" id="sf-surface-light" value="#f8f9fa"><span class="se-color-val" id="sv-surface-light"></span></div>
+            <div class="se-color-item"><label>Border</label><input type="color" name="border_light" id="sf-border-light" value="#dee2e6"><span class="se-color-val" id="sv-border-light"></span></div>
+            <div class="se-color-item"><label>Text</label><input type="color" name="text_light" id="sf-text-light" value="#212529"><span class="se-color-val" id="sv-text-light"></span></div>
+            <div class="se-color-item"><label>Text Dim</label><input type="color" name="text_dim_light" id="sf-text-dim-light" value="#6c757d"><span class="se-color-val" id="sv-text-dim-light"></span></div>
+          </div>
+        </div>
+
+        <!-- Dark Mode Colors -->
+        <div class="se-section">
+          <h4 class="se-section-title">Dark Mode</h4>
+          <div class="se-color-grid">
+            <div class="se-color-item"><label>Background</label><input type="color" name="bg_dark" id="sf-bg-dark" value="#1a1a1a"><span class="se-color-val" id="sv-bg-dark"></span></div>
+            <div class="se-color-item"><label>Surface</label><input type="color" name="surface_dark" id="sf-surface-dark" value="#2d2d2d"><span class="se-color-val" id="sv-surface-dark"></span></div>
+            <div class="se-color-item"><label>Border</label><input type="color" name="border_dark" id="sf-border-dark" value="#444444"><span class="se-color-val" id="sv-border-dark"></span></div>
+            <div class="se-color-item"><label>Text</label><input type="color" name="text_dark" id="sf-text-dark" value="#f8f9fa"><span class="se-color-val" id="sv-text-dark"></span></div>
+            <div class="se-color-item"><label>Text Dim</label><input type="color" name="text_dim_dark" id="sf-text-dim-dark" value="#adb5bd"><span class="se-color-val" id="sv-text-dim-dark"></span></div>
+          </div>
+        </div>
+
+        <!-- Accent & Radius -->
+        <div class="se-section">
+          <h4 class="se-section-title">Accent & Radius</h4>
+          <div class="se-color-grid">
+            <div class="se-color-item"><label>Accent</label><input type="color" name="accent" id="sf-accent" value="#007bff"><span class="se-color-val" id="sv-accent"></span></div>
+            <div class="se-color-item"><label>Accent Hover</label><input type="color" name="accent_hover" id="sf-accent-hover" value="#0056b3"><span class="se-color-val" id="sv-accent-hover"></span></div>
+            <div class="se-color-item">
+              <label>Border Radius</label>
+              <select class="form-select" name="radius" id="sf-radius" style="width:100px">
+                <option value="4px">4px</option>
+                <option value="6px">6px</option>
+                <option value="8px">8px</option>
+                <option value="10px">10px</option>
+                <option value="12px">12px</option>
+                <option value="16px">16px</option>
+                <option value="20px">20px</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-ghost" onclick="closeStyleEditor()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Style</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+/* ═══ SETTINGS TABS ═══ */
+.stab-nav { display:flex; gap:4px; border-bottom:2px solid var(--border); margin-bottom:24px; }
+.stab-btn { padding:10px 20px; border:none; background:none; font-size:14px; font-weight:600; color:var(--text-dim); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.15s; border-radius:6px 6px 0 0; }
+.stab-btn:hover { color:var(--text); background:var(--surface2); }
+.stab-btn.active { color:var(--accent); border-bottom-color:var(--accent); background:var(--surface); }
+.stab-panel { display:none; }
+.stab-panel.active { display:block; }
+
+/* ═══ SETTINGS CARD ═══ */
+.scard { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:20px; }
+.scard-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.scard-head h3 { font-size:15px; margin:0; }
+.scard-title { font-size:15px; margin-bottom:16px; }
+.scard-desc { color:var(--text-dim); margin-bottom:14px; }
+
+/* ═══ STYLE CARDS GRID ═══ */
+.style-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px; }
+.style-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:box-shadow 0.2s; }
+.style-card:hover { box-shadow:0 4px 20px rgba(0,0,0,0.08); }
+.sc-header { padding:14px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid var(--border); }
+.sc-color-bar { width:6px; height:30px; border-radius:3px; flex-shrink:0; }
+.sc-name { font-weight:700; font-size:15px; flex:1; }
+.sc-badge { font-size:14px; font-weight:600; padding:2px 8px; border-radius:4px; }
+.sc-badge-default { background:rgba(59,130,246,0.1); color:#3b82f6; }
+.sc-badge-custom { background:rgba(139,92,246,0.1); color:#8b5cf6; }
+.sc-body { padding:14px 16px; }
+.sc-section { margin-bottom:12px; }
+.sc-section:last-child { margin-bottom:0; }
+.sc-label { font-size:14px; font-weight:600; color:var(--text-dim); margin-bottom:6px; }
+.sc-label code { font-size:14px; padding:1px 5px; background:var(--surface2); border-radius:3px; }
+.sc-font-preview { font-size:14px; margin-bottom:4px; color:var(--text); line-height:1.4; }
+.sc-swatches { display:flex; gap:4px; flex-wrap:wrap; }
+.sc-swatch { width:28px; height:28px; border-radius:6px; cursor:help; }
+.sc-actions { padding:10px 16px; border-top:1px solid var(--border); display:flex; gap:8px; }
+
+/* ═══ MODAL ═══ */
+.modal-overlay { position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.modal-box { background:var(--surface); border-radius:12px; width:90%; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+.modal-head { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--surface); z-index:1; }
+.modal-head h3 { margin:0; font-size:18px; }
+.modal-close { background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-dim); padding:4px 8px; border-radius:6px; }
+.modal-close:hover { background:var(--surface2); color:var(--text); }
+.modal-body { padding:24px; }
+.modal-foot { padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; position:sticky; bottom:0; background:var(--surface); }
+
+/* ═══ STYLE EDITOR ═══ */
+.se-section { margin-top:20px; padding-top:16px; border-top:1px solid var(--border); }
+.se-section:first-of-type { margin-top:16px; }
+.se-section-title { font-size:14px; font-weight:700; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--accent); }
+.se-color-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:12px; }
+.se-color-item { display:flex; flex-direction:column; gap:4px; }
+.se-color-item label { font-size:14px; font-weight:600; color:var(--text-dim); }
+.se-color-item input[type="color"] { width:100%; height:36px; border:1px solid var(--border); border-radius:6px; cursor:pointer; padding:2px; }
+.se-color-val { font-size:14px; color:var(--text-dim); font-family:'DM Mono',monospace; }
+</style>
+
+<script>
+/* ═══ TAB SWITCHING ═══ */
+document.querySelectorAll('.stab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.stab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.stab-panel').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    history.replaceState(null, '', '?tab=' + this.dataset.tab);
+  });
+});
+
+/* ═══ STYLE DATA (from server) ═══ */
+const STYLES_DATA = {{ styles|tojson }};
+
+/* ═══ STYLE EDITOR ═══ */
+function openStyleEditor(name) {
+  const modal = document.getElementById('styleModal');
+  const title = document.getElementById('modalTitle');
+  const nameInput = document.getElementById('sf-name');
+
+  if (name === '__new__') {
+    title.textContent = 'Add New Style';
+    nameInput.value = '';
+    nameInput.readOnly = false;
+    // Set defaults
+    setField('sf-font-primary', "'Inter', -apple-system, system-ui, sans-serif");
+    setField('sf-font-secondary', "'DM Mono', monospace");
+    setColor('sf-bg-light', '#ffffff');
+    setColor('sf-bg-dark', '#1a1a1a');
+    setColor('sf-surface-light', '#f8f9fa');
+    setColor('sf-surface-dark', '#2d2d2d');
+    setColor('sf-border-light', '#dee2e6');
+    setColor('sf-border-dark', '#444444');
+    setColor('sf-text-light', '#212529');
+    setColor('sf-text-dark', '#f8f9fa');
+    setColor('sf-text-dim-light', '#6c757d');
+    setColor('sf-text-dim-dark', '#adb5bd');
+    setColor('sf-accent', '#007bff');
+    setColor('sf-accent-hover', '#0056b3');
+    setField('sf-radius', '8px');
+  } else {
+    const s = STYLES_DATA[name];
+    if (!s) return;
+    title.textContent = 'Edit Style: ' + name;
+    nameInput.value = name;
+    nameInput.readOnly = true;
+    setField('sf-font-primary', s.font_primary);
+    setField('sf-font-secondary', s.font_secondary);
+    setColor('sf-bg-light', s.bg_light);
+    setColor('sf-bg-dark', s.bg_dark);
+    setColor('sf-surface-light', s.surface_light);
+    setColor('sf-surface-dark', s.surface_dark);
+    setColor('sf-border-light', s.border_light);
+    setColor('sf-border-dark', s.border_dark);
+    setColor('sf-text-light', s.text_light);
+    setColor('sf-text-dark', s.text_dark);
+    setColor('sf-text-dim-light', s.text_dim_light);
+    setColor('sf-text-dim-dark', s.text_dim_dark);
+    setColor('sf-accent', s.accent);
+    setColor('sf-accent-hover', s.accent_hover);
+    setField('sf-radius', s.radius);
+  }
+
+  modal.style.display = 'flex';
+  updateAllColorLabels();
+}
+
+function closeStyleEditor() {
+  document.getElementById('styleModal').style.display = 'none';
+}
+
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val || '';
+}
+
+function setColor(id, val) {
+  const el = document.getElementById(id);
+  if (el) {
+    // Ensure valid hex for color input (must be #RRGGBB)
+    if (val && val.length === 4) val = '#' + val[1]+val[1] + val[2]+val[2] + val[3]+val[3];
+    el.value = val || '#000000';
+  }
+}
+
+function updateAllColorLabels() {
+  document.querySelectorAll('.se-color-item input[type="color"]').forEach(inp => {
+    const label = inp.parentElement.querySelector('.se-color-val');
+    if (label) label.textContent = inp.value;
+    inp.addEventListener('input', function() {
+      const l = this.parentElement.querySelector('.se-color-val');
+      if (l) l.textContent = this.value;
+    });
+  });
+}
+
+// Close modal on outside click
+document.getElementById('styleModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeStyleEditor();
+});
+
+// Close modal on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeStyleEditor();
+});
+</script>
 {% endblock %}

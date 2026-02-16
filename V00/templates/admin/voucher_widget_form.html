@@ -45,7 +45,7 @@
     <!-- Embed Code -->
     <div class="form-section">
       <h3>🔗 Embed Code</h3>
-      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px">
+      <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">
         Copy embed code từ AccessTrade hoặc affiliate network → Paste vào đây
       </p>
 
@@ -56,7 +56,7 @@
           rows="12"
           required
           placeholder="<!-- Paste embed code từ AccessTrade hoặc network khác -->"
-          style="font-family:'DM Mono',monospace;font-size:12px;line-height:1.6">{{ widget.embed_code if widget }}</textarea>
+          style="font-family:'DM Mono',monospace;font-size:14px;line-height:1.6">{{ widget.embed_code if widget }}</textarea>
         <small>
           <strong>VD AccessTrade:</strong> &lt;div id="at-voucher-widget"&gt;&lt;/div&gt;&lt;script src="..."&gt;&lt;/script&gt;
         </small>
@@ -64,7 +64,7 @@
 
       {% if widget and widget.embed_code %}
       <div style="margin-top:16px;padding:12px;background:var(--bg-subtle);border-radius:8px">
-        <strong style="font-size:12px;color:var(--text-dim)">Preview:</strong>
+        <strong style="font-size:14px;color:var(--text-dim)">Preview:</strong>
         <div style="margin-top:8px;max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;padding:12px;background:#fff">
           {{ widget.embed_code|safe }}
         </div>

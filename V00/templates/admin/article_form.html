@@ -2,7 +2,7 @@
 {% block title %}{% if article %}Edit Article{% else %}New Article{% endif %}{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_articles') }}">Articles</a><span class="sep">></span>{% if article %}Edit{% else %}New{% endif %}{% endblock %}
 {% block content %}
-<h1 class="page-title">{% if article %}Edit: {{ article.title[:50] }}{% else %}+ New Knowledge Article{% endif %}</h1>
+<h1 class="page-title">📝 {% if article %}Edit: {{ article.title[:50] }}{% else %}New Article{% endif %}</h1>
 
 <form method="POST" style="max-width:900px">
   <div class="form-group"><label class="form-label">Title *</label><input class="form-input" name="title" value="{{ article.title if article else '' }}" required placeholder="Cao su chan phuoc — Tat ca kien thuc ban can biet"></div>
@@ -32,11 +32,17 @@
 
   <div class="form-group"><label class="form-label">Tags (comma separated)</label><input class="form-input" name="tags" value="{{ article.tags if article else '' }}" placeholder="cao su phuoc, he thong treo, bao duong"></div>
 
+  <div class="form-group">
+    <label class="form-label">Thumbnail Image URL</label>
+    <input class="form-input" name="image_url" value="{{ article.image_url if article else '' }}" placeholder="https://...thumbnail.jpg">
+    {% if article and article.image_url %}<img src="{{ article.image_url }}" style="margin-top:8px;max-width:200px;border-radius:6px" alt="Preview">{% endif %}
+  </div>
+
   <div class="form-group"><label class="form-label">Excerpt</label><textarea class="form-textarea" name="excerpt" style="min-height:80px" placeholder="Mo ta ngan cho listing...">{{ article.excerpt if article else '' }}</textarea></div>
 
   <div class="form-group"><label class="form-label">Content (HTML)</label><textarea class="form-textarea" name="content" style="min-height:400px" placeholder="<h2>Title</h2><p>Content...</p>">{{ article.content if article else '' }}</textarea></div>
 
-  <div class="form-group"><label class="form-label">Product Embed Code</label><textarea class="form-textarea" name="embed_code" style="min-height:80px;font-family:'DM Mono';font-size:12px" placeholder='<div class="at-carousel" data-keyword="..." data-limit="6"></div>'>{{ article.embed_code if article else '' }}</textarea></div>
+  <div class="form-group"><label class="form-label">Product Embed Code</label><textarea class="form-textarea" name="embed_code" style="min-height:80px;font-family:'DM Mono';font-size:14px" placeholder='<div class="at-carousel" data-keyword="..." data-limit="6"></div>'>{{ article.embed_code if article else '' }}</textarea></div>
 
   <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="ai_generated" {% if article and article.ai_generated %}checked{% endif %}> AI Generated</label></div>
 

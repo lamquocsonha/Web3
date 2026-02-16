@@ -57,6 +57,7 @@
   <div class="articles-featured">
     {% for a in articles_nganh[:3] %}
     <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card {% if loop.first %}featured{% endif %}">
+      {% if a.image_url %}<div class="ac-thumb"><img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy"></div>{% endif %}
       <div class="ac-tier">Kiến thức ngành</div>
       <h3 class="ac-title">{{ a.title }}</h3>
       <p class="ac-excerpt">{{ a.excerpt[:120] }}{% if a.excerpt|length > 120 %}...{% endif %}</p>
@@ -97,7 +98,8 @@
   </div>
   <div class="articles-grid">
     {% for a in articles_chung[:4] %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm">
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
+      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
       <div class="acs-tier chung">Hệ thống</div>
       <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
       <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
@@ -117,7 +119,8 @@
   </div>
   <div class="articles-grid">
     {% for a in articles_chitiet[:4] %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm">
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
+      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
       <div class="acs-tier chitiet">Chi tiết</div>
       <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
       <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>

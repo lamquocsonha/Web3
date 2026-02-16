@@ -1,0 +1,211 @@
+{% extends "admin/base.html" %}
+{% block title %}Import tu Datafeeds{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>
+<a href="{{ url_for('admin_products') }}">Products</a><span class="sep">></span>
+Datafeeds
+{% endblock %}
+{% block content %}
+<h1 class="page-title">🔗 AccessTrade Datafeeds</h1>
+<p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">Tim va import san pham tu Shopee, Lazada, Tiki... qua AccessTrade Datafeeds API</p>
+
+<div style="max-width:1200px">
+  <!-- Search Form -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px">
+    <form method="GET" action="{{ url_for('admin_products_datafeeds') }}">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:2;min-width:200px">
+          <label class="form-label">Tu khoa san pham</label>
+          <input type="text" name="keyword" value="{{ keyword }}" class="form-input" placeholder="VD: cao su chan phuoc, ma phanh, royal canin...">
+        </div>
+        <div style="flex:1;min-width:150px">
+          <label class="form-label">Domain</label>
+          <select name="domain" class="form-select">
+            <option value="">Tat ca</option>
+            <option value="shopee.vn" {% if domain=='shopee.vn' %}selected{% endif %}>Shopee</option>
+            <option value="lazada.vn" {% if domain=='lazada.vn' %}selected{% endif %}>Lazada</option>
+            <option value="tiki.vn" {% if domain=='tiki.vn' %}selected{% endif %}>Tiki</option>
+            <option value="sendo.vn" {% if domain=='sendo.vn' %}selected{% endif %}>Sendo</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:150px">
+          <label class="form-label">Campaign</label>
+          <select name="campaign" class="form-select">
+            <option value="">Tat ca</option>
+            {% for c in campaigns %}
+            <option value="{{ c.id }}" {% if campaign==c.id|string %}selected{% endif %}>{{ c.merchant|default(c.name, true) }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <button type="submit" class="btn btn-primary">Tim kiem</button>
+        </div>
+        <div>
+          <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Quay lai</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if keyword or domain or campaign %}
+  <!-- Results -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="font-size:15px;margin:0">
+        Ket qua: <strong>{{ "{:,}".format(total) }}</strong> san pham
+        {% if keyword %} — "{{ keyword }}"{% endif %}
+      </h3>
+      {% if products %}
+      <div style="display:flex;gap:8px;align-items:center">
+        <label style="font-size:14px;color:var(--text-dim);display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" style="width:16px;height:16px">
+          Chon tat ca
+        </label>
+        <span id="selectedCount" style="font-size:14px;color:var(--accent);font-weight:700;min-width:80px"></span>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if products %}
+    <form method="POST" action="{{ url_for('admin_products_datafeeds') }}" id="importForm">
+      <!-- Deeplink option -->
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px;padding:12px 16px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:8px">
+        <label style="font-size:14px;display:flex;align-items:center;gap:6px">
+          <input type="checkbox" name="apply_deeplink" checked style="width:16px;height:16px">
+          Ap dung Deeplink Template
+        </label>
+        <span style="font-size:14px;color:var(--text-dim)">San pham da co deep_link se su dung truc tiep, khong can template</span>
+      </div>
+
+      <!-- Product Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px">
+        {% for p in products %}
+        <label class="df-card" style="display:block;border:2px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all .15s;position:relative" data-idx="{{ loop.index0 }}">
+          <input type="checkbox" name="selected_products" class="product-cb" style="position:absolute;top:12px;left:12px;width:18px;height:18px;z-index:2"
+                 value='{{ {"name": p.name|default(p.product_name|default("", true), true), "url": p.product_url|default(p.url|default("", true), true), "deep_link": p.deep_link|default(p.aff_link|default("", true), true), "image": p.image|default(p.image_url|default("", true), true), "price": p.price|default(p.original_price|default(0, true), true), "promotion_price": p.promotion_price|default(p.discount|default(0, true), true), "category": p.category|default(p.cate|default("", true), true)}|tojson }}'>
+          <div style="height:160px;background:var(--code-bg);display:flex;align-items:center;justify-content:center;overflow:hidden">
+            {% if p.image|default('', true) or p.image_url|default('', true) %}
+            <img src="{{ p.image|default(p.image_url|default('', true), true) }}" alt="" style="max-width:100%;max-height:100%;object-fit:contain" loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div style="display:none;align-items:center;justify-content:center;width:100%;height:100%;color:var(--text-dim);font-size:40px">📦</div>
+            {% else %}
+            <div style="color:var(--text-dim);font-size:40px">📦</div>
+            {% endif %}
+          </div>
+          <div style="padding:12px">
+            <div style="font-size:14px;font-weight:600;line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:40px">
+              {{ p.name|default(p.product_name|default('N/A', true), true) }}
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              {% set promo = p.promotion_price|default(p.discount|default(0, true), true)|float %}
+              {% set orig = p.price|default(p.original_price|default(0, true), true)|float %}
+              {% if promo and promo != orig %}
+              <div>
+                <span style="font-size:16px;font-weight:700;color:#ef4444">{{ "{:,.0f}".format(promo) }}đ</span>
+                <span style="font-size:12px;color:var(--text-dim);text-decoration:line-through;margin-left:4px">{{ "{:,.0f}".format(orig) }}đ</span>
+              </div>
+              {% else %}
+              <span style="font-size:16px;font-weight:700">{{ "{:,.0f}".format(orig) }}đ</span>
+              {% endif %}
+              {% set disc_rate = p.discount_percent|default(p.discount_rate|default(0, true), true)|float %}
+              {% if disc_rate %}
+              <span style="background:#fef2f2;color:#ef4444;font-size:12px;font-weight:700;padding:2px 8px;border-radius:4px">-{{ disc_rate|int }}%</span>
+              {% endif %}
+            </div>
+            <div style="font-size:12px;color:var(--text-dim);display:flex;justify-content:space-between">
+              <span>{{ p.domain|default('', true) }}</span>
+              <span>{{ p.category|default(p.cate|default('', true), true) }}</span>
+            </div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+
+      <!-- Import Button -->
+      <div style="position:sticky;bottom:0;background:var(--bg);padding:16px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span id="importStatus" style="font-size:14px;color:var(--text-dim)">Chon san pham de import</span>
+        <button type="submit" class="btn btn-primary" id="btnImport" disabled style="font-size:16px;padding:12px 32px">
+          Import san pham da chon
+        </button>
+      </div>
+    </form>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:20px">
+      {% if page > 1 %}
+      <a href="{{ url_for('admin_products_datafeeds', keyword=keyword, domain=domain, campaign=campaign, page=page-1) }}" class="btn btn-sm btn-secondary">&laquo; Trang truoc</a>
+      {% endif %}
+      <span style="padding:8px 16px;font-size:14px;color:var(--text-dim)">Trang {{ page }} / {{ total_pages }}</span>
+      {% if page < total_pages %}
+      <a href="{{ url_for('admin_products_datafeeds', keyword=keyword, domain=domain, campaign=campaign, page=page+1) }}" class="btn btn-sm btn-secondary">Trang sau &raquo;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div style="text-align:center;padding:40px;color:var(--text-dim)">
+      <div style="font-size:48px;margin-bottom:16px">🔍</div>
+      <p style="font-size:16px">Khong tim thay san pham nao</p>
+      <p style="font-size:14px">Thu thay doi tu khoa hoac domain</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <!-- Initial State -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:48px;text-align:center">
+    <div style="font-size:64px;margin-bottom:16px">🛒</div>
+    <h3 style="font-size:18px;margin-bottom:8px">Tim san pham tu AccessTrade Datafeeds</h3>
+    <p style="font-size:14px;color:var(--text-dim);max-width:500px;margin:0 auto 24px">Nhap tu khoa de tim san pham tu Shopee, Lazada, Tiki... Co the chon san pham va import truc tiep vao he thong.</p>
+    <div style="background:rgba(59,130,246,0.05);border:2px solid rgba(59,130,246,0.15);border-radius:12px;padding:20px;max-width:600px;margin:0 auto;text-align:left">
+      <h4 style="font-size:14px;color:#3b82f6;margin-bottom:12px">Cach su dung</h4>
+      <ol style="font-size:14px;color:var(--text-dim);line-height:2;padding-left:20px;margin:0">
+        <li>Nhap tu khoa san pham (VD: "cao su chan phuoc", "royal canin")</li>
+        <li>Chon domain neu muon loc theo san (Shopee, Lazada...)</li>
+        <li>Tick chon san pham muon import</li>
+        <li>Bam <strong>Import</strong> — san pham tu dong phan loai vao Hub + match vao vertical</li>
+      </ol>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+.df-card:has(input:checked) {
+  border-color: var(--accent) !important;
+  background: rgba(99,102,241,0.04);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+.df-card:hover {
+  border-color: var(--accent);
+}
+</style>
+
+<script>
+function toggleSelectAll(el) {
+  document.querySelectorAll('.product-cb').forEach(cb => { cb.checked = el.checked; });
+  updateCount();
+}
+
+document.querySelectorAll('.product-cb').forEach(cb => {
+  cb.addEventListener('change', updateCount);
+});
+
+function updateCount() {
+  var checked = document.querySelectorAll('.product-cb:checked').length;
+  var total = document.querySelectorAll('.product-cb').length;
+  var countEl = document.getElementById('selectedCount');
+  var btnEl = document.getElementById('btnImport');
+  var statusEl = document.getElementById('importStatus');
+
+  if (countEl) countEl.textContent = checked > 0 ? checked + '/' + total + ' da chon' : '';
+  if (btnEl) btnEl.disabled = checked === 0;
+  if (statusEl) statusEl.textContent = checked > 0 ? 'Se import ' + checked + ' san pham vao Hub + auto-match vertical' : 'Chon san pham de import';
+
+  // Update select all checkbox
+  var selectAll = document.getElementById('selectAll');
+  if (selectAll) selectAll.checked = checked === total && total > 0;
+}
+</script>
+{% endblock %}

@@ -41,7 +41,7 @@
       <div class="carousel-grid">
         {% for al in part.affiliate_links if al.is_active %}
         <div class="carousel-card">
-          <div class="cc-image"><div class="cc-placeholder">📦</div></div>
+          <div class="cc-image">{% if al.image_url %}<img src="{{ al.image_url }}" alt="{{ al.product_name or part.name_vi }}" loading="lazy">{% else %}<div class="cc-placeholder">📦</div>{% endif %}</div>
           <div class="cc-body">
             <div class="cc-network">{{ al.network }}</div>
             <div class="cc-name">{{ al.product_name or part.name_vi }}</div>
@@ -61,7 +61,8 @@
       <h2>📖 Bài viết liên quan</h2>
       <div class="articles-grid">
         {% for a in related_articles %}
-        <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm">
+        <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
+          <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
           <div class="acs-tier {{ a.tier }}">{{ a.tier|replace('-',' ')|title }}</div>
           <h4>{{ a.title[:60] }}...</h4>
           <p>{{ a.excerpt[:90] }}...</p>

@@ -2,7 +2,7 @@
 {% block title %}Generate Content{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_content') }}">AI Content</a><span class="sep">></span>Generate{% endblock %}
 {% block content %}
-<h1 class="page-title">Generate AI Content</h1>
+<h1 class="page-title">🤖 Generate AI Content</h1>
 
 <form method="POST" style="max-width:800px">
   <div class="form-row">
@@ -27,8 +27,8 @@
 
   <!-- Pricing Info -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:20px">
-    <div style="font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:8px">ESTIMATED COST</div>
-    <div style="display:flex;gap:24px;font-size:13px">
+    <div style="font-size:14px;font-weight:600;color:var(--text-dim);margin-bottom:8px">ESTIMATED COST</div>
+    <div style="display:flex;gap:24px;font-size:14px">
       <span>GPT-4o article: ~1,500d</span>
       <span>Claude article: ~1,000d</span>
       <span>DALL-E image: ~1,000d</span>
@@ -44,7 +44,7 @@
 <!-- How API Works -->
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:32px;max-width:800px">
   <h3 style="font-size:15px;margin-bottom:12px">How AI API Works</h3>
-  <div style="display:flex;gap:8px;font-size:12px;color:var(--text-dim)">
+  <div style="display:flex;gap:8px;font-size:14px;color:var(--text-dim)">
     <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px"><strong style="color:var(--accent)">1. You write prompt</strong><br>Title, keywords, tone, length</div>
     <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
     <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px"><strong style="color:var(--accent)">2. Server calls API</strong><br>POST to OpenAI/Claude with your prompt</div>
@@ -53,6 +53,6 @@
     <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
     <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px"><strong style="color:var(--accent)">4. You review & publish</strong><br>Edit if needed, then publish</div>
   </div>
-  <p style="font-size:11px;color:var(--text-dim);margin-top:12px">* Add your API keys in <a href="{{ url_for('admin_settings') }}" style="color:var(--accent)">Settings</a> to enable real AI generation.</p>
+  <p style="font-size:14px;color:var(--text-dim);margin-top:12px">* Add your API keys in <a href="{{ url_for('admin_settings') }}" style="color:var(--accent)">Settings</a> to enable real AI generation.</p>
 </div>
 {% endblock %}

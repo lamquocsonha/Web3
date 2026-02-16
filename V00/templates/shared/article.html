@@ -47,24 +47,22 @@
         {% endfor %}
 
         {# Product Carousel in the middle #}
-        {% if article.embed_code or related_parts %}
+        {% if article.embed_code or carousel_items %}
         <div class="product-carousel-section">
           <h2>🛒 Sản phẩm liên quan</h2>
           <p class="carousel-desc">Sản phẩm gợi ý từ các sàn thương mại — phù hợp với nội dung bài viết.</p>
-          {% if related_parts %}
+          {% if carousel_items %}
           <div class="carousel-grid">
-            {% for p in related_parts %}
-            {% for al in p.affiliate_links if al.is_active %}
+            {% for al in carousel_items %}
             <div class="carousel-card">
-              <div class="cc-image"><div class="cc-placeholder">📦</div></div>
+              <div class="cc-image">{% if al.image_url %}<img src="{{ al.image_url }}" alt="{{ al.product_name or al.part.name_vi }}" loading="lazy">{% else %}<div class="cc-placeholder">📦</div>{% endif %}</div>
               <div class="cc-body">
                 <div class="cc-network">{{ al.network }}</div>
-                <div class="cc-name">{{ al.product_name or p.name_vi }}</div>
+                <div class="cc-name">{{ al.product_name or al.part.name_vi }}</div>
                 <div class="cc-price">{{ "{:,.0f}".format(al.price) }}đ</div>
                 <a href="{{ al.url }}" target="_blank" rel="nofollow" class="cc-btn">Xem sản phẩm →</a>
               </div>
             </div>
-            {% endfor %}
             {% endfor %}
           </div>
           {% endif %}
@@ -174,6 +172,11 @@
     </div>
     {% endif %}
 
+    <!-- Voucher Sidebar Widget (position: after_popular) -->
+    {% if voucher_sidebar_position == 'after_popular' %}
+      {% include 'shared/_voucher_sidebar.html' %}
+    {% endif %}
+
     <!-- Banner Ad Slot 1 (Top) -->
     {% for banner in banners if banner.position == 1 %}
     <div class="sidebar-widget sidebar-banner">
@@ -203,6 +206,11 @@
     </div>
     {% endif %}
 
+    <!-- Voucher Sidebar Widget (position: after_related) -->
+    {% if voucher_sidebar_position == 'after_related' %}
+      {% include 'shared/_voucher_sidebar.html' %}
+    {% endif %}
+
     <!-- Banner Ad Slot 2 (Bottom) -->
     {% for banner in banners if banner.position == 2 %}
     <div class="sidebar-widget sidebar-banner">
@@ -215,6 +223,14 @@
       {% endif %}
     </div>
     {% endfor %}
+
+    <!-- Hot Products Sidebar Widget -->
+    {% include 'shared/_hot_products_sidebar.html' %}
+
+    <!-- Voucher Sidebar Widget (position: bottom) -->
+    {% if voucher_sidebar_position == 'bottom' %}
+      {% include 'shared/_voucher_sidebar.html' %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

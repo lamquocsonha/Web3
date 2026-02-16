@@ -2,12 +2,12 @@
 {% block title %}Analytics{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Analytics{% endblock %}
 {% block content %}
-<h1 class="page-title">Analytics</h1>
+<h1 class="page-title">📊 Analytics</h1>
 
 <!-- 4 Levels -->
 <div class="items-grid" style="grid-template-columns:1fr 1fr">
   <div class="item-card" style="border-left:4px solid #00cec9">
-    <div style="font-family:'DM Mono';font-size:10px;color:#00cec9;margin-bottom:8px">LEVEL 1 - CROSS-VERTICAL</div>
+    <div style="font-family:'DM Mono';font-size:14px;color:#00cec9;margin-bottom:8px">LEVEL 1 - CROSS-VERTICAL</div>
     <h3>System Overview</h3>
     <div class="item-desc" style="margin-top:8px;line-height:1.6">
       Compare performance across verticals: car vs pet vs finance.<br>
@@ -19,7 +19,7 @@
   </div>
 
   <div class="item-card" style="border-left:4px solid #8b5cf6">
-    <div style="font-family:'DM Mono';font-size:10px;color:#8b5cf6;margin-bottom:8px">LEVEL 2 - PER VERTICAL</div>
+    <div style="font-family:'DM Mono';font-size:14px;color:#8b5cf6;margin-bottom:8px">LEVEL 2 - PER VERTICAL</div>
     <h3>Vertical Deep Dive</h3>
     <div class="item-desc" style="margin-top:8px;line-height:1.6">
       car.unilab.vn: traffic by segment (CUV vs Sedan vs SUV).<br>
@@ -33,7 +33,7 @@
   </div>
 
   <div class="item-card" style="border-left:4px solid #fdcb6e">
-    <div style="font-family:'DM Mono';font-size:10px;color:#fdcb6e;margin-bottom:8px">LEVEL 3 - PER PAGE</div>
+    <div style="font-family:'DM Mono';font-size:14px;color:#fdcb6e;margin-bottom:8px">LEVEL 3 - PER PAGE</div>
     <h3>Page & Product Analytics</h3>
     <div class="item-desc" style="margin-top:8px;line-height:1.6">
       Heatmap: where users click on 3D model.<br>
@@ -45,7 +45,7 @@
   </div>
 
   <div class="item-card" style="border-left:4px solid #fd79a8">
-    <div style="font-family:'DM Mono';font-size:10px;color:#fd79a8;margin-bottom:8px">LEVEL 4 - USER BEHAVIOR</div>
+    <div style="font-family:'DM Mono';font-size:14px;color:#fd79a8;margin-bottom:8px">LEVEL 4 - USER BEHAVIOR</div>
     <h3>User Intelligence</h3>
     <div class="item-desc" style="margin-top:8px;line-height:1.6">
       User journey: from Google search > which page > what click > what buy.<br>
@@ -66,11 +66,11 @@
       <tbody>
         {% for v in verticals %}
         <tr>
-          <td style="font-family:'DM Mono';font-size:13px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{{ v.color }};margin-right:6px"></span>{{ v.slug }}.unilab.vn</td>
+          <td style="font-family:'DM Mono';font-size:14px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{{ v.color }};margin-right:6px"></span>{{ v.slug }}.unilab.vn</td>
           <td><span class="status-badge {{ v.status }}">{{ v.status }}</span></td>
           <td>{{ v.segments|length }}</td>
           <td>-</td>
-          <td style="font-size:12px">{{ v.default_mode }}</td>
+          <td style="font-size:14px">{{ v.default_mode }}</td>
           <td><a href="{{ url_for('admin_vertical_detail', vid=v.id) }}" class="btn btn-ghost btn-sm">Manage</a></td>
         </tr>
         {% endfor %}
@@ -79,7 +79,7 @@
   </div>
 </div>
 
-<div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius);padding:20px;margin-top:16px;font-size:13px;color:var(--text-dim)">
+<div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius);padding:20px;margin-top:16px;font-size:14px;color:var(--text-dim)">
   <strong style="color:var(--accent)">Note:</strong> Full analytics requires Google Analytics 4 or Plausible integration.
   Demo data is shown above. Connect your analytics provider in <a href="{{ url_for('admin_settings') }}" style="color:var(--accent)">Settings</a>.
 </div>

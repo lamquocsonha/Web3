@@ -1,11 +1,12 @@
 {# Bản đồ Việt Nam 34 tỉnh thành — vector extracted from official PDF #}
-<svg viewBox="0 0 440 700" class="vn-map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+<svg viewBox="0 0 440 710" class="vn-map-svg" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"
+     style="font-family:'DM Sans','Inter',-apple-system,system-ui,sans-serif; overflow:visible">
   <defs>
     <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <filter id="land-shadow"><feDropShadow dx="1" dy="2" stdDeviation="3" flood-opacity="0.12"/></filter>
   </defs>
 
-  <rect width="440" height="700" rx="14" class="map-sea"/>
+  <rect width="440" height="710" rx="14" class="map-sea"/>
   <g class="sea-grid" opacity="0.04">
     {% for i in range(0,700,50) %}<line x1="0" y1="{{ i }}" x2="440" y2="{{ i }}" stroke="currentColor" stroke-width="0.5"/>{% endfor %}
     {% for i in range(0,440,50) %}<line x1="{{ i }}" y1="0" x2="{{ i }}" y2="700" stroke="currentColor" stroke-width="0.5"/>{% endfor %}
@@ -451,4 +452,61 @@
   </g>
   <line x1="60" y1="682" x2="130" y2="682" class="scale-bar"/>
   <text x="95" y="694" class="scale-label">200 km</text>
+
+  <!-- Hover tooltip (hidden, positioned by JS) -->
+  <g id="mapTooltip" style="display:none;pointer-events:none">
+    <rect id="mapTooltipBg" x="0" y="0" width="80" height="22" rx="6" class="prov-label-bg" style="opacity:0.92"/>
+    <text id="mapTooltipText" x="0" y="0" class="prov-label" style="font-size:14px;font-weight:600">...</text>
+  </g>
 </svg>
+
+<script>
+(function(){
+  var svg = document.querySelector('.vn-map-svg');
+  if (!svg) return;
+  var tip = document.getElementById('mapTooltip');
+  var tipBg = document.getElementById('mapTooltipBg');
+  var tipTxt = document.getElementById('mapTooltipText');
+  if (!tip) return;
+
+  svg.querySelectorAll('.prov-shape').forEach(function(g){
+    var titleEl = g.querySelector('title');
+    if (!titleEl) return;
+    var name = titleEl.textContent;
+
+    g.addEventListener('mouseenter', function(e){
+      /* Get center of province bounding box */
+      var path = g.querySelector('.prov-path');
+      if (!path) return;
+      var bb = path.getBBox();
+      var cx = bb.x + bb.width / 2;
+      var cy = bb.y - 4; /* above the province */
+
+      /* Measure text width */
+      tipTxt.textContent = name;
+      var tbb = tipTxt.getBBox();
+      var pw = tbb.width + 14;
+      var ph = 22;
+
+      /* Keep within SVG bounds */
+      var tx = cx - pw / 2;
+      if (tx < 4) tx = 4;
+      if (tx + pw > 436) tx = 436 - pw;
+      var ty = cy - ph;
+      if (ty < 4) ty = bb.y + bb.height + 4; /* flip below if too high */
+
+      tipBg.setAttribute('x', tx);
+      tipBg.setAttribute('y', ty);
+      tipBg.setAttribute('width', pw);
+      tipBg.setAttribute('height', ph);
+      tipTxt.setAttribute('x', tx + pw / 2);
+      tipTxt.setAttribute('y', ty + 15);
+      tip.style.display = '';
+    });
+
+    g.addEventListener('mouseleave', function(){
+      tip.style.display = 'none';
+    });
+  });
+})();
+</script>

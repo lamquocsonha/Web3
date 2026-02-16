@@ -19,12 +19,12 @@
 </div>
 
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:16px">
-  <h3 style="font-size:13px;color:var(--text-dim);margin-bottom:8px">PROMPT</h3>
-  <pre style="font-size:13px;white-space:pre-wrap;color:var(--text)">{{ content.prompt or '(no prompt)' }}</pre>
+  <h3 style="font-size:14px;color:var(--text-dim);margin-bottom:8px">PROMPT</h3>
+  <pre style="font-size:14px;white-space:pre-wrap;color:var(--text)">{{ content.prompt or '(no prompt)' }}</pre>
 </div>
 
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px">
-  <h3 style="font-size:13px;color:var(--text-dim);margin-bottom:8px">RESULT</h3>
+  <h3 style="font-size:14px;color:var(--text-dim);margin-bottom:8px">RESULT</h3>
   <div style="font-size:14px;line-height:1.7">{{ content.result|safe }}</div>
 </div>
 {% endblock %}

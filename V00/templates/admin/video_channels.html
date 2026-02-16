@@ -2,7 +2,7 @@
 {% block title %}Social Channels{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_video') }}">Video</a><span class="sep">></span>Channels{% endblock %}
 {% block content %}
-<h1 class="page-title">Social Channels</h1>
+<h1 class="page-title">📺 Social Channels</h1>
 <p style="color:var(--text-dim);margin-bottom:24px;font-size:14px">Moi vertical co channel/fanpage rieng. Quan ly tap trung, publish phan tan.</p>
 
 <!-- Channels by platform -->
@@ -13,15 +13,15 @@
   {% for ch in channels %}
   <div class="item-card" style="border-top:3px solid {{ platforms[ch.platform]['color'] if ch.platform in platforms else '#666' }}">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <span style="font-family:'DM Mono';font-size:10px;font-weight:600;color:{{ platforms[ch.platform]['color'] if ch.platform in platforms else '#666' }};text-transform:uppercase">{{ ch.platform }}</span>
-      {% if ch.status == 'connected' %}<span style="color:#22c55e;font-size:11px">&#9679; Connected</span>{% else %}<span style="color:#f59e0b;font-size:11px">&#9675; Disconnected</span>{% endif %}
+      <span style="font-family:'DM Mono';font-size:14px;font-weight:600;color:{{ platforms[ch.platform]['color'] if ch.platform in platforms else '#666' }};text-transform:uppercase">{{ ch.platform }}</span>
+      {% if ch.status == 'connected' %}<span style="color:#22c55e;font-size:14px">&#9679; Connected</span>{% else %}<span style="color:#f59e0b;font-size:14px">&#9675; Disconnected</span>{% endif %}
     </div>
     <h3>{{ ch.channel_name }}</h3>
     <div class="item-desc">{{ ch.vertical.name if ch.vertical else '-' }}</div>
     <div class="item-meta">{{ "{:,}".format(ch.followers) }} followers</div>
     <div style="margin-top:12px;display:flex;gap:6px">
       <form method="POST" action="{{ url_for('admin_video_channel_connect', cid=ch.id) }}" style="display:flex;gap:6px;flex:1">
-        <input class="form-input" name="api_key" type="password" value="{{ ch.api_key }}" placeholder="API key" style="padding:5px 8px;font-size:11px">
+        <input class="form-input" name="api_key" type="password" value="{{ ch.api_key }}" placeholder="API key" style="padding:5px 8px;font-size:14px">
         <button class="btn btn-ghost btn-sm">Save</button>
       </form>
       <form method="POST" action="{{ url_for('admin_video_channel_delete', cid=ch.id) }}" onsubmit="return confirm('Delete?')"><button class="btn btn-danger btn-sm">X</button></form>
@@ -50,7 +50,7 @@
 </div>
 
 <!-- API Info -->
-<div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius);padding:20px;margin-top:16px;font-size:13px;color:var(--text-dim)">
+<div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius);padding:20px;margin-top:16px;font-size:14px;color:var(--text-dim)">
   <strong style="color:var(--accent)">API Requirements:</strong><br>
   <strong>TikTok:</strong> TikTok for Developers > Content Posting API (business account required)<br>
   <strong>YouTube:</strong> Google Cloud Console > YouTube Data API v3 > OAuth2 credentials<br>

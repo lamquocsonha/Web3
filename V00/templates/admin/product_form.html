@@ -2,19 +2,19 @@
 {% block title %}{% if product %}Edit Product{% else %}New Product{% endif %}{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_products') }}">Products</a><span class="sep">></span>{% if product %}Edit{% else %}New{% endif %}{% endblock %}
 {% block content %}
-<h1 class="page-title">{% if product %}Edit: {{ product.product_name[:40] }}{% else %}+ Add Product{% endif %}</h1>
+<h1 class="page-title">📦 {% if product %}Edit: {{ product.product_name[:40] }}{% else %}Add Product{% endif %}</h1>
 
 <form method="POST" style="max-width:800px">
   <!-- Part selection (full path) -->
   <div class="form-group">
     <label class="form-label">Gắn vào Part (Vertical › Segment › Zone › Part) *</label>
-    <select name="part_id" class="form-select" required style="font-size:13px">
+    <select name="part_id" class="form-select" required style="font-size:14px">
       <option value="">-- Chọn vị trí --</option>
       {% for pt in parts_tree %}
       <option value="{{ pt.id }}" {% if product and product.part_id == pt.id %}selected{% endif %}>{{ pt.label }}</option>
       {% endfor %}
     </select>
-    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Sản phẩm sẽ hiển thị ở trang Part tương ứng trên site public</div>
+    <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Sản phẩm sẽ hiển thị ở trang Part tương ứng trên site public</div>
   </div>
 
   <div class="form-row">
@@ -40,8 +40,8 @@
 
   <div class="form-group">
     <label class="form-label">Link đích (Affiliate URL) *</label>
-    <input class="form-input" name="url" type="url" value="{{ product.url if product else '' }}" required placeholder="https://shope.ee/abc123..." style="font-family:'DM Mono';font-size:12px">
-    <div style="font-size:11px;color:var(--text-dim);margin-top:4px">URL affiliate đã chứa tracking ID. User click → redirect → bạn nhận hoa hồng</div>
+    <input class="form-input" name="url" type="url" value="{{ product.url if product else '' }}" required placeholder="https://shope.ee/abc123..." style="font-family:'DM Mono';font-size:14px">
+    <div style="font-size:14px;color:var(--text-dim);margin-top:4px">URL affiliate đã chứa tracking ID. User click → redirect → bạn nhận hoa hồng</div>
   </div>
 
   <div class="form-row">
@@ -62,7 +62,7 @@
   </div>
 
   {% if product %}
-  <div style="margin:20px 0;padding:16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);font-size:12px">
+  <div style="margin:20px 0;padding:16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);font-size:14px">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
       <div><span style="color:var(--text-dim)">Clicks:</span> <strong>{{ "{:,}".format(product.clicks) }}</strong></div>
       <div><span style="color:var(--text-dim)">Conversions:</span> <strong>{{ "{:,}".format(product.conversions) }}</strong></div>

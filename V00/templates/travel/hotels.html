@@ -1,20 +1,15 @@
 {% extends "shared/base.html" %}
 {% block title %}Khách sạn{% endblock %}
-{% block extra_nav %}
-<a href="{{ url_for('travel_hotels') }}">🏨 Khách sạn</a>
-<a href="{{ url_for('travel_attractions') }}">📍 Vé tham quan</a>
-{% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Khách sạn</div>{% endblock %}
 {% block content %}
 <div class="page-hero">
-  <span style="font-size:36px">🏨</span>
-  <h1>Tìm khách sạn giá tốt</h1>
+  <h1><span class="hero-icon">🏨</span> Tìm khách sạn giá tốt</h1>
   <p class="subtitle">So sánh giá từ Agoda — 34 tỉnh thành Việt Nam</p>
 </div>
 
 {% if api_status != 'configured' and not destination %}
 <div class="hotel-api-notice notice-warn">
-  <span>⚙️</span> <strong>Demo Mode</strong> — Agoda API chưa cấu hình. <a href="/admin/settings">Cài đặt API →</a>
+  <span>⚙️</span> <strong>Demo Mode</strong> — Agoda API chưa cấu hình. <a href="{{ url_for('admin_hotel_sync') }}">Cài đặt API →</a>
 </div>
 {% endif %}
 
@@ -120,6 +115,12 @@
         {% endfor %}
       </div>
     </div>
+
+    <!-- Voucher Sidebar Widget -->
+    {% include 'shared/_voucher_sidebar.html' %}
+
+    <!-- Hot Products Sidebar Widget -->
+    {% include 'shared/_hot_products_sidebar.html' %}
   </aside>
 
   <!-- COL 2: Results -->
@@ -127,11 +128,13 @@
     {% if destination %}
     <div class="tz-results-header">
       <h2>Khách sạn tại <strong>{{ destination }}</strong></h2>
-      <span class="tz-results-count">{{ hotels|length }} kết quả</span>
-      {% if api_status != 'configured' %}<span class="tz-demo-badge">DEMO</span>{% endif %}
+      <span class="tz-results-count" id="resultsCount">{{ hotels|length }} kết quả</span>
+      {% if api_status == 'configured' %}<span class="tz-agoda-badge" style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600;margin-left:4px">Agoda</span>{% endif %}
     </div>
+
+    <!-- DB Hotels -->
     {% if hotels %}
-    <div class="tz-hotel-list">
+    <div class="tz-hotel-list" id="hotelList">
       {% for h in hotels %}
       <div class="tz-hotel-card">
         <div class="tz-hc-img">
@@ -147,24 +150,36 @@
           </div>
           {% if h.price_from %}
           <div class="tz-hc-price-row">
-            <span class="tz-hc-price">{{ '{:,.0f}'.format(h.price_from or 0) }}đ</span>
-            {% if h.original_price and h.original_price > (h.price_from or 0) %}
-            <span class="tz-hc-discount">{{ ((1 - h.price_from / h.original_price) * 100)|int }}%</span>
-            <span class="tz-hc-price-old">{{ '{:,.0f}'.format(h.original_price) }}đ</span>
+            {% if h.price_original and h.price_original > h.price_from %}
+            <span class="tz-hc-price-old">{{ '{:,.0f}'.format(h.price_original) }}đ</span>
+            <span class="tz-hc-discount">-{{ ((1 - h.price_from / h.price_original) * 100)|int }}%</span>
             {% endif %}
+            <span class="tz-hc-price">{{ '{:,.0f}'.format(h.price_from or 0) }}đ</span>
           </div>
           {% endif %}
           <h3 class="tz-hc-name"><a href="{{ h.agoda_url or h.booking_url or '#' }}" target="_blank" rel="nofollow">{{ h.name }}</a></h3>
-          <div class="tz-hc-address">{{ h.address or h.district or '' }}</div>
+          <div class="tz-hc-address">{{ h.district or '' }}</div>
           <div class="tz-hc-footer">
-            <span class="tz-hc-stars">⭐ Tiêu chuẩn: {{ h.stars }}</span>
-            {% if h.breakfast %}<span class="tz-hc-bf tz-bf-yes">✓ Có ăn sáng</span>{% else %}<span class="tz-hc-bf tz-bf-no">✗ Không ăn sáng</span>{% endif %}
+            <span class="tz-hc-stars">{% for i in range(h.stars) %}⭐{% endfor %}</span>
+            {% if h.rating %}<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">{{ h.rating }}</span>{% endif %}
           </div>
         </div>
       </div>
       {% endfor %}
     </div>
     {% else %}
+    <div class="tz-hotel-list" id="hotelList"></div>
+    {% endif %}
+
+    <!-- Agoda API live results (loaded async) -->
+    {% if agoda_enabled %}
+    <div id="agodaLoading" style="text-align:center;padding:24px;color:var(--text-dim);font-size:14px">
+      ⏳ Đang tìm thêm khách sạn từ Agoda...
+    </div>
+    <div id="agodaResults"></div>
+    {% endif %}
+
+    {% if not hotels and not agoda_enabled %}
     <div class="empty-state"><span style="font-size:48px">🔍</span><h3>Chưa có khách sạn tại {{ destination }}</h3><p>Thử chọn tỉnh thành khác</p></div>
     {% endif %}
 
@@ -225,5 +240,85 @@ document.querySelectorAll('.prov-shape').forEach(g => {
     document.querySelectorAll('.hps-prov.map-hover').forEach(s => s.classList.remove('map-hover'));
   });
 });
+
+// Agoda API live search
+{% if agoda_enabled and destination %}
+(function() {
+  var dest = '{{ destination }}';
+  var checkin = '{{ checkin }}';
+  var checkout = '{{ checkout }}';
+  var url = '/admin/api/agoda-search?destination=' + encodeURIComponent(dest);
+  if (checkin) url += '&checkin=' + encodeURIComponent(checkin);
+  if (checkout) url += '&checkout=' + encodeURIComponent(checkout);
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var loading = document.getElementById('agodaLoading');
+      if (loading) loading.style.display = 'none';
+      var hotels = data.hotels || [];
+      if (hotels.length === 0) return;
+
+      // Update count
+      var countEl = document.getElementById('resultsCount');
+      var dbCount = {{ hotels|length }};
+      if (countEl) countEl.textContent = (dbCount + hotels.length) + ' kết quả';
+
+      var container = document.getElementById('agodaResults');
+      if (!container) return;
+
+      var html = '';
+      hotels.forEach(function(h) {
+        var price = h.price_from ? Number(h.price_from).toLocaleString() + 'đ' : '';
+        var starsHtml = '';
+        for (var i = 0; i < (h.stars || 0); i++) starsHtml += '⭐';
+
+        html += '<div class="tz-hotel-card">'
+          + '<div class="tz-hc-img">'
+          + (h.image_url ? '<img src="'+h.image_url+'" alt="'+h.name+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=tz-hc-img-ph><span>🏨</span></div>\'">' : '<div class="tz-hc-img-ph"><span>🏨</span></div>')
+          + '<span class="tz-hc-cat-badge" style="background:rgba(231,76,60,0.9)">Agoda</span>'
+          + '</div>'
+          + '<div class="tz-hc-body">'
+          + '<div class="tz-hc-meta">'
+          + '<span class="tz-hc-meta-cat">Khách sạn</span>'
+          + '<span class="tz-hc-meta-sep">—</span>'
+          + '<span class="tz-hc-meta-loc">' + (h.district || h.address || h.destination_name || '') + '</span>'
+          + '</div>';
+        if (price) {
+          var priceOriginal = h.price_original ? Number(h.price_original) : 0;
+          var priceFrom = h.price_from ? Number(h.price_from) : 0;
+          html += '<div class="tz-hc-price-row">';
+          if (priceOriginal && priceOriginal > priceFrom) {
+            var discount = Math.round((1 - priceFrom / priceOriginal) * 100);
+            html += '<span class="tz-hc-price-old">' + priceOriginal.toLocaleString() + 'đ</span>';
+            html += '<span class="tz-hc-discount">-' + discount + '%</span>';
+          }
+          html += '<span class="tz-hc-price">' + price + '</span></div>';
+        }
+        html += '<h3 class="tz-hc-name"><a href="' + (h.agoda_url || '#') + '" target="_blank" rel="nofollow">' + (h.name || '') + '</a></h3>'
+          + '<div class="tz-hc-address">' + (h.district || h.address || '') + '</div>'
+          + '<div class="tz-hc-footer">'
+          + '<span class="tz-hc-stars">' + starsHtml + '</span>'
+          + (h.rating ? '<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">' + h.rating + '</span>' : '')
+          + (h.free_breakfast ? '<span class="tz-hc-bf tz-bf-yes">✓ Ăn sáng</span>' : '')
+          + (h.free_cancel ? '<span style="font-size:12px;color:#2ecc71;margin-left:6px">✓ Hủy miễn phí</span>' : '')
+          + '</div></div></div>';
+      });
+      container.innerHTML = html;
+
+      // Ensure hotel list container is visible
+      var list = document.getElementById('hotelList');
+      if (list && list.children.length === 0 && hotels.length > 0) {
+        // Remove empty state if present
+        var emptyState = list.parentElement.querySelector('.empty-state');
+        if (emptyState) emptyState.style.display = 'none';
+      }
+    })
+    .catch(function() {
+      var loading = document.getElementById('agodaLoading');
+      if (loading) loading.style.display = 'none';
+    });
+})();
+{% endif %}
 </script>
 {% endblock %}

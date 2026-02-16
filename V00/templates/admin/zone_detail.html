@@ -20,8 +20,8 @@
       {% for p in zone.parts|sort(attribute='order') %}
       <tr>
         <td><strong>{{ p.name_vi }}</strong></td>
-        <td style="color:var(--text-dim);font-size:12px">{{ p.name_en or '-' }}</td>
-        <td style="font-family:'DM Mono';font-size:11px;color:var(--text-dim)">{{ p.oem_code[:30] or '-' }}</td>
+        <td style="color:var(--text-dim);font-size:14px">{{ p.name_en or '-' }}</td>
+        <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ p.oem_code[:30] or '-' }}</td>
         <td>{{ p.affiliate_links|length }}</td>
         <td>
           <a href="{{ url_for('admin_part_edit', pid=p.id) }}" class="btn btn-ghost btn-sm">Edit</a>

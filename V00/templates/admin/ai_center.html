@@ -1,0 +1,954 @@
+{% extends "admin/base.html" %}
+{% block title %}AI Control Center{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>AI Control Center{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div class="section-header">
+  <div>
+    <h1 class="page-title" style="margin-bottom:4px">🧠 AI Control Center</h1>
+    <p style="font-size:14px;color:var(--text-dim);margin:0">Quan ly toan bo van de san pham, bai viet, vertical bang AI</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button onclick="document.getElementById('guideModal').style.display='block'" class="btn btn-ghost btn-sm"
+      style="font-size:14px;border:1px solid var(--border);padding:6px 14px;display:flex;align-items:center;gap:5px">
+      <span style="font-size:14px">&#128218;</span> Huong dan AI
+    </button>
+    <div style="text-align:center;padding:8px 16px;border-radius:10px;
+      {% if health_score >= 80 %}background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)
+      {% elif health_score >= 50 %}background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3)
+      {% else %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3){% endif %}">
+      <div style="font-size:14px;color:var(--text-dim)">Health Score</div>
+      <div style="font-size:24px;font-weight:800;font-family:'DM Mono';
+        {% if health_score >= 80 %}color:#2ecc71{% elif health_score >= 50 %}color:#f59e0b{% else %}color:#ef4444{% endif %}">
+        {{ health_score }}<span style="font-size:14px">%</span>
+      </div>
+    </div>
+    {% if not has_ai %}
+    <a href="{{ url_for('admin_settings') }}" class="btn btn-danger btn-sm" style="font-size:14px">Chua co API key</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="ai-tabs" style="display:flex;gap:4px;border-bottom:2px solid var(--border);margin:20px 0 0">
+  <button class="ai-tab active" data-tab="dashboard" onclick="switchTab('dashboard',this)">Tong quan</button>
+  <button class="ai-tab" data-tab="products" onclick="switchTab('products',this)">San pham</button>
+  <button class="ai-tab" data-tab="articles" onclick="switchTab('articles',this)">Bai viet</button>
+  <button class="ai-tab" data-tab="verticals" onclick="switchTab('verticals',this)">Verticals</button>
+  <button class="ai-tab" data-tab="ai-classify" onclick="switchTab('ai-classify',this)">AI Phan loai</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 1: DASHBOARD (Tong quan suc khoe)      -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="ai-panel" id="panel-dashboard">
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin:20px 0">
+    <div class="stat-card">
+      <div class="stat-label">San pham</div>
+      <div class="stat-value">{{ "{:,}".format(total_products) }}</div>
+      <div style="font-size:14px;color:var(--text-dim)">{{ active_products }} active</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bai viet</div>
+      <div class="stat-value">{{ total_articles }}</div>
+      <div style="font-size:14px;color:var(--text-dim)">{{ ai_articles }} AI-generated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Verticals</div>
+      <div class="stat-value">{{ vert_health|length }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Networks</div>
+      <div class="stat-value">{{ net_stats|length }}</div>
+    </div>
+  </div>
+
+  <!-- Issue Summary Cards -->
+  <h3 style="font-size:14px;margin:24px 0 12px">Van de can xu ly</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px">
+    {% set issues = [
+      ('dup_urls', 'URL trung lap', dup_urls, '#ef4444', 'San pham cung URL import nhieu lan'),
+      ('no_image', 'Thieu hinh anh', no_image, '#f59e0b', 'San pham khong co hinh'),
+      ('zero_price', 'Gia = 0', zero_price, '#f59e0b', 'San pham gia bang 0 hoac null'),
+      ('suspect_links', 'Click nhieu 0 conv', suspect_links, '#ef4444', '>10 clicks nhung 0 conversions'),
+      ('stale', '0 clicks (stale)', stale_products, '#6b7280', 'Chua co ai click bao gio'),
+      ('thin_articles', 'Bai viet mong', thin_articles, '#f59e0b', 'Noi dung < 500 ky tu'),
+      ('no_product_articles', 'Bai chua gan SP', no_product_articles, '#8b5cf6', 'Bai viet chua co san pham lien ket'),
+    ] %}
+    {% for key, label, count, color, desc in issues %}
+    <div class="issue-card" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.15s;border-left:3px solid {{ color }}"
+         onclick="showDetail('{{ key }}')">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:14px;font-weight:600">{{ label }}</span>
+        <span style="font-size:18px;font-weight:800;font-family:'DM Mono';color:{{ color }}">{{ "{:,}".format(count) }}</span>
+      </div>
+      <div style="font-size:14px;color:var(--text-dim);margin-top:4px">{{ desc }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Network Performance -->
+  {% if net_stats %}
+  <h3 style="font-size:14px;margin:24px 0 12px">Hieu suat Network</h3>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Network</th><th style="text-align:right">San pham</th><th style="text-align:right">Clicks</th><th style="text-align:right">Conversions</th><th style="text-align:right">Conv Rate</th></tr></thead>
+      <tbody>
+        {% for n in net_stats %}
+        <tr>
+          <td><strong>{{ n.name }}</strong></td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(n.count) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(n.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(n.conv) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px;font-weight:600;
+            {% if n.clicks > 0 and n.conv / n.clicks > 0.02 %}color:#2ecc71{% elif n.clicks > 0 %}color:#f59e0b{% else %}color:var(--text-dim){% endif %}">
+            {% if n.clicks > 0 %}{{ "%.1f"|format(n.conv / n.clicks * 100) }}%{% else %}-{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 2: PRODUCTS (San pham health check)    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="ai-panel" id="panel-products" style="display:none">
+  <h3 style="font-size:14px;margin:16px 0 12px">Kiem tra suc khoe san pham</h3>
+  <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">Tat ca cac van de co the xay ra voi san pham. Click de xem chi tiet va xu ly.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+    <!-- Product issues -->
+    <div class="check-card" onclick="showDetail('dup_urls')">
+      <div class="check-icon" style="background:rgba(239,68,68,.1);color:#ef4444">&#128257;</div>
+      <div class="check-info">
+        <div class="check-title">URL trung lap (duplicate)</div>
+        <div class="check-desc">Cung 1 URL duoc import nhieu lan</div>
+      </div>
+      <div class="check-count {% if dup_urls > 0 %}bad{% else %}good{% endif %}">{{ dup_urls }}</div>
+    </div>
+
+    <div class="check-card" onclick="showDetail('no_image')">
+      <div class="check-icon" style="background:rgba(245,158,11,.1);color:#f59e0b">&#128247;</div>
+      <div class="check-info">
+        <div class="check-title">Thieu hinh anh</div>
+        <div class="check-desc">San pham khong co image_url</div>
+      </div>
+      <div class="check-count {% if no_image > 0 %}warn{% else %}good{% endif %}">{{ no_image }}</div>
+    </div>
+
+    <div class="check-card" onclick="showDetail('zero_price')">
+      <div class="check-icon" style="background:rgba(245,158,11,.1);color:#f59e0b">&#128178;</div>
+      <div class="check-info">
+        <div class="check-title">Gia = 0 hoac null</div>
+        <div class="check-desc">San pham chua co gia</div>
+      </div>
+      <div class="check-count {% if zero_price > 0 %}warn{% else %}good{% endif %}">{{ zero_price }}</div>
+    </div>
+
+    <div class="check-card" onclick="showDetail('suspect_links')">
+      <div class="check-icon" style="background:rgba(239,68,68,.1);color:#ef4444">&#128269;</div>
+      <div class="check-info">
+        <div class="check-title">Nhieu click, 0 conversion</div>
+        <div class="check-desc">>10 clicks nhung chua convert (link loi?)</div>
+      </div>
+      <div class="check-count {% if suspect_links > 0 %}bad{% else %}good{% endif %}">{{ suspect_links }}</div>
+    </div>
+
+    <div class="check-card" onclick="showDetail('stale')">
+      <div class="check-icon" style="background:rgba(107,114,128,.1);color:#6b7280">&#128164;</div>
+      <div class="check-info">
+        <div class="check-title">0 clicks (stale)</div>
+        <div class="check-desc">San pham chua bao gio duoc click</div>
+      </div>
+      <div class="check-count {% if stale_products > total_products * 0.5 %}warn{% else %}neutral{% endif %}">{{ "{:,}".format(stale_products) }}</div>
+    </div>
+
+    <div class="check-card">
+      <div class="check-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6">&#128683;</div>
+      <div class="check-info">
+        <div class="check-title">SP inactive</div>
+        <div class="check-desc">San pham bi tat nhung van ton tai</div>
+      </div>
+      <div class="check-count neutral">{{ inactive_products }}</div>
+    </div>
+  </div>
+
+  <h3 style="font-size:14px;margin:24px 0 12px">Van de can AI xu ly</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+    <div class="check-card" onclick="switchTab('ai-classify',document.querySelector('[data-tab=ai-classify]'))">
+      <div class="check-icon" style="background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(59,130,246,.15));color:#8b5cf6">&#129302;</div>
+      <div class="check-info">
+        <div class="check-title">SP sai vertical</div>
+        <div class="check-desc">AI kiem tra SP co dung nganh hang khong</div>
+      </div>
+      <div class="check-count" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:#fff">AI</div>
+    </div>
+
+    <div class="check-card" style="opacity:0.6;cursor:default">
+      <div class="check-icon" style="background:rgba(107,114,128,.1);color:#6b7280">&#128197;</div>
+      <div class="check-info">
+        <div class="check-title">SP het mua</div>
+        <div class="check-desc">AI kiem tra SP con phu hop mua nay khong</div>
+      </div>
+      <div class="check-count neutral">Soon</div>
+    </div>
+
+    <div class="check-card" style="opacity:0.6;cursor:default">
+      <div class="check-icon" style="background:rgba(107,114,128,.1);color:#6b7280">&#128221;</div>
+      <div class="check-info">
+        <div class="check-title">Ten SP rac / spam</div>
+        <div class="check-desc">AI phat hien ten san pham bat thuong</div>
+      </div>
+      <div class="check-count neutral">Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 3: ARTICLES (Bai viet health check)    -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="ai-panel" id="panel-articles" style="display:none">
+  <h3 style="font-size:14px;margin:16px 0 12px">Kiem tra suc khoe bai viet</h3>
+  <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">Cac van de lien quan den bai viet, noi dung, SEO.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+    <div class="check-card" onclick="showDetail('thin_articles')">
+      <div class="check-icon" style="background:rgba(245,158,11,.1);color:#f59e0b">&#128196;</div>
+      <div class="check-info">
+        <div class="check-title">Noi dung mong (thin)</div>
+        <div class="check-desc">Bai viet duoi 500 ky tu</div>
+      </div>
+      <div class="check-count {% if thin_articles > 0 %}warn{% else %}good{% endif %}">{{ thin_articles }}</div>
+    </div>
+
+    <div class="check-card" onclick="showDetail('no_product_articles')">
+      <div class="check-icon" style="background:rgba(139,92,246,.1);color:#8b5cf6">&#128176;</div>
+      <div class="check-info">
+        <div class="check-title">Chua gan san pham</div>
+        <div class="check-desc">Bai viet khong co embed code (missed revenue)</div>
+      </div>
+      <div class="check-count {% if no_product_articles > 0 %}warn{% else %}good{% endif %}">{{ no_product_articles }}</div>
+    </div>
+
+    <div class="check-card">
+      <div class="check-icon" style="background:rgba(107,114,128,.1);color:#6b7280">&#128065;</div>
+      <div class="check-info">
+        <div class="check-title">0 views</div>
+        <div class="check-desc">Bai viet chua ai doc</div>
+      </div>
+      <div class="check-count {% if zero_view_articles > 0 %}neutral{% else %}good{% endif %}">{{ zero_view_articles }}</div>
+    </div>
+
+    <div class="check-card">
+      <div class="check-icon" style="background:rgba(46,204,113,.1);color:#2ecc71">&#129302;</div>
+      <div class="check-info">
+        <div class="check-title">AI-generated</div>
+        <div class="check-desc">Bai viet duoc tao boi AI</div>
+      </div>
+      <div class="check-count neutral">{{ ai_articles }}</div>
+    </div>
+  </div>
+
+  <h3 style="font-size:14px;margin:24px 0 12px">Van de can AI xu ly</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">
+    <div class="check-card" style="opacity:0.6;cursor:default">
+      <div class="check-icon" style="background:rgba(107,114,128,.1);color:#6b7280">&#128270;</div>
+      <div class="check-info">
+        <div class="check-title">SEO Audit</div>
+        <div class="check-desc">AI kiem tra meta, headings, keyword density</div>
+      </div>
+      <div class="check-count neutral">Soon</div>
+    </div>
+    <div class="check-card" style="opacity:0.6;cursor:default">
+      <div class="check-icon" style="background:rgba(107,114,128,.1);color:#6b7280">&#128257;</div>
+      <div class="check-info">
+        <div class="check-title">Content trung lap</div>
+        <div class="check-desc">AI phat hien bai viet cannibalization</div>
+      </div>
+      <div class="check-count neutral">Soon</div>
+    </div>
+    <div class="check-card" style="opacity:0.6;cursor:default">
+      <div class="check-icon" style="background:rgba(107,114,128,.1);color:#6b7280">&#128279;</div>
+      <div class="check-info">
+        <div class="check-title">Internal Linking</div>
+        <div class="check-desc">AI goi y lien ket noi bo giua cac bai</div>
+      </div>
+      <div class="check-count neutral">Soon</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 4: VERTICALS (Vertical health)         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="ai-panel" id="panel-verticals" style="display:none">
+  <h3 style="font-size:14px;margin:16px 0 12px">Suc khoe tung Vertical</h3>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th style="text-align:right">Parts</th>
+          <th style="text-align:right">San pham</th>
+          <th style="text-align:right">Bai viet</th>
+          <th style="text-align:right">Parts trong</th>
+          <th>Tinh trang</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vert_health %}
+        <tr>
+          <td><strong>{{ v.icon }} {{ v.name }}</strong></td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ v.parts }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ "{:,}".format(v.products) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px">{{ v.articles }}</td>
+          <td style="text-align:right;font-family:'DM Mono';font-size:14px;{% if v.parts_empty > 0 %}color:#ef4444;font-weight:700{% endif %}">
+            {{ v.parts_empty }}{% if v.parts > 0 %} <span style="color:var(--text-dim);font-weight:400">({{ "%.0f"|format(v.parts_empty / v.parts * 100) }}%)</span>{% endif %}
+          </td>
+          <td>
+            {% if v.products == 0 and v.articles == 0 %}
+            <span style="color:#ef4444;font-size:14px;font-weight:600">Trong</span>
+            {% elif v.parts_empty > v.parts * 0.5 %}
+            <span style="color:#f59e0b;font-size:14px;font-weight:600">Thieu SP</span>
+            {% elif v.articles < 3 %}
+            <span style="color:#f59e0b;font-size:14px;font-weight:600">Thieu bai</span>
+            {% else %}
+            <span style="color:#2ecc71;font-size:14px;font-weight:600">Tot</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if v.parts_empty > 0 %}
+            <button class="btn btn-ghost btn-sm" style="font-size:14px" onclick="showDetail('parts_empty', {{ v.id }})">
+              Xem parts trong
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TAB 5: AI CLASSIFY (AI Phan loai SP)       -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="ai-panel" id="panel-ai-classify" style="display:none">
+  {% if not has_ai %}
+  <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:20px;margin:16px 0">
+    <strong style="color:#ef4444">Chua cau hinh API Key</strong>
+    <p style="font-size:14px;margin-top:6px;color:var(--text-dim)">
+      Vao <a href="{{ url_for('admin_settings') }}" style="color:#3b82f6">Settings</a> de them OpenAI key hoac Claude key.
+    </p>
+  </div>
+  {% else %}
+  <h3 style="font-size:14px;margin:16px 0 8px">AI Phan loai san pham</h3>
+  <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">AI se kiem tra tung san pham xem co dang o dung vertical/zone hay khong. San pham sai se duoc danh dau de xoa hoac di chuyen.</p>
+
+  <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:20px">
+    <div>
+      <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:4px">Vertical can quet</label>
+      <select id="aiVertical" class="form-select" style="width:200px;padding:8px 10px;font-size:14px">
+        <option value="">Tat ca ({{ "{:,}".format(total_products) }} SP)</option>
+        {% for v in vert_health %}
+        <option value="{{ v.id }}">{{ v.icon }} {{ v.name }} ({{ "{:,}".format(v.products) }} SP)</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:4px">Batch size</label>
+      <select id="aiBatch" class="form-select" style="width:100px;padding:8px 10px;font-size:14px">
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="30">30</option>
+      </select>
+    </div>
+    <button id="btnScan" class="btn btn-primary" onclick="startAIScan()">Bat dau AI Scan</button>
+    <button id="btnStop" class="btn btn-danger btn-sm" onclick="stopAIScan()" style="display:none">Dung lai</button>
+  </div>
+
+  <!-- AI Progress -->
+  <div id="aiProgress" style="display:none;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+      <span style="font-size:14px;font-weight:600" id="aiLabel">Dang scan...</span>
+      <span style="font-size:14px;color:var(--text-dim)" id="aiCount">0/0</span>
+    </div>
+    <div style="background:var(--surface);border-radius:6px;height:6px;overflow:hidden">
+      <div id="aiBar" style="height:100%;background:linear-gradient(90deg,#8b5cf6,#3b82f6);width:0%;transition:width .3s"></div>
+    </div>
+  </div>
+
+  <!-- AI Stats -->
+  <div id="aiStats" style="display:none">
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">Da quet</div><div class="stat-value" id="sScanned">0</div></div>
+      <div class="stat-card"><div class="stat-label">Dung</div><div class="stat-value" style="color:#2ecc71" id="sCorrect">0</div></div>
+      <div class="stat-card"><div class="stat-label">Sai vertical</div><div class="stat-value" style="color:#ef4444" id="sMismatch">0</div></div>
+      <div class="stat-card"><div class="stat-label">Ti le sai</div><div class="stat-value" style="color:#f59e0b" id="sRate">0%</div></div>
+    </div>
+  </div>
+
+  <!-- AI Actions bar -->
+  <div id="aiActions" style="display:none;padding:10px 14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;margin-bottom:12px;display:none;justify-content:space-between;align-items:center">
+    <label style="font-size:14px;cursor:pointer"><input type="checkbox" id="aiSelectAll" onchange="aiToggleAll(this.checked)"> Chon tat ca sai</label>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:14px;color:var(--text-dim)" id="aiSelected">0 chon</span>
+      <button class="btn btn-danger btn-sm" onclick="aiApply('delete')">Xoa da chon</button>
+    </div>
+  </div>
+
+  <!-- AI Results -->
+  <div id="aiResults" style="display:none">
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="ai-filter active" onclick="aiFilter('all',this)">Tat ca</button>
+      <button class="ai-filter" onclick="aiFilter('mismatch',this)">Chi sai</button>
+      <button class="ai-filter" onclick="aiFilter('correct',this)">Chi dung</button>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr>
+          <th style="width:30px"><input type="checkbox" onchange="aiToggleAll(this.checked)"></th>
+          <th style="width:50px">ID</th><th>Ten SP</th><th>Hien tai</th><th>AI de xuat</th><th>Confidence</th><th>Ly do</th>
+        </tr></thead>
+        <tbody id="aiBody"></tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- DETAIL MODAL                                -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="detailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;overflow-y:auto">
+  <div style="max-width:800px;margin:40px auto;background:var(--bg,#fff);border-radius:12px;border:1px solid var(--border);overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <h3 style="font-size:14px;margin:0" id="detailTitle">Chi tiet</h3>
+      <button onclick="closeDetail()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text)">&times;</button>
+    </div>
+    <div style="padding:12px 20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:14px;color:var(--text-dim)" id="detailCount">0 items</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" id="detailSelectBtn" onclick="detailToggleAll()" style="font-size:14px">Chon tat ca</button>
+          <button class="btn btn-danger btn-sm" id="detailDeleteBtn" onclick="detailBulkDelete()" style="font-size:14px">Xoa da chon</button>
+          <button class="btn btn-ghost btn-sm" id="detailDeactivateBtn" onclick="detailBulkDeactivate()" style="font-size:14px">Tat da chon</button>
+        </div>
+      </div>
+      <div class="table-wrap" style="max-height:400px;overflow-y:auto">
+        <table class="data-table">
+          <thead><tr><th style="width:30px"><input type="checkbox" id="detailCheckAll" onchange="detailToggleAll(this.checked)"></th><th style="width:50px">ID</th><th>Ten</th><th>Chi tiet</th><th>Network</th></tr></thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.ai-tab{padding:10px 18px;font-size:14px;font-weight:600;border:none;background:none;color:var(--text-dim);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.ai-tab.active{color:var(--text);border-bottom-color:#8b5cf6}
+.ai-tab:hover{color:var(--text)}
+.ai-panel{padding:0 0 20px}
+.check-card{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.15s}
+.check-card:hover{border-color:#8b5cf6;transform:translateY(-1px)}
+.check-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.check-info{flex:1;min-width:0}
+.check-title{font-size:14px;font-weight:600}
+.check-desc{font-size:14px;color:var(--text-dim);margin-top:2px}
+.check-count{font-size:14px;font-weight:800;font-family:'DM Mono';padding:4px 10px;border-radius:6px;flex-shrink:0}
+.check-count.bad{background:rgba(239,68,68,.1);color:#ef4444}
+.check-count.warn{background:rgba(245,158,11,.1);color:#f59e0b}
+.check-count.good{background:rgba(46,204,113,.1);color:#2ecc71}
+.check-count.neutral{background:var(--surface);color:var(--text-dim)}
+.ai-filter{padding:5px 12px;font-size:14px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);cursor:pointer}
+.ai-filter.active{background:#8b5cf6;color:#fff;border-color:#8b5cf6}
+.row-bad{background:rgba(239,68,68,.04)}.row-bad td:nth-child(5){color:#ef4444;font-weight:700}
+.row-ok td:nth-child(5){color:#2ecc71}
+.conf-h{color:#2ecc71;font-weight:700}.conf-m{color:#f59e0b;font-weight:600}.conf-l{color:var(--text-dim)}
+</style>
+
+<script>
+/* ── Tab Switching ── */
+function switchTab(tab, btn){
+  document.querySelectorAll('.ai-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.ai-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+tab).style.display='block';
+  btn.classList.add('active');
+}
+
+/* ── Detail Modal ── */
+let detailType='', detailItems=[], detailSelected=new Set();
+function showDetail(type, verticalId){
+  detailType=type;detailItems=[];detailSelected.clear();
+  const titles={'dup_urls':'URL trung lap','no_image':'Thieu hinh anh','zero_price':'Gia = 0',
+    'suspect_links':'Nhieu click 0 conv','stale':'0 clicks','thin_articles':'Bai viet mong',
+    'no_product_articles':'Bai chua gan SP','parts_empty':'Parts khong co SP'};
+  document.getElementById('detailTitle').textContent=titles[type]||type;
+  document.getElementById('detailBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-dim)">Dang tai...</td></tr>';
+  document.getElementById('detailModal').style.display='block';
+  // Show/hide buttons based on type
+  const isArticle = type.includes('article');
+  document.getElementById('detailDeactivateBtn').style.display = isArticle || type==='parts_empty' ? 'none' : 'inline-block';
+  document.getElementById('detailDeleteBtn').style.display = type==='parts_empty' ? 'none' : 'inline-block';
+
+  fetch('/admin/ai-center/health-detail',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({type, page:1, vertical_id:verticalId||null})
+  }).then(r=>r.json()).then(data=>{
+    detailItems=data.results||[];
+    document.getElementById('detailCount').textContent=detailItems.length+' items';
+    const tbody=document.getElementById('detailBody');
+    tbody.innerHTML='';
+    if(!detailItems.length){
+      tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-dim)">Khong co van de</td></tr>';
+      return;
+    }
+    detailItems.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><input type="checkbox" class="d-check" value="${r.id}" onchange="detailToggle(${r.id},this.checked)"></td>
+        <td style="font-family:'DM Mono';font-size:14px">${r.id}</td>
+        <td style="font-size:14px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.name||''}</td>
+        <td style="font-size:14px;color:var(--text-dim)">${r.detail||''}</td>
+        <td style="font-size:14px">${r.network||''}</td>`;
+      tbody.appendChild(tr);
+    });
+  });
+}
+function closeDetail(){document.getElementById('detailModal').style.display='none';}
+function detailToggle(id,c){if(c)detailSelected.add(id);else detailSelected.delete(id);}
+function detailToggleAll(c){
+  if(c===undefined)c=true;
+  document.querySelectorAll('.d-check').forEach(cb=>{cb.checked=c;detailToggle(parseInt(cb.value),c);});
+}
+function detailBulkDelete(){
+  if(!detailSelected.size){alert('Chua chon item nao');return;}
+  if(!confirm('Xoa '+detailSelected.size+' items?'))return;
+  const itemType=detailType.includes('article')?'article':'product';
+  fetch('/admin/ai-center/bulk-action',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'delete',item_type:itemType,ids:Array.from(detailSelected)})
+  }).then(r=>r.json()).then(d=>{
+    if(d.success){alert(d.message);closeDetail();location.reload();}else alert(d.error);
+  });
+}
+function detailBulkDeactivate(){
+  if(!detailSelected.size){alert('Chua chon item nao');return;}
+  if(!confirm('Tat '+detailSelected.size+' san pham?'))return;
+  fetch('/admin/ai-center/bulk-action',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action:'deactivate',item_type:'product',ids:Array.from(detailSelected)})
+  }).then(r=>r.json()).then(d=>{
+    if(d.success){alert(d.message);closeDetail();location.reload();}else alert(d.error);
+  });
+}
+
+/* ── AI Classify ── */
+let aiScanning=false, aiAll=[], aiMisIds=new Set(), aiSelIds=new Set();
+function startAIScan(){
+  aiScanning=true;aiAll=[];aiMisIds.clear();aiSelIds.clear();
+  document.getElementById('aiBody').innerHTML='';
+  ['aiProgress','aiStats','aiResults'].forEach(id=>document.getElementById(id).style.display='block');
+  document.getElementById('btnScan').disabled=true;
+  document.getElementById('btnStop').style.display='inline-block';
+  aiUpdateStats();
+  aiBatch(0);
+}
+function stopAIScan(){
+  aiScanning=false;
+  document.getElementById('btnStop').style.display='none';
+  document.getElementById('btnScan').disabled=false;
+  document.getElementById('aiLabel').textContent='Da dung';
+}
+async function aiBatch(offset){
+  if(!aiScanning)return;
+  const vid=document.getElementById('aiVertical').value;
+  const bs=parseInt(document.getElementById('aiBatch').value);
+  try{
+    const r=await fetch('/admin/ai-center/ai-scan',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({vertical_id:vid?parseInt(vid):null,offset,batch_size:bs})
+    });
+    if(!r.ok){const e=await r.json();alert(e.error||'Loi');stopAIScan();return;}
+    const d=await r.json();
+    const pct=d.total>0?Math.round(d.processed/d.total*100):100;
+    document.getElementById('aiBar').style.width=pct+'%';
+    document.getElementById('aiCount').textContent=d.processed+'/'+d.total;
+    document.getElementById('aiLabel').textContent='Dang scan... '+pct+'%';
+    d.results.forEach(r=>{aiAll.push(r);if(r.mismatch)aiMisIds.add(r.id);aiAppendRow(r);});
+    aiUpdateStats();
+    if(d.done||!aiScanning){
+      aiScanning=false;
+      document.getElementById('aiLabel').textContent='Hoan tat!';
+      document.getElementById('btnStop').style.display='none';
+      document.getElementById('btnScan').disabled=false;
+      if(aiMisIds.size>0)document.getElementById('aiActions').style.display='flex';
+    }else setTimeout(()=>aiBatch(d.next_offset),500);
+  }catch(e){alert('Loi: '+e.message);stopAIScan();}
+}
+function aiAppendRow(r){
+  const tr=document.createElement('tr');
+  tr.className=r.mismatch?'row-bad':'row-ok';
+  tr.dataset.type=r.mismatch?'mismatch':'correct';tr.dataset.id=r.id;
+  const cc=r.confidence==='high'?'conf-h':r.confidence==='medium'?'conf-m':'conf-l';
+  tr.innerHTML=`<td>${r.mismatch?'<input type="checkbox" class="ai-chk" value="'+r.id+'" onchange="aiToggleSel('+r.id+',this.checked)">':''}</td>
+    <td style="font-family:'DM Mono';font-size:14px">${r.id}</td>
+    <td style="font-size:14px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.name}">${r.name}</td>
+    <td style="font-size:14px">${r.current_vertical} &gt; ${r.current_zone}</td>
+    <td style="font-size:14px">${r.suggested_vertical}</td>
+    <td><span class="${cc}" style="font-size:14px">${r.confidence}</span></td>
+    <td style="font-size:14px;color:var(--text-dim);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r.reason}">${r.reason}</td>`;
+  document.getElementById('aiBody').appendChild(tr);
+}
+function aiUpdateStats(){
+  const t=aiAll.length,m=aiAll.filter(r=>r.mismatch).length;
+  document.getElementById('sScanned').textContent=t.toLocaleString();
+  document.getElementById('sCorrect').textContent=(t-m).toLocaleString();
+  document.getElementById('sMismatch').textContent=m.toLocaleString();
+  document.getElementById('sRate').textContent=t>0?Math.round(m/t*100)+'%':'0%';
+}
+function aiFilter(type,btn){
+  document.querySelectorAll('.ai-filter').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.querySelectorAll('#aiBody tr').forEach(tr=>{
+    tr.style.display=type==='all'?'':tr.dataset.type===type?'':'none';
+  });
+}
+function aiToggleAll(c){document.querySelectorAll('.ai-chk').forEach(cb=>{cb.checked=c;aiToggleSel(parseInt(cb.value),c);});}
+function aiToggleSel(id,c){if(c)aiSelIds.add(id);else aiSelIds.delete(id);document.getElementById('aiSelected').textContent=aiSelIds.size+' chon';}
+function aiApply(action){
+  if(!aiSelIds.size){alert('Chua chon SP nao');return;}
+  if(!confirm((action==='delete'?'Xoa':'Xu ly')+' '+aiSelIds.size+' san pham?'))return;
+  fetch('/admin/ai-center/bulk-action',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,item_type:'product',ids:Array.from(aiSelIds)})
+  }).then(r=>r.json()).then(d=>{
+    if(d.success){
+      alert(d.message);
+      aiSelIds.forEach(id=>{const tr=document.querySelector(`#aiBody tr[data-id="${id}"]`);if(tr)tr.remove();});
+      aiAll=aiAll.filter(r=>!aiSelIds.has(r.id));
+      aiMisIds.forEach(id=>{if(aiSelIds.has(id))aiMisIds.delete(id);});
+      aiSelIds.clear();aiUpdateStats();
+    }else alert(d.error);
+  });
+}
+</script>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- GUIDE MODAL - Huong dan vai tro AI          -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="guideModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1100;overflow-y:auto;backdrop-filter:blur(3px)">
+  <div style="max-width:860px;margin:30px auto;background:var(--bg,#fff);border-radius:14px;border:1px solid var(--border);overflow:hidden">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);padding:24px 28px;color:#fff">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <h2 style="margin:0;font-size:20px;font-weight:700">Huong dan vai tro cua AI</h2>
+          <p style="margin:6px 0 0;font-size:14px;opacity:.85">AI ho tro gi trong viec van hanh website? Tung vai tro cu the.</p>
+        </div>
+        <button onclick="document.getElementById('guideModal').style.display='none'"
+          style="background:rgba(255,255,255,.2);border:none;color:#fff;width:32px;height:32px;border-radius:8px;font-size:18px;cursor:pointer">&times;</button>
+      </div>
+    </div>
+
+    <div style="padding:24px 28px">
+
+      <!-- Guide Nav -->
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:20px">
+        <button class="g-tab active" onclick="showGuide('overview',this)">Tong quan</button>
+        <button class="g-tab" onclick="showGuide('products',this)">San pham</button>
+        <button class="g-tab" onclick="showGuide('articles',this)">Bai viet</button>
+        <button class="g-tab" onclick="showGuide('verticals',this)">Verticals</button>
+        <button class="g-tab" onclick="showGuide('workflow',this)">Quy trinh</button>
+      </div>
+
+      <!-- GUIDE: Tong quan -->
+      <div class="g-panel" id="guide-overview">
+        <h3 style="font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#129302;</span> AI lam gi trong he thong?
+        </h3>
+        <p style="font-size:14px;color:var(--text-dim);margin:0 0 16px;line-height:1.6">
+          AI dong <strong>3 vai tro chinh</strong> trong viec van hanh website. Moi vai tro giup admin tiet kiem thoi gian va giam sai sot.
+        </p>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px">
+          <div class="role-card" style="border-top:3px solid #ef4444">
+            <div style="font-size:24px;margin-bottom:8px">&#128269;</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">1. Phat hien van de</div>
+            <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
+              Quet toan bo san pham va bai viet, tim ra cac van de: trung lap, thieu thong tin, sai phan loai, loi link, hieu suat kem.
+            </div>
+          </div>
+          <div class="role-card" style="border-top:3px solid #f59e0b">
+            <div style="font-size:24px;margin-bottom:8px">&#9889;</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">2. Phan loai & De xuat</div>
+            <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
+              AI tu dong phan loai san pham vao dung vertical, goi y hanh dong xu ly cho admin, danh gia muc do nghiem trong.
+            </div>
+          </div>
+          <div class="role-card" style="border-top:3px solid #2ecc71">
+            <div style="font-size:24px;margin-bottom:8px">&#128736;</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">3. Xu ly hang loat</div>
+            <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
+              Admin duyet va thuc thi: xoa SP sai, tat SP kem, cap nhat bai viet. AI ho tro, admin quyet dinh cuoi cung.
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">&#128161; Nguyen tac hoat dong</div>
+          <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:18px;line-height:1.8">
+            <li><strong>AI goi y, admin quyet dinh</strong> - AI khong tu dong xoa hay sua gi ca</li>
+            <li><strong>DB check truoc, AI check sau</strong> - Van de don gian (trung URL, thieu hinh) kiem tra bang database, nhanh va mien phi. Chi goi AI cho viec phuc tap (phan loai, SEO)</li>
+            <li><strong>Batch processing</strong> - AI quet theo batch 10-30 SP/lan de tiet kiem chi phi API</li>
+            <li><strong>Health Score</strong> - Diem suc khoe 0-100% tinh tu so van de phat hien, giup admin biet tong quan nhanh</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- GUIDE: San pham -->
+      <div class="g-panel" id="guide-products" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#128230;</span> AI kiem tra san pham nhu the nao?
+        </h3>
+
+        <div style="overflow:auto">
+          <table class="data-table" style="font-size:14px">
+            <thead><tr><th style="width:30px">#</th><th>Van de</th><th style="width:70px">Phat hien</th><th style="width:80px">Muc do</th><th>AI lam gi?</th><th>Admin lam gi?</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>URL trung lap</strong><br><span style="color:var(--text-dim);font-size:14px">Cung 1 SP import nhieu lan</span></td><td>DB</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:14px">Tim nhom URL giong nhau</td>
+                <td style="font-size:14px">Xoa ban sao, giu ban goc</td></tr>
+              <tr><td>2</td><td><strong>Thieu hinh anh</strong><br><span style="color:var(--text-dim);font-size:14px">SP khong co image_url</span></td><td>DB</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:14px">Loc SP thieu hinh</td>
+                <td style="font-size:14px">Bo sung hinh hoac xoa SP</td></tr>
+              <tr><td>3</td><td><strong>Gia = 0</strong><br><span style="color:var(--text-dim);font-size:14px">SP chua co gia hoac gia null</span></td><td>DB</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:14px">Loc SP gia bat thuong</td>
+                <td style="font-size:14px">Cap nhat gia hoac tat SP</td></tr>
+              <tr><td>4</td><td><strong>Nhieu click, 0 conversion</strong><br><span style="color:var(--text-dim);font-size:14px">>10 clicks nhung chua convert</span></td><td>DB</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:14px">Tim SP co ti le chuyen doi = 0%</td>
+                <td style="font-size:14px">Kiem tra link affiliate con hoat dong khong. Doi link hoac tat SP</td></tr>
+              <tr><td>5</td><td><strong>0 clicks (stale)</strong><br><span style="color:var(--text-dim);font-size:14px">SP khong ai click</span></td><td>DB</td>
+                <td><span style="color:#6b7280">Low</span></td>
+                <td style="font-size:14px">Loc SP khong traffic</td>
+                <td style="font-size:14px">Xem xet tat hoac push content</td></tr>
+              <tr><td>6</td><td><strong>Sai vertical</strong><br><span style="color:var(--text-dim);font-size:14px">SP xe may nam trong vertical thu cung</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:14px">Doc ten SP, so sanh voi verticals, de xuat vertical dung, danh gia confidence</td>
+                <td style="font-size:14px">Xoa hoac di chuyen SP sai</td></tr>
+              <tr><td>7</td><td><strong>SP het mua</strong><br><span style="color:var(--text-dim);font-size:14px">Ao am ban mua he</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#f59e0b;font-weight:600">Medium</span></td>
+                <td style="font-size:14px">Phan tich ten + loai SP theo thoi diem hien tai</td>
+                <td style="font-size:14px">Tat tam hoac len lich bat lai</td></tr>
+              <tr><td>8</td><td><strong>Ten SP rac / spam</strong><br><span style="color:var(--text-dim);font-size:14px">Ten SP bat thuong, ky tu la</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#f59e0b;font-weight:600">Medium</span></td>
+                <td style="font-size:14px">Phat hien ten co keyword stuffing, ky tu la, noi dung khong lien quan</td>
+                <td style="font-size:14px">Sua ten hoac xoa SP</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GUIDE: Bai viet -->
+      <div class="g-panel" id="guide-articles" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#128218;</span> AI kiem tra bai viet nhu the nao?
+        </h3>
+
+        <div style="overflow:auto">
+          <table class="data-table" style="font-size:14px">
+            <thead><tr><th style="width:30px">#</th><th>Van de</th><th style="width:70px">Phat hien</th><th style="width:80px">Muc do</th><th>AI lam gi?</th><th>Admin lam gi?</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Noi dung mong (thin)</strong><br><span style="color:var(--text-dim);font-size:14px">Bai viet duoi 500 ky tu</span></td><td>DB</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:14px">Dem so ky tu, loc bai qua ngan</td>
+                <td style="font-size:14px">Bo sung noi dung hoac hop nhat bai</td></tr>
+              <tr><td>2</td><td><strong>Chua gan san pham</strong><br><span style="color:var(--text-dim);font-size:14px">Bai khong co embed code</span></td><td>DB</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:14px">Tim bai khong co embed_code</td>
+                <td style="font-size:14px">Them SP phu hop de kiem tien tu bai. Day la nguon doanh thu bi bo lo!</td></tr>
+              <tr><td>3</td><td><strong>0 views</strong><br><span style="color:var(--text-dim);font-size:14px">Bai viet chua ai doc</span></td><td>DB</td>
+                <td><span style="color:#6b7280">Medium</span></td>
+                <td style="font-size:14px">Loc bai khong traffic</td>
+                <td style="font-size:14px">Toi uu SEO hoac chia se tren MXH</td></tr>
+              <tr><td>4</td><td><strong>SEO Audit</strong><br><span style="color:var(--text-dim);font-size:14px">Thieu meta, headings, keyword</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:14px">Phan tich title, meta, H2/H3, keyword density, de xuat cai thien</td>
+                <td style="font-size:14px">Sua bai theo goi y AI</td></tr>
+              <tr><td>5</td><td><strong>Content trung lap</strong><br><span style="color:var(--text-dim);font-size:14px">2 bai cung noi 1 chu de (cannibalization)</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:14px">So sanh noi dung cac bai, phat hien trung lap</td>
+                <td style="font-size:14px">Hop nhat bai hoac doi keyword</td></tr>
+              <tr><td>6</td><td><strong>Internal Linking</strong><br><span style="color:var(--text-dim);font-size:14px">Bai khong co lien ket noi bo</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#f59e0b;font-weight:600">High</span></td>
+                <td style="font-size:14px">Goi y bai lien quan de chen link vao nhau</td>
+                <td style="font-size:14px">Them link giua cac bai</td></tr>
+              <tr><td>7</td><td><strong>Bai SP sai vertical</strong><br><span style="color:var(--text-dim);font-size:14px">Bai viet gan SP khong lien quan</span></td><td style="color:#8b5cf6;font-weight:700">AI</td>
+                <td><span style="color:#ef4444;font-weight:700">Critical</span></td>
+                <td style="font-size:14px">Kiem tra SP trong bai co phu hop vertical cua bai khong</td>
+                <td style="font-size:14px">Doi SP cho phu hop</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- GUIDE: Verticals -->
+      <div class="g-panel" id="guide-verticals" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#127760;</span> AI kiem tra Vertical nhu the nao?
+        </h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div class="role-card">
+            <div style="font-size:14px;font-weight:700;margin-bottom:8px">Vertical khoe manh la gi?</div>
+            <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
+              <li>Co <strong>du san pham</strong> trong moi part</li>
+              <li>Co <strong>du bai viet</strong> (>= 3 bai/vertical)</li>
+              <li>Khong co <strong>parts trong</strong> (0 SP)</li>
+              <li>SP duoc <strong>phan loai dung</strong></li>
+              <li><strong>Can bang</strong> giua SP va noi dung</li>
+            </ul>
+          </div>
+          <div class="role-card">
+            <div style="font-size:14px;font-weight:700;margin-bottom:8px">AI phat hien van de gi?</div>
+            <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:16px;line-height:1.8">
+              <li><span style="color:#ef4444;font-weight:600">Trong</span> - Vertical 0 SP, 0 bai</li>
+              <li><span style="color:#f59e0b;font-weight:600">Thieu SP</span> - >50% parts khong co SP</li>
+              <li><span style="color:#f59e0b;font-weight:600">Thieu bai</span> - Duoi 3 bai viet</li>
+              <li><span style="color:#2ecc71;font-weight:600">Tot</span> - Du SP va bai viet</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">&#127919; Muc tieu</div>
+          <p style="font-size:14px;color:var(--text-dim);margin:0;line-height:1.7">
+            Moi vertical nen co: <strong>moi part it nhat 1 SP</strong>, <strong>it nhat 3 bai viet</strong> phu hop tier (nganh/chung/chi-tiet).
+            Tab Verticals giup admin nhin nhanh vertical nao can bo sung noi dung va san pham.
+          </p>
+        </div>
+      </div>
+
+      <!-- GUIDE: Quy trinh -->
+      <div class="g-panel" id="guide-workflow" style="display:none">
+        <h3 style="font-size:15px;margin:0 0 16px;display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">&#128736;</span> Quy trinh van hanh hang ngay
+        </h3>
+
+        <!-- Flow diagram -->
+        <div style="display:flex;flex-direction:column;gap:0;margin-bottom:24px">
+          <div class="flow-step">
+            <div class="flow-num">1</div>
+            <div class="flow-content">
+              <div style="font-size:14px;font-weight:700">Mo AI Control Center</div>
+              <div style="font-size:14px;color:var(--text-dim)">Xem Health Score va tong quan van de</div>
+            </div>
+            <div class="flow-time">1 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step">
+            <div class="flow-num">2</div>
+            <div class="flow-content">
+              <div style="font-size:14px;font-weight:700">Xu ly van de Critical truoc</div>
+              <div style="font-size:14px;color:var(--text-dim)">URL trung lap &#8594; Xoa. Click nhieu 0 conv &#8594; Kiem tra link. Bai chua gan SP &#8594; Them SP.</div>
+            </div>
+            <div class="flow-time">5-10 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step">
+            <div class="flow-num">3</div>
+            <div class="flow-content">
+              <div style="font-size:14px;font-weight:700">Chay AI Scan (tab AI Phan loai)</div>
+              <div style="font-size:14px;color:var(--text-dim)">Chon vertical &#8594; Bat dau scan &#8594; Duyet ket qua &#8594; Xoa SP sai</div>
+            </div>
+            <div class="flow-time">5-15 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step">
+            <div class="flow-num">4</div>
+            <div class="flow-content">
+              <div style="font-size:14px;font-weight:700">Kiem tra Verticals</div>
+              <div style="font-size:14px;color:var(--text-dim)">Tim vertical trong &#8594; Bo sung SP/bai viet &#8594; Dieu phoi noi dung</div>
+            </div>
+            <div class="flow-time">5 phut</div>
+          </div>
+          <div class="flow-arrow">&#8595;</div>
+          <div class="flow-step" style="border-color:#2ecc71">
+            <div class="flow-num" style="background:#2ecc71">5</div>
+            <div class="flow-content">
+              <div style="font-size:14px;font-weight:700;color:#2ecc71">Hoan tat!</div>
+              <div style="font-size:14px;color:var(--text-dim)">Health Score tang len. Lap lai moi ngay hoac moi tuan.</div>
+            </div>
+            <div class="flow-time">~20 phut/ngay</div>
+          </div>
+        </div>
+
+        <div style="background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(59,130,246,.06));border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:16px">
+          <div style="font-size:14px;font-weight:700;margin-bottom:8px">&#128204; Tan suat khuyen nghi</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;font-size:14px">
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Hang ngay</div>
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:14px">
+                <li>Check Health Score</li>
+                <li>Xu ly Critical issues</li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Hang tuan</div>
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:14px">
+                <li>AI Scan phan loai SP</li>
+                <li>Review bai viet mong</li>
+                <li>Bo sung SP cho parts trong</li>
+              </ul>
+            </div>
+            <div>
+              <div style="font-weight:600;margin-bottom:4px">Hang thang</div>
+              <ul style="color:var(--text-dim);margin:0;padding-left:14px;line-height:1.7;font-size:14px">
+                <li>Vertical health toan dien</li>
+                <li>So sanh network hieu suat</li>
+                <li>Don dep SP stale</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.g-tab{padding:8px 14px;font-size:14px;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);border-radius:6px;cursor:pointer;transition:.15s}
+.g-tab.active{background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:#fff;border-color:transparent}
+.g-tab:hover:not(.active){border-color:#8b5cf6;color:var(--text)}
+.role-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px}
+.flow-step{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.flow-num{width:28px;height:28px;border-radius:8px;background:#8b5cf6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0}
+.flow-content{flex:1}
+.flow-time{font-size:14px;color:var(--text-dim);font-family:'DM Mono';white-space:nowrap;padding:4px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
+.flow-arrow{text-align:center;font-size:16px;color:var(--text-dim);line-height:1;padding:2px 0}
+</style>
+
+<script>
+function showGuide(panel,btn){
+  document.querySelectorAll('.g-panel').forEach(p=>p.style.display='none');
+  document.querySelectorAll('.g-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('guide-'+panel).style.display='block';
+  btn.classList.add('active');
+}
+/* Close on backdrop click */
+document.getElementById('guideModal').addEventListener('click',function(e){
+  if(e.target===this)this.style.display='none';
+});
+</script>
+
+{% endblock %}

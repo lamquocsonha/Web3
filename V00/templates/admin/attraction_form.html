@@ -2,7 +2,7 @@
 {% block title %}{% if attraction %}Edit Attraction{% else %}New Attraction{% endif %}{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_attractions') }}">Attractions</a><span class="sep">></span>{% if attraction %}Edit{% else %}New{% endif %}{% endblock %}
 {% block content %}
-<h1 class="page-title">{% if attraction %}Edit: {{ attraction.name[:40] }}{% else %}+ Add Attraction{% endif %}</h1>
+<h1 class="page-title">🎯 {% if attraction %}Edit: {{ attraction.name[:40] }}{% else %}Add Attraction{% endif %}</h1>
 
 <form method="POST" style="max-width:800px">
   <div class="form-row">
@@ -44,7 +44,7 @@
         <option value="agoda" {% if attraction and attraction.network == 'agoda' %}selected{% endif %}>Agoda</option>
       </select></div>
     <div class="form-group" style="flex:2"><label class="form-label">Affiliate URL *</label>
-      <input class="form-input" name="affiliate_url" value="{{ attraction.affiliate_url if attraction else '' }}" required placeholder="https://klook.com/..." style="font-family:'DM Mono';font-size:11px"></div>
+      <input class="form-input" name="affiliate_url" value="{{ attraction.affiliate_url if attraction else '' }}" required placeholder="https://klook.com/..." style="font-family:'DM Mono';font-size:14px"></div>
   </div>
 
   <div class="form-group"><label class="form-label">Image URL</label>
@@ -58,7 +58,7 @@
   </div>
 
   {% if attraction %}
-  <div style="margin:16px 0;padding:14px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);font-size:12px">
+  <div style="margin:16px 0;padding:14px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);font-size:14px">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
       <div><span style="color:var(--text-dim)">Clicks:</span> <strong>{{ "{:,}".format(attraction.clicks) }}</strong></div>
       <div><span style="color:var(--text-dim)">Conversions:</span> <strong>{{ "{:,}".format(attraction.conversions) }}</strong></div>

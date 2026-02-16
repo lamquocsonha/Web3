@@ -1,14 +1,9 @@
 {% extends "shared/base.html" %}
 {% block title %}Vé tham quan{% endblock %}
-{% block extra_nav %}
-<a href="{{ url_for('travel_hotels') }}">🏨 Khách sạn</a>
-<a href="{{ url_for('travel_attractions') }}">📍 Vé tham quan</a>
-{% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Vé tham quan</div>{% endblock %}
 {% block content %}
 <div class="page-hero">
-  <span style="font-size:36px">🎫</span>
-  <h1>Vé tham quan & Trải nghiệm</h1>
+  <h1><span class="hero-icon">🎫</span> Vé tham quan & Trải nghiệm</h1>
   <p class="subtitle">{{ items|length }} hoạt động — Sở thú, thủy cung, cáp treo, công viên & tour</p>
 </div>
 
@@ -41,6 +36,12 @@
       </a>
       {% endfor %}
     </div>
+
+    <!-- Voucher Sidebar Widget -->
+    {% include 'shared/_voucher_sidebar.html' %}
+
+    <!-- Hot Products Sidebar Widget -->
+    {% include 'shared/_hot_products_sidebar.html' %}
   </aside>
 
   <!-- MAIN -->

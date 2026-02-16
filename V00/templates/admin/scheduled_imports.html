@@ -11,7 +11,7 @@ Scheduled Imports
   <a href="{{ url_for('admin_products_import_csv') }}" class="btn btn-primary">+ Tạo Scheduled Import</a>
 </div>
 
-<p style="font-size:13px;color:var(--text-dim);margin:-8px 0 24px">
+<p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">
   Quản lý các job import CSV tự động. Hệ thống sẽ tự động tải và cập nhật sản phẩm theo lịch.
 </p>
 
@@ -34,31 +34,31 @@ Scheduled Imports
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
             <h3 style="font-size:16px;margin:0;font-weight:700">{{ job.name }}</h3>
             {% if not job.is_active %}
-            <span style="padding:2px 8px;background:var(--bg-subtle);border-radius:4px;font-size:11px;font-weight:700;color:var(--text-dim)">PAUSED</span>
+            <span style="padding:2px 8px;background:var(--bg-subtle);border-radius:4px;font-size:14px;font-weight:700;color:var(--text-dim)">PAUSED</span>
             {% endif %}
           </div>
 
-          <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">
+          <div style="font-size:14px;color:var(--text-dim);margin-bottom:12px">
             <span>🔗 {{ job.csv_url[:60] }}{% if job.csv_url|length > 60 %}...{% endif %}</span>
           </div>
 
           <!-- Stats Grid -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px">
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Part</div>
-              <div style="font-size:13px;font-weight:600">{{ job.part.name_vi if job.part else 'N/A' }}</div>
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Part</div>
+              <div style="font-size:14px;font-weight:600">{{ job.part.name_vi if job.part else 'N/A' }}</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Network</div>
-              <div style="font-size:13px;font-weight:600">{{ job.network|upper }}</div>
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Network</div>
+              <div style="font-size:14px;font-weight:600">{{ job.network|upper }}</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Chu kỳ</div>
-              <div style="font-size:13px;font-weight:600">{{ job.update_interval_days }} ngày</div>
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Chu kỳ</div>
+              <div style="font-size:14px;font-weight:600">{{ job.update_interval_days }} ngày</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Lần import cuối</div>
-              <div style="font-size:13px;font-weight:600">
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Lần import cuối</div>
+              <div style="font-size:14px;font-weight:600">
                 {% if job.last_import_at %}
                 {{ job.last_import_at.strftime('%d/%m %H:%M') }}
                 {% else %}
@@ -67,12 +67,12 @@ Scheduled Imports
               </div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Sản phẩm</div>
-              <div style="font-size:13px;font-weight:600;color:#22c55e">{{ job.last_import_count }}</div>
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Sản phẩm</div>
+              <div style="font-size:14px;font-weight:600;color:#22c55e">{{ job.last_import_count }}</div>
             </div>
             <div>
-              <div style="font-size:11px;color:var(--text-dim);margin-bottom:2px">Import tiếp theo</div>
-              <div style="font-size:13px;font-weight:600">
+              <div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Import tiếp theo</div>
+              <div style="font-size:14px;font-weight:600">
                 {% if job.next_import_at %}
                 {{ job.next_import_at.strftime('%d/%m %H:%M') }}
                 {% else %}
@@ -85,13 +85,13 @@ Scheduled Imports
           <!-- Error Message -->
           {% if job.last_import_status == 'error' and job.last_error %}
           <div style="background:rgba(239,68,68,0.1);border-left:3px solid #ef4444;padding:10px;border-radius:4px;margin-bottom:12px">
-            <div style="font-size:11px;font-weight:700;color:#ef4444;margin-bottom:4px">❌ Lỗi:</div>
-            <div style="font-size:12px;color:var(--text-dim);font-family:'DM Mono',monospace">{{ job.last_error }}</div>
+            <div style="font-size:14px;font-weight:700;color:#ef4444;margin-bottom:4px">❌ Lỗi:</div>
+            <div style="font-size:14px;color:var(--text-dim);font-family:'DM Mono',monospace">{{ job.last_error }}</div>
           </div>
           {% endif %}
 
           <!-- Options -->
-          <div style="display:flex;align-items:center;gap:4px;font-size:12px">
+          <div style="display:flex;align-items:center;gap:4px;font-size:14px">
             {% if job.apply_deeplink %}
             <span style="padding:4px 8px;background:rgba(59,130,246,0.1);color:#3b82f6;border-radius:4px;font-weight:600">🔗 Deeplink</span>
             {% endif %}
@@ -100,16 +100,16 @@ Scheduled Imports
 
         <!-- Actions -->
         <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <a href="{{ url_for('admin_scheduled_import_run', job_id=job.id) }}" class="btn btn-sm btn-primary" style="font-size:12px;padding:6px 12px;white-space:nowrap">
+          <a href="{{ url_for('admin_scheduled_import_run', job_id=job.id) }}" class="btn btn-sm btn-primary" style="font-size:14px;padding:6px 12px;white-space:nowrap">
             ▶️ Chạy ngay
           </a>
           <form method="POST" action="{{ url_for('admin_scheduled_import_toggle', job_id=job.id) }}" style="margin:0">
-            <button type="submit" class="btn btn-sm btn-secondary" style="font-size:12px;padding:6px 12px;width:100%">
+            <button type="submit" class="btn btn-sm btn-secondary" style="font-size:14px;padding:6px 12px;width:100%">
               {% if job.is_active %}⏸️ Tạm dừng{% else %}▶️ Kích hoạt{% endif %}
             </button>
           </form>
           <form method="POST" action="{{ url_for('admin_scheduled_import_delete', job_id=job.id) }}" onsubmit="return confirm('Xóa scheduled import này?')" style="margin:0">
-            <button type="submit" class="btn btn-sm" style="font-size:12px;padding:6px 12px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)">
+            <button type="submit" class="btn btn-sm" style="font-size:14px;padding:6px 12px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.2)">
               🗑️ Xóa
             </button>
           </form>
@@ -131,7 +131,7 @@ Scheduled Imports
 <!-- Info Box -->
 <div style="background:rgba(59,130,246,0.05);border:2px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:24px;margin-top:24px;max-width:1400px">
   <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">💡 Cách hoạt động</h3>
-  <ul style="font-size:13px;color:var(--text-dim);margin:0;padding-left:20px;line-height:1.8">
+  <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:20px;line-height:1.8">
     <li>Scheduled import sẽ tự động tải CSV từ URL và import sản phẩm theo chu kỳ đã set</li>
     <li>Sản phẩm đã tồn tại (trùng URL) sẽ được cập nhật giá và thông tin</li>
     <li>Sản phẩm mới sẽ được thêm vào Part đã chọn</li>

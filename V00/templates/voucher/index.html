@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UniVoucher — Mã giảm giá & Voucher</title>
+<title>UniVoucher — Mã giảm giá & Voucher {{ f_platform or '' }}</title>
+<meta name="description" content="Tổng hợp {{ vouchers|length }} mã giảm giá, voucher Shopee, Lazada, Grab, Tiki mới nhất. Cập nhật tự động từ AccessTrade.">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/voucher.css') }}">
 </head>
@@ -16,79 +17,149 @@
       <span class="logo-name">UniVoucher</span>
     </a>
     <nav class="site-nav">
-      <a href="{{ url_for('voucher_index') }}">Trang chủ</a>
-      <a href="{{ url_for('voucher_index', category='food') }}">🍔 Ăn uống</a>
-      <a href="{{ url_for('voucher_index', category='shopping') }}">🛍️ Mua sắm</a>
-      <a href="{{ url_for('voucher_index', category='travel') }}">✈️ Du lịch</a>
+      <a href="{{ url_for('voucher_index') }}" class="{% if not f_category and not f_platform %}active{% endif %}">Tất cả</a>
+      {% for pname, pcount in platform_stats.items() %}
+      {% if pname != 'Khác' %}
+      <a href="{{ url_for('voucher_index', platform=pname.lower()) }}" class="{% if f_platform == pname.lower() %}active{% endif %}">{{ pname }} <sup>{{ pcount }}</sup></a>
+      {% endif %}
+      {% endfor %}
     </nav>
     <div class="header-actions">
-      <button class="mode-toggle" onclick="toggleMode()" title="Chuyển chế độ sáng/tối">
+      <button class="mode-toggle" onclick="toggleMode()" title="Sáng/Tối">
         <span class="mode-icon">☀️</span>
-        <span class="mode-label">Light</span>
       </button>
-      <a href="/admin/vouchers" class="admin-link">⚙️ Admin</a>
+      <a href="/admin/vouchers" class="admin-link">Admin</a>
     </div>
   </div>
 </header>
 
 <main class="site-main">
-  <!-- HERO -->
-  <div class="page-hero">
-    <h1>🎫 Mã giảm giá & Voucher</h1>
-    <p class="subtitle">{{ vouchers|length }} mã giảm giá đang hoạt động từ Shopee, Lazada, Grab, Tiki...</p>
-  </div>
 
-  <!-- FEATURED VOUCHERS -->
-  {% if featured %}
-  <section class="section">
-    <div class="section-header-pub">
-      <h2>⭐ Voucher nổi bật</h2>
+  <!-- HERO -->
+  <section class="v-hero">
+    <div class="v-hero-inner">
+      <h1>Mã giảm giá & Voucher</h1>
+      <p class="v-hero-sub">{{ vouchers|length }} voucher đang hoạt động — Cập nhật tự động từ AccessTrade</p>
+      <div class="v-hero-platforms">
+        {% for pname, pcount in platform_stats.items() %}
+        <a href="{{ url_for('voucher_index', platform=pname.lower()) }}" class="v-platform-chip {% if f_platform == pname.lower() %}active{% endif %}">
+          {% if pname == 'Shopee' %}🟠{% elif pname == 'Lazada' %}🔵{% elif pname == 'Tiki' %}🔷{% elif pname == 'Grab' %}🟢{% elif pname == 'Traveloka' %}✈️{% else %}🏷️{% endif %}
+          {{ pname }}
+          <span>{{ pcount }}</span>
+        </a>
+        {% endfor %}
+      </div>
     </div>
-    <div class="voucher-featured">
-      {% for v in featured[:3] %}
-      <a href="{{ url_for('voucher_detail', code=v.code) }}" class="voucher-card-featured">
-        <div class="vcf-badge">{{ v.get_discount_text() }}</div>
-        <div class="vcf-merchant">{{ v.icon }} {{ v.merchant }}</div>
-        <h3>{{ v.title }}</h3>
-        <p>{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</p>
-        <div class="vcf-meta">
-          <span>HSD: {{ v.valid_to.strftime('%d/%m') }}</span>
-          {% if v.is_exclusive %}<span class="vcf-exclusive">✨ Độc quyền</span>{% endif %}
+  </section>
+
+  <!-- FEATURED / TOP DEALS -->
+  {% if featured %}
+  <section class="section v-section-featured">
+    <div class="section-header-pub">
+      <h2>🔥 Ưu đãi tốt nhất</h2>
+      <p class="section-sub">Voucher giảm giá cao nhất hôm nay</p>
+    </div>
+    <div class="v-featured-wrapper">
+      <button class="v-feat-arrow v-feat-arrow-left" id="featPrev" aria-label="Trước">&#8249;</button>
+      <div class="v-featured-grid" id="featuredGrid">
+        {% for v in featured[:6] %}
+        <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color }}">
+          <div class="v-feat-top">
+            <span class="v-feat-discount">{{ v.get_discount_text() }}</span>
+            <span class="v-feat-exp">HSD {{ v.valid_to.strftime('%d/%m') if v.valid_to else '—' }}</span>
+          </div>
+          <div class="v-feat-merchant">{{ v.icon }} {{ v.merchant }}</div>
+          <h3>{{ v.title[:65] }}{% if v.title|length > 65 %}...{% endif %}</h3>
+          <div class="v-feat-bottom">
+            <div class="vc-code-wrap">
+              <span class="vc-sticker">👍 COPY MÃ</span>
+              <code class="v-feat-code vc-code-hidden">{{ v.code[-2:] }}</code>
+            </div>
+          </div>
         </div>
-      </a>
-      {% endfor %}
+        {% endfor %}
+      </div>
+      <button class="v-feat-arrow v-feat-arrow-right" id="featNext" aria-label="Sau">&#8250;</button>
     </div>
   </section>
   {% endif %}
 
-  <!-- VOUCHER WIDGETS (AccessTrade, etc.) -->
+  <!-- EXPIRING SOON -->
+  {% if expiring_soon %}
+  <section class="section v-section-expiring">
+    <div class="section-header-pub">
+      <h2>⏰ Sắp hết hạn</h2>
+      <p class="section-sub">Nhanh tay kẻo lỡ — hết hạn trong 3 ngày tới</p>
+    </div>
+    <div class="v-expiring-slider" id="expiringSlider">
+      <div class="v-expiring-track" id="expiringTrack">
+        {% for v in expiring_soon %}
+        <div class="v-exp-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
+          <div class="v-exp-timer">{{ v.icon }} Còn {{ ((v.valid_to - now).days) if v.valid_to else '?' }} ngày</div>
+          <div class="v-exp-discount" style="color:{{ v.color }}">{{ v.get_discount_text() }}</div>
+          <div class="v-exp-merchant">{{ v.merchant }}</div>
+          <div class="vc-code-wrap">
+            <span class="vc-sticker">👍 COPY MÃ</span>
+            <code class="v-exp-code vc-code-hidden">{{ v.code[-2:] }}</code>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- VOUCHER WIDGETS (AccessTrade Embed) -->
   {% if widgets %}
   {% for widget in widgets %}
-  <section class="section" style="margin-bottom:48px">
+  <section class="section" style="margin-bottom:32px">
     <div class="section-header-pub">
       <h2>{{ widget.name }}</h2>
-      {% if widget.description %}
-      <p style="font-size:13px;color:#666;margin-top:4px">{{ widget.description }}</p>
-      {% endif %}
     </div>
-    <div style="margin-top:20px">
-      {{ widget.embed_code|safe }}
-    </div>
+    <div style="margin-top:16px">{{ widget.embed_code|safe }}</div>
   </section>
   {% endfor %}
   {% endif %}
 
-  <!-- FILTERS & GRID -->
+  <!-- TOOLBAR: Sort + Filter -->
+  <div class="v-toolbar">
+    <div class="v-toolbar-left">
+      <span class="v-toolbar-count">{{ vouchers|length }} voucher</span>
+      {% if f_platform or f_category or f_merchant or f_type %}
+      <a href="{{ url_for('voucher_index') }}" class="v-clear-filter">Xóa bộ lọc</a>
+      {% endif %}
+    </div>
+    <div class="v-toolbar-right">
+      <select onchange="location.href=this.value" class="v-sort-select">
+        <option value="{{ url_for('voucher_index', platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort='newest') }}" {% if f_sort == 'newest' %}selected{% endif %}>Mới nhất</option>
+        <option value="{{ url_for('voucher_index', platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort='discount') }}" {% if f_sort == 'discount' %}selected{% endif %}>Giảm nhiều nhất</option>
+        <option value="{{ url_for('voucher_index', platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort='expiring') }}" {% if f_sort == 'expiring' %}selected{% endif %}>Sắp hết hạn</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
   <div class="voucher-layout">
+
     <!-- SIDEBAR -->
     <aside class="voucher-sidebar">
+      <!-- Discount Type Filter -->
+      <div class="vs-section">
+        <h3>💰 Loại giảm giá</h3>
+        <a href="{{ url_for('voucher_index', platform=f_platform, category=f_category, merchant=f_merchant) }}" class="vs-type {% if not f_type %}active{% endif %}">Tất cả</a>
+        <a href="{{ url_for('voucher_index', platform=f_platform, category=f_category, merchant=f_merchant, type='percentage') }}" class="vs-type {% if f_type == 'percentage' %}active{% endif %}">% Phần trăm</a>
+        <a href="{{ url_for('voucher_index', platform=f_platform, category=f_category, merchant=f_merchant, type='fixed_amount') }}" class="vs-type {% if f_type == 'fixed_amount' %}active{% endif %}">₫ Số tiền cố định</a>
+        <a href="{{ url_for('voucher_index', platform=f_platform, category=f_category, merchant=f_merchant, type='free_shipping') }}" class="vs-type {% if f_type == 'free_shipping' %}active{% endif %}">🚚 Freeship</a>
+      </div>
+
+      <!-- Category Filter -->
       <div class="vs-section">
         <h3>📂 Danh mục</h3>
-        <a href="{{ url_for('voucher_index') }}" class="vs-cat {% if not f_category %}active{% endif %}">
+        <a href="{{ url_for('voucher_index', platform=f_platform, type=f_type) }}" class="vs-cat {% if not f_category %}active{% endif %}">
           Tất cả <span class="vs-count">{{ vouchers|length }}</span>
         </a>
         {% for cat, count in categories.items() %}
-        <a href="{{ url_for('voucher_index', category=cat) }}" class="vs-cat {% if f_category == cat %}active{% endif %}">
+        <a href="{{ url_for('voucher_index', category=cat, platform=f_platform, type=f_type) }}" class="vs-cat {% if f_category == cat %}active{% endif %}">
           {% if cat == 'food' %}🍔 Ăn uống
           {% elif cat == 'shopping' %}🛍️ Mua sắm
           {% elif cat == 'travel' %}✈️ Du lịch
@@ -103,20 +174,25 @@
         {% endfor %}
       </div>
 
+      <!-- Merchants -->
       <div class="vs-section">
-        <h3>🏪 Thương hiệu</h3>
-        {% for m in merchants[:10] %}
-        <a href="{{ url_for('voucher_index', merchant=m, category=f_category) }}" class="vs-merchant {% if f_merchant == m %}active{% endif %}">
-          {{ m }}
+        <h3>🏪 Shop / Thương hiệu</h3>
+        {% for m in merchants[:15] %}
+        <a href="{{ url_for('voucher_index', merchant=m, platform=f_platform, category=f_category, type=f_type) }}" class="vs-merchant {% if f_merchant == m %}active{% endif %}">
+          {{ m[:20] }}{% if m|length > 20 %}..{% endif %}
+          <span class="vs-count">{{ merchant_count_map.get(m, '') }}</span>
         </a>
         {% endfor %}
+        {% if merchants|length > 15 %}
+        <span class="vs-more" onclick="this.parentElement.classList.toggle('expanded')">+{{ merchants|length - 15 }} shop khác...</span>
+        {% endif %}
       </div>
 
-      <div class="vs-section">
-        <h3>💰 Loại giảm giá</h3>
-        <a href="{{ url_for('voucher_index', type='percentage', category=f_category) }}" class="vs-type {% if f_type == 'percentage' %}active{% endif %}">% Phần trăm</a>
-        <a href="{{ url_for('voucher_index', type='fixed_amount', category=f_category) }}" class="vs-type {% if f_type == 'fixed_amount' %}active{% endif %}">₫ Số tiền</a>
-        <a href="{{ url_for('voucher_index', type='free_shipping', category=f_category) }}" class="vs-type {% if f_type == 'free_shipping' %}active{% endif %}">🚚 Freeship</a>
+      <!-- CTA Box -->
+      <div class="vs-cta">
+        <div class="vs-cta-icon">💡</div>
+        <h4>Mẹo tiết kiệm</h4>
+        <p>Kết hợp mã giảm giá + freeship + xu hoàn để tối ưu ưu đãi!</p>
       </div>
     </aside>
 
@@ -125,32 +201,35 @@
       {% if vouchers %}
       <div class="voucher-grid">
         {% for v in vouchers %}
-        <a href="{{ url_for('voucher_detail', code=v.code) }}" class="voucher-card">
-          <div class="vc-header" style="background:linear-gradient(135deg, {{ v.color }} 0%, {{ v.color }}dd 100%)">
+        <div class="voucher-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
+          <div class="vc-header" style="background:linear-gradient(135deg, {{ v.color }} 0%, {{ v.color }}cc 100%)">
             <div class="vc-discount">{{ v.get_discount_text() }}</div>
             <div class="vc-merchant">{{ v.icon }} {{ v.merchant }}</div>
           </div>
           <div class="vc-body">
-            <h4>{{ v.title[:50] }}{% if v.title|length > 50 %}...{% endif %}</h4>
-            <p>{{ v.description[:70] }}{% if v.description|length > 70 %}...{% endif %}</p>
+            <h4>{{ v.title[:55] }}{% if v.title|length > 55 %}...{% endif %}</h4>
+            {% if v.description and v.description != v.title %}
+            <p>{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</p>
+            {% endif %}
             <div class="vc-meta">
-              <span>📅 HSD: {{ v.valid_to.strftime('%d/%m/%Y') }}</span>
-              {% if v.min_order > 0 %}<span>💵 Đơn tối thiểu: {{ '{:,.0f}'.format(v.min_order) }}đ</span>{% endif %}
+              <span>📅 {{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</span>
+              {% if (v.min_order or 0) > 0 %}<span>💵 Từ {{ '{:,.0f}'.format(v.min_order) }}đ</span>{% endif %}
             </div>
-            {% if v.is_exclusive %}<div class="vc-exclusive">✨ Độc quyền UniLab</div>{% endif %}
           </div>
           <div class="vc-footer">
-            <span class="vc-code">{{ v.code }}</span>
-            <span class="vc-action">Sao chép →</span>
+            <div class="vc-code-wrap">
+              <span class="vc-sticker">👍 COPY MÃ</span>
+              <code class="vc-code vc-code-hidden">{{ v.code[-2:] }}</code>
+            </div>
           </div>
-        </a>
+        </div>
         {% endfor %}
       </div>
       {% else %}
       <div class="empty-state">
         <span style="font-size:64px">🔍</span>
         <h3>Không tìm thấy voucher</h3>
-        <p>Thử thay đổi bộ lọc hoặc quay lại sau</p>
+        <p>Thử thay đổi bộ lọc hoặc <a href="{{ url_for('voucher_index') }}">xem tất cả</a></p>
       </div>
       {% endif %}
     </div>
@@ -159,37 +238,149 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-    <p>🎫 UniVoucher — Mã giảm giá & Voucher từ các sàn TMĐT hàng đầu</p>
-    <p style="opacity:0.6;font-size:13px">Shopee · Lazada · Tiki · Grab · Accesstrade</p>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <span style="font-size:24px">🎫</span>
+        <strong>UniVoucher</strong>
+      </div>
+      <p>Tổng hợp mã giảm giá & voucher từ các sàn TMĐT hàng đầu Việt Nam. Cập nhật tự động qua AccessTrade API.</p>
+    </div>
+    <div class="footer-platforms">
+      {% for pname in platform_stats.keys() %}
+      <span>{{ pname }}</span>
+      {% endfor %}
+    </div>
   </div>
 </footer>
+
+<!-- TOAST -->
+<div id="toast" class="v-toast">
+  <span id="toastMsg">✓ Đã sao chép mã!</span>
+</div>
 
 <script>
 function toggleMode() {
   const body = document.body;
   const mode = body.dataset.mode === 'light' ? 'dark' : 'light';
   body.dataset.mode = mode;
-  const icon = mode === 'light' ? '☀️' : '🌙';
-  const label = mode === 'light' ? 'Light' : 'Dark';
-  const iconEl = document.querySelector('.mode-icon');
-  const labelEl = document.querySelector('.mode-label');
-  if (iconEl) iconEl.textContent = icon;
-  if (labelEl) labelEl.textContent = label;
+  document.querySelector('.mode-icon').textContent = mode === 'light' ? '☀️' : '🌙';
   localStorage.setItem('voucher-mode', mode);
 }
 
-// Load saved mode on page load
 document.addEventListener('DOMContentLoaded', function() {
   const savedMode = localStorage.getItem('voucher-mode') || 'light';
   document.body.dataset.mode = savedMode;
-  const icon = savedMode === 'light' ? '☀️' : '🌙';
-  const label = savedMode === 'light' ? 'Light' : 'Dark';
   const iconEl = document.querySelector('.mode-icon');
-  const labelEl = document.querySelector('.mode-label');
-  if (iconEl) iconEl.textContent = icon;
-  if (labelEl) labelEl.textContent = label;
+  if (iconEl) iconEl.textContent = savedMode === 'light' ? '☀️' : '🌙';
 });
-</script>
 
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function revealCode(el) {
+  const code = el.dataset.code;
+  const url = el.dataset.url;
+  const codeEl = el.querySelector('.vc-code, .v-feat-code, .v-exp-code');
+
+  // If already revealed, just copy again
+  if (el.classList.contains('revealed')) {
+    navigator.clipboard.writeText(code).then(() => {
+      showToast('✓ Đã sao chép lại mã: ' + code);
+    });
+    return;
+  }
+
+  // Mark as revealed
+  el.classList.add('revealed');
+
+  // Show the real code — replace sticker + peek with full code
+  if (codeEl) {
+    codeEl.classList.remove('vc-code-hidden');
+    codeEl.textContent = code;
+    codeEl.classList.add('vc-code-revealed');
+  }
+
+  // Hide sticker after reveal
+  const sticker = el.querySelector('.vc-sticker');
+  if (sticker) {
+    sticker.textContent = '✓ Đã copy';
+    sticker.classList.add('vc-sticker-done');
+  }
+
+  // Copy code to clipboard
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('✓ Đã sao chép mã: ' + code);
+  });
+
+  // Open affiliate link in new tab (registers commission)
+  if (url) {
+    setTimeout(() => window.open(url, '_blank'), 600);
+  }
+}
+
+// Featured deals — arrow navigation
+(function() {
+  const grid = document.getElementById('featuredGrid');
+  const prev = document.getElementById('featPrev');
+  const next = document.getElementById('featNext');
+  if (!grid || !prev || !next) return;
+
+  const scrollAmt = 340; // card width + gap
+
+  function updateArrows() {
+    prev.classList.toggle('hidden', grid.scrollLeft <= 0);
+    next.classList.toggle('hidden', grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 2);
+  }
+
+  prev.addEventListener('click', function(e) {
+    e.stopPropagation();
+    grid.scrollBy({ left: -scrollAmt, behavior: 'smooth' });
+  });
+  next.addEventListener('click', function(e) {
+    e.stopPropagation();
+    grid.scrollBy({ left: scrollAmt, behavior: 'smooth' });
+  });
+
+  grid.addEventListener('scroll', updateArrows);
+  updateArrows();
+})();
+
+// Auto-slide expiring vouchers
+(function() {
+  const track = document.getElementById('expiringTrack');
+  if (!track || track.children.length < 2) return;
+
+  // Duplicate cards for seamless loop
+  const cards = Array.from(track.children);
+  cards.forEach(c => track.appendChild(c.cloneNode(true)));
+
+  let pos = 0;
+  const speed = 0.5; // px per frame
+  let paused = false;
+  let raf;
+
+  function slide() {
+    if (!paused) {
+      pos += speed;
+      const halfWidth = track.scrollWidth / 2;
+      if (pos >= halfWidth) pos = 0;
+      track.style.transform = 'translateX(-' + pos + 'px)';
+    }
+    raf = requestAnimationFrame(slide);
+  }
+
+  const slider = document.getElementById('expiringSlider');
+  slider.addEventListener('mouseenter', () => paused = true);
+  slider.addEventListener('mouseleave', () => paused = false);
+  slider.addEventListener('touchstart', () => paused = true, {passive: true});
+  slider.addEventListener('touchend', () => { setTimeout(() => paused = false, 2000); });
+
+  raf = requestAnimationFrame(slide);
+})();
+</script>
 </body>
 </html>
