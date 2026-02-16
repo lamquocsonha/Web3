@@ -3463,6 +3463,7 @@ def admin_hotel_sync_fast():
             rating=float(h.get('rating', 0)) or 8.0,
             reviews_count=int(h.get('reviews_count', 0)),
             price_from=float(h.get('price_from', 0)),
+            price_original=float(h.get('price_original', 0)),
             image_url=h.get('image_url', ''),
             agoda_url=h.get('agoda_url', ''),
             source='agoda_api',

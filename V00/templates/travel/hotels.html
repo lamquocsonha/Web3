@@ -150,6 +150,10 @@
           </div>
           {% if h.price_from %}
           <div class="tz-hc-price-row">
+            {% if h.price_original and h.price_original > h.price_from %}
+            <span class="tz-hc-price-old">{{ '{:,.0f}'.format(h.price_original) }}đ</span>
+            <span class="tz-hc-discount">-{{ ((1 - h.price_from / h.price_original) * 100)|int }}%</span>
+            {% endif %}
             <span class="tz-hc-price">{{ '{:,.0f}'.format(h.price_from or 0) }}đ</span>
           </div>
           {% endif %}
@@ -281,7 +285,15 @@ document.querySelectorAll('.prov-shape').forEach(g => {
           + '<span class="tz-hc-meta-loc">' + (h.district || h.address || h.destination_name || '') + '</span>'
           + '</div>';
         if (price) {
-          html += '<div class="tz-hc-price-row"><span class="tz-hc-price">' + price + '</span></div>';
+          var priceOriginal = h.price_original ? Number(h.price_original) : 0;
+          var priceFrom = h.price_from ? Number(h.price_from) : 0;
+          html += '<div class="tz-hc-price-row">';
+          if (priceOriginal && priceOriginal > priceFrom) {
+            var discount = Math.round((1 - priceFrom / priceOriginal) * 100);
+            html += '<span class="tz-hc-price-old">' + priceOriginal.toLocaleString() + 'đ</span>';
+            html += '<span class="tz-hc-discount">-' + discount + '%</span>';
+          }
+          html += '<span class="tz-hc-price">' + price + '</span></div>';
         }
         html += '<h3 class="tz-hc-name"><a href="' + (h.agoda_url || '#') + '" target="_blank" rel="nofollow">' + (h.name || '') + '</a></h3>'
           + '<div class="tz-hc-address">' + (h.district || h.address || '') + '</div>'

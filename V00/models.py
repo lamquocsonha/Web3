@@ -292,6 +292,7 @@ class Hotel(db.Model):
     rating = db.Column(db.Float, default=8.0)
     reviews_count = db.Column(db.Integer, default=0)
     price_from = db.Column(db.Float, default=0)
+    price_original = db.Column(db.Float, default=0)
     image_url = db.Column(db.String(500), default='')
     agoda_url = db.Column(db.String(1000), default='')
     booking_url = db.Column(db.String(1000), default='')
