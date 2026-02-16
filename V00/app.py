@@ -3395,6 +3395,78 @@ def admin_hotel_sync_import():
     return jsonify({'imported': imported, 'message': f'Da import {imported} khach san'})
 
 
+@app.route('/admin/hotel-sync/fast', methods=['POST'])
+def admin_hotel_sync_fast():
+    """Fast Sync: search + auto-import for a single destination.
+
+    Called repeatedly from the frontend for each destination in the queue.
+    Returns results for that one destination so the UI can show progress.
+    """
+    from agoda_integration import get_agoda_api, AGODA_CITY_NAMES
+    api = get_agoda_api()
+    if not api:
+        return jsonify({'error': 'Agoda API chua cau hinh', 'imported': 0})
+
+    data = request.get_json() or {}
+    destination = data.get('destination', '')
+    max_per_city = int(data.get('max_per_city', 10))
+
+    if not destination:
+        return jsonify({'error': 'Thieu destination', 'imported': 0})
+
+    # Search hotels from Agoda
+    hotels = api.search_city_hotels(destination)
+
+    # Collect existing agoda hotel IDs from DB
+    existing_ids = set()
+    for h in Hotel.query.filter_by(source='agoda_api').all():
+        if h.agoda_url:
+            for part in h.agoda_url.split('&'):
+                if part.startswith('hid='):
+                    existing_ids.add(part.split('=')[1])
+
+    imported = 0
+    for h in hotels[:max_per_city]:
+        agoda_id = str(h.get('agoda_id', ''))
+        name = h.get('name', '').strip()
+        if not name or agoda_id in existing_ids:
+            continue
+
+        amenities_raw = h.get('amenities', '')
+        if isinstance(amenities_raw, list):
+            amenities_raw = ', '.join(str(a) for a in amenities_raw)
+
+        hotel = Hotel(
+            name=name,
+            slug=slugify(name)[:60],
+            destination=h.get('destination', ''),
+            destination_name=h.get('destination_name', '') or AGODA_CITY_NAMES.get(destination, destination),
+            stars=int(h.get('stars', 0)) or 4,
+            district=h.get('district', '') or h.get('address', ''),
+            description=h.get('description', ''),
+            amenities=str(amenities_raw)[:500],
+            rating=float(h.get('rating', 0)) or 8.0,
+            reviews_count=int(h.get('reviews_count', 0)),
+            price_from=float(h.get('price_from', 0)),
+            image_url=h.get('image_url', ''),
+            agoda_url=h.get('agoda_url', ''),
+            source='agoda_api',
+            is_active=True,
+            is_featured=False
+        )
+        db.session.add(hotel)
+        existing_ids.add(agoda_id)
+        imported += 1
+
+    db.session.commit()
+    return jsonify({
+        'destination': destination,
+        'found': len(hotels),
+        'imported': imported,
+        'skipped': len(hotels[:max_per_city]) - imported
+    })
+
+
 @app.route('/admin/api/agoda-search')
 def admin_api_agoda_search_public():
     """Public API: search Agoda hotels for a destination (used by travel page)"""

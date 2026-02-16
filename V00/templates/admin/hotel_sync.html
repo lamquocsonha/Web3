@@ -46,10 +46,46 @@
   <div id="testResult" style="margin-top:8px;font-size:13px;display:none"></div>
 </div>
 
-<!-- Search Hotels from Agoda -->
+<!-- Fast Sync -->
 {% if api_connected %}
+<div style="background:linear-gradient(135deg,rgba(231,76,60,0.04),rgba(231,76,60,0.08));border:2px solid rgba(231,76,60,0.2);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <h3 style="margin:0;font-size:15px">⚡ Fast Sync — Tu dong phan bo tat ca tinh thanh</h3>
+      <p style="margin:4px 0 0;font-size:13px;color:var(--text-dim)">Tim & import khach san tu Agoda cho {{ destinations|length }} tinh thanh. Chay tuan tu, tu dong bo qua hotel da import.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="form-group" style="margin-bottom:0">
+        <select id="fsMaxPerCity" class="form-select" style="width:auto;padding:6px 10px;font-size:13px">
+          <option value="5">5 hotels/tinh</option>
+          <option value="10" selected>10 hotels/tinh</option>
+          <option value="20">20 hotels/tinh</option>
+          <option value="50">50 hotels/tinh</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="startFastSync()" id="fsSyncBtn">⚡ Fast Sync</button>
+      <button class="btn btn-ghost btn-sm" onclick="stopFastSync()" id="fsStopBtn" style="display:none;color:#e74c3c">Stop</button>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div id="fsProgress" style="display:none">
+    <div style="background:var(--border);border-radius:6px;height:8px;margin-bottom:10px;overflow:hidden">
+      <div id="fsBar" style="height:100%;background:linear-gradient(90deg,#e74c3c,#ff6b6b);border-radius:6px;width:0%;transition:width 0.4s"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+      <span id="fsStatus" style="color:var(--text-dim)">Dang chuan bi...</span>
+      <span id="fsSummary" style="font-family:'DM Mono';font-weight:600"></span>
+    </div>
+  </div>
+
+  <!-- Log -->
+  <div id="fsLog" style="display:none;margin-top:12px;max-height:300px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'DM Mono';font-size:12px;line-height:1.8"></div>
+</div>
+
+<!-- Search Hotels from Agoda -->
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
-  <h3 style="margin:0 0 16px;font-size:15px">🔍 Tim khach san tu Agoda</h3>
+  <h3 style="margin:0 0 16px;font-size:15px">🔍 Tim thu cong theo tinh thanh</h3>
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
     <div class="form-group" style="margin-bottom:0">
       <label class="form-label">Destination</label>
@@ -110,6 +146,102 @@
 {% endif %}
 
 <script>
+// ─── Fast Sync ───
+var fsStopped = false;
+var fsRunning = false;
+var DESTINATIONS = [
+  {% for d in destinations %}
+  {slug:'{{ d.slug }}', name:'{{ d.name }}'},
+  {% endfor %}
+];
+
+function startFastSync() {
+  if (fsRunning) return;
+  fsRunning = true;
+  fsStopped = false;
+
+  var btn = document.getElementById('fsSyncBtn');
+  btn.disabled = true;
+  btn.textContent = 'Dang sync...';
+  document.getElementById('fsStopBtn').style.display = 'inline-flex';
+  document.getElementById('fsProgress').style.display = 'block';
+  document.getElementById('fsLog').style.display = 'block';
+  document.getElementById('fsLog').innerHTML = '';
+
+  var maxPerCity = parseInt(document.getElementById('fsMaxPerCity').value) || 10;
+  var total = DESTINATIONS.length;
+  var done = 0;
+  var totalImported = 0;
+  var totalFound = 0;
+
+  function syncNext(idx) {
+    if (fsStopped || idx >= total) {
+      // Done
+      document.getElementById('fsBar').style.width = '100%';
+      fsRunning = false;
+      btn.disabled = false;
+      btn.textContent = '⚡ Fast Sync';
+      document.getElementById('fsStopBtn').style.display = 'none';
+      document.getElementById('fsStatus').innerHTML = fsStopped
+        ? '<span style="color:#f59e0b;font-weight:600">Da dung lai</span>'
+        : '<span style="color:#2ecc71;font-weight:600">✓ Hoan tat!</span>';
+      document.getElementById('fsSummary').textContent = totalImported + ' imported / ' + totalFound + ' found';
+      appendLog('─'.repeat(40));
+      appendLog(fsStopped
+        ? '⏸ Dung tai ' + done + '/' + total + ' tinh thanh'
+        : '✅ Hoan tat! ' + totalImported + ' hotel imported tu ' + total + ' tinh thanh');
+      return;
+    }
+
+    var dest = DESTINATIONS[idx];
+    done = idx;
+    var pct = Math.round(((idx) / total) * 100);
+    document.getElementById('fsBar').style.width = pct + '%';
+    document.getElementById('fsStatus').textContent = '(' + (idx+1) + '/' + total + ') Dang sync: ' + dest.name + '...';
+    document.getElementById('fsSummary').textContent = totalImported + ' imported';
+    appendLog('🔍 ' + dest.name + ' ...');
+
+    fetch('/admin/hotel-sync/fast', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({destination: dest.slug, max_per_city: maxPerCity})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      totalFound += (data.found || 0);
+      totalImported += (data.imported || 0);
+      var msg = '   → ' + dest.name + ': '
+        + (data.found||0) + ' found, '
+        + '<strong style="color:#2ecc71">' + (data.imported||0) + ' imported</strong>'
+        + (data.skipped ? ', ' + data.skipped + ' skipped' : '');
+      appendLog(msg);
+
+      // Small delay to avoid hammering API
+      setTimeout(function() { syncNext(idx + 1); }, 500);
+    })
+    .catch(function(err) {
+      appendLog('   → <span style="color:#e74c3c">Loi: ' + dest.name + '</span>');
+      setTimeout(function() { syncNext(idx + 1); }, 1000);
+    });
+  }
+
+  appendLog('⚡ Bat dau Fast Sync — ' + total + ' tinh thanh, max ' + maxPerCity + ' hotels/tinh');
+  appendLog('─'.repeat(40));
+  syncNext(0);
+}
+
+function stopFastSync() {
+  fsStopped = true;
+  document.getElementById('fsStopBtn').style.display = 'none';
+}
+
+function appendLog(msg) {
+  var log = document.getElementById('fsLog');
+  log.innerHTML += msg + '<br>';
+  log.scrollTop = log.scrollHeight;
+}
+
+// ─── Test Connection ───
 function testConnection() {
   var btn = document.getElementById('testBtn');
   var result = document.getElementById('testResult');
