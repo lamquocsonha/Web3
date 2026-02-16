@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal
+from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal, WardCommune
 from datetime import datetime, date, timedelta
 import os, random, json
 
@@ -3971,6 +3971,203 @@ def admin_hotdeals_delete_all():
     db.session.commit()
     flash(f'Da xoa {count} deal', 'success')
     return redirect(url_for('admin_hotdeals'))
+
+# =============================================
+# ADMIN — WARD/COMMUNE (Phường/Xã)
+# =============================================
+
+# Province coordinates for map centering
+PROVINCE_COORDS = {
+    '01': {'lat': 21.0285, 'lng': 105.8542, 'name': 'Hà Nội'},
+    '04': {'lat': 22.6666, 'lng': 106.2640, 'name': 'Cao Bằng'},
+    '08': {'lat': 21.8237, 'lng': 105.2140, 'name': 'Tuyên Quang'},
+    '11': {'lat': 21.3860, 'lng': 103.0230, 'name': 'Điện Biên'},
+    '12': {'lat': 22.3686, 'lng': 103.4700, 'name': 'Lai Châu'},
+    '14': {'lat': 21.3270, 'lng': 103.9144, 'name': 'Sơn La'},
+    '15': {'lat': 22.3380, 'lng': 104.1487, 'name': 'Lào Cai'},
+    '19': {'lat': 21.5928, 'lng': 105.8442, 'name': 'Thái Nguyên'},
+    '20': {'lat': 21.8460, 'lng': 106.7610, 'name': 'Lạng Sơn'},
+    '22': {'lat': 20.9530, 'lng': 107.0750, 'name': 'Quảng Ninh'},
+    '24': {'lat': 21.1861, 'lng': 106.0763, 'name': 'Bắc Ninh'},
+    '25': {'lat': 21.4225, 'lng': 105.2290, 'name': 'Phú Thọ'},
+    '31': {'lat': 20.8449, 'lng': 106.6881, 'name': 'Hải Phòng'},
+    '33': {'lat': 20.6530, 'lng': 106.0510, 'name': 'Hưng Yên'},
+    '37': {'lat': 20.2510, 'lng': 105.9750, 'name': 'Ninh Bình'},
+    '38': {'lat': 19.8070, 'lng': 105.7760, 'name': 'Thanh Hóa'},
+    '40': {'lat': 18.6790, 'lng': 105.6813, 'name': 'Nghệ An'},
+    '42': {'lat': 18.3430, 'lng': 105.9058, 'name': 'Hà Tĩnh'},
+    '44': {'lat': 16.7500, 'lng': 107.1860, 'name': 'Quảng Trị'},
+    '46': {'lat': 16.4637, 'lng': 107.5909, 'name': 'Huế'},
+    '48': {'lat': 16.0544, 'lng': 108.2022, 'name': 'Đà Nẵng'},
+    '51': {'lat': 15.1214, 'lng': 108.8044, 'name': 'Quảng Ngãi'},
+    '52': {'lat': 13.9833, 'lng': 108.0000, 'name': 'Gia Lai'},
+    '56': {'lat': 12.2388, 'lng': 109.1967, 'name': 'Khánh Hòa'},
+    '66': {'lat': 12.7100, 'lng': 108.2378, 'name': 'Đắk Lắk'},
+    '68': {'lat': 11.9404, 'lng': 108.4583, 'name': 'Lâm Đồng'},
+    '75': {'lat': 10.9453, 'lng': 106.8243, 'name': 'Đồng Nai'},
+    '79': {'lat': 10.8231, 'lng': 106.6297, 'name': 'Hồ Chí Minh'},
+    '80': {'lat': 11.3352, 'lng': 106.0980, 'name': 'Tây Ninh'},
+    '82': {'lat': 10.4524, 'lng': 105.6322, 'name': 'Đồng Tháp'},
+    '86': {'lat': 10.2530, 'lng': 105.9720, 'name': 'Vĩnh Long'},
+    '91': {'lat': 10.3860, 'lng': 105.4350, 'name': 'An Giang'},
+    '92': {'lat': 10.0452, 'lng': 105.7469, 'name': 'Cần Thơ'},
+    '96': {'lat': 9.1770, 'lng': 105.1500, 'name': 'Cà Mau'},
+}
+
+@app.route('/admin/wards')
+def admin_wards():
+    """Manage ward/commune data"""
+    wards = WardCommune.query.order_by(WardCommune.province_code, WardCommune.name).all()
+    # Group by province
+    provinces = {}
+    for w in wards:
+        if w.province_code not in provinces:
+            provinces[w.province_code] = {
+                'name': w.province_name,
+                'code': w.province_code,
+                'wards': [],
+                'coords': PROVINCE_COORDS.get(w.province_code, {'lat': 16.0, 'lng': 108.0})
+            }
+        provinces[w.province_code]['wards'].append(w)
+
+    f_province = request.args.get('province', '')
+    f_level = request.args.get('level', '')
+    f_search = request.args.get('q', '')
+
+    filtered_wards = wards
+    if f_province:
+        filtered_wards = [w for w in filtered_wards if w.province_code == f_province]
+    if f_level:
+        filtered_wards = [w for w in filtered_wards if w.level == f_level]
+    if f_search:
+        q = f_search.lower()
+        filtered_wards = [w for w in filtered_wards if q in w.name.lower() or q in w.code]
+
+    return render_template('admin/wards.html',
+        wards=filtered_wards,
+        provinces=provinces,
+        province_coords=PROVINCE_COORDS,
+        total=len(wards),
+        f_province=f_province,
+        f_level=f_level,
+        f_search=f_search
+    )
+
+@app.route('/admin/wards/upload', methods=['POST'])
+def admin_wards_upload():
+    """Upload danh-sach-xa-phuong.xls and import data"""
+    file = request.files.get('file')
+    if not file or not file.filename.endswith(('.xlsx', '.xls')):
+        flash('Vui long chon file Excel (.xlsx hoac .xls)', 'error')
+        return redirect(url_for('admin_wards'))
+
+    try:
+        from io import BytesIO
+        file_data = BytesIO(file.read())
+        filename = file.filename.lower()
+
+        rows_data = []
+        if filename.endswith('.xls'):
+            try:
+                import xlrd
+            except ImportError:
+                flash('Thieu thu vien xlrd. Chay: pip install xlrd', 'error')
+                return redirect(url_for('admin_wards'))
+            wb = xlrd.open_workbook(file_contents=file_data.read())
+            ws = wb.sheet_by_index(0)
+            for r in range(1, ws.nrows):
+                rows_data.append([ws.cell_value(r, c) for c in range(ws.ncols)])
+        else:
+            import openpyxl
+            wb = openpyxl.load_workbook(file_data)
+            ws = wb.active
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                rows_data.append(list(row))
+
+        imported = 0
+        updated = 0
+        for vals in rows_data:
+            if len(vals) < 6:
+                continue
+            code = str(vals[0] or '').strip()
+            name = str(vals[1] or '').strip().replace('\n', ' ')
+            level = str(vals[2] or '').strip()
+            resolution = str(vals[3] or '').strip()
+            province_code = str(vals[4] or '').strip()
+            province_name = str(vals[5] or '').strip()
+
+            if not code or not name:
+                continue
+
+            existing = WardCommune.query.filter_by(code=code).first()
+            if existing:
+                existing.name = name
+                existing.level = level
+                existing.resolution = resolution
+                existing.province_code = province_code
+                existing.province_name = province_name
+                updated += 1
+            else:
+                ward = WardCommune(
+                    code=code, name=name, level=level,
+                    resolution=resolution,
+                    province_code=province_code,
+                    province_name=province_name
+                )
+                db.session.add(ward)
+                imported += 1
+
+        db.session.commit()
+        flash(f'Import thanh cong: {imported} moi, {updated} cap nhat', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Loi import: {str(e)}', 'error')
+
+    return redirect(url_for('admin_wards'))
+
+@app.route('/admin/wards/delete-all', methods=['POST'])
+def admin_wards_delete_all():
+    """Delete all ward data"""
+    count = WardCommune.query.count()
+    WardCommune.query.delete()
+    db.session.commit()
+    flash(f'Da xoa {count} phuong/xa', 'success')
+    return redirect(url_for('admin_wards'))
+
+@app.route('/api/wards')
+def api_wards():
+    """API endpoint to get wards filtered by province"""
+    province_code = request.args.get('province', '')
+    level = request.args.get('level', '')
+    q = request.args.get('q', '')
+
+    query = WardCommune.query
+    if province_code:
+        query = query.filter_by(province_code=province_code)
+    if level:
+        query = query.filter_by(level=level)
+    if q:
+        query = query.filter(WardCommune.name.ilike(f'%{q}%'))
+
+    wards = query.order_by(WardCommune.name).all()
+    return jsonify({
+        'wards': [{
+            'code': w.code,
+            'name': w.name,
+            'level': w.level,
+            'province_code': w.province_code,
+            'province_name': w.province_name
+        } for w in wards],
+        'total': len(wards)
+    })
+
+@app.route('/api/province-coords')
+def api_province_coords():
+    """API endpoint to get province coordinates for map"""
+    code = request.args.get('code', '')
+    if code and code in PROVINCE_COORDS:
+        return jsonify(PROVINCE_COORDS[code])
+    return jsonify(PROVINCE_COORDS)
 
 # =============================================
 # ADMIN — VOUCHER SYNC (AccessTrade Auto-Import)

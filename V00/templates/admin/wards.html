@@ -1,0 +1,203 @@
+{% extends "admin/base.html" %}
+{% block title %}Phường/Xã{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Phường/Xã{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <h1 class="page-title" style="margin:0">Phường / Xã</h1>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <form method="POST" action="{{ url_for('admin_wards_upload') }}" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center">
+      <input type="file" name="file" accept=".xlsx,.xls" required style="font-size:14px;padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+      <button type="submit" class="btn btn-primary">Upload Excel</button>
+    </form>
+    {% if total > 0 %}
+    <form method="POST" action="{{ url_for('admin_wards_delete_all') }}" onsubmit="return confirm('Xoa tat ca du lieu phuong/xa?')">
+      <button type="submit" class="btn btn-ghost" style="color:var(--red)">Xoa tat ca</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Stats -->
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+  <div class="stat-chip">Tong: <strong>{{ total }}</strong></div>
+  <div class="stat-chip">Tinh/TP: <strong>{{ provinces|length }}</strong></div>
+  {% set phuong_count = wards|selectattr('level','equalto','Phường')|list|length %}
+  {% set xa_count = wards|selectattr('level','equalto','Xã')|list|length %}
+  <div class="stat-chip" style="color:#3b82f6">Phường: <strong>{{ phuong_count }}</strong></div>
+  <div class="stat-chip" style="color:#22c55e">Xã: <strong>{{ xa_count }}</strong></div>
+</div>
+
+<!-- Map -->
+<div style="margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+  <div id="ward-map" style="height:400px;width:100%"></div>
+</div>
+
+<!-- Filters -->
+<form method="GET" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+  <select name="province" class="form-input" style="width:auto;min-width:200px" onchange="this.form.submit(); jumpToProvince(this.value);">
+    <option value="">-- Tat ca tinh/TP --</option>
+    {% for code, prov in provinces|dictsort %}
+    <option value="{{ code }}" {% if f_province == code %}selected{% endif %}>{{ prov.name }} ({{ prov.wards|length }})</option>
+    {% endfor %}
+  </select>
+  <select name="level" class="form-input" style="width:auto" onchange="this.form.submit()">
+    <option value="">-- Tat ca cap --</option>
+    <option value="Phường" {% if f_level == 'Phường' %}selected{% endif %}>Phường</option>
+    <option value="Xã" {% if f_level == 'Xã' %}selected{% endif %}>Xã</option>
+    <option value="Đặc khu" {% if f_level == 'Đặc khu' %}selected{% endif %}>Đặc khu</option>
+  </select>
+  <input type="text" name="q" class="form-input" style="width:auto;min-width:200px" placeholder="Tim kiem phuong/xa..." value="{{ f_search }}">
+  <button type="submit" class="btn btn-primary">Tim</button>
+  {% if f_province or f_level or f_search %}
+  <a href="{{ url_for('admin_wards') }}" class="btn btn-ghost">Xoa bo loc</a>
+  {% endif %}
+</form>
+
+{% if wards %}
+<div class="table-wrap" style="max-height:500px;overflow-y:auto">
+  <table class="data-table">
+    <thead style="position:sticky;top:0;z-index:2">
+      <tr>
+        <th style="width:40px">#</th>
+        <th style="width:80px">Ma</th>
+        <th>Ten</th>
+        <th style="width:80px">Cap</th>
+        <th>Tinh/TP</th>
+        <th style="width:60px">Ban do</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for w in wards %}
+      <tr class="ward-row" data-province="{{ w.province_code }}" data-name="{{ w.name }}">
+        <td>{{ loop.index }}</td>
+        <td><code style="font-size:12px">{{ w.code }}</code></td>
+        <td><strong>{{ w.name }}</strong></td>
+        <td>
+          {% if w.level == 'Phường' %}
+          <span class="badge badge-blue">Phường</span>
+          {% elif w.level == 'Xã' %}
+          <span class="badge badge-green">Xã</span>
+          {% else %}
+          <span class="badge badge-orange">{{ w.level }}</span>
+          {% endif %}
+        </td>
+        <td>{{ w.province_name }}</td>
+        <td>
+          <button type="button" class="btn btn-ghost btn-sm btn-map-jump"
+            data-province="{{ w.province_code }}"
+            data-ward-name="{{ w.name }}"
+            title="Xem tren ban do">
+            &#128205;
+          </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p style="margin-top:8px;color:var(--text-dim);font-size:13px">Hien thi {{ wards|length }} / {{ total }} phuong/xa</p>
+{% elif total == 0 %}
+<div class="empty-state">
+  <div style="font-size:48px;margin-bottom:12px">&#128506;</div>
+  <h3>Chua co du lieu phuong/xa</h3>
+  <p>Upload file Excel (danh-sach-xa-phuong.xls) de import du lieu.</p>
+</div>
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;margin-bottom:12px">&#128269;</div>
+  <h3>Khong tim thay ket qua</h3>
+  <p>Thu thay doi bo loc hoac tu khoa tim kiem.</p>
+</div>
+{% endif %}
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// Province coordinates
+const PROVINCE_COORDS = {{ province_coords|tojson }};
+
+// Initialize map centered on Vietnam
+const map = L.map('ward-map').setView([16.0, 106.0], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap',
+  maxZoom: 18
+}).addTo(map);
+
+// Add province markers
+const markers = {};
+Object.entries(PROVINCE_COORDS).forEach(([code, data]) => {
+  const marker = L.marker([data.lat, data.lng])
+    .addTo(map)
+    .bindPopup(`<strong>${data.name}</strong><br>Ma: ${code}`);
+  markers[code] = marker;
+});
+
+// Active marker for selected ward
+let activeMarker = null;
+
+function jumpToProvince(code) {
+  if (!code || !PROVINCE_COORDS[code]) return;
+  const coords = PROVINCE_COORDS[code];
+  map.setView([coords.lat, coords.lng], 11, { animate: true });
+  if (markers[code]) {
+    markers[code].openPopup();
+  }
+}
+
+// Jump to province on map button click
+document.querySelectorAll('.btn-map-jump').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const provinceCode = this.dataset.province;
+    const wardName = this.dataset.wardName;
+    if (!provinceCode || !PROVINCE_COORDS[provinceCode]) return;
+
+    const coords = PROVINCE_COORDS[provinceCode];
+    map.setView([coords.lat, coords.lng], 13, { animate: true });
+
+    // Remove previous active marker
+    if (activeMarker) {
+      map.removeLayer(activeMarker);
+    }
+
+    // Add a special marker for the selected ward
+    activeMarker = L.marker([coords.lat, coords.lng], {
+      icon: L.divIcon({
+        className: 'ward-marker',
+        html: '<div style="background:#ef4444;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3)">' + wardName + '</div>',
+        iconSize: null,
+        iconAnchor: [50, 30]
+      })
+    }).addTo(map)
+      .bindPopup(`<strong>${wardName}</strong><br>${PROVINCE_COORDS[provinceCode].name}`)
+      .openPopup();
+
+    // Highlight the row
+    document.querySelectorAll('.ward-row').forEach(r => r.style.background = '');
+    this.closest('.ward-row').style.background = 'rgba(59,130,246,0.1)';
+
+    // Scroll map into view
+    document.getElementById('ward-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+});
+
+// Auto-jump if province filter is set
+{% if f_province %}
+  jumpToProvince('{{ f_province }}');
+{% endif %}
+</script>
+
+<style>
+.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 16px;font-size:14px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-blue{background:rgba(59,130,246,0.1);color:#3b82f6}
+.badge-green{background:rgba(34,197,94,0.1);color:#22c55e}
+.badge-orange{background:rgba(249,115,22,0.1);color:#f97316}
+.btn-sm{padding:4px 8px;font-size:13px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.empty-state h3{margin-bottom:8px;color:var(--text)}
+.ward-marker{background:none!important;border:none!important}
+#ward-map{background:#e5e7eb}
+</style>
+{% endblock %}

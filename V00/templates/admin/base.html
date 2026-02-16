@@ -84,6 +84,9 @@
           <a href="{{ url_for('admin_hotdeals') }}" class="sb-link sb-sub {% if 'hotdeal' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600;color:#ef4444">
             <span class="sb-icon">🔥</span> Hot Deals
           </a>
+          <a href="{{ url_for('admin_wards') }}" class="sb-link sb-sub {% if 'ward' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128506;</span> Phường/Xã
+          </a>
         </div>
       </div>
 

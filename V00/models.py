@@ -455,6 +455,18 @@ class HotDeal(db.Model):
         except:
             return []
 
+class WardCommune(db.Model):
+    """Phường/Xã data imported from Excel"""
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(10), nullable=False, unique=True, index=True)  # Mã phường xã
+    name = db.Column(db.String(200), nullable=False)  # Tên phường xã
+    level = db.Column(db.String(20), default='')  # Cấp: Phường, Xã, Đặc khu
+    resolution = db.Column(db.String(200), default='')  # Nghị quyết
+    province_code = db.Column(db.String(10), nullable=False, index=True)  # Mã tỉnh/TP
+    province_name = db.Column(db.String(200), nullable=False)  # Tên tỉnh/TP
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class VoucherWidget(db.Model):
     """Voucher embed widgets from affiliate networks (AccessTrade, etc.)"""
     id = db.Column(db.Integer, primary_key=True)
