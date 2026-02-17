@@ -749,9 +749,9 @@ def get_agoda_api(site_id=None, api_key=None):
         from app import app, SiteSettings, AffiliateNetwork
         with app.app_context():
             if site_id is None:
-                site_id = SiteSettings.get('agoda_cid', '')
+                site_id = SiteSettings.get('agoda_cid', '1959245')
             if api_key is None:
-                api_key = SiteSettings.get('agoda_api_key', '')
+                api_key = SiteSettings.get('agoda_api_key', '961c1874-3ec4-40a7-b195-a7b80f20638d')
                 if not api_key:
                     net = AffiliateNetwork.query.filter_by(slug='agoda').first()
                     if net and net.api_key:
