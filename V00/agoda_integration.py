@@ -114,8 +114,11 @@ class AgodaAPI:
         # Authorization header: siteId:apiKey (per PDF spec)
         if ':' in api_key:
             self.auth_header = api_key
+            # Feed API token = UUID only (after the colon)
+            self.feed_token = api_key.split(':', 1)[1]
         else:
             self.auth_header = f"{self.site_id}:{api_key}"
+            self.feed_token = api_key
 
     # ─── LONG TAIL SEARCH API (per Affiliate_Lite_API_V2.0.pdf) ───
 
@@ -154,7 +157,7 @@ class AgodaAPI:
                     adults=2, children=0, currency='VND', language='vi-vn',
                     sort_by='Recommended', max_result=10,
                     min_star=0, min_review=0, discount_only=False,
-                    price_min=0, price_max=100000):
+                    price_min=0, price_max=50000000):
         """City search — find hotels in a city with availability & pricing.
 
         Per PDF: uses cityId in criteria body.
@@ -260,7 +263,7 @@ class AgodaAPI:
         """
         try:
             query = {
-                "token": self.api_key,
+                "token": self.feed_token,
                 "site_id": self.site_id,
                 "feed_id": feed_id,
                 **params
