@@ -54,7 +54,7 @@
 }
 </style>
 {% endautoescape %}
-
+{% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}
 </head>
 <body data-mode="{{ vertical.default_mode or 'light' }}">
 
@@ -140,17 +140,6 @@ if (saved) {
   document.querySelector('.mode-label').textContent = label;
 }
 </script>
-{% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}
-<!-- AccessTrade Smart Tag — loaded at end of body to avoid UI overlay -->
-<script type="text/javascript">
-var __atsmarttag = { pub_id: '5514121382375886156' };
-(function () {
-  var s = document.createElement('script');
-  s.src = '//static.accesstrade.vn/js/v2/atsmarttag.min.js?v=1.1.0';
-  s.type = 'text/javascript';
-  s.async = true;
-  document.body.appendChild(s);
-})();
-</script>
+
 </body>
 </html>
