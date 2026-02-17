@@ -2,69 +2,121 @@
 {% block title %}Uni{{ vertical.name }} — {{ hero_title|default('Kiến thức chi tiết') }}{% endblock %}
 {% block content %}
 
-<!-- HERO -->
-<section class="hero-section">
-  <div class="hero-content">
-    <h1 class="hero-title">{{ hero_title|default('Kiến thức ' + vertical.name) }}<br><span class="hero-accent">{{ hero_subtitle|default('từ tổng thể đến chi tiết') }}</span></h1>
-    <p class="hero-desc">{{ hero_desc|default(vertical.description) }}</p>
-    <div class="hero-actions">
-      <a href="#segments" class="hero-btn primary">{{ hero_cta1|default('Khám phá') }}</a>
+{% set all_articles = [] %}
+{% for a in articles_nganh %}{% if all_articles.append(a) %}{% endif %}{% endfor %}
+{% for a in articles_chung %}{% if all_articles.append(a) %}{% endif %}{% endfor %}
+{% for a in articles_chitiet %}{% if all_articles.append(a) %}{% endif %}{% endfor %}
+
+<!-- ═══ HERO SPLIT ═══ -->
+<section class="vi-hero">
+  <div class="vi-hero-text">
+    <div class="vi-hero-badge">{{ vertical.icon }} Uni{{ vertical.name }}</div>
+    <h1 class="vi-hero-title">{{ hero_title|default('Kiến thức ' + vertical.name) }}</h1>
+    <p class="vi-hero-accent">{{ hero_subtitle|default('từ tổng thể đến chi tiết') }}</p>
+    <p class="vi-hero-desc">{{ hero_desc|default(vertical.description) }}</p>
+    <div class="vi-hero-actions">
+      <a href="#vi-articles" class="hero-btn primary">{{ hero_cta1|default('Khám phá') }}</a>
       <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="hero-btn secondary">Đọc kiến thức</a>
     </div>
-    <div class="hero-stats">
-      <div class="hs-item"><span class="hs-num">{{ vertical.segments|length }}</span><span class="hs-label">{{ segments_label|default('danh mục') }}</span></div>
-      <div class="hs-item"><span class="hs-num">{{ recent_articles|length * 2 }}+</span><span class="hs-label">bài viết</span></div>
-      <div class="hs-item"><span class="hs-num">3</span><span class="hs-label">tầng kiến thức</span></div>
+    <div class="vi-hero-stats">
+      <div class="vi-hs"><span class="vi-hs-num">{{ vertical.segments|length }}</span> {{ segments_label|default('danh mục') }}</div>
+      <div class="vi-hs"><span class="vi-hs-num">{{ all_articles|length }}+</span> bài viết</div>
+      <div class="vi-hs"><span class="vi-hs-num">3</span> tầng kiến thức</div>
     </div>
+  </div>
+  {% if articles_nganh %}
+  {% set feat = articles_nganh[0] %}
+  <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=feat.slug) }}" class="vi-hero-featured">
+    <div class="vi-hf-img">
+      {% if feat.image_url %}<img src="{{ feat.image_url }}" alt="{{ feat.title[:50] }}" loading="lazy">{% else %}<div class="vi-hf-placeholder">{{ feat.title[:1] }}</div>{% endif %}
+    </div>
+    <div class="vi-hf-body">
+      <span class="vi-hf-tier">Kiến thức ngành</span>
+      <h3>{{ feat.title[:70] }}{% if feat.title|length > 70 %}...{% endif %}</h3>
+      <p>{{ feat.excerpt[:100] }}{% if feat.excerpt|length > 100 %}...{% endif %}</p>
+      <span class="vi-hf-meta">{{ feat.reading_time }} phút đọc · {{ "{:,}".format(feat.views) }} views</span>
+    </div>
+  </a>
+  {% endif %}
+</section>
+
+<!-- ═══ SEGMENT PILLS ═══ -->
+{% if vertical.segments %}
+<nav class="vi-pills" id="segments">
+  <div class="vi-pills-scroll">
+    {% for s in vertical.segments %}
+    <a href="{{ url_for('vertical_segment', vertical_slug=vertical.slug, segment_slug=s.slug) }}" class="vi-pill">
+      <span class="vi-pill-icon">{{ s.icon }}</span>
+      <span>{{ s.name }}</span>
+      <span class="vi-pill-count">{{ s.zones|length }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</nav>
+{% endif %}
+
+<!-- ═══ KNOWLEDGE PATH ═══ -->
+<section class="vi-kpath">
+  <div class="vi-kpath-header">
+    <span class="vi-kpath-label">Lộ trình kiến thức</span>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
+  </div>
+  <div class="vi-kpath-track">
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}#nganh" class="vi-kp-step vi-kp-nganh">
+      <span class="vi-kp-badge">T1</span>
+      <span class="vi-kp-name">Kiến thức ngành</span>
+      <span class="vi-kp-desc">{{ tier1_desc|default('Thị trường, xu hướng, chi phí') }}</span>
+      <span class="vi-kp-count">{{ articles_nganh|length }} bài</span>
+    </a>
+    <span class="vi-kp-arrow">→</span>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}#chung" class="vi-kp-step vi-kp-chung">
+      <span class="vi-kp-badge">T2</span>
+      <span class="vi-kp-name">Hệ thống</span>
+      <span class="vi-kp-desc">{{ tier2_desc|default('Quy trình, phương pháp') }}</span>
+      <span class="vi-kp-count">{{ articles_chung|length }} bài</span>
+    </a>
+    <span class="vi-kp-arrow">→</span>
+    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}#chitiet" class="vi-kp-step vi-kp-chitiet">
+      <span class="vi-kp-badge">T3</span>
+      <span class="vi-kp-name">Chi tiết</span>
+      <span class="vi-kp-desc">{{ tier3_desc|default('Review, so sánh, hướng dẫn') }}</span>
+      <span class="vi-kp-count">{{ articles_chitiet|length }} bài</span>
+    </a>
   </div>
 </section>
 
-<!-- KNOWLEDGE TIERS -->
-<section class="section">
+<!-- ═══ MIXED ARTICLES FEED ═══ -->
+{% if all_articles %}
+<section class="section" id="vi-articles">
   <div class="section-header-pub">
-    <h2>📚 3 tầng kiến thức</h2>
+    <h2>Bài viết mới</h2>
     <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
   </div>
-  <div class="tier-grid">
-    <div class="tier-card tier-nganh">
-      <div class="tier-badge">T1</div>
-      <h3>Kiến thức ngành</h3>
-      <p>{{ tier1_desc|default('Thị trường, xu hướng, chi phí tổng quan.') }}</p>
-      <span class="tier-count">{{ articles_nganh|length }} bài viết</span>
-    </div>
-    <div class="tier-card tier-chung">
-      <div class="tier-badge">T2</div>
-      <h3>Kiến thức hệ thống</h3>
-      <p>{{ tier2_desc|default('Hệ thống, quy trình, phương pháp.') }}</p>
-      <span class="tier-count">{{ articles_chung|length }} bài viết</span>
-    </div>
-    <div class="tier-card tier-chitiet">
-      <div class="tier-badge">T3</div>
-      <h3>Chi tiết</h3>
-      <p>{{ tier3_desc|default('Review sản phẩm, so sánh, hướng dẫn cụ thể.') }}</p>
-      <span class="tier-count">{{ articles_chitiet|length }} bài viết</span>
-    </div>
-  </div>
-</section>
 
-<!-- FEATURED ARTICLES - NGANH -->
-{% if articles_nganh %}
-<section class="section">
-  <div class="section-header-pub">
-    <h2>🏭 Kiến thức ngành</h2>
-    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
+  <!-- Filter tabs -->
+  <div class="vi-filter-tabs">
+    <button class="vi-ftab active" data-filter="all">Tất cả</button>
+    <button class="vi-ftab" data-filter="nganh">T1 Ngành</button>
+    <button class="vi-ftab" data-filter="chung">T2 Hệ thống</button>
+    <button class="vi-ftab" data-filter="chi-tiet">T3 Chi tiết</button>
   </div>
-  <div class="articles-featured">
-    {% for a in articles_nganh[:3] %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card {% if loop.first %}featured{% endif %}">
-      {% if a.image_url %}<div class="ac-thumb"><img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy"></div>{% endif %}
-      <div class="ac-tier">Kiến thức ngành</div>
-      <h3 class="ac-title">{{ a.title }}</h3>
-      <p class="ac-excerpt">{{ a.excerpt[:120] }}{% if a.excerpt|length > 120 %}...{% endif %}</p>
-      <div class="ac-meta">
-        <span>{{ a.reading_time }} phút đọc</span>
-        <span>{{ "{:,}".format(a.views) }} views</span>
-        {% if a.ai_generated %}<span class="ac-ai">AI ✨</span>{% endif %}
+
+  <!-- Article grid: featured left + list right -->
+  <div class="vi-articles-mix">
+    {% for a in articles_nganh[1:3] + articles_chung[:3] + articles_chitiet[:3] %}
+    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="vi-acard" data-tier="{{ a.tier }}">
+      <div class="vi-acard-thumb">
+        {% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="vi-acard-ph">{{ a.title[:1] }}</div>{% endif %}
+      </div>
+      <div class="vi-acard-body">
+        <span class="vi-acard-tier {{ a.tier }}">{% if a.tier == 'nganh' %}Ngành{% elif a.tier == 'chung' %}Hệ thống{% else %}Chi tiết{% endif %}</span>
+        <h4>{{ a.title[:65] }}{% if a.title|length > 65 %}...{% endif %}</h4>
+        <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
+        <div class="vi-acard-meta">
+          <span>{{ a.reading_time }} phút</span>
+          <span>{{ "{:,}".format(a.views) }} views</span>
+          {% if a.ai_generated %}<span class="ac-ai">AI</span>{% endif %}
+        </div>
       </div>
     </a>
     {% endfor %}
@@ -72,70 +124,75 @@
 </section>
 {% endif %}
 
-<!-- SEGMENTS -->
-<section class="section" id="segments">
+<!-- ═══ SEGMENTS EXPLORE ═══ -->
+{% if vertical.segments|length > 0 %}
+<section class="section">
   <div class="section-header-pub">
-    <h2>{{ vertical.icon }} {{ segments_heading|default('Danh mục') }}</h2>
+    <h2>{{ vertical.icon }} {{ segments_heading|default('Khám phá danh mục') }}</h2>
   </div>
-  <div class="segments-grid">
+  <div class="vi-seg-grid">
+    {% set seg_gradients = ['135deg,#ff6b35,#f7c948','135deg,#667eea,#764ba2','135deg,#f093fb,#f5576c','135deg,#4facfe,#00f2fe','135deg,#43e97b,#38f9d7','135deg,#fa709a,#fee140','135deg,#a18cd1,#fbc2eb','135deg,#fccb90,#d57eeb'] %}
     {% for s in vertical.segments %}
-    <a href="{{ url_for('vertical_segment', vertical_slug=vertical.slug, segment_slug=s.slug) }}" class="segment-card-pub">
-      <span class="seg-icon">{{ s.icon }}</span>
-      <h3>{{ s.name }}</h3>
-      <p>{{ s.description[:80] }}{% if s.description|length > 80 %}...{% endif %}</p>
-      <span class="seg-count">{{ s.zones|length }} zones</span>
-    </a>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- ARTICLES - CHUNG -->
-{% if articles_chung %}
-<section class="section">
-  <div class="section-header-pub">
-    <h2>⚙️ Kiến thức hệ thống</h2>
-    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
-  </div>
-  <div class="articles-grid">
-    {% for a in articles_chung[:4] %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
-      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
-      <div class="acs-tier chung">Hệ thống</div>
-      <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
-      <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
-      <div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div>
+    <a href="{{ url_for('vertical_segment', vertical_slug=vertical.slug, segment_slug=s.slug) }}" class="vi-seg-card">
+      <div class="vi-seg-gradient" style="background:linear-gradient({{ seg_gradients[loop.index0 % seg_gradients|length] }})">
+        <span class="vi-seg-icon">{{ s.icon }}</span>
+      </div>
+      <div class="vi-seg-info">
+        <h3>{{ s.name }}</h3>
+        <p>{{ s.description[:60] }}{% if s.description|length > 60 %}...{% endif %}</p>
+        <span class="vi-seg-count">{{ s.zones|length }} zones →</span>
+      </div>
     </a>
     {% endfor %}
   </div>
 </section>
 {% endif %}
 
-<!-- ARTICLES - CHI TIET -->
-{% if articles_chitiet %}
-<section class="section">
-  <div class="section-header-pub">
-    <h2>🔍 Chi tiết</h2>
-    <a href="{{ url_for('vertical_knowledge', vertical_slug=vertical.slug) }}" class="section-link">Xem tất cả →</a>
+<!-- ═══ STATS BAR ═══ -->
+<section class="vi-stats-bar">
+  {% set total_views = [] %}
+  {% for a in all_articles %}{% if total_views.append(a.views) %}{% endif %}{% endfor %}
+  <div class="vi-stat">
+    <span class="vi-stat-num">{{ vertical.segments|length }}</span>
+    <span class="vi-stat-label">{{ segments_label|default('danh mục') }}</span>
   </div>
-  <div class="articles-grid">
-    {% for a in articles_chitiet[:4] %}
-    <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="article-card-sm has-thumb">
-      <div class="acs-thumb">{% if a.image_url %}<img src="{{ a.image_url }}" alt="{{ a.title[:50] }}" loading="lazy">{% else %}<div class="acs-placeholder">{{ a.title[:1] }}</div>{% endif %}</div>
-      <div class="acs-tier chitiet">Chi tiết</div>
-      <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
-      <p>{{ a.excerpt[:90] }}{% if a.excerpt|length > 90 %}...{% endif %}</p>
-      <div class="acs-meta">{{ a.reading_time }} phút · {{ "{:,}".format(a.views) }} views</div>
-    </a>
-    {% endfor %}
+  <div class="vi-stat-sep"></div>
+  <div class="vi-stat">
+    <span class="vi-stat-num">{{ all_articles|length }}+</span>
+    <span class="vi-stat-label">bài viết</span>
+  </div>
+  <div class="vi-stat-sep"></div>
+  <div class="vi-stat">
+    <span class="vi-stat-num">{{ "{:,}".format(total_views|sum) }}</span>
+    <span class="vi-stat-label">lượt đọc</span>
+  </div>
+  <div class="vi-stat-sep"></div>
+  <div class="vi-stat">
+    <span class="vi-stat-num">3</span>
+    <span class="vi-stat-label">tầng kiến thức</span>
   </div>
 </section>
-{% endif %}
 
-<!-- CTA -->
-<section class="section cta-section">
-  <h2>{{ cta_title|default('Khám phá thêm kiến thức') }}</h2>
-  <p>{{ cta_desc|default('Hệ thống kiến thức đang được mở rộng mỗi ngày.') }}</p>
-  <a href="#segments" class="hero-btn primary">{{ cta_button|default('Khám phá ngay →') }}</a>
-</section>
+<!-- Filter JS -->
+<script>
+(function(){
+  var tabs = document.querySelectorAll('.vi-ftab');
+  var cards = document.querySelectorAll('.vi-acard');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      tabs.forEach(function(t){ t.classList.remove('active'); });
+      tab.classList.add('active');
+      var f = tab.dataset.filter;
+      cards.forEach(function(c){
+        if(f === 'all' || c.dataset.tier === f){
+          c.style.display = '';
+        } else {
+          c.style.display = 'none';
+        }
+      });
+    });
+  });
+})();
+</script>
 
 {% endblock %}
