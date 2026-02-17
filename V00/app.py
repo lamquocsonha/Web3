@@ -5634,9 +5634,10 @@ def vertical_part(vertical_slug, segment_slug, zone_slug, part_slug):
     if not related_articles:
         related_articles = Article.query.filter_by(vertical_slug=vertical_slug, tier='chi-tiet', status='published').limit(3).all()
     related_parts = Part.query.filter(Part.zone_id==z.id, Part.id!=p.id, Part.status=='published').limit(4).all()
+    zone_parts = Part.query.filter_by(zone_id=z.id, status='published').order_by(Part.order).all()
     config = get_vertical_config(vertical_slug)
     return render_template('shared/part.html', vertical=v, segment=s, zone=z, part=p,
-        related_articles=related_articles, related_parts=related_parts, **config)
+        related_articles=related_articles, related_parts=related_parts, zone_parts=zone_parts, **config)
 
 # =============================================
 # SHOP ROUTES (Standalone e-commerce aggregator)
