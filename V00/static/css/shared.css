@@ -319,6 +319,8 @@ body {
 .article-sidebar {
   position: sticky;
   top: 80px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
 }
 
 /* Sidebar Widgets */
@@ -1608,7 +1610,7 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 [data-mode="dark"] .tz-empty-hero p { color:#64748b; }
 
 /* Map column */
-.hp-map-col { position:sticky; top:80px; }
+.hp-map-col { position:sticky; top:80px; max-height:calc(100vh - 120px); overflow-y:auto; }
 .hpm-map-card { border-radius:12px; padding:14px; overflow:visible; }
 [data-mode="light"] .hpm-map-card { background:#fff; border:1px solid #e8e2d8; }
 [data-mode="dark"] .hpm-map-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }

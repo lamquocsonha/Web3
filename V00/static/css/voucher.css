@@ -672,6 +672,10 @@
 }
 
 .voucher-sidebar {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
   height: fit-content;
 }
 
@@ -1093,7 +1097,7 @@
   color: var(--text-tertiary);
 }
 
-.vd-sidebar { position: sticky; top: 80px; height: fit-content; }
+.vd-sidebar { position: sticky; top: 80px; max-height: calc(100vh - 120px); overflow-y: auto; height: fit-content; }
 
 .vd-related {
   background: var(--surface);

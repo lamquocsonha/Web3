@@ -492,6 +492,8 @@ body {
   gap: 32px;
   position: sticky;
   top: 120px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
 }
 
 .sidebar-widget {
