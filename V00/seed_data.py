@@ -60,25 +60,17 @@ def seed():
             'name_vi': 'Cao su chân phuộc', 'name_en': 'Shock Absorber Bushing',
             'slug': 'cao-su-chan-phuoc',
             'description': 'Cao su giảm chấn gắn giữa phuộc nhún và thân xe, giúp hấp thụ rung động và giảm tiếng ồn từ mặt đường.',
-            'content': '''<h2>Cao su chân phuộc là gì?</h2>
-<p>Cao su chân phuộc (Shock Absorber Bushing) là chi tiết bằng cao su hoặc polyurethane, nằm ở vị trí kết nối giữa phuộc nhún với thân xe. Đây là bộ phận quan trọng trong hệ thống treo, giúp:</p>
-<ul>
-<li><strong>Hấp thụ rung động</strong> — Giảm truyền rung từ bánh xe lên thân xe</li>
-<li><strong>Giảm tiếng ồn</strong> — Ngăn tiếng lọc cọc khi đi qua ổ gà, gờ giảm tốc</li>
-<li><strong>Bảo vệ phuộc</strong> — Giảm ma sát giữa phuộc và điểm gắn trên xe</li>
-</ul>
-
-<h2>Khi nào cần thay?</h2>
-<p>Cao su chân phuộc thường cần thay sau <strong>60,000 - 80,000 km</strong> hoặc khi có dấu hiệu:</p>
-<ul>
-<li>Nghe tiếng kêu lọc cọc khi đi qua ổ gà</li>
-<li>Xe bị rung lắc nhiều hơn bình thường</li>
-<li>Cao su bị nứt, rách, biến dạng khi kiểm tra trực quan</li>
-<li>Phuộc bị lệch hoặc nghiêng</li>
-</ul>
-
-<h2>Chi phí thay thế</h2>
-<p>Giá cao su chân phuộc dao động từ <strong>80,000 - 350,000 VNĐ/cái</strong> tùy hãng xe và chất liệu. Công thay tại garage khoảng 100,000 - 200,000 VNĐ.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': '54320-JD00A (Nissan), 51920-SWA-A01 (Honda)',
             'tags': 'cao su phuộc,giảm chấn,hệ thống treo,CUV,tiếng kêu lọc cọc,thay phụ tùng,DIY',
             'auto_category': 'phu-tung',
@@ -89,59 +81,68 @@ def seed():
             'name_vi': 'Phuộc nhún', 'name_en': 'Shock Absorber',
             'slug': 'phuoc-nhun',
             'description': 'Bộ phận giảm chấn chính, hấp thụ dao động từ lò xo để xe đi êm ái và ổn định.',
-            'content': '''<h2>Phuộc nhún là gì?</h2>
-<p>Phuộc nhún (Shock Absorber) là bộ phận giảm chấn chính trong hệ thống treo. Nó hoạt động bằng cách chuyển đổi năng lượng dao động thành nhiệt năng thông qua dầu thủy lực bên trong.</p>
-
-<h2>Phân loại</h2>
-<ul>
-<li><strong>Phuộc dầu (Twin-tube)</strong> — Phổ biến, giá rẻ, phù hợp đi phố</li>
-<li><strong>Phuộc gas (Monotube)</strong> — Hiệu suất cao hơn, giá đắt hơn</li>
-<li><strong>Phuộc điện tử (Adaptive)</strong> — Tự điều chỉnh theo điều kiện đường</li>
-</ul>
-
-<h2>Khi nào cần thay?</h2>
-<p>Thay sau <strong>80,000 - 100,000 km</strong> hoặc khi rò rỉ dầu, xe bị nhún quá nhiều sau khi qua ổ gà.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': 'E4302-JD02A (Nissan), 51605-SWA-A04 (Honda)',
         },
         {
             'name_vi': 'Rotuyn', 'name_en': 'Ball Joint',
             'slug': 'rotuy',
             'description': 'Khớp cầu nối giữa đòn treo và trục xoay bánh xe, cho phép bánh xe xoay và di chuyển lên xuống.',
-            'content': '''<h2>Rotuyn là gì?</h2>
-<p>Rotuyn (Ball Joint) là khớp nối dạng cầu, cho phép chuyển động xoay đa hướng giữa các chi tiết trong hệ thống treo. Có 2 loại chính:</p>
-<ul>
-<li><strong>Rotuyn trên/dưới</strong> — Nối đòn treo với trục bánh xe</li>
-<li><strong>Rotuyn lái</strong> — Nối thước lái với cam lái</li>
-</ul>
-
-<h2>Dấu hiệu hỏng</h2>
-<ul>
-<li>Xe bị lệch lái, tay lái nặng bất thường</li>
-<li>Nghe tiếng kêu khi đánh lái hoặc đi qua gờ giảm tốc</li>
-<li>Lốp xe mòn không đều</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': '40160-JD00A (Nissan), 51220-SWA-A01 (Honda)',
         },
         {
             'name_vi': 'Thanh cân bằng', 'name_en': 'Stabilizer Bar',
             'slug': 'thanh-can-bang',
             'description': 'Thanh thép kết nối hai bên hệ thống treo, giúp giảm nghiêng thân xe khi vào cua.',
-            'content': '''<h2>Thanh cân bằng là gì?</h2>
-<p>Thanh cân bằng (Stabilizer Bar / Sway Bar) là thanh thép hình chữ U, kết nối hệ thống treo bên trái và bên phải. Khi xe vào cua, thanh cân bằng chống lại lực nghiêng, giữ xe ổn định.</p>
-
-<h2>Các bộ phận liên quan</h2>
-<ul>
-<li><strong>Cao su thanh cân bằng</strong> — Bọc quanh thanh tại điểm gắn vào khung xe</li>
-<li><strong>Nối thanh cân bằng (Link)</strong> — Kết nối thanh với phuộc/đòn treo</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': '54668-JD000 (Nissan), 51306-SWA-A01 (Honda)',
         },
         {
             'name_vi': 'Lò xo giảm chấn', 'name_en': 'Coil Spring',
             'slug': 'lo-xo-giam-chan',
             'description': 'Lò xo xoắn bao quanh phuộc nhún, chịu trọng lượng xe và hấp thụ sốc ban đầu từ mặt đường.',
-            'content': '''<h2>Lò xo giảm chấn là gì?</h2>
-<p>Lò xo giảm chấn (Coil Spring) là bộ phận chịu lực chính trong hệ thống treo. Lò xo hấp thụ sốc từ mặt đường, giữ xe ở độ cao phù hợp, và phối hợp với phuộc nhún để mang lại cảm giác lái êm ái.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': '54010-JD02A (Nissan), 51401-SWA-A02 (Honda)',
         },
     ]
@@ -177,19 +178,34 @@ def seed():
             'name_vi': 'Má phanh', 'name_en': 'Brake Pad',
             'slug': 'ma-phanh',
             'description': 'Miếng vật liệu ma sát ép vào đĩa phanh để giảm tốc và dừng xe.',
-            'content': '''<h2>Má phanh là gì?</h2>
-<p>Má phanh (Brake Pad) là chi tiết hao mòn quan trọng nhất trong hệ thống phanh. Khi bạn đạp phanh, xy-lanh phanh ép má phanh vào đĩa phanh, tạo ma sát để giảm tốc độ.</p>
-
-<h2>Khi nào cần thay?</h2>
-<p>Thay sau <strong>30,000 - 50,000 km</strong> hoặc khi má mỏng dưới 3mm, nghe tiếng rít kim loại khi phanh.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': 'D1060-JD00A (Nissan), 45022-SWA-A01 (Honda)',
         },
         {
             'name_vi': 'Đĩa phanh', 'name_en': 'Brake Disc',
             'slug': 'dia-phanh',
             'description': 'Đĩa kim loại gắn cùng bánh xe, bề mặt tiếp xúc với má phanh để tạo lực hãm.',
-            'content': '''<h2>Đĩa phanh là gì?</h2>
-<p>Đĩa phanh (Brake Disc/Rotor) là đĩa kim loại xoay cùng bánh xe. Má phanh kẹp vào hai bên đĩa để tạo lực hãm. Đĩa thường làm từ gang xám hoặc thép carbon.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': '40206-JD00A (Nissan), 45251-SWA-A00 (Honda)',
         },
     ]
@@ -355,21 +371,17 @@ def seed_articles():
             'tags': 'thị trường,phụ tùng,Việt Nam,2025,xu hướng,aftermarket',
             'excerpt': 'Phân tích toàn cảnh thị trường phụ tùng ô tô Việt Nam: quy mô 3.5 tỷ USD, tăng trưởng 12%/năm, và cơ hội cho người tiêu dùng thông minh.',
             'reading_time': 8,
-            'content': '''<h2>Quy mô thị trường</h2>
-<p>Thị trường phụ tùng ô tô Việt Nam đạt giá trị khoảng <strong>3.5 tỷ USD</strong> trong năm 2024, với tốc độ tăng trưởng trung bình 12%/năm. Số lượng xe ô tô lưu hành trên cả nước đã vượt mốc <strong>6.5 triệu xe</strong>, tạo nhu cầu rất lớn cho việc bảo dưỡng và thay thế phụ tùng.</p>
-
-<h2>3 xu hướng lớn năm 2025</h2>
-<p><strong>1. Phụ tùng OEM thay thế (aftermarket) lên ngôi</strong> — Người dùng ngày càng chuyển từ phụ tùng chính hãng sang các thương hiệu aftermarket uy tín với giá chỉ 30-50% so với chính hãng nhưng chất lượng tương đương.</p>
-<p><strong>2. Mua online tăng mạnh</strong> — Các sàn TMDT (Shopee, Lazada) ghi nhận doanh số phụ tùng ô tô tăng 85% YoY. Người mua đã quen với việc tra cứu mã OEM và đặt hàng online.</p>
-<p><strong>3. DIY (Do-It-Yourself) phát triển</strong> — Cộng đồng tự sửa xe tại nhà ngày càng đông, đặc biệt với các bộ phận đơn giản như cao su, lọc gió, bóng đèn.</p>
-
-<h2>Cơ hội cho người tiêu dùng</h2>
-<p>Với sự cạnh tranh ngày càng cao, giá phụ tùng aftermarket đã giảm 15-20% so với 3 năm trước. Người tiêu dùng thông minh có thể tiết kiệm hàng triệu đồng mỗi năm bằng cách:</p>
-<ul>
-<li>Tự tra cứu mã OEM chính xác trước khi mua</li>
-<li>So sánh giá từ nhiều nguồn (online + offline)</li>
-<li>Học cách tự thay các phụ tùng đơn giản</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'OEM vs Aftermarket vs Fake — Cách phân biệt phụ tùng ô tô',
@@ -379,27 +391,17 @@ def seed_articles():
             'tags': 'OEM,aftermarket,hàng giả,phân biệt,chất lượng,mã phụ tùng',
             'excerpt': 'Hướng dẫn phân biệt 3 loại phụ tùng trên thị trường: OEM chính hãng, aftermarket chất lượng, và hàng nhái/fake. Cách đọc mã OEM và kiểm tra xuất xứ.',
             'reading_time': 10,
-            'content': '''<h2>3 loại phụ tùng trên thị trường</h2>
-<p><strong>OEM (Original Equipment Manufacturer)</strong> — Phụ tùng do chính hãng xe sản xuất hoặc đặt hàng từ nhà cung cấp cấp 1. Đắt nhất nhưng đảm bảo 100% tương thích.</p>
-<p><strong>Aftermarket</strong> — Phụ tùng do các hãng thứ 3 sản xuất theo tiêu chuẩn OEM. Giá rẻ hơn 30-60%, chất lượng từ trung bình đến rất tốt tùy thương hiệu.</p>
-<p><strong>Hàng nhái/Fake</strong> — Phụ tùng kém chất lượng, thường copy bao bì hàng chính hãng. Nguy hiểm và cần tránh tuyệt đối.</p>
-
-<h2>Cách đọc mã OEM</h2>
-<p>Mỗi phụ tùng ô tô đều có <strong>mã OEM</strong> (Part Number) riêng biệt. Ví dụ:</p>
-<ul>
-<li><strong>54320-JD00A</strong> — Mã Nissan. 5 số đầu = nhóm phụ tùng (543 = hệ thống treo). Suffix JD00A = đời xe cụ thể.</li>
-<li><strong>51920-SWA-A01</strong> — Mã Honda. SWA = dòng CR-V. A01 = phiên bản.</li>
-<li><strong>48609-0D050</strong> — Mã Toyota. 48609 = base giảm chấn. 0D050 = Vios/Yaris.</li>
-</ul>
-
-<h2>5 cách nhận biết hàng fake</h2>
-<ul>
-<li>Bao bì in mờ, font chữ không sắc nét</li>
-<li>Không có mã QR hoặc hologram xác thực</li>
-<li>Giá rẻ bất thường (dưới 50% giá aftermarket)</li>
-<li>Trọng lượng nhẹ hơn hàng thật</li>
-<li>Không có thông tin nhà sản xuất rõ ràng trên sản phẩm</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Top 10 lỗi ô tô thường gặp và cách xử lý tại chỗ',
@@ -409,25 +411,17 @@ def seed_articles():
             'tags': 'lỗi thường gặp,xử lý sự cố,roadside,khẩn cấp,mẹo xe',
             'excerpt': '10 sự cố ô tô phổ biến nhất và cách xử lý ngay tại chỗ: từ xe không nổ máy, đèn cảnh báo, đến nổ lốp giữa đường.',
             'reading_time': 12,
-            'content': '''<h2>1. Xe không nổ máy</h2>
-<p><strong>Nguyên nhân:</strong> Ắc-quy yếu (80% trường hợp), bugi hỏng, bơm xăng lỗi.</p>
-<p><strong>Xử lý:</strong> Thử câu bình từ xe khác. Nếu không được → gọi cứu hộ.</p>
-
-<h2>2. Đèn Check Engine sáng</h2>
-<p><strong>Nguyên nhân:</strong> Cảm biến oxy, nắp bình xăng chưa đóng chặt, bộ chuyển đổi xúc tác.</p>
-<p><strong>Xử lý:</strong> Kiểm tra nắp xăng trước. Nếu đèn vẫn sáng → đọc mã lỗi bằng OBD2 scanner.</p>
-
-<h2>3. Xe bị rung lắc khi chạy tốc độ cao</h2>
-<p><strong>Nguyên nhân:</strong> Mất cân bằng lốp, cao su hệ thống treo mòn, rotuyn lỏng.</p>
-<p><strong>Xử lý:</strong> Cân chỉnh lốp. Kiểm tra cao su chân phuộc và rotuyn.</p>
-
-<h2>4. Tiếng kêu lọc cọc dưới gầm</h2>
-<p><strong>Nguyên nhân:</strong> Cao su chân phuộc hỏng, thanh cân bằng lỏng, giảm chấn mòn.</p>
-<p><strong>Xử lý:</strong> Kiểm tra trực quan hệ thống treo. Thay cao su nếu bị nứt/biến dạng.</p>
-
-<h2>5. Phanh kêu rít</h2>
-<p><strong>Nguyên nhân:</strong> Má phanh mòn hết, đĩa phanh bị trầy xước, bụi bẩn kẹt.</p>
-<p><strong>Xử lý:</strong> Kiểm tra má phanh ngay. Nếu còn dưới 2mm → thay ngay, không trì hoãn.</p>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
 
         # === TIER 2: CHUNG (System-level knowledge) ===
@@ -441,29 +435,17 @@ def seed_articles():
             'tags': 'hệ thống treo,suspension,MacPherson,double wishbone,torsion beam,phuộc nhún',
             'excerpt': 'Toàn tập về hệ thống treo: 4 loại phổ biến, ưu nhược điểm, và cách nhận biết hệ thống treo cần bảo dưỡng.',
             'reading_time': 10,
-            'content': '''<h2>Hệ thống treo là gì?</h2>
-<p>Hệ thống treo (Suspension System) là tập hợp các bộ phận kết nối <strong>bánh xe với thân xe</strong>, có chức năng hấp thụ dao động từ mặt đường, giữ cho xe ổn định và hành khách thoải mái.</p>
-
-<h2>4 loại hệ thống treo phổ biến</h2>
-<h3>1. MacPherson Strut</h3>
-<p>Phổ biến nhất trên xe con. Cấu tạo đơn giản: phuộc nhún kết hợp lò xo thành 1 cụm. Dùng trên: Toyota Vios, Honda City, Hyundai Accent.</p>
-
-<h3>2. Double Wishbone (tay đòn kép)</h3>
-<p>2 tay đòn trên và dưới hình chữ A. Khả năng xử lý tốt hơn MacPherson. Dùng trên: Honda CR-V, Toyota Camry, Mazda CX-5.</p>
-
-<h3>3. Multi-link (đa liên kết)</h3>
-<p>Dùng nhiều thanh nối cho phép điều chỉnh chính xác góc bánh xe. Thường dùng ở cầu sau xe cao cấp: Mercedes, BMW, Audi.</p>
-
-<h3>4. Torsion Beam (thanh xoắn)</h3>
-<p>Cấu tạo đơn giản, rẻ, nhẹ. Thường dùng ở cầu sau xe hạng B-C: Toyota Vios, Hyundai i10. Nhược điểm: kém linh hoạt trên đường xấu.</p>
-
-<h2>Dấu hiệu hệ thống treo cần bảo dưỡng</h2>
-<ul>
-<li>Xe nghiêng khi vào cua, cảm giác "bồng bềnh"</li>
-<li>Tiếng kêu lọc cọc khi qua ổ gà</li>
-<li>Lốp mòn không đều</li>
-<li>Tay lái bị rung ở tốc độ cao</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
 
         # === TIER 3: CHI-TIET (Detailed part knowledge) ===
@@ -477,28 +459,17 @@ def seed_articles():
             'excerpt': 'Hướng dẫn toàn tập về cao su chân phuộc: chức năng, tuổi thọ, dấu hiệu hỏng, cách tự kiểm tra, so sánh OEM vs aftermarket.',
             'reading_time': 12,
             'embed_code': '<div class="at-carousel" data-network="accesstrade" data-keyword="cao su chan phuoc oto" data-limit="6"></div>',
-            'content': '''<h2>Cao su chân phuộc nằm ở đâu?</h2>
-<p>Cao su chân phuộc nằm ở <strong>2 đầu của phuộc nhún</strong>: đầu trên (gắn vào thân xe/tháp phuộc) và đầu dưới (gắn vào cam quay/tay đòn). Mỗi xe có 4 phuộc → 8 cao su chân phuộc.</p>
-
-<h2>Chất liệu: Cao su vs Polyurethane</h2>
-<p><strong>Cao su tự nhiên (OEM):</strong> Mềm, êm, giảm tiếng ồn tốt. Tuổi thọ 60,000-80,000km.</p>
-<p><strong>Polyurethane:</strong> Cứng hơn, bền hơn gấp 2-3 lần, phù hợp xe thường xuyên đi đường xấu. Nhược: hơi ồn hơn.</p>
-
-<h2>5 dấu hiệu cần thay</h2>
-<ul>
-<li>Tiếng lọc cọc khi qua ổ gà, gờ giảm tốc</li>
-<li>Xe bồng bềnh, mất cảm giác đường ở tốc độ cao</li>
-<li>Lốp mòn lệch (mòn 1 bên nhiều hơn)</li>
-<li>Nhìn thấy cao su nứt, rách khi kiểm tra trực quan</li>
-<li>Phuộc bị lệch, nghiêng khi kích xe lên</li>
-</ul>
-
-<h2>Chi phí thay thế theo hãng xe</h2>
-<p><strong>Toyota:</strong> 120,000-250,000đ/cái (OEM). <strong>Honda:</strong> 150,000-300,000đ/cái. <strong>Hyundai/Kia:</strong> 80,000-200,000đ/cái. Công thay: 100,000-200,000đ/cái.</p>
-
-<h2>Tự thay tại nhà được không?</h2>
-<p>Với cao su chân phuộc <strong>đầu dưới</strong>: Có thể tự thay nếu có cầu nâng hoặc kích xe. Cần dụng cụ: kích, cờ-lê, búa cao su.</p>
-<p>Với cao su <strong>đầu trên</strong>: Khó hơn, cần tháo cụm phuộc. Nên mang ra garage.</p>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
     ]
 
@@ -553,15 +524,21 @@ def seed_pet():
                   'desc':'Thức ăn khô dạng hạt — phổ biến nhất, tiện lợi, bảo quản lâu',
                   'oem':'Royal Canin / Pedigree / Taste of the Wild',
                   'tags':'thức ăn hạt,dry food,kibble,Royal Canin,dinh dưỡng chó',
-                  'content':'<h2>Thức ăn hạt là gì?</h2><p>Dry food (kibble) là loại thức ăn chó phổ biến nhất thế giới, chiếm 60% thị trường. Được sấy khô ở nhiệt độ cao, có hàm lượng nước chỉ 6-10%.</p><h2>Cách chọn thức ăn hạt</h2><p>Xem thành phần: <strong>protein từ thịt</strong> phải đứng đầu danh sách. Tránh sản phẩm có ngô, lúa mì làm thành phần chính. Chọn theo size: Small breed (< 10kg), Medium (10-25kg), Large (> 25kg).</p><h2>Top thương hiệu</h2><p><strong>Premium:</strong> Royal Canin, Hill\'s Science Diet — 300-500k/kg. <strong>Super Premium:</strong> Taste of the Wild, Acana — 400-700k/kg. <strong>Phổ thông:</strong> Pedigree, SmartHeart — 80-150k/kg.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'s Science Diet — 300-500k/kg. <strong>Super Premium:</strong> Taste of the Wild, Acana — 400-700k/kg. <strong>Phổ thông:</strong> Pedigree, SmartHeart — 80-150k/kg.</p>'},
                  {'vi':'Thức ăn ướt (Wet Food)','en':'Wet Dog Food','slug':'thuc-an-uot',
                   'desc':'Pate, thức ăn đóng hộp — hàm lượng nước cao, phù hợp chó biếng ăn',
                   'tags':'thức ăn ướt,pate,wet food,đóng hộp',
-                  'content':'<h2>Ưu điểm thức ăn ướt</h2><p>Hàm lượng nước 75-85% giúp chó bổ sung nước. Mùi vị hấp dẫn, phù hợp chó biếng ăn hoặc chó già răng yếu.</p><h2>Nhược điểm</h2><p>Đắt hơn dry food 3-5 lần. Mở ra phải dùng trong 24h (tủ lạnh). Không tốt cho răng như dry food.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Vitamin & Supplement','en':'Dog Supplements','slug':'vitamin-supplement',
                   'desc':'Bổ sung vitamin, khoáng chất, glucosamine, omega-3 cho chó',
                   'tags':'vitamin,supplement,glucosamine,omega-3,canxi,bổ sung',
-                  'content':'<h2>Khi nào cần bổ sung?</h2><p>Chó ăn thức ăn hạt premium thường đã đủ dinh dưỡng. Cần bổ sung khi: chó mang thai/cho con bú, chó già > 7 tuổi, chó bệnh hồi phục, chó ăn cơm nhà.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Y tế & Bệnh lý','slug':'y-te','icon':'💉','color':'#3498db',
              'desc':'Vaccine, tẩy giun, bệnh thường gặp, phòng ngừa',
@@ -569,15 +546,21 @@ def seed_pet():
                  {'vi':'Vaccine cơ bản','en':'Core Vaccines','slug':'vaccine-co-ban',
                   'desc':'Lịch tiêm vaccine cho chó: 5in1, 7in1, dại — phòng bệnh nguy hiểm',
                   'tags':'vaccine,tiêm phòng,5in1,7in1,dại,puppy',
-                  'content':'<h2>Lịch vaccine cho chó con</h2><p><strong>6-8 tuần:</strong> Mũi 1 (5in1 hoặc 7in1). <strong>9-11 tuần:</strong> Mũi 2. <strong>12-14 tuần:</strong> Mũi 3 + vaccine dại. <strong>Hàng năm:</strong> Nhắc lại 1 mũi tổng hợp + dại.</p><h2>Chi phí</h2><p>Vaccine 5in1: 150-250k/mũi. Vaccine 7in1: 200-350k/mũi. Vaccine dại: 100-200k/mũi.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Tẩy giun định kỳ','en':'Deworming','slug':'tay-giun',
                   'desc':'Lịch tẩy giun, loại thuốc, dấu hiệu nhiễm giun ở chó',
                   'tags':'tẩy giun,giun sán,deworming,phòng ngừa',
-                  'content':'<h2>Lịch tẩy giun</h2><p>Chó con: mỗi 2 tuần từ 2-12 tuần tuổi. Chó trưởng thành: mỗi 3-6 tháng. Thuốc phổ biến: Drontal, Milbemax — giá 50-120k/viên.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Ve & Bọ chét','en':'Flea & Tick Prevention','slug':'ve-bo-chet',
                   'desc':'Phòng trị ve, bọ chét — nhỏ gáy, vòng cổ, xịt',
                   'tags':'ve,bọ chét,flea,tick,nhỏ gáy,Nexgard,Frontline',
-                  'content':'<h2>3 phương pháp phòng ve</h2><p><strong>Nhỏ gáy (Spot-on):</strong> Frontline, Revolution — nhỏ 1 lần/tháng. 150-300k/tuýp. <strong>Viên uống:</strong> Nexgard, Bravecto — hiệu quả 1-3 tháng. 200-500k/viên. <strong>Vòng cổ:</strong> Seresto — hiệu quả 8 tháng. 400-600k.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Huấn luyện','slug':'huan-luyen','icon':'🎯','color':'#2ecc71',
              'desc':'Huấn luyện cơ bản, ngồi, nằm, đi vệ sinh đúng chỗ, xã hội hóa',
@@ -585,11 +568,15 @@ def seed_pet():
                  {'vi':'Đi vệ sinh đúng chỗ','en':'Potty Training','slug':'di-ve-sinh-dung-cho',
                   'desc':'Hướng dẫn dạy chó con đi vệ sinh đúng nơi quy định',
                   'tags':'vệ sinh,potty training,chó con,huấn luyện cơ bản',
-                  'content':'<h2>Nguyên tắc vàng</h2><p>Chó con cần đi vệ sinh mỗi 2-3 giờ. Đưa chó đến vị trí quy định <strong>ngay sau khi</strong>: ăn xong, ngủ dậy, chơi xong. Khen thưởng ngay khi chó đi đúng chỗ.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Lệnh cơ bản (Ngồi, Nằm, Lại đây)','en':'Basic Commands','slug':'lenh-co-ban',
                   'desc':'Dạy chó 5 lệnh cơ bản: Sit, Down, Come, Stay, Heel',
                   'tags':'lệnh cơ bản,sit,down,come,huấn luyện,clicker',
-                  'content':'<h2>5 lệnh nền tảng</h2><p><strong>Sit (Ngồi):</strong> Đưa treat lên cao → chó tự ngồi → khen + thưởng. Luyện 5-10 lần/ngày. <strong>Down (Nằm):</strong> Từ tư thế ngồi, đưa treat xuống đất. <strong>Come (Lại đây):</strong> Bắt đầu ở khoảng cách ngắn, tăng dần.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Đồ dùng & Phụ kiện','slug':'do-dung','icon':'🦴','color':'#f39c12',
              'desc':'Chuồng, dây dắt, bát ăn, đồ chơi, quần áo cho chó',
@@ -597,11 +584,15 @@ def seed_pet():
                  {'vi':'Dây dắt & Vòng cổ','en':'Leash & Collar','slug':'day-dat-vong-co',
                   'desc':'Chọn dây dắt, vòng cổ, yếm (harness) phù hợp theo size và giống chó',
                   'tags':'dây dắt,vòng cổ,harness,yếm,dạo phố',
-                  'content':'<h2>3 loại dây dắt</h2><p><strong>Dây cố định:</strong> Dài 1.2-1.8m, phổ biến nhất. <strong>Dây rút (Flexi):</strong> Tự cuộn, dài 3-8m. Phù hợp công viên. <strong>Yếm (Harness):</strong> An toàn hơn vòng cổ, không gây áp lực lên cổ. Nên dùng cho giống nhỏ.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Chuồng & Nệm ngủ','en':'Crate & Bed','slug':'chuong-nem',
                   'desc':'Chọn chuồng, nệm, ổ ngủ phù hợp cho chó',
                   'tags':'chuồng,nệm,giường,crate,ngủ',
-                  'content':'<h2>Chọn size chuồng</h2><p>Chuồng phải đủ lớn để chó <strong>đứng, xoay, nằm thoải mái</strong>. Đo chiều dài chó (mũi → gốc đuôi) + 5-10cm. Chó con: mua size trưởng thành + dùng vách ngăn.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
         ],
         'meo': [
@@ -611,11 +602,15 @@ def seed_pet():
                  {'vi':'Thức ăn hạt cho mèo','en':'Dry Cat Food','slug':'thuc-an-hat-meo',
                   'desc':'Chọn thức ăn hạt cho mèo: protein cao, ít carb, đủ taurine',
                   'tags':'thức ăn mèo,dry food,Royal Canin,Whiskas,taurine',
-                  'content':'<h2>Mèo cần gì?</h2><p>Mèo là <strong>động vật ăn thịt bắt buộc</strong>. Thức ăn phải có protein > 30%, chất béo > 15%, và bắt buộc có <strong>taurine</strong> (mèo không tự tổng hợp được).</p><h2>Top thương hiệu</h2><p><strong>Premium:</strong> Royal Canin, Hill\'s — 300-500k/kg. <strong>Super Premium:</strong> Orijen, Acana — 500-800k/kg. <strong>Phổ thông:</strong> Whiskas, Me-O — 60-120k/kg.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'s — 300-500k/kg. <strong>Super Premium:</strong> Orijen, Acana — 500-800k/kg. <strong>Phổ thông:</strong> Whiskas, Me-O — 60-120k/kg.</p>'},
                  {'vi':'Pate & Thức ăn ướt','en':'Wet Cat Food','slug':'pate-meo',
                   'desc':'Pate mèo, thức ăn ướt — bổ sung nước, phòng bệnh thận',
                   'tags':'pate mèo,wet food,thận,bổ sung nước',
-                  'content':'<h2>Tại sao mèo cần ăn ướt?</h2><p>Mèo bản năng uống ít nước. Thức ăn ướt chứa 75-85% nước, giúp phòng <strong>bệnh thận</strong> và <strong>sỏi tiết niệu</strong> — 2 bệnh phổ biến nhất ở mèo.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Y tế','slug':'y-te','icon':'💊','color':'#e74c3c',
              'desc':'Vaccine, triệt sản, bệnh thường gặp ở mèo',
@@ -623,11 +618,15 @@ def seed_pet():
                  {'vi':'Vaccine mèo','en':'Cat Vaccines','slug':'vaccine-meo',
                   'desc':'Lịch tiêm vaccine cho mèo: 3in1, 4in1, dại',
                   'tags':'vaccine mèo,3in1,4in1,dại,FPV,FCV',
-                  'content':'<h2>Lịch vaccine mèo</h2><p><strong>8 tuần:</strong> Mũi 1 (3in1: FPV + FCV + FHV). <strong>12 tuần:</strong> Mũi 2. <strong>16 tuần:</strong> Mũi 3 + dại. <strong>Hàng năm:</strong> Nhắc lại. Chi phí: 150-300k/mũi.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Triệt sản','en':'Spay/Neuter','slug':'triet-san',
                   'desc':'Triệt sản mèo: lợi ích, thời điểm, chi phí, chăm sóc sau phẫu thuật',
                   'tags':'triệt sản,spay,neuter,phẫu thuật,6 tháng',
-                  'content':'<h2>Nên triệt sản khi nào?</h2><p>Thời điểm lý tưởng: <strong>5-6 tháng tuổi</strong>, trước khi mèo vào kỳ động dục đầu tiên. Chi phí: Mèo đực 300-600k, mèo cái 500-1,000k.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Đồ dùng','slug':'do-dung','icon':'🧶','color':'#1abc9c',
              'desc':'Khay cát, cây mèo, đồ chơi, bát ăn',
@@ -635,11 +634,15 @@ def seed_pet():
                  {'vi':'Khay cát & Cát vệ sinh','en':'Litter Box & Litter','slug':'khay-cat',
                   'desc':'Chọn khay cát, loại cát phù hợp, mẹo khử mùi',
                   'tags':'khay cát,cát vệ sinh,litter box,bentonite,tofu',
-                  'content':'<h2>2 loại cát phổ biến</h2><p><strong>Bentonite (cát khoáng):</strong> Vón cục tốt, rẻ (30-60k/5L). Nhược: bụi, nặng. <strong>Tofu (cát đậu nành):</strong> Ít bụi, nhẹ, xả được bồn cầu. Giá 80-150k/6L.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Cây leo & Trụ cào','en':'Cat Tree & Scratcher','slug':'cay-leo-tru-cao',
                   'desc':'Cây mèo, trụ cào móng — thỏa mãn bản năng, bảo vệ nội thất',
                   'tags':'cây mèo,trụ cào,cat tree,scratcher,nội thất',
-                  'content':'<h2>Tại sao cần trụ cào?</h2><p>Mèo <strong>bắt buộc</strong> phải cào. Không có trụ cào → mèo cào sofa, rèm, tường. Chọn trụ cao hơn mèo khi đứng (tối thiểu 60cm). Vật liệu tốt nhất: dây thừng sisal.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
         ],
         'thu-nho': [
@@ -649,11 +652,15 @@ def seed_pet():
                  {'vi':'Chuồng & Lót chuồng','en':'Hamster Cage','slug':'chuong-hamster',
                   'desc':'Chọn chuồng, lót chuồng, phụ kiện cho hamster',
                   'tags':'chuồng hamster,lót chuồng,mùn cưa,cage',
-                  'content':'<h2>Kích thước tối thiểu</h2><p>Chuồng hamster cần tối thiểu <strong>450 cm² sàn</strong> (VD: 60x30cm). Lớn hơn = hamster vui hơn. Lót chuồng: mùn cưa (phổ thông) hoặc giấy xé (an toàn hơn). KHÔNG dùng bông gòn.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Thức ăn hamster','en':'Hamster Food','slug':'thuc-an-hamster',
                   'desc':'Thức ăn hỗn hợp, hạt, rau quả cho hamster',
                   'tags':'thức ăn hamster,hạt hướng dương,rau,trái cây',
-                  'content':'<h2>Chế độ ăn</h2><p>Chủ yếu: thức ăn hỗn hợp chuyên dụng (30-50k/gói). Bổ sung: rau (bông cải, cà rốt), protein (trứng luộc, sâu khô). <strong>TRÁNH:</strong> hành, tỏi, sô-cô-la, cam quýt.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Cá cảnh','slug':'ca-canh','icon':'🐠','color':'#3498db',
              'desc':'Cá cảnh nước ngọt, nước mặn, hồ thủy sinh',
@@ -661,11 +668,15 @@ def seed_pet():
                  {'vi':'Bể & Lọc nước','en':'Aquarium & Filter','slug':'be-loc-nuoc',
                   'desc':'Chọn bể, hệ thống lọc, ánh sáng cho hồ cá',
                   'tags':'bể cá,lọc nước,filter,aquarium,thủy sinh',
-                  'content':'<h2>Bể đầu tiên</h2><p>Bể tối thiểu <strong>40 lít</strong> cho người mới. Bể lớn = nước ổn định hơn = dễ chăm hơn. Hệ thống lọc: lọc thác (rẻ, đơn giản) hoặc lọc tràn (hiệu quả, cho bể lớn).</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Thức ăn cá','en':'Fish Food','slug':'thuc-an-ca',
                   'desc':'Thức ăn viên, lá, đông lạnh cho các loại cá cảnh',
                   'tags':'thức ăn cá,pellet,flake,artemia,cá cảnh',
-                  'content':'<h2>3 loại thức ăn</h2><p><strong>Viên/Flake:</strong> Tiện, phổ thông (20-50k). <strong>Đông lạnh:</strong> Trùn chỉ, artemia — dinh dưỡng cao. <strong>Sống:</strong> Bo bo, trùn chỉ sống — kích thích bản năng săn mồi.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
         ],
     }
@@ -704,17 +715,23 @@ def seed_pet_articles():
          'tags':'thị trường,thú cưng,Việt Nam,2025,pet economy',
          'excerpt':'Thị trường thú cưng VN đạt 1.2 tỷ USD, tăng 25%/năm. Phân tích xu hướng, cơ hội kinh doanh, và thói quen chi tiêu của pet parent Việt.',
          'reading_time':8,
-         'content':'<h2>Quy mô thị trường</h2><p>Việt Nam có khoảng <strong>12 triệu hộ gia đình</strong> nuôi thú cưng, chi tiêu trung bình 2-5 triệu/tháng. Thị trường pet food chiếm 45%, dịch vụ y tế 25%, đồ dùng 20%, dịch vụ làm đẹp 10%.</p><h2>Xu hướng 2025</h2><p><strong>Humanization:</strong> Pet được đối xử như thành viên gia đình. <strong>Premium hóa:</strong> Chuyển từ hàng rẻ sang thương hiệu uy tín. <strong>Online shopping:</strong> Mua online chiếm 40%+ doanh số pet food.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Chọn giống chó phù hợp — Hướng dẫn cho người mới','slug':'chon-giong-cho-phu-hop','tier':'nganh','category':'chon-giong',
          'tags':'giống chó,chọn giống,người mới,apartment,gia đình',
          'excerpt':'Hướng dẫn chọn giống chó phù hợp với điều kiện sống: chung cư, nhà rộng, có trẻ nhỏ, người bận rộn.',
          'reading_time':10,
-         'content':'<h2>Chọn theo điều kiện sống</h2><p><strong>Chung cư nhỏ:</strong> Poodle, Corgi, Shih Tzu, Pomeranian — nhỏ, ít sủa. <strong>Nhà có sân:</strong> Golden Retriever, Labrador, Husky — cần không gian. <strong>Có trẻ nhỏ:</strong> Golden, Beagle, Pug — hiền, kiên nhẫn.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Chi phí nuôi chó/mèo 1 năm — Tính sao cho đúng?','slug':'chi-phi-nuoi-cho-meo-1-nam','tier':'nganh','category':'chi-phi',
          'tags':'chi phí,nuôi chó,nuôi mèo,budget,1 năm',
          'excerpt':'Bảng tính chi phí nuôi chó/mèo chi tiết: thức ăn, vaccine, y tế, đồ dùng, làm đẹp — từ tiết kiệm đến premium.',
          'reading_time':7,
-         'content':'<h2>Chó (size trung bình)</h2><p><strong>Thức ăn:</strong> 1.5-4 triệu/tháng. <strong>Vaccine năm 1:</strong> 1-2 triệu. <strong>Tẩy giun + ve:</strong> 500k-1.5 triệu/năm. <strong>Đồ dùng:</strong> 1-3 triệu (ban đầu). <strong>Y tế khẩn cấp:</strong> dự phòng 3-5 triệu. Tổng năm 1: <strong>25-65 triệu.</strong></p><h2>Mèo</h2><p>Thường rẻ hơn chó 20-30%: thức ăn ít hơn, ít cần dắt đi dạo, ít tắm. Tổng năm 1: <strong>15-40 triệu.</strong></p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
 
         # T2: CHUNG
         {'title':'Dinh dưỡng chó theo từng giai đoạn — Puppy, Adult, Senior','slug':'dinh-duong-cho-theo-giai-doan','tier':'chung','category':'dinh-duong',
@@ -722,24 +739,32 @@ def seed_pet_articles():
          'tags':'dinh dưỡng,puppy,adult,senior,protein,chất béo',
          'excerpt':'Nhu cầu dinh dưỡng chó thay đổi theo tuổi. Hướng dẫn chọn thức ăn đúng cho từng giai đoạn.',
          'reading_time':9,
-         'content':'<h2>Puppy (0-12 tháng)</h2><p>Cần <strong>protein 28-32%</strong>, chất béo 17-20%. Ăn 3-4 bữa/ngày. Chọn thức ăn ghi "Puppy" hoặc "Growth".</p><h2>Adult (1-7 tuổi)</h2><p>Protein 22-28%, chất béo 12-16%. Ăn 2 bữa/ngày. Kiểm soát cân nặng.</p><h2>Senior (> 7 tuổi)</h2><p>Ít calo hơn, bổ sung glucosamine cho khớp, omega-3 cho não.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Hành vi mèo — Giải mã ngôn ngữ cơ thể','slug':'hanh-vi-meo-giai-ma','tier':'chung','category':'hanh-vi',
          'related_segment_slug':'meo',
          'tags':'hành vi mèo,ngôn ngữ cơ thể,đuôi mèo,rên gừ,cắn',
          'excerpt':'Mèo giao tiếp bằng đuôi, tai, mắt, và âm thanh. Hiểu ngôn ngữ mèo để chăm sóc tốt hơn.',
          'reading_time':8,
-         'content':'<h2>Đuôi mèo nói gì?</h2><p><strong>Đuôi dựng thẳng:</strong> Vui, tự tin, chào hỏi. <strong>Đuôi phồng to:</strong> Sợ hãi hoặc hung dữ. <strong>Đuôi quẫy nhanh:</strong> Khó chịu, bực bội (KHÁC với chó!). <strong>Đuôi cuộn quanh người:</strong> Thân thiện, tin tưởng.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'5 bệnh thường gặp ở chó và dấu hiệu nhận biết','slug':'5-benh-thuong-gap-o-cho','tier':'chung','category':'y-te',
          'related_segment_slug':'cho','related_zone_slug':'y-te',
          'tags':'bệnh chó,Parvo,Care,viêm ruột,nấm da',
          'excerpt':'5 bệnh nguy hiểm nhất ở chó: Parvo, Care, viêm ruột, nấm da, viêm tai — dấu hiệu và cách phòng.',
          'reading_time':10,
-         'content':'<h2>1. Parvo (Parvovirus)</h2><p><strong>Triệu chứng:</strong> Nôn mửa, tiêu chảy ra máu, bỏ ăn, sốt cao. <strong>Nguy hiểm:</strong> Tỷ lệ tử vong 80% nếu không điều trị. <strong>Phòng:</strong> Vaccine đầy đủ.</p><h2>2. Care (Distemper)</h2><p><strong>Triệu chứng:</strong> Chảy dịch mũi/mắt, ho, co giật, liệt. <strong>Phòng:</strong> Vaccine 5in1/7in1.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Cách tắm chó mèo đúng cách tại nhà','slug':'cach-tam-cho-meo-dung-cach','tier':'chung','category':'cham-soc',
          'tags':'tắm chó,tắm mèo,grooming,sữa tắm,lông',
          'excerpt':'Hướng dẫn tắm chó mèo tại nhà: tần suất, nhiệt độ nước, sữa tắm, sấy khô — tránh sai lầm gây bệnh da.',
          'reading_time':6,
-         'content':'<h2>Tần suất tắm</h2><p><strong>Chó:</strong> 2-4 tuần/lần (tùy giống lông). Chó lông dài: 2 tuần. Chó lông ngắn: 3-4 tuần. <strong>Mèo:</strong> 1-3 tháng/lần. Mèo tự làm sạch rất tốt.</p><h2>Lưu ý quan trọng</h2><p>Nước ấm 37-38°C. Dùng sữa tắm <strong>CHUYÊN DỤNG</strong> cho pet (pH 7.0-7.5), KHÔNG dùng sữa tắm người (pH 5.5 — quá acid cho da pet).</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
 
         # T3: CHI TIET
         {'title':'Royal Canin vs Taste of the Wild — So sánh chi tiết','slug':'royal-canin-vs-taste-of-the-wild','tier':'chi-tiet','category':'dinh-duong',
@@ -748,13 +773,17 @@ def seed_pet_articles():
          'excerpt':'So sánh 2 thương hiệu thức ăn chó nổi tiếng: thành phần, giá, ưu nhược điểm. Nên chọn loại nào?',
          'reading_time':7,
          'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="royal canin dog food" data-limit="6"></div>',
-         'content':'<h2>Royal Canin</h2><p><strong>Ưu:</strong> Nghiên cứu khoa học, chia theo giống chó cụ thể, dễ mua tại VN. <strong>Nhược:</strong> Chứa ngô/bột phụ phẩm, giá cao (350-500k/kg).</p><h2>Taste of the Wild</h2><p><strong>Ưu:</strong> Grain-free, protein từ thịt thật (bò rừng, cá hồi, hươu), không phụ phẩm. <strong>Nhược:</strong> Ít lựa chọn theo giống, khó mua hơn (400-600k/kg).</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Hướng dẫn chọn cát vệ sinh cho mèo — Bentonite vs Tofu vs Crystal','slug':'chon-cat-ve-sinh-meo','tier':'chi-tiet','category':'do-dung',
          'related_segment_slug':'meo','related_zone_slug':'do-dung',
          'tags':'cát vệ sinh,bentonite,tofu,crystal,khay cát,mèo',
          'excerpt':'So sánh 3 loại cát mèo phổ biến: bentonite, tofu, crystal. Ưu nhược điểm và chi phí hàng tháng.',
          'reading_time':6,
-         'content':'<h2>Bentonite (cát khoáng)</h2><p>Vón cục tốt, mèo thích. Giá rẻ (30-60k/5L). Nhược: bụi nhiều, nặng, không xả bồn cầu được.</p><h2>Tofu (đậu nành)</h2><p>Ít bụi, nhẹ, xả bồn cầu OK. Giá 80-150k/6L. Nhược: vón kém hơn bentonite, ẩm dễ mốc.</p><h2>Crystal (silica)</h2><p>Hút mùi cực tốt, thay 1 lần/tháng. Giá 60-120k/3.8L. Nhược: không vón cục, mèo khó quen.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
     ]
 
     for ad in articles:
@@ -824,15 +853,21 @@ def seed_pet_v2():
                 {'vi':'Thức ăn theo giống','en':'Breed-Specific Food','slug':'thuc-an-theo-giong',
                  'desc':'Thức ăn chuyên biệt cho từng giống: Poodle, Golden, Corgi, Husky, Phốc sóc',
                  'tags':'thức ăn theo giống,breed,poodle,golden,corgi,husky,phoc soc',
-                 'content':'<h2>Tại sao cần ăn theo giống?</h2><p>Mỗi giống chó có nhu cầu dinh dưỡng riêng. Chó nhỏ (Poodle, Phốc) cần hạt nhỏ, năng lượng cao. Chó lớn (Golden, Husky) cần glucosamine cho khớp, ít calo tránh béo phì.</p><h2>Top sản phẩm</h2><p><strong>Royal Canin Breed:</strong> Có riêng cho Poodle, Golden, Chihuahua, French Bulldog — 350-500k/1.5kg. <strong>Nutrience Subzero:</strong> Công thức vùng miền (Canadian Pacific, Prairie Red) — 450-650k/2.27kg.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Snack & Treat thưởng','en':'Dog Treats','slug':'snack-treat-cho',
                  'desc':'Bánh thưởng, snack huấn luyện, xương gặm, thịt sấy cho chó',
                  'tags':'snack,treat,bánh thưởng,xương gặm,thịt sấy,jerky,dental stick',
-                 'content':'<h2>Khi nào dùng treat?</h2><p><strong>Huấn luyện:</strong> Treat nhỏ, ít calo. Dùng khi chó làm đúng lệnh. <strong>Dental stick:</strong> Xương gặm giúp sạch răng, giảm mảng bám. Dùng 1-2 cái/ngày. <strong>Giải trí:</strong> Xương da bò, tai heo sấy — giữ chó bận rộn.</p><h2>Lưu ý</h2><p>Treat không quá <strong>10% lượng calo/ngày</strong>. Tránh: xương gà (gãy sắc), sô-cô-la, nho khô.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Thức ăn chó con (Puppy)','en':'Puppy Food','slug':'thuc-an-cho-con',
                  'desc':'Thức ăn chuyên dụng cho chó con 2 tháng - 12 tháng tuổi',
                  'tags':'puppy,chó con,sữa chó,weaning,bổ sung canxi',
-                 'content':'<h2>Giai đoạn cai sữa (2-4 tháng)</h2><p>Ngâm hạt trong nước ấm 10-15 phút cho mềm. Cho ăn 4 bữa/ngày, mỗi bữa 1/4 khẩu phần. Bổ sung sữa chuyên dụng (KHÔNG dùng sữa bò).</p><h2>4-12 tháng</h2><p>Chuyển sang hạt khô dần. Giảm còn 3 bữa/ngày (4-6 tháng), rồi 2 bữa (6-12 tháng). Chọn sản phẩm ghi <strong>\"Puppy\"</strong> hoặc <strong>\"Growth\"</strong>.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_parts_dd):
                 add_part_if_new(z_dd, pd, order=10+i)
@@ -844,15 +879,21 @@ def seed_pet_v2():
                 {'vi':'Nấm da & Viêm da','en':'Skin Disease','slug':'nam-da-viem-da',
                  'desc':'Bệnh da liễu phổ biến ở chó: nấm, ghẻ, viêm da dị ứng, rụng lông',
                  'tags':'nấm da,viêm da,ghẻ,rụng lông,dị ứng,ngứa,dermatitis',
-                 'content':'<h2>Dấu hiệu bệnh da</h2><p><strong>Nấm:</strong> Vùng tròn rụng lông, vảy trắng, ngứa nhẹ. <strong>Ghẻ:</strong> Ngứa dữ dội, gãi liên tục, da đỏ sần. <strong>Dị ứng:</strong> Ngứa toàn thân, liếm chân, viêm tai tái phát.</p><h2>Điều trị</h2><p>Nấm: tắm thuốc (Malaseb, Nizoral vet) + uống kháng nấm 4-6 tuần. Ghẻ: nhỏ thuốc (Advocate, Revolution). Dị ứng: tìm nguyên nhân (thức ăn/môi trường), dùng thuốc theo bác sĩ.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Bệnh đường ruột','en':'Digestive Issues','slug':'benh-duong-ruot',
                  'desc':'Tiêu chảy, nôn mửa, viêm dạ dày ruột ở chó — nguyên nhân và xử lý',
                  'tags':'tiêu chảy,nôn,viêm ruột,đường ruột,probiotic',
-                 'content':'<h2>Nguyên nhân phổ biến</h2><p><strong>Ăn bậy:</strong> Xương gà, thức ăn thừa, rác. <strong>Thay đổi thức ăn đột ngột:</strong> Phải chuyển dần trong 7-10 ngày. <strong>Nhiễm khuẩn/virus:</strong> Parvo, viêm ruột. <strong>Ký sinh trùng:</strong> Giun, sán.</p><h2>Khi nào cần đi bác sĩ?</h2><p>Tiêu chảy > 2 ngày. Nôn > 3 lần/ngày. Phân có máu. Bỏ ăn + lờ đờ. Chó con < 6 tháng — đi NGAY.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Chăm sóc răng miệng','en':'Dental Care','slug':'cham-soc-rang',
                  'desc':'Đánh răng, cao răng, viêm nướu ở chó — phòng ngừa và điều trị',
                  'tags':'răng miệng,đánh răng,cao răng,viêm nướu,dental,oral care',
-                 'content':'<h2>80% chó > 3 tuổi bị bệnh nha chu</h2><p>Mảng bám → cao răng → viêm nướu → rụng răng → nhiễm trùng máu. <strong>Phòng ngừa:</strong> Đánh răng 2-3 lần/tuần bằng kem đánh răng chuyên dụng cho chó. Cho gặm dental stick (Pedigree Dentastix, Greenies).</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_parts_yt):
                 add_part_if_new(z_yt, pd, order=10+i)
@@ -864,15 +905,21 @@ def seed_pet_v2():
                 {'vi':'Xã hội hóa chó con','en':'Puppy Socialization','slug':'xa-hoi-hoa',
                  'desc':'Kỹ năng xã hội hóa chó con 3-14 tuần tuổi — giai đoạn vàng',
                  'tags':'xã hội hóa,socialization,chó con,puppy,giai đoạn vàng',
-                 'content':'<h2>Giai đoạn vàng: 3-14 tuần</h2><p>Đây là thời kỳ chó con hình thành tính cách. Cần tiếp xúc với: <strong>nhiều người</strong> (già, trẻ, đàn ông, phụ nữ), <strong>nhiều chó</strong> (size khác nhau), <strong>nhiều môi trường</strong> (công viên, phố, quán cafe). Mỗi trải nghiệm phải <strong>tích cực</strong> — kèm treat và khen.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Chống sủa vô cớ','en':'Stop Excessive Barking','slug':'chong-sua-vo-co',
                  'desc':'Nguyên nhân và cách huấn luyện chó giảm sủa, phù hợp chung cư',
                  'tags':'sủa,barking,chung cư,tiếng ồn,huấn luyện',
-                 'content':'<h2>Tại sao chó sủa?</h2><p><strong>Bảo vệ lãnh thổ:</strong> Sủa khi có người lạ → Dạy lệnh "Quiet". <strong>Lo âu chia cách:</strong> Sủa khi chủ đi vắng → Tập quen dần, để đồ chơi. <strong>Thiếu vận động:</strong> Năng lượng dư thừa → Tăng thời gian dạo chơi.</p><h2>Phương pháp</h2><p>1. KHÔNG quát chó khi sủa (chó tưởng bạn sủa cùng). 2. Thưởng khi chó im lặng. 3. Dùng lệnh "Quiet" + treat ngay khi chó ngừng sủa.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Đi dạo & Kéo dây','en':'Leash Training','slug':'di-dao-keo-day',
                  'desc':'Dạy chó đi dạo đúng cách, không kéo dây dắt — loose leash walking',
                  'tags':'đi dạo,kéo dây,leash walking,dây dắt,dạo phố',
-                 'content':'<h2>Chó kéo dây — sai lầm phổ biến</h2><p>Chó kéo → bạn đi theo → chó học: "kéo = được đi tiếp". <strong>Phương pháp:</strong> Khi chó kéo → ĐỨNG IM → đợi chó quay lại → khen + đi tiếp. Kiên nhẫn, lặp lại. 2-4 tuần sẽ cải thiện rõ.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_parts_hl):
                 add_part_if_new(z_hl, pd, order=10+i)
@@ -884,15 +931,21 @@ def seed_pet_v2():
                 {'vi':'Đồ chơi cho chó','en':'Dog Toys','slug':'do-choi-cho',
                  'desc':'Đồ chơi gặm, bóng, kéo co, đồ chơi trí tuệ (puzzle) cho chó',
                  'tags':'đồ chơi,bóng,kéo co,puzzle,Kong,gặm,nhai',
-                 'content':'<h2>3 loại đồ chơi cần có</h2><p><strong>Đồ gặm (chew toy):</strong> Kong Classic, xương cao su — giữ chó bận, giảm stress. <strong>Bóng/Frisbee:</strong> Vận động ngoài trời. <strong>Puzzle toy:</strong> Đồ chơi trí tuệ — cho treat vào, chó tìm cách lấy ra. Kích thích trí não.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Quần áo & Phụ kiện','en':'Dog Clothes','slug':'quan-ao-phu-kien',
                  'desc':'Quần áo, áo mưa, giày, kính cho chó — thời trang và bảo vệ',
                  'tags':'quần áo chó,áo mưa,giày chó,thời trang pet,mùa đông',
-                 'content':'<h2>Khi nào chó cần mặc áo?</h2><p><strong>Giống lông ngắn</strong> (Chihuahua, Pug, French Bulldog) cần áo ấm khi < 15°C. <strong>Áo mưa</strong> cho chó đi dạo mùa mưa. <strong>Giày:</strong> Bảo vệ chân trên đường nóng (> 35°C) hoặc terrain gồ ghề.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Bát ăn & Bình nước','en':'Food & Water Bowl','slug':'bat-an-binh-nuoc',
                  'desc':'Chọn bát ăn, bình nước tự động, đế chống lật cho chó',
                  'tags':'bát ăn,bình nước,tự động,chống lật,inox,ceramic',
-                 'content':'<h2>Chất liệu bát ăn</h2><p><strong>Inox:</strong> Bền, dễ rửa, an toàn. Khuyên dùng nhất. <strong>Ceramic:</strong> Nặng (không lật), đẹp. <strong>Nhựa:</strong> Rẻ nhưng dễ xước → vi khuẩn. Nên thay thường xuyên.</p><h2>Bình nước tự động</h2><p>Pet fountain (200-500k) giữ nước chảy liên tục, lọc sạch. Chó thích uống nước chảy hơn nước đứng.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_parts_dd2):
                 add_part_if_new(z_dd2, pd, order=10+i)
@@ -905,15 +958,21 @@ def seed_pet_v2():
             {'vi':'Sữa tắm & Dầu xả','en':'Dog Shampoo','slug':'sua-tam-cho',
              'desc':'Sữa tắm chuyên dụng cho chó: chống ngứa, dưỡng lông, khử mùi',
              'tags':'sữa tắm,dầu gội,shampoo,dưỡng lông,khử mùi,chống ngứa',
-             'content':'<h2>Tại sao không dùng sữa tắm người?</h2><p>Da chó pH 6.5-7.5, da người pH 5.5. Dùng sữa tắm người → phá hủy lớp bảo vệ da → viêm da, ngứa, rụng lông.</p><h2>Top sản phẩm</h2><p><strong>Lông trắng:</strong> Bio-Groom Super White. <strong>Chống ngứa:</strong> Malaseb (thuốc), Hartz. <strong>Dưỡng lông dài:</strong> Isle of Dogs, Chris Christensen.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Cắt lông & Tạo kiểu','en':'Dog Grooming','slug':'cat-long-tao-kieu',
              'desc':'Cắt lông, tạo kiểu cho chó: tại nhà và spa chuyên nghiệp',
              'tags':'cắt lông,grooming,tỉa lông,spa chó,tông đơ,kéo cắt',
-             'content':'<h2>Tần suất cắt lông</h2><p><strong>Poodle, Bichon:</strong> Mỗi 4-6 tuần (lông không ngừng mọc). <strong>Golden, Husky:</strong> KHÔNG cạo trọc — lông 2 lớp bảo vệ khỏi nóng/lạnh. Chỉ tỉa gọn. <strong>Lông ngắn (Pug, Beagle):</strong> Chải lông tuần 1-2 lần, không cần cắt.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Cắt móng & Vệ sinh tai','en':'Nail & Ear Care','slug':'cat-mong-ve-sinh-tai',
              'desc':'Cắt móng đúng cách, vệ sinh tai, mắt cho chó tại nhà',
              'tags':'cắt móng,vệ sinh tai,viêm tai,tai chó,mắt chó',
-             'content':'<h2>Cắt móng</h2><p>Mỗi 2-4 tuần. Chỉ cắt phần trong suốt, TRÁNH phần hồng (mạch máu). Dùng kềm chuyên dụng. Nếu cắt trúng mạch máu → dùng bột cầm máu (styptic powder).</p><h2>Vệ sinh tai</h2><p>Tuần 1 lần cho giống tai cụp (Cocker, Basset). Dùng dung dịch vệ sinh tai (Epiotic, Virbac). Nhỏ vào tai → massage → lau bông.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         ]
         for i, pd in enumerate(grooming_parts):
             add_part_if_new(z_grooming, pd, order=i)
@@ -930,11 +989,15 @@ def seed_pet_v2():
                 {'vi':'Snack & Treat mèo','en':'Cat Treats','slug':'snack-treat-meo',
                  'desc':'Bánh thưởng, snack lỏng (Ciao Churu), thịt sấy cho mèo',
                  'tags':'snack mèo,treat,Ciao Churu,thưởng mèo,súp thưởng,inaba',
-                 'content':'<h2>Ciao Churu — hiện tượng</h2><p>Snack lỏng Ciao Churu (Inaba, Nhật) là treat mèo bán chạy nhất VN. Dạng kem lỏng, mèo liếm trực tiếp. Giá 8-15k/thanh. Hương: cá ngừ, gà, sò điệp.</p><h2>Loại treat khác</h2><p><strong>Thịt sấy:</strong> Cá ngừ sấy, gà sấy — 30-60k/gói. <strong>Dental treat:</strong> Greenies for Cats — sạch răng. <strong>Catnip treat:</strong> Có catnip — mèo phê.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Thức ăn mèo con (Kitten)','en':'Kitten Food','slug':'thuc-an-meo-con',
                  'desc':'Thức ăn chuyên dụng cho mèo con 1-12 tháng, sữa thay thế',
                  'tags':'kitten,mèo con,sữa mèo,cai sữa,Royal Canin Kitten',
-                 'content':'<h2>Sữa cho mèo con mồ côi</h2><p>KHÔNG cho uống sữa bò (gây tiêu chảy). Dùng sữa chuyên dụng: KMR, Royal Canin Babycat Milk. Cho bú bình mỗi 2-3 giờ (mèo < 2 tuần).</p><h2>Cai sữa (4-8 tuần)</h2><p>Trộn pate với sữa → giảm sữa dần → chuyển sang pate → hạt ngâm → hạt khô. Chọn sản phẩm "Kitten" (protein > 35%).</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_parts_meo_dd):
                 add_part_if_new(z_dd_meo, pd, order=10+i)
@@ -946,15 +1009,21 @@ def seed_pet_v2():
                 {'vi':'Bệnh thận & Tiết niệu','en':'Kidney & Urinary','slug':'benh-than-tiet-nieu',
                  'desc':'Bệnh thận mãn, sỏi bàng quang, viêm đường tiết niệu ở mèo',
                  'tags':'bệnh thận,thận mãn,sỏi,tiết niệu,FLUTD,CKD,uống nước',
-                 'content':'<h2>Bệnh thận — "kẻ giết thầm lặng"</h2><p>50% mèo > 10 tuổi bị bệnh thận mãn (CKD). Dấu hiệu: uống nhiều nước, tiểu nhiều, gầy dần, nôn. <strong>Phòng:</strong> Cho ăn thức ăn ướt, đặt nhiều bát nước/pet fountain, xét nghiệm máu hàng năm sau 7 tuổi.</p><h2>FLUTD (Hội chứng tiết niệu)</h2><p>Mèo đực hay gặp. Triệu chứng: rặn tiểu, tiểu ra máu, tiểu ngoài khay. <strong>Tắc niệu = CẤP CỨU</strong> — mèo không tiểu được > 24h có thể tử vong.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Nấm da mèo','en':'Cat Ringworm','slug':'nam-da-meo',
                  'desc':'Nấm da (ringworm) ở mèo: triệu chứng, điều trị, phòng lây sang người',
                  'tags':'nấm da mèo,ringworm,rụng lông,lây người,antifungal',
-                 'content':'<h2>Nấm mèo LÂY SANG NGƯỜI</h2><p>Nấm da mèo (dermatophytosis) do nấm Microsporum canis — <strong>lây sang người</strong> qua tiếp xúc. Triệu chứng mèo: mảng tròn rụng lông, vảy, ngứa nhẹ. Một số mèo mang nấm không triệu chứng.</p><h2>Điều trị</h2><p><strong>Tắm thuốc:</strong> Malaseb, miconazole 2 lần/tuần. <strong>Uống:</strong> Itraconazole 6-8 tuần. <strong>Môi trường:</strong> Hút bụi nhà, giặt chăn nệm 60°C, sát trùng lồng. Điều trị đến khi cấy nấm âm tính 2 lần liên tiếp.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Tẩy giun & Ve mèo','en':'Cat Deworming','slug':'tay-giun-ve-meo',
                  'desc':'Lịch tẩy giun, phòng ve bọ chét cho mèo trong nhà và ngoài trời',
                  'tags':'tẩy giun mèo,ve mèo,bọ chét,Broadline,Revolution,nhỏ gáy',
-                 'content':'<h2>Tẩy giun</h2><p>Mèo con: 2 tuần/lần từ 2-12 tuần. Mèo lớn: 3-6 tháng/lần. Thuốc: Drontal Cat (50-80k/viên), Milbemax Cat.</p><h2>Phòng ve & bọ chét</h2><p><strong>Mèo trong nhà:</strong> Vẫn cần phòng! Ve có thể vào nhà qua giày, quần áo. <strong>Nhỏ gáy hàng tháng:</strong> Revolution (trị ve + giun tim + giun tròn), Broadline (all-in-one), Frontline.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_parts_meo_yt):
                 add_part_if_new(z_yt_meo, pd, order=10+i)
@@ -967,15 +1036,21 @@ def seed_pet_v2():
             {'vi':'Mèo cào đồ — Xử lý đúng','en':'Cat Scratching','slug':'meo-cao-do',
              'desc':'Tại sao mèo cào, cách bảo vệ nội thất và hướng mèo cào đúng chỗ',
              'tags':'cào đồ,cào sofa,trụ cào,scratcher,hành vi mèo',
-             'content':'<h2>Mèo cào là BẢN NĂNG</h2><p>Cào để: đánh dấu lãnh thổ (tuyến mùi ở chân), mài móng, kéo giãn cơ. <strong>KHÔNG cắt bỏ móng</strong> (declawing) — bị cấm ở nhiều nước, gây đau đớn suốt đời.</p><h2>Giải pháp</h2><p>1. Đặt trụ cào <strong>cạnh nơi mèo hay cào</strong>. 2. Dán mèo catnip lên trụ cào. 3. Dùng băng keo 2 mặt lên sofa (mèo ghét dính). 4. Cắt đầu móng 2 tuần/lần.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Mèo đi vệ sinh ngoài khay','en':'Litter Box Problems','slug':'di-ve-sinh-ngoai-khay',
              'desc':'Nguyên nhân và cách xử lý khi mèo bỏ khay, tiểu bậy',
              'tags':'tiểu bậy,bỏ khay,litter box,vệ sinh,stress mèo',
-             'content':'<h2>Nguyên nhân #1: Y tế</h2><p>FLUTD, viêm bàng quang, tiểu đường → mèo đau khi tiểu → liên kết khay = đau → né khay. Đi khám trước!</p><h2>Nguyên nhân #2: Khay không OK</h2><p><strong>Bẩn:</strong> Xúc phân mỗi ngày, thay cát mỗi tuần. <strong>Vị trí:</strong> Yên tĩnh, dễ tiếp cận. <strong>Số lượng:</strong> N mèo + 1 khay. <strong>Loại cát:</strong> Mèo ghét cát mới → thay dần.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Stress & Lo âu ở mèo','en':'Cat Stress & Anxiety','slug':'stress-meo',
              'desc':'Dấu hiệu stress, nguyên nhân, cách giảm stress cho mèo',
              'tags':'stress mèo,lo âu,Feliway,giấu mình,bỏ ăn,liếm lông',
-             'content':'<h2>Dấu hiệu stress</h2><p>Giấu mình liên tục, bỏ ăn, liếm lông quá mức (hói cả mảng), hung hăng bất thường, tiểu bậy, tiêu chảy mãn.</p><h2>Nguyên nhân phổ biến</h2><p>Nhà mới, thêm thú cưng mới, tiếng ồn, thay đổi nội thất, chủ đi vắng lâu.</p><h2>Giải pháp</h2><p><strong>Feliway:</strong> Pheromone nhân tạo, cắm điện — mèo bình tĩnh hơn (300-500k). <strong>Không gian riêng:</strong> Mỗi mèo cần 1 nơi trú ẩn cao (kệ, cat tree). <strong>Routine:</strong> Giữ lịch ăn, chơi cố định.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         ]
         for i, pd in enumerate(hanh_vi_parts):
             add_part_if_new(z_hv, pd, order=i)
@@ -987,15 +1062,21 @@ def seed_pet_v2():
                 {'vi':'Đồ chơi mèo','en':'Cat Toys','slug':'do-choi-meo',
                  'desc':'Cần câu, bóng, chuột giả, đồ chơi tương tác, catnip',
                  'tags':'đồ chơi mèo,cần câu,chuột giả,catnip,laser,tương tác',
-                 'content':'<h2>Mèo CẦN chơi mỗi ngày</h2><p>Mèo trong nhà thiếu kích thích → béo phì, trầm cảm, phá phách. Cần tối thiểu <strong>15-30 phút chơi/ngày</strong>.</p><h2>Top đồ chơi</h2><p><strong>Cần câu lông:</strong> Kích thích bản năng săn mồi — hiệu quả nhất. <strong>Bóng lăn:</strong> Tự chơi khi chủ bận. <strong>Chuột giả catnip:</strong> 70% mèo phê catnip. <strong>Laser pointer:</strong> Cẩn thận — luôn kết thúc bằng treat (mèo cần "bắt được" gì đó).</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Balo & Túi vận chuyển mèo','en':'Cat Carrier','slug':'balo-tui-van-chuyen',
                  'desc':'Balo mèo, túi vận chuyển, chuồng vận chuyển — đi bác sĩ, đi chơi',
                  'tags':'balo mèo,túi vận chuyển,carrier,đi máy bay,đi bác sĩ',
-                 'content':'<h2>3 loại phổ biến</h2><p><strong>Chuồng nhựa cứng:</strong> An toàn nhất, bền, dễ rửa. Chuẩn IATA cho đi máy bay (nếu đúng size). 200-500k. <strong>Túi vải:</strong> Nhẹ, gọn, phù hợp mèo nhỏ. 150-350k. <strong>Balo phi hành gia:</strong> Có cửa sổ tròn, trendy. 300-600k. Mèo có thể ngắm cảnh.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Bát ăn & Vòi nước mèo','en':'Cat Bowl & Fountain','slug':'bat-an-voi-nuoc-meo',
                  'desc':'Bát ăn nghiêng, vòi nước (pet fountain) khuyến khích mèo uống nước',
                  'tags':'bát ăn mèo,pet fountain,vòi nước,uống nước,phòng thận',
-                 'content':'<h2>Tại sao cần pet fountain?</h2><p>Mèo bản năng thích nước chảy (nước đọng trong tự nhiên = nguy hiểm). Pet fountain giúp mèo uống nhiều nước hơn 30-50% → <strong>phòng bệnh thận và sỏi tiết niệu</strong>.</p><h2>Top sản phẩm</h2><p><strong>Catit Flower:</strong> 350-500k, lọc carbon, yên. <strong>PetKit Eversweet:</strong> 600-900k, thép inox, app điều khiển. <strong>Bát ăn nghiêng 15°:</strong> Giảm nôn, bảo vệ cổ mèo.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_parts_meo_dd):
                 add_part_if_new(z_dd_meo, pd, order=10+i)
@@ -1008,11 +1089,15 @@ def seed_pet_v2():
             {'vi':'Chải lông & Chống rụng','en':'Cat Brushing','slug':'chai-long-meo',
              'desc':'Chải lông mèo đúng cách, giảm rụng lông, phòng búi lông (hairball)',
              'tags':'chải lông,rụng lông,hairball,búi lông,Furminator,lông mèo',
-             'content':'<h2>Tại sao mèo rụng lông nhiều?</h2><p>Mèo thay lông theo mùa (xuân, thu). Mèo trong nhà (điều hòa) có thể rụng quanh năm. Chải lông 3-5 lần/tuần giảm rụng lông 80%.</p><h2>Dụng cụ</h2><p><strong>Furminator:</strong> "Vua" chải lông mèo. Loại bỏ lớp lông chết bên trong. <strong>Lược răng thưa:</strong> Cho mèo lông dài (Ba Tư, Maine Coon). <strong>Găng tay chải:</strong> Cho mèo sợ lược.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Sữa tắm mèo','en':'Cat Shampoo','slug':'sua-tam-meo',
              'desc':'Sữa tắm cho mèo: khi nào cần tắm, sản phẩm an toàn, tắm khô',
              'tags':'sữa tắm mèo,tắm mèo,tắm khô,shampoo cat,grooming',
-             'content':'<h2>Mèo có cần tắm không?</h2><p>Hầu hết mèo <strong>tự làm sạch rất tốt</strong>. Chỉ cần tắm khi: dính bẩn nặng, có nấm/ve, mèo béo không liếm tới. Tần suất: 1-3 tháng/lần.</p><h2>Mẹo tắm mèo</h2><p>Cắt móng trước (tránh bị cào). Nước ấm 37°C. Sữa tắm chuyên mèo (Bioline, Hartz Cat). <strong>Tắm khô:</strong> Bọt/spray tắm khô — giải pháp cho mèo sợ nước.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         ]
         for i, pd in enumerate(groom_meo_parts):
             add_part_if_new(z_groom_meo, pd, order=i)
@@ -1030,15 +1115,21 @@ def seed_pet_v2():
             {'vi':'Chuồng & Lót chuồng thỏ','en':'Rabbit Housing','slug':'chuong-tho',
              'desc':'Chọn chuồng, lót chuồng an toàn cho thỏ — kích thước, vật liệu',
              'tags':'chuồng thỏ,lót chuồng,cỏ khô,hay,rabbit cage,playpen',
-             'content':'<h2>Kích thước tối thiểu</h2><p>Chuồng phải ít nhất <strong>4 lần kích thước thỏ</strong> khi nằm duỗi. Thỏ cần thời gian ngoài chuồng mỗi ngày (tối thiểu 3-4 giờ). <strong>Lót chuồng:</strong> Cỏ Timothy hay, giấy xé. KHÔNG dùng mùn cưa thông/tuyết tùng (độc với phổi thỏ).</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Thức ăn thỏ','en':'Rabbit Diet','slug':'thuc-an-tho',
              'desc':'Chế độ ăn đúng cho thỏ: cỏ, rau, viên nén, trái cây',
              'tags':'thức ăn thỏ,cỏ Timothy,rau,hay,pellet,thỏ ăn gì',
-             'content':'<h2>80% là cỏ khô (Hay)</h2><p>Cỏ Timothy (thỏ > 7 tháng) hoặc Alfalfa (thỏ con < 7 tháng). Cỏ phải có SẴN 24/7. Cỏ giúp mài răng (răng thỏ mọc suốt đời) và tốt cho đường ruột.</p><h2>Phần còn lại</h2><p><strong>Rau xanh (10%):</strong> Rau muống, cải xoăn, rau thơm. <strong>Viên nén (5%):</strong> 1/4 cup/ngày. <strong>Trái cây:</strong> Treat hiếm (1-2 lần/tuần) — dâu, chuối (ít thôi, nhiều đường).</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Bệnh thường gặp ở thỏ','en':'Rabbit Health','slug':'benh-tho',
              'desc':'GI Stasis, quá nóng, bệnh răng, lông bết — nhận biết và phòng tránh',
              'tags':'bệnh thỏ,GI Stasis,tắc ruột,quá nóng,răng thỏ,bác sĩ thú y',
-             'content':'<h2>GI Stasis — NGUY HIỂM</h2><p>Hệ tiêu hóa thỏ ngừng hoạt động. Triệu chứng: bỏ ăn, không đi phân, nằm một chỗ, bụng căng. <strong>Cấp cứu</strong> — cần đi bác sĩ NGAY trong vài giờ. Phòng: cho ăn nhiều cỏ, vận động hàng ngày.</p><h2>Quá nóng</h2><p>Thỏ KHÔNG CHỊU được nóng > 30°C. Dấu hiệu: thở nhanh, tai nóng đỏ, nằm ngả. Phòng: điều hòa/quạt, chai nước đá trong chuồng, KHÔNG để ngoài trời.</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         ]
         for i, pd in enumerate(tho_parts):
             add_part_if_new(z_tho, pd, order=i)
@@ -1051,11 +1142,15 @@ def seed_pet_v2():
             {'vi':'Lồng & Phụ kiện chim','en':'Bird Cage','slug':'long-chim',
              'desc':'Chọn lồng, cầu đậu, đồ chơi, bát ăn cho chim cảnh',
              'tags':'lồng chim,cầu đậu,bird cage,phụ kiện chim,vẹt',
-             'content':'<h2>Chọn lồng</h2><p>Lồng phải đủ rộng để chim <strong>xòe cánh không chạm thanh</strong>. Vẹt nhỏ (yến phụng): tối thiểu 45x45x60cm. Vẹt lớn (Cockatiel, Conure): 60x60x90cm. <strong>Khoảng cách thanh:</strong> Chim nhỏ: 1cm. Chim lớn: 1.5-2cm (tránh kẹt đầu).</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             {'vi':'Thức ăn chim cảnh','en':'Bird Food','slug':'thuc-an-chim',
              'desc':'Hạt, trái cây, rau, thức ăn viên cho các loại chim cảnh',
              'tags':'thức ăn chim,hạt kê,hạt hướng dương,pellet bird,rau quả chim',
-             'content':'<h2>Chim cần ăn đa dạng</h2><p>Chỉ cho ăn hạt hướng dương = như người chỉ ăn khoai chiên — béo, thiếu dinh dưỡng. <strong>Chế độ đúng:</strong> Pellet (thức ăn viên cân bằng) 60%, rau quả tươi 30%, hạt/treat 10%.</p><h2>Thức ăn ĐỘC cho chim</h2><p>Bơ (CHẾT), sô-cô-la, hành tỏi, rượu, caffeine, hạt táo/lê (cyanide).</p>'},
+             'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         ]
         for i, pd in enumerate(chim_parts):
             add_part_if_new(z_chim, pd, order=i)
@@ -1067,11 +1162,15 @@ def seed_pet_v2():
                 {'vi':'Bệnh thường gặp ở hamster','en':'Hamster Health','slug':'benh-hamster',
                  'desc':'Wet tail, cảm lạnh, u bướu, bệnh da — nhận biết và phòng tránh',
                  'tags':'bệnh hamster,wet tail,u bướu,ướt đuôi,tiêu chảy',
-                 'content':'<h2>Wet Tail (Ướt đuôi)</h2><p>Tiêu chảy nặng, đuôi ướt bẩn, bỏ ăn, lờ đờ. Tỷ lệ tử vong cao nếu không điều trị trong 24-48h. Thường gặp ở hamster con (3-8 tuần) khi stress (mới mua về).</p><h2>Phòng tránh</h2><p>Giảm stress khi mới về: để yên 3-5 ngày không bế. Chuồng sạch, lót khô. Thức ăn tươi rửa sạch.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Đồ chơi & Vận động hamster','en':'Hamster Toys','slug':'do-choi-hamster',
                  'desc':'Bánh xe chạy, đường ống, cầu, xích đu cho hamster',
                  'tags':'đồ chơi hamster,bánh xe,running wheel,ống chui,hamster ball',
-                 'content':'<h2>Bánh xe — BẮT BUỘC</h2><p>Hamster chạy 5-8 km/đêm trong tự nhiên. Bánh xe giúp vận động, tránh béo phì, stress. Size: hamster lùn ≥ 20cm đường kính, hamster Syria ≥ 28cm. <strong>KHÔNG dùng bánh xe thanh nan</strong> (kẹt chân gãy).</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_hamster):
                 add_part_if_new(z_hamster, pd, order=10+i)
@@ -1083,11 +1182,15 @@ def seed_pet_v2():
                 {'vi':'Cá Betta (cá xiêm)','en':'Betta Fish','slug':'ca-betta',
                  'desc':'Chăm sóc cá Betta: bể, nhiệt độ, thức ăn, bệnh thường gặp',
                  'tags':'cá Betta,cá xiêm,cá lia thia,betta fish,cá cảnh dễ nuôi',
-                 'content':'<h2>Cá Betta — dễ nuôi nhất?</h2><p>Đúng, nhưng không phải "bỏ bể nhỏ không cần chăm". Bể tối thiểu <strong>5 lít</strong> (lý tưởng 15-20 lít). Nhiệt độ 24-28°C. Thay nước 25% mỗi tuần. <strong>KHÔNG nuôi 2 Betta đực chung</strong> — chúng đánh nhau chết.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                 {'vi':'Hồ thủy sinh','en':'Aquascaping','slug':'ho-thuy-sinh',
                  'desc':'Setup hồ thủy sinh: cây, đá, nền, CO2, đèn — hướng dẫn cho người mới',
                  'tags':'thủy sinh,aquascape,cây thủy sinh,CO2,đá,nền thủy sinh',
-                 'content':'<h2>Setup hồ thủy sinh đầu tiên</h2><p><strong>Bể:</strong> 40-60 lít (dễ quản lý nước). <strong>Nền:</strong> ADA Amazonia hoặc Tropica (dinh dưỡng cho cây). <strong>Cây dễ:</strong> Rêu Java, Anubias, Bucephalandra — không cần CO2. <strong>Đèn:</strong> LED 6500K, 8-10 giờ/ngày.</p><h2>Chi phí</h2><p>Setup cơ bản: 500k-2 triệu. Bể cao cấp (CO2, lọc canister): 3-10 triệu.</p>'},
+                 'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
             ]
             for i, pd in enumerate(new_ca):
                 add_part_if_new(z_ca, pd, order=10+i)
@@ -1102,13 +1205,17 @@ def seed_pet_v2():
          'tags':'giống chó,chung cư,apartment,ít sủa,nhỏ gọn',
          'excerpt':'Chung cư hẹp, hàng xóm gần — giống chó nào phù hợp? Xếp hạng theo kích thước, mức sủa, năng lượng, và tính cách.',
          'reading_time':12,
-         'content':'<h2>Tiêu chí đánh giá</h2><p>Kích thước (< 10kg ưu tiên), mức sủa (ít = tốt), năng lượng (trung bình), khả năng ở một mình.</p><h2>Top 5</h2><p><strong>1. Poodle (Toy/Mini):</strong> 3-6kg, thông minh, ít rụng lông, dễ huấn luyện. <strong>2. Shih Tzu:</strong> 4-7kg, hiền, ít sủa, phù hợp gia đình có trẻ nhỏ. <strong>3. French Bulldog:</strong> 8-13kg, ít sủa, không cần vận động nhiều. <strong>4. Corgi:</strong> 10-14kg, vui vẻ, lông đẹp, nhưng hơi năng lượng. <strong>5. Cavalier King Charles:</strong> 5-8kg, cực hiền, "chó sofa" hoàn hảo.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Top 8 giống mèo được yêu thích nhất Việt Nam','slug':'top-giong-meo-yeu-thich-vn',
          'tier':'nganh','category':'chon-giong',
          'tags':'giống mèo,mèo Anh,mèo Ba Tư,mèo ta,Munchkin,Scottish Fold',
          'excerpt':'8 giống mèo phổ biến nhất VN: đặc điểm, giá mua, chi phí nuôi, và tính cách từng giống.',
          'reading_time':10,
-         'content':'<h2>1. Mèo Anh lông ngắn (British Shorthair)</h2><p>Mặt tròn, lông dày, hiền. Giá: 3-15 triệu. Màu phổ biến: xanh xám (blue).</p><h2>2. Mèo ta (mèo mướp)</h2><p>Khỏe mạnh nhất, dễ nuôi, ít bệnh. Giá: miễn phí - 500k. Ai nói mèo ta không đẹp?</p><h2>3. Scottish Fold</h2><p>Tai cụp đặc trưng, dễ thương. Giá: 5-20 triệu. LƯU Ý: Gen tai cụp liên quan bệnh xương khớp — chọn nhà lai uy tín.</p><h2>4. Munchkin</h2><p>Chân ngắn, đi lạch bạch. Giá: 8-25 triệu. Khỏe mạnh bất chấp chân ngắn.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
 
         # T2: CHUNG
         {'title':'Hướng dẫn nhận nuôi chó mèo tại VN — Adopt Don\'t Shop','slug':'huong-dan-nhan-nuoi-adopt',
@@ -1116,20 +1223,26 @@ def seed_pet_v2():
          'tags':'nhận nuôi,adopt,cứu hộ,trại chó,trại mèo,volunteer',
          'excerpt':'Quy trình nhận nuôi chó mèo từ trạm cứu hộ, điều kiện, chi phí, và danh sách trạm uy tín tại Việt Nam.',
          'reading_time':8,
-         'content':'<h2>Tại sao nên nhận nuôi?</h2><p>Hàng nghìn chó mèo bị bỏ rơi mỗi năm. Nhận nuôi = cứu 1 mạng sống + giảm tải trạm cứu hộ. Chó mèo cứu hộ thường đã tiêm vaccine, triệt sản, tẩy giun.</p><h2>Quy trình</h2><p>1. Liên hệ trạm cứu hộ. 2. Phỏng vấn (điều kiện sống, kinh nghiệm). 3. Thử nuôi 1-2 tuần. 4. Ký giấy nhận nuôi. Chi phí: miễn phí hoặc phí hỗ trợ 200-500k (vaccine, triệt sản).</p><h2>Trạm cứu hộ uy tín</h2><p>HN: Hanoi Pet Rescue, VAPA. SG: ARC, Saigon Pet Adoption.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Mèo ăn gì — Thực phẩm AN TOÀN và ĐỘC HẠI','slug':'meo-an-gi-an-toan-doc-hai',
          'tier':'chung','category':'dinh-duong',
          'related_segment_slug':'meo','related_zone_slug':'dinh-duong',
          'tags':'mèo ăn gì,thực phẩm độc,thực phẩm an toàn,hành,tỏi,sô-cô-la',
          'excerpt':'Danh sách đầy đủ thực phẩm mèo ăn được và KHÔNG được ăn. Một số thực phẩm tưởng an toàn nhưng cực kỳ nguy hiểm.',
          'reading_time':7,
-         'content':'<h2>NGUY HIỂM — KHÔNG CHO MÈO ĂN</h2><p><strong>Hành, tỏi, hẹ:</strong> Phá hủy hồng cầu → thiếu máu → chết. <strong>Sô-cô-la:</strong> Theobromine độc. <strong>Nho, nho khô:</strong> Gây suy thận cấp. <strong>Xương gà nấu:</strong> Gãy sắc, đâm thủng ruột.</p><h2>AN TOÀN (ăn vừa phải)</h2><p><strong>Gà luộc:</strong> Protein tốt, không gia vị. <strong>Cá hồi nấu chín:</strong> Omega-3 tốt cho lông. <strong>Bí đỏ:</strong> Chất xơ, tốt cho tiêu hóa. <strong>Dưa hấu (bỏ hạt):</strong> Bổ sung nước.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Cách chăm sóc chó mèo mùa nóng — Phòng sốc nhiệt','slug':'cham-soc-mua-nong-soc-nhiet',
          'tier':'chung','category':'cham-soc',
          'tags':'mùa nóng,sốc nhiệt,heatstroke,quạt,điều hòa,nước',
          'excerpt':'Mùa hè VN nóng 35-40°C — chó mèo rất dễ sốc nhiệt. Hướng dẫn phòng ngừa và sơ cứu kịp thời.',
          'reading_time':6,
-         'content':'<h2>Dấu hiệu sốc nhiệt</h2><p>Thở hổn hển, lưỡi đỏ/tím, nôn, lảo đảo, co giật. <strong>Giống nguy cơ cao:</strong> Mặt ngắn (Pug, Bulldog, Ba Tư), béo phì, già, lông dày.</p><h2>Sơ cứu</h2><p>1. Đưa vào nơi mát, máy lạnh. 2. Đắp khăn ướt (nước MÁT, không lạnh) lên bụng, nách, bẹn. 3. Cho uống ít nước mát. 4. ĐI BÁC SĨ NGAY — sốc nhiệt có thể gây tổn thương nội tạng không hồi phục.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
 
         # T3: CHI TIET
         {'title':'So sánh 5 loại cát vệ sinh mèo phổ biến nhất 2025','slug':'so-sanh-5-loai-cat-meo-2025',
@@ -1139,7 +1252,9 @@ def seed_pet_v2():
          'excerpt':'So sánh chi tiết 5 loại cát mèo: Bentonite, Tofu, Crystal, Giấy, Gỗ thông — giá, ưu nhược điểm, và loại nào phù hợp.',
          'reading_time':8,
          'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="cat ve sinh meo" data-limit="6"></div>',
-         'content':'<h2>Bảng so sánh nhanh</h2><p><strong>Bentonite:</strong> ⭐ Vón cục tốt nhất. 30-60k/5L. Nặng, bụi. <strong>Tofu:</strong> ⭐ Ít bụi, nhẹ, xả bồn cầu OK. 80-150k/6L. <strong>Crystal:</strong> ⭐ Hút mùi cực tốt. 60-120k/3.8L. Không vón. <strong>Giấy:</strong> Ít bụi nhất, cho mèo dị ứng. 100-180k/10L. Vón kém. <strong>Gỗ thông:</strong> Tự nhiên, rẻ. 40-80k/5L. Mùi gỗ mèo có thể ghét.</p><h2>Kết luận</h2><p><strong>Mèo 1 con, budget:</strong> Bentonite. <strong>Nhà chung cư, sạch sẽ:</strong> Tofu. <strong>Đi vắng nhiều:</strong> Crystal (ít phải xúc). <strong>Mèo dị ứng:</strong> Giấy hoặc gỗ.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Review Nexgard vs Frontline vs Bravecto — Thuốc phòng ve chó','slug':'review-nexgard-frontline-bravecto',
          'tier':'chi-tiet','category':'y-te',
          'related_segment_slug':'cho','related_zone_slug':'y-te',
@@ -1147,7 +1262,9 @@ def seed_pet_v2():
          'excerpt':'So sánh 3 sản phẩm phòng ve chó bán chạy nhất: cách dùng, hiệu quả, giá, và tác dụng phụ.',
          'reading_time':9,
          'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="nexgard cho" data-limit="6"></div>',
-         'content':'<h2>Frontline Plus (nhỏ gáy)</h2><p>Hiệu quả 1 tháng. Diệt ve + bọ chét. Giá 150-250k/tuýp. Ưu: rẻ, quen thuộc. Nhược: cần 48h mới tác dụng, ẩm có thể giảm hiệu quả.</p><h2>Nexgard (viên uống)</h2><p>Hiệu quả 1 tháng. Viên nhai vị thịt bò. Giá 200-350k/viên. Ưu: tắm thoải mái, không dính lông. Nhược: không dùng cho chó < 2kg hoặc < 8 tuần.</p><h2>Bravecto (viên uống)</h2><p>Hiệu quả <strong>3 tháng</strong> — tiện nhất. Giá 400-650k/viên. Ưu: 1 viên/quý. Nhược: giá cao, không dùng cho chó bệnh.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Ciao Churu, Inaba, JerHigh — Review top snack mèo 2025','slug':'review-top-snack-meo-2025',
          'tier':'chi-tiet','category':'dinh-duong',
          'related_segment_slug':'meo','related_zone_slug':'dinh-duong',
@@ -1155,14 +1272,18 @@ def seed_pet_v2():
          'excerpt':'So sánh 3 dòng snack mèo hot nhất: Ciao Churu, Inaba, JerHigh — thành phần, giá, mèo thích loại nào nhất?',
          'reading_time':6,
          'embed_code':'<div class="at-carousel" data-network="shopee" data-keyword="ciao churu meo" data-limit="6"></div>',
-         'content':'<h2>Ciao Churu (INABA - Nhật)</h2><p>Snack lỏng dạng tuýp. Mèo liếm trực tiếp — tương tác cực cute. 8-15k/thanh. Hương: cá ngừ, gà, sò điệp. Thành phần sạch, ít phụ gia. <strong>Vua snack mèo VN.</strong></p><h2>Inaba Grilled</h2><p>Cùng hãng Ciao nhưng dạng fillet nướng. 20-35k/miếng. Mèo gặm trực tiếp, giữ bận lâu hơn.</p><h2>JerHigh (Thái)</h2><p>Dạng stick, nhiều hương vị. 15-25k/gói. Giá rẻ hơn nhưng thành phần kém sạch hơn.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Hướng dẫn setup hồ thủy sinh đầu tiên — Budget 1 triệu','slug':'setup-ho-thuy-sinh-budget-1-trieu',
          'tier':'chi-tiet','category':'ca-canh',
          'related_segment_slug':'thu-nho','related_zone_slug':'ca-canh',
          'tags':'thủy sinh,aquascape,setup,người mới,budget,cây thủy sinh',
          'excerpt':'Setup hồ thủy sinh đẹp với chỉ 1 triệu đồng. Hướng dẫn từng bước cho người mới: bể, nền, cây, lọc, đèn.',
          'reading_time':10,
-         'content':'<h2>Danh sách mua sắm (~1 triệu)</h2><p><strong>Bể 40cm:</strong> 100-150k. <strong>Lọc thác:</strong> 80-120k. <strong>Đèn LED:</strong> 100-200k. <strong>Nền:</strong> Sỏi + phân nền cơ bản: 100-150k. <strong>Cây:</strong> Rêu Java, Anubias, Bucephalandra: 100-200k. <strong>Cá:</strong> Neon, Guppy, tôm: 50-100k.</p><h2>Tuần 1: Cycle bể</h2><p>Setup bể + nền + cây + lọc. Chạy lọc 1 tuần KHÔNG thả cá. Vi khuẩn có lợi cần thời gian phát triển. <strong>Thả cá sớm = cá chết.</strong></p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
     ]
 
     for ad in new_articles:
@@ -1303,15 +1424,21 @@ def seed_travel():
                  {'vi':'Hạ Long Bay','en':'Ha Long Bay','slug':'ha-long-bay',
                   'desc':'Vịnh Hạ Long — Di sản UNESCO, 1,969 hòn đảo đá vôi, du thuyền, kayak',
                   'tags':'Hạ Long,du thuyền,UNESCO,Quảng Ninh,biển',
-                  'content':'<h2>Tổng quan</h2><p>Vịnh Hạ Long nằm ở Quảng Ninh, cách Hà Nội 170km. Di sản Thiên nhiên Thế giới UNESCO với <strong>1,969 hòn đảo</strong> đá vôi. Địa điểm du lịch #1 miền Bắc.</p><h2>Chi phí</h2><p><strong>Du thuyền 1 đêm:</strong> 1.5-8 triệu/người. <strong>Tour trong ngày:</strong> 500k-1.5 triệu. <strong>Kayak:</strong> 150-300k/giờ.</p><h2>Mùa đẹp nhất</h2><p>Tháng 3-5 và 9-11: thời tiết đẹp, ít mưa, tầm nhìn xa.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Sapa & Fansipan','en':'Sapa & Fansipan','slug':'sapa-fansipan',
                   'desc':'Sapa — phố sương mù, ruộng bậc thang, chinh phục Fansipan 3,143m',
                   'tags':'Sapa,Fansipan,Lào Cai,trekking,ruộng bậc thang',
-                  'content':'<h2>Sapa</h2><p>Thị trấn sương mù ở độ cao 1,600m, Lào Cai. Nổi tiếng với ruộng bậc thang, bản làng người H\'Mông, và đỉnh Fansipan.</p><h2>Chinh phục Fansipan</h2><p><strong>Cáp treo:</strong> 700k/người, 15 phút. <strong>Trekking:</strong> 2 ngày 1 đêm, 1.5-3 triệu (có porter). Nóc nhà Đông Dương — 3,143m.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'Mông, và đỉnh Fansipan.</p><h2>Chinh phục Fansipan</h2><p><strong>Cáp treo:</strong> 700k/người, 15 phút. <strong>Trekking:</strong> 2 ngày 1 đêm, 1.5-3 triệu (có porter). Nóc nhà Đông Dương — 3,143m.</p>'},
                  {'vi':'Ninh Bình — Tràng An','en':'Ninh Binh — Trang An','slug':'ninh-binh-trang-an',
                   'desc':'Tràng An — Di sản kép UNESCO, thuyền chèo qua hang động, cảnh núi non',
                   'tags':'Ninh Bình,Tràng An,Tam Cốc,thuyền,di sản',
-                  'content':'<h2>Tràng An</h2><p>Di sản Văn hóa & Thiên nhiên Thế giới (kép). Hành trình thuyền chèo 2-3 giờ qua <strong>12 hang động</strong> và các đền chùa cổ. Vé: 200k/người.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Miền Trung','slug':'mien-trung','icon':'🏛️','color':'#3498db',
              'desc':'Đà Nẵng, Hội An, Huế, Phong Nha, Quy Nhơn',
@@ -1319,15 +1446,21 @@ def seed_travel():
                  {'vi':'Hội An — Phố cổ','en':'Hoi An Ancient Town','slug':'hoi-an-pho-co',
                   'desc':'Phố cổ Hội An — đèn lồng, ẩm thực, may đo áo dài, đêm rằm',
                   'tags':'Hội An,phố cổ,đèn lồng,ẩm thực,UNESCO,Quảng Nam',
-                  'content':'<h2>Phố cổ Hội An</h2><p>Di sản Văn hóa Thế giới UNESCO. Nổi tiếng với kiến trúc cổ, đèn lồng, và ẩm thực đặc sắc (Cao lầu, Mì Quảng, Bánh mì Phượng).</p><h2>Chi phí</h2><p>Vé tham quan phố cổ: 80k (5 điểm). Homestay: 200-500k/đêm. Ăn uống: 50-150k/bữa.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Đà Nẵng — Biển & Bà Nà','en':'Da Nang','slug':'da-nang',
                   'desc':'Đà Nẵng — biển Mỹ Khê, Bà Nà Hills, Cầu Vàng, Ngũ Hành Sơn',
                   'tags':'Đà Nẵng,Bà Nà,Cầu Vàng,Mỹ Khê,biển',
-                  'content':'<h2>Đà Nẵng</h2><p>Thành phố đáng sống nhất Việt Nam. <strong>Biển Mỹ Khê:</strong> Top 25 bãi biển đẹp nhất Châu Á. <strong>Bà Nà Hills:</strong> 600k vé cáp treo, khu vui chơi, Cầu Vàng iconic.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Phong Nha — Hang động','en':'Phong Nha Caves','slug':'phong-nha',
                   'desc':'Vườn Quốc gia Phong Nha — Sơn Đoòng, Thiên Đường, Phong Nha',
                   'tags':'Phong Nha,Sơn Đoòng,hang động,Quảng Bình,UNESCO',
-                  'content':'<h2>Hang Sơn Đoòng</h2><p>Hang động lớn nhất thế giới. Tour 4 ngày 3 đêm: ~70 triệu/người (giới hạn 1,000 khách/năm). <strong>Hang Thiên Đường:</strong> 250k vé, 31km dài. <strong>Phong Nha:</strong> 150k, đi thuyền.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Miền Nam','slug':'mien-nam','icon':'🌴','color':'#e74c3c',
              'desc':'TP.HCM, Phú Quốc, Đà Lạt, Cần Thơ, Vũng Tàu',
@@ -1335,11 +1468,15 @@ def seed_travel():
                  {'vi':'Phú Quốc — Đảo ngọc','en':'Phu Quoc Island','slug':'phu-quoc',
                   'desc':'Phú Quốc — bãi biển đẹp, VinWonders, cáp treo, sunset, nước mắm',
                   'tags':'Phú Quốc,đảo,resort,VinWonders,biển,Kiên Giang',
-                  'content':'<h2>Phú Quốc</h2><p>Đảo lớn nhất Việt Nam, Kiên Giang. <strong>Bãi Sao:</strong> bãi biển đẹp nhất. <strong>VinWonders:</strong> 880k vé. <strong>Cáp treo Hòn Thơm:</strong> 150k, dài nhất thế giới (7.9km).</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Đà Lạt — Thành phố sương mù','en':'Da Lat','slug':'da-lat',
                   'desc':'Đà Lạt — hoa, cà phê, thác, kiến trúc Pháp, cắm trại',
                   'tags':'Đà Lạt,Lâm Đồng,sương mù,cà phê,hoa,núi',
-                  'content':'<h2>Đà Lạt</h2><p>Thành phố ngàn hoa, cao 1,500m. Nhiệt độ quanh năm 18-25°C. <strong>Highlight:</strong> Hồ Xuân Hương, Đường hầm Đất Sét, Thác Datanla, vườn hoa. Cà phê: 30-60k/ly (chất lượng rất cao).</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
         ],
         'quoc-te': [
@@ -1349,11 +1486,15 @@ def seed_travel():
                  {'vi':'Bangkok & Pattaya','en':'Bangkok & Pattaya','slug':'bangkok-pattaya',
                   'desc':'Thái Lan — chùa, chợ đêm, street food, show, biển Pattaya',
                   'tags':'Bangkok,Pattaya,Thái Lan,chùa,street food,Chatuchak',
-                  'content':'<h2>Bangkok</h2><p>Thủ đô Thái Lan. <strong>Must-see:</strong> Grand Palace (500 baht), Wat Pho, Chatuchak Weekend Market, Chinatown. <strong>Street food:</strong> 40-100 baht/món (30-70k VND).</p><h2>Budget</h2><p>Vé bay VN-Bangkok: 1.5-4 triệu. Hostel: 200-400k/đêm. Ăn: 100-200k/ngày. Tour 4N3Đ: 5-10 triệu tổng.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Bali — Đảo thần tiên','en':'Bali Island','slug':'bali',
                   'desc':'Bali — ruộng bậc thang, đền thiêng, lướt sóng, yoga retreat',
                   'tags':'Bali,Indonesia,đền,yoga,lướt sóng,Ubud,Seminyak',
-                  'content':'<h2>Bali</h2><p>Đảo của thần — Indonesia. <strong>Ubud:</strong> Ruộng bậc thang Tegallalang, Monkey Forest. <strong>Seminyak:</strong> Beach club, sunset. <strong>Uluwatu:</strong> Đền trên vách đá, múa Kecak.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'Đông Á','slug':'dong-a','icon':'🗼','color':'#e74c3c',
              'desc':'Nhật Bản, Hàn Quốc, Đài Loan — văn hóa, ẩm thực, mua sắm',
@@ -1361,11 +1502,15 @@ def seed_travel():
                  {'vi':'Tokyo — Nhật Bản','en':'Tokyo Japan','slug':'tokyo',
                   'desc':'Tokyo — truyền thống & hiện đại, sushi, anime, cherry blossom',
                   'tags':'Tokyo,Nhật Bản,Japan,sushi,anime,sakura,Shibuya',
-                  'content':'<h2>Tokyo</h2><p>Thủ đô Nhật Bản. <strong>Must-see:</strong> Shibuya Crossing, Asakusa/Senso-ji, Akihabara, Shinjuku Gyoen, Meiji Shrine. <strong>Ẩm thực:</strong> Sushi Tsukiji (500-3000 yen), Ramen (800-1500 yen).</p><h2>Budget</h2><p>Vé bay: 4-10 triệu. Hotel: 600k-2 triệu/đêm. JR Pass 7 ngày: 50,000 yen. Tour 7N: 20-40 triệu.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Seoul — Hàn Quốc','en':'Seoul South Korea','slug':'seoul',
                   'desc':'Seoul — K-pop, K-drama, BBQ, skincare, cung điện, Myeongdong',
                   'tags':'Seoul,Hàn Quốc,Korea,K-pop,Myeongdong,BBQ',
-                  'content':'<h2>Seoul</h2><p><strong>Must-see:</strong> Gyeongbokgung Palace (hanbok miễn phí vào), Myeongdong shopping, Bukchon Hanok Village, Namsan Tower. <strong>Ẩm thực:</strong> Korean BBQ (15,000-30,000 won), tteokbokki street food.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
         ],
         'khach-san': [
@@ -1375,11 +1520,15 @@ def seed_travel():
                  {'vi':'Cách đặt phòng giá rẻ','en':'Budget Booking Tips','slug':'cach-dat-phong-gia-re',
                   'desc':'Mẹo đặt phòng giá tốt: so sánh OTA, flash sale, loyalty program',
                   'tags':'đặt phòng,giá rẻ,OTA,Booking,Agoda,flash sale',
-                  'content':'<h2>5 mẹo đặt phòng giá tốt</h2><p><strong>1. So sánh OTA:</strong> Cùng phòng, Agoda có thể rẻ hơn Booking 20%. <strong>2. Đặt trước 2-3 tháng.</strong> <strong>3. Dùng VPN:</strong> Giá hiển thị khác nhau theo quốc gia. <strong>4. Đặt trực tiếp:</strong> Hotel website thường có best rate guarantee. <strong>5. Flash sale:</strong> Agoda 11/11, Booking Black Friday.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Homestay vs Hostel vs Hotel','en':'Accommodation Types','slug':'homestay-hostel-hotel',
                   'desc':'So sánh 3 loại hình lưu trú: homestay, hostel, hotel — phù hợp với ai?',
                   'tags':'homestay,hostel,hotel,so sánh,lưu trú,backpacker',
-                  'content':'<h2>Homestay</h2><p>Ở cùng gia đình bản địa. Giá: 100-400k/đêm. Phù hợp: trải nghiệm văn hóa, trekking.</p><h2>Hostel</h2><p>Giường dorm chia sẻ. Giá: 100-250k/đêm. Phù hợp: solo traveler, backpacker, kết bạn.</p><h2>Hotel</h2><p>Phòng riêng, tiện nghi. Giá từ 300k+. Phù hợp: gia đình, cặp đôi, cần riêng tư.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
             {'name':'4-5 Sao & Resort','slug':'resort','icon':'🌟','color':'#9b59b6',
              'desc':'Resort cao cấp, khách sạn 5 sao — trải nghiệm sang trọng',
@@ -1387,11 +1536,15 @@ def seed_travel():
                  {'vi':'Top Resort Việt Nam','en':'Best Vietnam Resorts','slug':'top-resort-viet-nam',
                   'desc':'Top 10 resort đẹp nhất Việt Nam: InterContinental, Six Senses, Amanoi',
                   'tags':'resort,5 sao,InterContinental,Six Senses,Amanoi,luxury',
-                  'content':'<h2>Top 5 Resort</h2><p><strong>1. Amanoi (Ninh Thuận):</strong> Ultra-luxury, 20-50 triệu/đêm. <strong>2. Six Senses Côn Đảo:</strong> 15-30 triệu/đêm. <strong>3. InterContinental Đà Nẵng:</strong> 5-15 triệu/đêm, Sun Peninsula. <strong>4. The Nam Hai Hội An:</strong> 8-20 triệu/đêm. <strong>5. Fusion Maia Đà Nẵng:</strong> 3-8 triệu/đêm, all-spa-inclusive.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
                  {'vi':'Cách chọn resort phù hợp','en':'How to Choose a Resort','slug':'cach-chon-resort',
                   'desc':'Tiêu chí chọn resort: vị trí, view, F&B, spa, pool, giá trị thực',
                   'tags':'chọn resort,tiêu chí,review,đánh giá,value',
-                  'content':'<h2>6 tiêu chí đánh giá</h2><p><strong>1. Vị trí:</strong> Beachfront hay hillside? <strong>2. View phòng:</strong> Sea view thường đắt hơn 30-50%. <strong>3. F&B:</strong> Nhà hàng trong resort có ngon không? <strong>4. Pool & Beach:</strong> Private beach hay public? <strong>5. Spa:</strong> In-house hay outsource? <strong>6. Giá trị thực:</strong> So sánh giá/trải nghiệm.</p>'},
+                  'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
              ]},
         ],
     }
@@ -1430,17 +1583,23 @@ def seed_travel_articles():
          'tags':'du lịch,Việt Nam,2025,xu hướng,điểm đến',
          'excerpt':'Phân tích xu hướng du lịch VN 2025: staycation, du lịch trải nghiệm, digital nomad, và 5 điểm đến hot nhất.',
          'reading_time':8,
-         'content':'<h2>5 xu hướng lớn</h2><p><strong>1. Staycation:</strong> Nghỉ dưỡng gần nhà, resort ngoại ô. <strong>2. Du lịch trải nghiệm:</strong> Trekking, homestay bản địa, farm tour. <strong>3. Digital nomad:</strong> Làm việc + du lịch, Đà Lạt & Hội An là hub chính. <strong>4. Wellness travel:</strong> Yoga retreat, detox, spa. <strong>5. Du lịch xanh:</strong> Eco-resort, bảo tồn, zero waste.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Cách lên kế hoạch du lịch tiết kiệm — Hướng dẫn A-Z','slug':'cach-len-ke-hoach-du-lich-tiet-kiem','tier':'nganh','category':'huong-dan',
          'tags':'tiết kiệm,kế hoạch,budget,mẹo,đặt vé,lịch trình',
          'excerpt':'Hướng dẫn lên kế hoạch du lịch từ A-Z: đặt vé rẻ, chọn lưu trú, lên lịch trình, và mẹo tiết kiệm tới 50%.',
          'reading_time':10,
-         'content':'<h2>1. Đặt vé bay</h2><p>Đặt trước 2-3 tháng. Theo dõi flash sale VietJet, Bamboo Airways. Dùng Google Flights so sánh. Bay thứ 3-4 rẻ nhất.</p><h2>2. Chọn lưu trú</h2><p>So sánh Agoda vs Booking vs Traveloka. Đặt phòng free cancellation. Check review gần nhất (< 3 tháng).</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Bảo hiểm du lịch — Có cần thiết không? Chọn gói nào?','slug':'bao-hiem-du-lich','tier':'nganh','category':'bao-hiem',
          'tags':'bảo hiểm,du lịch,quốc tế,trễ chuyến,hành lý,y tế',
          'excerpt':'Bảo hiểm du lịch: khi nào cần mua, gói nào phù hợp, và cách claim bồi thường.',
          'reading_time':7,
-         'content':'<h2>Khi nào cần?</h2><p><strong>Bắt buộc:</strong> Du lịch Schengen (EU), một số nước yêu cầu. <strong>Nên mua:</strong> Tour dài ngày, sport adventure, đi xa. <strong>Có thể bỏ qua:</strong> Tour ngắn trong nước, gần nhà.</p><h2>Gói phổ biến</h2><p>Bảo Việt, Liberty, AIG — 50-200k/ngày. Cover: y tế (500 triệu+), trễ chuyến (1-3 triệu), mất hành lý (5-15 triệu).</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
 
         # T2: CHUNG
         {'title':'Du lịch miền Bắc — Lịch trình 5N4Đ hoàn hảo','slug':'du-lich-mien-bac-5n4d','tier':'chung','category':'lich-trinh',
@@ -1448,17 +1607,23 @@ def seed_travel_articles():
          'tags':'miền Bắc,Hà Nội,Hạ Long,Sapa,Ninh Bình,5 ngày',
          'excerpt':'Lịch trình 5 ngày 4 đêm khám phá miền Bắc: Hà Nội → Hạ Long → Ninh Bình → Sapa. Budget 5-10 triệu.',
          'reading_time':12,
-         'content':'<h2>Ngày 1-2: Hà Nội</h2><p>Phố cổ, Hồ Gươm, Bún chả, Phở, Egg Coffee. <strong>Ngày 2:</strong> Temple of Literature, West Lake, Train Street.</p><h2>Ngày 3: Hạ Long</h2><p>Du thuyền 1 ngày: 800k-2 triệu. Hang Sửng Sốt, Đảo Ti Tớp, kayak.</p><h2>Ngày 4: Ninh Bình</h2><p>Tràng An (thuyền 2-3h, 200k), Hang Múa (100k), Bích Động.</p><h2>Ngày 5: Về HN</h2><p>Mua quà: ô mai, cốm, bánh cốm.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Ẩm thực đường phố Việt Nam — 20 món phải thử','slug':'am-thuc-duong-pho-viet-nam','tier':'chung','category':'am-thuc',
          'tags':'ẩm thực,street food,phở,bún chả,bánh mì,Việt Nam',
          'excerpt':'20 món ăn đường phố Việt Nam nổi tiếng thế giới: phở, bún chả, bánh mì, bún bò Huế...',
          'reading_time':8,
-         'content':'<h2>Miền Bắc</h2><p><strong>Phở Hà Nội:</strong> 40-60k. <strong>Bún chả:</strong> 40-50k (Obama ate at Bún Chả Hương Liên). <strong>Bún đậu mắm tôm:</strong> 50-80k.</p><h2>Miền Trung</h2><p><strong>Mì Quảng:</strong> 30-50k. <strong>Bún bò Huế:</strong> 40-60k. <strong>Bánh mì Phượng (Hội An):</strong> 25k — CNN Top 25 street food.</p><h2>Miền Nam</h2><p><strong>Bánh mì Sài Gòn:</strong> 15-30k. <strong>Hủ tiếu:</strong> 30-50k. <strong>Cơm tấm:</strong> 30-50k.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Visa du lịch — Hướng dẫn xin visa các nước phổ biến','slug':'visa-du-lich-huong-dan','tier':'chung','category':'visa',
          'tags':'visa,hộ chiếu,miễn visa,eVisa,Schengen,Nhật',
          'excerpt':'Hướng dẫn xin visa du lịch: Nhật, Hàn, Schengen, Mỹ, Úc. Điều kiện, hồ sơ, và mẹo đậu visa.',
          'reading_time':10,
-         'content':'<h2>Miễn visa (hộ chiếu VN)</h2><p>Thái Lan (30 ngày), Singapore (30), Malaysia (30), Indonesia (30), Philippines (21), Campuchia (30), Myanmar (14). Tổng: ~25 nước miễn visa.</p><h2>Visa dễ xin</h2><p><strong>Nhật:</strong> eVisa online, 3-5 ngày. <strong>Hàn:</strong> Cần chứng minh tài chính. <strong>Đài Loan:</strong> Miễn visa nếu có visa Nhật/Hàn/Schengen còn hạn.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
 
         # T3: CHI TIET
         {'title':'Review InterContinental Đà Nẵng Sun Peninsula — Có đáng giá?','slug':'review-intercontinental-da-nang','tier':'chi-tiet','category':'review-resort',
@@ -1467,19 +1632,25 @@ def seed_travel_articles():
          'excerpt':'Review chi tiết InterContinental Đà Nẵng: phòng, view, F&B, spa, pool — và liệu giá 5-15 triệu/đêm có xứng đáng?',
          'reading_time':8,
          'embed_code':'<div class="at-carousel" data-network="agoda" data-keyword="InterContinental Da Nang" data-limit="3"></div>',
-         'content':'<h2>Tổng quan</h2><p>Thiết kế bởi Bill Bensley trên bán đảo Sơn Trà. 4 tầng: Heaven, Sky, Earth, Sea — mỗi tầng một concept khác nhau.</p><h2>Điểm cộng</h2><p>View biển tuyệt đẹp, kiến trúc độc đáo, La Maison 1888 (fine dining top VN), private beach, spa chất lượng.</p><h2>Điểm trừ</h2><p>Xa trung tâm (30 phút), giá premium (đặc biệt minibar), bể bơi infinity đông vào cuối tuần.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'Hướng dẫn trekking Sapa — Lịch trình, chuẩn bị, chi phí','slug':'huong-dan-trekking-sapa','tier':'chi-tiet','category':'trekking',
          'related_segment_slug':'trong-nuoc','related_zone_slug':'mien-bac',
          'tags':'trekking,Sapa,Fansipan,bản Cát Cát,ruộng bậc thang',
          'excerpt':'Hướng dẫn chi tiết trekking Sapa: chuẩn bị gì, mang gì, lịch trình 2N1Đ và 3N2Đ, chi phí từ 1 đến 5 triệu.',
          'reading_time':10,
-         'content':'<h2>Chuẩn bị</h2><p><strong>Giày:</strong> Giày trekking chống trượt (bắt buộc). <strong>Quần áo:</strong> Layers (nhiều lớp), áo gió, áo mưa. <strong>Balô:</strong> 20-30L. <strong>Khác:</strong> Gậy trekking, kem chống nắng, thuốc cá nhân.</p><h2>Lịch trình 2N1Đ</h2><p><strong>Ngày 1:</strong> Sapa → Bản Cát Cát → Bản Tả Van (trekking 5-6h). Ngủ homestay. <strong>Ngày 2:</strong> Tả Van → Bản Giang Tà Chải → Sapa (4-5h). Chi phí: 1.5-3 triệu (guide + homestay + ăn).</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
         {'title':'So sánh Agoda vs Booking.com vs Traveloka — Đặt ở đâu rẻ nhất?','slug':'agoda-vs-booking-vs-traveloka','tier':'chi-tiet','category':'dat-phong',
          'related_segment_slug':'khach-san',
          'tags':'Agoda,Booking,Traveloka,OTA,đặt phòng,so sánh,giá rẻ',
          'excerpt':'So sánh 3 OTA lớn nhất: Agoda, Booking.com, Traveloka. Giá, ưu đãi, chính sách hủy, và mẹo chọn nền tảng.',
          'reading_time':7,
-         'content':'<h2>Agoda</h2><p>Giá thường rẻ nhất Đông Nam Á. Flash sale thường xuyên. AgodaCash 5-7% hoàn tiền. Nhược: UI hơi rối, giá ẩn phí.</p><h2>Booking.com</h2><p>Phòng nhiều nhất thế giới. Free cancellation phổ biến. Genius program giảm 10-15%. Nhược: Giá đôi khi cao hơn Agoda 10-20% khu vực Châu Á.</p><h2>Traveloka</h2><p>Tích hợp vé bay + hotel. PayLater trả sau. Mạnh ở VN & Indonesia. Nhược: Ít lựa chọn quốc tế.</p>'},
+         'content':'<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>'},
     ]
 
     for ad in articles:
@@ -1774,21 +1945,17 @@ def seed_bike():
             'name_vi': 'Líp (Chainring)', 'name_en': 'Chainring',
             'slug': 'lip-chainring',
             'description': 'Đĩa răng phía trước gắn với bàn đạp, truyền lực từ chân đạp sang sên.',
-            'content': '''<h2>Líp (Chainring) là gì?</h2>
-<p>Líp là đĩa răng phía trước (gắn với bàn đạp), có nhiều răng khác nhau để tạo ra tỷ số truyền khác nhau. Road bike thường có 2 líp (compact: 50/34T hoặc standard: 53/39T).</p>
-
-<h2>Phân loại líp</h2>
-<ul>
-<li><strong>Compact (50/34T)</strong> — Phổ biến nhất, dễ leo dốc, phù hợp người mới</li>
-<li><strong>Standard (53/39T)</strong> — Tốc độ cao hơn trên đường bằng, cần thể lực tốt</li>
-<li><strong>Semi-compact (52/36T)</strong> — Cân bằng giữa tốc độ và khả năng leo</li>
-</ul>
-
-<h2>Khi nào cần thay?</h2>
-<p>Thay sau <strong>15,000 - 20,000 km</strong> hoặc khi răng líp mòn nhọn, sên bị tuột khi đạp mạnh.</p>
-
-<h2>Chi phí</h2>
-<p>Líp road bike dao động <strong>500,000 - 3,000,000 VNĐ</strong> tùy hãng (Shimano, SRAM, Campagnolo).</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': 'FC-R7000 (Shimano 105), FC-RS510 (Shimano Tiagra)',
             'tags': 'líp,chainring,truyền động,road bike,50/34T,53/39T,nâng cấp',
             'auto_category': 'phu-tung',
@@ -1797,21 +1964,17 @@ def seed_bike():
             'name_vi': 'Sên xe đạp', 'name_en': 'Chain',
             'slug': 'sen-xe-dap',
             'description': 'Dây xích truyền lực từ líp đến pít-tông (cassette), là bộ phận tiêu hao nhất.',
-            'content': '''<h2>Sên xe đạp</h2>
-<p>Sên (chain) là dây xích kim loại truyền lực quay từ líp phía trước sang cassette phía sau. Đây là bộ phận cần bảo dưỡng thường xuyên nhất.</p>
-
-<h2>Loại sên road bike</h2>
-<ul>
-<li><strong>Sên 11 speed</strong> — Shimano 105/Ultegra/Dura-Ace, SRAM Rival/Force/Red</li>
-<li><strong>Sên 10 speed</strong> — Shimano Tiagra</li>
-<li><strong>Sên 9 speed</strong> — Shimano Sora</li>
-</ul>
-
-<h2>Bảo dưỡng</h2>
-<p>Vệ sinh và tra dầu sên mỗi <strong>200-300 km</strong>. Thay sên mới sau <strong>3,000 - 5,000 km</strong> để tránh mòn cassette.</p>
-
-<h2>Giá thành</h2>
-<p><strong>250,000 - 800,000 VNĐ</strong> tùy số líp (speed) và hãng.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': 'CN-HG601-11 (Shimano 11s), CN-HG71 (Shimano 10s)',
             'tags': 'sên,chain,11 speed,bảo dưỡng,thay sên,road bike',
             'auto_category': 'bao-duong',
@@ -1820,21 +1983,17 @@ def seed_bike():
             'name_vi': 'Cassette (Pít-tông)', 'name_en': 'Cassette',
             'slug': 'cassette-pittong',
             'description': 'Bộ đĩa răng phía sau, gắn với đùm sau, có 8-12 líp với số răng tăng dần.',
-            'content': '''<h2>Cassette là gì?</h2>
-<p>Cassette (hay pít-tông) là bộ đĩa răng phía sau bánh xe, thường có 8-12 líp xếp chồng, số răng tăng dần (ví dụ: 11-28T, 11-32T).</p>
-
-<h2>Cách chọn cassette</h2>
-<ul>
-<li><strong>11-28T</strong> — Road phẳng, tốc độ cao</li>
-<li><strong>11-30T</strong> — Đa năng, vừa phẳng vừa leo được</li>
-<li><strong>11-32T hoặc 11-34T</strong> — Leo dốc dễ dàng, phù hợp người mới</li>
-</ul>
-
-<h2>Tuổi thọ</h2>
-<p>Cassette bền hơn sên, thường thay sau <strong>10,000 - 15,000 km</strong> hoặc sau 2-3 lần thay sên.</p>
-
-<h2>Giá</h2>
-<p><strong>600,000 - 4,000,000 VNĐ</strong> (Shimano 105 ~ 1.2tr, Ultegra ~ 2.5tr, Dura-Ace ~ 4tr).</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': 'CS-R7000 11-30T (Shimano 105)',
             'tags': 'cassette,pít-tông,11-28T,11-32T,leo dốc,road bike',
             'auto_category': 'nang-cap',
@@ -1843,18 +2002,17 @@ def seed_bike():
             'name_vi': 'Tay đề (Shifter)', 'name_en': 'Shifter',
             'slug': 'tay-de-shifter',
             'description': 'Tay chuyển số tích hợp phanh (brifter), điều khiển chuyển líp trước và sau.',
-            'content': '''<h2>Tay đề (Shifter) - Bộ não điều khiển</h2>
-<p>Tay đề road bike (hay còn gọi brifter) là tay cầm tích hợp cả chuyển số và phanh, thường gắn ở đầu cong (drop bar).</p>
-
-<h2>Hệ thống phổ biến</h2>
-<ul>
-<li><strong>Shimano</strong> — STI (Shimano Total Integration): nút bên trong (shift up), cần phanh đẩy (shift down)</li>
-<li><strong>SRAM</strong> — DoubleTap: 1 cần duy nhất, đẩy nhẹ (up), đẩy mạnh (down)</li>
-<li><strong>Campagnolo</strong> — Ergopower: 2 cần riêng cho up/down</li>
-</ul>
-
-<h2>Khi nào nâng cấp?</h2>
-<p>Tay đề rất bền, thường chỉ thay khi nâng cấp groupset (ví dụ từ Tiagra lên 105) hoặc khi hỏng cơ cấu bên trong.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'oem_code': 'ST-R7000 (Shimano 105 11s)',
             'tags': 'tay đề,shifter,brifter,Shimano STI,SRAM DoubleTap,road bike',
             'auto_category': 'nang-cap',
@@ -1883,18 +2041,17 @@ def seed_bike():
             'name_vi': 'Vành xe đạp', 'name_en': 'Rim',
             'slug': 'vanh-xe-dap',
             'description': 'Vành bánh xe (rim), ảnh hưởng trọng lượng, độ khí động và độ cứng.',
-            'content': '''<h2>Vành xe đạp</h2>
-<p>Vành (rim) là bộ phận khung tròn của bánh xe, nơi gắn lốp và căm. Vành road bike thường cao 30-60mm để tăng khí động học.</p>
-
-<h2>Loại vành</h2>
-<ul>
-<li><strong>Vành nhôm (Aluminum)</strong> — Giá rẻ, phanh lốp hiệu quả, nặng hơn carbon</li>
-<li><strong>Vành carbon</strong> — Nhẹ, khí động, đắt tiền, cần phanh đĩa để tránh mòn</li>
-<li><strong>Độ cao vành</strong> — 30mm (leo dốc), 50mm (đa năng), 60mm+ (đường phẳng, tốc độ)</li>
-</ul>
-
-<h2>Giá tham khảo</h2>
-<p>Vành nhôm: <strong>3-8 triệu/cặp</strong>, Vành carbon: <strong>15-50 triệu/cặp</strong>.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'vành,rim,carbon,nhôm,50mm,road bike,nâng cấp',
             'auto_category': 'nang-cap',
         },
@@ -1902,24 +2059,17 @@ def seed_bike():
             'name_vi': 'Lốp xe đạp', 'name_en': 'Tire',
             'slug': 'lop-xe-dap',
             'description': 'Lốp road bike (700x23C, 700x25C, 700x28C), ảnh hưởng tốc độ và độ êm.',
-            'content': '''<h2>Lốp xe đạp road bike</h2>
-<p>Lốp road bike dùng chuẩn 700C (đường kính 622mm), độ rộng phổ biến: 23mm, 25mm, 28mm, 30mm.</p>
-
-<h2>Loại lốp</h2>
-<ul>
-<li><strong>Clincher</strong> — Phổ biến nhất, có săm bên trong, dễ sửa xịt</li>
-<li><strong>Tubeless</strong> — Không săm, ít xịt hơn, êm hơn, cần vành tương thích</li>
-<li><strong>Tubular</strong> — Dán chặt vào vành, dùng đua, khó sửa</li>
-</ul>
-
-<h2>Độ rộng lốp</h2>
-<ul>
-<li><strong>23-25mm</strong> — Tốc độ cao, cứng, ít thoải mái</li>
-<li><strong>28-30mm</strong> — Xu hướng hiện đại, êm hơn, ít chậm hơn không đáng kể</li>
-</ul>
-
-<h2>Giá</h2>
-<p><strong>300,000 - 1,500,000 VNĐ/chiếc</strong> (Continental, Michelin, Schwalbe).</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'lốp,tire,700x25C,tubeless,Continental GP5000,road bike',
             'auto_category': 'phu-tung',
         },
@@ -1953,36 +2103,17 @@ def seed_bike():
             'tier': 'nganh',
             'category': 'mua-xe',
             'excerpt': 'Hướng dẫn chi tiết cách chọn xe đạp đường trường phù hợp với ngân sách và nhu cầu sử dụng.',
-            'content': '''<h2>Road bike là gì?</h2>
-<p>Road bike (xe đạp đường trường) là loại xe thiết kế để đạp trên đường nhựa phẳng, ưu tiên tốc độ và hiệu suất. Đặc điểm: tay lái cong (drop bar), lốp mỏng (23-28mm), trọng lượng nhẹ.</p>
-
-<h2>Phân khúc giá</h2>
-<h3>10-15 triệu (Entry level)</h3>
-<ul>
-<li><strong>Groupset</strong>: Shimano Claris/Sora (8-9 speed)</li>
-<li><strong>Khung</strong>: Nhôm (Aluminum 6061)</li>
-<li><strong>Phanh</strong>: Phanh lốp (rim brake)</li>
-<li><strong>VD</strong>: Giant Contend 3, Trinx Tempo 1.0</li>
-</ul>
-
-<h3>15-25 triệu (Mid-range)</h3>
-<ul>
-<li><strong>Groupset</strong>: Shimano Tiagra/105 (10-11 speed)</li>
-<li><strong>Khung</strong>: Nhôm cao cấp hoặc Carbon entry</li>
-<li><strong>Phanh</strong>: Phanh đĩa hoặc phanh lốp</li>
-<li><strong>VD</strong>: Giant TCR Advanced 3, Specialized Allez Sprint</li>
-</ul>
-
-<h3>25-40 triệu (High-end)</h3>
-<ul>
-<li><strong>Groupset</strong>: Shimano 105/Ultegra (11 speed)</li>
-<li><strong>Khung</strong>: Carbon chất lượng cao</li>
-<li><strong>Phanh</strong>: Phanh đĩa thủy lực</li>
-<li><strong>VD</strong>: Canyon Endurace CF 7, Specialized Tarmac SL6</li>
-</ul>
-
-<h2>Lời khuyên</h2>
-<p>Với người mới, nên bắt đầu ở phân khúc <strong>15-20 triệu</strong> với Shimano 105. Đây là groupset đủ tốt để đạp lâu dài mà không cần nâng cấp sớm.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'reading_time': 8,
             'tags': 'road bike,mua xe mới,Shimano 105,Giant,Specialized,ngân sách',
         },
@@ -1991,28 +2122,17 @@ def seed_bike():
             'tier': 'chung',
             'category': 'truyen-dong',
             'excerpt': 'So sánh chi tiết 3 dòng groupset phổ biến nhất của Shimano, giúp bạn quyết định nâng cấp.',
-            'content': '''<h2>Groupset Shimano cho Road Bike</h2>
-<p>Shimano có 3 dòng groupset chính cho road bike: 105 (mid-range), Ultegra (high-end), Dura-Ace (pro).</p>
-
-<h2>So sánh chi tiết</h2>
-<table>
-<tr><th>Tiêu chí</th><th>105 (R7000)</th><th>Ultegra (R8000)</th><th>Dura-Ace (R9200)</th></tr>
-<tr><td>Giá bộ groupset</td><td>~12 triệu</td><td>~22 triệu</td><td>~50 triệu</td></tr>
-<tr><td>Trọng lượng</td><td>~2500g</td><td>~2300g</td><td>~2000g</td></tr>
-<tr><td>Số líp</td><td>11 speed</td><td>11 speed</td><td>12 speed</td></tr>
-<tr><td>Chất liệu</td><td>Nhôm + composite</td><td>Nhôm cao cấp + carbon</td><td>Titan + carbon</td></tr>
-<tr><td>Độ mượt chuyển số</td><td>Tốt</td><td>Rất tốt</td><td>Hoàn hảo</td></tr>
-<tr><td>Tuổi thọ</td><td>15,000km</td><td>20,000km</td><td>25,000km</td></tr>
-</table>
-
-<h2>Nên chọn gì?</h2>
-<ul>
-<li><strong>105</strong> — Đủ tốt cho 90% người đạp, giá hợp lý</li>
-<li><strong>Ultegra</strong> — Nếu muốn nhẹ hơn 200g và mượt hơn một chút</li>
-<li><strong>Dura-Ace</strong> — Chỉ dành cho đua chuyên nghiệp hoặc người có điều kiện</li>
-</ul>
-
-<p><strong>Kết luận</strong>: 105 là lựa chọn tốt nhất về tỷ lệ giá/hiệu suất. Ultegra chỉ đáng nâng cấp nếu bạn đạp >200km/tuần.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'reading_time': 10,
             'tags': 'groupset,Shimano 105,Ultegra,Dura-Ace,so sánh,nâng cấp',
             'related_segment_slug': 'road-bike',
@@ -2022,41 +2142,17 @@ def seed_bike():
             'tier': 'chi-tiet',
             'category': 'bao-duong',
             'excerpt': 'Hướng dẫn từng bước vệ sinh và tra dầu sên, giúp tăng tuổi thọ hệ thống truyền động.',
-            'content': '''<h2>Tại sao phải bảo dưỡng sên?</h2>
-<p>Sên là bộ phận tiếp xúc trực tiếp với bùn đất, nước mưa, bụi bẩn. Nếu không vệ sinh thường xuyên, sên sẽ gỉ sét, kêu cọt kẹt, mòn nhanh và làm hỏng cassette.</p>
-
-<h2>Công cụ cần thiết</h2>
-<ul>
-<li>Bàn chải cứng (hoặc bàn chải đánh răng cũ)</li>
-<li>Nước rửa sên chuyên dụng (chain cleaner) hoặc xăng</li>
-<li>Dầu tra sên (chain lube): loại khô (dry) hoặc ướt (wet)</li>
-<li>Giẻ sạch</li>
-<li>Dụng cụ vệ sinh sên (chain scrubber) — không bắt buộc</li>
-</ul>
-
-<h2>Các bước thực hiện</h2>
-<h3>1. Vệ sinh sên (mỗi 200-300km)</h3>
-<ol>
-<li>Xịt nước rửa sên hoặc nhúng giẻ vào xăng, chà sạch sên</li>
-<li>Dùng bàn chải chải kẽ các mắt xích</li>
-<li>Lau khô bằng giẻ</li>
-</ol>
-
-<h3>2. Tra dầu sên</h3>
-<ol>
-<li>Nhỏ từng giọt dầu vào mỗi mắt xích (mặt trong) trong khi quay pedal chậm</li>
-<li>Chờ 5-10 phút để dầu thấm vào</li>
-<li>Lau sạch dầu thừa ở mặt ngoài (tránh bám bụi)</li>
-</ol>
-
-<h3>Loại dầu nào?</h3>
-<ul>
-<li><strong>Dầu khô (Dry lube)</strong> — Đạp đường phẳng, ít bám bụi, cần tra thường xuyên hơn</li>
-<li><strong>Dầu ướt (Wet lube)</strong> — Đạp địa hình hoặc mùa mưa, bền hơn nhưng bám bụi nhiều</li>
-</ul>
-
-<h2>Khi nào thay sên?</h2>
-<p>Thay sên mới sau <strong>3,000 - 5,000 km</strong> hoặc khi kiểm tra bằng thước đo sên (chain checker) cho thấy sên dãn >0.75%.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'reading_time': 7,
             'tags': 'bảo dưỡng sên,tra dầu sên,vệ sinh sên,chain lube,thay sên',
             'related_zone_slug': 'he-thong-truyen-dong',
@@ -2389,44 +2485,51 @@ def seed_beauty():
             'name_vi': 'Serum Vitamin C', 'name_en': 'Vitamin C Serum',
             'slug': 'serum-vitamin-c',
             'description': 'Serum dưỡng trắng, mờ thâm nám, chống lão hóa với vitamin C nguyên chất.',
-            'content': '''<h2>Serum Vitamin C là gì?</h2>
-<p>Serum Vitamin C là sản phẩm chăm sóc da chứa vitamin C ở dạng tinh khiết, giúp làm sáng da, mờ thâm nám và chống lão hóa hiệu quả.</p>
-
-<h2>Công dụng</h2>
-<ul>
-<li><strong>Làm sáng da</strong> — Giảm melanin, da trắng hồng tự nhiên</li>
-<li><strong>Chống lão hóa</strong> — Kích thích collagen, giảm nếp nhăn</li>
-<li><strong>Mờ thâm nám</strong> — Giảm vết thâm sau mụn, nám da</li>
-</ul>
-
-<h2>Cách sử dụng</h2>
-<p>Thoa 2-3 giọt lên da sạch, vỗ nhẹ cho thấm. Dùng buổi tối, kết hợp kem chống nắng ban ngày.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'serum,vitamin c,làm trắng da,chống lão hóa,skincare',
         },
         {
             'name_vi': 'Serum Niacinamide', 'name_en': 'Niacinamide Serum',
             'slug': 'serum-niacinamide',
             'description': 'Serum se khít lỗ chân lông, kiểm soát dầu, mờ thâm với niacinamide 10%.',
-            'content': '''<h2>Serum Niacinamide là gì?</h2>
-<p>Niacinamide (Vitamin B3) là thành phần đa năng, phù hợp mọi loại da, đặc biệt da dầu mụn.</p>
-
-<h2>Công dụng</h2>
-<ul>
-<li><strong>Se khít lỗ chân lông</strong> — Giảm bóng nhờn</li>
-<li><strong>Kiểm soát dầu</strong> — Cân bằng bã nhờn</li>
-<li><strong>Mờ thâm</strong> — Làm đều màu da</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'serum,niacinamide,se lỗ chân lông,da dầu,skincare',
         },
         {
             'name_vi': 'Serum Retinol', 'name_en': 'Retinol Serum',
             'slug': 'serum-retinol',
             'description': 'Serum chống lão hóa mạnh mẽ với retinol, giảm nếp nhăn, tái tạo da.',
-            'content': '''<h2>Serum Retinol là gì?</h2>
-<p>Retinol là dạng vitamin A nguyên chất, "thần dược" chống lão hóa được chứng minh lâm sàng.</p>
-
-<h2>Lưu ý</h2>
-<p>Chỉ dùng ban đêm, bắt đầu với nồng độ thấp 0.3%, tăng dần lên 1%. Bắt buộc dùng kem chống nắng ban ngày.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'serum,retinol,chống lão hóa,nếp nhăn,skincare',
         },
     ]
@@ -2449,60 +2552,68 @@ def seed_beauty():
             'name_vi': 'Sữa rửa mặt CeraVe', 'name_en': 'CeraVe Foaming Cleanser',
             'slug': 'sua-rua-mat-cerave',
             'description': 'Sữa rửa mặt CeraVe dịu nhẹ, chứa ceramide phục hồi hàng rào da, pH 5.5.',
-            'content': '''<h2>CeraVe — Sữa rửa mặt bác sĩ da liễu khuyên dùng</h2>
-<p>CeraVe Foaming Facial Cleanser là sữa rửa mặt dạng gel tạo bọt nhẹ, làm sạch sâu mà không gây khô da nhờ 3 ceramide thiết yếu.</p>
-<h2>Thành phần nổi bật</h2>
-<ul>
-<li><strong>3 Ceramide</strong> — Phục hồi hàng rào bảo vệ da</li>
-<li><strong>Niacinamide</strong> — Làm dịu, giảm mẩn đỏ</li>
-<li><strong>Hyaluronic Acid</strong> — Giữ ẩm, không gây khô căng</li>
-</ul>
-<h2>Phù hợp ai?</h2>
-<p>Da dầu, da hỗn hợp, da mụn. Người mới bắt đầu skincare nên chọn CeraVe vì an toàn, ít kích ứng.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'CeraVe,sữa rửa mặt,làm sạch,ceramide,da dầu,skincare',
         },
         {
             'name_vi': 'Tẩy trang dầu DHC', 'name_en': 'DHC Deep Cleansing Oil',
             'slug': 'tay-trang-dau-dhc',
             'description': 'Dầu tẩy trang DHC olive, làm sạch makeup chống nước, không gây mụn.',
-            'content': '''<h2>Double Cleanse — Bước 1 quan trọng nhất</h2>
-<p>Dầu tẩy trang là bước đầu tiên trong quy trình double cleanse (rửa mặt 2 bước). DHC Deep Cleansing Oil chứa dầu olive tinh khiết, hòa tan makeup, kem chống nắng và bã nhờn.</p>
-<h2>Cách dùng</h2>
-<ul>
-<li><strong>Bước 1</strong> — Thoa dầu lên da khô, massage 1-2 phút</li>
-<li><strong>Bước 2</strong> — Thêm nước, nhũ hóa thành sữa trắng</li>
-<li><strong>Bước 3</strong> — Rửa sạch bằng nước, tiếp tục sữa rửa mặt</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'DHC,tẩy trang,dầu tẩy trang,double cleanse,skincare',
         },
         {
             'name_vi': 'Gel rửa mặt La Roche-Posay', 'name_en': 'La Roche-Posay Effaclar Gel',
             'slug': 'gel-rua-mat-la-roche-posay',
             'description': 'Gel rửa mặt cho da dầu mụn, chứa zinc PCA kiểm soát bã nhờn, pH 5.5.',
-            'content': '''<h2>La Roche-Posay Effaclar</h2>
-<p>Dòng sản phẩm chuyên biệt cho da dầu mụn từ thương hiệu dược mỹ phẩm Pháp. Gel rửa mặt Effaclar Purifying Foaming Gel không chứa xà phòng, không paraben.</p>
-<h2>Công dụng</h2>
-<ul>
-<li><strong>Zinc PCA</strong> — Kiểm soát bã nhờn, giảm bóng nhờn</li>
-<li><strong>Thermal Water</strong> — Làm dịu, chống kích ứng</li>
-<li><strong>pH 5.5</strong> — Không phá hủy hàng rào da</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'La Roche-Posay,Effaclar,gel rửa mặt,da dầu mụn,skincare',
         },
         {
             'name_vi': 'Nước tẩy trang Bioderma', 'name_en': 'Bioderma Sensibio H2O',
             'slug': 'nuoc-tay-trang-bioderma',
             'description': 'Nước tẩy trang micellar Bioderma Sensibio, dịu nhẹ cho da nhạy cảm.',
-            'content': '''<h2>Bioderma Sensibio H2O</h2>
-<p>Nước tẩy trang micellar nổi tiếng nhất thế giới, dùng công nghệ micelle bắt giữ bụi bẩn và makeup mà không cần rửa lại.</p>
-<h2>Vì sao nổi tiếng?</h2>
-<ul>
-<li><strong>Không cần rửa lại</strong> — Tiện lợi, nhanh gọn</li>
-<li><strong>Da nhạy cảm</strong> — Không cồn, không mùi, không paraben</li>
-<li><strong>Cân bằng pH</strong> — Tôn trọng độ pH tự nhiên của da</li>
-</ul>
-<h2>Cách dùng</h2>
-<p>Thấm bông tẩy trang, lau nhẹ khắp mặt đến khi bông sạch. Buổi tối dùng trước sữa rửa mặt.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Bioderma,nước tẩy trang,micellar,da nhạy cảm,skincare',
         },
     ]
@@ -2524,49 +2635,51 @@ def seed_beauty():
             'name_vi': 'Toner Klairs Supple Preparation', 'name_en': 'Klairs Supple Preparation Toner',
             'slug': 'toner-klairs',
             'description': 'Toner dưỡng ẩm Klairs không cồn, dịu nhẹ, cấp nước sâu cho da khô.',
-            'content': '''<h2>Klairs Supple Preparation</h2>
-<p>Toner dưỡng ẩm best-seller từ Hàn Quốc, phù hợp mọi loại da kể cả da nhạy cảm. Không cồn, không mùi, pH 5.0.</p>
-<h2>Thành phần</h2>
-<ul>
-<li><strong>Hyaluronic Acid</strong> — Cấp nước sâu, giữ ẩm 24h</li>
-<li><strong>Beta-glucan</strong> — Làm dịu, phục hồi da</li>
-<li><strong>Centella Asiatica</strong> — Chống viêm, làm lành</li>
-</ul>
-<h2>Cách dùng</h2>
-<p>Sau rửa mặt, đổ toner ra tay hoặc bông, vỗ nhẹ lên mặt. Có thể dùng 2-3 lớp (7-skin method) cho da khô.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Klairs,toner,dưỡng ẩm,K-beauty,da nhạy cảm,skincare',
         },
         {
             'name_vi': 'Essence SK-II Facial Treatment', 'name_en': 'SK-II Facial Treatment Essence',
             'slug': 'essence-sk-ii',
             'description': 'Nước thần SK-II chứa 90% Pitera, trẻ hóa da, cải thiện kết cấu da rõ rệt.',
-            'content': '''<h2>SK-II Facial Treatment Essence — "Nước thần"</h2>
-<p>Sản phẩm iconic của SK-II với 90% Pitera (men tự nhiên) giúp cải thiện 5 yếu tố: độ mịn, săn chắc, giảm nếp nhăn, giảm đốm nâu, rạng rỡ.</p>
-<h2>Pitera là gì?</h2>
-<ul>
-<li><strong>Nguồn gốc</strong> — Chiết xuất từ quá trình lên men nấm men tự nhiên</li>
-<li><strong>Thành phần</strong> — Vitamin, axit amin, khoáng chất, axit hữu cơ</li>
-<li><strong>Tác dụng</strong> — Tái tạo tế bào, làm sáng da, chống lão hóa</li>
-</ul>
-<h2>Giá & Cách dùng</h2>
-<p>Giá khoảng 2-4 triệu/chai 230ml. Đổ ra bông, vỗ nhẹ lên mặt sau bước toner, trước serum.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'SK-II,nước thần,Pitera,essence,chống lão hóa,skincare',
         },
         {
             'name_vi': 'Toner Some By Mi AHA-BHA-PHA', 'name_en': 'Some By Mi AHA BHA PHA Toner',
             'slug': 'toner-some-by-mi',
             'description': 'Toner tẩy da chết hóa học 3 trong 1, cải thiện da mụn trong 30 ngày.',
-            'content': '''<h2>Some By Mi Miracle Toner</h2>
-<p>Toner viral nhất K-beauty với công thức 3 acid tẩy da chết: AHA (glycolic), BHA (salicylic), PHA (gluconolactone). Cam kết cải thiện da trong 30 ngày.</p>
-<h2>Cơ chế hoạt động</h2>
-<ul>
-<li><strong>AHA 10000ppm</strong> — Tẩy tế bào chết bề mặt, sáng da</li>
-<li><strong>BHA</strong> — Thông thoáng lỗ chân lông, giảm mụn</li>
-<li><strong>PHA</strong> — Tẩy da chết nhẹ nhàng, cấp ẩm</li>
-<li><strong>Tràm trà</strong> — Kháng khuẩn, giảm viêm</li>
-</ul>
-<h2>Lưu ý</h2>
-<p>Không dùng cùng retinol hoặc vitamin C. Bắt đầu 2-3 lần/tuần, tăng dần.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Some By Mi,toner,AHA,BHA,PHA,tẩy da chết,da mụn,skincare',
         },
     ]
@@ -2588,62 +2701,68 @@ def seed_beauty():
             'name_vi': 'Kem dưỡng ẩm CeraVe', 'name_en': 'CeraVe Moisturizing Cream',
             'slug': 'kem-duong-am-cerave',
             'description': 'Kem dưỡng ẩm CeraVe chứa 3 ceramide, phục hồi hàng rào da, dùng cả mặt và body.',
-            'content': '''<h2>CeraVe Moisturizing Cream</h2>
-<p>Kem dưỡng ẩm "quốc dân" được bác sĩ da liễu toàn cầu khuyên dùng. Công nghệ MVE giải phóng dưỡng chất suốt 24h.</p>
-<h2>Thành phần chính</h2>
-<ul>
-<li><strong>3 Ceramide (1, 3, 6-II)</strong> — Phục hồi hàng rào bảo vệ da</li>
-<li><strong>Hyaluronic Acid</strong> — Giữ ẩm, da căng mọng</li>
-<li><strong>MVE Technology</strong> — Giải phóng dưỡng chất từ từ 24h</li>
-</ul>
-<h2>Phù hợp ai?</h2>
-<p>Da khô, da nhạy cảm, da vừa peel/laser cần phục hồi. Texture đặc nhưng không bí, thấm nhanh.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'CeraVe,kem dưỡng ẩm,ceramide,moisturizer,skincare',
         },
         {
             'name_vi': 'Kem dưỡng Laneige Water Bank', 'name_en': 'Laneige Water Bank Cream',
             'slug': 'kem-duong-laneige',
             'description': 'Kem dưỡng cấp nước Laneige, công nghệ Blue Hyaluronic Acid, da căng bóng.',
-            'content': '''<h2>Laneige Water Bank Blue Hyaluronic</h2>
-<p>Dòng kem dưỡng cấp nước best-seller từ Laneige (Hàn Quốc), nay nâng cấp với Blue Hyaluronic Acid mạnh hơn HA thường.</p>
-<h2>Công nghệ Blue HA</h2>
-<ul>
-<li><strong>Blue Hyaluronic Acid</strong> — Phân tử nhỏ, thấm sâu hơn HA thường</li>
-<li><strong>Cấp nước 100h</strong> — Da luôn căng mọng, không bị khô</li>
-<li><strong>Texture mỏng nhẹ</strong> — Phù hợp khí hậu nóng ẩm Việt Nam</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Laneige,kem dưỡng,cấp nước,Blue HA,K-beauty,skincare',
         },
         {
             'name_vi': 'Kem dưỡng trắng Pond\'s', 'name_en': 'Pond\'s White Beauty Cream',
             'slug': 'kem-duong-trang-ponds',
             'description': 'Kem dưỡng trắng da Pond\'s chứa niacinamide, giá bình dân, hiệu quả rõ.',
-            'content': '''<h2>Pond\'s White Beauty</h2>
-<p>Dòng kem dưỡng trắng da "quốc dân" với giá bình dân nhất thị trường, chứa niacinamide và vitamin B3 giúp da sáng hơn từ bên trong.</p>
-<h2>Các phiên bản</h2>
-<ul>
-<li><strong>Pond\'s White Beauty</strong> — Dưỡng trắng cơ bản, giá ~80K</li>
-<li><strong>Pond\'s Age Miracle</strong> — Chống lão hóa, giá ~200K</li>
-<li><strong>Pond\'s Bright Beauty</strong> — Sáng da nhanh, SPF 15</li>
-</ul>
-<h2>Review thực tế</h2>
-<p>Hiệu quả sáng da nhẹ sau 2-4 tuần, giá tốt cho sinh viên và người mới bắt đầu skincare.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Pond\'s,kem dưỡng trắng,niacinamide,bình dân,skincare',
         },
         {
             'name_vi': 'Kem dưỡng Innisfree Green Tea', 'name_en': 'Innisfree Green Tea Cream',
             'slug': 'kem-duong-innisfree',
             'description': 'Kem dưỡng trà xanh Innisfree, cấp ẩm sâu, thành phần tự nhiên từ đảo Jeju.',
-            'content': '''<h2>Innisfree Green Tea Seed Cream</h2>
-<p>Kem dưỡng chiết xuất trà xanh hữu cơ từ đảo Jeju (Hàn Quốc), cấp ẩm sâu và bảo vệ da khỏi tác hại môi trường.</p>
-<h2>Thành phần</h2>
-<ul>
-<li><strong>Trà xanh Jeju</strong> — Chống oxy hóa, bảo vệ da</li>
-<li><strong>Green Tea Seed Oil</strong> — Khóa ẩm, nuôi dưỡng</li>
-<li><strong>Amino Acid</strong> — Tăng cường hàng rào da</li>
-</ul>
-<h2>Phù hợp ai?</h2>
-<p>Da thường, da hỗn hợp. Texture nhẹ, thấm nhanh, không bí. Mùi trà xanh tự nhiên dễ chịu.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Innisfree,trà xanh,green tea,Jeju,kem dưỡng,skincare',
         },
     ]
@@ -2665,47 +2784,51 @@ def seed_beauty():
             'name_vi': 'Kem chống nắng Anessa', 'name_en': 'Anessa Perfect UV Sunscreen',
             'slug': 'kem-chong-nang-anessa',
             'description': 'Kem chống nắng Anessa SPF50+ PA++++ vàng, chống nước, bền bỉ ngoài trời.',
-            'content': '''<h2>Anessa Perfect UV — "Vua" chống nắng</h2>
-<p>Anessa của Shiseido (Nhật) là kem chống nắng #1 tại Nhật 21 năm liên tiếp. SPF50+ PA++++ với công nghệ Auto Booster bền bỉ khi tiếp xúc mồ hôi và nước.</p>
-<h2>Công nghệ đặc biệt</h2>
-<ul>
-<li><strong>Auto Booster</strong> — Càng tiếp xúc nhiệt/mồ hôi, màng chống nắng càng bền</li>
-<li><strong>Smooth Protect</strong> — Texture mỏng nhẹ như sữa, không bết</li>
-<li><strong>Chống nước</strong> — Super Waterproof, phù hợp đi biển</li>
-</ul>
-<h2>Giá</h2>
-<p>Khoảng 350-550K/chai 60ml tùy nơi mua. Nên mua ở Shopee Mall hoặc store chính hãng.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Anessa,chống nắng,SPF50,Shiseido,chống nước,skincare',
         },
         {
             'name_vi': 'Kem chống nắng Skin Aqua Tone Up', 'name_en': 'Skin Aqua Tone Up UV Essence',
             'slug': 'kem-chong-nang-skin-aqua',
             'description': 'Kem chống nắng Skin Aqua nâng tông, giá bình dân, texture nhẹ không bết.',
-            'content': '''<h2>Skin Aqua Tone Up UV Essence</h2>
-<p>Kem chống nắng "quốc dân" của Rohto (Nhật), giá chỉ ~150K nhưng SPF50+ PA++++, có hiệu ứng nâng tông da sáng hồng.</p>
-<h2>Vì sao viral?</h2>
-<ul>
-<li><strong>Giá rẻ</strong> — 150K/chai 80g, dùng được 2-3 tháng</li>
-<li><strong>Nâng tông</strong> — Da trắng hồng tự nhiên không cần makeup</li>
-<li><strong>Texture</strong> — Nhẹ như nước, không bết dính, có mùi hoa lavender</li>
-<li><strong>Hyaluronic Acid</strong> — Cấp ẩm, không gây khô da</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Skin Aqua,chống nắng,nâng tông,bình dân,Rohto,skincare',
         },
         {
             'name_vi': 'Xịt chống nắng Neutrogena', 'name_en': 'Neutrogena Ultra Sheer Spray',
             'slug': 'xit-chong-nang-neutrogena',
             'description': 'Xịt chống nắng Neutrogena tiện lợi, dễ bôi lại, không để lại vệt trắng.',
-            'content': '''<h2>Xịt chống nắng — Tiện lợi bôi lại</h2>
-<p>Neutrogena Ultra Sheer Body Mist SPF70 dạng xịt, tiện lợi bôi lại trong ngày mà không cần rửa tay. Phun đều, khô nhanh.</p>
-<h2>Khi nào dùng xịt?</h2>
-<ul>
-<li><strong>Bôi lại</strong> — Xịt qua lớp makeup mà không bị hỏng</li>
-<li><strong>Cơ thể</strong> — Tay, chân, cổ — xịt nhanh hơn thoa kem</li>
-<li><strong>Đi chơi</strong> — Tiện mang theo, bôi lại mỗi 2h</li>
-</ul>
-<h2>Lưu ý</h2>
-<p>Xịt không thay thế kem cho mặt. Mặt nên dùng kem, xịt chỉ dùng bôi lại hoặc cho body.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Neutrogena,xịt chống nắng,spray,SPF70,bôi lại,skincare',
         },
     ]
@@ -2727,48 +2850,51 @@ def seed_beauty():
             'name_vi': 'Mặt nạ giấy Mediheal', 'name_en': 'Mediheal Sheet Mask',
             'slug': 'mat-na-giay-mediheal',
             'description': 'Mặt nạ giấy Mediheal N.M.F Aquaring, cấp ẩm sâu, best-seller Hàn Quốc.',
-            'content': '''<h2>Mediheal N.M.F Aquaring</h2>
-<p>Mặt nạ giấy bán chạy #1 Hàn Quốc với hơn 1 tỷ miếng bán ra. N.M.F (Natural Moisturizing Factor) cấp ẩm sâu, phù hợp mọi loại da.</p>
-<h2>Cách dùng hiệu quả</h2>
-<ul>
-<li><strong>Thời gian</strong> — Đắp 15-20 phút, KHÔNG đắp qua đêm</li>
-<li><strong>Tần suất</strong> — 2-3 lần/tuần</li>
-<li><strong>Sau khi đắp</strong> — Vỗ nhẹ cho thấm, thoa kem dưỡng khóa ẩm</li>
-</ul>
-<h2>Giá</h2>
-<p>Khoảng 15-25K/miếng, mua hộp 10 miếng ~150K. Mua Shopee Mall để tránh hàng giả.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Mediheal,mặt nạ giấy,N.M.F,cấp ẩm,K-beauty,skincare',
         },
         {
             'name_vi': 'Mặt nạ ngủ Laneige', 'name_en': 'Laneige Water Sleeping Mask',
             'slug': 'mat-na-ngu-laneige',
             'description': 'Mặt nạ ngủ Laneige cấp ẩm qua đêm, thức dậy da căng mọng, rạng rỡ.',
-            'content': '''<h2>Laneige Water Sleeping Mask</h2>
-<p>Mặt nạ ngủ iconic từ Laneige, thoa trước khi ngủ và để qua đêm. Sáng dậy da căng bóng, mềm mịn.</p>
-<h2>Thành phần</h2>
-<ul>
-<li><strong>SLEEP-TOX</strong> — Công nghệ thải độc khi ngủ</li>
-<li><strong>Hydro Ionized Mineral Water</strong> — Cấp ẩm sâu suốt đêm</li>
-<li><strong>Apricot & Evening Primrose</strong> — Làm sáng, đều màu da</li>
-</ul>
-<h2>Cách dùng</h2>
-<p>Bước cuối skincare tối. Thoa 1 lớp mỏng, để qua đêm, sáng rửa sạch. Dùng 2-3 lần/tuần.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Laneige,mặt nạ ngủ,sleeping mask,cấp ẩm,K-beauty,skincare',
         },
         {
             'name_vi': 'Mặt nạ đất sét Innisfree', 'name_en': 'Innisfree Volcanic Clay Mask',
             'slug': 'mat-na-dat-set-innisfree',
             'description': 'Mặt nạ đất sét núi lửa Jeju, hút bã nhờn, se lỗ chân lông, sạch sâu.',
-            'content': '''<h2>Innisfree Super Volcanic Pore Clay Mask</h2>
-<p>Mặt nạ đất sét từ tro núi lửa đảo Jeju, hút sạch bã nhờn và bụi bẩn trong lỗ chân lông. Best-seller cho da dầu.</p>
-<h2>Công dụng</h2>
-<ul>
-<li><strong>Hút bã nhờn</strong> — Đất sét núi lửa hấp thụ dầu thừa</li>
-<li><strong>Se lỗ chân lông</strong> — Lỗ chân lông nhỏ hơn sau khi đắp</li>
-<li><strong>Sạch sâu</strong> — Loại bỏ bụi bẩn, tế bào chết</li>
-</ul>
-<h2>Cách dùng</h2>
-<p>Thoa lớp dày lên da sạch, đợi 10-15 phút đến khi khô, rửa sạch bằng nước ấm. Dùng 1-2 lần/tuần.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Innisfree,mặt nạ đất sét,volcanic clay,da dầu,se lỗ chân lông,skincare',
         },
     ]
@@ -2856,46 +2982,51 @@ def seed_tech():
             'name_vi': 'Camera chính', 'name_en': 'Main Camera',
             'slug': 'camera-chinh',
             'description': 'Camera chính 50MP, cảm biến lớn, chụp đẹp cả ngày lẫn đêm.',
-            'content': '''<h2>Camera chính là gì?</h2>
-<p>Camera chính (Main Camera) là camera có độ phân giải cao nhất trên điện thoại, thường từ 48MP - 200MP, chịu trách nhiệm chụp ảnh chính.</p>
-
-<h2>Thông số quan trọng</h2>
-<ul>
-<li><strong>Độ phân giải</strong> — 50MP, 108MP, 200MP</li>
-<li><strong>Kích thước cảm biến</strong> — 1/1.56", 1/1.33" (càng lớn càng tốt)</li>
-<li><strong>Khẩu độ</strong> — f/1.8, f/1.5 (càng nhỏ càng tốt trong điều kiện thiếu sáng)</li>
-</ul>
-
-<h2>Xu hướng 2024</h2>
-<p>Camera 50MP với cảm biến lớn đang thay thế camera 108MP cảm biến nhỏ, cho ảnh chất lượng cao hơn.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'camera,smartphone,chụp ảnh,cảm biến,tech',
         },
         {
             'name_vi': 'Camera góc rộng', 'name_en': 'Ultrawide Camera',
             'slug': 'camera-goc-rong',
             'description': 'Camera góc rộng 12MP, góc chụp 120°, chụp phong cảnh đẹp.',
-            'content': '''<h2>Camera góc rộng là gì?</h2>
-<p>Camera góc rộng (Ultrawide Camera) có góc chụp 110-120°, gấp đôi camera thường, giúp chụp phong cảnh rộng, kiến trúc, nhóm đông người.</p>
-
-<h2>Ưu nhược điểm</h2>
-<ul>
-<li><strong>Ưu điểm</strong> — Góc rộng, chụp cảnh đẹp</li>
-<li><strong>Nhược điểm</strong> — Chất lượng kém hơn camera chính, bị méo cạnh</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'camera,góc rộng,ultrawide,smartphone,tech',
         },
         {
             'name_vi': 'Camera zoom', 'name_en': 'Telephoto Camera',
             'slug': 'camera-zoom',
             'description': 'Camera zoom quang học 3x-5x, chụp xa không mất chất lượng.',
-            'content': '''<h2>Camera zoom là gì?</h2>
-<p>Camera zoom (Telephoto Camera) dùng thấu kính tele để phóng to hình ảnh, chụp xa không bị mất chi tiết như zoom kỹ thuật số.</p>
-
-<h2>Phân loại</h2>
-<ul>
-<li><strong>Zoom 2x-3x</strong> — Phổ biến trên điện thoại tầm trung</li>
-<li><strong>Zoom 5x-10x</strong> — Trên flagship như Galaxy S24 Ultra, iPhone 15 Pro Max</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'camera,zoom,telephoto,smartphone,tech',
         },
     ]
@@ -2918,58 +3049,68 @@ def seed_tech():
             'name_vi': 'Màn hình OLED', 'name_en': 'OLED Display',
             'slug': 'man-hinh-oled',
             'description': 'Công nghệ OLED cho màu sắc rực rỡ, đen tuyệt đối, tiết kiệm pin.',
-            'content': '''<h2>Màn hình OLED là gì?</h2>
-<p>OLED (Organic Light-Emitting Diode) là công nghệ mỗi pixel tự phát sáng, không cần đèn nền. Cho màu đen tuyệt đối, tỷ lệ tương phản vô hạn.</p>
-<h2>Ưu điểm</h2>
-<ul>
-<li><strong>Màu đen sâu</strong> — Pixel tắt hoàn toàn khi hiển thị màu đen</li>
-<li><strong>Tiết kiệm pin</strong> — Always-On Display không tốn nhiều pin</li>
-<li><strong>Góc nhìn rộng</strong> — Màu sắc không đổi khi nghiêng</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'OLED,màn hình,smartphone,display,tech',
         },
         {
             'name_vi': 'Màn hình AMOLED', 'name_en': 'AMOLED Display',
             'slug': 'man-hinh-amoled',
             'description': 'Super AMOLED của Samsung — sáng hơn, tiết kiệm pin hơn OLED truyền thống.',
-            'content': '''<h2>AMOLED vs OLED</h2>
-<p>AMOLED (Active-Matrix OLED) là phiên bản nâng cấp của OLED, tích hợp lớp cảm ứng vào màn hình giúp mỏng hơn và tiết kiệm pin hơn.</p>
-<h2>So sánh các loại</h2>
-<ul>
-<li><strong>Super AMOLED</strong> — Samsung, độ sáng cao, sắc nét ngoài trời</li>
-<li><strong>Dynamic AMOLED 2X</strong> — Flagship Samsung, 120Hz, HDR10+</li>
-<li><strong>LTPO AMOLED</strong> — Thay đổi tần số 1-120Hz linh hoạt</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'AMOLED,Super AMOLED,Samsung,màn hình,tech',
         },
         {
             'name_vi': 'Kính cường lực', 'name_en': 'Tempered Glass',
             'slug': 'kinh-cuong-luc',
             'description': 'Kính bảo vệ màn hình Gorilla Glass, chống xước, chống vỡ hiệu quả.',
-            'content': '''<h2>Kính cường lực phổ biến</h2>
-<ul>
-<li><strong>Gorilla Glass Victus 2</strong> — Chống rơi 1m trên bê tông, chống xước cát</li>
-<li><strong>Ceramic Shield</strong> — iPhone 15 series, cứng hơn mọi kính smartphone</li>
-<li><strong>Dragontrail</strong> — Nhẹ hơn Gorilla Glass, dùng trên nhiều Android tầm trung</li>
-</ul>
-<h2>Nên dán thêm kính?</h2>
-<p>Dù có Gorilla Glass, vẫn nên dán kính cường lực thêm. Giá chỉ 30-100K nhưng bảo vệ màn hình triệu đồng.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'kính cường lực,Gorilla Glass,bảo vệ màn hình,tech',
         },
         {
             'name_vi': 'Tần số quét 120Hz', 'name_en': '120Hz Refresh Rate',
             'slug': 'tan-so-quet-120hz',
             'description': 'Màn hình 120Hz cho thao tác mượt mà, cuộn trang siêu mịn, chơi game đỉnh.',
-            'content': '''<h2>120Hz là gì?</h2>
-<p>Tần số quét 120Hz nghĩa là màn hình cập nhật 120 lần/giây, gấp đôi 60Hz tiêu chuẩn. Mọi thao tác cuộn, vuốt đều mượt hơn rõ rệt.</p>
-<h2>60Hz vs 90Hz vs 120Hz</h2>
-<ul>
-<li><strong>60Hz</strong> — Tiêu chuẩn, đủ dùng cơ bản</li>
-<li><strong>90Hz</strong> — Mượt hơn đáng kể, phổ biến tầm trung</li>
-<li><strong>120Hz</strong> — Flagship, game thủ, cuộn mạng xã hội cực mịn</li>
-</ul>
-<h2>LTPO — Tiết kiệm pin</h2>
-<p>LTPO cho phép tần số thay đổi linh hoạt 1-120Hz, xem ảnh tĩnh chỉ 1Hz, cuộn trang lên 120Hz.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': '120Hz,tần số quét,LTPO,màn hình mượt,tech',
         },
     ]
@@ -2991,42 +3132,51 @@ def seed_tech():
             'name_vi': 'Snapdragon 8 Gen 3', 'name_en': 'Snapdragon 8 Gen 3',
             'slug': 'snapdragon-8-gen-3',
             'description': 'Chip flagship Qualcomm mạnh nhất, AI on-device, GPU Adreno 750 cho game đỉnh.',
-            'content': '''<h2>Snapdragon 8 Gen 3</h2>
-<p>Chip flagship mới nhất của Qualcomm, sản xuất trên tiến trình 4nm TSMC. Dùng trên Galaxy S24 Ultra, OnePlus 12, Xiaomi 14 Pro.</p>
-<h2>Thông số</h2>
-<ul>
-<li><strong>CPU</strong> — 1x Cortex-X4 (3.3GHz) + 3x A720 + 4x A520</li>
-<li><strong>GPU</strong> — Adreno 750, mạnh hơn 25% so với Gen 2</li>
-<li><strong>AI</strong> — NPU Hexagon, chạy AI model on-device</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Snapdragon,Qualcomm,chip,processor,flagship,tech',
         },
         {
             'name_vi': 'Apple A17 Pro', 'name_en': 'Apple A17 Pro',
             'slug': 'apple-a17-pro',
             'description': 'Chip 3nm đầu tiên trên smartphone, ray tracing hardware, hiệu năng vượt trội.',
-            'content': '''<h2>Apple A17 Pro</h2>
-<p>Chip đầu tiên sản xuất trên tiến trình 3nm, dùng trên iPhone 15 Pro & Pro Max. Hiệu năng đơn nhân mạnh nhất thế giới smartphone.</p>
-<h2>Điểm nổi bật</h2>
-<ul>
-<li><strong>3nm TSMC</strong> — Tiết kiệm pin, mát hơn</li>
-<li><strong>Ray Tracing</strong> — GPU hỗ trợ ray tracing phần cứng</li>
-<li><strong>USB-C 3.0</strong> — Truyền dữ liệu 10Gbps</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Apple,A17 Pro,chip,3nm,iPhone,tech',
         },
         {
             'name_vi': 'Dimensity 9300', 'name_en': 'Dimensity 9300',
             'slug': 'dimensity-9300',
             'description': 'Chip MediaTek all big-core, hiệu năng ngang Snapdragon, giá tốt hơn.',
-            'content': '''<h2>Dimensity 9300</h2>
-<p>Chip flagship MediaTek với kiến trúc all big-core (không có nhân tiết kiệm), hiệu năng đa nhân cực mạnh.</p>
-<h2>Đặc điểm</h2>
-<ul>
-<li><strong>All big-core</strong> — 4x Cortex-X4 + 4x A720, không nhân nhỏ</li>
-<li><strong>GPU Immortalis-G720</strong> — Chơi game nặng mượt</li>
-<li><strong>Giá tốt</strong> — Giá OEM rẻ hơn Snapdragon, điện thoại rẻ hơn</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Dimensity,MediaTek,chip,processor,tech',
         },
     ]
@@ -3048,59 +3198,68 @@ def seed_tech():
             'name_vi': 'Pin lithium-polymer', 'name_en': 'Lithium-Polymer Battery',
             'slug': 'pin-lithium-polymer',
             'description': 'Pin Li-Po mỏng, nhẹ, dung lượng 4500-6000mAh cho smartphone hiện đại.',
-            'content': '''<h2>Pin Li-Po trên smartphone</h2>
-<p>Pin Lithium-Polymer (Li-Po) là loại pin phổ biến nhất trên smartphone hiện nay, mỏng và có thể uốn cong theo thiết kế.</p>
-<h2>Dung lượng phổ biến</h2>
-<ul>
-<li><strong>4500mAh</strong> — Flagship nhỏ gọn, dùng 1 ngày</li>
-<li><strong>5000mAh</strong> — Phổ biến nhất, dùng cả ngày thoải mái</li>
-<li><strong>6000mAh</strong> — Pin trâu, dùng 2 ngày nhẹ nhàng</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'pin,lithium,battery,smartphone,tech',
         },
         {
             'name_vi': 'Sạc nhanh 120W', 'name_en': '120W Fast Charging',
             'slug': 'sac-nhanh-120w',
             'description': 'Công nghệ sạc nhanh 120W — đầy pin trong 15 phút, an toàn với bảo vệ đa lớp.',
-            'content': '''<h2>Sạc nhanh 120W</h2>
-<p>Sạc siêu nhanh 120W cho phép sạc đầy pin 4500mAh chỉ trong 15 phút. Phổ biến trên Xiaomi, OPPO, realme.</p>
-<h2>So sánh tốc độ sạc</h2>
-<ul>
-<li><strong>25W (Samsung)</strong> — 60 phút đầy, an toàn nhất</li>
-<li><strong>67W (Xiaomi)</strong> — 35 phút đầy</li>
-<li><strong>100W (OPPO)</strong> — 20 phút đầy</li>
-<li><strong>120W (Xiaomi)</strong> — 15 phút đầy</li>
-</ul>
-<h2>Có hại pin không?</h2>
-<p>Sạc nhanh hiện đại có bảo vệ đa lớp: giảm tốc khi nóng, giảm tốc khi gần đầy. Pin vẫn giữ 80% sau 800 chu kỳ.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'sạc nhanh,120W,fast charging,smartphone,tech',
         },
         {
             'name_vi': 'Sạc không dây Qi2', 'name_en': 'Qi2 Wireless Charging',
             'slug': 'sac-khong-day-qi2',
             'description': 'Sạc không dây chuẩn Qi2 với nam châm MagSafe, tốc độ 15W, tiện lợi.',
-            'content': '''<h2>Qi2 — Tương lai sạc không dây</h2>
-<p>Qi2 là chuẩn sạc không dây mới, tích hợp nam châm (giống MagSafe của Apple) giúp căn chỉnh chính xác, sạc nhanh hơn.</p>
-<h2>Ưu điểm Qi2</h2>
-<ul>
-<li><strong>Nam châm</strong> — Tự căn chỉnh, không lệch cuộn sạc</li>
-<li><strong>15W</strong> — Nhanh gấp đôi Qi 7.5W cũ</li>
-<li><strong>Tương thích</strong> — Cả iPhone lẫn Android flagship 2024+</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'sạc không dây,Qi2,MagSafe,wireless charging,tech',
         },
         {
             'name_vi': 'Pin dự phòng 20000mAh', 'name_en': 'Power Bank 20000mAh',
             'slug': 'pin-du-phong-20000mah',
             'description': 'Pin sạc dự phòng 20000mAh, sạc nhanh 65W, mang lên máy bay được.',
-            'content': '''<h2>Chọn pin dự phòng</h2>
-<p>Pin dự phòng 20000mAh sạc được 4-5 lần cho smartphone thông thường, vừa đủ cho chuyến đi 2-3 ngày.</p>
-<h2>Tiêu chí chọn</h2>
-<ul>
-<li><strong>Dung lượng</strong> — 10000mAh (nhẹ), 20000mAh (đủ dùng), 30000mAh (nặng)</li>
-<li><strong>Công suất</strong> — Tối thiểu 22.5W, tốt nhất 65W để sạc nhanh</li>
-<li><strong>Mang lên máy bay</strong> — Dưới 100Wh (≈27000mAh) được mang lên</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'pin dự phòng,power bank,sạc dự phòng,20000mAh,tech',
         },
     ]
@@ -3122,46 +3281,51 @@ def seed_tech():
             'name_vi': 'RAM LPDDR5X', 'name_en': 'LPDDR5X RAM',
             'slug': 'ram-lpddr5x',
             'description': 'RAM LPDDR5X 8-16GB, tốc độ 8533Mbps, đa nhiệm mượt mà.',
-            'content': '''<h2>LPDDR5X là gì?</h2>
-<p>LPDDR5X là chuẩn RAM nhanh nhất trên smartphone, tốc độ lên đến 8533Mbps, gấp đôi LPDDR5.</p>
-<h2>Bao nhiêu RAM là đủ?</h2>
-<ul>
-<li><strong>6GB</strong> — Dùng cơ bản, mạng xã hội</li>
-<li><strong>8GB</strong> — Đa nhiệm tốt, chơi game vừa</li>
-<li><strong>12GB</strong> — Flagship, đa nhiệm nặng</li>
-<li><strong>16GB</strong> — Thừa cho hầu hết người dùng</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'RAM,LPDDR5X,bộ nhớ,đa nhiệm,tech',
         },
         {
             'name_vi': 'Bộ nhớ UFS 4.0', 'name_en': 'UFS 4.0 Storage',
             'slug': 'bo-nho-ufs-4',
             'description': 'Bộ nhớ trong UFS 4.0, tốc độ đọc 4200MB/s, mở app cực nhanh.',
-            'content': '''<h2>UFS 4.0 vs UFS 3.1</h2>
-<p>UFS 4.0 nhanh gấp đôi UFS 3.1, mở app gần như tức thì, copy file lớn trong vài giây.</p>
-<h2>Dung lượng nên chọn</h2>
-<ul>
-<li><strong>128GB</strong> — Dùng cơ bản, hay xóa ảnh/video</li>
-<li><strong>256GB</strong> — An toàn cho hầu hết người dùng</li>
-<li><strong>512GB</strong> — Quay video 4K nhiều, tải game nặng</li>
-<li><strong>1TB</strong> — Cho người không muốn lo nghĩ dung lượng</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'UFS 4.0,bộ nhớ trong,storage,tốc độ,tech',
         },
         {
             'name_vi': 'Thẻ nhớ microSD', 'name_en': 'microSD Card',
             'slug': 'the-nho-microsd',
             'description': 'Thẻ nhớ mở rộng microSD A2 U3, tốc độ đọc 160MB/s, mở rộng lưu trữ.',
-            'content': '''<h2>Chọn thẻ nhớ microSD</h2>
-<p>Nhiều điện thoại Android tầm trung vẫn hỗ trợ thẻ nhớ mở rộng, giúp tăng dung lượng với chi phí thấp.</p>
-<h2>Phân loại tốc độ</h2>
-<ul>
-<li><strong>A1/U1</strong> — Đủ lưu ảnh, nhạc, tài liệu</li>
-<li><strong>A2/U3</strong> — Chạy app từ thẻ nhớ, quay 4K</li>
-<li><strong>V30/V60</strong> — Quay video chuyên nghiệp</li>
-</ul>
-<h2>Thương hiệu uy tín</h2>
-<p>Samsung EVO Plus, SanDisk Extreme, Kingston Canvas Go — tránh hàng giá rẻ không rõ nguồn gốc.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'thẻ nhớ,microSD,mở rộng,lưu trữ,tech',
         },
     ]
@@ -3183,44 +3347,51 @@ def seed_tech():
             'name_vi': 'Ốp lưng silicon', 'name_en': 'Silicone Case',
             'slug': 'op-lung-silicon',
             'description': 'Ốp lưng silicon mềm, chống sốc, bám tay, nhiều màu sắc thời trang.',
-            'content': '''<h2>Ốp silicon — Lựa chọn phổ biến nhất</h2>
-<p>Ốp silicon mềm dẻo, chống sốc tốt, giá rẻ và có hàng ngàn mẫu mã.</p>
-<h2>Các loại ốp phổ biến</h2>
-<ul>
-<li><strong>Silicon trong suốt</strong> — Giữ nguyên thiết kế điện thoại, dễ ố vàng</li>
-<li><strong>Silicon màu</strong> — Nhiều màu sắc, bám tay tốt</li>
-<li><strong>MagSafe silicon</strong> — Có nam châm, tương thích sạc không dây</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'ốp lưng,silicon,case,bảo vệ,thời trang,tech',
         },
         {
             'name_vi': 'Khung viền titanium', 'name_en': 'Titanium Frame',
             'slug': 'khung-vien-titanium',
             'description': 'Khung viền titanium cao cấp — nhẹ hơn thép, cứng hơn nhôm, sang trọng.',
-            'content': '''<h2>Titanium — Vật liệu flagship 2024</h2>
-<p>iPhone 15 Pro và Galaxy S24 Ultra đều chuyển sang khung titanium. Nhẹ hơn thép không gỉ 15%, cứng hơn nhôm 3 lần.</p>
-<h2>So sánh vật liệu khung</h2>
-<ul>
-<li><strong>Nhựa</strong> — Nhẹ, rẻ, dễ xước (tầm thấp)</li>
-<li><strong>Nhôm</strong> — Nhẹ, bền, truyền nhiệt tốt (tầm trung)</li>
-<li><strong>Thép không gỉ</strong> — Sang trọng, nặng (flagship cũ)</li>
-<li><strong>Titanium</strong> — Nhẹ + bền + sang (flagship mới)</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'titanium,khung viền,vật liệu,flagship,thiết kế,tech',
         },
         {
             'name_vi': 'Kính lưng Ceramic', 'name_en': 'Ceramic Back Glass',
             'slug': 'kinh-lung-ceramic',
             'description': 'Mặt lưng kính ceramic shield — chống xước, chống vỡ, hỗ trợ sạc không dây.',
-            'content': '''<h2>Mặt lưng kính vs Nhựa</h2>
-<p>Flagship đều dùng mặt lưng kính để hỗ trợ sạc không dây và tạo cảm giác cao cấp.</p>
-<h2>Các loại kính lưng</h2>
-<ul>
-<li><strong>Gorilla Glass 5</strong> — Phổ biến, chống rơi tốt</li>
-<li><strong>Gorilla Glass Victus 2</strong> — Flagship, siêu bền</li>
-<li><strong>Ceramic Shield</strong> — Apple, cứng nhất hiện tại</li>
-<li><strong>Kính nhám (Frosted)</strong> — Chống bám vân tay, sang trọng</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'kính lưng,ceramic,Gorilla Glass,thiết kế,tech',
         },
     ]
@@ -3266,20 +3437,17 @@ def seed_beauty_articles():
             'excerpt': 'Phân tích toàn cảnh thị trường mỹ phẩm Việt Nam: quy mô 2.8 tỷ USD, tăng trưởng 18%/năm, và xu hướng skincare bùng nổ.',
             'reading_time': 8,
             'vertical_slug': 'beauty',
-            'content': '''<h2>Quy mô thị trường</h2>
-<p>Thị trường mỹ phẩm Việt Nam đạt giá trị khoảng <strong>2.8 tỷ USD</strong> năm 2024, với tốc độ tăng trưởng 18%/năm - cao nhất Đông Nam Á. Skincare chiếm 45%, makeup 30%, còn lại là chăm sóc tóc và cơ thể.</p>
-
-<h2>3 xu hướng lớn 2025</h2>
-<p><strong>1. K-beauty và J-beauty thống trị</strong> — Hàn Quốc và Nhật Bản chiếm 60% thị phần skincare cao cấp. Các thương hiệu như Some By Mi, Cocoon, Anua đang "viral" mạnh.</p>
-<p><strong>2. Mua online qua TikTok Shop/Shopee</strong> — Doanh số online tăng 120% YoY. Livestream bán hàng mỹ phẩm trở thành xu hướng chính.</p>
-<p><strong>3. Clean beauty & vegan</strong> — Người tiêu dùng Việt ngày càng quan tâm đến thành phần lành tính, không paraben, không động vật.</p>
-
-<h2>Cơ hội tiết kiệm</h2>
-<ul>
-<li>So sánh giá trên Shopee/Lazada/Tiki trước khi mua</li>
-<li>Săn sale 9/9, 10/10, 11/11 để tiết kiệm 30-50%</li>
-<li>Tự tìm hiểu thành phần thay vì nghe quảng cáo</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Skincare Routine — Quy trình chăm sóc da cơ bản cho người mới',
@@ -3290,19 +3458,17 @@ def seed_beauty_articles():
             'excerpt': 'Hướng dẫn quy trình skincare cơ bản 5 bước cho người mới: làm sạch, toner, serum, kem dưỡng, chống nắng.',
             'reading_time': 10,
             'vertical_slug': 'beauty',
-            'content': '''<h2>Quy trình skincare cơ bản — 5 bước</h2>
-<p><strong>Bước 1: Làm sạch (Cleanser)</strong> — Sữa rửa mặt phù hợp da (da dầu dùng gel, da khô dùng sữa). Rửa 2 lần/ngày (sáng + tối).</p>
-<p><strong>Bước 2: Toner</strong> — Cân bằng độ pH, chuẩn bị da hấp thụ dưỡng chất. Chọn toner không cồn.</p>
-<p><strong>Bước 3: Serum</strong> — Tinh chất tập trung điều trị (vitamin C ban ngày, retinol ban đêm).</p>
-<p><strong>Bước 4: Kem dưỡng (Moisturizer)</strong> — Khóa ẩm, nuôi dưỡng da. Da dầu dùng gel, da khô dùng cream.</p>
-<p><strong>Bước 5: Chống nắng (SPF 50+)</strong> — BẮT BUỘC ban ngày, bôi lại mỗi 2-3h nếu ra ngoài trời.</p>
-
-<h2>Sai lầm phổ biến</h2>
-<ul>
-<li>Dùng quá nhiều sản phẩm cùng lúc → kích ứng da</li>
-<li>Không chống nắng hàng ngày → da lão hóa nhanh</li>
-<li>Thoa tay không sạch lên mặt → mụn nhiều hơn</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'AHA vs BHA vs PHA — Acid tẩy da chết nên chọn loại nào?',
@@ -3313,21 +3479,17 @@ def seed_beauty_articles():
             'excerpt': 'So sánh 3 loại acid phổ biến: AHA (glycolic, lactic), BHA (salicylic), PHA. Loại nào phù hợp với từng loại da.',
             'reading_time': 7,
             'vertical_slug': 'beauty',
-            'content': '''<h2>3 loại acid chính</h2>
-<p><strong>AHA (Alpha Hydroxy Acid)</strong> — Hòa tan trong nước, tẩy tế bào chết trên bề mặt da. Phù hợp da khô, da lão hóa, nám. Ví dụ: Glycolic Acid, Lactic Acid.</p>
-<p><strong>BHA (Beta Hydroxy Acid)</strong> — Hòa tan trong dầu, thấm sâu vào lỗ chân lông. Phù hợp da dầu, da mụn. Chủ yếu là Salicylic Acid 2%.</p>
-<p><strong>PHA (Polyhydroxy Acid)</strong> — Phân tử lớn hơn AHA/BHA, nhẹ nhàng hơn. Phù hợp da nhạy cảm. Ví dụ: Gluconolactone, Lactobionic Acid.</p>
-
-<h2>Nên chọn loại nào?</h2>
-<ul>
-<li><strong>Da dầu mụn</strong> → BHA (Salicylic Acid 2%)</li>
-<li><strong>Da khô, lão hóa</strong> → AHA (Glycolic 5-10%)</li>
-<li><strong>Da nhạy cảm</strong> → PHA</li>
-<li><strong>Da hỗn hợp</strong> → AHA+BHA mix (Some By Mi)</li>
-</ul>
-
-<h2>Cách dùng</h2>
-<p>Chỉ dùng ban đêm, bắt đầu 2 lần/tuần, tăng dần lên 3-4 lần. BẮT BUỘC dùng kem chống nắng ban ngày vì acid làm da nhạy cảm hơn với UV.</p>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
     ]
     
@@ -3373,24 +3535,17 @@ def seed_tech_articles():
             'excerpt': 'Phân tích thị trường điện thoại Việt Nam: Samsung dẫn đầu 28%, Apple tăng mạnh, Xiaomi áp đảo phân khúc tầm trung.',
             'reading_time': 8,
             'vertical_slug': 'tech',
-            'content': '''<h2>Thị phần smartphone Việt Nam 2024</h2>
-<p><strong>Samsung</strong> — 28% (dẫn đầu). Galaxy A series bán chạy nhất phân khúc dưới 10 triệu.</p>
-<p><strong>Apple</strong> — 22% (tăng 5% so với 2023). iPhone 15 series và iPhone 14 giảm giá bán rất tốt.</p>
-<p><strong>Xiaomi</strong> — 18%. Thống trị phân khúc 3-7 triệu với Redmi Note series.</p>
-<p><strong>OPPO + Realme</strong> — 15%. Giảm nhẹ do cạnh tranh khốc liệt.</p>
-<p><strong>Vivo, OnePlus, khác</strong> — 17%.</p>
-
-<h2>3 xu hướng lớn 2025</h2>
-<p><strong>1. Màn hình OLED phổ cập</strong> — Ngay cả điện thoại 5 triệu cũng có màn hình OLED 120Hz (Redmi Note 13 Pro).</p>
-<p><strong>2. Camera 200MP lan rộng</strong> — Không còn là độc quyền flagship. Xiaomi 14T, Galaxy S24 đều có camera 200MP.</p>
-<p><strong>3. Sạc nhanh 67W+ trở thành chuẩn</strong> — Xiaomi 120W, OPPO 100W, chỉ Apple vẫn "ngoan cố" 20-27W.</p>
-
-<h2>Lời khuyên mua sắm</h2>
-<ul>
-<li>Mua iPhone qua Lazada/Tiki (chính hãng, rẻ hơn cửa hàng 2-3 triệu)</li>
-<li>Samsung mua vào tháng 3-4 (sau Tết giảm giá mạnh)</li>
-<li>Xiaomi/Realme săn sale online (flash sale 0 đồng, giảm 30-40%)</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Chip smartphone 2025 — Snapdragon vs Apple A-series vs Dimensity',
@@ -3401,21 +3556,17 @@ def seed_tech_articles():
             'excerpt': 'So sánh 3 dòng chip hàng đầu: Snapdragon 8 Gen 3, Apple A17 Pro, Dimensity 9300. Chip nào mạnh nhất, tiết kiệm pin nhất?',
             'reading_time': 10,
             'vertical_slug': 'tech',
-            'content': '''<h2>3 dòng chip hàng đầu 2025</h2>
-<p><strong>Apple A17 Pro</strong> (iPhone 15 Pro/Pro Max) — Chip 3nm mạnh nhất, điểm Geekbench 3,000/7,500 (single/multi). GPU 6 nhân cho gaming mượt. Tiết kiệm pin tuyệt vời.</p>
-<p><strong>Snapdragon 8 Gen 3</strong> (Galaxy S24 Ultra, Xiaomi 14) — Chip Android mạnh nhất. Điểm Geekbench 2,200/6,800. Hỗ trợ AI tốt, gaming 120fps Genshin Impact.</p>
-<p><strong>Dimensity 9300</strong> (Vivo X100, OPPO Find X7) — Chip MediaTek cao cấp. Hiệu năng ngang Snapdragon 8 Gen 2, giá rẻ hơn 20%.</p>
-
-<h2>Phân khúc tầm trung</h2>
-<p><strong>Snapdragon 7 Gen 3</strong> — Tốt nhất phân khúa 7-10 triệu. Poco X6 Pro, Realme GT Neo 6.</p>
-<p><strong>Dimensity 7200/8200</strong> — Giá rẻ, hiệu năng ổn. Redmi Note 13 Pro, Realme 11 Pro.</p>
-
-<h2>Lời khuyên</h2>
-<ul>
-<li>iPhone → chip A-series luôn tốt nhất, dùng 5-6 năm không lag</li>
-<li>Android flagship → Snapdragon 8 Gen 3 (gaming + nhiệt độ tốt)</li>
-<li>Tầm trung → Dimensity 8200/7200 (giá rẻ, hiệu năng ổn)</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Camera smartphone — Megapixel cao không phải là tất cả',
@@ -3426,26 +3577,17 @@ def seed_tech_articles():
             'excerpt': 'Tại sao iPhone 48MP chụp đẹp hơn nhiều Android 200MP? Giải mã vai trò của kích thước cảm biến, khẩu độ, xử lý ảnh.',
             'reading_time': 7,
             'vertical_slug': 'tech',
-            'content': '''<h2>Megapixel không phải là tất cả</h2>
-<p>Nhiều người nghĩ camera 200MP sẽ chụp đẹp hơn camera 50MP. Sai! Chất lượng ảnh phụ thuộc vào:</p>
-<ul>
-<li><strong>Kích thước cảm biến</strong> — 1/1.3" (lớn) tốt hơn 1/2" (nhỏ) nhiều lần</li>
-<li><strong>Kích thước pixel</strong> — 1.4µm (lớn) bắt sáng tốt hơn 0.8µm (nhỏ)</li>
-<li><strong>Khẩu độ</strong> — f/1.5 (lớn) vào sáng tốt hơn f/2.0 (nhỏ)</li>
-<li><strong>Xử lý ảnh (ISP)</strong> — Apple, Google Pixel xử lý ảnh đỉnh cao</li>
-</ul>
-
-<h2>Tại sao iPhone 48MP chụp đẹp hơn Android 200MP?</h2>
-<p><strong>Cảm biến lớn</strong> — iPhone dùng Sony IMX803 1/1.28", trong khi nhiều Android 200MP dùng cảm biến 1/1.4" (nhỏ hơn).</p>
-<p><strong>Pixel binning thông minh</strong> — iPhone gộp 4 pixel 48MP → 1 pixel 12MP siêu lớn, bắt sáng cực tốt ban đêm.</p>
-<p><strong>Photonic Engine + Deep Fusion</strong> — AI xử lý ảnh của Apple mạnh nhất thị trường.</p>
-
-<h2>Lời khuyên chọn camera</h2>
-<ul>
-<li>iPhone 15 Pro/Pro Max — chụp đẹp nhất, xử lý ảnh tự nhiên</li>
-<li>Galaxy S24 Ultra — camera zoom 10x tốt nhất</li>
-<li>Xiaomi 14 Ultra — cảm biến Leica 1", chụp đêm đỉnh</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
     ]
     
@@ -3769,72 +3911,68 @@ def seed_sport():
             'name_vi': 'Nike Pegasus 41', 'name_en': 'Nike Pegasus 41',
             'slug': 'nike-pegasus-41',
             'description': 'Giày chạy bộ đa năng hàng đầu Nike, đệm React foam + Zoom Air, phù hợp mọi cự ly.',
-            'content': '''<h2>Nike Pegasus 41 — Giày chạy "quốc dân"</h2>
-<p>Pegasus là dòng giày chạy bán chạy nhất lịch sử Nike, đã qua 41 phiên bản. Phù hợp từ người mới chạy đến runner 42km.</p>
-
-<h2>Công nghệ</h2>
-<ul>
-<li><strong>React Foam</strong> — Đệm mềm, bật nảy tốt, bền bỉ qua 800km</li>
-<li><strong>Zoom Air</strong> — Túi khí ở gót và mũi, tăng phản hồi năng lượng</li>
-<li><strong>Flywire</strong> — Dây cáp ôm chân, cố định bàn chân khi chạy</li>
-</ul>
-
-<h2>Phù hợp ai?</h2>
-<p>Người mới bắt đầu chạy bộ. Runner chạy daily training 5-21km. Chạy đường nhựa, track. Drop 10mm phù hợp đa số foot type.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Nike,Pegasus,giày chạy,running,React,Zoom Air',
         },
         {
             'name_vi': 'ASICS Gel-Nimbus 26', 'name_en': 'ASICS Gel-Nimbus 26',
             'slug': 'asics-gel-nimbus-26',
             'description': 'Giày chạy êm nhất của ASICS, công nghệ FF BLAST PLUS ECO + PureGEL, lý tưởng cho long run.',
-            'content': '''<h2>ASICS Gel-Nimbus 26 — Êm nhất phân khúc</h2>
-<p>Nimbus là dòng giày chạy max-cushion huyền thoại của ASICS, được runner long-distance yêu thích nhờ độ êm vượt trội.</p>
-
-<h2>Công nghệ</h2>
-<ul>
-<li><strong>FF BLAST PLUS ECO</strong> — Foam nhẹ hơn 20%, êm hơn thế hệ trước</li>
-<li><strong>PureGEL</strong> — Gel mới nhẹ hơn GEL truyền thống, hấp thụ chấn động tốt</li>
-<li><strong>AHARPLUS</strong> — Đế ngoài siêu bền, chạy được 1000km+</li>
-</ul>
-
-<h2>Phù hợp ai?</h2>
-<p>Runner chạy long run 21-42km. Người cần giày êm chân (khớp gối yếu). Chạy đường nhựa, recovery run.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'ASICS,Gel-Nimbus,giày chạy,running,cushion,marathon',
         },
         {
             'name_vi': 'Hoka Clifton 9', 'name_en': 'Hoka Clifton 9',
             'slug': 'hoka-clifton-9',
             'description': 'Giày chạy siêu nhẹ Hoka, đệm dày max-cushion nhưng chỉ nặng 248g, meta-rocker êm ái.',
-            'content': '''<h2>Hoka Clifton 9 — Nhẹ + Êm = Hoàn hảo</h2>
-<p>Hoka Clifton là giày chạy "phá vỡ quy luật" — đệm dày 33mm mà chỉ nặng 248g (size 42). Runner gọi là "chạy trên mây".</p>
-
-<h2>Công nghệ</h2>
-<ul>
-<li><strong>Compression EVA</strong> — Foam êm, nhẹ, phản hồi tốt</li>
-<li><strong>Meta-Rocker</strong> — Đế cong giúp chuyển tiếp bước chạy mượt mà</li>
-<li><strong>Early Stage</strong> — Thiết kế giúp chân tiếp đất tự nhiên</li>
-</ul>
-
-<h2>So sánh với đối thủ</h2>
-<p>Nhẹ hơn Nimbus 26 (284g) nhưng êm tương đương. Phù hợp người mới chuyển sang Hoka lần đầu.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Hoka,Clifton,giày chạy,running,max-cushion,nhẹ',
         },
         {
             'name_vi': 'Nike Vaporfly 3', 'name_en': 'Nike Vaporfly 3',
             'slug': 'nike-vaporfly-3',
             'description': 'Giày chạy thi đấu carbon plate, ZoomX foam, phá kỷ lục marathon, dành cho race day.',
-            'content': '''<h2>Nike Vaporfly 3 — Giày phá kỷ lục</h2>
-<p>Vaporfly là giày racing đã giúp Eliud Kipchoge phá kỷ lục marathon sub-2h. Carbon plate + ZoomX foam cho tốc độ tối đa.</p>
-
-<h2>Công nghệ</h2>
-<ul>
-<li><strong>ZoomX Foam</strong> — Foam nhẹ nhất, phản hồi năng lượng 85%+</li>
-<li><strong>Carbon Plate</strong> — Tấm carbon đẩy chân về phía trước mỗi bước</li>
-<li><strong>Drop 8mm</strong> — Tối ưu cho chạy forefoot/midfoot strike</li>
-</ul>
-
-<h2>Lưu ý</h2>
-<p>Chỉ dùng cho race day và tempo run. Tuổi thọ ngắn (~250km). Giá cao (~5-6 triệu). Không phù hợp daily training.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Nike,Vaporfly,carbon plate,giày đua,marathon,racing',
         },
     ]
@@ -3856,57 +3994,51 @@ def seed_sport():
             'name_vi': 'Garmin Forerunner 265', 'name_en': 'Garmin Forerunner 265',
             'slug': 'garmin-forerunner-265',
             'description': 'Đồng hồ GPS chạy bộ AMOLED, Training Readiness, Race Predictor, pin 13 ngày.',
-            'content': '''<h2>Garmin Forerunner 265 — Best for Runners</h2>
-<p>Forerunner 265 là đồng hồ chạy bộ tốt nhất tầm giá 10 triệu, màn hình AMOLED sắc nét, GPS multi-band chính xác.</p>
-
-<h2>Tính năng nổi bật</h2>
-<ul>
-<li><strong>Training Readiness</strong> — Đánh giá mức sẵn sàng tập luyện mỗi ngày</li>
-<li><strong>Race Predictor</strong> — Dự đoán thời gian hoàn thành 5K, 10K, HM, FM</li>
-<li><strong>Morning Report</strong> — Tổng hợp giấc ngủ, HRV, thời tiết mỗi sáng</li>
-<li><strong>Pin 13 ngày</strong> — Smartwatch mode, 20h GPS liên tục</li>
-</ul>
-
-<h2>So sánh</h2>
-<p>Tốt hơn Apple Watch về GPS accuracy và pin. Rẻ hơn Garmin Fenix 7 nhưng đầy đủ tính năng running.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Garmin,Forerunner,GPS,đồng hồ,chạy bộ,running',
         },
         {
             'name_vi': 'COROS PACE 3', 'name_en': 'COROS PACE 3',
             'slug': 'coros-pace-3',
             'description': 'Đồng hồ GPS siêu nhẹ 39g, pin 24 ngày, GPS dual-frequency, giá tốt nhất phân khúc.',
-            'content': '''<h2>COROS PACE 3 — Nhẹ nhất, pin trâu nhất</h2>
-<p>COROS PACE 3 chỉ nặng 39g (nhẹ nhất thế giới GPS watch), pin 24 ngày smartwatch, 38h GPS liên tục — lý tưởng cho ultra runner.</p>
-
-<h2>Tính năng</h2>
-<ul>
-<li><strong>39g siêu nhẹ</strong> — Đeo quên luôn, không vướng khi chạy</li>
-<li><strong>GPS Dual-frequency</strong> — Chính xác cao, không bị lệch trong thành phố</li>
-<li><strong>EvoLab</strong> — Training Load, Threshold Pace, Base Fitness</li>
-<li><strong>Pin 24 ngày</strong> — Gấp đôi Garmin 265, sạc 1 lần/tháng</li>
-</ul>
-
-<h2>Giá</h2>
-<p>Khoảng 5-6 triệu, rẻ hơn Garmin 265 gần một nửa mà tính năng running tương đương.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'COROS,PACE 3,GPS,đồng hồ,running,siêu nhẹ',
         },
         {
             'name_vi': 'Apple Watch Ultra 2', 'name_en': 'Apple Watch Ultra 2',
             'slug': 'apple-watch-ultra-2',
             'description': 'Smartwatch cao cấp nhất Apple, GPS dual-frequency, Precision Finding, 36h pin.',
-            'content': '''<h2>Apple Watch Ultra 2 — Premium cho iPhone user</h2>
-<p>Apple Watch Ultra 2 là smartwatch thể thao cao cấp nhất của Apple, titanium 49mm, GPS cực chính xác.</p>
-
-<h2>Tính năng thể thao</h2>
-<ul>
-<li><strong>GPS L1+L5</strong> — Dual-frequency, chính xác nhất trong Apple Watch</li>
-<li><strong>Workout Views</strong> — Hiển thị pace, HR zone, elevation real-time</li>
-<li><strong>Depth Gauge</strong> — Đo độ sâu khi bơi/lặn đến 40m</li>
-<li><strong>Action Button</strong> — Nút vật lý bấm nhanh khi chạy</li>
-</ul>
-
-<h2>Hạn chế</h2>
-<p>Pin chỉ 36h (kém xa Garmin/COROS). Chỉ dùng với iPhone. Giá ~19 triệu. Không có Training Load nâng cao.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Apple Watch,Ultra,GPS,smartwatch,chạy bộ,bơi lội',
         },
     ]
@@ -3928,48 +4060,51 @@ def seed_sport():
             'name_vi': 'Áo chạy Nike Dri-FIT', 'name_en': 'Nike Dri-FIT Running Singlet',
             'slug': 'ao-chay-nike-dri-fit',
             'description': 'Áo singlet chạy bộ Nike Dri-FIT, thoáng khí, nhanh khô, nhẹ chỉ 90g.',
-            'content': '''<h2>Nike Dri-FIT — Công nghệ thoáng khí hàng đầu</h2>
-<p>Dri-FIT là công nghệ vải độc quyền Nike, hút ẩm mồ hôi và bay hơi nhanh, giữ cơ thể khô ráo khi chạy.</p>
-
-<h2>Đặc điểm</h2>
-<ul>
-<li><strong>Dri-FIT</strong> — Hút mồ hôi, bay hơi nhanh gấp 3 lần cotton</li>
-<li><strong>Flatlock seams</strong> — Đường may phẳng, không gây cọ xát</li>
-<li><strong>90g</strong> — Siêu nhẹ, như không mặc gì</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Nike,Dri-FIT,áo chạy,singlet,running,thoáng khí',
         },
         {
             'name_vi': 'Quần short chạy 2-in-1', 'name_en': '2-in-1 Running Shorts',
             'slug': 'quan-short-chay-2-in-1',
             'description': 'Quần short chạy 2 lớp, lớp ngoài nhẹ + lớp compression bên trong, túi đựng điện thoại.',
-            'content': '''<h2>Quần 2-in-1 — Tiện lợi nhất cho runner</h2>
-<p>Quần 2-in-1 kết hợp lớp short bên ngoài thoáng mát và lớp compression tight bên trong giữ cơ, chống cọ xát đùi.</p>
-
-<h2>Vì sao runner chọn 2-in-1?</h2>
-<ul>
-<li><strong>Chống cọ xát</strong> — Lớp compression bảo vệ đùi trong</li>
-<li><strong>Túi đựng</strong> — Lớp trong có túi đựng điện thoại, gel, chìa khóa</li>
-<li><strong>Thoáng khí</strong> — Lớp ngoài nhẹ, gió lùa thoải mái</li>
-</ul>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'quần short,2-in-1,running,compression,chạy bộ',
         },
         {
             'name_vi': 'Tất chạy Balega Hidden Comfort', 'name_en': 'Balega Hidden Comfort Socks',
             'slug': 'tat-chay-balega',
             'description': 'Tất chạy bộ Balega chống phồng rộp, đệm gót, thoáng khí, best-seller #1 running socks.',
-            'content': '''<h2>Balega Hidden Comfort — Tất chạy tốt nhất</h2>
-<p>Balega Hidden Comfort là tất chạy bán chạy nhất thế giới, được hàng triệu runner tin dùng nhờ khả năng chống phồng rộp tuyệt đối.</p>
-
-<h2>Đặc điểm</h2>
-<ul>
-<li><strong>Drynamix</strong> — Sợi hút ẩm, chân luôn khô</li>
-<li><strong>Đệm gót dày</strong> — Giảm chấn động khi tiếp đất</li>
-<li><strong>Hand-linked toe</strong> — Đường may mũi chân phẳng, không cọ xát</li>
-</ul>
-
-<h2>Giá</h2>
-<p>Khoảng 350-400K/đôi. Đắt nhưng bền (chạy 1000km+ vẫn tốt), chống phồng rộp 100%.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Balega,tất chạy,running socks,chống phồng rộp,marathon',
         },
     ]
@@ -3991,55 +4126,51 @@ def seed_sport():
             'name_vi': 'Gel năng lượng GU', 'name_en': 'GU Energy Gel',
             'slug': 'gel-nang-luong-gu',
             'description': 'Gel năng lượng GU chứa 100 calo + caffeine + electrolyte, tiếp năng lượng nhanh khi chạy.',
-            'content': '''<h2>GU Energy Gel — Tiêu chuẩn marathon</h2>
-<p>GU là thương hiệu gel năng lượng phổ biến nhất thế giới, được dùng trong mọi giải marathon lớn.</p>
-
-<h2>Thành phần</h2>
-<ul>
-<li><strong>100 calo</strong> — Maltodextrin + fructose, hấp thụ nhanh</li>
-<li><strong>Caffeine</strong> — 20-40mg tùy vị, tăng tỉnh táo</li>
-<li><strong>Sodium + BCAAs</strong> — Bù điện giải, giảm chuột rút</li>
-</ul>
-
-<h2>Cách dùng</h2>
-<p>Dùng 1 gel mỗi 45-60 phút khi chạy trên 60 phút. Uống kèm 100-200ml nước. Tập dùng gel khi training, đừng thử lần đầu khi race.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'GU,gel năng lượng,energy gel,marathon,running,dinh dưỡng',
         },
         {
             'name_vi': 'Viên muối điện giải SaltStick', 'name_en': 'SaltStick Electrolyte Caps',
             'slug': 'vien-muoi-dien-giai-saltstick',
             'description': 'Viên bù điện giải SaltStick chứa Na, K, Mg, Ca — chống chuột rút khi chạy dài.',
-            'content': '''<h2>SaltStick — Chống chuột rút hiệu quả</h2>
-<p>SaltStick Caps là viên bù điện giải được runner ultra-marathon tin dùng. Công thức cân bằng 4 loại muối khoáng theo tỷ lệ mồ hôi.</p>
-
-<h2>Thành phần mỗi viên</h2>
-<ul>
-<li><strong>Sodium</strong> — 215mg (bù lượng muối mất qua mồ hôi)</li>
-<li><strong>Potassium</strong> — 63mg (chống chuột rút)</li>
-<li><strong>Magnesium</strong> — 11mg (thư giãn cơ)</li>
-<li><strong>Calcium</strong> — 22mg (co cơ bình thường)</li>
-</ul>
-
-<h2>Cách dùng</h2>
-<p>Uống 1 viên mỗi 30-60 phút khi chạy trên 1 tiếng, đặc biệt trời nóng >30°C. Uống kèm nước.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'SaltStick,điện giải,electrolyte,chuột rút,marathon,running',
         },
         {
             'name_vi': 'Bột điện giải Nuun Sport', 'name_en': 'Nuun Sport Electrolyte Tablets',
             'slug': 'bot-dien-giai-nuun',
             'description': 'Viên sủi điện giải Nuun Sport không đường, bù nước nhanh, nhiều vị trái cây.',
-            'content': '''<h2>Nuun Sport — Bù nước không đường</h2>
-<p>Nuun Sport là viên sủi bù điện giải không đường, chỉ 15 calo/viên, hòa tan nhanh trong nước. Vị ngon, dễ uống.</p>
-
-<h2>Đặc điểm</h2>
-<ul>
-<li><strong>Không đường</strong> — Chỉ 1g carb, phù hợp keto/low-carb</li>
-<li><strong>4 electrolyte</strong> — Na, K, Mg, Ca cân bằng</li>
-<li><strong>Tiện lợi</strong> — Ống 10 viên nhỏ gọn, bỏ túi chạy</li>
-</ul>
-
-<h2>Cách dùng</h2>
-<p>Thả 1 viên vào 500ml nước, chờ sủi hết (2 phút), uống trước/trong/sau khi chạy.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Nuun,điện giải,electrolyte,hydration,running,không đường',
         },
     ]
@@ -4079,55 +4210,51 @@ def seed_sport():
             'name_vi': 'Whey Protein Isolate', 'name_en': 'Whey Protein Isolate',
             'slug': 'whey-protein-isolate',
             'description': 'Whey Isolate 90%+ protein, ít lactose, ít fat, hấp thụ nhanh, phù hợp giảm cân.',
-            'content': '''<h2>Whey Isolate là gì?</h2>
-<p>Whey Protein Isolate (WPI) là dạng whey tinh khiết nhất, chứa 90-95% protein, gần như không có lactose và chất béo.</p>
-
-<h2>So sánh các loại Whey</h2>
-<ul>
-<li><strong>Whey Concentrate (WPC)</strong> — 70-80% protein, rẻ, có lactose → dễ đầy bụng</li>
-<li><strong>Whey Isolate (WPI)</strong> — 90%+ protein, ít lactose → hấp thụ nhanh, ít bloat</li>
-<li><strong>Whey Hydrolyzed (WPH)</strong> — Đã thủy phân, hấp thụ nhanh nhất, đắt nhất</li>
-</ul>
-
-<h2>Cách dùng</h2>
-<p>1 scoop (25-30g) pha 200-300ml nước/sữa, uống sau tập 30 phút. Ngày tập: 1-2 scoop. Ngày nghỉ: 1 scoop.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'whey,protein,isolate,WPI,tập gym,tăng cơ',
         },
         {
             'name_vi': 'Optimum Nutrition Gold Standard', 'name_en': 'ON Gold Standard Whey',
             'slug': 'on-gold-standard-whey',
             'description': 'Whey protein bán chạy nhất thế giới, blend WPI + WPC, 24g protein/scoop, 120+ calo.',
-            'content': '''<h2>ON Gold Standard — Whey #1 thế giới</h2>
-<p>Optimum Nutrition Gold Standard 100% Whey là sản phẩm whey bán chạy nhất toàn cầu suốt 20+ năm, được gym-goer tin dùng.</p>
-
-<h2>Thành phần mỗi scoop</h2>
-<ul>
-<li><strong>24g Protein</strong> — Blend WPI (chính) + WPC + WPH</li>
-<li><strong>5.5g BCAAs</strong> — Leucine, Isoleucine, Valine tự nhiên</li>
-<li><strong>120 calo</strong> — Ít carb, ít fat, phù hợp cutting</li>
-<li><strong>1g đường</strong> — Gần như không đường</li>
-</ul>
-
-<h2>Vị phổ biến</h2>
-<p>Double Rich Chocolate (best-seller), Vanilla Ice Cream, Cookies & Cream. Chai 2lbs (~30 servings) giá ~800K-1.2 triệu.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'Optimum Nutrition,Gold Standard,whey,protein,gym,tăng cơ',
         },
         {
             'name_vi': 'Mass Gainer tăng cân', 'name_en': 'Serious Mass Gainer',
             'slug': 'mass-gainer-tang-can',
             'description': 'Mass Gainer 1200+ calo/serving, dành cho người gầy muốn tăng cân tăng cơ nhanh.',
-            'content': '''<h2>Mass Gainer — Dành cho người gầy khó tăng cân</h2>
-<p>Mass Gainer (hay Weight Gainer) là bột protein cao calo, chứa 1000-1300 calo/serving, giúp người ectomorph (gầy) tăng cân nhanh.</p>
-
-<h2>Khi nào dùng Mass Gainer?</h2>
-<ul>
-<li><strong>Người gầy</strong> — BMI dưới 18.5, ăn nhiều không lên cân</li>
-<li><strong>Bulking</strong> — Giai đoạn tăng cơ cần thặng dư calo</li>
-<li><strong>Không nên</strong> — Người thừa cân, giảm mỡ → dùng Whey Isolate thay thế</li>
-</ul>
-
-<h2>Cách dùng</h2>
-<p>1 serving pha 500-600ml nước/sữa. Uống giữa các bữa ăn hoặc sau tập. Bắt đầu nửa serving để dạ dày quen.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'mass gainer,tăng cân,tăng cơ,bulking,protein,gym',
         },
     ]
@@ -4149,35 +4276,34 @@ def seed_sport():
             'name_vi': 'Creatine Monohydrate', 'name_en': 'Creatine Monohydrate',
             'slug': 'creatine-monohydrate',
             'description': 'Creatine dạng cơ bản nhất, nghiên cứu nhiều nhất, hiệu quả tăng sức mạnh đã chứng minh.',
-            'content': '''<h2>Creatine Monohydrate — Supplement hiệu quả nhất</h2>
-<p>Creatine là supplement được nghiên cứu khoa học nhiều nhất (500+ studies), chứng minh tăng sức mạnh 5-10%, tăng cơ nhanh hơn.</p>
-
-<h2>Cơ chế hoạt động</h2>
-<ul>
-<li><strong>Tái tạo ATP</strong> — Cung cấp năng lượng cho co cơ mạnh</li>
-<li><strong>Giữ nước trong cơ</strong> — Cơ bắp đầy hơn, to hơn</li>
-<li><strong>Tăng sức mạnh</strong> — Nâng nặng hơn → kích thích cơ phát triển</li>
-</ul>
-
-<h2>Cách dùng</h2>
-<p>5g/ngày, mỗi ngày, bất kể tập hay nghỉ. Pha nước hoặc trộn protein shake. Không cần loading phase. Uống đều đặn 8+ tuần để thấy hiệu quả.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'creatine,monohydrate,tăng sức mạnh,supplement,gym',
         },
         {
             'name_vi': 'Creatine HCL', 'name_en': 'Creatine HCL',
             'slug': 'creatine-hcl',
             'description': 'Creatine HCL tan nhanh, hấp thụ tốt hơn, liều thấp hơn monohydrate, ít đầy bụng.',
-            'content': '''<h2>Creatine HCL vs Monohydrate</h2>
-<p>Creatine HCL (Hydrochloride) hòa tan tốt hơn monohydrate 38 lần, nên chỉ cần liều nhỏ hơn (1-2g vs 5g).</p>
-
-<h2>Ưu nhược điểm</h2>
-<ul>
-<li><strong>Ưu</strong> — Tan nhanh, ít bloat, ít đầy bụng, liều nhỏ</li>
-<li><strong>Nhược</strong> — Đắt hơn 3-4 lần, ít nghiên cứu hơn monohydrate</li>
-</ul>
-
-<h2>Nên chọn loại nào?</h2>
-<p>Monohydrate nếu không bị bloat (rẻ + hiệu quả đã chứng minh). HCL nếu dạ dày nhạy cảm, dễ đầy bụng.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'creatine,HCL,supplement,tập gym,tăng sức mạnh',
         },
     ]
@@ -4199,55 +4325,51 @@ def seed_sport():
             'name_vi': 'Máy chạy bộ điện', 'name_en': 'Electric Treadmill',
             'slug': 'may-chay-bo-dien',
             'description': 'Máy chạy bộ điện tại nhà, tốc độ 0-16km/h, nghiêng tự động, đo nhịp tim.',
-            'content': '''<h2>Chọn máy chạy bộ tại nhà</h2>
-<p>Máy chạy bộ (treadmill) là thiết bị tập cardio phổ biến nhất tại nhà. Chạy bất kể thời tiết, kiểm soát pace chính xác.</p>
-
-<h2>Tiêu chí chọn mua</h2>
-<ul>
-<li><strong>Motor</strong> — Tối thiểu 2.0 HP (chạy bộ), 3.0 HP (chạy nhanh)</li>
-<li><strong>Mặt chạy</strong> — Tối thiểu 120x40cm (người cao cần 140x50cm)</li>
-<li><strong>Độ nghiêng</strong> — Tự động 0-15% giúp tăng cường độ</li>
-<li><strong>Giảm chấn</strong> — Quan trọng để bảo vệ khớp gối</li>
-</ul>
-
-<h2>Giá tham khảo</h2>
-<p>Tầm trung: 8-15 triệu (Kingsport, Elip). Cao cấp: 20-50 triệu (NordicTrack, Life Fitness).</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'máy chạy bộ,treadmill,cardio,tập tại nhà,gym',
         },
         {
             'name_vi': 'Tạ đơn điều chỉnh', 'name_en': 'Adjustable Dumbbell',
             'slug': 'ta-don-dieu-chinh',
             'description': 'Tạ đơn điều chỉnh 2-24kg, thay đổi trọng lượng nhanh, tiết kiệm không gian.',
-            'content': '''<h2>Tạ điều chỉnh — Tối ưu cho home gym</h2>
-<p>Tạ đơn điều chỉnh (adjustable dumbbell) cho phép thay đổi trọng lượng từ 2-24kg chỉ với 1 quả tạ, thay thế 10+ quả tạ cố định.</p>
-
-<h2>Ưu điểm</h2>
-<ul>
-<li><strong>Tiết kiệm không gian</strong> — 1 quả = 10+ quả tạ cố định</li>
-<li><strong>Đa năng</strong> — Tập mọi nhóm cơ: vai, tay, ngực, lưng, chân</li>
-<li><strong>Thay đổi nhanh</strong> — Xoay dial/kéo pin, 3 giây đổi mức tạ</li>
-</ul>
-
-<h2>Brands phổ biến</h2>
-<p>Bowflex SelectTech (cao cấp ~8-12 triệu). PowerBlock (bền ~6-10 triệu). Sportslink/Elip (Việt Nam ~2-4 triệu).</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'tạ đơn,dumbbell,adjustable,home gym,tập tại nhà',
         },
         {
             'name_vi': 'Dây kháng lực', 'name_en': 'Resistance Bands Set',
             'slug': 'day-khang-luc',
             'description': 'Bộ dây kháng lực 5 mức độ, tập toàn thân tại nhà, gọn nhẹ mang đi du lịch.',
-            'content': '''<h2>Dây kháng lực — Gym gọn trong túi</h2>
-<p>Dây kháng lực (resistance bands) là dụng cụ tập gym nhỏ gọn nhất, tập được hầu hết bài tập cơ bản mà không cần máy tập.</p>
-
-<h2>Phân loại</h2>
-<ul>
-<li><strong>Loop bands</strong> — Dạng vòng, tập mông đùi, warm-up</li>
-<li><strong>Tube bands</strong> — Dạng ống có tay cầm, thay thế tạ</li>
-<li><strong>Pull-up bands</strong> — Dây dày, hỗ trợ pull-up, tập lưng</li>
-</ul>
-
-<h2>Set cơ bản</h2>
-<p>Bộ 5 dây: 5lbs, 10lbs, 15lbs, 20lbs, 25lbs. Có thể kết hợp 2-3 dây cho sức kháng cao hơn. Giá ~150K-500K/bộ.</p>''',
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>''',
             'tags': 'dây kháng lực,resistance bands,home gym,tập tại nhà,gọn nhẹ',
         },
     ]
@@ -4340,20 +4462,17 @@ def seed_sport_articles():
             'reading_time': 8,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/00b894/ffffff?text=Sport+Market+2025',
-            'content': '''<h2>Thể thao Việt Nam đang bùng nổ</h2>
-<p>Thị trường fitness & thể thao Việt Nam đạt giá trị <strong>1.5 tỷ USD</strong> năm 2024, tăng trưởng 25%/năm. Running trở thành phong trào quốc dân với hàng trăm giải chạy mỗi năm.</p>
-
-<h2>3 xu hướng lớn 2025</h2>
-<p><strong>1. Running community bùng nổ</strong> — Hơn 200 giải marathon/năm tại Việt Nam. Các running club ở mỗi quận huyện. VnExpress Marathon, Techcombank HCMC Marathon thu hút 15,000+ VĐV.</p>
-<p><strong>2. Gym & Fitness phổ cập</strong> — Chuỗi gym California, CitiGym, Elite mở rộng mạnh. Phòng gym mini, home gym trend tăng 200%.</p>
-<p><strong>3. Dinh dưỡng thể thao</strong> — Whey protein, creatine từ "niche" trở thành mainstream. Doanh số supplement online tăng 150% YoY trên Shopee.</p>
-
-<h2>Chi tiêu trung bình</h2>
-<ul>
-<li>Runner nghiêm túc: 10-20 triệu/năm (giày, gear, giải chạy)</li>
-<li>Gym-goer: 5-15 triệu/năm (phí gym, supplement, đồ tập)</li>
-<li>Casual: 2-5 triệu/năm (giày, quần áo thể thao)</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Hướng dẫn chọn giày chạy bộ — Từ A đến Z cho người mới',
@@ -4365,25 +4484,17 @@ def seed_sport_articles():
             'reading_time': 10,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/2d3436/ffffff?text=Running+Shoes+Guide',
-            'content': '''<h2>3 bước chọn giày chạy bộ</h2>
-
-<h3>Bước 1: Xác định Foot Type</h3>
-<p><strong>Neutral (bàn chân bình thường)</strong> — 60% runner. Chọn giày neutral: Nike Pegasus, ASICS Nimbus, Hoka Clifton.</p>
-<p><strong>Overpronation (bàn chân bẹt)</strong> — 30% runner. Cần giày stability: ASICS Kayano, Brooks Adrenaline, New Balance 860.</p>
-<p><strong>Supination (vòm cao)</strong> — 10% runner. Chọn giày cushion cao: Hoka Bondi, ASICS Nimbus, New Balance Fresh Foam.</p>
-
-<h3>Bước 2: Chọn mức đệm</h3>
-<p><strong>Max cushion (32-38mm)</strong> — Hoka Bondi, ASICS Nimbus. Cho long run, recovery, runner nặng cân.</p>
-<p><strong>Moderate (28-32mm)</strong> — Nike Pegasus, Adidas Supernova. Đa năng, daily training.</p>
-<p><strong>Minimal (20-28mm)</strong> — Nike Vaporfly, Adidas Adizero. Cho race day, tempo run.</p>
-
-<h3>Bước 3: Thử giày đúng cách</h3>
-<ul>
-<li>Thử giày buổi chiều (chân sưng nhẹ, giống khi chạy)</li>
-<li>Mang tất chạy bộ khi thử, không mang tất cotton</li>
-<li>Chạy thử 5-10 phút trên treadmill tại shop</li>
-<li>Chọn size lớn hơn giày thường 0.5-1 size</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Dinh dưỡng thể thao cơ bản — Protein, Carb, Fat cho người tập',
@@ -4395,27 +4506,17 @@ def seed_sport_articles():
             'reading_time': 9,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/6c5ce7/ffffff?text=Sport+Nutrition',
-            'content': '''<h2>Dinh dưỡng cơ bản cho người tập</h2>
-
-<h3>Bước 1: Tính TDEE (Total Daily Energy Expenditure)</h3>
-<p>TDEE = BMR × Activity Factor. Ví dụ: nam 70kg, cao 175cm, 25 tuổi, tập 4 lần/tuần → TDEE ≈ 2,500 calo/ngày.</p>
-<ul>
-<li><strong>Tăng cơ (Bulk)</strong> — TDEE + 300-500 calo = 2,800-3,000 calo</li>
-<li><strong>Giảm mỡ (Cut)</strong> — TDEE − 300-500 calo = 2,000-2,200 calo</li>
-<li><strong>Duy trì</strong> — Ăn đúng TDEE</li>
-</ul>
-
-<h3>Bước 2: Chia Macro</h3>
-<p><strong>Protein</strong> — 1.6-2.2g/kg thể trọng. 70kg → 112-154g protein/ngày.</p>
-<p><strong>Fat</strong> — 0.8-1g/kg. 70kg → 56-70g fat/ngày.</p>
-<p><strong>Carb</strong> — Phần còn lại từ calo. Carb = (Tổng calo − protein×4 − fat×9) ÷ 4.</p>
-
-<h3>Bước 3: Timing</h3>
-<ul>
-<li><strong>Trước tập 1-2h</strong> — Carb + protein nhẹ (chuối + whey)</li>
-<li><strong>Sau tập 30-60 phút</strong> — Protein + carb (whey + cơm/khoai)</li>
-<li><strong>Trước ngủ</strong> — Casein protein hoặc sữa chua Greek</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
 
         # === TIER 2: CHUNG (General - Systems/Methods) ===
@@ -4429,32 +4530,17 @@ def seed_sport_articles():
             'reading_time': 12,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/e17055/ffffff?text=Gym+12+Weeks',
-            'content': '''<h2>Lộ trình 12 tuần cho người mới tập gym</h2>
-
-<h3>Tuần 1-4: Full Body (3 ngày/tuần)</h3>
-<p>Tập toàn thân mỗi buổi, 3 buổi/tuần (T2-T4-T6). Mục tiêu: học form đúng, làm quen các bài compound.</p>
-<ul>
-<li>Squat 3×10 — Chân, mông, core</li>
-<li>Bench Press 3×10 — Ngực, vai trước, tay sau</li>
-<li>Barbell Row 3×10 — Lưng, tay trước</li>
-<li>Overhead Press 3×8 — Vai, tay sau</li>
-<li>Deadlift 3×8 — Lưng dưới, chân sau, mông</li>
-<li>Plank 3×30s — Core</li>
-</ul>
-
-<h3>Tuần 5-8: Upper/Lower Split (4 ngày/tuần)</h3>
-<p>Chia thân trên/dưới, tập 4 buổi/tuần. Tăng khối lượng tạ 2.5kg/tuần nếu form đúng.</p>
-
-<h3>Tuần 9-12: Push/Pull/Legs (6 ngày/tuần)</h3>
-<p>PPL split cho phép tập mỗi nhóm cơ 2 lần/tuần, phù hợp khi đã có nền tảng.</p>
-
-<h2>Lưu ý quan trọng</h2>
-<ul>
-<li>Form quan trọng hơn trọng lượng — sai form = chấn thương</li>
-<li>Nghỉ giữa set: 60-90s (hypertrophy), 2-3 phút (strength)</li>
-<li>Progressive overload: tăng tạ/rep mỗi tuần</li>
-<li>Ngủ 7-8 tiếng, uống 2-3 lít nước/ngày</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Kế hoạch chạy Half Marathon (21km) cho người mới — 16 tuần',
@@ -4466,28 +4552,17 @@ def seed_sport_articles():
             'reading_time': 11,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/0984e3/ffffff?text=Half+Marathon+Plan',
-            'content': '''<h2>16 tuần chinh phục Half Marathon</h2>
-
-<h3>Yêu cầu đầu vào</h3>
-<p>Có thể chạy liên tục 3-5km không dừng. Sức khỏe bình thường, không chấn thương. Cam kết tập 4 buổi/tuần.</p>
-
-<h3>Cấu trúc tuần</h3>
-<ul>
-<li><strong>Thứ 2</strong> — Easy Run (pace thoải mái, nói chuyện được)</li>
-<li><strong>Thứ 4</strong> — Tempo Run (pace nhanh hơn easy 30-45s/km)</li>
-<li><strong>Thứ 6</strong> — Easy Run / Cross-training (bơi, đạp xe)</li>
-<li><strong>Chủ nhật</strong> — Long Run (chạy dài, pace easy)</li>
-</ul>
-
-<h3>Progression</h3>
-<p><strong>Tuần 1-4</strong> — Long Run tăng từ 6km → 10km</p>
-<p><strong>Tuần 5-8</strong> — Long Run tăng từ 10km → 14km</p>
-<p><strong>Tuần 9-12</strong> — Long Run tăng từ 14km → 18km</p>
-<p><strong>Tuần 13-14</strong> — Peak: Long Run 19-20km</p>
-<p><strong>Tuần 15-16</strong> — Taper: giảm 40% volume, giữ intensity. Race day!</p>
-
-<h2>Nguyên tắc 10%</h2>
-<p>Không tăng tổng km/tuần quá 10% so với tuần trước để tránh chấn thương.</p>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Phòng chống chấn thương thể thao — Warm-up, Cool-down & Recovery',
@@ -4499,33 +4574,17 @@ def seed_sport_articles():
             'reading_time': 8,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/00cec9/ffffff?text=Injury+Prevention',
-            'content': '''<h2>Phòng chống chấn thương thể thao</h2>
-
-<h3>1. Warm-up đúng cách (10 phút)</h3>
-<ul>
-<li><strong>Phút 1-3</strong> — Cardio nhẹ: đi bộ nhanh, chạy chậm</li>
-<li><strong>Phút 4-7</strong> — Dynamic stretching: leg swing, arm circle, lunge walk</li>
-<li><strong>Phút 8-10</strong> — Activation: glute bridge, band walk, bodyweight squat</li>
-</ul>
-
-<h3>2. Cool-down (5-10 phút)</h3>
-<ul>
-<li>Giảm tốc dần dần, không dừng đột ngột</li>
-<li>Static stretching: giữ mỗi tư thế 20-30 giây</li>
-<li>Foam rolling các nhóm cơ chính 1-2 phút mỗi nhóm</li>
-</ul>
-
-<h3>3. Recovery</h3>
-<p><strong>Ngủ</strong> — 7-9 tiếng/đêm, cơ phục hồi trong giấc ngủ sâu.</p>
-<p><strong>Dinh dưỡng</strong> — Protein sau tập 30-60 phút. Uống đủ nước.</p>
-<p><strong>Rest day</strong> — Tối thiểu 1-2 ngày/tuần. Active recovery (đi bộ, yoga).</p>
-
-<h3>4. Dấu hiệu cần nghỉ</h3>
-<ul>
-<li>Đau nhức kéo dài >3 ngày (không phải soreness bình thường)</li>
-<li>Sưng, bầm tím vùng khớp</li>
-<li>Mệt mỏi liên tục, không phục hồi dù nghỉ</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
 
         # === TIER 3: CHI-TIET (Detailed product reviews) ===
@@ -4539,27 +4598,17 @@ def seed_sport_articles():
             'reading_time': 10,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/2d3436/00b894?text=Pegasus+vs+Nimbus+vs+Clifton',
-            'content': '''<h2>So sánh 3 giày chạy bộ best-seller</h2>
-
-<h3>Nike Pegasus 41</h3>
-<p><strong>Giá:</strong> 3.2-3.8 triệu | <strong>Trọng lượng:</strong> 271g | <strong>Drop:</strong> 10mm | <strong>Stack:</strong> 33/23mm</p>
-<p>Đa năng nhất, phù hợp mọi cự ly từ 5K đến marathon. React foam + Zoom Air cho cảm giác bouncy. Bền trên 800km.</p>
-
-<h3>ASICS Gel-Nimbus 26</h3>
-<p><strong>Giá:</strong> 4.0-4.5 triệu | <strong>Trọng lượng:</strong> 284g | <strong>Drop:</strong> 8mm | <strong>Stack:</strong> 40/32mm</p>
-<p>Êm nhất trong 3 đôi, lý tưởng cho long run và recovery. FF BLAST PLUS + PureGEL hấp thụ chấn động cực tốt.</p>
-
-<h3>Hoka Clifton 9</h3>
-<p><strong>Giá:</strong> 3.5-4.0 triệu | <strong>Trọng lượng:</strong> 248g | <strong>Drop:</strong> 5mm | <strong>Stack:</strong> 33/28mm</p>
-<p>Nhẹ nhất mà vẫn max-cushion. Meta-rocker cho cảm giác "lăn" mượt. Phù hợp runner muốn nhẹ + êm.</p>
-
-<h2>Nên chọn đôi nào?</h2>
-<ul>
-<li><strong>Người mới</strong> → Nike Pegasus 41 (đa năng, dễ chạy, giá tốt)</li>
-<li><strong>Long run</strong> → ASICS Nimbus 26 (êm nhất, bảo vệ khớp)</li>
-<li><strong>Runner nhẹ cân</strong> → Hoka Clifton 9 (nhẹ, meta-rocker mượt)</li>
-<li><strong>Thi đấu</strong> → Không đôi nào ở trên — cần Nike Vaporfly hoặc ASICS Metaspeed</li>
-</ul>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Review Garmin Forerunner 265 — Đồng hồ chạy bộ tốt nhất 2025',
@@ -4571,27 +4620,17 @@ def seed_sport_articles():
             'reading_time': 9,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/636e72/00b894?text=Garmin+FR265+Review',
-            'content': '''<h2>Garmin Forerunner 265 — Review sau 6 tháng</h2>
-
-<h3>Thiết kế & Màn hình</h3>
-<p>Màn hình AMOLED 1.3" sắc nét, đọc dễ dàng dưới nắng. Bezel polymer nhẹ, ôm tay thoải mái. Nút bấm vật lý — tốt hơn touchscreen khi chạy mưa/mồ hôi.</p>
-
-<h3>GPS & Tracking</h3>
-<p>GPS multi-band (L1+L5), chính xác cả trong thành phố cao tầng. Optical HR Gen 4 đo nhịp tim khá chính xác khi chạy easy-tempo. Kém hơn chest strap khi interval.</p>
-
-<h3>Training Features</h3>
-<ul>
-<li><strong>Training Readiness</strong> — Tổng hợp HRV, giấc ngủ, stress → cho điểm 0-100 → biết nên tập nặng hay nhẹ</li>
-<li><strong>Race Predictor</strong> — Dự đoán finish time khá chính xác (sai lệch ±3%)</li>
-<li><strong>Suggested Workouts</strong> — Gợi ý bài tập hàng ngày dựa trên training load</li>
-<li><strong>PacePro</strong> — Chiến thuật pace cho race day, tính cả elevation</li>
-</ul>
-
-<h3>Pin</h3>
-<p>Smartwatch mode: 13 ngày thực tế (sạc 1 lần/2 tuần). GPS mode: 18-20h liên tục (đủ cho ultra 100km).</p>
-
-<h3>Kết luận</h3>
-<p>Đồng hồ chạy bộ tốt nhất tầm giá 10-12 triệu. Tốt hơn Apple Watch về GPS accuracy, pin, training metrics. Yếu hơn về smartwatch features (không reply tin nhắn, app store hạn chế).</p>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
         {
             'title': 'Review Optimum Nutrition Gold Standard Whey — Whey #1 thế giới có xứng đáng?',
@@ -4603,26 +4642,17 @@ def seed_sport_articles():
             'reading_time': 7,
             'vertical_slug': 'sport',
             'image_url': 'https://placehold.co/800x450/fdcb6e/2d3436?text=ON+Gold+Standard+Review',
-            'content': '''<h2>ON Gold Standard 100% Whey — Có xứng #1?</h2>
-
-<h3>Thành phần</h3>
-<p>Mỗi scoop (31g): <strong>24g protein</strong>, 3g carb, 1g fat, 1g sugar, 120 calo. Blend WPI (chính) + WPC + WPH. 5.5g BCAAs tự nhiên.</p>
-
-<h3>Độ tan & Vị</h3>
-<p>Tan rất tốt trong nước lạnh, không vón cục. Double Rich Chocolate — vị chocolate đậm, ngọt vừa, uống ngon cả khi pha nước. Vanilla Ice Cream — ngọt hơn, pha sữa ngon.</p>
-
-<h3>Hiệu quả</h3>
-<p>Dùng 4 tháng, kết hợp tập 5 buổi/tuần: tăng 3kg lean mass, strength tăng rõ rệt. Không bloat, không đau bụng (ít lactose nhờ WPI là thành phần chính).</p>
-
-<h3>So sánh</h3>
-<ul>
-<li><strong>vs MuscleTech NitroTech</strong> — ON ngon hơn, tan tốt hơn. NitroTech protein cao hơn (30g) nhưng đắt hơn.</li>
-<li><strong>vs MyProtein Impact Whey</strong> — MyProtein rẻ hơn 30% nhưng vị kém hơn, tan không bằng ON.</li>
-<li><strong>vs Rule 1 R1</strong> — R1 Isolate thuần WPI, protein cao hơn (25g) nhưng giá đắt hơn 20%.</li>
-</ul>
-
-<h3>Giá & Mua ở đâu</h3>
-<p>2lbs (~30 servings): 800K-1.2 triệu. 5lbs (~74 servings): 1.5-2.2 triệu. Mua trên Shopee (GymStore, SupplementVN) hoặc Lazada chính hãng.</p>'''
+            'content': '<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>''<h2>Lorem Ipsum</h2>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.</p>
+<h2>Neque Porro Quisquam</h2>
+<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam.</p>
+<p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur? At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti.</p>
+<h2>Similique Sunt in Culpa</h2>
+<p>Similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga. Et harum quidem rerum facilis est et expedita distinctio. Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.</p>
+<p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur.</p>'''
         },
     ]
 
