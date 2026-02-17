@@ -220,14 +220,13 @@
 
   <div class="scard" style="margin-top:20px">
     <h3 class="scard-title">Custom Head Code</h3>
-    <p class="scard-desc">Chen code vao the <code>&lt;head&gt;</code> cua tat ca trang frontend. Dung de them tracking code (AccessTrade, Google Analytics, Facebook Pixel...).</p>
+    <p class="scard-desc">Chen code truoc <code>&lt;/body&gt;</code> cua tat ca trang frontend. Dung de them tracking code (Google Analytics, Facebook Pixel...).<br><strong>Luu y:</strong> AccessTrade Smart Tag da duoc tich hop san, khong can them o day.</p>
     <div class="form-group">
       <label class="form-label">Code (HTML/JS)</label>
-      {% set default_head_code = '<script type="text/javascript">var __atsmarttag={pub_id:"5514121382375886156"};(function(){var s=document.createElement("script");s.src="//static.accesstrade.vn/js/v2/atsmarttag.min.js?v=1.1.0";s.type="text/javascript";s.async=true;(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(s)})();</script>' %}
-      <textarea class="form-input" name="custom_head_code" rows="6" style="font-family:'DM Mono',monospace;font-size:14px;line-height:1.6" placeholder="<script>...</script>">{{ settings.get('custom_head_code', default_head_code) }}</textarea>
+      <textarea class="form-input" name="custom_head_code" rows="6" style="font-family:'DM Mono',monospace;font-size:14px;line-height:1.6" placeholder="<script>...</script>">{{ settings.get('custom_head_code', '') }}</textarea>
       <p class="form-help" style="margin-top:8px;line-height:1.7">
-        Paste nguyen doan code vao day. Vi du: AccessTrade Smart Tag, Google Analytics, Facebook Pixel...<br>
-        Code se duoc chen truoc the <code>&lt;/head&gt;</code> cua moi trang.
+        Paste nguyen doan code vao day. Vi du: Google Analytics, Facebook Pixel...<br>
+        Code se duoc chen truoc the <code>&lt;/body&gt;</code> cua moi trang.
       </p>
     </div>
   </div>

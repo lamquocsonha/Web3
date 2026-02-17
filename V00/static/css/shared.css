@@ -21,8 +21,14 @@ body {
   background: var(--surface);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 99999;
 }
+
+/* Force AccessTrade Smart Tag overlay below header/footer */
+#at-smart-tag-container,
+[id^="at-smart"],
+.at-smart-tag,
+div[class*="atsmarttag"] { z-index: 9999 !important; }
 
 .header-inner {
   max-width: 1100px;
@@ -62,6 +68,9 @@ body {
   color: var(--text-dim);
   text-decoration: none;
   transition: color 0.15s;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
 }
 
 .site-nav a:hover { color: var(--accent); }
@@ -677,14 +686,14 @@ body {
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 20px 0;
+  position: relative;
+  z-index: 10000;
 }
 
 .footer-inner {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 0 32px;
-  display: flex;
-  justify-content: space-between;
+  padding: 24px 32px;
   font-family: var(--font-primary);
   font-size: 14px;
   color: var(--text-dim);

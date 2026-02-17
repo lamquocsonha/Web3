@@ -252,7 +252,7 @@ def inject_globals():
             'site_favicon_url': favicon_url,
             'sidebar_vouchers': sidebar_vouchers,
             'voucher_sidebar_position': SiteSettings.get('voucher_sidebar_position', 'after_popular'),
-            'custom_head_code': SiteSettings.get('custom_head_code', '<script type="text/javascript">var __atsmarttag={pub_id:"5514121382375886156"};(function(){var s=document.createElement("script");s.src="//static.accesstrade.vn/js/v2/atsmarttag.min.js?v=1.1.0";s.type="text/javascript";s.async=true;(document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(s)})();</script>'),
+            'custom_head_code': SiteSettings.get('custom_head_code', ''),
             'hot_products': hot_products,
             'hot_products_show_shop': hp_show_shop,
             'hot_products_show_sidebar': hp_show_sidebar,
