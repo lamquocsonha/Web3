@@ -802,7 +802,52 @@ def admin_content_delete(cid):
 @app.route('/admin/analytics')
 def admin_analytics():
     verticals = Vertical.query.all()
-    return render_template('admin/analytics.html', verticals=verticals)
+
+    # Per-vertical stats
+    vertical_stats = []
+    for v in verticals:
+        articles = Article.query.filter_by(vertical_slug=v.slug).all()
+        article_count = len(articles)
+        total_views = sum(a.views or 0 for a in articles)
+
+        # Count parts via Vertical > Segments > Zones > Parts
+        part_count = 0
+        link_count = 0
+        total_clicks = 0
+        total_conversions = 0
+        for seg in v.segments:
+            for zone in seg.zones:
+                part_count += len(zone.parts)
+                for part in zone.parts:
+                    link_count += len(part.affiliate_links)
+                    total_clicks += sum(al.clicks or 0 for al in part.affiliate_links)
+                    total_conversions += sum(al.conversions or 0 for al in part.affiliate_links)
+
+        # Article tier breakdown
+        tier_nganh = sum(1 for a in articles if a.tier == 'nganh')
+        tier_chung = sum(1 for a in articles if a.tier == 'chung')
+        tier_chitiet = sum(1 for a in articles if a.tier == 'chi-tiet')
+
+        vertical_stats.append({
+            'name': v.name, 'slug': v.slug, 'icon': v.icon, 'color': v.color,
+            'articles': article_count, 'views': total_views,
+            'parts': part_count, 'links': link_count,
+            'clicks': total_clicks, 'conversions': total_conversions,
+            'tier_nganh': tier_nganh, 'tier_chung': tier_chung, 'tier_chitiet': tier_chitiet,
+        })
+
+    # Totals
+    totals = {
+        'articles': sum(s['articles'] for s in vertical_stats),
+        'views': sum(s['views'] for s in vertical_stats),
+        'parts': sum(s['parts'] for s in vertical_stats),
+        'links': sum(s['links'] for s in vertical_stats),
+        'clicks': sum(s['clicks'] for s in vertical_stats),
+        'conversions': sum(s['conversions'] for s in vertical_stats),
+    }
+
+    return render_template('admin/analytics.html',
+        verticals=verticals, vertical_stats=vertical_stats, totals=totals)
 
 # =============================================
 # ADMIN — SETTINGS
