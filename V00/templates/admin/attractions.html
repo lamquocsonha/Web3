@@ -34,9 +34,17 @@
 </div>
 
 {% if items %}
+<!-- Bulk actions -->
+<div id="bulkBar" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px">
+  <span id="bulkCount" style="font-size:13px;font-weight:600">0 selected</span>
+  <button onclick="bulkDelete()" class="btn btn-danger btn-sm">Xoa da chon</button>
+  <button onclick="toggleAll(false)" class="btn btn-ghost btn-sm">Bo chon</button>
+</div>
+
 <div class="table-wrap">
   <table class="data-table">
     <thead><tr>
+      <th style="width:36px"><input type="checkbox" id="checkAll" onchange="toggleAll(this.checked)"></th>
       <th style="width:35px">#</th><th>Attraction</th><th>Category</th><th>Destination</th>
       <th>Network</th><th style="text-align:right">Price</th><th style="text-align:center">Disc</th>
       <th style="text-align:center">Clicks</th><th>Status</th><th>Actions</th>
@@ -44,6 +52,7 @@
     <tbody>
       {% for a in items %}
       <tr>
+        <td><input type="checkbox" class="a-check" value="{{ a.id }}" onchange="updateBulk()"></td>
         <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ a.id }}</td>
         <td>
           <strong style="font-size:14px">{{ a.name }}</strong>
@@ -77,6 +86,40 @@
   </table>
 </div>
 <div style="margin-top:12px;font-size:14px;color:var(--text-dim)">{{ items|length }} attractions</div>
+
+<script>
+function toggleAll(checked) {
+  document.querySelectorAll('.a-check').forEach(function(cb){ cb.checked = checked; });
+  document.getElementById('checkAll').checked = checked;
+  updateBulk();
+}
+function updateBulk() {
+  var checked = document.querySelectorAll('.a-check:checked');
+  var bar = document.getElementById('bulkBar');
+  var cnt = document.getElementById('bulkCount');
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    cnt.textContent = checked.length + ' selected';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+function bulkDelete() {
+  var ids = [];
+  document.querySelectorAll('.a-check:checked').forEach(function(cb){ ids.push(cb.value); });
+  if (ids.length === 0) return;
+  if (!confirm('Xoa ' + ids.length + ' attraction?')) return;
+  fetch('{{ url_for("admin_attractions_bulk_delete") }}', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ids: ids})
+  }).then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.ok) location.reload();
+      else alert(data.error || 'Loi');
+    });
+}
+</script>
 {% else %}
 <div class="empty-state"><div class="empty-icon">🎫</div><p>No attractions yet</p><a href="{{ url_for('admin_attraction_new') }}" class="btn btn-primary" style="margin-top:12px">Add first attraction</a></div>
 {% endif %}

@@ -3791,6 +3791,16 @@ def admin_attraction_delete(aid):
     flash('Da xoa ve tham quan', 'success')
     return redirect(url_for('admin_attractions'))
 
+@app.route('/admin/attractions/bulk-delete', methods=['POST'])
+def admin_attractions_bulk_delete():
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = Attraction.query.filter(Attraction.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 # =============================================
 # ADMIN — VOUCHERS (Mã giảm giá)
 # =============================================
