@@ -3406,17 +3406,17 @@ def admin_hotel_sync():
     cid = SiteSettings.get('agoda_cid', '')
     has_key = bool(SiteSettings.get('agoda_api_key', ''))
 
-    # Agoda destinations for Fast Sync (only cities with Agoda city IDs)
-    agoda_destinations = [
-        {'slug': slug, 'name': AGODA_CITY_NAMES.get(slug, slug), 'city_id': cid_val}
-        for slug, cid_val in AGODA_CITY_IDS.items()
-    ]
-
-    # Full destination dropdown: 34 provinces + Agoda tourism destinations
+    # Full destination list: 34 provinces + Agoda tourism destinations
     from agoda_integration import VIETNAM_DESTINATIONS
     destinations = [
         {'slug': slug, 'name': name, 'city_id': cid, 'province_code': ''}
         for name, slug, cid in VIETNAM_DESTINATIONS
+    ]
+
+    # Fast Sync uses ALL destinations (not just AGODA_CITY_IDS)
+    agoda_destinations = [
+        {'slug': d['slug'], 'name': d['name'], 'city_id': d['city_id']}
+        for d in destinations if d['city_id']
     ]
 
     recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()

@@ -241,6 +241,10 @@ VIETNAM_DESTINATIONS = [
     ('Vũng Tàu', 'vung-tau', 17193),
 ]
 
+# Quick lookup dicts built from VIETNAM_DESTINATIONS for all 34 provinces + tourism spots
+_DEST_SLUG_TO_CITY_ID = {slug: cid for (_, slug, cid) in VIETNAM_DESTINATIONS if cid}
+_DEST_SLUG_TO_NAME = {slug: name for (name, slug, _) in VIETNAM_DESTINATIONS}
+
 
 class AgodaAPI:
     """Agoda Affiliate Long Tail Search API client.
@@ -521,7 +525,11 @@ class AgodaAPI:
         Returns:
             list of hotel dicts ready to display
         """
+        # Look up city_id from AGODA_CITY_IDS first, then fallback to
+        # VIETNAM_DESTINATIONS (covers all 34 provinces + tourism spots)
         city_id = AGODA_CITY_IDS.get(destination_slug)
+        if not city_id:
+            city_id = _DEST_SLUG_TO_CITY_ID.get(destination_slug)
         if not city_id:
             return []
 
@@ -576,7 +584,7 @@ class AgodaAPI:
                     'accommodation_type': 'Hotel',
                     'agoda_url': landing_url,
                     'destination': destination_slug,
-                    'destination_name': AGODA_CITY_NAMES.get(destination_slug, destination_slug),
+                    'destination_name': _DEST_SLUG_TO_NAME.get(destination_slug, AGODA_CITY_NAMES.get(destination_slug, destination_slug)),
                 })
 
         # Strategy 2: Use content feed + hotel list search as fallback
@@ -607,7 +615,7 @@ class AgodaAPI:
                     'accommodation_type': h.get('accommodationType') or h.get('type', ''),
                     'agoda_url': self.build_affiliate_url(hotel_id, checkin, checkout, adults, 0, rooms, currency),
                     'destination': destination_slug,
-                    'destination_name': AGODA_CITY_NAMES.get(destination_slug, destination_slug),
+                    'destination_name': _DEST_SLUG_TO_NAME.get(destination_slug, AGODA_CITY_NAMES.get(destination_slug, destination_slug)),
                 })
 
             # Enrich with pricing from hotel list search
