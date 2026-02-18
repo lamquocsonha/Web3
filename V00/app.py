@@ -4376,9 +4376,47 @@ PROVINCE_TO_SLUG = {
     '92': 'can-tho', '96': 'ca-mau',
 }
 
+def _auto_seed_wards():
+    """Seed WardCommune from bundled Excel if table is empty. Returns count seeded."""
+    if WardCommune.query.count() > 0:
+        return 0
+    import os as _os
+    _xls = _os.path.join(_os.path.dirname(__file__), 'danh-sach-3321-xa-phuong.xls')
+    if not _os.path.exists(_xls):
+        return 0
+    try:
+        import xlrd
+        wb = xlrd.open_workbook(_xls)
+        ws = wb.sheet_by_index(0)
+        seeded = 0
+        for r in range(1, ws.nrows):
+            code = str(ws.cell_value(r, 0) or '').strip()
+            name = str(ws.cell_value(r, 1) or '').strip().replace('\n', ' ')
+            level = str(ws.cell_value(r, 2) or '').strip()
+            resolution = str(ws.cell_value(r, 3) or '').strip()
+            province_code = str(ws.cell_value(r, 4) or '').strip()
+            province_name = str(ws.cell_value(r, 5) or '').strip()
+            if code and name:
+                db.session.add(WardCommune(
+                    code=code, name=name, level=level,
+                    resolution=resolution,
+                    province_code=province_code,
+                    province_name=province_name
+                ))
+                seeded += 1
+        db.session.commit()
+        return seeded
+    except Exception:
+        db.session.rollback()
+        return 0
+
 @app.route('/admin/wards')
 def admin_wards():
     """Manage ward/commune data"""
+    seeded = _auto_seed_wards()
+    if seeded:
+        flash(f'Tu dong nap {seeded} phuong/xa tu Excel', 'success')
+
     wards = WardCommune.query.order_by(WardCommune.province_code, WardCommune.name).all()
     # Group by province
     provinces = {}
@@ -4577,6 +4615,7 @@ def api_wards():
 @app.route('/api/wards/by-destination')
 def api_wards_by_destination():
     """Get wards for an Agoda destination slug (for cascading dropdown)."""
+    _auto_seed_wards()  # ensure data exists
     slug = request.args.get('slug', '').strip()
     if not slug:
         return jsonify({'wards': [], 'province': ''})
