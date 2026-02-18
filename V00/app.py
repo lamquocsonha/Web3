@@ -3411,47 +3411,13 @@ def admin_hotel_sync():
         for slug, cid_val in AGODA_CITY_IDS.items()
     ]
 
-    # Build 2-level grouped destinations from WardCommune DB (tỉnh thành → phường xã)
-    from agoda_integration import PROVINCE_NAME_TO_AGODA
-    dest_grouped = []
-    try:
-        provinces_db = db.session.query(
-            WardCommune.province_code, WardCommune.province_name
-        ).distinct().order_by(WardCommune.province_name).all()
-
-        for pcode, pname in provinces_db:
-            # Normalize province name (strip "Thành phố ", "Tỉnh ", etc.)
-            pclean = pname.strip()
-            for pfx in ['Thành phố ', 'Tỉnh ', 'TP. ', 'TP ']:
-                if pclean.startswith(pfx):
-                    pclean = pclean[len(pfx):]
-
-            agoda_slugs = PROVINCE_NAME_TO_AGODA.get(pclean) or PROVINCE_NAME_TO_AGODA.get(pname.strip())
-            if not agoda_slugs:
-                continue
-
-            wards = WardCommune.query.filter_by(province_code=pcode).order_by(WardCommune.name).all()
-
-            for slug in agoda_slugs:
-                if slug not in AGODA_CITY_IDS:
-                    continue
-                dest_grouped.append({
-                    'province_name': pname.strip(),
-                    'slug': slug,
-                    'city_name': AGODA_CITY_NAMES.get(slug, slug),
-                    'city_id': AGODA_CITY_IDS[slug],
-                    'wards': [{'name': w.name, 'level': w.level} for w in wards]
-                })
-    except Exception:
-        pass  # WardCommune table might not exist or be empty
-
     recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()
 
     return render_template('admin/hotel_sync.html',
         api_connected=api_connected, cid=cid, has_key=has_key,
         total_hotels=total_hotels, total_agoda=total_agoda,
         total_manual=total_manual, total_active=total_active,
-        destinations=destinations, dest_grouped=dest_grouped, recent=recent)
+        destinations=destinations, recent=recent)
 
 
 @app.route('/admin/hotel-sync/save-credentials', methods=['POST'])
@@ -4549,6 +4515,32 @@ def api_wards():
         } for w in wards],
         'total': len(wards)
     })
+
+@app.route('/api/wards/by-destination')
+def api_wards_by_destination():
+    """Get wards for an Agoda destination slug (for cascading dropdown)."""
+    slug = request.args.get('slug', '').strip()
+    if not slug:
+        return jsonify({'wards': [], 'province': ''})
+
+    from agoda_integration import AGODA_TO_PROVINCE_NAMES
+    province_names = AGODA_TO_PROVINCE_NAMES.get(slug, [])
+    if not province_names:
+        return jsonify({'wards': [], 'province': ''})
+
+    # Search WardCommune by province name variants
+    wards = []
+    matched_province = ''
+    for pname in province_names:
+        results = WardCommune.query.filter(
+            WardCommune.province_name.ilike(f'%{pname}%')
+        ).order_by(WardCommune.name).all()
+        if results:
+            wards = [{'code': w.code, 'name': w.name, 'level': w.level} for w in results]
+            matched_province = pname
+            break
+
+    return jsonify({'wards': wards, 'province': matched_province, 'total': len(wards)})
 
 @app.route('/api/wards/search')
 def api_wards_search():

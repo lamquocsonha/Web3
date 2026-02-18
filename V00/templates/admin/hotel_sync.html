@@ -91,22 +91,17 @@
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
     <div class="form-group" style="margin-bottom:0">
       <label class="form-label">Tinh thanh</label>
-      <select id="syncDest" class="form-select" style="width:220px;padding:8px;font-size:13px">
+      <select id="syncDest" class="form-select" style="width:200px;padding:8px;font-size:13px">
         <option value="">Chon tinh thanh...</option>
-        {% if dest_grouped %}
-        {% for g in dest_grouped %}
-        <optgroup label="{{ g.province_name }}">
-          <option value="{{ g.slug }}">{{ g.city_name }} — Tat ca ({{ g.city_id }})</option>
-          {% for w in g.wards %}
-          <option value="{{ g.slug }}" data-ward="{{ w.name }}">{{ w.name }}</option>
-          {% endfor %}
-        </optgroup>
-        {% endfor %}
-        {% else %}
         {% for d in destinations %}
         <option value="{{ d.slug }}">{{ d.name }} ({{ d.city_id }})</option>
         {% endfor %}
-        {% endif %}
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0;display:none" id="wardGroup">
+      <label class="form-label">Phuong xa</label>
+      <select id="syncWard" class="form-select" style="width:200px;padding:8px;font-size:13px">
+        <option value="">Tat ca phuong xa</option>
       </select>
     </div>
     <div class="form-group" style="margin-bottom:0">
@@ -178,6 +173,46 @@ function fixImages(){
     .then(d=>{el.textContent='Da fix '+d.fixed+' hotels. Reload de xem.';})
     .catch(e=>{el.textContent='Loi: '+e;});
 }
+
+// ─── Cascading: Tinh thanh → Phuong xa ───
+(function(){
+  var destSel = document.getElementById('syncDest');
+  var wardGrp = document.getElementById('wardGroup');
+  var wardSel = document.getElementById('syncWard');
+  if (!destSel || !wardGrp || !wardSel) return;
+
+  destSel.addEventListener('change', function(){
+    var slug = this.value;
+    wardSel.innerHTML = '<option value="">Tat ca phuong xa</option>';
+    if (!slug) { wardGrp.style.display = 'none'; return; }
+
+    wardGrp.style.display = '';
+    wardSel.innerHTML = '<option value="">Dang tai...</option>';
+    wardSel.disabled = true;
+
+    fetch('/api/wards/by-destination?slug=' + encodeURIComponent(slug))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        wardSel.disabled = false;
+        wardSel.innerHTML = '<option value="">Tat ca phuong xa (' + (data.total||0) + ')</option>';
+        if (data.wards && data.wards.length > 0) {
+          data.wards.forEach(function(w){
+            var opt = document.createElement('option');
+            opt.value = w.name;
+            opt.textContent = (w.level ? w.level + ' ' : '') + w.name;
+            wardSel.appendChild(opt);
+          });
+        } else {
+          wardSel.innerHTML = '<option value="">Chua co du lieu phuong xa</option>';
+        }
+      })
+      .catch(function(){
+        wardSel.disabled = false;
+        wardSel.innerHTML = '<option value="">Khong tai duoc</option>';
+      });
+  });
+})();
+
 // ─── Fast Sync ───
 var fsStopped = false;
 var fsRunning = false;

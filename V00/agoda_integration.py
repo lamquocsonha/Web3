@@ -134,6 +134,30 @@ PROVINCE_NAME_TO_AGODA = {
     'Vĩnh Phúc': ['tam-dao'],
 }
 
+# Reverse mapping: Agoda destination slug → province name variants to search in WardCommune
+AGODA_TO_PROVINCE_NAMES = {
+    'ha-noi': ['Hà Nội', 'Thành phố Hà Nội'],
+    'ho-chi-minh': ['Hồ Chí Minh', 'Thành phố Hồ Chí Minh', 'TP. Hồ Chí Minh'],
+    'da-nang': ['Đà Nẵng', 'Thành phố Đà Nẵng'],
+    'nha-trang': ['Khánh Hòa', 'Tỉnh Khánh Hòa'],
+    'phu-quoc': ['Kiên Giang', 'Tỉnh Kiên Giang'],
+    'da-lat': ['Lâm Đồng', 'Tỉnh Lâm Đồng'],
+    'hoi-an': ['Quảng Nam', 'Tỉnh Quảng Nam'],
+    'sa-pa': ['Lào Cai', 'Tỉnh Lào Cai'],
+    'hue': ['Thừa Thiên Huế', 'Tỉnh Thừa Thiên Huế'],
+    'hai-phong': ['Hải Phòng', 'Thành phố Hải Phòng'],
+    'cat-ba': ['Hải Phòng', 'Thành phố Hải Phòng'],
+    'can-tho': ['Cần Thơ', 'Thành phố Cần Thơ'],
+    'quang-ninh': ['Quảng Ninh', 'Tỉnh Quảng Ninh'],
+    'ha-long': ['Quảng Ninh', 'Tỉnh Quảng Ninh'],
+    'ninh-binh': ['Ninh Bình', 'Tỉnh Ninh Bình'],
+    'vung-tau': ['Bà Rịa - Vũng Tàu', 'Tỉnh Bà Rịa - Vũng Tàu'],
+    'con-dao': ['Bà Rịa - Vũng Tàu', 'Tỉnh Bà Rịa - Vũng Tàu'],
+    'quy-nhon': ['Bình Định', 'Tỉnh Bình Định'],
+    'mui-ne': ['Bình Thuận', 'Tỉnh Bình Thuận'],
+    'tam-dao': ['Vĩnh Phúc', 'Tỉnh Vĩnh Phúc'],
+}
+
 
 class AgodaAPI:
     """Agoda Affiliate Long Tail Search API client.
