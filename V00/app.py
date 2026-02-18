@@ -3498,7 +3498,7 @@ def admin_hotel_sync_import():
             rating=float(h.get('rating', 0)) or 8.0,
             reviews_count=int(h.get('reviews_count', 0)),
             price_from=float(h.get('price_from', 0)),
-            image_url=h.get('image_url', ''),
+            image_url=h.get('image_url', '') or f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300",
             agoda_url=h.get('agoda_url', ''),
             source='agoda_api',
             is_active=True,
@@ -3542,10 +3542,16 @@ def admin_hotel_sync_fast():
                     existing_ids.add(part.split('=')[1])
 
     imported = 0
+    skipped_location = 0
     for h in hotels[:max_per_city]:
         agoda_id = str(h.get('agoda_id', ''))
         name = h.get('name', '').strip()
         if not name or agoda_id in existing_ids:
+            continue
+        # Double-check: skip non-Vietnam hotels that slipped through
+        from agoda_integration import _is_vietnam_hotel
+        if not _is_vietnam_hotel(name, h.get('address', ''), destination):
+            skipped_location += 1
             continue
 
         amenities_raw = h.get('amenities', '')
@@ -3565,7 +3571,7 @@ def admin_hotel_sync_fast():
             reviews_count=int(h.get('reviews_count', 0)),
             price_from=float(h.get('price_from', 0)),
             price_original=float(h.get('price_original', 0)),
-            image_url=h.get('image_url', ''),
+            image_url=h.get('image_url', '') or f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300",
             agoda_url=h.get('agoda_url', ''),
             source='agoda_api',
             is_active=True,
@@ -3580,8 +3586,29 @@ def admin_hotel_sync_fast():
         'destination': destination,
         'found': len(hotels),
         'imported': imported,
-        'skipped': len(hotels[:max_per_city]) - imported
+        'skipped': len(hotels[:max_per_city]) - imported,
+        'skipped_location': skipped_location
     })
+
+
+@app.route('/admin/hotel-sync/fix-images', methods=['POST'])
+def admin_hotel_fix_images():
+    """Fix missing image_url for existing agoda_api hotels."""
+    fixed = 0
+    for h in Hotel.query.filter_by(source='agoda_api').all():
+        if not h.image_url:
+            # Extract agoda hotel ID from agoda_url
+            agoda_id = None
+            if h.agoda_url:
+                for part in h.agoda_url.split('&'):
+                    if part.startswith('hid='):
+                        agoda_id = part.split('=')[1]
+                        break
+            if agoda_id:
+                h.image_url = f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300"
+                fixed += 1
+    db.session.commit()
+    return jsonify({'fixed': fixed})
 
 
 @app.route('/admin/api/agoda-search')

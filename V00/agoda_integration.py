@@ -27,6 +27,29 @@ from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
+# Keywords that indicate a hotel is NOT in Vietnam (common false positives from Agoda API)
+_NON_VN_KEYWORDS = [
+    'bali', 'legian', 'kuta', 'seminyak', 'ubud', 'denpasar', 'nusa dua', 'sanur',
+    'bangkok', 'pattaya', 'phuket', 'chiang mai', 'krabi',
+    'singapore', 'kuala lumpur', 'penang', 'langkawi',
+    'tokyo', 'osaka', 'seoul', 'busan', 'taipei',
+    'jakarta', 'surabaya', 'yogyakarta', 'lombok',
+    'manila', 'cebu', 'boracay',
+    'hong kong', 'macau', 'shenzhen',
+    'paris', 'london', 'amsterdam', 'barcelona', 'rome', 'milan',
+    'new york', 'los angeles', 'dubai', 'doha',
+    'crato', 'pousada', 'aventus',
+]
+
+def _is_vietnam_hotel(hotel_name, address='', destination_slug=''):
+    """Check if hotel likely belongs to Vietnam based on name/address."""
+    text = f"{hotel_name} {address}".lower()
+    for kw in _NON_VN_KEYWORDS:
+        if kw in text:
+            logger.info(f"Filtered non-VN hotel: '{hotel_name}' (matched '{kw}')")
+            return False
+    return True
+
 # Vietnamese city ID mapping for Agoda
 AGODA_CITY_IDS = {
     'ha-noi': 13170,
@@ -393,6 +416,9 @@ class AgodaAPI:
                 hotel_id = h.get('hotelId')
                 if not hotel_id:
                     continue
+                hotel_name = h.get('hotelName', '')
+                if not _is_vietnam_hotel(hotel_name, '', destination_slug):
+                    continue
                 # landingURL from API already has affiliate CID
                 landing_url = h.get('landingURL', '')
                 if not landing_url:
@@ -400,7 +426,7 @@ class AgodaAPI:
 
                 results.append({
                     'agoda_id': hotel_id,
-                    'name': h.get('hotelName', ''),
+                    'name': hotel_name,
                     'stars': h.get('starRating', 0),
                     'rating': h.get('reviewScore', 0),
                     'reviews_count': h.get('reviewCount', 0),
@@ -408,7 +434,7 @@ class AgodaAPI:
                     'longitude': 0,
                     'address': '',
                     'district': '',
-                    'image_url': h.get('imageURL', ''),
+                    'image_url': h.get('imageURL', '') or _agoda_img(hotel_id),
                     'price_from': h.get('dailyRate', 0),
                     'price_original': h.get('crossedOutRate', 0),
                     'discount_pct': h.get('discountPercentage', 0),
@@ -431,9 +457,13 @@ class AgodaAPI:
                 hotel_id = h.get('hotelId') or h.get('propertyId') or h.get('id')
                 if not hotel_id:
                     continue
+                hotel_name = h.get('hotelName') or h.get('propertyName') or h.get('name', '')
+                hotel_addr = h.get('address') or h.get('addressLine1', '')
+                if not _is_vietnam_hotel(hotel_name, hotel_addr, destination_slug):
+                    continue
                 results.append({
                     'agoda_id': hotel_id,
-                    'name': h.get('hotelName') or h.get('propertyName') or h.get('name', ''),
+                    'name': hotel_name,
                     'stars': h.get('starRating') or h.get('star_rating', 0),
                     'rating': h.get('reviewScore') or h.get('rating', 0),
                     'reviews_count': h.get('numberOfReviews') or h.get('reviews_count', 0),
@@ -441,7 +471,7 @@ class AgodaAPI:
                     'longitude': h.get('longitude') or h.get('lng', 0),
                     'address': h.get('address') or h.get('addressLine1', ''),
                     'district': h.get('area') or h.get('district', ''),
-                    'image_url': h.get('hotelImage') or h.get('imageUrl') or h.get('image', ''),
+                    'image_url': h.get('hotelImage') or h.get('imageUrl') or h.get('image', '') or _agoda_img(hotel_id),
                     'price_from': h.get('dailyRate') or h.get('price') or h.get('price_from', 0),
                     'amenities': h.get('facilities') or h.get('amenities', ''),
                     'description': h.get('overview') or h.get('description', ''),
