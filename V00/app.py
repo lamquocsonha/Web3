@@ -225,7 +225,18 @@ def inject_globals():
                 HotDeal.end_date > now_utc
             ).order_by(HotDeal.end_date.asc()).all()
 
-        # AccessTrade auto-pull banners (dedup: each merchant appears once)
+        # AccessTrade auto-pull banners (dedup: each brand appears once)
+        # Brand key = merchant + sub-brand from [...] in offer_name
+        # e.g. "[M2store]-Giam 10%..." on SHOPEE → key "shopee_m2store"
+        import re as _re
+        def _at_brand_key(ab):
+            merchant = (ab.merchant or '').strip().lower()
+            offer = ab.offer_name or ''
+            m = _re.search(r'\[([^\]]+)\]', offer)
+            if m:
+                return f"{merchant}_{m.group(1).strip().lower()}"
+            return merchant
+
         at_banners_hotdeal = []
         at_banners_sidebar = []
         try:
@@ -233,21 +244,21 @@ def inject_globals():
             at_all = AccessTradeBanner.query.filter(
                 AccessTradeBanner.is_active == True
             ).order_by(AccessTradeBanner.synced_at.desc()).all()
-            hotdeal_merchants = set()
+            hotdeal_brands = set()
             for ab in at_all:
                 if ab.end_date and ab.end_date < now_utc2:
                     continue
-                merchant_key = (ab.merchant or '').strip().lower()
+                brand_key = _at_brand_key(ab)
                 if ab.placement in ('hotdeal', 'both'):
-                    if merchant_key not in hotdeal_merchants:
+                    if brand_key not in hotdeal_brands:
                         at_banners_hotdeal.append(ab)
-                        hotdeal_merchants.add(merchant_key)
+                        hotdeal_brands.add(brand_key)
             for ab in at_all:
                 if ab.end_date and ab.end_date < now_utc2:
                     continue
-                merchant_key = (ab.merchant or '').strip().lower()
+                brand_key = _at_brand_key(ab)
                 if ab.placement in ('sidebar', 'both'):
-                    if merchant_key not in hotdeal_merchants:
+                    if brand_key not in hotdeal_brands:
                         at_banners_sidebar.append(ab)
         except Exception:
             pass
