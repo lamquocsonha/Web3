@@ -717,8 +717,14 @@ import random as _random
 # Format per PDF: pix6.agoda.net/hotelImages/{folder}/{hid}/{hid}_{hash}.jpg
 # We use the Agoda /hotel/ page thumbnail which auto-resolves from hotel ID
 def _agoda_img(hotel_id):
-    """Generate Agoda hotel image URL from hotel ID."""
-    return f"https://pix6.agoda.net/hotelImages/{hotel_id}/0/{hotel_id}_1.jpg?s=400x300"
+    """Generate Agoda hotel image URL from hotel ID.
+
+    Agoda CDN uses hash-based filenames that can't be guessed from hotel_id alone.
+    Real image URLs come from the LT Search API (imageURL field) or Content Feed
+    (feed_id=7). Return empty so the template shows a clean placeholder instead
+    of a broken image that triggers onerror.
+    """
+    return ''
 
 # Real Agoda hotel IDs and data for Vietnamese cities (curated top hotels)
 # IDs are REAL Agoda property IDs — affiliate links will point to correct hotels

@@ -3533,7 +3533,7 @@ def admin_hotel_sync_import():
             rating=float(h.get('rating', 0)) or 8.0,
             reviews_count=int(h.get('reviews_count', 0)),
             price_from=float(h.get('price_from', 0)),
-            image_url=h.get('image_url', '') or f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300",
+            image_url=h.get('image_url', ''),
             agoda_url=h.get('agoda_url', ''),
             source='agoda_api',
             is_active=True,
@@ -3606,7 +3606,7 @@ def admin_hotel_sync_fast():
             reviews_count=int(h.get('reviews_count', 0)),
             price_from=float(h.get('price_from', 0)),
             price_original=float(h.get('price_original', 0)),
-            image_url=h.get('image_url', '') or f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300",
+            image_url=h.get('image_url', ''),
             agoda_url=h.get('agoda_url', ''),
             source='agoda_api',
             is_active=True,
@@ -3634,24 +3634,33 @@ def admin_hotel_fix_images():
     api = get_agoda_api()
 
     fixed = 0
+    cleared = 0
     hotels_to_fix = []
-    for h in Hotel.query.filter_by(source='agoda_api').all():
-        if not h.image_url:
-            agoda_id = None
-            if h.agoda_url:
-                for part in h.agoda_url.split('&'):
-                    if part.startswith('hid='):
-                        agoda_id = part.split('=')[1]
-                        break
-            if agoda_id:
-                hotels_to_fix.append((h, agoda_id))
 
-    if not hotels_to_fix:
-        return jsonify({'fixed': 0})
+    # Also clear broken image URLs (old pix6.agoda.net/{id}/0/{id}_1.jpg pattern)
+    broken_pattern = 'agoda.net/hotelImages/'
+    for h in Hotel.query.filter_by(source='agoda_api').all():
+        agoda_id = None
+        if h.agoda_url:
+            for part in h.agoda_url.split('&'):
+                if part.startswith('hid='):
+                    agoda_id = part.split('=')[1]
+                    break
+
+        # Clear broken CDN URLs that don't actually work
+        if h.image_url and broken_pattern in h.image_url and agoda_id and f'/{agoda_id}_' in h.image_url:
+            h.image_url = ''
+            cleared += 1
+
+        if not h.image_url and agoda_id:
+            hotels_to_fix.append((h, agoda_id))
+
+    if not hotels_to_fix and not cleared:
+        return jsonify({'fixed': 0, 'cleared': 0})
 
     # Try Content Feed API to get real image URLs
     img_map = {}
-    if api:
+    if api and hotels_to_fix:
         try:
             hotel_ids = [aid for _, aid in hotels_to_fix[:100]]
             images_data = api.get_hotel_images(hotel_ids)
@@ -3666,12 +3675,10 @@ def admin_hotel_fix_images():
     for h, agoda_id in hotels_to_fix:
         if agoda_id in img_map:
             h.image_url = img_map[agoda_id]
-        else:
-            h.image_url = f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300"
-        fixed += 1
+            fixed += 1
 
     db.session.commit()
-    return jsonify({'fixed': fixed})
+    return jsonify({'fixed': fixed, 'cleared': cleared})
 
 
 @app.route('/admin/api/agoda-search')
