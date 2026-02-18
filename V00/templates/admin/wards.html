@@ -4,17 +4,11 @@
 {% block content %}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
   <h1 class="page-title" style="margin:0">Phường / Xã</h1>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <form method="POST" action="{{ url_for('admin_wards_seed') }}" onsubmit="return confirm('Nap 3321 phuong/xa tu file Excel co san?')">
-      <button type="submit" class="btn btn-primary">Nap du lieu co san</button>
-    </form>
-    <form method="POST" action="{{ url_for('admin_wards_upload') }}" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center">
-      <input type="file" name="file" accept=".xlsx,.xls" required style="font-size:14px;padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
-      <button type="submit" class="btn btn-primary">Upload Excel</button>
-    </form>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button type="button" class="btn btn-primary" onclick="document.getElementById('addModal').style.display='flex'">+ Them moi</button>
     {% if total > 0 %}
-    <form method="POST" action="{{ url_for('admin_wards_delete_all') }}" onsubmit="return confirm('Xoa tat ca du lieu phuong/xa?')">
-      <button type="submit" class="btn btn-ghost" style="color:var(--red)">Xoa tat ca</button>
+    <form method="POST" action="{{ url_for('admin_wards_reset') }}" onsubmit="return confirm('Reset ve du lieu mac dinh (3321 phuong/xa)?')">
+      <button type="submit" class="btn btn-ghost">Reset mac dinh</button>
     </form>
     {% endif %}
   </div>
@@ -30,14 +24,9 @@
   <div class="stat-chip" style="color:#22c55e">Xã: <strong>{{ xa_count }}</strong></div>
 </div>
 
-<!-- Map -->
-<div style="margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
-  <div id="ward-map" style="height:400px;width:100%"></div>
-</div>
-
 <!-- Filters -->
 <form method="GET" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
-  <select name="province" class="form-input" style="width:auto;min-width:200px" onchange="this.form.submit(); jumpToProvince(this.value);">
+  <select name="province" class="form-input" style="width:auto;min-width:200px" onchange="this.form.submit()">
     <option value="">-- Tat ca tinh/TP --</option>
     {% for code, prov in provinces|dictsort %}
     <option value="{{ code }}" {% if f_province == code %}selected{% endif %}>{{ prov.name }} ({{ prov.wards|length }})</option>
@@ -47,9 +36,8 @@
     <option value="">-- Tat ca cap --</option>
     <option value="Phường" {% if f_level == 'Phường' %}selected{% endif %}>Phường</option>
     <option value="Xã" {% if f_level == 'Xã' %}selected{% endif %}>Xã</option>
-    <option value="Đặc khu" {% if f_level == 'Đặc khu' %}selected{% endif %}>Đặc khu</option>
   </select>
-  <input type="text" name="q" class="form-input" style="width:auto;min-width:200px" placeholder="Tim kiem phuong/xa..." value="{{ f_search }}">
+  <input type="text" name="q" class="form-input" style="width:auto;min-width:200px" placeholder="Tim kiem..." value="{{ f_search }}">
   <button type="submit" class="btn btn-primary">Tim</button>
   {% if f_province or f_level or f_search %}
   <a href="{{ url_for('admin_wards') }}" class="btn btn-ghost">Xoa bo loc</a>
@@ -57,7 +45,7 @@
 </form>
 
 {% if wards %}
-<div class="table-wrap" style="max-height:500px;overflow-y:auto">
+<div class="table-wrap" style="max-height:600px;overflow-y:auto">
   <table class="data-table">
     <thead style="position:sticky;top:0;z-index:2">
       <tr>
@@ -66,12 +54,12 @@
         <th>Ten</th>
         <th style="width:80px">Cap</th>
         <th>Tinh/TP</th>
-        <th style="width:60px">Ban do</th>
+        <th style="width:100px">Thao tac</th>
       </tr>
     </thead>
     <tbody>
       {% for w in wards %}
-      <tr class="ward-row" data-province="{{ w.province_code }}" data-name="{{ w.name }}">
+      <tr>
         <td>{{ loop.index }}</td>
         <td><code style="font-size:12px">{{ w.code }}</code></td>
         <td><strong>{{ w.name }}</strong></td>
@@ -85,13 +73,12 @@
           {% endif %}
         </td>
         <td>{{ w.province_name }}</td>
-        <td>
-          <button type="button" class="btn btn-ghost btn-sm btn-map-jump"
-            data-province="{{ w.province_code }}"
-            data-ward-name="{{ w.name }}"
-            title="Xem tren ban do">
-            &#128205;
-          </button>
+        <td style="white-space:nowrap">
+          <button type="button" class="btn btn-ghost btn-sm" title="Sua"
+            onclick="openEdit({{ w.id }}, '{{ w.code }}', '{{ w.name|e }}', '{{ w.level|e }}', '{{ w.province_code }}', '{{ w.province_name|e }}')">Sua</button>
+          <form method="POST" action="{{ url_for('admin_wards_delete', ward_id=w.id) }}" style="display:inline" onsubmit="return confirm('Xoa {{ w.name|e }}?')">
+            <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)">Xoa</button>
+          </form>
         </td>
       </tr>
       {% endfor %}
@@ -101,94 +88,73 @@
 <p style="margin-top:8px;color:var(--text-dim);font-size:13px">Hien thi {{ wards|length }} / {{ total }} phuong/xa</p>
 {% elif total == 0 %}
 <div class="empty-state">
-  <div style="font-size:48px;margin-bottom:12px">&#128506;</div>
-  <h3>Chua co du lieu phuong/xa</h3>
-  <p>Upload file Excel (danh-sach-xa-phuong.xls) de import du lieu.</p>
+  <h3>Du lieu phuong/xa dang duoc nap...</h3>
+  <p>Tai lai trang de xem du lieu mac dinh.</p>
 </div>
 {% else %}
 <div class="empty-state">
-  <div style="font-size:48px;margin-bottom:12px">&#128269;</div>
   <h3>Khong tim thay ket qua</h3>
   <p>Thu thay doi bo loc hoac tu khoa tim kiem.</p>
 </div>
 {% endif %}
 
-<!-- Leaflet CSS & JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Add Modal -->
+<div id="addModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center">
+  <form method="POST" action="{{ url_for('admin_wards_add') }}" style="background:var(--surface);border-radius:var(--radius);padding:24px;width:400px;max-width:90vw">
+    <h3 style="margin:0 0 16px">Them phuong/xa</h3>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input name="code" class="form-input" placeholder="Ma (VD: 00001)" required>
+      <input name="name" class="form-input" placeholder="Ten (VD: Phường Ba Đình)" required>
+      <select name="level" class="form-input">
+        <option value="Phường">Phường</option>
+        <option value="Xã">Xã</option>
+      </select>
+      <input name="province_code" class="form-input" placeholder="Ma tinh (VD: 01)">
+      <input name="province_name" class="form-input" placeholder="Ten tinh (VD: Thành phố Hà Nội)">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button type="button" class="btn btn-ghost" onclick="this.closest('[id=addModal]').style.display='none'">Huy</button>
+      <button type="submit" class="btn btn-primary">Them</button>
+    </div>
+  </form>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center">
+  <form id="editForm" method="POST" style="background:var(--surface);border-radius:var(--radius);padding:24px;width:400px;max-width:90vw">
+    <h3 style="margin:0 0 16px">Sua phuong/xa</h3>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input name="code" id="editCode" class="form-input" placeholder="Ma" required>
+      <input name="name" id="editName" class="form-input" placeholder="Ten" required>
+      <select name="level" id="editLevel" class="form-input">
+        <option value="Phường">Phường</option>
+        <option value="Xã">Xã</option>
+      </select>
+      <input name="province_code" id="editPCode" class="form-input" placeholder="Ma tinh">
+      <input name="province_name" id="editPName" class="form-input" placeholder="Ten tinh">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button type="button" class="btn btn-ghost" onclick="document.getElementById('editModal').style.display='none'">Huy</button>
+      <button type="submit" class="btn btn-primary">Luu</button>
+    </div>
+  </form>
+</div>
 
 <script>
-// Province coordinates
-const PROVINCE_COORDS = {{ province_coords|tojson }};
-
-// Initialize map centered on Vietnam
-const map = L.map('ward-map').setView([16.0, 106.0], 6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap',
-  maxZoom: 18
-}).addTo(map);
-
-// Add province markers
-const markers = {};
-Object.entries(PROVINCE_COORDS).forEach(([code, data]) => {
-  const marker = L.marker([data.lat, data.lng])
-    .addTo(map)
-    .bindPopup(`<strong>${data.name}</strong><br>Ma: ${code}`);
-  markers[code] = marker;
-});
-
-// Active marker for selected ward
-let activeMarker = null;
-
-function jumpToProvince(code) {
-  if (!code || !PROVINCE_COORDS[code]) return;
-  const coords = PROVINCE_COORDS[code];
-  map.setView([coords.lat, coords.lng], 11, { animate: true });
-  if (markers[code]) {
-    markers[code].openPopup();
-  }
+function openEdit(id, code, name, level, pcode, pname) {
+  document.getElementById('editForm').action = '/admin/wards/edit/' + id;
+  document.getElementById('editCode').value = code;
+  document.getElementById('editName').value = name;
+  document.getElementById('editLevel').value = level;
+  document.getElementById('editPCode').value = pcode;
+  document.getElementById('editPName').value = pname;
+  document.getElementById('editModal').style.display = 'flex';
 }
-
-// Jump to province on map button click
-document.querySelectorAll('.btn-map-jump').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const provinceCode = this.dataset.province;
-    const wardName = this.dataset.wardName;
-    if (!provinceCode || !PROVINCE_COORDS[provinceCode]) return;
-
-    const coords = PROVINCE_COORDS[provinceCode];
-    map.setView([coords.lat, coords.lng], 13, { animate: true });
-
-    // Remove previous active marker
-    if (activeMarker) {
-      map.removeLayer(activeMarker);
-    }
-
-    // Add a special marker for the selected ward
-    activeMarker = L.marker([coords.lat, coords.lng], {
-      icon: L.divIcon({
-        className: 'ward-marker',
-        html: '<div style="background:#ef4444;color:#fff;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.3)">' + wardName + '</div>',
-        iconSize: null,
-        iconAnchor: [50, 30]
-      })
-    }).addTo(map)
-      .bindPopup(`<strong>${wardName}</strong><br>${PROVINCE_COORDS[provinceCode].name}`)
-      .openPopup();
-
-    // Highlight the row
-    document.querySelectorAll('.ward-row').forEach(r => r.style.background = '');
-    this.closest('.ward-row').style.background = 'rgba(59,130,246,0.1)';
-
-    // Scroll map into view
-    document.getElementById('ward-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
+// Close modals on backdrop click
+['addModal','editModal'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(el) el.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
 });
-
-// Auto-jump if province filter is set
-{% if f_province %}
-  jumpToProvince('{{ f_province }}');
-{% endif %}
 </script>
 
 <style>
@@ -200,7 +166,5 @@ document.querySelectorAll('.btn-map-jump').forEach(btn => {
 .btn-sm{padding:4px 8px;font-size:13px}
 .empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
 .empty-state h3{margin-bottom:8px;color:var(--text)}
-.ward-marker{background:none!important;border:none!important}
-#ward-map{background:#e5e7eb}
 </style>
 {% endblock %}

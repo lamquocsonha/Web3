@@ -4377,35 +4377,25 @@ PROVINCE_TO_SLUG = {
 }
 
 def _auto_seed_wards():
-    """Seed WardCommune from bundled Excel if table is empty. Returns count seeded."""
+    """Seed WardCommune from wards_default.json if table is empty."""
     if WardCommune.query.count() > 0:
         return 0
-    import os as _os
-    _xls = _os.path.join(_os.path.dirname(__file__), 'danh-sach-3321-xa-phuong.xls')
-    if not _os.path.exists(_xls):
+    import json as _json
+    _path = os.path.join(os.path.dirname(__file__), 'wards_default.json')
+    if not os.path.exists(_path):
         return 0
     try:
-        import xlrd
-        wb = xlrd.open_workbook(_xls)
-        ws = wb.sheet_by_index(0)
-        seeded = 0
-        for r in range(1, ws.nrows):
-            code = str(ws.cell_value(r, 0) or '').strip()
-            name = str(ws.cell_value(r, 1) or '').strip().replace('\n', ' ')
-            level = str(ws.cell_value(r, 2) or '').strip()
-            resolution = str(ws.cell_value(r, 3) or '').strip()
-            province_code = str(ws.cell_value(r, 4) or '').strip()
-            province_name = str(ws.cell_value(r, 5) or '').strip()
-            if code and name:
-                db.session.add(WardCommune(
-                    code=code, name=name, level=level,
-                    resolution=resolution,
-                    province_code=province_code,
-                    province_name=province_name
-                ))
-                seeded += 1
+        with open(_path, 'r', encoding='utf-8') as f:
+            rows = _json.load(f)
+        for code, name, level, resolution, province_code, province_name in rows:
+            db.session.add(WardCommune(
+                code=code, name=name, level=level,
+                resolution=resolution,
+                province_code=province_code,
+                province_name=province_name
+            ))
         db.session.commit()
-        return seeded
+        return len(rows)
     except Exception:
         db.session.rollback()
         return 0
@@ -4415,7 +4405,7 @@ def admin_wards():
     """Manage ward/commune data"""
     seeded = _auto_seed_wards()
     if seeded:
-        flash(f'Tu dong nap {seeded} phuong/xa tu Excel', 'success')
+        flash(f'Tu dong nap {seeded} phuong/xa mac dinh', 'success')
 
     wards = WardCommune.query.order_by(WardCommune.province_code, WardCommune.name).all()
     # Group by province
@@ -4453,135 +4443,56 @@ def admin_wards():
         f_search=f_search
     )
 
-@app.route('/admin/wards/upload', methods=['POST'])
-def admin_wards_upload():
-    """Upload danh-sach-xa-phuong.xls and import data"""
-    file = request.files.get('file')
-    if not file or not file.filename.endswith(('.xlsx', '.xls')):
-        flash('Vui long chon file Excel (.xlsx hoac .xls)', 'error')
+@app.route('/admin/wards/add', methods=['POST'])
+def admin_wards_add():
+    """Add a new ward"""
+    code = request.form.get('code', '').strip()
+    name = request.form.get('name', '').strip()
+    level = request.form.get('level', '').strip()
+    province_code = request.form.get('province_code', '').strip()
+    province_name = request.form.get('province_name', '').strip()
+    if not code or not name:
+        flash('Ma va ten phuong/xa la bat buoc', 'error')
         return redirect(url_for('admin_wards'))
-
-    try:
-        from io import BytesIO
-        file_data = BytesIO(file.read())
-        filename = file.filename.lower()
-
-        rows_data = []
-        if filename.endswith('.xls'):
-            try:
-                import xlrd
-            except ImportError:
-                flash('Thieu thu vien xlrd. Chay: pip install xlrd', 'error')
-                return redirect(url_for('admin_wards'))
-            wb = xlrd.open_workbook(file_contents=file_data.read())
-            ws = wb.sheet_by_index(0)
-            for r in range(1, ws.nrows):
-                rows_data.append([ws.cell_value(r, c) for c in range(ws.ncols)])
-        else:
-            import openpyxl
-            wb = openpyxl.load_workbook(file_data)
-            ws = wb.active
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                rows_data.append(list(row))
-
-        imported = 0
-        updated = 0
-        for vals in rows_data:
-            if len(vals) < 6:
-                continue
-            code = str(vals[0] or '').strip()
-            name = str(vals[1] or '').strip().replace('\n', ' ')
-            level = str(vals[2] or '').strip()
-            resolution = str(vals[3] or '').strip()
-            province_code = str(vals[4] or '').strip()
-            province_name = str(vals[5] or '').strip()
-
-            if not code or not name:
-                continue
-
-            existing = WardCommune.query.filter_by(code=code).first()
-            if existing:
-                existing.name = name
-                existing.level = level
-                existing.resolution = resolution
-                existing.province_code = province_code
-                existing.province_name = province_name
-                updated += 1
-            else:
-                ward = WardCommune(
-                    code=code, name=name, level=level,
-                    resolution=resolution,
-                    province_code=province_code,
-                    province_name=province_name
-                )
-                db.session.add(ward)
-                imported += 1
-
-        db.session.commit()
-        flash(f'Import thanh cong: {imported} moi, {updated} cap nhat', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Loi import: {str(e)}', 'error')
-
+    if WardCommune.query.filter_by(code=code).first():
+        flash(f'Ma {code} da ton tai', 'error')
+        return redirect(url_for('admin_wards'))
+    db.session.add(WardCommune(code=code, name=name, level=level,
+                                province_code=province_code, province_name=province_name))
+    db.session.commit()
+    flash(f'Da them: {name}', 'success')
     return redirect(url_for('admin_wards'))
 
-@app.route('/admin/wards/seed', methods=['POST'])
-def admin_wards_seed():
-    """Seed WardCommune from bundled Excel file (danh-sach-3321-xa-phuong.xls)"""
-    import os
-    xls_path = os.path.join(os.path.dirname(__file__), 'danh-sach-3321-xa-phuong.xls')
-    if not os.path.exists(xls_path):
-        flash('Khong tim thay file danh-sach-3321-xa-phuong.xls', 'error')
-        return redirect(url_for('admin_wards'))
-    try:
-        import xlrd
-    except ImportError:
-        flash('Thieu thu vien xlrd. Chay: pip install xlrd', 'error')
-        return redirect(url_for('admin_wards'))
-    try:
-        wb = xlrd.open_workbook(xls_path)
-        ws = wb.sheet_by_index(0)
-        imported = 0
-        updated = 0
-        for r in range(1, ws.nrows):
-            code = str(ws.cell_value(r, 0) or '').strip()
-            name = str(ws.cell_value(r, 1) or '').strip().replace('\n', ' ')
-            level = str(ws.cell_value(r, 2) or '').strip()
-            resolution = str(ws.cell_value(r, 3) or '').strip()
-            province_code = str(ws.cell_value(r, 4) or '').strip()
-            province_name = str(ws.cell_value(r, 5) or '').strip()
-            if not code or not name:
-                continue
-            existing = WardCommune.query.filter_by(code=code).first()
-            if existing:
-                existing.name = name
-                existing.level = level
-                existing.resolution = resolution
-                existing.province_code = province_code
-                existing.province_name = province_name
-                updated += 1
-            else:
-                db.session.add(WardCommune(
-                    code=code, name=name, level=level,
-                    resolution=resolution,
-                    province_code=province_code,
-                    province_name=province_name
-                ))
-                imported += 1
-        db.session.commit()
-        flash(f'Nap du lieu thanh cong: {imported} moi, {updated} cap nhat', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Loi nap du lieu: {str(e)}', 'error')
+@app.route('/admin/wards/edit/<int:ward_id>', methods=['POST'])
+def admin_wards_edit(ward_id):
+    """Edit a ward"""
+    w = WardCommune.query.get_or_404(ward_id)
+    w.code = request.form.get('code', w.code).strip()
+    w.name = request.form.get('name', w.name).strip()
+    w.level = request.form.get('level', w.level).strip()
+    w.province_code = request.form.get('province_code', w.province_code).strip()
+    w.province_name = request.form.get('province_name', w.province_name).strip()
+    db.session.commit()
+    flash(f'Da cap nhat: {w.name}', 'success')
     return redirect(url_for('admin_wards'))
 
-@app.route('/admin/wards/delete-all', methods=['POST'])
-def admin_wards_delete_all():
-    """Delete all ward data"""
-    count = WardCommune.query.count()
+@app.route('/admin/wards/delete/<int:ward_id>', methods=['POST'])
+def admin_wards_delete(ward_id):
+    """Delete a single ward"""
+    w = WardCommune.query.get_or_404(ward_id)
+    name = w.name
+    db.session.delete(w)
+    db.session.commit()
+    flash(f'Da xoa: {name}', 'success')
+    return redirect(url_for('admin_wards'))
+
+@app.route('/admin/wards/reset', methods=['POST'])
+def admin_wards_reset():
+    """Reset to default data from wards_default.json"""
     WardCommune.query.delete()
     db.session.commit()
-    flash(f'Da xoa {count} phuong/xa', 'success')
+    seeded = _auto_seed_wards()
+    flash(f'Da reset ve mac dinh: {seeded} phuong/xa', 'success')
     return redirect(url_for('admin_wards'))
 
 @app.route('/api/wards')
@@ -6332,42 +6243,11 @@ def _run_schema_migration():
     if changed:
         db.session.commit()
 
-    # --- Auto-seed WardCommune from Excel if table is empty ---
+    # --- Auto-seed WardCommune from JSON if table is empty ---
     try:
-        ward_count = WardCommune.query.count()
-        if ward_count == 0:
-            import os
-            xls_path = os.path.join(os.path.dirname(__file__), 'danh-sach-3321-xa-phuong.xls')
-            if os.path.exists(xls_path):
-                print(f'  [+] Seeding WardCommune from {os.path.basename(xls_path)}...')
-                try:
-                    import xlrd
-                    wb = xlrd.open_workbook(xls_path)
-                    ws = wb.sheet_by_index(0)
-                    seeded = 0
-                    for r in range(1, ws.nrows):
-                        code = str(ws.cell_value(r, 0) or '').strip()
-                        name = str(ws.cell_value(r, 1) or '').strip().replace('\n', ' ')
-                        level = str(ws.cell_value(r, 2) or '').strip()
-                        resolution = str(ws.cell_value(r, 3) or '').strip()
-                        province_code = str(ws.cell_value(r, 4) or '').strip()
-                        province_name = str(ws.cell_value(r, 5) or '').strip()
-                        if not code or not name:
-                            continue
-                        db.session.add(WardCommune(
-                            code=code, name=name, level=level,
-                            resolution=resolution,
-                            province_code=province_code,
-                            province_name=province_name
-                        ))
-                        seeded += 1
-                    db.session.commit()
-                    print(f'  [+] Seeded {seeded} wards from Excel')
-                except ImportError:
-                    print('  [!] xlrd not installed, skipping WardCommune seed')
-                except Exception as e:
-                    db.session.rollback()
-                    print(f'  [!] WardCommune seed error: {e}')
+        seeded = _auto_seed_wards()
+        if seeded:
+            print(f'  [+] Seeded {seeded} wards from wards_default.json')
     except Exception:
         pass  # WardCommune table might not exist yet
 
