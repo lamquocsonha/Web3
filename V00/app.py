@@ -6235,6 +6235,45 @@ def _run_schema_migration():
     if changed:
         db.session.commit()
 
+    # --- Auto-seed WardCommune from Excel if table is empty ---
+    try:
+        ward_count = WardCommune.query.count()
+        if ward_count == 0:
+            import os
+            xls_path = os.path.join(os.path.dirname(__file__), 'danh-sach-3321-xa-phuong.xls')
+            if os.path.exists(xls_path):
+                print(f'  [+] Seeding WardCommune from {os.path.basename(xls_path)}...')
+                try:
+                    import xlrd
+                    wb = xlrd.open_workbook(xls_path)
+                    ws = wb.sheet_by_index(0)
+                    seeded = 0
+                    for r in range(1, ws.nrows):
+                        code = str(ws.cell_value(r, 0) or '').strip()
+                        name = str(ws.cell_value(r, 1) or '').strip().replace('\n', ' ')
+                        level = str(ws.cell_value(r, 2) or '').strip()
+                        resolution = str(ws.cell_value(r, 3) or '').strip()
+                        province_code = str(ws.cell_value(r, 4) or '').strip()
+                        province_name = str(ws.cell_value(r, 5) or '').strip()
+                        if not code or not name:
+                            continue
+                        db.session.add(WardCommune(
+                            code=code, name=name, level=level,
+                            resolution=resolution,
+                            province_code=province_code,
+                            province_name=province_name
+                        ))
+                        seeded += 1
+                    db.session.commit()
+                    print(f'  [+] Seeded {seeded} wards from Excel')
+                except ImportError:
+                    print('  [!] xlrd not installed, skipping WardCommune seed')
+                except Exception as e:
+                    db.session.rollback()
+                    print(f'  [!] WardCommune seed error: {e}')
+    except Exception:
+        pass  # WardCommune table might not exist yet
+
     elapsed = round((time.time() - t0) * 1000)
     print(f'[*] Schema check done ({elapsed}ms)')
 

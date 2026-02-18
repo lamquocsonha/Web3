@@ -144,7 +144,7 @@ AGODA_TO_PROVINCE_NAMES = {
     'da-lat': ['Lâm Đồng', 'Tỉnh Lâm Đồng'],
     'hoi-an': ['Quảng Nam', 'Tỉnh Quảng Nam'],
     'sa-pa': ['Lào Cai', 'Tỉnh Lào Cai'],
-    'hue': ['Thừa Thiên Huế', 'Tỉnh Thừa Thiên Huế'],
+    'hue': ['Huế', 'Thành phố Huế', 'Thừa Thiên Huế'],
     'hai-phong': ['Hải Phòng', 'Thành phố Hải Phòng'],
     'cat-ba': ['Hải Phòng', 'Thành phố Hải Phòng'],
     'can-tho': ['Cần Thơ', 'Thành phố Cần Thơ'],
