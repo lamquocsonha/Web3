@@ -199,7 +199,7 @@ function fixImages(){
           data.wards.forEach(function(w){
             var opt = document.createElement('option');
             opt.value = w.name;
-            opt.textContent = (w.level ? w.level + ' ' : '') + w.name;
+            opt.textContent = w.name;
             wardSel.appendChild(opt);
           });
         } else {
