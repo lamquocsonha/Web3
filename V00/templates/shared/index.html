@@ -24,19 +24,34 @@
       <div class="vi-hs"><span class="vi-hs-num">3</span> tầng kiến thức</div>
     </div>
   </div>
-  {% if articles_nganh %}
-  {% set feat = articles_nganh[0] %}
-  <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=feat.slug) }}" class="vi-hero-featured">
-    <div class="vi-hf-img">
-      {% if feat.image_url %}<img src="{{ feat.image_url }}" alt="{{ feat.title[:50] }}" loading="lazy">{% else %}<div class="vi-hf-placeholder">{{ feat.title[:1] }}</div>{% endif %}
+  {% set hero_slides = recent_articles[:6] if recent_articles else all_articles[:6] %}
+  {% if hero_slides %}
+  <div class="vi-hero-carousel">
+    <div class="vi-hc-track">
+      {% for feat in hero_slides %}
+      <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=feat.slug) }}" class="vi-hero-featured vi-hc-slide{% if loop.first %} active{% endif %}">
+        <div class="vi-hf-img">
+          {% if feat.image_url %}<img src="{{ feat.image_url }}" alt="{{ feat.title[:50] }}" loading="lazy">{% else %}<div class="vi-hf-placeholder">{{ feat.title[:1] }}</div>{% endif %}
+        </div>
+        <div class="vi-hf-body">
+          <span class="vi-hf-tier">{% if feat.tier == 'nganh' %}Kiến thức ngành{% elif feat.tier == 'chung' %}Hệ thống{% else %}Chi tiết{% endif %}</span>
+          <h3>{{ feat.title[:70] }}{% if feat.title|length > 70 %}...{% endif %}</h3>
+          <p>{{ feat.excerpt[:100] }}{% if feat.excerpt|length > 100 %}...{% endif %}</p>
+          <span class="vi-hf-meta">{{ feat.reading_time }} phút đọc · {{ "{:,}".format(feat.views) }} views</span>
+        </div>
+      </a>
+      {% endfor %}
     </div>
-    <div class="vi-hf-body">
-      <span class="vi-hf-tier">Kiến thức ngành</span>
-      <h3>{{ feat.title[:70] }}{% if feat.title|length > 70 %}...{% endif %}</h3>
-      <p>{{ feat.excerpt[:100] }}{% if feat.excerpt|length > 100 %}...{% endif %}</p>
-      <span class="vi-hf-meta">{{ feat.reading_time }} phút đọc · {{ "{:,}".format(feat.views) }} views</span>
+    {% if hero_slides|length > 1 %}
+    <button class="vi-hc-arrow vi-hc-prev" aria-label="Previous">&#8249;</button>
+    <button class="vi-hc-arrow vi-hc-next" aria-label="Next">&#8250;</button>
+    <div class="vi-hc-dots">
+      {% for feat in hero_slides %}
+      <button class="vi-hc-dot{% if loop.first %} active{% endif %}" data-idx="{{ loop.index0 }}"></button>
+      {% endfor %}
     </div>
-  </a>
+    {% endif %}
+  </div>
   {% endif %}
 </section>
 
@@ -172,6 +187,75 @@
     <span class="vi-stat-label">tầng kiến thức</span>
   </div>
 </section>
+
+<!-- Hero Carousel JS -->
+<script>
+(function(){
+  var slides = document.querySelectorAll('.vi-hc-slide');
+  var dots = document.querySelectorAll('.vi-hc-dot');
+  var prevBtn = document.querySelector('.vi-hc-prev');
+  var nextBtn = document.querySelector('.vi-hc-next');
+  if (!slides.length || slides.length < 2) return;
+
+  var current = 0;
+  var total = slides.length;
+  var autoTimer = null;
+  var AUTO_INTERVAL = 5000;
+
+  function goTo(idx, direction) {
+    if (idx === current) return;
+    var prev = current;
+    current = (idx + total) % total;
+    // Animate out
+    slides[prev].classList.remove('active');
+    slides[prev].classList.add('prev');
+    setTimeout(function(){ slides[prev].classList.remove('prev'); }, 500);
+    // Animate in
+    slides[current].classList.add('active');
+    // Update dots
+    dots.forEach(function(d){ d.classList.remove('active'); });
+    if (dots[current]) dots[current].classList.add('active');
+  }
+
+  function next() { goTo((current + 1) % total, 'next'); }
+  function prev() { goTo((current - 1 + total) % total, 'prev'); }
+
+  function startAuto() {
+    stopAuto();
+    autoTimer = setInterval(next, AUTO_INTERVAL);
+  }
+  function stopAuto() { clearInterval(autoTimer); }
+
+  if (nextBtn) nextBtn.addEventListener('click', function(){ next(); startAuto(); });
+  if (prevBtn) prevBtn.addEventListener('click', function(){ prev(); startAuto(); });
+  dots.forEach(function(dot){
+    dot.addEventListener('click', function(){ goTo(parseInt(this.dataset.idx)); startAuto(); });
+  });
+
+  // Pause on hover
+  var carousel = document.querySelector('.vi-hero-carousel');
+  if (carousel) {
+    carousel.addEventListener('mouseenter', stopAuto);
+    carousel.addEventListener('mouseleave', startAuto);
+  }
+
+  // Touch swipe support
+  var touchStartX = 0;
+  if (carousel) {
+    carousel.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+      stopAuto();
+    }, {passive: true});
+    carousel.addEventListener('touchend', function(e) {
+      var diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) { diff > 0 ? next() : prev(); }
+      startAuto();
+    }, {passive: true});
+  }
+
+  startAuto();
+})();
+</script>
 
 <!-- Filter JS -->
 <script>
