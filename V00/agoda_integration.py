@@ -112,6 +112,28 @@ PROVINCE_TO_CITY_SLUG = {
     'ninh-binh': 'ninh-binh',
 }
 
+# Map province names (from WardCommune DB) to Agoda destination slugs
+# Used for 2-level destination dropdown in hotel sync
+PROVINCE_NAME_TO_AGODA = {
+    'Hà Nội': ['ha-noi'],
+    'Hồ Chí Minh': ['ho-chi-minh'],
+    'Đà Nẵng': ['da-nang'],
+    'Khánh Hòa': ['nha-trang'],
+    'Kiên Giang': ['phu-quoc'],
+    'Lâm Đồng': ['da-lat'],
+    'Quảng Nam': ['hoi-an'],
+    'Lào Cai': ['sa-pa'],
+    'Thừa Thiên Huế': ['hue'],
+    'Hải Phòng': ['hai-phong', 'cat-ba'],
+    'Cần Thơ': ['can-tho'],
+    'Quảng Ninh': ['quang-ninh', 'ha-long'],
+    'Ninh Bình': ['ninh-binh'],
+    'Bà Rịa - Vũng Tàu': ['vung-tau', 'con-dao'],
+    'Bình Định': ['quy-nhon'],
+    'Bình Thuận': ['mui-ne'],
+    'Vĩnh Phúc': ['tam-dao'],
+}
+
 
 class AgodaAPI:
     """Agoda Affiliate Long Tail Search API client.
@@ -681,6 +703,30 @@ _SEED_HOTELS = {
         {'id': 2154321, 'name': 'Sapa Catcat Hills Resort', 'stars': 3, 'rating': 8.1, 'reviews': 2000, 'price': 800000, 'orig': 1050000, 'district': 'San Sả Hồ', 'lat': 22.3200, 'lng': 103.8300, 'img': _agoda_img(2154321), 'amenities': 'WiFi, Restaurant, Trekking'},
         {'id': 2265432, 'name': 'Hmong Sapa Hotel', 'stars': 3, 'rating': 8.0, 'reviews': 1300, 'price': 700000, 'orig': 900000, 'district': 'Sa Pa', 'lat': 22.3340, 'lng': 103.8450, 'img': _agoda_img(2265432), 'amenities': 'WiFi, Restaurant'},
         {'id': 2376543, 'name': 'Aira Boutique Sapa Hotel & Spa', 'stars': 4, 'rating': 8.7, 'reviews': 700, 'price': 1300000, 'orig': 1700000, 'district': 'Sa Pa', 'lat': 22.3355, 'lng': 103.8445, 'img': _agoda_img(2376543), 'amenities': 'WiFi, Spa, Restaurant, View'},
+    ],
+    'quy-nhon': [
+        {'id': 571889, 'name': 'FLC Grand Hotel Quy Nhon', 'stars': 5, 'rating': 8.5, 'reviews': 2100, 'price': 2800000, 'orig': 3600000, 'district': 'Ghềnh Ráng', 'lat': 13.7390, 'lng': 109.2270, 'img': _agoda_img(571889), 'amenities': 'WiFi, Pool, Beach, Spa, Restaurant'},
+        {'id': 2775925, 'name': 'HAIAN Beach Hotel & Spa', 'stars': 4, 'rating': 8.8, 'reviews': 3200, 'price': 1800000, 'orig': 2300000, 'district': 'Trần Phú', 'lat': 13.7680, 'lng': 109.2350, 'img': _agoda_img(2775925), 'amenities': 'WiFi, Pool, Beach, Spa, Restaurant'},
+        {'id': 5022680, 'name': 'Avani Quy Nhon Resort', 'stars': 5, 'rating': 9.0, 'reviews': 1800, 'price': 4500000, 'orig': 5800000, 'district': 'Ghềnh Ráng', 'lat': 13.7320, 'lng': 109.2250, 'img': _agoda_img(5022680), 'amenities': 'WiFi, Pool, Beach, Spa, Restaurant, Gym'},
+        {'id': 847382, 'name': 'Seagull Hotel Quy Nhon', 'stars': 4, 'rating': 8.3, 'reviews': 2800, 'price': 1200000, 'orig': 1550000, 'district': 'An Dương Vương', 'lat': 13.7650, 'lng': 109.2340, 'img': _agoda_img(847382), 'amenities': 'WiFi, Pool, Beach, Restaurant'},
+        {'id': 1238756, 'name': 'Melia Vinpearl Quy Nhon', 'stars': 5, 'rating': 8.7, 'reviews': 1500, 'price': 3200000, 'orig': 4200000, 'district': 'Ghềnh Ráng', 'lat': 13.7350, 'lng': 109.2280, 'img': _agoda_img(1238756), 'amenities': 'WiFi, Pool, Beach, Spa, Restaurant, Gym'},
+        {'id': 3467809, 'name': 'TTC Hotel Premium Quy Nhon', 'stars': 4, 'rating': 8.4, 'reviews': 1900, 'price': 1500000, 'orig': 1950000, 'district': 'Nguyễn Huệ', 'lat': 13.7700, 'lng': 109.2300, 'img': _agoda_img(3467809), 'amenities': 'WiFi, Pool, Restaurant'},
+        {'id': 6534210, 'name': 'Quy Nhon Boutique Hotel', 'stars': 3, 'rating': 8.6, 'reviews': 900, 'price': 800000, 'orig': 1050000, 'district': 'Lê Lợi', 'lat': 13.7720, 'lng': 109.2280, 'img': _agoda_img(6534210), 'amenities': 'WiFi, Restaurant'},
+        {'id': 4589123, 'name': 'Hoang Yen Canary Hotel', 'stars': 4, 'rating': 8.2, 'reviews': 2200, 'price': 1000000, 'orig': 1300000, 'district': 'Lê Hồng Phong', 'lat': 13.7660, 'lng': 109.2310, 'img': _agoda_img(4589123), 'amenities': 'WiFi, Restaurant, City View'},
+        {'id': 7891234, 'name': 'Anantara Quy Nhon Villas', 'stars': 5, 'rating': 9.2, 'reviews': 800, 'price': 7500000, 'orig': 9800000, 'district': 'Bãi Dài', 'lat': 13.6950, 'lng': 109.2100, 'img': _agoda_img(7891234), 'amenities': 'WiFi, Pool, Beach, Spa, Villa, Restaurant'},
+        {'id': 5678432, 'name': 'Rosa Alba Resort & Villas', 'stars': 5, 'rating': 8.9, 'reviews': 1200, 'price': 3500000, 'orig': 4500000, 'district': 'Phước Mỹ', 'lat': 13.7400, 'lng': 109.2260, 'img': _agoda_img(5678432), 'amenities': 'WiFi, Pool, Beach, Spa, Restaurant'},
+    ],
+    'vung-tau': [
+        {'id': 289432, 'name': 'Pullman Vung Tau', 'stars': 5, 'rating': 8.7, 'reviews': 2500, 'price': 3200000, 'orig': 4200000, 'district': 'Thùy Vân', 'lat': 10.3460, 'lng': 107.0850, 'img': _agoda_img(289432), 'amenities': 'WiFi, Pool, Beach, Spa, Restaurant'},
+        {'id': 156789, 'name': 'Imperial Hotel Vung Tau', 'stars': 5, 'rating': 8.5, 'reviews': 3100, 'price': 2500000, 'orig': 3200000, 'district': 'Thùy Vân', 'lat': 10.3480, 'lng': 107.0830, 'img': _agoda_img(156789), 'amenities': 'WiFi, Pool, Beach, Restaurant, Gym'},
+        {'id': 478901, 'name': 'Malibu Hotel Vung Tau', 'stars': 4, 'rating': 8.3, 'reviews': 2800, 'price': 1500000, 'orig': 1950000, 'district': 'Bãi Sau', 'lat': 10.3450, 'lng': 107.0870, 'img': _agoda_img(478901), 'amenities': 'WiFi, Pool, Beach, Restaurant'},
+        {'id': 623456, 'name': 'Fusion Suites Vung Tau', 'stars': 4, 'rating': 8.6, 'reviews': 1400, 'price': 1800000, 'orig': 2300000, 'district': 'Thùy Vân', 'lat': 10.3470, 'lng': 107.0840, 'img': _agoda_img(623456), 'amenities': 'WiFi, Pool, Spa, Beach'},
+        {'id': 345678, 'name': 'The Grand Ho Tram Strip', 'stars': 5, 'rating': 8.8, 'reviews': 2000, 'price': 4000000, 'orig': 5200000, 'district': 'Hồ Tràm', 'lat': 10.4600, 'lng': 107.3800, 'img': _agoda_img(345678), 'amenities': 'WiFi, Pool, Beach, Casino, Spa, Restaurant'},
+        {'id': 789012, 'name': 'Lan Rung Resort & Spa', 'stars': 4, 'rating': 8.4, 'reviews': 1800, 'price': 1600000, 'orig': 2100000, 'district': 'Phước Hải', 'lat': 10.3430, 'lng': 107.0890, 'img': _agoda_img(789012), 'amenities': 'WiFi, Pool, Beach, Spa'},
+        {'id': 901234, 'name': 'Côn Sơn Blue Sea Hotel', 'stars': 3, 'rating': 8.2, 'reviews': 1200, 'price': 900000, 'orig': 1200000, 'district': 'Bãi Trước', 'lat': 10.3500, 'lng': 107.0750, 'img': _agoda_img(901234), 'amenities': 'WiFi, Restaurant, Sea View'},
+        {'id': 234567, 'name': 'The Shells Resort & Spa', 'stars': 5, 'rating': 8.9, 'reviews': 900, 'price': 3500000, 'orig': 4500000, 'district': 'Phước Hải', 'lat': 10.3420, 'lng': 107.0900, 'img': _agoda_img(234567), 'amenities': 'WiFi, Pool, Beach, Spa, Restaurant'},
+        {'id': 567890, 'name': 'Vung Tau Intourco Resort', 'stars': 4, 'rating': 8.1, 'reviews': 2200, 'price': 1300000, 'orig': 1700000, 'district': 'Thùy Vân', 'lat': 10.3490, 'lng': 107.0820, 'img': _agoda_img(567890), 'amenities': 'WiFi, Pool, Beach, Restaurant'},
+        {'id': 678123, 'name': 'Green Hotel Vung Tau', 'stars': 4, 'rating': 8.5, 'reviews': 1500, 'price': 1100000, 'orig': 1400000, 'district': 'Bãi Sau', 'lat': 10.3440, 'lng': 107.0860, 'img': _agoda_img(678123), 'amenities': 'WiFi, Pool, Restaurant'},
     ],
     'hue': [
         {'id': 87432, 'name': 'Azerai La Residence Hue', 'stars': 5, 'rating': 9.0, 'reviews': 1900, 'price': 3800000, 'orig': 4900000, 'district': 'Phú Hội', 'lat': 16.4598, 'lng': 107.5855, 'img': _agoda_img(87432), 'amenities': 'WiFi, Pool, Spa, River View'},

@@ -3411,13 +3411,47 @@ def admin_hotel_sync():
         for slug, cid_val in AGODA_CITY_IDS.items()
     ]
 
+    # Build 2-level grouped destinations from WardCommune DB (tỉnh thành → phường xã)
+    from agoda_integration import PROVINCE_NAME_TO_AGODA
+    dest_grouped = []
+    try:
+        provinces_db = db.session.query(
+            WardCommune.province_code, WardCommune.province_name
+        ).distinct().order_by(WardCommune.province_name).all()
+
+        for pcode, pname in provinces_db:
+            # Normalize province name (strip "Thành phố ", "Tỉnh ", etc.)
+            pclean = pname.strip()
+            for pfx in ['Thành phố ', 'Tỉnh ', 'TP. ', 'TP ']:
+                if pclean.startswith(pfx):
+                    pclean = pclean[len(pfx):]
+
+            agoda_slugs = PROVINCE_NAME_TO_AGODA.get(pclean) or PROVINCE_NAME_TO_AGODA.get(pname.strip())
+            if not agoda_slugs:
+                continue
+
+            wards = WardCommune.query.filter_by(province_code=pcode).order_by(WardCommune.name).all()
+
+            for slug in agoda_slugs:
+                if slug not in AGODA_CITY_IDS:
+                    continue
+                dest_grouped.append({
+                    'province_name': pname.strip(),
+                    'slug': slug,
+                    'city_name': AGODA_CITY_NAMES.get(slug, slug),
+                    'city_id': AGODA_CITY_IDS[slug],
+                    'wards': [{'name': w.name, 'level': w.level} for w in wards]
+                })
+    except Exception:
+        pass  # WardCommune table might not exist or be empty
+
     recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()
 
     return render_template('admin/hotel_sync.html',
         api_connected=api_connected, cid=cid, has_key=has_key,
         total_hotels=total_hotels, total_agoda=total_agoda,
         total_manual=total_manual, total_active=total_active,
-        destinations=destinations, recent=recent)
+        destinations=destinations, dest_grouped=dest_grouped, recent=recent)
 
 
 @app.route('/admin/hotel-sync/save-credentials', methods=['POST'])
@@ -3620,11 +3654,15 @@ def admin_hotel_sync_fast():
 
 @app.route('/admin/hotel-sync/fix-images', methods=['POST'])
 def admin_hotel_fix_images():
-    """Fix missing image_url for existing agoda_api hotels."""
+    """Fix missing image_url for existing agoda_api hotels.
+    Tries Content Feed API for real image URLs, falls back to CDN pattern."""
+    from agoda_integration import get_agoda_api
+    api = get_agoda_api()
+
     fixed = 0
+    hotels_to_fix = []
     for h in Hotel.query.filter_by(source='agoda_api').all():
         if not h.image_url:
-            # Extract agoda hotel ID from agoda_url
             agoda_id = None
             if h.agoda_url:
                 for part in h.agoda_url.split('&'):
@@ -3632,8 +3670,32 @@ def admin_hotel_fix_images():
                         agoda_id = part.split('=')[1]
                         break
             if agoda_id:
-                h.image_url = f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300"
-                fixed += 1
+                hotels_to_fix.append((h, agoda_id))
+
+    if not hotels_to_fix:
+        return jsonify({'fixed': 0})
+
+    # Try Content Feed API to get real image URLs
+    img_map = {}
+    if api:
+        try:
+            hotel_ids = [aid for _, aid in hotels_to_fix[:100]]
+            images_data = api.get_hotel_images(hotel_ids)
+            for item in images_data:
+                hid = str(item.get('hotelId') or item.get('hotel_id', ''))
+                img_url = item.get('url') or item.get('imageUrl') or item.get('hotelImage', '')
+                if hid and img_url:
+                    img_map[hid] = img_url
+        except Exception:
+            pass
+
+    for h, agoda_id in hotels_to_fix:
+        if agoda_id in img_map:
+            h.image_url = img_map[agoda_id]
+        else:
+            h.image_url = f"https://pix6.agoda.net/hotelImages/{agoda_id}/0/{agoda_id}_1.jpg?s=400x300"
+        fixed += 1
+
     db.session.commit()
     return jsonify({'fixed': fixed})
 

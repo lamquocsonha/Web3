@@ -90,12 +90,23 @@
   {% if not api_connected %}<p style="margin:-8px 0 12px;font-size:13px;color:#e74c3c;font-weight:600">⚠ Luu credentials truoc khi search</p>{% endif %}
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
     <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">Destination</label>
-      <select id="syncDest" class="form-select" style="width:180px;padding:8px;font-size:13px">
+      <label class="form-label">Tinh thanh</label>
+      <select id="syncDest" class="form-select" style="width:220px;padding:8px;font-size:13px">
         <option value="">Chon tinh thanh...</option>
+        {% if dest_grouped %}
+        {% for g in dest_grouped %}
+        <optgroup label="{{ g.province_name }}">
+          <option value="{{ g.slug }}">{{ g.city_name }} — Tat ca ({{ g.city_id }})</option>
+          {% for w in g.wards %}
+          <option value="{{ g.slug }}" data-ward="{{ w.name }}">{{ w.name }}</option>
+          {% endfor %}
+        </optgroup>
+        {% endfor %}
+        {% else %}
         {% for d in destinations %}
         <option value="{{ d.slug }}">{{ d.name }} ({{ d.city_id }})</option>
         {% endfor %}
+        {% endif %}
       </select>
     </div>
     <div class="form-group" style="margin-bottom:0">
@@ -135,7 +146,8 @@
           <td style="font-family:'DM Mono';color:var(--text-dim)">{{ h.id }}</td>
           <td>
             {% if h.image_url %}
-            <img src="{{ h.image_url }}" alt="" style="width:48px;height:36px;object-fit:cover;border-radius:4px;display:block" loading="lazy" onerror="this.style.display='none'">
+            <img src="{{ h.image_url }}" alt="" style="width:48px;height:36px;object-fit:cover;border-radius:4px;display:block" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display=''">
+            <span style="display:none;width:48px;height:36px;background:var(--border);border-radius:4px;text-align:center;line-height:36px;font-size:16px">🏨</span>
             {% else %}
             <span style="display:inline-block;width:48px;height:36px;background:var(--border);border-radius:4px;text-align:center;line-height:36px;font-size:16px">🏨</span>
             {% endif %}
@@ -339,7 +351,7 @@ function searchAgoda() {
       html += '<tr style="' + (imported ? 'opacity:0.5' : '') + '">'
         + '<td><input type="checkbox" class="hCheck" data-idx="' + i + '" ' + (imported ? 'disabled' : 'checked') + '></td>'
         + '<td><div style="display:flex;gap:10px;align-items:center">'
-        + (h.image_url ? '<img src="'+h.image_url+'" style="width:60px;height:40px;border-radius:4px;object-fit:cover" onerror="this.style.display=\'none\'">' : '')
+        + (h.image_url ? '<img src="'+h.image_url+'" style="width:60px;height:40px;border-radius:4px;object-fit:cover" onerror="this.onerror=null;this.outerHTML=\'<span style=\\\'display:inline-block;width:60px;height:40px;background:var(--border);border-radius:4px;text-align:center;line-height:40px;font-size:18px\\\'>🏨</span>\'">' : '<span style="display:inline-block;width:60px;height:40px;background:var(--border);border-radius:4px;text-align:center;line-height:40px;font-size:18px">🏨</span>')
         + '<div><strong>' + (h.name||'').substring(0,50) + '</strong>'
         + '<div style="font-size:12px;color:var(--text-dim)">' + (h.district||h.address||'') + '</div></div></div></td>'
         + '<td>' + '⭐'.repeat(h.stars||0) + '</td>'
