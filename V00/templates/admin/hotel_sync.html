@@ -94,7 +94,7 @@
       <select id="syncDest" class="form-select" style="width:200px;padding:8px;font-size:13px">
         <option value="">Chon tinh thanh...</option>
         {% for d in destinations %}
-        <option value="{{ d.slug }}">{{ d.name }} ({{ d.city_id }})</option>
+        <option value="{{ d.slug }}"{% if not d.city_id %} data-no-agoda="1"{% endif %}>{{ d.name }}{% if d.city_id %} ({{ d.city_id }}){% endif %}</option>
         {% endfor %}
       </select>
     </div>
@@ -217,7 +217,7 @@ function fixImages(){
 var fsStopped = false;
 var fsRunning = false;
 var DESTINATIONS = [
-  {% for d in destinations %}
+  {% for d in agoda_destinations %}
   {slug:'{{ d.slug }}', name:'{{ d.name }}'},
   {% endfor %}
 ];

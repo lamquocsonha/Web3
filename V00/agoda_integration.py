@@ -134,8 +134,10 @@ PROVINCE_NAME_TO_AGODA = {
     'Vĩnh Phúc': ['tam-dao'],
 }
 
-# Reverse mapping: Agoda destination slug → province name variants to search in WardCommune
+# Reverse mapping: destination slug → province name variants to search in WardCommune
+# Covers all 34 provinces from Excel + Agoda tourism destinations
 AGODA_TO_PROVINCE_NAMES = {
+    # --- Agoda tourism destinations ---
     'ha-noi': ['Hà Nội', 'Thành phố Hà Nội'],
     'ho-chi-minh': ['Hồ Chí Minh', 'Thành phố Hồ Chí Minh', 'TP. Hồ Chí Minh'],
     'da-nang': ['Đà Nẵng', 'Thành phố Đà Nẵng'],
@@ -156,6 +158,33 @@ AGODA_TO_PROVINCE_NAMES = {
     'quy-nhon': ['Bình Định', 'Tỉnh Bình Định'],
     'mui-ne': ['Bình Thuận', 'Tỉnh Bình Thuận'],
     'tam-dao': ['Vĩnh Phúc', 'Tỉnh Vĩnh Phúc'],
+    # --- All 34 provinces from Excel (slug = slugify(province_name)) ---
+    'cao-bang': ['Cao Bằng', 'Tỉnh Cao Bằng'],
+    'tuyen-quang': ['Tuyên Quang', 'Tỉnh Tuyên Quang'],
+    'dien-bien': ['Điện Biên', 'Tỉnh Điện Biên'],
+    'lai-chau': ['Lai Châu', 'Tỉnh Lai Châu'],
+    'son-la': ['Sơn La', 'Tỉnh Sơn La'],
+    'lao-cai': ['Lào Cai', 'Tỉnh Lào Cai'],
+    'thai-nguyen': ['Thái Nguyên', 'Tỉnh Thái Nguyên'],
+    'lang-son': ['Lạng Sơn', 'Tỉnh Lạng Sơn'],
+    'bac-ninh': ['Bắc Ninh', 'Tỉnh Bắc Ninh'],
+    'phu-tho': ['Phú Thọ', 'Tỉnh Phú Thọ'],
+    'hung-yen': ['Hưng Yên', 'Tỉnh Hưng Yên'],
+    'thanh-hoa': ['Thanh Hóa', 'Tỉnh Thanh Hóa'],
+    'nghe-an': ['Nghệ An', 'Tỉnh Nghệ An'],
+    'ha-tinh': ['Hà Tĩnh', 'Tỉnh Hà Tĩnh'],
+    'quang-tri': ['Quảng Trị', 'Tỉnh Quảng Trị'],
+    'quang-ngai': ['Quảng Ngãi', 'Tỉnh Quảng Ngãi'],
+    'gia-lai': ['Gia Lai', 'Tỉnh Gia Lai'],
+    'khanh-hoa': ['Khánh Hòa', 'Tỉnh Khánh Hòa'],
+    'dak-lak': ['Đắk Lắk', 'Tỉnh Đắk Lắk'],
+    'lam-dong': ['Lâm Đồng', 'Tỉnh Lâm Đồng'],
+    'dong-nai': ['Đồng Nai', 'Tỉnh Đồng Nai'],
+    'tay-ninh': ['Tây Ninh', 'Tỉnh Tây Ninh'],
+    'dong-thap': ['Đồng Tháp', 'Tỉnh Đồng Tháp'],
+    'vinh-long': ['Vĩnh Long', 'Tỉnh Vĩnh Long'],
+    'an-giang': ['An Giang', 'Tỉnh An Giang'],
+    'ca-mau': ['Cà Mau', 'Tỉnh Cà Mau'],
 }
 
 

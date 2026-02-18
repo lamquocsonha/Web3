@@ -3406,10 +3406,52 @@ def admin_hotel_sync():
     cid = SiteSettings.get('agoda_cid', '')
     has_key = bool(SiteSettings.get('agoda_api_key', ''))
 
-    destinations = [
+    # Agoda destinations for Fast Sync (only cities with Agoda city IDs)
+    agoda_destinations = [
         {'slug': slug, 'name': AGODA_CITY_NAMES.get(slug, slug), 'city_id': cid_val}
         for slug, cid_val in AGODA_CITY_IDS.items()
     ]
+
+    # Full 34-province dropdown from WardCommune DB
+    from agoda_integration import PROVINCE_NAME_TO_AGODA, PROVINCE_TO_CITY_SLUG
+    destinations = []
+    try:
+        provinces_db = db.session.query(
+            WardCommune.province_code, WardCommune.province_name
+        ).distinct().order_by(WardCommune.province_name).all()
+
+        for pcode, pname in provinces_db:
+            pclean = pname.strip()
+            for pfx in ['Thành phố ', 'Tỉnh ', 'TP. ', 'TP ']:
+                if pclean.startswith(pfx):
+                    pclean = pclean[len(pfx):]
+            pslug = slugify(pclean)
+
+            # Find Agoda city mapping
+            agoda_slug = None
+            agoda_city_id = 0
+            if pslug in AGODA_CITY_IDS:
+                agoda_slug = pslug
+                agoda_city_id = AGODA_CITY_IDS[pslug]
+            elif pslug in PROVINCE_TO_CITY_SLUG:
+                agoda_slug = PROVINCE_TO_CITY_SLUG[pslug]
+                agoda_city_id = AGODA_CITY_IDS.get(agoda_slug, 0)
+            elif pclean in PROVINCE_NAME_TO_AGODA:
+                agoda_slug = PROVINCE_NAME_TO_AGODA[pclean][0]
+                agoda_city_id = AGODA_CITY_IDS.get(agoda_slug, 0)
+
+            destinations.append({
+                'slug': agoda_slug or pslug,
+                'name': pclean,
+                'city_id': agoda_city_id,
+                'province_code': pcode,
+            })
+    except Exception:
+        pass
+
+    # Fallback: if WardCommune empty, use Agoda city list
+    if not destinations:
+        destinations = agoda_destinations
 
     recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()
 
@@ -3417,7 +3459,7 @@ def admin_hotel_sync():
         api_connected=api_connected, cid=cid, has_key=has_key,
         total_hotels=total_hotels, total_agoda=total_agoda,
         total_manual=total_manual, total_active=total_active,
-        destinations=destinations, recent=recent)
+        destinations=destinations, agoda_destinations=agoda_destinations, recent=recent)
 
 
 @app.route('/admin/hotel-sync/save-credentials', methods=['POST'])
