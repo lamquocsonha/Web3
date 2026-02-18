@@ -3449,6 +3449,18 @@ def admin_hotel_sync():
     except Exception:
         pass
 
+    # Append Agoda tourism destinations that are NOT provinces
+    # (e.g., Cát Bà, Côn Đảo, Hạ Long are tourism spots, not provinces)
+    used_slugs = {d['slug'] for d in destinations}
+    for slug, cid_val in AGODA_CITY_IDS.items():
+        if slug not in used_slugs:
+            destinations.append({
+                'slug': slug,
+                'name': AGODA_CITY_NAMES.get(slug, slug),
+                'city_id': cid_val,
+                'province_code': '',
+            })
+
     # Fallback: if WardCommune empty, use Agoda city list
     if not destinations:
         destinations = agoda_destinations
