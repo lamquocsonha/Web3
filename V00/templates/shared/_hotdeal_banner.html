@@ -7,29 +7,7 @@
   <div class="hotdeal-scroll-wrapper">
     <button class="hotdeal-arrow hotdeal-arrow-left" onclick="scrollHotDeals(-1)" aria-label="Truoc">&#8249;</button>
     <div class="hotdeal-grid" id="hotdealGrid">
-      {# Excel-uploaded HotDeals #}
-      {% for deal in hotdeals_active %}
-      <a href="{{ deal.product_link or '#' }}" target="_blank" rel="nofollow noopener" class="hotdeal-card" data-end="{{ deal.end_date.isoformat() }}">
-        {% set banners = deal.get_banner_urls() %}
-        {% if banners %}
-        <div class="hotdeal-banner">
-          <img src="{{ banners[0] }}" alt="{{ deal.campaign }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'hotdeal-fallback\'>&#128293;</div>'">
-        </div>
-        {% else %}
-        <div class="hotdeal-banner"><div class="hotdeal-fallback">&#128293;</div></div>
-        {% endif %}
-        <div class="hotdeal-info">
-          <div class="hotdeal-campaign">{{ deal.campaign }}</div>
-          <div class="hotdeal-name">{{ deal.name[:80] }}{% if deal.name|length > 80 %}...{% endif %}</div>
-          <div class="hotdeal-meta">
-            <span class="hotdeal-date">{{ deal.end_date.strftime('%d/%m') if deal.end_date else '' }}</span>
-            <span class="hotdeal-countdown" data-end="{{ deal.end_date.isoformat() }}"></span>
-          </div>
-        </div>
-      </a>
-      {% endfor %}
-
-      {# AccessTrade auto-pulled banners #}
+      {# AccessTrade banners — shown first #}
       {% for ab in at_banners_hotdeal %}
       <a href="{{ url_for('admin_at_banner_click', banner_id=ab.id) }}" target="_blank" rel="nofollow noopener" class="hotdeal-card{% if ab.end_date %}" data-end="{{ ab.end_date.isoformat() }}{% endif %}">
         {% if ab.image_url %}
@@ -55,6 +33,28 @@
             {% else %}
             <span class="hotdeal-date">&#127912; AccessTrade</span>
             {% endif %}
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+
+      {# Excel-uploaded HotDeals #}
+      {% for deal in hotdeals_active %}
+      <a href="{{ deal.product_link or '#' }}" target="_blank" rel="nofollow noopener" class="hotdeal-card" data-end="{{ deal.end_date.isoformat() }}">
+        {% set banners = deal.get_banner_urls() %}
+        {% if banners %}
+        <div class="hotdeal-banner">
+          <img src="{{ banners[0] }}" alt="{{ deal.campaign }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'hotdeal-fallback\'>&#128293;</div>'">
+        </div>
+        {% else %}
+        <div class="hotdeal-banner"><div class="hotdeal-fallback">&#128293;</div></div>
+        {% endif %}
+        <div class="hotdeal-info">
+          <div class="hotdeal-campaign">{{ deal.campaign }}</div>
+          <div class="hotdeal-name">{{ deal.name[:80] }}{% if deal.name|length > 80 %}...{% endif %}</div>
+          <div class="hotdeal-meta">
+            <span class="hotdeal-date">{{ deal.end_date.strftime('%d/%m') if deal.end_date else '' }}</span>
+            <span class="hotdeal-countdown" data-end="{{ deal.end_date.isoformat() }}"></span>
           </div>
         </div>
       </a>

@@ -225,7 +225,7 @@ def inject_globals():
                 HotDeal.end_date > now_utc
             ).order_by(HotDeal.end_date.asc()).all()
 
-        # AccessTrade auto-pull banners
+        # AccessTrade auto-pull banners (dedup: each merchant appears once)
         at_banners_hotdeal = []
         at_banners_sidebar = []
         try:
@@ -233,13 +233,22 @@ def inject_globals():
             at_all = AccessTradeBanner.query.filter(
                 AccessTradeBanner.is_active == True
             ).order_by(AccessTradeBanner.synced_at.desc()).all()
+            hotdeal_merchants = set()
             for ab in at_all:
                 if ab.end_date and ab.end_date < now_utc2:
                     continue
+                merchant_key = (ab.merchant or '').strip().lower()
                 if ab.placement in ('hotdeal', 'both'):
-                    at_banners_hotdeal.append(ab)
+                    if merchant_key not in hotdeal_merchants:
+                        at_banners_hotdeal.append(ab)
+                        hotdeal_merchants.add(merchant_key)
+            for ab in at_all:
+                if ab.end_date and ab.end_date < now_utc2:
+                    continue
+                merchant_key = (ab.merchant or '').strip().lower()
                 if ab.placement in ('sidebar', 'both'):
-                    at_banners_sidebar.append(ab)
+                    if merchant_key not in hotdeal_merchants:
+                        at_banners_sidebar.append(ab)
         except Exception:
             pass
 
