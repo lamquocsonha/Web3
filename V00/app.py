@@ -4487,6 +4487,56 @@ def admin_wards_upload():
 
     return redirect(url_for('admin_wards'))
 
+@app.route('/admin/wards/seed', methods=['POST'])
+def admin_wards_seed():
+    """Seed WardCommune from bundled Excel file (danh-sach-3321-xa-phuong.xls)"""
+    import os
+    xls_path = os.path.join(os.path.dirname(__file__), 'danh-sach-3321-xa-phuong.xls')
+    if not os.path.exists(xls_path):
+        flash('Khong tim thay file danh-sach-3321-xa-phuong.xls', 'error')
+        return redirect(url_for('admin_wards'))
+    try:
+        import xlrd
+    except ImportError:
+        flash('Thieu thu vien xlrd. Chay: pip install xlrd', 'error')
+        return redirect(url_for('admin_wards'))
+    try:
+        wb = xlrd.open_workbook(xls_path)
+        ws = wb.sheet_by_index(0)
+        imported = 0
+        updated = 0
+        for r in range(1, ws.nrows):
+            code = str(ws.cell_value(r, 0) or '').strip()
+            name = str(ws.cell_value(r, 1) or '').strip().replace('\n', ' ')
+            level = str(ws.cell_value(r, 2) or '').strip()
+            resolution = str(ws.cell_value(r, 3) or '').strip()
+            province_code = str(ws.cell_value(r, 4) or '').strip()
+            province_name = str(ws.cell_value(r, 5) or '').strip()
+            if not code or not name:
+                continue
+            existing = WardCommune.query.filter_by(code=code).first()
+            if existing:
+                existing.name = name
+                existing.level = level
+                existing.resolution = resolution
+                existing.province_code = province_code
+                existing.province_name = province_name
+                updated += 1
+            else:
+                db.session.add(WardCommune(
+                    code=code, name=name, level=level,
+                    resolution=resolution,
+                    province_code=province_code,
+                    province_name=province_name
+                ))
+                imported += 1
+        db.session.commit()
+        flash(f'Nap du lieu thanh cong: {imported} moi, {updated} cap nhat', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Loi nap du lieu: {str(e)}', 'error')
+    return redirect(url_for('admin_wards'))
+
 @app.route('/admin/wards/delete-all', methods=['POST'])
 def admin_wards_delete_all():
     """Delete all ward data"""
