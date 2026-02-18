@@ -3926,6 +3926,16 @@ def admin_voucher_delete(vid):
     flash('Da xoa voucher', 'success')
     return redirect(url_for('admin_vouchers'))
 
+@app.route('/admin/vouchers/bulk-delete', methods=['POST'])
+def admin_vouchers_bulk_delete():
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = Voucher.query.filter(Voucher.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 # =============================================
 # ADMIN — VOUCHER WIDGETS (AccessTrade, etc.)
 # =============================================
