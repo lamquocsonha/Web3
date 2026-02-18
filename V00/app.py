@@ -3358,6 +3358,22 @@ def admin_hotels_bulk_delete():
     flash(f'Da xoa {count} khach san', 'success')
     return redirect(url_for('admin_hotels'))
 
+@app.route('/admin/hotels/bulk-toggle', methods=['POST'])
+def admin_hotels_bulk_toggle():
+    ids = request.form.getlist('hotel_ids')
+    action = request.form.get('action', '')
+    if not ids:
+        flash('Chua chon khach san nao', 'warning')
+        return redirect(url_for('admin_hotels'))
+    new_state = action == 'activate'
+    hotels = Hotel.query.filter(Hotel.id.in_([int(i) for i in ids])).all()
+    for h in hotels:
+        h.is_active = new_state
+    db.session.commit()
+    label = 'bat' if new_state else 'tat'
+    flash(f'Da {label} {len(hotels)} khach san', 'success')
+    return redirect(url_for('admin_hotels'))
+
 # =============================================
 # ADMIN — HOTEL SYNC (Agoda API)
 # =============================================
@@ -4467,49 +4483,51 @@ def api_wards():
             'level': w.level,
             'province_code': w.province_code,
             'province_name': w.province_name,
-            'destination_slug': PROVINCE_TO_SLUG.get(w.province_code, '')
+            'destination_slug': slugify(w.province_name)
         } for w in wards],
         'total': len(wards)
     })
 
 @app.route('/api/wards/search')
 def api_wards_search():
-    """Search wards + provinces for hotel page autocomplete. Returns destination slugs."""
+    """Search provinces + wards from WardCommune DB for hotel autocomplete.
+    No hardcoded province lists — everything comes from the database."""
     q = request.args.get('q', '').strip()
     if not q or len(q) < 2:
         return jsonify({'results': []})
 
     results = []
-    # 1. Search province names first
-    for code, slug in PROVINCE_TO_SLUG.items():
-        info = PROVINCE_COORDS.get(code, {})
-        pname = info.get('name', '')
-        if pname and q.lower() in pname.lower():
+    ql = q.lower()
+
+    # 1. Search provinces dynamically from WardCommune table
+    all_provinces = db.session.query(
+        WardCommune.province_code, WardCommune.province_name
+    ).distinct().order_by(WardCommune.province_name).all()
+
+    for pcode, pname in all_provinces:
+        if ql in pname.lower():
             results.append({
                 'type': 'province',
                 'name': pname,
-                'destination_slug': slug,
-                'province_code': code,
+                'destination_slug': slugify(pname),
+                'province_code': pcode,
                 'province_name': pname
             })
 
-    # 2. Search wards (limit 20)
+    # 2. Search wards/phuong by name (limit 30)
     wards = WardCommune.query.filter(
         WardCommune.name.ilike(f'%{q}%')
-    ).order_by(WardCommune.name).limit(20).all()
+    ).order_by(WardCommune.name).limit(30).all()
 
-    seen_provinces = set()
     for w in wards:
-        slug = PROVINCE_TO_SLUG.get(w.province_code, '')
         results.append({
             'type': 'ward',
             'name': w.name,
             'level': w.level,
-            'destination_slug': slug,
+            'destination_slug': slugify(w.province_name),
             'province_code': w.province_code,
             'province_name': w.province_name
         })
-        seen_provinces.add(w.province_code)
 
     return jsonify({'results': results})
 

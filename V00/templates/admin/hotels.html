@@ -39,13 +39,18 @@
 
 {% if hotels %}
 <!-- Bulk action bar -->
-<div id="bulkBar" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;position:sticky;top:60px;z-index:10">
-  <span id="bulkCount" style="font-size:14px;font-weight:600">0 selected</span>
+<div id="bulkBar" style="display:none;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #e74c3c44;border-radius:10px;padding:12px 20px;margin-bottom:14px;align-items:center;gap:14px;position:sticky;top:60px;z-index:10;box-shadow:0 4px 15px rgba(231,76,60,.15)">
+  <span id="bulkCount" style="font-size:14px;font-weight:700;color:#e74c3c">0 selected</span>
   <form method="POST" action="{{ url_for('admin_hotels_bulk_delete') }}" id="bulkForm" style="display:inline">
     <div id="bulkInputs"></div>
     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xoa ' + document.querySelectorAll('.hotel-cb:checked').length + ' khach san?')">🗑 Xoa da chon</button>
   </form>
-  <button type="button" class="btn btn-ghost btn-sm" onclick="toggleAll(false)" style="font-size:13px">Bo chon</button>
+  <form method="POST" action="{{ url_for('admin_hotels_bulk_toggle') }}" id="bulkToggleForm" style="display:inline">
+    <div id="bulkToggleInputs"></div>
+    <button type="submit" name="action" value="deactivate" class="btn btn-ghost btn-sm" style="font-size:13px;color:#f39c12">Tat da chon</button>
+    <button type="submit" name="action" value="activate" class="btn btn-ghost btn-sm" style="font-size:13px;color:#2ecc71">Bat da chon</button>
+  </form>
+  <button type="button" class="btn btn-ghost btn-sm" onclick="toggleAll(false)" style="font-size:13px;margin-left:auto">Bo chon</button>
 </div>
 
 <div class="table-wrap">
@@ -100,38 +105,61 @@
 <div style="margin-top:12px;font-size:14px;color:var(--text-dim)">{{ hotels|length }} hotels</div>
 
 <script>
-var selectAll = document.getElementById('selectAll');
-var bulkBar = document.getElementById('bulkBar');
-var bulkCount = document.getElementById('bulkCount');
-var bulkInputs = document.getElementById('bulkInputs');
-var checkboxes = document.querySelectorAll('.hotel-cb');
+(function() {
+  var selectAll = document.getElementById('selectAll');
+  var bulkBar = document.getElementById('bulkBar');
+  var bulkCount = document.getElementById('bulkCount');
+  var bulkInputs = document.getElementById('bulkInputs');
+  var bulkToggleInputs = document.getElementById('bulkToggleInputs');
+  var checkboxes = Array.prototype.slice.call(document.querySelectorAll('.hotel-cb'));
+  var total = checkboxes.length;
 
-function updateBulkBar() {
-  var checked = document.querySelectorAll('.hotel-cb:checked');
-  var n = checked.length;
-  if (n > 0) {
-    bulkBar.style.display = 'flex';
-    bulkCount.textContent = n + ' selected';
-    bulkInputs.innerHTML = '';
-    checked.forEach(function(cb) {
-      var inp = document.createElement('input');
-      inp.type = 'hidden'; inp.name = 'hotel_ids'; inp.value = cb.value;
-      bulkInputs.appendChild(inp);
-    });
-  } else {
-    bulkBar.style.display = 'none';
+  function getChecked() {
+    return checkboxes.filter(function(cb) { return cb.checked; });
   }
-  selectAll.checked = n === checkboxes.length && n > 0;
-  selectAll.indeterminate = n > 0 && n < checkboxes.length;
-}
 
-function toggleAll(state) {
-  checkboxes.forEach(function(cb) { cb.checked = state; });
-  updateBulkBar();
-}
+  function updateBulkBar() {
+    var checked = getChecked();
+    var n = checked.length;
+    if (n > 0) {
+      bulkBar.style.display = 'flex';
+      bulkCount.textContent = n + ' / ' + total + ' da chon';
+      // Populate hidden inputs for bulk delete form
+      bulkInputs.innerHTML = '';
+      bulkToggleInputs.innerHTML = '';
+      checked.forEach(function(cb) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'hotel_ids'; inp.value = cb.value;
+        bulkInputs.appendChild(inp);
+        var inp2 = inp.cloneNode(true);
+        bulkToggleInputs.appendChild(inp2);
+      });
+    } else {
+      bulkBar.style.display = 'none';
+    }
+    selectAll.checked = n === total && n > 0;
+    selectAll.indeterminate = n > 0 && n < total;
+  }
 
-selectAll.addEventListener('change', function() { toggleAll(this.checked); });
-checkboxes.forEach(function(cb) { cb.addEventListener('change', updateBulkBar); });
+  window.toggleAll = function(state) {
+    checkboxes.forEach(function(cb) { cb.checked = state; });
+    updateBulkBar();
+  };
+
+  selectAll.addEventListener('change', function() { window.toggleAll(this.checked); });
+
+  // Use event delegation on tbody for checkbox changes
+  var tbody = document.querySelector('.data-table tbody');
+  if (tbody) {
+    tbody.addEventListener('change', function(e) {
+      if (e.target && e.target.classList.contains('hotel-cb')) {
+        updateBulkBar();
+      }
+    });
+  }
+  // Also direct listeners as fallback
+  checkboxes.forEach(function(cb) { cb.addEventListener('change', updateBulkBar); });
+})();
 </script>
 
 {% else %}
