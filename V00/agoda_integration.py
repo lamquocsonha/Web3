@@ -188,6 +188,60 @@ AGODA_TO_PROVINCE_NAMES = {
 }
 
 
+# Complete destination list for dropdown: 34 provinces + Agoda tourism destinations
+# Each: (display_name, slug, agoda_city_id)  — city_id=0 means no direct Agoda mapping
+VIETNAM_DESTINATIONS = [
+    # ── 34 Tỉnh thành from Excel ──
+    ('An Giang', 'an-giang', 0),
+    ('Bắc Ninh', 'bac-ninh', 0),
+    ('Cà Mau', 'ca-mau', 0),
+    ('Cần Thơ', 'can-tho', 14550),
+    ('Cao Bằng', 'cao-bang', 0),
+    ('Đà Nẵng', 'da-nang', 14537),
+    ('Đắk Lắk', 'dak-lak', 0),
+    ('Điện Biên', 'dien-bien', 0),
+    ('Đồng Nai', 'dong-nai', 0),
+    ('Đồng Tháp', 'dong-thap', 0),
+    ('Gia Lai', 'gia-lai', 0),
+    ('Hà Nội', 'ha-noi', 13170),
+    ('Hà Tĩnh', 'ha-tinh', 0),
+    ('Hải Phòng', 'hai-phong', 14543),
+    ('Hồ Chí Minh', 'ho-chi-minh', 17072),
+    ('Hưng Yên', 'hung-yen', 0),
+    ('Khánh Hòa', 'khanh-hoa', 0),
+    ('Lai Châu', 'lai-chau', 0),
+    ('Lâm Đồng', 'lam-dong', 0),
+    ('Lạng Sơn', 'lang-son', 0),
+    ('Lào Cai', 'lao-cai', 0),
+    ('Nghệ An', 'nghe-an', 0),
+    ('Ninh Bình', 'ninh-binh', 349498),
+    ('Phú Thọ', 'phu-tho', 0),
+    ('Quảng Ngãi', 'quang-ngai', 0),
+    ('Quảng Ninh', 'quang-ninh', 20028),
+    ('Quảng Trị', 'quang-tri', 0),
+    ('Sơn La', 'son-la', 0),
+    ('Tây Ninh', 'tay-ninh', 0),
+    ('Thái Nguyên', 'thai-nguyen', 0),
+    ('Thanh Hóa', 'thanh-hoa', 0),
+    ('Thừa Thiên Huế', 'hue', 13165),
+    ('Tuyên Quang', 'tuyen-quang', 0),
+    ('Vĩnh Long', 'vinh-long', 0),
+    # ── Điểm du lịch Agoda (tourism destinations, not provinces) ──
+    ('Cát Bà', 'cat-ba', 93511),
+    ('Côn Đảo', 'con-dao', 574889),
+    ('Đà Lạt', 'da-lat', 17572),
+    ('Hạ Long', 'ha-long', 20028),
+    ('Hội An', 'hoi-an', 17579),
+    ('Mũi Né', 'mui-ne', 15621),
+    ('Nha Trang', 'nha-trang', 16550),
+    ('Phú Quốc', 'phu-quoc', 28614),
+    ('Quy Nhơn', 'quy-nhon', 16561),
+    ('Sa Pa', 'sa-pa', 17620),
+    ('Tam Đảo', 'tam-dao', 463379),
+    ('Vũng Tàu', 'vung-tau', 17193),
+]
+
+
 class AgodaAPI:
     """Agoda Affiliate Long Tail Search API client.
 

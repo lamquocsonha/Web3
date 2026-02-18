@@ -3412,58 +3412,12 @@ def admin_hotel_sync():
         for slug, cid_val in AGODA_CITY_IDS.items()
     ]
 
-    # Full 34-province dropdown from WardCommune DB
-    from agoda_integration import PROVINCE_NAME_TO_AGODA, PROVINCE_TO_CITY_SLUG
-    destinations = []
-    try:
-        provinces_db = db.session.query(
-            WardCommune.province_code, WardCommune.province_name
-        ).distinct().order_by(WardCommune.province_name).all()
-
-        for pcode, pname in provinces_db:
-            pclean = pname.strip()
-            for pfx in ['Thành phố ', 'Tỉnh ', 'TP. ', 'TP ']:
-                if pclean.startswith(pfx):
-                    pclean = pclean[len(pfx):]
-            pslug = slugify(pclean)
-
-            # Find Agoda city mapping
-            agoda_slug = None
-            agoda_city_id = 0
-            if pslug in AGODA_CITY_IDS:
-                agoda_slug = pslug
-                agoda_city_id = AGODA_CITY_IDS[pslug]
-            elif pslug in PROVINCE_TO_CITY_SLUG:
-                agoda_slug = PROVINCE_TO_CITY_SLUG[pslug]
-                agoda_city_id = AGODA_CITY_IDS.get(agoda_slug, 0)
-            elif pclean in PROVINCE_NAME_TO_AGODA:
-                agoda_slug = PROVINCE_NAME_TO_AGODA[pclean][0]
-                agoda_city_id = AGODA_CITY_IDS.get(agoda_slug, 0)
-
-            destinations.append({
-                'slug': agoda_slug or pslug,
-                'name': pclean,
-                'city_id': agoda_city_id,
-                'province_code': pcode,
-            })
-    except Exception:
-        pass
-
-    # Append Agoda tourism destinations that are NOT provinces
-    # (e.g., Cát Bà, Côn Đảo, Hạ Long are tourism spots, not provinces)
-    used_slugs = {d['slug'] for d in destinations}
-    for slug, cid_val in AGODA_CITY_IDS.items():
-        if slug not in used_slugs:
-            destinations.append({
-                'slug': slug,
-                'name': AGODA_CITY_NAMES.get(slug, slug),
-                'city_id': cid_val,
-                'province_code': '',
-            })
-
-    # Fallback: if WardCommune empty, use Agoda city list
-    if not destinations:
-        destinations = agoda_destinations
+    # Full destination dropdown: 34 provinces + Agoda tourism destinations
+    from agoda_integration import VIETNAM_DESTINATIONS
+    destinations = [
+        {'slug': slug, 'name': name, 'city_id': cid, 'province_code': ''}
+        for name, slug, cid in VIETNAM_DESTINATIONS
+    ]
 
     recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()
 
