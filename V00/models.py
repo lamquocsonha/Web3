@@ -297,6 +297,9 @@ class Hotel(db.Model):
     agoda_url = db.Column(db.String(1000), default='')
     booking_url = db.Column(db.String(1000), default='')
     traveloka_url = db.Column(db.String(1000), default='')
+    latitude = db.Column(db.Float, default=0)
+    longitude = db.Column(db.Float, default=0)
+    address = db.Column(db.String(500), default='')
     source = db.Column(db.String(50), default='manual')  # manual, agoda_api, import
     is_active = db.Column(db.Boolean, default=True)
     is_featured = db.Column(db.Boolean, default=False)

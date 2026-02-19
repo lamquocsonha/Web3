@@ -1755,7 +1755,7 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 .tz-sf-btn:hover { opacity:0.9; transform:translateY(-1px); }
 
 /* ═══ Hotel 3-column layout ═══ */
-.hotel-3col { display:grid; grid-template-columns:220px 1fr 280px; gap:24px; align-items:start; }
+.hotel-3col { display:grid; grid-template-columns:220px 1fr; gap:24px; align-items:start; }
 
 /* Sidebar provinces */
 .hp-sidebar { position:sticky; top:80px; max-height:calc(100vh - 120px); overflow-y:auto; border-radius:12px; padding:14px; }
@@ -1866,12 +1866,31 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 [data-mode="light"] .tz-empty-hero p { color:#8a7e6e; }
 [data-mode="dark"] .tz-empty-hero p { color:#64748b; }
 
-/* Map column */
-.hp-map-col { position:sticky; top:80px; max-height:calc(100vh - 120px); overflow-y:auto; }
+/* Map column — SVG map hidden by default (replaced by Leaflet) */
+.hp-map-col { display:none; }
 .hpm-map-card { border-radius:12px; padding:14px; overflow:visible; }
 [data-mode="light"] .hpm-map-card { background:#fff; border:1px solid #e8e2d8; }
 [data-mode="dark"] .hpm-map-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); }
 .hpm-map-card svg { width:100%; height:auto; }
+
+/* View toggle: List / Map */
+.view-toggle { display:flex; gap:4px; }
+.view-toggle-btn { display:inline-flex; align-items:center; gap:5px; padding:6px 14px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid transparent; transition:all .15s; background:transparent; font-family:inherit; }
+[data-mode="light"] .view-toggle-btn { color:#8a7e6e; }
+[data-mode="dark"] .view-toggle-btn { color:#64748b; }
+.view-toggle-btn.active { font-weight:700; }
+[data-mode="light"] .view-toggle-btn.active { background:#fff; border-color:#e8e2d8; color:#c45d3e; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+[data-mode="dark"] .view-toggle-btn.active { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); color:#a78bfa; }
+
+/* Leaflet map container */
+.leaflet-map-wrap { display:none; border-radius:12px; overflow:hidden; margin-bottom:16px; }
+.leaflet-map-wrap.active { display:block; }
+#hotelLeafletMap { width:100%; height:540px; }
+
+/* 2-col layout when in map mode */
+.hotel-3col.map-mode { grid-template-columns:220px 1fr; }
+.hotel-3col.map-mode .hp-main { display:grid; grid-template-columns:1fr; }
+.hotel-3col.map-mode .tz-hotel-list { max-height:calc(100vh - 200px); overflow-y:auto; }
 
 /* ═══ Vietnam Map SVG Styles ═══ */
 .vn-map-svg { display:block; border-radius:10px; font-family:var(--font-primary); overflow:visible; }
@@ -1967,12 +1986,13 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 
 /* Hotel responsive */
 @media (max-width: 1024px) {
-  .hotel-3col { grid-template-columns:1fr; }
+  .hotel-3col, .hotel-3col.map-mode { grid-template-columns:1fr; }
   .hp-sidebar { position:static; max-height:none; display:flex; flex-wrap:wrap; gap:4px; }
   .hp-sidebar .hps-region { display:contents; }
   .hp-sidebar .hps-region-head { display:none; }
   .hp-sidebar .hps-prov { padding:5px 10px; border-radius:20px; font-size:14px; }
   .hp-map-col { display:none; }
+  #hotelLeafletMap { height:380px; }
 }
 @media (max-width: 640px) {
   .tz-sf-row { flex-direction:column; }

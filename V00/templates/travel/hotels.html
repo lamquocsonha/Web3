@@ -1,6 +1,9 @@
 {% extends "shared/base.html" %}
-{% block title %}Khách sạn{% endblock %}
-{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Khách sạn</div>{% endblock %}
+{% block title %}Khách sạn{% if destination %} {{ destination }}{% endif %}{% endblock %}
+{% block breadcrumbs %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Khách sạn</div>{% endblock %}
 {% block content %}
 <div class="page-hero">
   <h1><span class="hero-icon">🏨</span> Tìm khách sạn giá tốt</h1>
@@ -130,10 +133,21 @@
   <!-- COL 2: Results -->
   <div class="hp-main">
     {% if destination %}
-    <div class="tz-results-header">
-      <h2>Khách sạn tại <strong>{{ destination }}</strong></h2>
-      <span class="tz-results-count" id="resultsCount">{{ hotels|length }} kết quả</span>
-      {% if api_status == 'configured' %}<span class="tz-agoda-badge" style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600;margin-left:4px">Agoda</span>{% endif %}
+    <div class="tz-results-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0">Khách sạn tại <strong>{{ destination }}</strong></h2>
+        <span class="tz-results-count" id="resultsCount">{{ hotels|length }} kết quả</span>
+        {% if api_status == 'configured' %}<span class="tz-agoda-badge" style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">Agoda</span>{% endif %}
+      </div>
+      <div class="view-toggle">
+        <button class="view-toggle-btn active" data-view="list" onclick="switchView('list')">📋 Danh sách</button>
+        <button class="view-toggle-btn" data-view="map" onclick="switchView('map')">🗺️ Bản đồ</button>
+      </div>
+    </div>
+
+    <!-- Leaflet Map (hidden by default, shown when "Bản đồ" is clicked) -->
+    <div class="leaflet-map-wrap" id="mapWrap">
+      <div id="hotelLeafletMap"></div>
     </div>
 
     <!-- DB Hotels -->
@@ -162,7 +176,7 @@
           </div>
           {% endif %}
           <h3 class="tz-hc-name"><a href="{{ h.agoda_url or h.booking_url or '#' }}" target="_blank" rel="nofollow">{{ h.name }}</a></h3>
-          <div class="tz-hc-address">{{ h.district or '' }}</div>
+          <div class="tz-hc-address">📍 {{ h.address or h.district or h.destination_name or '' }}</div>
           <div class="tz-hc-footer">
             <span class="tz-hc-stars">{% for i in range(h.stars) %}⭐{% endfor %}</span>
             {% if h.rating %}<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">{{ h.rating }}</span>{% endif %}
@@ -209,13 +223,15 @@
     {% endif %}
   </div>
 
-  <!-- COL 3: Map -->
+  <!-- COL 3: SVG Map (hidden — replaced by Leaflet) -->
+  <!--
   <aside class="hp-map-col">
     <div class="hpm-map-card">
       {% set active_province = destination %}
       {% include 'travel/_vietnam_map_34.html' %}
     </div>
   </aside>
+  -->
 </div>
 
 <!-- ═══ SEO CONTENT — dynamic by province ═══ -->
@@ -355,25 +371,77 @@ function toggleSeoContent() {
     if (dropdown.innerHTML && input.value.length >= 2) dropdown.style.display = 'block';
   });
 })();
-document.querySelectorAll('.hps-prov').forEach(el => {
-  el.addEventListener('mouseenter', function() {
-    const g = document.querySelector('.prov-shape[data-slug="'+this.dataset.prov+'"]');
-    if (g) g.classList.add('hover');
-  });
-  el.addEventListener('mouseleave', function() {
-    document.querySelectorAll('.prov-shape.hover').forEach(g => g.classList.remove('hover'));
-  });
-});
-document.querySelectorAll('.prov-shape').forEach(g => {
-  g.addEventListener('mouseenter', function() {
-    const s = document.querySelector('.hps-prov[data-prov="'+this.dataset.slug+'"]');
-    if (s) s.classList.add('map-hover');
-  });
-  g.addEventListener('mouseleave', function() {
-    document.querySelectorAll('.hps-prov.map-hover').forEach(s => s.classList.remove('map-hover'));
-  });
-});
+/* ── View Toggle: List / Map ── */
+{% if destination %}
+var _leafletMap = null;
+var _allMarkers = [];
+function switchView(mode) {
+  var btns = document.querySelectorAll('.view-toggle-btn');
+  btns.forEach(function(b) { b.classList.toggle('active', b.dataset.view === mode); });
+  var mapWrap = document.getElementById('mapWrap');
+  var hotelList = document.getElementById('hotelList');
+  var agodaResults = document.getElementById('agodaResults');
+  var agodaLoading = document.getElementById('agodaLoading');
+  if (mode === 'map') {
+    if (mapWrap) mapWrap.classList.add('active');
+    if (hotelList) hotelList.style.display = 'none';
+    if (agodaResults) agodaResults.style.display = 'none';
+    if (agodaLoading) agodaLoading.style.display = 'none';
+    initLeafletMap();
+  } else {
+    if (mapWrap) mapWrap.classList.remove('active');
+    if (hotelList) hotelList.style.display = '';
+    if (agodaResults) agodaResults.style.display = '';
+  }
+}
 
+function initLeafletMap() {
+  if (_leafletMap) { _leafletMap.invalidateSize(); return; }
+  var el = document.getElementById('hotelLeafletMap');
+  if (!el || typeof L === 'undefined') return;
+
+  var center = [{{ province_center[0] }}, {{ province_center[1] }}];
+  _leafletMap = L.map('hotelLeafletMap', { scrollWheelZoom: true }).setView(center, 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(_leafletMap);
+
+  // DB hotel markers
+  var markers = {{ hotel_markers|tojson }};
+  addMarkersToMap(markers);
+
+  // Fit bounds if we have markers
+  if (_allMarkers.length > 0) {
+    var group = L.featureGroup(_allMarkers);
+    _leafletMap.fitBounds(group.getBounds().pad(0.1));
+  }
+}
+
+function addMarkersToMap(markers) {
+  if (!_leafletMap) return;
+  markers.forEach(function(h) {
+    if (!h.lat || !h.lng) return;
+    var starsHtml = '';
+    for (var i = 0; i < (h.stars || 0); i++) starsHtml += '⭐';
+    var price = h.price ? Number(h.price).toLocaleString() + 'đ' : '';
+    var imgHtml = h.image ? '<img src="'+h.image+'" style="width:100%;height:90px;object-fit:cover;border-radius:6px 6px 0 0;display:block" onerror="this.style.display=\'none\'">' : '';
+    var popup = '<div style="min-width:200px;font-family:inherit">'
+      + imgHtml
+      + '<div style="padding:8px 10px">'
+      + '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + (h.name || '') + '</div>'
+      + '<div style="font-size:11px;margin-bottom:4px">' + starsHtml + (h.rating ? ' <span style="background:#004fac;color:#fff;padding:1px 4px;border-radius:3px;font-size:11px;font-weight:700">' + h.rating + '</span>' : '') + '</div>'
+      + (h.address ? '<div style="font-size:11px;color:#888;margin-bottom:4px">📍 ' + h.address + '</div>' : '')
+      + (price ? '<div style="font-size:14px;font-weight:800;color:#c45d3e">' + price + '/đêm</div>' : '')
+      + '<a href="' + (h.url || '#') + '" target="_blank" rel="nofollow" style="display:inline-block;margin-top:6px;font-size:12px;font-weight:600;color:#fff;background:#c45d3e;padding:4px 10px;border-radius:4px;text-decoration:none">Xem giá &rarr;</a>'
+      + '</div></div>';
+    var marker = L.marker([h.lat, h.lng]).addTo(_leafletMap).bindPopup(popup);
+    _allMarkers.push(marker);
+  });
+}
+
+{% endif %}
 // Agoda API live search
 {% if agoda_enabled and destination %}
 (function() {
@@ -401,6 +469,7 @@ document.querySelectorAll('.prov-shape').forEach(g => {
       if (!container) return;
 
       var html = '';
+      var agodaMarkers = [];
       hotels.forEach(function(h) {
         var price = h.price_from ? Number(h.price_from).toLocaleString() + 'đ' : '';
         var starsHtml = '';
@@ -429,20 +498,39 @@ document.querySelectorAll('.prov-shape').forEach(g => {
           html += '<span class="tz-hc-price">' + price + '</span></div>';
         }
         html += '<h3 class="tz-hc-name"><a href="' + (h.agoda_url || '#') + '" target="_blank" rel="nofollow">' + (h.name || '') + '</a></h3>'
-          + '<div class="tz-hc-address">' + (h.district || h.address || '') + '</div>'
+          + '<div class="tz-hc-address">📍 ' + (h.address || h.district || '') + '</div>'
           + '<div class="tz-hc-footer">'
           + '<span class="tz-hc-stars">' + starsHtml + '</span>'
           + (h.rating ? '<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">' + h.rating + '</span>' : '')
           + (h.free_breakfast ? '<span class="tz-hc-bf tz-bf-yes">✓ Ăn sáng</span>' : '')
           + (h.free_cancel ? '<span style="font-size:12px;color:#2ecc71;margin-left:6px">✓ Hủy miễn phí</span>' : '')
           + '</div></div></div>';
+
+        // Collect markers for map
+        if (h.latitude && h.longitude) {
+          agodaMarkers.push({
+            name: h.name, lat: h.latitude, lng: h.longitude,
+            stars: h.stars, rating: h.rating,
+            price: h.price_from, image: h.image_url || '',
+            url: h.agoda_url || '#',
+            address: h.address || h.district || ''
+          });
+        }
       });
       container.innerHTML = html;
+
+      // Add Agoda markers to map if it's initialized
+      if (agodaMarkers.length > 0) {
+        addMarkersToMap(agodaMarkers);
+        if (_leafletMap && _allMarkers.length > 0) {
+          var group = L.featureGroup(_allMarkers);
+          _leafletMap.fitBounds(group.getBounds().pad(0.1));
+        }
+      }
 
       // Ensure hotel list container is visible
       var list = document.getElementById('hotelList');
       if (list && list.children.length === 0 && hotels.length > 0) {
-        // Remove empty state if present
         var emptyState = list.parentElement.querySelector('.empty-state');
         if (emptyState) emptyState.style.display = 'none';
       }

@@ -3561,6 +3561,9 @@ def admin_hotel_sync_import():
             price_from=float(h.get('price_from', 0)),
             image_url=h.get('image_url', ''),
             agoda_url=h.get('agoda_url', ''),
+            latitude=float(h.get('latitude', 0)),
+            longitude=float(h.get('longitude', 0)),
+            address=h.get('address', '') or h.get('district', ''),
             source='agoda_api',
             is_active=True,
             is_featured=False
@@ -3634,6 +3637,9 @@ def admin_hotel_sync_fast():
             price_original=float(h.get('price_original', 0)),
             image_url=h.get('image_url', ''),
             agoda_url=h.get('agoda_url', ''),
+            latitude=float(h.get('latitude', 0)),
+            longitude=float(h.get('longitude', 0)),
+            address=h.get('address', '') or h.get('district', ''),
             source='agoda_api',
             is_active=True,
             is_featured=False
@@ -5530,10 +5536,27 @@ def travel_hotels():
                     'count': 0
                 })
 
+    # Build hotel markers JSON for Leaflet map
+    from agoda_integration import PROVINCE_CENTERS
+    hotel_markers = []
+    for h in hotels:
+        lat = h.latitude or 0
+        lng = h.longitude or 0
+        if lat and lng:
+            hotel_markers.append({
+                'name': h.name, 'lat': lat, 'lng': lng,
+                'stars': h.stars, 'rating': h.rating,
+                'price': h.price_from, 'image': h.image_url or '',
+                'url': h.agoda_url or h.booking_url or '#',
+                'address': h.address or h.district or '',
+            })
+    province_center = PROVINCE_CENTERS.get(destination, PROVINCE_CENTERS.get(city_slug, (16.0, 108.0)))
+
     return render_template('travel/hotels.html', vertical=v, hotels=hotels,
         destination=destination, city_slug=city_slug,
         checkin=checkin, checkout=checkout, guests=guests,
-        stars=stars, api_status=api_status, agoda_enabled=agoda_enabled, popular=popular)
+        stars=stars, api_status=api_status, agoda_enabled=agoda_enabled, popular=popular,
+        hotel_markers=hotel_markers, province_center=province_center)
 
 
 @app.route('/travel/ve-tham-quan')
@@ -6328,6 +6351,12 @@ def _run_schema_migration():
     hotel_cols = _get_table_columns('hotel')
     if hotel_cols:
         if _ensure_column('hotel', 'price_original', "FLOAT DEFAULT 0", hotel_cols):
+            changed = True
+        if _ensure_column('hotel', 'latitude', "FLOAT DEFAULT 0", hotel_cols):
+            changed = True
+        if _ensure_column('hotel', 'longitude', "FLOAT DEFAULT 0", hotel_cols):
+            changed = True
+        if _ensure_column('hotel', 'address', "VARCHAR(500) DEFAULT ''", hotel_cols):
             changed = True
 
     # --- Attraction table ---

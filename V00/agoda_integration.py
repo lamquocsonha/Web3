@@ -187,6 +187,33 @@ AGODA_TO_PROVINCE_NAMES = {
     'ca-mau': ['Cà Mau', 'Tỉnh Cà Mau'],
 }
 
+# Province center coordinates (lat, lng) — used for map centering and generated hotels
+PROVINCE_CENTERS = {
+    'ha-noi': (21.0285, 105.8542), 'ho-chi-minh': (10.7769, 106.7009),
+    'da-nang': (16.0544, 108.2022), 'nha-trang': (12.2388, 109.1967),
+    'phu-quoc': (10.2899, 103.9840), 'da-lat': (11.9404, 108.4583),
+    'hoi-an': (15.8801, 108.3380), 'sa-pa': (22.3364, 103.8440),
+    'hue': (16.4637, 107.5909), 'hai-phong': (20.8449, 106.6881),
+    'cat-ba': (20.7255, 106.9957), 'can-tho': (10.0452, 105.7469),
+    'quang-ninh': (20.9517, 107.0748), 'ha-long': (20.9517, 107.0748),
+    'ninh-binh': (20.2539, 105.9750), 'vung-tau': (10.3460, 107.0843),
+    'con-dao': (8.6833, 106.6167), 'quy-nhon': (13.7765, 109.2237),
+    'mui-ne': (10.9333, 108.2878), 'tam-dao': (21.4571, 105.6496),
+    'cao-bang': (22.6666, 106.2578), 'tuyen-quang': (21.8237, 105.2141),
+    'dien-bien': (21.3860, 103.0230), 'lai-chau': (22.3964, 103.4594),
+    'son-la': (21.3270, 103.9030), 'lao-cai': (22.4856, 103.9707),
+    'thai-nguyen': (21.5942, 105.8480), 'lang-son': (21.8537, 106.7614),
+    'bac-ninh': (21.1861, 106.0763), 'phu-tho': (21.3191, 105.2298),
+    'hung-yen': (20.6538, 106.0513), 'thanh-hoa': (19.8068, 105.7852),
+    'nghe-an': (18.6790, 105.6813), 'ha-tinh': (18.3559, 105.8877),
+    'quang-tri': (16.7504, 107.1854), 'quang-ngai': (15.1214, 108.8044),
+    'gia-lai': (13.9832, 108.0154), 'khanh-hoa': (12.2388, 109.1967),
+    'dak-lak': (12.7100, 108.2378), 'lam-dong': (11.9404, 108.4583),
+    'dong-nai': (10.9453, 106.8243), 'tay-ninh': (11.3100, 106.0985),
+    'dong-thap': (10.4934, 105.6880), 'vinh-long': (10.2539, 105.9722),
+    'an-giang': (10.5215, 105.1259), 'ca-mau': (9.1769, 105.1524),
+}
+
 
 # Complete destination list for dropdown: 34 provinces + Agoda tourism destinations
 # Each: (display_name, slug, agoda_city_id)
@@ -567,9 +594,9 @@ class AgodaAPI:
                     'stars': h.get('starRating', 0),
                     'rating': h.get('reviewScore', 0),
                     'reviews_count': h.get('reviewCount', 0),
-                    'latitude': 0,
-                    'longitude': 0,
-                    'address': '',
+                    'latitude': h.get('latitude') or h.get('lat', 0),
+                    'longitude': h.get('longitude') or h.get('lng', 0),
+                    'address': h.get('address') or h.get('addressLine1', ''),
                     'district': '',
                     'image_url': h.get('imageURL', '') or _agoda_img(hotel_id),
                     'price_from': h.get('dailyRate', 0),
@@ -888,10 +915,14 @@ def _get_seed_hotels(api_instance, destination_slug, city_id, checkin, checkout,
     else:
         # Generate from templates
         _random.seed(city_id)  # deterministic per city
+        center = PROVINCE_CENTERS.get(destination_slug, (16.0, 108.0))
         seed_list = []
         for i, tpl in enumerate(_GENERIC_HOTEL_TEMPLATES):
             hotel_id = city_id * 100 + i + 1
             price_adj = _random.randint(-300000, 300000)
+            # Scatter around province center (±0.02 degrees ≈ ±2km)
+            lat_off = _random.uniform(-0.02, 0.02)
+            lng_off = _random.uniform(-0.02, 0.02)
             seed_list.append({
                 'id': hotel_id,
                 'name': f"{city_name} {tpl['prefix']}",
@@ -901,7 +932,8 @@ def _get_seed_hotels(api_instance, destination_slug, city_id, checkin, checkout,
                 'price': tpl['price'] + price_adj,
                 'orig': tpl['orig'] + price_adj,
                 'district': city_name,
-                'lat': 0, 'lng': 0,
+                'lat': round(center[0] + lat_off, 6),
+                'lng': round(center[1] + lng_off, 6),
                 'img': _agoda_img(hotel_id),
                 'amenities': tpl['amenities'],
             })
