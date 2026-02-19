@@ -200,11 +200,19 @@
 <script>
 function fixImages(){
   var el=document.getElementById('fixImgResult');
-  el.textContent='Dang fix...';
+  el.textContent='Dang fix... (co the mat 30-60s)';
+  el.style.color='var(--text-dim)';
   fetch('/admin/hotel-sync/fix-images',{method:'POST'})
     .then(r=>r.json())
-    .then(d=>{el.textContent='Da fix '+d.fixed+' hotels. Reload de xem.';})
-    .catch(e=>{el.textContent='Loi: '+e;});
+    .then(d=>{
+      var parts=[];
+      if(d.fixed_api) parts.push(d.fixed_api+' tu API');
+      if(d.fixed_placeholder) parts.push(d.fixed_placeholder+' placeholder');
+      if(d.cleared) parts.push(d.cleared+' broken URL cleared');
+      el.textContent='Done! '+d.fixed+' fixed'+(parts.length?' ('+parts.join(', ')+')':'')+'. Reload de xem.';
+      el.style.color='#2ecc71';
+    })
+    .catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
 }
 
 // ─── Cascading: Tinh thanh → Phuong xa ───

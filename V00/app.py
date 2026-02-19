@@ -3655,15 +3655,19 @@ def admin_hotel_sync_fast():
 @app.route('/admin/hotel-sync/fix-images', methods=['POST'])
 def admin_hotel_fix_images():
     """Fix missing image_url for existing agoda_api hotels.
-    Tries Content Feed API for real image URLs, falls back to CDN pattern."""
+
+    Strategy 1: Re-search each destination via LT Search API → match by agoda_id
+    Strategy 2: Content Feed API for batch image lookup
+    Strategy 3: Generate SVG placeholder with hotel initial + destination gradient
+    """
     from agoda_integration import get_agoda_api
     api = get_agoda_api()
 
-    fixed = 0
+    fixed_api = 0
+    fixed_placeholder = 0
     cleared = 0
-    hotels_to_fix = []
 
-    # Also clear broken image URLs (old pix6.agoda.net/{id}/0/{id}_1.jpg pattern)
+    # Clear broken image URLs (old pix6.agoda.net/{id}/0/{id}_1.jpg pattern)
     broken_pattern = 'agoda.net/hotelImages/'
     for h in Hotel.query.filter_by(source='agoda_api').all():
         agoda_id = None
@@ -3672,39 +3676,78 @@ def admin_hotel_fix_images():
                 if part.startswith('hid='):
                     agoda_id = part.split('=')[1]
                     break
-
-        # Clear broken CDN URLs that don't actually work
         if h.image_url and broken_pattern in h.image_url and agoda_id and f'/{agoda_id}_' in h.image_url:
             h.image_url = ''
             cleared += 1
 
-        if not h.image_url and agoda_id:
-            hotels_to_fix.append((h, agoda_id))
+    # Collect hotels missing images, grouped by destination
+    hotels_no_img = Hotel.query.filter(
+        Hotel.source == 'agoda_api',
+        db.or_(Hotel.image_url == '', Hotel.image_url == None)
+    ).all()
 
-    if not hotels_to_fix and not cleared:
-        return jsonify({'fixed': 0, 'cleared': 0})
+    if not hotels_no_img and not cleared:
+        return jsonify({'fixed': 0, 'fixed_api': 0, 'fixed_placeholder': 0, 'cleared': 0})
 
-    # Try Content Feed API to get real image URLs
-    img_map = {}
-    if api and hotels_to_fix:
-        try:
-            hotel_ids = [aid for _, aid in hotels_to_fix[:100]]
-            images_data = api.get_hotel_images(hotel_ids)
-            for item in images_data:
-                hid = str(item.get('hotelId') or item.get('hotel_id', ''))
-                img_url = item.get('url') or item.get('imageUrl') or item.get('hotelImage', '')
-                if hid and img_url:
-                    img_map[hid] = img_url
-        except Exception:
-            pass
+    by_dest = {}
+    for h in hotels_no_img:
+        by_dest.setdefault(h.destination, []).append(h)
 
-    for h, agoda_id in hotels_to_fix:
-        if agoda_id in img_map:
-            h.image_url = img_map[agoda_id]
-            fixed += 1
+    # Strategy 1: Re-search each destination via API and match by agoda_id
+    if api:
+        for dest, hotels in by_dest.items():
+            try:
+                results = api.search_city_hotels(dest)
+                img_map = {}
+                for r in results:
+                    aid = str(r.get('agoda_id', ''))
+                    img = r.get('image_url', '')
+                    if aid and img:
+                        img_map[aid] = img
+                for h in hotels:
+                    if h.image_url:
+                        continue
+                    agoda_id = None
+                    if h.agoda_url:
+                        for part in h.agoda_url.split('&'):
+                            if part.startswith('hid='):
+                                agoda_id = part.split('=')[1]
+                                break
+                    if agoda_id and agoda_id in img_map:
+                        h.image_url = img_map[agoda_id]
+                        fixed_api += 1
+            except Exception:
+                continue
+
+    # Strategy 2: Generate SVG placeholder for remaining hotels without images
+    still_missing = Hotel.query.filter(
+        Hotel.source == 'agoda_api',
+        db.or_(Hotel.image_url == '', Hotel.image_url == None)
+    ).all()
+    for h in still_missing:
+        initial = h.name[0].upper() if h.name else 'H'
+        hue = abs(hash(h.name)) % 360
+        h.image_url = (
+            f"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E"
+            f"%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E"
+            f"%3Cstop offset='0%25' stop-color='hsl({hue},55%25,35%25)'/%3E"
+            f"%3Cstop offset='100%25' stop-color='hsl({(hue+45)%360},45%25,22%25)'/%3E"
+            f"%3C/linearGradient%3E%3C/defs%3E"
+            f"%3Crect width='400' height='300' fill='url(%23g)'/%3E"
+            f"%3Ctext x='200' y='135' text-anchor='middle' font-family='Arial,sans-serif' font-size='72' font-weight='700' fill='rgba(255,255,255,0.18)'%3E{initial}%3C/text%3E"
+            f"%3Ctext x='200' y='185' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' fill='rgba(255,255,255,0.5)'%3E"
+            f"{'%E2%AD%90' * min(h.stars, 5)}"
+            f"%3C/text%3E%3C/svg%3E"
+        )
+        fixed_placeholder += 1
 
     db.session.commit()
-    return jsonify({'fixed': fixed, 'cleared': cleared})
+    return jsonify({
+        'fixed': fixed_api + fixed_placeholder,
+        'fixed_api': fixed_api,
+        'fixed_placeholder': fixed_placeholder,
+        'cleared': cleared
+    })
 
 
 @app.route('/admin/api/agoda-search')
