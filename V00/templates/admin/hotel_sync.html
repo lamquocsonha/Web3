@@ -130,6 +130,7 @@
     <h3 style="margin:0;font-size:15px">📋 Hotels da import tu Agoda <span style="font-weight:400;color:var(--text-dim)">({{ total_agoda }})</span></h3>
     {% if agoda_no_image %}<span style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">{{ agoda_no_image }} thieu anh</span>{% endif %}
     <button onclick="fixImages()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">🖼 Fix missing images</button>
+    <button onclick="fixAddresses()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">📍 Fix addresses</button>
     <span id="fixImgResult" style="font-size:12px;color:var(--text-dim)"></span>
     <div style="margin-left:auto;display:flex;gap:6px">
       <a href="{{ url_for('admin_hotel_sync') }}" class="btn btn-ghost btn-sm" style="font-size:12px{% if not f_image %};font-weight:700{% endif %}">All</a>
@@ -210,6 +211,18 @@ function fixImages(){
       if(d.fixed_placeholder) parts.push(d.fixed_placeholder+' placeholder');
       if(d.cleared) parts.push(d.cleared+' broken URL cleared');
       el.textContent='Done! '+d.fixed+' fixed'+(parts.length?' ('+parts.join(', ')+')':'')+'. Reload de xem.';
+      el.style.color='#2ecc71';
+    })
+    .catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
+}
+function fixAddresses(){
+  var el=document.getElementById('fixImgResult');
+  el.textContent='Dang geocode dia chi... (~3-4 phut, 1 req/s Nominatim)';
+  el.style.color='var(--text-dim)';
+  fetch('/admin/hotel-sync/fix-addresses',{method:'POST'})
+    .then(r=>r.json())
+    .then(d=>{
+      el.textContent='Done! '+d.updated+'/'+d.total+' hotels da cap nhat dia chi. Reload de xem.';
       el.style.color='#2ecc71';
     })
     .catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});

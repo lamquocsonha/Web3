@@ -3756,6 +3756,55 @@ def admin_hotel_fix_images():
     })
 
 
+@app.route('/admin/hotel-sync/fix-addresses', methods=['POST'])
+def admin_hotel_fix_addresses():
+    """Reverse geocode hotels using OpenStreetMap Nominatim to get street addresses."""
+    import requests as req
+    import time as _time
+
+    headers = {'User-Agent': 'UniTravel/1.0 (hotel geocoding)'}
+    hotels = Hotel.query.filter(Hotel.latitude != 0, Hotel.longitude != 0).all()
+    updated = 0
+    errors = 0
+
+    for h in hotels:
+        try:
+            r = req.get('https://nominatim.openstreetmap.org/reverse',
+                params={'lat': h.latitude, 'lon': h.longitude,
+                        'format': 'json', 'addressdetails': 1,
+                        'accept-language': 'vi', 'zoom': 18},
+                headers=headers, timeout=10)
+            data = r.json()
+            addr = data.get('address', {})
+
+            road = addr.get('road', '')
+            house = addr.get('house_number', '')
+            suburb = addr.get('suburb') or addr.get('city_district') or addr.get('quarter') or ''
+            city = h.destination_name or ''
+
+            parts = []
+            if house and road:
+                parts.append(f'{house} {road}')
+            elif road:
+                parts.append(road)
+            if suburb:
+                parts.append(suburb)
+            if city and city not in (suburb, road):
+                parts.append(city)
+
+            new_addr = ', '.join(parts)
+            if new_addr and len(new_addr) > len(h.address or ''):
+                h.address = new_addr
+                updated += 1
+        except Exception:
+            errors += 1
+
+        _time.sleep(1.1)  # Nominatim rate limit: 1 req/sec
+
+    db.session.commit()
+    return jsonify({'updated': updated, 'total': len(hotels), 'errors': errors})
+
+
 @app.route('/admin/api/agoda-search')
 def admin_api_agoda_search_public():
     """Public API: search Agoda hotels for a destination (used by travel page)"""
