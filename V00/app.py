@@ -3430,13 +3430,28 @@ def admin_hotel_sync():
         for d in destinations if d['city_id']
     ]
 
-    recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()
+    # Paginated Agoda hotel list with image filter
+    page = request.args.get('page', 1, type=int)
+    per_page = 30
+    f_image = request.args.get('image', '')
+    rq = Hotel.query.filter_by(source='agoda_api')
+    if f_image == 'missing':
+        rq = rq.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
+    elif f_image == 'has':
+        rq = rq.filter(Hotel.image_url != '', Hotel.image_url != None)
+    agoda_no_image = Hotel.query.filter_by(source='agoda_api').filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
+    recent_total = rq.count()
+    recent = rq.order_by(Hotel.id.desc()).offset((page - 1) * per_page).limit(per_page).all()
+    recent_pages = (recent_total + per_page - 1) // per_page
 
     return render_template('admin/hotel_sync.html',
         api_connected=api_connected, cid=cid, has_key=has_key,
         total_hotels=total_hotels, total_agoda=total_agoda,
         total_manual=total_manual, total_active=total_active,
-        destinations=destinations, agoda_destinations=agoda_destinations, recent=recent)
+        destinations=destinations, agoda_destinations=agoda_destinations,
+        recent=recent, page=page, recent_total=recent_total,
+        recent_pages=recent_pages, per_page=per_page, f_image=f_image,
+        agoda_no_image=agoda_no_image)
 
 
 @app.route('/admin/hotel-sync/save-credentials', methods=['POST'])
