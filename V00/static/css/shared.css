@@ -24,11 +24,19 @@ body {
   z-index: 99999;
 }
 
-/* Force AccessTrade Smart Tag overlay below header/footer */
+/* Force AccessTrade Smart Tag overlay below header/footer
+   and prevent it from blocking clicks on page content */
 #at-smart-tag-container,
 [id^="at-smart"],
 .at-smart-tag,
-div[class*="atsmarttag"] { z-index: 9999 !important; }
+div[class*="atsmarttag"] { z-index: 9999 !important; pointer-events: none !important; }
+/* Re-enable clicks on actual AT smart tag links/buttons inside */
+#at-smart-tag-container a,
+#at-smart-tag-container button,
+[id^="at-smart"] a,
+[id^="at-smart"] button,
+.at-smart-tag a,
+.at-smart-tag button { pointer-events: auto !important; }
 
 .header-inner {
   max-width: 1100px;
