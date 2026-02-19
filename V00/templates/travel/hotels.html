@@ -423,15 +423,18 @@ function addMarkersToMap(markers) {
     var priceShort = h.price ? (h.price >= 1000000 ? (h.price/1000000).toFixed(1).replace('.0','') + 'tr' : Math.round(h.price/1000) + 'k') : '';
     var priceDisplay = h.price ? Number(h.price).toLocaleString() + 'đ' : '';
 
-    // Custom marker label with price (like tripzone)
+    // Custom marker label with name + price (like tripzone)
+    var shortName = (h.name || '').length > 18 ? (h.name || '').substring(0, 18) + '…' : (h.name || '');
     var labelHtml = '<div class="map-price-marker">'
+      + (shortName ? '<span class="mpm-name">' + shortName + '</span>' : '')
       + (priceShort ? '<span class="mpm-price">' + priceShort + '</span>' : '<span class="mpm-price">🏨</span>')
       + '</div>';
+    var markerWidth = Math.max(80, Math.min(200, (shortName.length + (priceShort ? priceShort.length : 2)) * 7 + 24));
     var icon = L.divIcon({
       className: 'leaflet-price-icon',
       html: labelHtml,
-      iconSize: [60, 28],
-      iconAnchor: [30, 28],
+      iconSize: [markerWidth, 28],
+      iconAnchor: [markerWidth/2, 28],
       popupAnchor: [0, -30]
     });
 

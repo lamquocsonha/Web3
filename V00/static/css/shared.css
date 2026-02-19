@@ -1887,18 +1887,20 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 .leaflet-map-wrap.active { display:block; }
 #hotelLeafletMap { width:100%; height:540px; }
 
-/* Custom price markers (tripzone style) */
+/* Custom price markers (tripzone style) — name + price */
 .leaflet-price-icon { background:none !important; border:none !important; }
-.map-price-marker { display:inline-flex; align-items:center; justify-content:center; background:#fff; border:2px solid #c45d3e; border-radius:8px; padding:2px 8px; box-shadow:0 2px 8px rgba(0,0,0,0.18); white-space:nowrap; cursor:pointer; transition:all .15s; position:relative; }
+.map-price-marker { display:inline-flex; align-items:center; gap:4px; background:#fff; border:2px solid #c45d3e; border-radius:8px; padding:2px 8px; box-shadow:0 2px 8px rgba(0,0,0,0.18); white-space:nowrap; cursor:pointer; transition:all .15s; position:relative; }
 .map-price-marker::after { content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid #c45d3e; }
 .map-price-marker:hover { background:#c45d3e; }
-.map-price-marker:hover .mpm-price { color:#fff; }
+.map-price-marker:hover .mpm-name, .map-price-marker:hover .mpm-price { color:#fff; }
+.mpm-name { font-size:11px; font-weight:600; color:#333; max-width:130px; overflow:hidden; text-overflow:ellipsis; font-family:var(--font-primary); }
 .mpm-price { font-size:12px; font-weight:800; color:#c45d3e; font-family:var(--font-primary); }
 [data-mode="dark"] .map-price-marker { background:#1e293b; border-color:#f87171; }
+[data-mode="dark"] .mpm-name { color:#e2e8f0; }
 [data-mode="dark"] .mpm-price { color:#f87171; }
 [data-mode="dark"] .map-price-marker::after { border-top-color:#f87171; }
 [data-mode="dark"] .map-price-marker:hover { background:#f87171; }
-[data-mode="dark"] .map-price-marker:hover .mpm-price { color:#1e293b; }
+[data-mode="dark"] .map-price-marker:hover .mpm-name, [data-mode="dark"] .map-price-marker:hover .mpm-price { color:#1e293b; }
 /* Leaflet popup custom */
 .leaflet-popup-content-wrapper { border-radius:10px !important; padding:0 !important; overflow:hidden; }
 .leaflet-popup-content { margin:0 !important; }
