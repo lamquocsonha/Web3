@@ -58,6 +58,13 @@
   </form>
   <button type="button" class="btn btn-ghost btn-sm" onclick="toggleAll(false)" style="font-size:13px;margin-left:auto">Bo chon</button>
 </div>
+<!-- Delete ALL banner — shows when select-all checkbox is checked -->
+<div id="deleteAllBanner" style="display:none;background:linear-gradient(135deg,#2d1b1b,#1a1a2e);border:2px solid #e74c3c;border-radius:10px;padding:14px 20px;margin-bottom:14px;align-items:center;gap:14px;text-align:center">
+  <span style="font-size:14px;color:#fca5a5">Bạn đã chọn {{ hotels|length }} khách sạn trên trang này.</span>
+  <form method="POST" action="{{ url_for('admin_hotels_delete_all') }}" id="deleteAllForm" style="display:inline;margin-left:12px">
+    <button type="submit" class="btn btn-danger btn-sm" style="font-weight:700;font-size:14px" id="deleteAllBtn">🗑 Xóa tất cả {{ total_filtered }} khách sạn</button>
+  </form>
+</div>
 
 <div class="table-wrap">
   <table class="data-table">
@@ -139,8 +146,11 @@
   var bulkCount = document.getElementById('bulkCount');
   var bulkInputs = document.getElementById('bulkInputs');
   var bulkToggleInputs = document.getElementById('bulkToggleInputs');
+  var deleteAllBanner = document.getElementById('deleteAllBanner');
+  var deleteAllForm = document.getElementById('deleteAllForm');
   var checkboxes = Array.prototype.slice.call(document.querySelectorAll('.hotel-cb'));
   var total = checkboxes.length;
+  var totalAll = {{ total_filtered }};
 
   function getChecked() {
     return checkboxes.filter(function(cb) { return cb.checked; });
@@ -152,7 +162,6 @@
     if (n > 0) {
       bulkBar.style.display = 'flex';
       bulkCount.textContent = n + ' / ' + total + ' da chon';
-      // Populate hidden inputs for bulk delete form
       bulkInputs.innerHTML = '';
       bulkToggleInputs.innerHTML = '';
       checked.forEach(function(cb) {
@@ -165,8 +174,24 @@
     } else {
       bulkBar.style.display = 'none';
     }
+    // Show "Delete All" banner when all on page are selected and there are more pages
+    if (n === total && totalAll > total) {
+      deleteAllBanner.style.display = 'flex';
+    } else {
+      deleteAllBanner.style.display = 'none';
+    }
     selectAll.checked = n === total && n > 0;
     selectAll.indeterminate = n > 0 && n < total;
+  }
+
+  // Confirmation for Delete All
+  if (deleteAllForm) {
+    deleteAllForm.addEventListener('submit', function(e) {
+      var msg = 'BẠN CÓ CHẮC CHẮN muốn xóa TẤT CẢ ' + totalAll + ' khách sạn?\n\nHành động này KHÔNG THỂ hoàn tác!';
+      if (!confirm(msg)) {
+        e.preventDefault();
+      }
+    });
   }
 
   window.toggleAll = function(state) {
@@ -185,7 +210,6 @@
       }
     });
   }
-  // Also direct listeners as fallback
   checkboxes.forEach(function(cb) { cb.addEventListener('change', updateBulkBar); });
 })();
 </script>

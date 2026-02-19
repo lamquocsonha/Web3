@@ -3369,6 +3369,17 @@ def admin_hotels_bulk_delete():
     flash(f'Da xoa {count} khach san', 'success')
     return redirect(url_for('admin_hotels'))
 
+@app.route('/admin/hotels/delete-all', methods=['POST'])
+def admin_hotels_delete_all():
+    count = Hotel.query.count()
+    if count == 0:
+        flash('Khong co khach san nao de xoa', 'warning')
+        return redirect(url_for('admin_hotels'))
+    Hotel.query.delete(synchronize_session=False)
+    db.session.commit()
+    flash(f'Da xoa tat ca {count} khach san', 'success')
+    return redirect(url_for('admin_hotels'))
+
 @app.route('/admin/hotels/bulk-toggle', methods=['POST'])
 def admin_hotels_bulk_toggle():
     ids = request.form.getlist('hotel_ids')
