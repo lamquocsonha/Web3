@@ -5537,7 +5537,8 @@ def travel_hotels():
                 })
 
     # Build hotel markers JSON for Leaflet map
-    from agoda_integration import PROVINCE_CENTERS
+    from agoda_integration import PROVINCE_CENTERS, _DEST_SLUG_TO_NAME
+    destination_display = _DEST_SLUG_TO_NAME.get(destination, destination.replace('-', ' ').title()) if destination else ''
     hotel_markers = []
     for h in hotels:
         lat = h.latitude or 0
@@ -5553,7 +5554,7 @@ def travel_hotels():
     province_center = PROVINCE_CENTERS.get(destination, PROVINCE_CENTERS.get(city_slug, (16.0, 108.0)))
 
     return render_template('travel/hotels.html', vertical=v, hotels=hotels,
-        destination=destination, city_slug=city_slug,
+        destination=destination, destination_display=destination_display, city_slug=city_slug,
         checkin=checkin, checkout=checkout, guests=guests,
         stars=stars, api_status=api_status, agoda_enabled=agoda_enabled, popular=popular,
         hotel_markers=hotel_markers, province_center=province_center)

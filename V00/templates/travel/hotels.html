@@ -135,7 +135,7 @@
     {% if destination %}
     <div class="tz-results-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <h2 style="margin:0">Khách sạn tại <strong>{{ destination }}</strong></h2>
+        <h2 style="margin:0">Khách sạn tại <strong>{{ destination_display or destination }}</strong></h2>
         <span class="tz-results-count" id="resultsCount">{{ hotels|length }} kết quả</span>
         {% if api_status == 'configured' %}<span class="tz-agoda-badge" style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">Agoda</span>{% endif %}
       </div>
@@ -223,15 +223,7 @@
     {% endif %}
   </div>
 
-  <!-- COL 3: SVG Map (hidden — replaced by Leaflet) -->
-  <!--
-  <aside class="hp-map-col">
-    <div class="hpm-map-card">
-      {% set active_province = destination %}
-      {% include 'travel/_vietnam_map_34.html' %}
-    </div>
-  </aside>
-  -->
+  {# COL 3: SVG Map removed — replaced by Leaflet in COL 2 #}
 </div>
 
 <!-- ═══ SEO CONTENT — dynamic by province ═══ -->
@@ -425,18 +417,32 @@ function addMarkersToMap(markers) {
     if (!h.lat || !h.lng) return;
     var starsHtml = '';
     for (var i = 0; i < (h.stars || 0); i++) starsHtml += '⭐';
-    var price = h.price ? Number(h.price).toLocaleString() + 'đ' : '';
-    var imgHtml = h.image ? '<img src="'+h.image+'" style="width:100%;height:90px;object-fit:cover;border-radius:6px 6px 0 0;display:block" onerror="this.style.display=\'none\'">' : '';
-    var popup = '<div style="min-width:200px;font-family:inherit">'
+    var priceShort = h.price ? (h.price >= 1000000 ? (h.price/1000000).toFixed(1).replace('.0','') + 'tr' : Math.round(h.price/1000) + 'k') : '';
+    var priceDisplay = h.price ? Number(h.price).toLocaleString() + 'đ' : '';
+
+    // Custom marker label with price (like tripzone)
+    var labelHtml = '<div class="map-price-marker">'
+      + (priceShort ? '<span class="mpm-price">' + priceShort + '</span>' : '<span class="mpm-price">🏨</span>')
+      + '</div>';
+    var icon = L.divIcon({
+      className: 'leaflet-price-icon',
+      html: labelHtml,
+      iconSize: [60, 28],
+      iconAnchor: [30, 28],
+      popupAnchor: [0, -30]
+    });
+
+    var imgHtml = h.image ? '<img src="'+h.image+'" style="width:100%;height:100px;object-fit:cover;display:block" onerror="this.style.display=\'none\'">' : '';
+    var popup = '<div style="min-width:220px;max-width:260px;font-family:inherit;border-radius:8px;overflow:hidden">'
       + imgHtml
-      + '<div style="padding:8px 10px">'
-      + '<div style="font-size:13px;font-weight:700;margin-bottom:4px">' + (h.name || '') + '</div>'
-      + '<div style="font-size:11px;margin-bottom:4px">' + starsHtml + (h.rating ? ' <span style="background:#004fac;color:#fff;padding:1px 4px;border-radius:3px;font-size:11px;font-weight:700">' + h.rating + '</span>' : '') + '</div>'
-      + (h.address ? '<div style="font-size:11px;color:#888;margin-bottom:4px">📍 ' + h.address + '</div>' : '')
-      + (price ? '<div style="font-size:14px;font-weight:800;color:#c45d3e">' + price + '/đêm</div>' : '')
-      + '<a href="' + (h.url || '#') + '" target="_blank" rel="nofollow" style="display:inline-block;margin-top:6px;font-size:12px;font-weight:600;color:#fff;background:#c45d3e;padding:4px 10px;border-radius:4px;text-decoration:none">Xem giá &rarr;</a>'
+      + '<div style="padding:10px 12px">'
+      + '<div style="font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.3">' + (h.name || '') + '</div>'
+      + '<div style="font-size:11px;margin-bottom:4px">' + starsHtml + (h.rating ? ' <span style="background:#004fac;color:#fff;padding:1px 5px;border-radius:3px;font-size:11px;font-weight:700">' + h.rating + '</span>' : '') + '</div>'
+      + (h.address ? '<div style="font-size:11px;color:#888;margin-bottom:6px">📍 ' + h.address + '</div>' : '')
+      + (priceDisplay ? '<div style="font-size:15px;font-weight:800;color:#c45d3e">' + priceDisplay + '<span style="font-size:11px;font-weight:400;color:#999"> /đêm</span></div>' : '')
+      + '<a href="' + (h.url || '#') + '" target="_blank" rel="nofollow" style="display:block;text-align:center;margin-top:8px;font-size:12px;font-weight:600;color:#fff;background:#c45d3e;padding:6px 10px;border-radius:6px;text-decoration:none">Xem giá &rarr;</a>'
       + '</div></div>';
-    var marker = L.marker([h.lat, h.lng]).addTo(_leafletMap).bindPopup(popup);
+    var marker = L.marker([h.lat, h.lng], {icon: icon}).addTo(_leafletMap).bindPopup(popup, {maxWidth:280});
     _allMarkers.push(marker);
   });
 }
