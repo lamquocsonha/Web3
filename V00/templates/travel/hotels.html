@@ -176,7 +176,10 @@
           </div>
           {% endif %}
           <h3 class="tz-hc-name"><a href="{{ h.agoda_url or h.booking_url or '#' }}" target="_blank" rel="nofollow">{{ h.name }}</a></h3>
-          <div class="tz-hc-address">📍 {{ h.address or h.district or h.destination_name or '' }}</div>
+          {% set addr_parts = [] %}
+          {% if h.address and h.address != h.destination_name %}{% set _ = addr_parts.append(h.address) %}{% elif h.district and h.district != h.destination_name %}{% set _ = addr_parts.append(h.district) %}{% endif %}
+          {% if h.destination_name %}{% set _ = addr_parts.append(h.destination_name) %}{% endif %}
+          {% if addr_parts %}<div class="tz-hc-address">📍 {{ addr_parts|join(', ') }}</div>{% endif %}
           <div class="tz-hc-footer">
             <span class="tz-hc-stars">{% for i in range(h.stars) %}⭐{% endfor %}</span>
             {% if h.rating %}<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">{{ h.rating }}</span>{% endif %}
@@ -503,8 +506,14 @@ function addMarkersToMap(markers) {
           }
           html += '<span class="tz-hc-price">' + price + '</span></div>';
         }
+        var addrParts = [];
+        var _d = h.district || h.address || '';
+        var _dn = h.destination_name || '{{ destination_display or destination }}';
+        if (_d && _d !== _dn) addrParts.push(_d);
+        if (_dn) addrParts.push(_dn);
+        var addrText = addrParts.join(', ');
         html += '<h3 class="tz-hc-name"><a href="' + (h.agoda_url || '#') + '" target="_blank" rel="nofollow">' + (h.name || '') + '</a></h3>'
-          + '<div class="tz-hc-address">📍 ' + (h.address || h.district || '') + '</div>'
+          + (addrText ? '<div class="tz-hc-address">📍 ' + addrText + '</div>' : '')
           + '<div class="tz-hc-footer">'
           + '<span class="tz-hc-stars">' + starsHtml + '</span>'
           + (h.rating ? '<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">' + h.rating + '</span>' : '')
