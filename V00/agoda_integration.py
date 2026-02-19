@@ -104,7 +104,7 @@ AGODA_CITY_NAMES = {
 PROVINCE_TO_CITY_SLUG = {
     'lam-dong': 'da-lat',
     'khanh-hoa': 'nha-trang',
-    'quang-ninh': 'quang-ninh',  # same
+    'quang-ninh': 'ha-long',
     'ha-noi': 'ha-noi',
     'ho-chi-minh': 'ho-chi-minh',
     'da-nang': 'da-nang',
@@ -112,6 +112,15 @@ PROVINCE_TO_CITY_SLUG = {
     'hai-phong': 'hai-phong',
     'can-tho': 'can-tho',
     'ninh-binh': 'ninh-binh',
+    # Tỉnh → điểm du lịch chính
+    'binh-dinh': 'quy-nhon',
+    'binh-thuan': 'mui-ne',
+    'ba-ria-vung-tau': 'vung-tau',
+    'kien-giang': 'phu-quoc',
+    'quang-nam': 'hoi-an',
+    'lao-cai': 'sa-pa',
+    'vinh-phuc': 'tam-dao',
+    'gia-lai': 'quy-nhon',      # nearest major tourism city
 }
 
 # Map province names (from WardCommune DB) to Agoda destination slugs
