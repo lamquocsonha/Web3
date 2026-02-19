@@ -424,7 +424,8 @@ function addMarkersToMap(markers) {
     var priceDisplay = h.price ? Number(h.price).toLocaleString() + 'đ' : '';
 
     // Custom marker label with name + price (like tripzone)
-    var shortName = (h.name || '').length > 18 ? (h.name || '').substring(0, 18) + '…' : (h.name || '');
+    var rawName = (h.name || '').replace(/^Khách\s*[Ss]ạn\s*/i, '').replace(/^Hotel\s*/i, '');
+    var shortName = rawName.length > 18 ? rawName.substring(0, 18) + '…' : rawName;
     var labelHtml = '<div class="map-price-marker">'
       + (shortName ? '<span class="mpm-name">' + shortName + '</span>' : '')
       + (priceShort ? '<span class="mpm-price">' + priceShort + '</span>' : '<span class="mpm-price">🏨</span>')
