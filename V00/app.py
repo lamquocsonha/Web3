@@ -3263,6 +3263,9 @@ def admin_hotels():
     f_dest = request.args.get('destination', '')
     f_stars = request.args.get('stars', '')
     f_status = request.args.get('status', '')
+    f_image = request.args.get('image', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = 30
     q = Hotel.query
     if f_dest:
         q = q.filter(Hotel.destination == f_dest)
@@ -3272,15 +3275,23 @@ def admin_hotels():
         q = q.filter(Hotel.is_active == True)
     elif f_status == 'inactive':
         q = q.filter(Hotel.is_active == False)
-    hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).all()
+    if f_image == 'missing':
+        q = q.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
+    elif f_image == 'has':
+        q = q.filter(Hotel.image_url != '', Hotel.image_url != None)
+    total_filtered = q.count()
+    hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).offset((page - 1) * per_page).limit(per_page).all()
+    total_pages = (total_filtered + per_page - 1) // per_page
     destinations = db.session.query(Hotel.destination, Hotel.destination_name).distinct().all()
     total = Hotel.query.count()
     active = Hotel.query.filter_by(is_active=True).count()
+    no_image = Hotel.query.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
     total_clicks = db.session.query(db.func.sum(Hotel.clicks)).scalar() or 0
     total_conv = db.session.query(db.func.sum(Hotel.conversions)).scalar() or 0
     return render_template('admin/hotels.html', hotels=hotels, destinations=destinations,
-        f_dest=f_dest, f_stars=f_stars, f_status=f_status,
-        total=total, active=active, total_clicks=total_clicks, total_conv=total_conv)
+        f_dest=f_dest, f_stars=f_stars, f_status=f_status, f_image=f_image,
+        total=total, active=active, no_image=no_image, total_clicks=total_clicks, total_conv=total_conv,
+        page=page, total_pages=total_pages, total_filtered=total_filtered, per_page=per_page)
 
 @app.route('/admin/hotel/new', methods=['GET','POST'])
 def admin_hotel_new():

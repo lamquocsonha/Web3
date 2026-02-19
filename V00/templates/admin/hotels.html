@@ -10,9 +10,10 @@
   </div>
 </div>
 
-<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin:20px 0">
+<div class="stats-grid" style="grid-template-columns:repeat(5,1fr);margin:20px 0">
   <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">{{ total }}</div></div>
   <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value" style="color:#2ecc71">{{ active }}</div></div>
+  <div class="stat-card"><div class="stat-label">No Image</div><div class="stat-value" style="color:#e74c3c">{{ no_image }}</div></div>
   <div class="stat-card"><div class="stat-label">Clicks</div><div class="stat-value" style="color:#3498db">{{ "{:,}".format(total_clicks) }}</div></div>
   <div class="stat-card"><div class="stat-label">Bookings</div><div class="stat-value" style="color:#8b5cf6">{{ "{:,}".format(total_conv) }}</div></div>
 </div>
@@ -32,8 +33,13 @@
       <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
       <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
     </select>
+    <select name="image" class="form-select" style="width:140px;padding:8px;font-size:14px">
+      <option value="">All Images</option>
+      <option value="missing" {% if f_image=='missing' %}selected{% endif %}>🚫 No Image</option>
+      <option value="has" {% if f_image=='has' %}selected{% endif %}>✅ Has Image</option>
+    </select>
     <button class="btn btn-ghost btn-sm" type="submit">Filter</button>
-    {% if f_dest or f_stars or f_status %}<a href="{{ url_for('admin_hotels') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>{% endif %}
+    {% if f_dest or f_stars or f_status or f_image %}<a href="{{ url_for('admin_hotels') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>{% endif %}
   </form>
 </div>
 
@@ -102,7 +108,29 @@
     </tbody>
   </table>
 </div>
-<div style="margin-top:12px;font-size:14px;color:var(--text-dim)">{{ hotels|length }} hotels</div>
+<!-- Pagination -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;font-size:14px;color:var(--text-dim)">
+  <span>{{ (page - 1) * per_page + 1 }}–{{ [(page - 1) * per_page + hotels|length, total_filtered]|min }} / {{ total_filtered }} hotels</span>
+  {% if total_pages > 1 %}
+  <div style="display:flex;gap:4px;align-items:center">
+    {% if page > 1 %}
+    <a href="{{ url_for('admin_hotels', destination=f_dest, stars=f_stars, status=f_status, image=f_image, page=page-1) }}" class="btn btn-ghost btn-sm">&laquo; Prev</a>
+    {% endif %}
+    {% for p in range(1, total_pages + 1) %}
+      {% if p == page %}
+        <span style="display:inline-block;min-width:32px;text-align:center;padding:4px 8px;background:var(--accent);color:#fff;border-radius:6px;font-weight:700;font-size:13px">{{ p }}</span>
+      {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+        <a href="{{ url_for('admin_hotels', destination=f_dest, stars=f_stars, status=f_status, image=f_image, page=p) }}" class="btn btn-ghost btn-sm" style="min-width:32px;text-align:center;font-size:13px">{{ p }}</a>
+      {% elif p == page - 3 or p == page + 3 %}
+        <span style="padding:0 4px;color:var(--text-dim)">…</span>
+      {% endif %}
+    {% endfor %}
+    {% if page < total_pages %}
+    <a href="{{ url_for('admin_hotels', destination=f_dest, stars=f_stars, status=f_status, image=f_image, page=page+1) }}" class="btn btn-ghost btn-sm">Next &raquo;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
 
 <script>
 (function() {
