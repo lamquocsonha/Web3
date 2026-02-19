@@ -139,6 +139,42 @@ if (saved) {
   document.querySelector('.mode-icon').textContent = icon;
   document.querySelector('.mode-label').textContent = label;
 }
+/* Neutralize AccessTrade Smart Tag overlay — it creates a full-screen
+   fixed div that intercepts all clicks. CSS pointer-events alone is
+   insufficient because the script applies inline styles. */
+(function() {
+  function killATOverlay() {
+    document.querySelectorAll('[id*="at-smart"], [class*="atsmarttag"], [id*="atsmart"]').forEach(function(el) {
+      var s = window.getComputedStyle(el);
+      if (s.position === 'fixed' && (parseInt(s.width) > window.innerWidth * 0.8 || parseInt(s.height) > window.innerHeight * 0.8)) {
+        el.style.setProperty('pointer-events', 'none', 'important');
+        el.style.setProperty('z-index', '-1', 'important');
+      }
+    });
+    /* Catch any full-screen fixed div injected by third-party scripts */
+    document.querySelectorAll('body > div').forEach(function(el) {
+      if (el.classList.contains('site-header') || el.classList.contains('site-main') || el.classList.contains('site-footer')) return;
+      var s = window.getComputedStyle(el);
+      if (s.position === 'fixed' && s.top === '0px' && s.left === '0px' &&
+          (s.width === '100%' || s.width === '100vw' || parseInt(s.width) >= window.innerWidth) &&
+          s.opacity < 0.05 && el.children.length === 0) {
+        el.style.setProperty('pointer-events', 'none', 'important');
+        el.style.setProperty('display', 'none', 'important');
+      }
+    });
+  }
+  /* Run after AT script loads (async) */
+  setTimeout(killATOverlay, 2000);
+  setTimeout(killATOverlay, 5000);
+  /* Also watch for dynamically inserted overlays */
+  if (window.MutationObserver) {
+    new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].addedNodes.length) { killATOverlay(); return; }
+      }
+    }).observe(document.body, { childList: true });
+  }
+})();
 </script>
 
 </body>
