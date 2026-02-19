@@ -1034,13 +1034,24 @@ def admin_seed_data():
             except Exception as e:
                 flash(f'❌ Error seeding Sport: {str(e)}', 'error')
 
+        elif action == 'seed_garden':
+            from seed_data import seed_garden, seed_garden_articles, seed_products_garden
+            try:
+                seed_garden()
+                seed_garden_articles()
+                seed_products_garden()
+                flash('✅ Garden vertical seeded successfully!', 'success')
+            except Exception as e:
+                flash(f'❌ Error seeding Garden: {str(e)}', 'error')
+
         elif action == 'seed_all':
             from seed_data import (seed, seed_articles, seed_networks, seed_video,
                 seed_pet, seed_pet_articles, seed_pet_v2, seed_travel, seed_travel_articles,
                 seed_products_pet_travel, seed_hotels, seed_attractions,
                 seed_bike, seed_vouchers, seed_beauty, seed_beauty_articles,
                 seed_tech, seed_tech_articles, seed_products_beauty_tech,
-                seed_sport, seed_sport_articles, seed_products_sport)
+                seed_sport, seed_sport_articles, seed_products_sport,
+                seed_garden, seed_garden_articles, seed_products_garden)
             try:
                 seed()
                 seed_articles()
@@ -1063,6 +1074,9 @@ def admin_seed_data():
                 seed_sport()
                 seed_sport_articles()
                 seed_products_sport()
+                seed_garden()
+                seed_garden_articles()
+                seed_products_garden()
                 flash('✅ All verticals seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding all: {str(e)}', 'error')
@@ -5796,6 +5810,25 @@ def get_vertical_config(vertical_slug):
             'products_icon': '🏋️',
             'parts_label': 'sản phẩm',
             'parts_heading': 'Sản phẩm',
+        },
+        'garden': {
+            'hero_title': 'Kiến thức làm vườn',
+            'hero_subtitle': 'chăm sóc cây trồng từ hạt giống đến thu hoạch',
+            'hero_desc': 'Trồng rau sạch, hoa, cây ăn quả, cây cảnh. Hướng dẫn chi tiết, review dụng cụ, phân bón, giá thể.',
+            'hero_cta1': 'Khám phá danh mục',
+            'segments_label': 'danh mục',
+            'segments_heading': 'Danh mục cây trồng',
+            'tier1_desc': 'Tổng quan thị trường, xu hướng làm vườn đô thị, nông nghiệp sạch.',
+            'tier2_desc': 'Kỹ thuật trồng, chăm sóc, phòng bệnh cho cây.',
+            'tier3_desc': 'Hướng dẫn chi tiết từng loại cây, review sản phẩm vật tư.',
+            'cta_title': 'Bắt đầu hành trình làm vườn?',
+            'cta_desc': 'Khám phá kiến thức từ chọn giống đến thu hoạch, phù hợp mọi không gian.',
+            'cta_button': 'Xem danh mục →',
+            'products_title': 'Dụng cụ & Vật tư làm vườn',
+            'products_subtitle': 'Đất, phân bón, chậu, hạt giống — giá tốt từ Shopee, Lazada, Tiki',
+            'products_icon': '🌱',
+            'parts_label': 'loại cây / sản phẩm',
+            'parts_heading': 'Loại cây & Sản phẩm',
         },
     }
     return configs.get(vertical_slug, {})

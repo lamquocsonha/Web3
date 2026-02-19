@@ -1,0 +1,240 @@
+{# Garden Zone Diagram - Interactive SVG Plant/Garden Illustration #}
+
+<div class="travel-diagram-wrap">
+  <div class="cd-title">🌿 Sơ đồ vườn — <strong>{{ segment.name }}</strong></div>
+  <div class="cd-subtitle">Di chuột hoặc chạm vào khu vực để khám phá</div>
+
+  <svg class="travel-diagram-svg" viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg">
+
+    <!-- Background: garden/sky gradient feel -->
+    <rect x="0" y="0" width="600" height="500" rx="16" fill="#f0f7e6"/>
+    <!-- Sky -->
+    <rect x="0" y="0" width="600" height="180" rx="16" fill="#e8f4fd" opacity="0.6"/>
+    <!-- Sun -->
+    <circle cx="520" cy="60" r="30" fill="#f9ca24" opacity="0.35"/>
+    <circle cx="520" cy="60" r="22" fill="#f9ca24" opacity="0.5"/>
+    <!-- Clouds -->
+    <ellipse cx="120" cy="50" rx="50" ry="18" fill="#fff" opacity="0.5"/>
+    <ellipse cx="150" cy="42" rx="35" ry="14" fill="#fff" opacity="0.5"/>
+    <ellipse cx="350" cy="70" rx="40" ry="15" fill="#fff" opacity="0.4"/>
+    <!-- Ground line -->
+    <path d="M 0,340 Q 150,320 300,340 Q 450,360 600,340 L 600,500 L 0,500 Z" fill="#c8e6a0" opacity="0.4"/>
+    <path d="M 0,370 Q 200,355 400,370 Q 500,380 600,365 L 600,500 L 0,500 Z" fill="#a8d88a" opacity="0.3"/>
+
+    {% for z in segment.zones %}
+    <a href="{{ url_for('vertical_zone', vertical_slug='garden', segment_slug=segment.slug, zone_slug=z.slug) }}" class="travel-zone-link">
+      <g class="travel-zone-group {% if active_zone_slug is defined and active_zone_slug == z.slug %}active{% endif %}"
+         data-zone="{{ z.slug }}" data-name="{{ z.name }}" data-color="{{ z.color }}">
+
+        {% if z.slug == 'rau-an-la' %}
+        <!-- Rau ăn lá: leafy vegetables bed -->
+        <rect class="zone-fill" x="30" y="240" width="130" height="110" rx="12"/>
+        <circle class="zone-dot" cx="95" cy="280" r="6"/>
+        <text class="zone-label" x="95" y="268" style="font-size:12px">{{ z.icon }} Rau ăn lá</text>
+        <!-- Small leaf icons -->
+        <text x="55" y="325" style="font-size:16px">🥬</text>
+        <text x="85" y="315" style="font-size:14px">🥗</text>
+        <text x="115" y="328" style="font-size:15px">🥬</text>
+
+        {% elif z.slug == 'rau-gia-vi' %}
+        <!-- Rau gia vị: herbs pot -->
+        <rect class="zone-fill" x="180" y="250" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="240" cy="285" r="6"/>
+        <text class="zone-label" x="240" y="273" style="font-size:12px">{{ z.icon }} Rau gia vị</text>
+        <text x="200" y="330" style="font-size:16px">🌿</text>
+        <text x="235" y="325" style="font-size:14px">🌱</text>
+        <text x="265" y="332" style="font-size:15px">🌿</text>
+
+        {% elif z.slug == 'rau-an-qua' %}
+        <!-- Rau ăn quả: fruiting vegetables -->
+        <rect class="zone-fill" x="320" y="240" width="130" height="110" rx="12"/>
+        <circle class="zone-dot" cx="385" cy="280" r="6"/>
+        <text class="zone-label" x="385" y="268" style="font-size:12px">{{ z.icon }} Rau ăn quả</text>
+        <text x="340" y="328" style="font-size:16px">🍅</text>
+        <text x="375" y="320" style="font-size:14px">🌶️</text>
+        <text x="410" y="330" style="font-size:15px">🥒</text>
+
+        {% elif z.slug == 'thuy-canh-huu-co' %}
+        <!-- Thủy canh & Hữu cơ -->
+        <rect class="zone-fill" x="470" y="250" width="115" height="100" rx="12"/>
+        <circle class="zone-dot" cx="527" cy="285" r="6"/>
+        <text class="zone-label" x="527" y="273" style="font-size:11px">{{ z.icon }} Thủy canh</text>
+        <text x="495" y="328" style="font-size:16px">💧</text>
+        <text x="530" y="325" style="font-size:14px">🌱</text>
+
+        {% elif z.slug == 'hoa-hong' %}
+        <!-- Hoa hồng -->
+        <rect class="zone-fill" x="30" y="110" width="120" height="110" rx="12"/>
+        <circle class="zone-dot" cx="90" cy="155" r="6"/>
+        <text class="zone-label" x="90" y="140" style="font-size:12px">{{ z.icon }} Hoa hồng</text>
+        <text x="50" y="200" style="font-size:18px">🌹</text>
+        <text x="85" y="195" style="font-size:15px">🌹</text>
+        <text x="115" y="202" style="font-size:13px">🌹</text>
+
+        {% elif z.slug == 'hoa-lan' %}
+        <!-- Hoa lan -->
+        <rect class="zone-fill" x="170" y="110" width="120" height="110" rx="12"/>
+        <circle class="zone-dot" cx="230" cy="155" r="6"/>
+        <text class="zone-label" x="230" y="140" style="font-size:12px">{{ z.icon }} Hoa lan</text>
+        <text x="195" y="200" style="font-size:18px">🌺</text>
+        <text x="230" y="195" style="font-size:14px">🪻</text>
+
+        {% elif z.slug == 'hoa-mua' %}
+        <!-- Hoa mùa -->
+        <rect class="zone-fill" x="310" y="110" width="120" height="110" rx="12"/>
+        <circle class="zone-dot" cx="370" cy="155" r="6"/>
+        <text class="zone-label" x="370" y="140" style="font-size:12px">{{ z.icon }} Hoa mùa</text>
+        <text x="330" y="200" style="font-size:18px">🌻</text>
+        <text x="370" y="195" style="font-size:14px">🌼</text>
+        <text x="400" y="202" style="font-size:13px">🌷</text>
+
+        {% elif z.slug == 'cam-hoa-trang-tri' %}
+        <!-- Cắm hoa & Trang trí -->
+        <rect class="zone-fill" x="450" y="110" width="130" height="110" rx="12"/>
+        <circle class="zone-dot" cx="515" cy="155" r="6"/>
+        <text class="zone-label" x="515" y="138" style="font-size:11px">{{ z.icon }} Cắm hoa</text>
+        <text x="480" y="200" style="font-size:18px">💐</text>
+        <text x="520" y="195" style="font-size:15px">🏵️</text>
+
+        {% elif z.slug == 'cay-co-mui' %}
+        <!-- Cây có múi -->
+        <rect class="zone-fill" x="30" y="370" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="90" cy="405" r="6"/>
+        <text class="zone-label" x="90" y="393" style="font-size:12px">{{ z.icon }} Cây có múi</text>
+        <text x="55" y="450" style="font-size:16px">🍊</text>
+        <text x="90" y="445" style="font-size:14px">🍋</text>
+
+        {% elif z.slug == 'cay-nhiet-doi' %}
+        <!-- Cây nhiệt đới -->
+        <rect class="zone-fill" x="170" y="370" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="230" cy="405" r="6"/>
+        <text class="zone-label" x="230" y="390" style="font-size:11px">{{ z.icon }} Nhiệt đới</text>
+        <text x="195" y="450" style="font-size:16px">🥭</text>
+        <text x="230" y="445" style="font-size:14px">🍌</text>
+
+        {% elif z.slug == 'cay-leo-gian' %}
+        <!-- Cây leo giàn -->
+        <rect class="zone-fill" x="310" y="370" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="370" cy="405" r="6"/>
+        <text class="zone-label" x="370" y="393" style="font-size:12px">{{ z.icon }} Cây leo</text>
+        <text x="335" y="450" style="font-size:16px">🍇</text>
+        <text x="375" y="445" style="font-size:14px">🫛</text>
+
+        {% elif z.slug == 'chiet-ghep-nhan-giong' %}
+        <!-- Chiết ghép & Nhân giống -->
+        <rect class="zone-fill" x="450" y="370" width="130" height="100" rx="12"/>
+        <circle class="zone-dot" cx="515" cy="405" r="6"/>
+        <text class="zone-label" x="515" y="390" style="font-size:11px">{{ z.icon }} Chiết ghép</text>
+        <text x="485" y="450" style="font-size:16px">✂️</text>
+        <text x="520" y="445" style="font-size:14px">🌱</text>
+
+        {% elif z.slug == 'cay-noi-that' %}
+        <!-- Cây nội thất -->
+        <rect class="zone-fill" x="30" y="240" width="130" height="110" rx="12"/>
+        <circle class="zone-dot" cx="95" cy="280" r="6"/>
+        <text class="zone-label" x="95" y="268" style="font-size:12px">{{ z.icon }} Cây nội thất</text>
+        <text x="55" y="330" style="font-size:16px">🌱</text>
+        <text x="90" y="325" style="font-size:14px">🪴</text>
+        <text x="120" y="332" style="font-size:13px">🌿</text>
+
+        {% elif z.slug == 'cay-phong-thuy' %}
+        <!-- Cây phong thủy -->
+        <rect class="zone-fill" x="180" y="250" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="240" cy="285" r="6"/>
+        <text class="zone-label" x="240" y="270" style="font-size:11px">{{ z.icon }} Phong thủy</text>
+        <text x="205" y="330" style="font-size:16px">🍀</text>
+        <text x="245" y="325" style="font-size:14px">🪴</text>
+
+        {% elif z.slug == 'bonsai' %}
+        <!-- Bonsai -->
+        <rect class="zone-fill" x="320" y="240" width="130" height="110" rx="12"/>
+        <circle class="zone-dot" cx="385" cy="280" r="6"/>
+        <text class="zone-label" x="385" y="268" style="font-size:12px">{{ z.icon }} Bonsai</text>
+        <text x="355" y="330" style="font-size:18px">🌳</text>
+        <text x="395" y="325" style="font-size:14px">🌲</text>
+
+        {% elif z.slug == 'sen-da-xuong-rong' %}
+        <!-- Sen đá & Xương rồng -->
+        <rect class="zone-fill" x="470" y="250" width="115" height="100" rx="12"/>
+        <circle class="zone-dot" cx="527" cy="285" r="6"/>
+        <text class="zone-label" x="527" y="270" style="font-size:10px">{{ z.icon }} Sen đá</text>
+        <text x="495" y="330" style="font-size:16px">🌵</text>
+        <text x="530" y="325" style="font-size:14px">🪴</text>
+
+        {% elif z.slug == 'dat-gia-the' %}
+        <!-- Đất & Giá thể -->
+        <rect class="zone-fill" x="30" y="370" width="130" height="100" rx="12"/>
+        <circle class="zone-dot" cx="95" cy="405" r="6"/>
+        <text class="zone-label" x="95" y="393" style="font-size:12px">{{ z.icon }} Đất & Giá thể</text>
+        <text x="60" y="450" style="font-size:16px">🪨</text>
+        <text x="100" y="445" style="font-size:14px">🌍</text>
+
+        {% elif z.slug == 'phan-bon' %}
+        <!-- Phân bón -->
+        <rect class="zone-fill" x="180" y="370" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="240" cy="405" r="6"/>
+        <text class="zone-label" x="240" y="393" style="font-size:12px">{{ z.icon }} Phân bón</text>
+        <text x="205" y="450" style="font-size:16px">🧪</text>
+        <text x="245" y="445" style="font-size:14px">🌿</text>
+
+        {% elif z.slug == 'chau-khay' %}
+        <!-- Chậu & Khay -->
+        <rect class="zone-fill" x="320" y="370" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="380" cy="405" r="6"/>
+        <text class="zone-label" x="380" y="393" style="font-size:12px">{{ z.icon }} Chậu & Khay</text>
+        <text x="345" y="450" style="font-size:16px">🪴</text>
+        <text x="385" y="445" style="font-size:14px">🏺</text>
+
+        {% elif z.slug == 'dung-cu-lam-vuon' %}
+        <!-- Dụng cụ làm vườn -->
+        <rect class="zone-fill" x="460" y="370" width="120" height="100" rx="12"/>
+        <circle class="zone-dot" cx="520" cy="405" r="6"/>
+        <text class="zone-label" x="520" y="390" style="font-size:11px">{{ z.icon }} Dụng cụ</text>
+        <text x="485" y="450" style="font-size:16px">✂️</text>
+        <text x="525" y="445" style="font-size:14px">🧤</text>
+
+        {% else %}
+        <!-- Generic fallback -->
+        <rect class="zone-fill" x="220" y="200" width="160" height="80" rx="12"/>
+        <circle class="zone-dot" cx="300" cy="230" r="6"/>
+        <text class="zone-label" x="300" y="220" style="font-size:12px">{{ z.icon }} {{ z.name[:12] }}</text>
+        {% endif %}
+      </g>
+    </a>
+    {% endfor %}
+
+    <!-- Garden fence decoration -->
+    <line x1="20" y1="360" x2="580" y2="360" stroke="#a0855b" stroke-width="2" opacity="0.2"/>
+
+  </svg>
+
+  <!-- Legend -->
+  <div class="cd-legend">
+    {% for z in segment.zones %}
+    <a href="{{ url_for('vertical_zone', vertical_slug='garden', segment_slug=segment.slug, zone_slug=z.slug) }}"
+       class="cd-legend-item {% if active_zone_slug is defined and active_zone_slug == z.slug %}active{% endif %}"
+       data-zone="{{ z.slug }}"
+       onmouseenter="highlightTravelZone('{{ z.slug }}')" onmouseleave="unhighlightTravelZone('{{ z.slug }}')">
+      <span class="cd-legend-dot" style="background:{{ z.color }}"></span>
+      <span class="cd-legend-name">{{ z.name }}</span>
+      <span class="cd-legend-count">{{ z.parts|length }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.travel-zone-group').forEach(g => {
+  const slug = g.dataset.zone;
+  g.addEventListener('mouseenter', () => {
+    g.classList.add('hover');
+    document.querySelectorAll(`.cd-legend-item[data-zone="${slug}"]`).forEach(l => l.classList.add('hover'));
+  });
+  g.addEventListener('mouseleave', () => {
+    g.classList.remove('hover');
+    document.querySelectorAll(`.cd-legend-item[data-zone="${slug}"]`).forEach(l => l.classList.remove('hover'));
+  });
+});
+function highlightTravelZone(slug) { document.querySelectorAll(`.travel-zone-group[data-zone="${slug}"]`).forEach(g => g.classList.add('hover')); }
+function unhighlightTravelZone(slug) { document.querySelectorAll(`.travel-zone-group[data-zone="${slug}"]`).forEach(g => g.classList.remove('hover')); }
+</script>
