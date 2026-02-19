@@ -258,7 +258,7 @@
   'dak-lak':'Buôn Ma Thuột — thủ phủ cà phê, hồ Lắk thơ mộng và Vườn quốc gia Yok Đôn',
   'gia-lai':'Biển Hồ (T\'Nưng) huyền bí, thác Phú Cường hùng vĩ và văn hóa cồng chiêng Tây Nguyên'
 } %}
-{% set dest_name = prov_names.get(destination, destination) if destination else '' %}
+{% set dest_name = destination_display or prov_names.get(destination, destination) if destination else '' %}
 {% set dest_hl = prov_highlights.get(destination, '') if destination else '' %}
 
 <section class="seo-section">

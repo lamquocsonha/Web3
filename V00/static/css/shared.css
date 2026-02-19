@@ -2000,6 +2000,28 @@ input[type="date"].tz-sf-input { cursor:pointer; }
 [data-mode="light"] .scale-label { fill:#999; }
 [data-mode="dark"] .scale-label { fill:#666; }
 
+/* SEO content section */
+.seo-section { margin-top:40px; padding:32px 0 0; }
+[data-mode="light"] .seo-section { border-top:1px solid #e8e2d8; }
+[data-mode="dark"] .seo-section { border-top:1px solid rgba(255,255,255,0.06); }
+.seo-inner { max-width:var(--max-w,1400px); margin:0 auto; padding:0 20px; }
+.seo-title { font-size:18px; font-weight:700; margin:0 0 12px; }
+.seo-content { font-size:14px; line-height:1.7; }
+[data-mode="light"] .seo-content { color:#5a4f3e; }
+[data-mode="dark"] .seo-content { color:#94a3b8; }
+.seo-content h3 { font-size:15px; font-weight:700; margin:16px 0 6px; }
+[data-mode="light"] .seo-content h3 { color:#3a3428; }
+[data-mode="dark"] .seo-content h3 { color:#e2e8f0; }
+.seo-content p { margin:0 0 10px; }
+.seo-content.collapsed { max-height:80px; overflow:hidden; position:relative; }
+.seo-content.collapsed::after { content:''; position:absolute; bottom:0; left:0; right:0; height:50px; pointer-events:none; }
+[data-mode="light"] .seo-content.collapsed::after { background:linear-gradient(transparent, #fff); }
+[data-mode="dark"] .seo-content.collapsed::after { background:linear-gradient(transparent, var(--bg,#0f172a)); }
+.seo-toggle { display:inline-block; margin-top:8px; font-size:14px; font-weight:600; cursor:pointer; border:none; background:none; padding:4px 0; font-family:inherit; }
+[data-mode="light"] .seo-toggle { color:#c45d3e; }
+[data-mode="dark"] .seo-toggle { color:#a78bfa; }
+.seo-toggle:hover { text-decoration:underline; }
+
 /* Hotel responsive */
 @media (max-width: 1024px) {
   .hotel-3col, .hotel-3col.map-mode { grid-template-columns:1fr; }
