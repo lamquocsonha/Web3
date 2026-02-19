@@ -5600,7 +5600,11 @@ def travel_hotels():
     from agoda_integration import PROVINCE_CENTERS, _DEST_SLUG_TO_NAME
     destination_display = _DEST_SLUG_TO_NAME.get(destination, destination.replace('-', ' ').title()) if destination else ''
     hotel_markers = []
-    for h in hotels:
+    marker_src = hotels
+    if not destination:
+        # No destination selected → show ALL active hotels on the Vietnam-wide map
+        marker_src = Hotel.query.filter(Hotel.is_active == True, Hotel.latitude != 0, Hotel.longitude != 0).all()
+    for h in marker_src:
         lat = h.latitude or 0
         lng = h.longitude or 0
         if lat and lng:

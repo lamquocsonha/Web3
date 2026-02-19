@@ -205,8 +205,20 @@
     {% endif %}
 
     {% elif popular %}
-    <h2 class="tz-section-title">Cùng UniTravel khám phá khách sạn, homestay được yêu thích tại khắp Việt Nam</h2>
-    <div class="tz-dest-grid">
+    <div class="tz-results-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <h2 style="margin:0">Khách sạn toàn quốc</h2>
+      <div class="view-toggle">
+        <button class="view-toggle-btn active" data-view="list" onclick="switchView('list')">📋 Danh sách</button>
+        <button class="view-toggle-btn" data-view="map" onclick="switchView('map')">🗺️ Bản đồ</button>
+      </div>
+    </div>
+
+    <!-- Leaflet Map (hidden by default) -->
+    <div class="leaflet-map-wrap" id="mapWrap">
+      <div id="hotelLeafletMap"></div>
+    </div>
+
+    <div class="tz-dest-grid" id="hotelList">
       {% for p in popular %}
       <a href="{{ url_for('travel_hotels', destination=p.slug) }}" class="tz-dest-card">
         <div class="tz-dc-icon">{{ p.icon }}</div>
@@ -367,7 +379,6 @@ function toggleSeoContent() {
   });
 })();
 /* ── View Toggle: List / Map ── */
-{% if destination %}
 var _leafletMap = null;
 var _allMarkers = [];
 function switchView(mode) {
@@ -396,7 +407,8 @@ function initLeafletMap() {
   if (!el || typeof L === 'undefined') return;
 
   var center = [{{ province_center[0] }}, {{ province_center[1] }}];
-  _leafletMap = L.map('hotelLeafletMap', { scrollWheelZoom: true }).setView(center, 13);
+  var defaultZoom = {{ '13' if destination else '6' }};
+  _leafletMap = L.map('hotelLeafletMap', { scrollWheelZoom: true }).setView(center, defaultZoom);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -453,8 +465,6 @@ function addMarkersToMap(markers) {
     _allMarkers.push(marker);
   });
 }
-
-{% endif %}
 // Agoda API live search
 {% if agoda_enabled and destination %}
 (function() {
