@@ -38,21 +38,18 @@
         </select>
       </div>
       <div class="tz-sf-field tz-sf-price">
-        <label>Khoảng giá</label>
-        <div class="price-range-wrap">
-          <div class="price-inputs">
-            <input type="number" name="price_min" id="priceMin" class="tz-sf-input price-input" placeholder="Từ" value="{{ price_min }}" min="0" max="50000000" step="100000">
-            <span class="price-sep">—</span>
-            <input type="number" name="price_max" id="priceMax" class="tz-sf-input price-input" placeholder="Đến" value="{{ price_max }}" min="0" max="50000000" step="100000">
+        <label>Khoảng giá (VNĐ)</label>
+        <div class="price-range-box">
+          <div class="price-row">
+            <input type="text" name="price_min" id="priceMin" class="pr-input" placeholder="0" value="{{ price_min }}" inputmode="numeric">
+            <span class="pr-dash">–</span>
+            <input type="text" name="price_max" id="priceMax" class="pr-input" placeholder="50,000,000" value="{{ price_max }}" inputmode="numeric">
           </div>
-          <div class="price-slider-wrap">
-            <div class="price-slider-track" id="priceTrack"></div>
-            <input type="range" id="priceSliderMin" class="price-slider" min="0" max="50000000" step="100000" value="{{ price_min or 0 }}">
-            <input type="range" id="priceSliderMax" class="price-slider" min="0" max="50000000" step="100000" value="{{ price_max or 50000000 }}">
-          </div>
-          <div class="price-labels">
-            <span id="priceLabelMin">{{ '{:,.0f}'.format((price_min or 0)|int) }}đ</span>
-            <span id="priceLabelMax">{{ '{:,.0f}'.format((price_max or 50000000)|int) }}đ</span>
+          <div class="pr-slider-wrap">
+            <div class="pr-track-bg"></div>
+            <div class="pr-track-fill" id="priceTrack"></div>
+            <input type="range" id="priceSliderMin" class="pr-slider" min="0" max="50000000" step="100000" value="{{ price_min or 0 }}">
+            <input type="range" id="priceSliderMax" class="pr-slider" min="0" max="50000000" step="100000" value="{{ price_max or 50000000 }}">
           </div>
         </div>
       </div>
@@ -613,55 +610,42 @@ function locateMe() {
 })();
 {% endif %}
 
-/* ── Price Range Slider Sync ── */
+/* ── Price Range Slider ── */
 (function() {
-  var sliderMin = document.getElementById('priceSliderMin');
-  var sliderMax = document.getElementById('priceSliderMax');
-  var inputMin = document.getElementById('priceMin');
-  var inputMax = document.getElementById('priceMax');
-  var labelMin = document.getElementById('priceLabelMin');
-  var labelMax = document.getElementById('priceLabelMax');
+  var sMin = document.getElementById('priceSliderMin');
+  var sMax = document.getElementById('priceSliderMax');
+  var iMin = document.getElementById('priceMin');
+  var iMax = document.getElementById('priceMax');
   var track = document.getElementById('priceTrack');
-  if (!sliderMin || !sliderMax) return;
+  if (!sMin || !sMax) return;
 
   var MAX = 50000000;
-  function fmt(v) { return Number(v).toLocaleString('vi-VN') + 'đ'; }
+  function num(v) { return parseInt(String(v).replace(/[^0-9]/g,'')) || 0; }
+  function fmt(v) { return v ? Number(v).toLocaleString('vi-VN') : ''; }
 
-  function updateTrack() {
-    var lo = parseInt(sliderMin.value), hi = parseInt(sliderMax.value);
-    var pctL = (lo / MAX) * 100, pctR = (hi / MAX) * 100;
-    track.style.left = pctL + '%';
-    track.style.width = (pctR - pctL) + '%';
+  function updateUI() {
+    var lo = parseInt(sMin.value), hi = parseInt(sMax.value);
+    if (lo > hi) { var t = lo; lo = hi; hi = t; sMin.value = lo; sMax.value = hi; }
+    track.style.left = (lo/MAX*100) + '%';
+    track.style.right = (100 - hi/MAX*100) + '%';
+    iMin.value = lo > 0 ? fmt(lo) : '';
+    iMax.value = hi < MAX ? fmt(hi) : '';
   }
 
-  function syncFromSliders() {
-    var lo = parseInt(sliderMin.value), hi = parseInt(sliderMax.value);
-    if (lo > hi) { sliderMin.value = hi; lo = hi; }
-    inputMin.value = lo || '';
-    inputMax.value = hi >= MAX ? '' : hi;
-    labelMin.textContent = fmt(lo);
-    labelMax.textContent = hi >= MAX ? '50M+' : fmt(hi);
-    updateTrack();
-  }
+  sMin.addEventListener('input', updateUI);
+  sMax.addEventListener('input', updateUI);
 
-  function syncFromInputs() {
-    var lo = parseInt(inputMin.value) || 0;
-    var hi = parseInt(inputMax.value) || MAX;
-    if (lo > hi) lo = hi;
-    sliderMin.value = lo;
-    sliderMax.value = hi;
-    labelMin.textContent = fmt(lo);
-    labelMax.textContent = hi >= MAX ? '50M+' : fmt(hi);
-    updateTrack();
-  }
+  iMin.addEventListener('change', function() { sMin.value = Math.min(num(this.value), parseInt(sMax.value)); updateUI(); });
+  iMax.addEventListener('change', function() { sMax.value = Math.max(num(this.value) || MAX, parseInt(sMin.value)); updateUI(); });
 
-  sliderMin.addEventListener('input', syncFromSliders);
-  sliderMax.addEventListener('input', syncFromSliders);
-  inputMin.addEventListener('change', syncFromInputs);
-  inputMax.addEventListener('change', syncFromInputs);
+  // On submit: convert formatted values back to raw numbers
+  var form = sMin.closest('form');
+  if (form) form.addEventListener('submit', function() {
+    iMin.value = num(iMin.value) || '';
+    iMax.value = num(iMax.value) || '';
+  });
 
-  // Init
-  updateTrack();
+  updateUI();
 })();
 </script>
 {% endblock %}
