@@ -620,7 +620,7 @@ def admin_monetization():
 
 @app.route('/admin/products-hub')
 def admin_products_hub():
-    """Products Hub — Products, Affiliate, Hot Deals, AT Banners"""
+    """Products Hub — Products, Affiliate"""
     from sqlalchemy import func as sqlfunc
     tab = request.args.get('tab', 'products')
     ctx = {'active_tab': tab}
@@ -670,14 +670,6 @@ def admin_products_hub():
         total_conv = sum(n['conv'] for n in net_stats)
         total_links = sum(n['count'] for n in net_stats)
         ctx.update(net_stats=net_stats, total_clicks=total_clicks, total_conv=total_conv, total_links=total_links)
-
-    elif tab == 'hotdeals':
-        deals = HotDeal.query.order_by(HotDeal.created_at.desc()).all()
-        ctx.update(deals=deals, now=datetime.utcnow())
-
-    elif tab == 'banners':
-        banners = AccessTradeBanner.query.order_by(AccessTradeBanner.created_at.desc()).all()
-        ctx.update(banners=banners, now=datetime.utcnow())
 
     return render_template('admin/products_hub.html', **ctx)
 
@@ -845,6 +837,14 @@ def admin_vouchers_hub():
             last_sync_count=SiteSettings.get('voucher_last_sync_count', '0'),
             last_sync_error=SiteSettings.get('voucher_last_sync_error', ''),
             recent_synced=Voucher.query.filter_by(sync_mode='api').order_by(Voucher.created_at.desc()).limit(20).all())
+
+    elif tab == 'hotdeals':
+        deals = HotDeal.query.order_by(HotDeal.created_at.desc()).all()
+        ctx.update(deals=deals)
+
+    elif tab == 'banners':
+        at_banners = AccessTradeBanner.query.order_by(AccessTradeBanner.created_at.desc()).all()
+        ctx.update(at_banners=at_banners)
 
     return render_template('admin/voucher_hub.html', **ctx)
 

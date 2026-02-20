@@ -36,8 +36,6 @@
 <div class="hub-tabs">
   <button class="hub-tab {% if active_tab=='products' %}active{% endif %}" onclick="location.href='?tab=products'">Products</button>
   <button class="hub-tab {% if active_tab=='affiliate' %}active{% endif %}" onclick="location.href='?tab=affiliate'">Affiliate</button>
-  <button class="hub-tab {% if active_tab=='hotdeals' %}active{% endif %}" onclick="location.href='?tab=hotdeals'">Hot Deals</button>
-  <button class="hub-tab {% if active_tab=='banners' %}active{% endif %}" onclick="location.href='?tab=banners'">AT Banners</button>
 </div>
 
 <!-- ══ PRODUCTS TAB ══ -->
@@ -127,75 +125,4 @@
 {% endif %}
 </div>
 
-<!-- ══ HOT DEALS TAB ══ -->
-<div class="hub-panel {% if active_tab=='hotdeals' %}active{% endif %}">
-{% if active_tab == 'hotdeals' %}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h2 style="margin:0;font-size:18px">Hot Deals ({{ deals|length }})</h2>
-    <div style="display:flex;gap:8px">
-      <a href="{{ url_for('admin_hotdeals_upload') }}" class="btn btn-primary">Upload Deals</a>
-      <form method="POST" action="{{ url_for('admin_hotdeals_delete_all') }}" style="display:inline"><button type="submit" class="btn btn-danger" onclick="return confirm('Delete ALL deals?')">Delete All</button></form>
-    </div>
-  </div>
-  {% if deals %}
-  <div class="tbl-wrap"><table><thead><tr><th>Deal</th><th>Campaign</th><th>Period</th><th>Status</th><th>Active</th><th></th></tr></thead><tbody>
-    {% for d in deals %}
-    {% set banners = d.get_banner_urls() %}
-    <tr>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        {% if banners %}<img src="{{ banners[0] }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'">{% endif %}
-        <div>
-          <strong>{{ d.name[:50] }}</strong>
-          {% if d.hot_day %}<br><span style="font-size:12px;color:var(--text-dim)">{{ d.hot_day }}</span>{% endif %}
-        </div>
-      </div></td>
-      <td>{{ d.campaign or '—' }}</td>
-      <td style="font-size:13px;white-space:nowrap">{{ d.start_date.strftime('%d/%m/%Y') }} — {{ d.end_date.strftime('%d/%m/%Y') }}</td>
-      <td>{% if d.status %}<span class="badge" style="background:#fef3c7;color:#92400e">{{ d.status }}</span>{% endif %}</td>
-      <td>{% if d.is_active and d.is_valid() %}<span class="badge" style="background:#d1fae5;color:#065f46">Yes</span>{% elif d.is_active and not d.is_valid() %}<span class="badge" style="background:#fef3c7;color:#92400e">Expired</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
-      <td>
-        <form method="POST" action="{{ url_for('admin_hotdeal_toggle', deal_id=d.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
-        <form method="POST" action="{{ url_for('admin_hotdeal_delete', deal_id=d.id) }}" style="display:inline"><button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Delete?')">Del</button></form>
-      </td>
-    </tr>{% endfor %}
-  </tbody></table></div>
-  {% else %}
-  <div class="empty"><h3>No hot deals</h3><p>Upload deals to get started.</p></div>
-  {% endif %}
-{% endif %}
-</div>
-
-<!-- ══ AT BANNERS TAB ══ -->
-<div class="hub-panel {% if active_tab=='banners' %}active{% endif %}">
-{% if active_tab == 'banners' %}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h2 style="margin:0;font-size:18px">AccessTrade Banners ({{ banners|length }})</h2>
-    <div style="display:flex;gap:8px">
-      <form method="POST" action="{{ url_for('admin_at_banners_sync') }}"><button type="submit" class="btn btn-primary">Sync Banners</button></form>
-      <form method="POST" action="{{ url_for('admin_at_banners_delete_all') }}" style="display:inline"><button type="submit" class="btn btn-danger" onclick="return confirm('Delete ALL?')">Delete All</button></form>
-    </div>
-  </div>
-  {% if banners %}
-  <div class="tbl-wrap"><table><thead><tr><th>Banner</th><th>Merchant</th><th>Discount</th><th>Placement</th><th>Clicks</th><th>Active</th><th></th></tr></thead><tbody>
-    {% for b in banners %}<tr>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        {% if b.image_url %}<img src="{{ b.image_url }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'">{% endif %}
-        <strong>{{ b.offer_name[:50] }}</strong>
-      </div></td>
-      <td>{{ b.merchant or '—' }}</td>
-      <td>{% if b.discount_text %}<span class="badge" style="background:#fef3c7;color:#92400e">{{ b.discount_text }}</span>{% endif %}</td>
-      <td>{{ b.placement or '—' }}</td>
-      <td>{{ b.clicks or 0 }}</td>
-      <td>{% if b.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
-      <td>
-        <form method="POST" action="{{ url_for('admin_at_banner_toggle', banner_id=b.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
-        <form method="POST" action="{{ url_for('admin_at_banner_delete', banner_id=b.id) }}" style="display:inline"><button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Delete?')">Del</button></form>
-      </td>
-    </tr>{% endfor %}
-  </tbody></table></div>
-  {% else %}
-  <div class="empty"><h3>No banners</h3><p>Sync from AccessTrade to get started.</p></div>
-  {% endif %}
-{% endif %}
-</div>
 {% endblock %}
