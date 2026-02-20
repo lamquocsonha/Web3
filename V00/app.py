@@ -1091,7 +1091,7 @@ def admin_content_delete(cid):
 # =============================================
 @app.route('/admin/tools')
 def admin_tools():
-    """Unified Tools Hub — Video, Analytics, Settings, Seed Data in tabs"""
+    """Unified Tools Hub — Analytics, Video, Seed Data in tabs"""
     tab = request.args.get('tab', 'analytics')
     ctx = {'active_tab': tab}
 
@@ -1123,10 +1123,6 @@ def admin_tools():
         total_views = db.session.query(db.func.sum(VideoPublish.views)).scalar() or 0
         total_published = VideoPublish.query.filter_by(status='published').count()
         ctx.update(videos=videos, channels=channels, total_views=total_views, total_published=total_published)
-
-    elif tab == 'settings':
-        # Redirect to settings page (it's too complex with its own sub-tabs)
-        pass
 
     elif tab == 'seed':
         verticals = Vertical.query.all()

@@ -49,12 +49,6 @@
 .th-tree-parts { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; margin-left:16px }
 .th-tree-part { font-size:12px; padding:2px 8px; border-radius:5px; background:var(--surface2); color:var(--text-dim) }
 
-/* ── Settings card ── */
-.th-settings-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:40px; text-align:center; max-width:480px; margin:40px auto }
-.th-settings-icon { font-size:48px; margin-bottom:16px }
-.th-settings-card h3 { font-size:20px; font-weight:700; margin-bottom:8px }
-.th-settings-card p { font-size:14px; color:var(--text-dim); margin-bottom:24px }
-
 /* ── Empty state ── */
 .th-empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
 .th-empty-icon { font-size:42px; margin-bottom:10px }
@@ -73,9 +67,6 @@
   </a>
   <a class="th-tab {% if active_tab=='video' %}active{% endif %}" href="{{ url_for('admin_tools', tab='video') }}">
     &#127909; Video
-  </a>
-  <a class="th-tab {% if active_tab=='settings' %}active{% endif %}" href="{{ url_for('admin_tools', tab='settings') }}">
-    &#9881; Settings
   </a>
   <a class="th-tab {% if active_tab=='seed' %}active{% endif %}" href="{{ url_for('admin_tools', tab='seed') }}">
     &#127793; Seed Data
@@ -224,22 +215,6 @@
     <p style="font-size:14px">Create your first video project to get started.</p>
   </div>
   {% endif %}
-</div>
-{% endif %}
-
-<!-- ══════════════════════════════════════════════
-     TAB: SETTINGS
-     ══════════════════════════════════════════════ -->
-{% if active_tab == 'settings' %}
-<div class="th-panel active">
-  <div class="th-settings-card">
-    <div class="th-settings-icon">&#9881;</div>
-    <h3>Site Settings</h3>
-    <p>Settings has its own dedicated page with multiple sub-tabs for branding, styles, database, and more.</p>
-    <a href="{{ url_for('admin_settings') }}" class="th-btn th-btn-primary" style="font-size:16px;padding:12px 32px">
-      Open Settings
-    </a>
-  </div>
 </div>
 {% endif %}
 
