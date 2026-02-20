@@ -52,6 +52,17 @@
   --font-primary: {{ theme.font_primary }};
   --font-secondary: {{ theme.font_secondary }};
 }
+/* SEO Backlink Styles */
+a.seo-backlink {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent);
+  transition: border-color 0.2s, color 0.2s;
+}
+a.seo-backlink:hover {
+  border-bottom-style: solid;
+  color: var(--accent-hover, var(--accent));
+}
 </style>
 {% endautoescape %}
 {% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}

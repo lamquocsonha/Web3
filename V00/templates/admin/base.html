@@ -93,6 +93,31 @@
         </div>
       </div>
 
+      <!-- SEO Backlinks Dropdown -->
+      <div class="sb-dropdown">
+        <div class="sb-dropdown-header">
+          <span class="sb-icon">&#128269;</span> SEO
+          <span class="sb-arrow">›</span>
+        </div>
+        <div class="sb-dropdown-content">
+          <a href="{{ url_for('admin_seo_dashboard') }}" class="sb-link sb-sub {% if request.endpoint == 'admin_seo_dashboard' %}active{% endif %}" style="font-weight:600">
+            <span class="sb-icon">&#128200;</span> Dashboard
+          </a>
+          <a href="{{ url_for('admin_seo_keywords') }}" class="sb-link sb-sub {% if 'seo_keyword' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128273;</span> Keywords
+          </a>
+          <a href="{{ url_for('admin_seo_instances') }}" class="sb-link sb-sub {% if 'seo_instance' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128279;</span> Instances
+          </a>
+          <a href="{{ url_for('admin_seo_auto_generate') }}" class="sb-link sb-sub {% if 'seo_auto_generate' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#9889;</span> Auto Generate
+          </a>
+          <a href="{{ url_for('admin_seo_scan') }}" class="sb-link sb-sub {% if 'seo_scan' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600;color:#27ae60">
+            <span class="sb-icon">&#128270;</span> Scan & Build
+          </a>
+        </div>
+      </div>
+
       <!-- AI Engine Dropdown -->
       <div class="sb-dropdown">
         <div class="sb-dropdown-header">

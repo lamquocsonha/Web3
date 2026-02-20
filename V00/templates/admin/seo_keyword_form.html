@@ -1,0 +1,98 @@
+{% extends "admin/base.html" %}
+{% block title %}{% if keyword %}Edit Keyword{% else %}New Keyword{% endif %}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> <a href="{{ url_for('admin_seo_dashboard') }}">SEO</a> <span class="sep">›</span> <a href="{{ url_for('admin_seo_keywords') }}">Keywords</a> <span class="sep">›</span> {% if keyword %}Edit{% else %}New{% endif %}
+{% endblock %}
+{% block content %}
+<div style="max-width:700px">
+  <h1 style="margin:0 0 24px;font-size:1.5rem">{% if keyword %}Edit Keyword: {{ keyword.keyword[:40] }}{% else %}New Backlink Keyword{% endif %}</h1>
+
+  <form method="POST" style="display:flex;flex-direction:column;gap:16px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px">
+      <h2 style="margin:0;font-size:1.1rem;border-bottom:1px solid var(--border);padding-bottom:10px">Keyword Settings</h2>
+
+      <div>
+        <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Keyword / Phrase *</label>
+        <input type="text" name="keyword" value="{{ keyword.keyword if keyword else '' }}" required
+          style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)"
+          placeholder="e.g. phanh dia, rau muong, cam sanh">
+        <small style="color:var(--muted)">The keyword/phrase to match in article/part content</small>
+      </div>
+
+      <div>
+        <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Anchor Text (optional)</label>
+        <input type="text" name="anchor_text" value="{{ keyword.anchor_text if keyword else '' }}"
+          style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)"
+          placeholder="Custom display text (if different from keyword)">
+        <small style="color:var(--muted)">Leave empty to use the keyword as anchor text</small>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Vertical</label>
+          <select name="vertical_slug" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)">
+            <option value="">Global (all verticals)</option>
+            {% for v in verticals %}
+            <option value="{{ v.slug }}" {% if keyword and keyword.vertical_slug == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Priority (1-10)</label>
+          <input type="number" name="priority" value="{{ keyword.priority if keyword else 5 }}" min="1" max="10"
+            style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)">
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px">
+      <h2 style="margin:0;font-size:1.1rem;border-bottom:1px solid var(--border);padding-bottom:10px">Target Page</h2>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Target Type *</label>
+          <select name="target_type" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)">
+            <option value="article" {% if keyword and keyword.target_type == 'article' %}selected{% endif %}>Article</option>
+            <option value="zone" {% if keyword and keyword.target_type == 'zone' %}selected{% endif %}>Zone</option>
+            <option value="part" {% if keyword and keyword.target_type == 'part' %}selected{% endif %}>Part</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Max Links Per Page</label>
+          <input type="number" name="max_per_page" value="{{ keyword.max_per_page if keyword else 1 }}" min="1" max="5"
+            style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)">
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Target Slug *</label>
+        <input type="text" name="target_slug" value="{{ keyword.target_slug if keyword else '' }}" required
+          style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)"
+          placeholder="e.g. phanh-dia-oto, rau-muong">
+        <small style="color:var(--muted)">The URL slug of the target article/zone/part</small>
+      </div>
+
+      <div>
+        <label style="font-size:0.85rem;font-weight:600;display:block;margin-bottom:4px">Target Title (for reference)</label>
+        <input type="text" name="target_title" value="{{ keyword.target_title if keyword else '' }}"
+          style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)"
+          placeholder="e.g. Phanh đĩa ô tô - Cấu tạo và nguyên lý">
+      </div>
+
+      <div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" name="is_active" {% if not keyword or keyword.is_active %}checked{% endif %}>
+          <span style="font-size:0.85rem;font-weight:600">Active</span>
+        </label>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button type="submit" style="padding:10px 24px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:600">
+        {% if keyword %}Update Keyword{% else %}Create Keyword{% endif %}
+      </button>
+      <a href="{{ url_for('admin_seo_keywords') }}" style="padding:10px 24px;border-radius:8px;border:1px solid var(--border);text-decoration:none;color:var(--text)">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

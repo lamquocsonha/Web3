@@ -385,6 +385,38 @@ class Voucher(db.Model):
         elif self.discount_type == 'free_shipping':
             return 'Freeship'
         return f'Giảm {int(val)}%'
+# === SEO BACKLINK ENGINE ===
+class BacklinkKeyword(db.Model):
+    """Defines a keyword/phrase that should be auto-linked to a target page"""
+    id = db.Column(db.Integer, primary_key=True)
+    vertical_slug = db.Column(db.String(50), default='', index=True)  # scope to vertical, '' = global
+    keyword = db.Column(db.String(200), nullable=False)  # keyword/phrase to match in content
+    target_type = db.Column(db.String(20), nullable=False)  # article / zone / part
+    target_slug = db.Column(db.String(200), nullable=False)  # slug of target page
+    target_title = db.Column(db.String(300), default='')  # display title for reference
+    anchor_text = db.Column(db.String(200), default='')  # custom anchor text, if empty uses keyword
+    priority = db.Column(db.Integer, default=5)  # 1-10, higher = linked first
+    max_per_page = db.Column(db.Integer, default=1)  # max times this keyword is linked per source page
+    is_active = db.Column(db.Boolean, default=True, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    instances = db.relationship('BacklinkInstance', backref='keyword', cascade='all,delete-orphan', lazy=True)
+
+class BacklinkInstance(db.Model):
+    """Tracks each actual backlink placement: source → target"""
+    id = db.Column(db.Integer, primary_key=True)
+    keyword_id = db.Column(db.Integer, db.ForeignKey('backlink_keyword.id'), nullable=False, index=True)
+    source_type = db.Column(db.String(20), nullable=False)  # article / part / zone
+    source_id = db.Column(db.Integer, nullable=False, index=True)
+    source_slug = db.Column(db.String(200), default='')
+    source_title = db.Column(db.String(300), default='')
+    target_type = db.Column(db.String(20), nullable=False)  # article / zone / part
+    target_slug = db.Column(db.String(200), nullable=False)
+    link_type = db.Column(db.String(10), default='intext')  # intext / outtext
+    anchor_text = db.Column(db.String(200), default='')
+    status = db.Column(db.String(15), default='active')  # active / pending / removed
+    clicks = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class ArticleFeedback(db.Model):
     """User feedback on article accuracy"""
     id = db.Column(db.Integer, primary_key=True)

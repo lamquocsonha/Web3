@@ -34,8 +34,9 @@
 
     <!-- Content with carousel in the middle -->
     <article class="article-body">
-      {% if article.content %}
-        {% set paragraphs = article.content.split('</p>') %}
+      {% if article_content_with_backlinks or article.content %}
+        {% set bl_content = article_content_with_backlinks if article_content_with_backlinks else article.content %}
+        {% set paragraphs = bl_content.split('</p>') %}
         {% set total = paragraphs|length %}
         {% set mid = (total // 2)|int %}
 
@@ -189,6 +190,21 @@
       {% endif %}
     </div>
     {% endfor %}
+
+    <!-- Outtext Backlinks Widget (SEO internal links) -->
+    {% if outtext_links %}
+    <div class="sidebar-widget">
+      <h3 class="widget-title">📎 Xem thêm</h3>
+      <div class="sidebar-articles">
+        {% for ol in outtext_links %}
+        <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=ol.target_slug) if ol.target_type == 'article' else '#' }}" class="sidebar-article-card seo-outtext">
+          <h4>{{ ol.anchor_text }}</h4>
+          <div class="sac-meta">{{ ol.target_type|title }}</div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
 
     <!-- Related Articles Widget -->
     {% if related %}

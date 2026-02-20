@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal, WardCommune, AccessTradeBanner
+from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal, WardCommune, AccessTradeBanner, BacklinkKeyword, BacklinkInstance
 from datetime import datetime, date, timedelta
 import os, random, json
 
@@ -955,6 +955,510 @@ def admin_toggle_mode():
 def admin_deployment():
     """Deployment guide and workflow documentation"""
     return render_template('admin/deployment.html')
+
+# =============================================
+# ADMIN — SEO BACKLINK ENGINE
+# =============================================
+import re as _re
+from markupsafe import Markup
+
+def _build_target_url(vertical_slug, target_type, target_slug, segment_slug='', zone_slug=''):
+    """Build the frontend URL for a backlink target."""
+    if target_type == 'article':
+        return f'/{vertical_slug}/bai-viet/{target_slug}/'
+    elif target_type == 'zone':
+        if segment_slug:
+            return f'/{vertical_slug}/{segment_slug}/{zone_slug or target_slug}/'
+        return f'/{vertical_slug}/zone/{target_slug}/'
+    elif target_type == 'part':
+        if segment_slug and zone_slug:
+            return f'/{vertical_slug}/{segment_slug}/{zone_slug}/{target_slug}/'
+        return f'/{vertical_slug}/part/{target_slug}/'
+    return '#'
+
+def _inject_backlinks(html_content, vertical_slug, source_type, source_id, source_slug):
+    """Inject internal backlinks into HTML content by replacing keyword matches with links.
+
+    - Only replaces text outside of HTML tags and existing links
+    - Respects max_per_page limit for each keyword
+    - Sorted by priority (highest first) to link the most important keywords
+    - Tracks clicks via BacklinkInstance
+    """
+    if not html_content:
+        return html_content
+
+    # Get active backlink instances for this source
+    instances = BacklinkInstance.query.join(BacklinkKeyword).filter(
+        BacklinkInstance.source_type == source_type,
+        BacklinkInstance.source_id == source_id,
+        BacklinkInstance.status == 'active',
+        BacklinkKeyword.is_active == True
+    ).all()
+
+    if not instances:
+        return html_content
+
+    # Group instances by keyword, respect max_per_page
+    keyword_data = {}
+    for inst in instances:
+        kw = inst.keyword
+        if kw.id not in keyword_data:
+            keyword_data[kw.id] = {
+                'keyword': kw.keyword,
+                'anchor': inst.anchor_text or kw.anchor_text or kw.keyword,
+                'target_type': kw.target_type,
+                'target_slug': kw.target_slug,
+                'vertical_slug': kw.vertical_slug or vertical_slug,
+                'priority': kw.priority,
+                'max_per_page': kw.max_per_page,
+                'count': 0,
+                'instance_id': inst.id
+            }
+
+    # Sort by priority (highest first), then by keyword length (longest first for better matching)
+    sorted_kw = sorted(keyword_data.values(), key=lambda x: (-x['priority'], -len(x['keyword'])))
+
+    for kw_data in sorted_kw:
+        keyword = kw_data['keyword']
+        max_links = kw_data['max_per_page']
+
+        # Build target URL
+        target_url = _build_target_url(kw_data['vertical_slug'], kw_data['target_type'], kw_data['target_slug'])
+        anchor = kw_data['anchor']
+        inst_id = kw_data['instance_id']
+
+        # Build the link HTML
+        link_html = f'<a href="{target_url}" class="seo-backlink" data-bid="{inst_id}" title="{anchor}">{anchor}</a>'
+
+        # Replace keyword in text content only (not inside HTML tags or existing links)
+        # Strategy: split by tags, only replace in text nodes
+        parts = _re.split(r'(<[^>]+>)', html_content)
+        in_link = 0
+        replaced = 0
+        new_parts = []
+
+        for part in parts:
+            if part.startswith('<'):
+                # It's a tag
+                lower_part = part.lower()
+                if lower_part.startswith('<a ') or lower_part.startswith('<a>'):
+                    in_link += 1
+                elif lower_part.startswith('</a'):
+                    in_link = max(0, in_link - 1)
+                new_parts.append(part)
+            else:
+                # It's text content
+                if in_link == 0 and replaced < max_links and part.strip():
+                    # Case-insensitive replacement, but preserve original case in anchor
+                    pattern = _re.compile(_re.escape(keyword), _re.IGNORECASE)
+                    match = pattern.search(part)
+                    if match:
+                        part = part[:match.start()] + link_html + part[match.end():]
+                        replaced += 1
+                new_parts.append(part)
+
+        html_content = ''.join(new_parts)
+
+    return html_content
+
+@app.template_filter('backlinks')
+def backlinks_filter(content, vertical_slug='', source_type='', source_id=0, source_slug=''):
+    """Jinja filter to inject backlinks into article content."""
+    result = _inject_backlinks(content, vertical_slug, source_type, source_id, source_slug)
+    return Markup(result)
+
+@app.route('/admin/seo')
+def admin_seo_dashboard():
+    """SEO Backlink Dashboard — overview of all backlink keywords & instances."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    filter_v = request.args.get('vertical', '')
+
+    # Stats
+    total_keywords = BacklinkKeyword.query.count()
+    active_keywords = BacklinkKeyword.query.filter_by(is_active=True).count()
+    total_instances = BacklinkInstance.query.count()
+    active_instances = BacklinkInstance.query.filter_by(status='active').count()
+    total_clicks = db.session.query(db.func.coalesce(db.func.sum(BacklinkInstance.clicks), 0)).scalar()
+
+    # Per-vertical stats
+    v_stats = []
+    for v in verticals:
+        kw_count = BacklinkKeyword.query.filter_by(vertical_slug=v.slug, is_active=True).count()
+        inst_count = BacklinkInstance.query.join(BacklinkKeyword).filter(
+            BacklinkKeyword.vertical_slug == v.slug,
+            BacklinkInstance.status == 'active'
+        ).count()
+        v_clicks = db.session.query(db.func.coalesce(db.func.sum(BacklinkInstance.clicks), 0)).join(BacklinkKeyword).filter(
+            BacklinkKeyword.vertical_slug == v.slug
+        ).scalar()
+        v_stats.append({'vertical': v, 'keywords': kw_count, 'instances': inst_count, 'clicks': v_clicks})
+
+    # Recent instances
+    recent = BacklinkInstance.query.order_by(BacklinkInstance.created_at.desc()).limit(20).all()
+
+    return render_template('admin/seo_dashboard.html',
+        verticals=verticals, filter_v=filter_v,
+        total_keywords=total_keywords, active_keywords=active_keywords,
+        total_instances=total_instances, active_instances=active_instances,
+        total_clicks=total_clicks, v_stats=v_stats, recent=recent)
+
+@app.route('/admin/seo/keywords')
+def admin_seo_keywords():
+    """Manage backlink keywords."""
+    filter_v = request.args.get('vertical', '')
+    filter_type = request.args.get('type', '')
+    q = request.args.get('q', '')
+
+    query = BacklinkKeyword.query
+    if filter_v:
+        query = query.filter_by(vertical_slug=filter_v)
+    if filter_type:
+        query = query.filter_by(target_type=filter_type)
+    if q:
+        query = query.filter(BacklinkKeyword.keyword.ilike(f'%{q}%'))
+
+    keywords = query.order_by(BacklinkKeyword.priority.desc(), BacklinkKeyword.created_at.desc()).all()
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    return render_template('admin/seo_keywords.html',
+        keywords=keywords, verticals=verticals,
+        filter_v=filter_v, filter_type=filter_type, q=q)
+
+@app.route('/admin/seo/keyword/new', methods=['GET', 'POST'])
+def admin_seo_keyword_new():
+    """Create a new backlink keyword."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    if request.method == 'POST':
+        kw = BacklinkKeyword(
+            vertical_slug=request.form.get('vertical_slug', ''),
+            keyword=request.form.get('keyword', '').strip(),
+            target_type=request.form.get('target_type', 'article'),
+            target_slug=request.form.get('target_slug', '').strip(),
+            target_title=request.form.get('target_title', '').strip(),
+            anchor_text=request.form.get('anchor_text', '').strip(),
+            priority=int(request.form.get('priority', 5)),
+            max_per_page=int(request.form.get('max_per_page', 1)),
+            is_active=request.form.get('is_active') == 'on'
+        )
+        db.session.add(kw)
+        db.session.commit()
+        flash(f'Keyword "{kw.keyword}" created successfully!', 'success')
+        return redirect(url_for('admin_seo_keywords'))
+    return render_template('admin/seo_keyword_form.html', verticals=verticals, keyword=None)
+
+@app.route('/admin/seo/keyword/<int:kid>/edit', methods=['GET', 'POST'])
+def admin_seo_keyword_edit(kid):
+    """Edit a backlink keyword."""
+    kw = BacklinkKeyword.query.get_or_404(kid)
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    if request.method == 'POST':
+        kw.vertical_slug = request.form.get('vertical_slug', '')
+        kw.keyword = request.form.get('keyword', '').strip()
+        kw.target_type = request.form.get('target_type', 'article')
+        kw.target_slug = request.form.get('target_slug', '').strip()
+        kw.target_title = request.form.get('target_title', '').strip()
+        kw.anchor_text = request.form.get('anchor_text', '').strip()
+        kw.priority = int(request.form.get('priority', 5))
+        kw.max_per_page = int(request.form.get('max_per_page', 1))
+        kw.is_active = request.form.get('is_active') == 'on'
+        db.session.commit()
+        flash(f'Keyword "{kw.keyword}" updated!', 'success')
+        return redirect(url_for('admin_seo_keywords'))
+    return render_template('admin/seo_keyword_form.html', verticals=verticals, keyword=kw)
+
+@app.route('/admin/seo/keyword/<int:kid>/delete', methods=['POST'])
+def admin_seo_keyword_delete(kid):
+    """Delete a backlink keyword and all its instances."""
+    kw = BacklinkKeyword.query.get_or_404(kid)
+    name = kw.keyword
+    db.session.delete(kw)
+    db.session.commit()
+    flash(f'Keyword "{name}" deleted.', 'success')
+    return redirect(url_for('admin_seo_keywords'))
+
+@app.route('/admin/seo/keyword/<int:kid>/toggle', methods=['POST'])
+def admin_seo_keyword_toggle(kid):
+    """Toggle active/inactive for a keyword."""
+    kw = BacklinkKeyword.query.get_or_404(kid)
+    kw.is_active = not kw.is_active
+    db.session.commit()
+    return redirect(request.referrer or url_for('admin_seo_keywords'))
+
+@app.route('/admin/seo/instances')
+def admin_seo_instances():
+    """View all backlink instances (where links are placed)."""
+    filter_v = request.args.get('vertical', '')
+    filter_type = request.args.get('link_type', '')
+    filter_status = request.args.get('status', '')
+
+    query = BacklinkInstance.query.join(BacklinkKeyword)
+    if filter_v:
+        query = query.filter(BacklinkKeyword.vertical_slug == filter_v)
+    if filter_type:
+        query = query.filter(BacklinkInstance.link_type == filter_type)
+    if filter_status:
+        query = query.filter(BacklinkInstance.status == filter_status)
+
+    instances = query.order_by(BacklinkInstance.created_at.desc()).all()
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    return render_template('admin/seo_instances.html',
+        instances=instances, verticals=verticals,
+        filter_v=filter_v, filter_type=filter_type, filter_status=filter_status)
+
+@app.route('/admin/seo/instance/<int:iid>/remove', methods=['POST'])
+def admin_seo_instance_remove(iid):
+    """Mark a backlink instance as removed."""
+    inst = BacklinkInstance.query.get_or_404(iid)
+    inst.status = 'removed'
+    db.session.commit()
+    flash('Backlink instance removed.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_instances'))
+
+@app.route('/admin/seo/instance/<int:iid>/delete', methods=['POST'])
+def admin_seo_instance_delete(iid):
+    """Delete a backlink instance permanently."""
+    inst = BacklinkInstance.query.get_or_404(iid)
+    db.session.delete(inst)
+    db.session.commit()
+    flash('Backlink instance deleted.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_instances'))
+
+@app.route('/admin/seo/auto-generate', methods=['GET', 'POST'])
+def admin_seo_auto_generate():
+    """Auto-generate backlink keywords from existing articles/parts/zones."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    if request.method == 'POST':
+        target_vertical = request.form.get('vertical_slug', '')
+        gen_from = request.form.get('generate_from', 'articles')  # articles / parts / zones / all
+        overwrite = request.form.get('overwrite') == 'on'
+        created = 0
+
+        if not target_vertical:
+            flash('Please select a vertical.', 'error')
+            return redirect(url_for('admin_seo_auto_generate'))
+
+        # Generate from articles
+        if gen_from in ('articles', 'all'):
+            articles = Article.query.filter_by(vertical_slug=target_vertical, status='published').all()
+            for art in articles:
+                # Use title as keyword, tags as additional keywords
+                keywords_to_add = [art.title]
+                if art.tags:
+                    keywords_to_add.extend([t.strip() for t in art.tags.split(',') if t.strip()])
+
+                for kw_text in keywords_to_add:
+                    if len(kw_text) < 3 or len(kw_text) > 100:
+                        continue
+                    existing = BacklinkKeyword.query.filter_by(
+                        vertical_slug=target_vertical, keyword=kw_text, target_type='article', target_slug=art.slug
+                    ).first()
+                    if existing and not overwrite:
+                        continue
+                    if existing and overwrite:
+                        existing.is_active = True
+                        existing.target_title = art.title
+                    else:
+                        bk = BacklinkKeyword(
+                            vertical_slug=target_vertical, keyword=kw_text,
+                            target_type='article', target_slug=art.slug,
+                            target_title=art.title, priority=7 if kw_text == art.title else 4
+                        )
+                        db.session.add(bk)
+                        created += 1
+
+        # Generate from parts
+        if gen_from in ('parts', 'all'):
+            zones = Zone.query.join(Segment).join(Vertical).filter(Vertical.slug == target_vertical).all()
+            for z in zones:
+                for p in z.parts:
+                    keywords_to_add = [p.name_vi]
+                    if p.name_en:
+                        keywords_to_add.append(p.name_en)
+                    if p.tags:
+                        keywords_to_add.extend([t.strip() for t in p.tags.split(',') if t.strip()])
+
+                    for kw_text in keywords_to_add:
+                        if len(kw_text) < 3 or len(kw_text) > 100:
+                            continue
+                        existing = BacklinkKeyword.query.filter_by(
+                            vertical_slug=target_vertical, keyword=kw_text, target_type='part', target_slug=p.slug
+                        ).first()
+                        if existing and not overwrite:
+                            continue
+                        if existing and overwrite:
+                            existing.is_active = True
+                        else:
+                            bk = BacklinkKeyword(
+                                vertical_slug=target_vertical, keyword=kw_text,
+                                target_type='part', target_slug=p.slug,
+                                target_title=p.name_vi, priority=6 if kw_text == p.name_vi else 3
+                            )
+                            db.session.add(bk)
+                            created += 1
+
+        # Generate from zones
+        if gen_from in ('zones', 'all'):
+            zones = Zone.query.join(Segment).join(Vertical).filter(Vertical.slug == target_vertical).all()
+            for z in zones:
+                existing = BacklinkKeyword.query.filter_by(
+                    vertical_slug=target_vertical, keyword=z.name, target_type='zone', target_slug=z.slug
+                ).first()
+                if existing and not overwrite:
+                    continue
+                if existing and overwrite:
+                    existing.is_active = True
+                else:
+                    bk = BacklinkKeyword(
+                        vertical_slug=target_vertical, keyword=z.name,
+                        target_type='zone', target_slug=z.slug,
+                        target_title=z.name, priority=8
+                    )
+                    db.session.add(bk)
+                    created += 1
+
+        db.session.commit()
+        flash(f'Auto-generated {created} backlink keywords for "{target_vertical}".', 'success')
+        return redirect(url_for('admin_seo_keywords', vertical=target_vertical))
+
+    return render_template('admin/seo_auto_generate.html', verticals=verticals)
+
+@app.route('/admin/seo/scan', methods=['GET', 'POST'])
+def admin_seo_scan():
+    """Scan articles/parts content and create backlink instances where keywords are found."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    if request.method == 'POST':
+        target_vertical = request.form.get('vertical_slug', '')
+        scan_scope = request.form.get('scan_scope', 'articles')  # articles / parts / all
+        clear_old = request.form.get('clear_old') == 'on'
+
+        if not target_vertical:
+            flash('Please select a vertical.', 'error')
+            return redirect(url_for('admin_seo_scan'))
+
+        # Get active keywords for this vertical
+        keywords = BacklinkKeyword.query.filter_by(vertical_slug=target_vertical, is_active=True)\
+            .order_by(BacklinkKeyword.priority.desc()).all()
+
+        if not keywords:
+            flash('No active keywords found for this vertical. Generate keywords first.', 'error')
+            return redirect(url_for('admin_seo_scan'))
+
+        # Clear old instances if requested
+        if clear_old:
+            old_ids = [inst.id for inst in BacklinkInstance.query.join(BacklinkKeyword).filter(
+                BacklinkKeyword.vertical_slug == target_vertical
+            ).all()]
+            if old_ids:
+                BacklinkInstance.query.filter(BacklinkInstance.id.in_(old_ids)).delete(synchronize_session=False)
+                db.session.flush()
+
+        created = 0
+        scanned = 0
+
+        # Scan articles
+        if scan_scope in ('articles', 'all'):
+            articles = Article.query.filter_by(vertical_slug=target_vertical, status='published').all()
+            for art in articles:
+                scanned += 1
+                content_text = (art.content or '') + ' ' + (art.excerpt or '')
+                content_lower = content_text.lower()
+
+                for kw in keywords:
+                    # Skip self-linking (article linking to itself)
+                    if kw.target_type == 'article' and kw.target_slug == art.slug:
+                        continue
+
+                    kw_lower = kw.keyword.lower()
+                    if kw_lower in content_lower:
+                        # Check if instance already exists
+                        existing = BacklinkInstance.query.filter_by(
+                            keyword_id=kw.id, source_type='article',
+                            source_id=art.id, status='active'
+                        ).first()
+                        if not existing:
+                            inst = BacklinkInstance(
+                                keyword_id=kw.id,
+                                source_type='article', source_id=art.id,
+                                source_slug=art.slug, source_title=art.title,
+                                target_type=kw.target_type, target_slug=kw.target_slug,
+                                link_type='intext',
+                                anchor_text=kw.anchor_text or kw.keyword
+                            )
+                            db.session.add(inst)
+                            created += 1
+
+        # Scan parts
+        if scan_scope in ('parts', 'all'):
+            zones = Zone.query.join(Segment).join(Vertical).filter(Vertical.slug == target_vertical).all()
+            for z in zones:
+                for p in z.parts:
+                    scanned += 1
+                    content_text = (p.content or '') + ' ' + (p.description or '')
+                    content_lower = content_text.lower()
+
+                    for kw in keywords:
+                        # Skip self-linking
+                        if kw.target_type == 'part' and kw.target_slug == p.slug:
+                            continue
+
+                        kw_lower = kw.keyword.lower()
+                        if kw_lower in content_lower:
+                            existing = BacklinkInstance.query.filter_by(
+                                keyword_id=kw.id, source_type='part',
+                                source_id=p.id, status='active'
+                            ).first()
+                            if not existing:
+                                inst = BacklinkInstance(
+                                    keyword_id=kw.id,
+                                    source_type='part', source_id=p.id,
+                                    source_slug=p.slug, source_title=p.name_vi,
+                                    target_type=kw.target_type, target_slug=kw.target_slug,
+                                    link_type='intext',
+                                    anchor_text=kw.anchor_text or kw.keyword
+                                )
+                                db.session.add(inst)
+                                created += 1
+
+        db.session.commit()
+        flash(f'Scan complete! Scanned {scanned} items, created {created} new backlink instances.', 'success')
+        return redirect(url_for('admin_seo_instances', vertical=target_vertical))
+
+    return render_template('admin/seo_scan.html', verticals=verticals)
+
+@app.route('/admin/seo/bulk-action', methods=['POST'])
+def admin_seo_bulk_action():
+    """Bulk actions on keywords or instances."""
+    action = request.form.get('action', '')
+    item_type = request.form.get('item_type', 'keyword')
+    ids = request.form.getlist('ids')
+
+    if not ids:
+        flash('No items selected.', 'error')
+        return redirect(request.referrer or url_for('admin_seo_dashboard'))
+
+    id_list = [int(i) for i in ids]
+
+    if item_type == 'keyword':
+        if action == 'activate':
+            BacklinkKeyword.query.filter(BacklinkKeyword.id.in_(id_list)).update({BacklinkKeyword.is_active: True}, synchronize_session=False)
+        elif action == 'deactivate':
+            BacklinkKeyword.query.filter(BacklinkKeyword.id.in_(id_list)).update({BacklinkKeyword.is_active: False}, synchronize_session=False)
+        elif action == 'delete':
+            BacklinkKeyword.query.filter(BacklinkKeyword.id.in_(id_list)).delete(synchronize_session=False)
+    elif item_type == 'instance':
+        if action == 'activate':
+            BacklinkInstance.query.filter(BacklinkInstance.id.in_(id_list)).update({BacklinkInstance.status: 'active'}, synchronize_session=False)
+        elif action == 'remove':
+            BacklinkInstance.query.filter(BacklinkInstance.id.in_(id_list)).update({BacklinkInstance.status: 'removed'}, synchronize_session=False)
+        elif action == 'delete':
+            BacklinkInstance.query.filter(BacklinkInstance.id.in_(id_list)).delete(synchronize_session=False)
+
+    db.session.commit()
+    flash(f'Bulk action "{action}" applied to {len(id_list)} items.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_dashboard'))
 
 # =============================================
 # ADMIN — SEED DATA
@@ -5928,7 +6432,21 @@ def vertical_article(vertical_slug, slug):
         db.or_(Banner.vertical_slug=='', Banner.vertical_slug==vertical_slug)
     ).order_by(Banner.position).all()
 
-    return render_template('shared/article.html', vertical=v, article=a, related=related, featured=featured, carousel_items=carousel_items, banners=banners)
+    # Inject SEO backlinks into article content
+    article_content = _inject_backlinks(a.content or '', vertical_slug, 'article', a.id, a.slug)
+
+    # Outtext backlinks (related articles from backlink system, shown in sidebar)
+    outtext_links = BacklinkInstance.query.join(BacklinkKeyword).filter(
+        BacklinkInstance.source_type == 'article',
+        BacklinkInstance.source_id == a.id,
+        BacklinkInstance.link_type == 'outtext',
+        BacklinkInstance.status == 'active',
+        BacklinkKeyword.is_active == True
+    ).limit(5).all()
+
+    return render_template('shared/article.html', vertical=v, article=a, related=related, featured=featured,
+        carousel_items=carousel_items, banners=banners,
+        article_content_with_backlinks=article_content, outtext_links=outtext_links)
 
 @app.route('/article/<int:article_id>/feedback', methods=['POST'])
 def submit_article_feedback(article_id):
@@ -5980,8 +6498,11 @@ def vertical_part(vertical_slug, segment_slug, zone_slug, part_slug):
     related_parts = Part.query.filter(Part.zone_id==z.id, Part.id!=p.id, Part.status=='published').limit(4).all()
     zone_parts = Part.query.filter_by(zone_id=z.id, status='published').order_by(Part.order).all()
     config = get_vertical_config(vertical_slug)
+    # Inject SEO backlinks into part content
+    part_content = _inject_backlinks(p.content or '', vertical_slug, 'part', p.id, p.slug)
     return render_template('shared/part.html', vertical=v, segment=s, zone=z, part=p,
-        related_articles=related_articles, related_parts=related_parts, zone_parts=zone_parts, **config)
+        related_articles=related_articles, related_parts=related_parts, zone_parts=zone_parts,
+        part_content_with_backlinks=part_content, **config)
 
 # =============================================
 # SHOP ROUTES (Standalone e-commerce aggregator)
@@ -6462,6 +6983,53 @@ def _run_schema_migration():
     if attraction_cols:
         if _ensure_column('attraction', 'price_original', "FLOAT DEFAULT 0", attraction_cols):
             changed = True
+
+    # --- Backlink Keyword table ---
+    if not _table_exists('backlink_keyword'):
+        print('  [+] Creating backlink_keyword table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS backlink_keyword (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                vertical_slug VARCHAR(50) DEFAULT '',
+                keyword VARCHAR(200) NOT NULL,
+                target_type VARCHAR(20) NOT NULL,
+                target_slug VARCHAR(200) NOT NULL,
+                target_title VARCHAR(300) DEFAULT '',
+                anchor_text VARCHAR(200) DEFAULT '',
+                priority INTEGER DEFAULT 5,
+                max_per_page INTEGER DEFAULT 1,
+                is_active BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bk_vertical ON backlink_keyword(vertical_slug)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bk_active ON backlink_keyword(is_active)"))
+        changed = True
+
+    # --- Backlink Instance table ---
+    if not _table_exists('backlink_instance'):
+        print('  [+] Creating backlink_instance table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS backlink_instance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                keyword_id INTEGER NOT NULL,
+                source_type VARCHAR(20) NOT NULL,
+                source_id INTEGER NOT NULL,
+                source_slug VARCHAR(200) DEFAULT '',
+                source_title VARCHAR(300) DEFAULT '',
+                target_type VARCHAR(20) NOT NULL,
+                target_slug VARCHAR(200) NOT NULL,
+                link_type VARCHAR(10) DEFAULT 'intext',
+                anchor_text VARCHAR(200) DEFAULT '',
+                status VARCHAR(15) DEFAULT 'active',
+                clicks INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (keyword_id) REFERENCES backlink_keyword(id)
+            )
+        """))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bi_keyword ON backlink_instance(keyword_id)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bi_source ON backlink_instance(source_type, source_id)"))
+        changed = True
 
     if changed:
         db.session.commit()

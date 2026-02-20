@@ -1,0 +1,100 @@
+{% extends "admin/base.html" %}
+{% block title %}Scan & Build Backlinks{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> <a href="{{ url_for('admin_seo_dashboard') }}">SEO</a> <span class="sep">›</span> Scan & Build
+{% endblock %}
+{% block content %}
+<div style="max-width:700px">
+  <h1 style="margin:0 0 8px;font-size:1.5rem">Scan & Build Backlinks</h1>
+  <p style="color:var(--muted);margin:0 0 24px">Scan all content to find keyword matches and create backlink instances. This includes scanning older articles to add links to newer content.</p>
+
+  <!-- Navigation Tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid var(--border);padding-bottom:12px">
+    <a href="{{ url_for('admin_seo_dashboard') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Dashboard</a>
+    <a href="{{ url_for('admin_seo_keywords') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Keywords</a>
+    <a href="{{ url_for('admin_seo_instances') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Instances</a>
+    <a href="{{ url_for('admin_seo_auto_generate') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Auto Generate</a>
+    <a href="{{ url_for('admin_seo_scan') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;background:var(--accent);color:#fff;font-weight:600">Scan & Build</a>
+  </div>
+
+  <form method="POST" style="display:flex;flex-direction:column;gap:16px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px">
+      <div>
+        <label style="font-size:0.9rem;font-weight:600;display:block;margin-bottom:6px">Select Vertical *</label>
+        <select name="vertical_slug" required style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:0.95rem">
+          <option value="">-- Choose a vertical --</option>
+          {% for v in verticals %}
+          <option value="{{ v.slug }}">{{ v.icon }} {{ v.name }} ({{ v.slug }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size:0.9rem;font-weight:600;display:block;margin-bottom:6px">Scan Scope</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <input type="radio" name="scan_scope" value="all" checked>
+            <div>
+              <div style="font-weight:500">All Content</div>
+              <div style="font-size:0.8rem;color:var(--muted)">Scan articles + parts for keyword matches</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <input type="radio" name="scan_scope" value="articles">
+            <div>
+              <div style="font-weight:500">Articles Only</div>
+              <div style="font-size:0.8rem;color:var(--muted)">Only scan article content and excerpts</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <input type="radio" name="scan_scope" value="parts">
+            <div>
+              <div style="font-weight:500">Parts Only</div>
+              <div style="font-size:0.8rem;color:var(--muted)">Only scan part content and descriptions</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div style="padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" name="clear_old">
+          <div>
+            <div style="font-weight:500;font-size:0.9rem">Clear old instances first</div>
+            <div style="font-size:0.8rem;color:var(--muted)">Delete all existing backlink instances for this vertical before scanning. Use this to fully rebuild links.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- What it does -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px">
+      <h3 style="margin:0 0 10px;font-size:0.95rem">How the scan works:</h3>
+      <ul style="margin:0;padding:0 0 0 18px;color:var(--muted);font-size:0.85rem;line-height:1.8">
+        <li>Loads all active keywords for the selected vertical</li>
+        <li>Scans each article/part content for keyword matches (case-insensitive)</li>
+        <li><strong>Self-linking is prevented</strong> — articles won't link to themselves</li>
+        <li>Creates a <code>BacklinkInstance</code> for each match (source → target)</li>
+        <li>Duplicates are skipped — same source+keyword won't create multiple instances</li>
+        <li><strong>Retroactive:</strong> Old articles get links to newer content that was added after them</li>
+        <li>Links are rendered automatically when articles are displayed on the frontend</li>
+      </ul>
+    </div>
+
+    <!-- Workflow tip -->
+    <div style="background:#fef3cd;border:1px solid #ffc107;border-radius:12px;padding:16px;color:#856404;font-size:0.85rem">
+      <strong>Recommended workflow:</strong>
+      <ol style="margin:8px 0 0;padding:0 0 0 18px;line-height:1.8">
+        <li>First, <a href="{{ url_for('admin_seo_auto_generate') }}" style="color:#856404;font-weight:600">Auto Generate Keywords</a> from your content</li>
+        <li>Review and adjust keywords in the <a href="{{ url_for('admin_seo_keywords') }}" style="color:#856404;font-weight:600">Keywords</a> page</li>
+        <li>Then run this scan to build all backlink instances</li>
+        <li>Re-run the scan whenever you add new articles or keywords</li>
+      </ol>
+    </div>
+
+    <button type="submit" style="padding:12px 28px;border-radius:8px;background:#27ae60;color:#fff;border:none;cursor:pointer;font-weight:600;font-size:1rem;align-self:flex-start">
+      Start Scanning
+    </button>
+  </form>
+</div>
+{% endblock %}

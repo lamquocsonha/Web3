@@ -31,7 +31,7 @@
     {% endif %}
 
     <!-- Article Content -->
-    <article class="article-body">{{ part.content|safe }}</article>
+    <article class="article-body">{{ (part_content_with_backlinks if part_content_with_backlinks else part.content)|safe }}</article>
 
     <!-- Product Carousel -->
     {% if part.embed_code or part.affiliate_links %}
