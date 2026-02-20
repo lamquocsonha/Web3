@@ -721,11 +721,53 @@ def admin_hotels_hub():
                    page=page, total_pages=(total_filtered + per_page - 1) // per_page)
 
     elif tab == 'sync':
-        # Hotel sync data - basic stats
+        from agoda_integration import get_agoda_api, VIETNAM_DESTINATIONS
+        # Auto-populate default Agoda credentials if not saved yet
+        _default_cid = '1959245'
+        _default_key = '1959245:5669c3b3-2865-4591-ba56-1b02a3c04082'
+        if not SiteSettings.get('agoda_cid', ''):
+            SiteSettings.set_val('agoda_cid', _default_cid, 'api')
+            SiteSettings.set_val('agoda_api_key', _default_key, 'api')
+            SiteSettings.set_val('agoda_enabled', '1', 'general')
+            import agoda_integration
+            agoda_integration._api_instance = None
+            db.session.commit()
+
+        api = get_agoda_api()
+        api_connected = api is not None
         total_hotels = Hotel.query.count()
         total_agoda = Hotel.query.filter_by(source='agoda_api').count()
+        total_manual = Hotel.query.filter(Hotel.source != 'agoda_api').count()
         total_active = Hotel.query.filter_by(is_active=True).count()
-        ctx.update(total_hotels=total_hotels, total_agoda=total_agoda, total_active=total_active)
+        cid = SiteSettings.get('agoda_cid', '')
+        has_key = bool(SiteSettings.get('agoda_api_key', ''))
+        destinations_sync = [
+            {'slug': slug, 'name': name, 'city_id': city_id, 'province_code': ''}
+            for name, slug, city_id in VIETNAM_DESTINATIONS
+        ]
+        agoda_destinations = [
+            {'slug': d['slug'], 'name': d['name'], 'city_id': d['city_id']}
+            for d in destinations_sync if d['city_id']
+        ]
+        page_sync = request.args.get('page', 1, type=int)
+        per_page_sync = 30
+        f_image = request.args.get('image', '')
+        rq = Hotel.query.filter_by(source='agoda_api')
+        if f_image == 'missing':
+            rq = rq.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
+        elif f_image == 'has':
+            rq = rq.filter(Hotel.image_url != '', Hotel.image_url != None)
+        agoda_no_image = Hotel.query.filter_by(source='agoda_api').filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
+        recent_total = rq.count()
+        recent = rq.order_by(Hotel.id.desc()).offset((page_sync - 1) * per_page_sync).limit(per_page_sync).all()
+        recent_pages = (recent_total + per_page_sync - 1) // per_page_sync
+        ctx.update(api_connected=api_connected, cid=cid, has_key=has_key,
+                   total_hotels=total_hotels, total_agoda=total_agoda,
+                   total_manual=total_manual, total_active=total_active,
+                   destinations=destinations_sync, agoda_destinations=agoda_destinations,
+                   recent=recent, page=page_sync, recent_total=recent_total,
+                   recent_pages=recent_pages, per_page=per_page_sync, f_image=f_image,
+                   agoda_no_image=agoda_no_image)
 
     elif tab == 'attractions':
         f_dest = request.args.get('dest', 'all')

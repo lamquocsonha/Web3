@@ -102,18 +102,125 @@
 <!-- ══ HOTEL SYNC TAB ══ -->
 <div class="hub-panel {% if active_tab=='sync' %}active{% endif %}">
 {% if active_tab == 'sync' %}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h2 style="margin:0;font-size:18px">Hotel Sync</h2>
-    <a href="{{ url_for('admin_hotel_sync') }}" class="btn btn-primary">Open Full Sync Panel</a>
-  </div>
-  <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+  <!-- Stats -->
+  <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
     <div class="stat-box"><div class="stat-val">{{ total_hotels }}</div><div class="stat-lbl">Total Hotels</div></div>
-    <div class="stat-box"><div class="stat-val" style="color:#3b82f6">{{ total_agoda }}</div><div class="stat-lbl">From Agoda</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#e74c3c">{{ total_agoda }}</div><div class="stat-lbl">From Agoda</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#3498db">{{ total_manual }}</div><div class="stat-lbl">Manual</div></div>
     <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ total_active }}</div><div class="stat-lbl">Active</div></div>
   </div>
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; text-align:center">
-    <p style="font-size:14px; color:var(--text-dim); margin-bottom:16px">Hotel Sync co nhieu tinh nang nang cao (search, import, fix images, fix addresses). Bam nut o tren de mo full panel.</p>
-    <a href="{{ url_for('admin_hotel_sync') }}" class="btn btn-primary">Go to Hotel Sync</a>
+
+  <!-- API Credentials -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0;font-size:15px">API Credentials</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        {% if api_connected %}
+        <span style="font-size:13px;padding:4px 10px;background:rgba(46,204,113,0.1);color:#2ecc71;border-radius:4px;font-weight:600">Connected</span>
+        {% else %}
+        <span style="font-size:13px;padding:4px 10px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">Not configured</span>
+        {% endif %}
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:13px" onclick="testConnection()" id="testBtn">Test</button>
+      </div>
+    </div>
+    <form method="POST" action="{{ url_for('admin_hotel_sync_save_credentials') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px"><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">CID</label><input style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2);color:var(--text);font-family:'DM Mono';box-sizing:border-box" name="cid" value="{{ cid }}" placeholder="1959245"></div>
+      <div style="flex:3;min-width:200px"><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">API Key</label><input style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2);color:var(--text);font-family:'DM Mono';box-sizing:border-box" name="api_key" value="{{ 'configured' if has_key else '' }}" placeholder="1959245:5669c3b3-..." {% if has_key %}onfocus="if(this.value==='configured')this.value=''"{% endif %}></div>
+      <button class="btn btn-primary" type="submit">Save</button>
+    </form>
+    <div id="testResult" style="margin-top:8px;font-size:13px;display:none"></div>
+  </div>
+
+  <!-- Fast Sync -->
+  <div style="background:linear-gradient(135deg,rgba(231,76,60,0.04),rgba(231,76,60,0.08));border:2px solid rgba(231,76,60,0.2);border-radius:12px;padding:20px;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <h3 style="margin:0;font-size:15px">Fast Sync — Tu dong phan bo tat ca tinh thanh</h3>
+        <p style="margin:4px 0 0;font-size:13px;color:var(--text-dim)">Tim & import khach san tu Agoda cho {{ agoda_destinations|length }} tinh thanh.</p>
+        {% if not api_connected %}<p style="margin:6px 0 0;font-size:13px;color:#e74c3c;font-weight:600">Luu credentials truoc khi sync</p>{% endif %}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="fsMaxPerCity" style="padding:6px 10px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)">
+          <option value="5">5/tinh</option><option value="10">10/tinh</option><option value="20">20/tinh</option><option value="30" selected>30/tinh</option><option value="50">50/tinh</option>
+        </select>
+        <button class="btn btn-primary" onclick="startFastSync()" id="fsSyncBtn" {% if not api_connected %}disabled{% endif %}>Fast Sync</button>
+        <button class="btn btn-ghost" onclick="stopFastSync()" id="fsStopBtn" style="display:none;color:#e74c3c;padding:6px 12px;font-size:13px">Stop</button>
+      </div>
+    </div>
+    <div id="fsProgress" style="display:none">
+      <div style="background:var(--border);border-radius:6px;height:8px;margin-bottom:10px;overflow:hidden"><div id="fsBar" style="height:100%;background:linear-gradient(90deg,#e74c3c,#ff6b6b);border-radius:6px;width:0%;transition:width 0.4s"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span id="fsStatus" style="color:var(--text-dim)">Dang chuan bi...</span><span id="fsSummary" style="font-family:'DM Mono';font-weight:600"></span></div>
+    </div>
+    <div id="fsLog" style="display:none;margin-top:12px;max-height:300px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'DM Mono';font-size:12px;line-height:1.8"></div>
+  </div>
+
+  <!-- Search Hotels -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+    <h3 style="margin:0 0 16px;font-size:15px">Tim thu cong theo tinh thanh</h3>
+    {% if not api_connected %}<p style="margin:-8px 0 12px;font-size:13px;color:#e74c3c;font-weight:600">Luu credentials truoc khi search</p>{% endif %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Tinh thanh</label>
+        <select id="syncDest" style="width:200px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)">
+          <option value="">Chon tinh thanh...</option>
+          {% for d in destinations %}<option value="{{ d.slug }}"{% if not d.city_id %} data-no-agoda="1"{% endif %}>{{ d.name }}{% if d.city_id %} ({{ d.city_id }}){% endif %}</option>{% endfor %}
+        </select>
+      </div>
+      <div style="display:none" id="wardGroup"><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Phuong xa</label>
+        <select id="syncWard" style="width:200px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)"><option value="">Tat ca phuong xa</option></select>
+      </div>
+      <div><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Check-in</label><input type="date" id="syncCheckin" style="width:150px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)"></div>
+      <div><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Check-out</label><input type="date" id="syncCheckout" style="width:150px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)"></div>
+      <button class="btn btn-primary" onclick="searchAgoda()" id="searchBtn" {% if not api_connected %}disabled{% endif %}>Search</button>
+      <button class="btn btn-ghost" onclick="importSelected()" id="importBtn" style="display:none;font-size:13px;padding:6px 14px">Import selected</button>
+    </div>
+    <div id="searchLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);font-size:14px">Dang tai du lieu tu Agoda API...</div>
+    <div id="searchResults" style="margin-top:16px"></div>
+    <div id="searchCount" style="margin-top:8px;font-size:13px;color:var(--text-dim);display:none"></div>
+  </div>
+
+  <!-- Imported Hotels List -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <h3 style="margin:0;font-size:15px">Hotels da import tu Agoda <span style="font-weight:400;color:var(--text-dim)">({{ total_agoda }})</span></h3>
+      {% if agoda_no_image %}<span style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">{{ agoda_no_image }} thieu anh</span>{% endif %}
+      <button onclick="fixImages()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">Fix images</button>
+      <button onclick="fixAddresses()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">Fix addresses</button>
+      <span id="fixImgResult" style="font-size:12px;color:var(--text-dim)"></span>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <a href="?tab=sync" class="btn btn-ghost" style="padding:4px 10px;font-size:12px{% if not f_image %};font-weight:700{% endif %}">All</a>
+        <a href="?tab=sync&image=missing" class="btn btn-ghost" style="padding:4px 10px;font-size:12px{% if f_image=='missing' %};font-weight:700;color:#e74c3c{% endif %}">No Image</a>
+        <a href="?tab=sync&image=has" class="btn btn-ghost" style="padding:4px 10px;font-size:12px{% if f_image=='has' %};font-weight:700;color:#2ecc71{% endif %}">Has Image</a>
+      </div>
+    </div>
+    {% if recent %}
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th style="width:56px">Anh</th><th>Hotel</th><th>Destination</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead><tbody>
+      {% for h in recent %}<tr>
+        <td style="font-family:'DM Mono';color:var(--text-dim)">{{ h.id }}</td>
+        <td>{% if h.image_url %}<img src="{{ h.image_url }}" style="width:48px;height:36px;object-fit:cover;border-radius:4px" loading="lazy" onerror="this.style.display='none'">{% else %}<span style="display:inline-block;width:48px;height:36px;background:rgba(231,76,60,0.1);border-radius:4px;text-align:center;line-height:36px;font-size:14px">-</span>{% endif %}</td>
+        <td><strong>{{ h.name[:50] }}</strong><div style="font-size:12px;color:var(--text-dim)">{{ h.district }}</div></td>
+        <td>{{ h.destination_name }}</td>
+        <td>{% for i in range(h.stars) %}&#11088;{% endfor %}</td>
+        <td><span style="background:#004fac;color:#fff;padding:1px 5px;border-radius:3px;font-size:12px;font-weight:700">{{ h.rating }}</span></td>
+        <td style="font-family:'DM Mono'">{{ "{:,.0f}".format(h.price_from) }}d</td>
+        <td>{% if h.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Active</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">Off</span>{% endif %}</td>
+      </tr>{% endfor %}
+    </tbody></table></div>
+    {% if recent_pages > 1 %}
+    <div class="pag">
+      {% if page > 1 %}<a href="?tab=sync&image={{ f_image }}&page={{ page-1 }}">Prev</a>{% endif %}
+      {% for p in range(1, recent_pages + 1) %}
+        {% if p == page %}<a class="current">{{ p }}</a>
+        {% elif p == 1 or p == recent_pages or (p >= page - 2 and p <= page + 2) %}<a href="?tab=sync&image={{ f_image }}&page={{ p }}">{{ p }}</a>
+        {% elif p == page - 3 or p == page + 3 %}<span style="padding:0 3px;color:var(--text-dim)">...</span>{% endif %}
+      {% endfor %}
+      {% if page < recent_pages %}<a href="?tab=sync&image={{ f_image }}&page={{ page+1 }}">Next</a>{% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div style="padding:24px;text-align:center;color:var(--text-dim);font-size:14px">
+      {% if f_image == 'missing' %}Khong co hotel nao thieu anh{% elif f_image == 'has' %}Khong co hotel nao co anh{% else %}Chua import hotel nao tu Agoda{% endif %}
+    </div>
+    {% endif %}
   </div>
 {% endif %}
 </div>
@@ -158,4 +265,93 @@
   {% endif %}
 {% endif %}
 </div>
+
+{% if active_tab == 'sync' %}
+<script>
+function fixImages(){
+  var el=document.getElementById('fixImgResult');el.textContent='Dang fix...';el.style.color='var(--text-dim)';
+  fetch('/admin/hotel-sync/fix-images',{method:'POST'}).then(r=>r.json()).then(d=>{el.textContent='Done! '+d.fixed+' fixed. Reload de xem.';el.style.color='#2ecc71';}).catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
+}
+function fixAddresses(){
+  var el=document.getElementById('fixImgResult');el.textContent='Dang geocode...';el.style.color='var(--text-dim)';
+  fetch('/admin/hotel-sync/fix-addresses',{method:'POST'}).then(r=>r.json()).then(d=>{el.textContent='Done! '+d.updated+'/'+d.total+' updated. Reload de xem.';el.style.color='#2ecc71';}).catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
+}
+(function(){
+  var destSel=document.getElementById('syncDest'),wardGrp=document.getElementById('wardGroup'),wardSel=document.getElementById('syncWard');
+  if(!destSel||!wardGrp||!wardSel)return;
+  destSel.addEventListener('change',function(){
+    var slug=this.value;wardSel.innerHTML='<option value="">Tat ca phuong xa</option>';
+    if(!slug){wardGrp.style.display='none';return;}
+    wardGrp.style.display='';wardSel.innerHTML='<option value="">Dang tai...</option>';wardSel.disabled=true;
+    fetch('/api/wards/by-destination?slug='+encodeURIComponent(slug)).then(r=>r.json()).then(data=>{
+      wardSel.disabled=false;wardSel.innerHTML='<option value="">Tat ca phuong xa ('+( data.total||0)+')</option>';
+      if(data.wards&&data.wards.length>0)data.wards.forEach(w=>{var o=document.createElement('option');o.value=w.name;o.textContent=w.name;wardSel.appendChild(o);});
+      else wardSel.innerHTML='<option value="">Chua co du lieu phuong xa</option>';
+    }).catch(()=>{wardSel.disabled=false;wardSel.innerHTML='<option value="">Khong tai duoc</option>';});
+  });
+})();
+var fsStopped=false,fsRunning=false;
+var DESTINATIONS=[{% for d in agoda_destinations %}{slug:'{{ d.slug }}',name:'{{ d.name }}'},{% endfor %}];
+function startFastSync(){
+  if(fsRunning)return;fsRunning=true;fsStopped=false;
+  var btn=document.getElementById('fsSyncBtn');btn.disabled=true;btn.textContent='Dang sync...';
+  document.getElementById('fsStopBtn').style.display='inline-flex';
+  document.getElementById('fsProgress').style.display='block';
+  document.getElementById('fsLog').style.display='block';document.getElementById('fsLog').innerHTML='';
+  var maxPerCity=parseInt(document.getElementById('fsMaxPerCity').value)||10,total=DESTINATIONS.length,totalImported=0,totalFound=0;
+  function syncNext(idx){
+    if(fsStopped||idx>=total){document.getElementById('fsBar').style.width='100%';fsRunning=false;btn.disabled=false;btn.textContent='Fast Sync';document.getElementById('fsStopBtn').style.display='none';
+      document.getElementById('fsStatus').innerHTML=fsStopped?'<span style="color:#f59e0b;font-weight:600">Da dung lai</span>':'<span style="color:#2ecc71;font-weight:600">Hoan tat!</span>';
+      document.getElementById('fsSummary').textContent=totalImported+' imported / '+totalFound+' found';appendLog(fsStopped?'Dung tai':'Hoan tat! '+totalImported+' hotel imported');return;}
+    var dest=DESTINATIONS[idx],pct=Math.round(idx/total*100);
+    document.getElementById('fsBar').style.width=pct+'%';document.getElementById('fsStatus').textContent='('+(idx+1)+'/'+total+') '+dest.name+'...';
+    document.getElementById('fsSummary').textContent=totalImported+' imported';appendLog(dest.name+' ...');
+    fetch('/admin/hotel-sync/fast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({destination:dest.slug,max_per_city:maxPerCity})})
+    .then(r=>r.json()).then(data=>{totalFound+=(data.found||0);totalImported+=(data.imported||0);appendLog('  '+dest.name+': '+(data.found||0)+' found, '+(data.imported||0)+' imported');setTimeout(()=>syncNext(idx+1),500);})
+    .catch(()=>{appendLog('  Loi: '+dest.name);setTimeout(()=>syncNext(idx+1),1000);});
+  }
+  appendLog('Bat dau Fast Sync — '+total+' tinh thanh, max '+maxPerCity+' hotels/tinh');syncNext(0);
+}
+function stopFastSync(){fsStopped=true;document.getElementById('fsStopBtn').style.display='none';}
+function appendLog(msg){var log=document.getElementById('fsLog');log.innerHTML+=msg+'<br>';log.scrollTop=log.scrollHeight;}
+function testConnection(){
+  var btn=document.getElementById('testBtn'),result=document.getElementById('testResult');btn.textContent='...';btn.disabled=true;result.style.display='none';
+  fetch('/admin/hotel-sync/test',{method:'POST'}).then(r=>r.json()).then(data=>{
+    result.style.display='block';
+    result.innerHTML=data.connected?'<span style="color:#2ecc71;font-weight:600">Ket noi thanh cong</span>':'<span style="color:#e74c3c;font-weight:600">Ket noi that bai</span> '+(data.error||'');
+    btn.textContent='Test';btn.disabled=false;
+  }).catch(()=>{result.style.display='block';result.innerHTML='<span style="color:#e74c3c">Loi network</span>';btn.textContent='Test';btn.disabled=false;});
+}
+var searchResultsData=[];
+function searchAgoda(){
+  var dest=document.getElementById('syncDest').value;if(!dest){alert('Chon destination truoc');return;}
+  var btn=document.getElementById('searchBtn');btn.textContent='...';btn.disabled=true;
+  document.getElementById('searchLoading').style.display='block';document.getElementById('searchResults').innerHTML='';document.getElementById('searchCount').style.display='none';document.getElementById('importBtn').style.display='none';
+  fetch('/admin/hotel-sync/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({destination:dest,checkin:document.getElementById('syncCheckin').value,checkout:document.getElementById('syncCheckout').value})})
+  .then(r=>r.json()).then(data=>{
+    document.getElementById('searchLoading').style.display='none';btn.textContent='Search';btn.disabled=false;searchResultsData=data.hotels||[];
+    if(data.error){document.getElementById('searchResults').innerHTML='<div style="padding:16px;color:#e74c3c">'+data.error+'</div>';return;}
+    if(searchResultsData.length===0){document.getElementById('searchResults').innerHTML='<div style="padding:16px;color:var(--text-dim)">Khong tim thay hotel nao</div>';return;}
+    document.getElementById('importBtn').style.display='inline-flex';document.getElementById('searchCount').style.display='block';document.getElementById('searchCount').textContent=data.total+' hotels found';
+    var html='<div class="tbl-wrap"><table><thead><tr><th style="width:30px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th><th>Hotel</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead><tbody>';
+    searchResultsData.forEach(function(h,i){var imp=h.already_imported;
+      html+='<tr style="'+(imp?'opacity:0.5':'')+'">'+'<td><input type="checkbox" class="hCheck" data-idx="'+i+'" '+(imp?'disabled':'checked')+'></td>'
+      +'<td><strong>'+(h.name||'').substring(0,50)+'</strong><div style="font-size:12px;color:var(--text-dim)">'+(h.district||h.address||'')+'</div></td>'
+      +'<td>'+'&#11088;'.repeat(h.stars||0)+'</td><td>'+(h.rating||0)+'</td>'
+      +'<td style="font-family:DM Mono">'+Number(h.price_from||0).toLocaleString()+'d</td>'
+      +'<td>'+(imp?'<span style="color:var(--text-dim)">Da import</span>':'<span style="color:#2ecc71">Moi</span>')+'</td></tr>';
+    });html+='</tbody></table></div>';document.getElementById('searchResults').innerHTML=html;
+  }).catch(()=>{document.getElementById('searchLoading').style.display='none';document.getElementById('searchResults').innerHTML='<div style="padding:16px;color:#e74c3c">Loi ket noi API</div>';btn.textContent='Search';btn.disabled=false;});
+}
+function toggleAll(el){document.querySelectorAll('.hCheck:not(:disabled)').forEach(cb=>{cb.checked=el.checked;});}
+function importSelected(){
+  var selected=[];document.querySelectorAll('.hCheck:checked').forEach(cb=>{var idx=parseInt(cb.dataset.idx);if(searchResultsData[idx])selected.push(searchResultsData[idx]);});
+  if(selected.length===0){alert('Chon it nhat 1 hotel');return;}
+  var btn=document.getElementById('importBtn');btn.textContent='Importing...';btn.disabled=true;
+  fetch('/admin/hotel-sync/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hotels:selected})})
+  .then(r=>r.json()).then(data=>{btn.textContent='Import selected';btn.disabled=false;if(data.error)alert(data.error);else{alert('Da import '+data.imported+' khach san!');location.reload();}})
+  .catch(()=>{btn.textContent='Import selected';btn.disabled=false;alert('Loi import');});
+}
+</script>
+{% endif %}
 {% endblock %}
