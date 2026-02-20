@@ -1,0 +1,134 @@
+{% extends "admin/base.html" %}
+{% block title %}Vouchers{% endblock %}
+{% block breadcrumb %}Vouchers{% endblock %}
+{% block content %}
+<style>
+.hub-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:24px }
+.hub-tab { flex:1; padding:11px 18px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; color:var(--text-dim); border:none; background:transparent; font-family:inherit; transition:all .2s }
+.hub-tab:hover { background:var(--surface2); color:var(--text) }
+.hub-tab.active { background:var(--accent); color:#fff }
+.hub-panel { display:none }
+.hub-panel.active { display:block }
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.stat-val { font-size:26px; font-weight:800 }
+.stat-lbl { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+.filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center }
+.filter-bar select { padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface); color:var(--text); font-family:inherit }
+.tbl-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.tbl-wrap table { width:100%; border-collapse:collapse }
+.tbl-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.tbl-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.tbl-wrap tr:last-child td { border:none }
+.tbl-wrap tr:hover td { background:var(--surface2) }
+.btn { padding:8px 18px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.btn-primary { background:var(--accent); color:#fff }
+.btn-ghost { background:var(--surface2); color:var(--text) }
+.btn-danger { background:rgba(239,68,68,.1); color:#ef4444 }
+.empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:5px; font-weight:700 }
+</style>
+
+<div class="hub-tabs">
+  <button class="hub-tab {% if active_tab=='vouchers' %}active{% endif %}" onclick="location.href='?tab=vouchers'">Vouchers</button>
+  <button class="hub-tab {% if active_tab=='widgets' %}active{% endif %}" onclick="location.href='?tab=widgets'">Widgets</button>
+  <button class="hub-tab {% if active_tab=='sync' %}active{% endif %}" onclick="location.href='?tab=sync'">Voucher Sync</button>
+</div>
+
+<!-- ══ VOUCHERS TAB ══ -->
+<div class="hub-panel {% if active_tab=='vouchers' %}active{% endif %}">
+{% if active_tab == 'vouchers' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Vouchers</h2>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_voucher_new') }}" class="btn btn-primary">+ New Voucher</a>
+      <form method="POST" action="{{ url_for('admin_vouchers_bulk_delete') }}" style="display:inline"><button type="submit" class="btn btn-danger" onclick="return confirm('Delete selected?')">Bulk Delete</button></form>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val">{{ total }}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ active_v }}</div><div class="stat-lbl">Active</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="stat-lbl">Clicks</div></div>
+  </div>
+  <form class="filter-bar" method="GET">
+    <input type="hidden" name="tab" value="vouchers">
+    <select name="cat" onchange="this.form.submit()">
+      <option value="all">All Categories</option>
+      {% for c in cats %}<option value="{{ c }}" {% if f_cat==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+    <select name="merchant" onchange="this.form.submit()">
+      <option value="all">All Merchants</option>
+      {% for m in merchants %}<option value="{{ m }}" {% if f_merchant==m %}selected{% endif %}>{{ m }}</option>{% endfor %}
+    </select>
+    <select name="status" onchange="this.form.submit()">
+      <option value="all">All Status</option>
+      <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+  </form>
+  {% if items %}
+  <div class="tbl-wrap"><table><thead><tr><th>Voucher</th><th>Merchant</th><th>Category</th><th>Discount</th><th>Clicks</th><th>Active</th><th></th></tr></thead><tbody>
+    {% for v in items %}<tr>
+      <td><strong>{{ v.title[:50] }}</strong></td>
+      <td>{{ v.merchant }}</td>
+      <td><span class="badge" style="background:var(--accent-dim);color:var(--accent)">{{ v.category }}</span></td>
+      <td style="font-weight:700;color:#ef4444">{{ v.discount_text or '-' }}</td>
+      <td>{{ v.clicks or 0 }}</td>
+      <td>{% if v.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('admin_voucher_edit', vid=v.id) }}" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_voucher_delete', vid=v.id) }}" style="display:inline"><button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Delete?')">Del</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty"><h3>No vouchers found</h3></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══ WIDGETS TAB ══ -->
+<div class="hub-panel {% if active_tab=='widgets' %}active{% endif %}">
+{% if active_tab == 'widgets' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Voucher Widgets</h2>
+    <a href="{{ url_for('admin_voucher_widget_new') }}" class="btn btn-primary">+ New Widget</a>
+  </div>
+  {% if widgets %}
+  <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Vouchers</th><th>Active</th><th></th></tr></thead><tbody>
+    {% for w in widgets %}<tr>
+      <td><strong>{{ w.name }}</strong></td>
+      <td><span class="badge" style="background:var(--accent-dim);color:var(--accent)">{{ w.widget_type }}</span></td>
+      <td>{{ w.voucher_count if w.voucher_count else '-' }}</td>
+      <td>{% if w.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('admin_voucher_widget_edit', wid=w.id) }}" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_voucher_widget_toggle', wid=w.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty"><h3>No widgets</h3><p>Create a voucher widget to display vouchers on your site.</p></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══ VOUCHER SYNC TAB ══ -->
+<div class="hub-panel {% if active_tab=='sync' %}active{% endif %}">
+{% if active_tab == 'sync' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Voucher Sync</h2>
+    <a href="{{ url_for('admin_voucher_sync') }}" class="btn btn-primary">Open Full Sync Panel</a>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val">{{ total_synced }}</div><div class="stat-lbl">Synced</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ total_active }}</div><div class="stat-lbl">Active</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#3b82f6">{{ total_manual }}</div><div class="stat-lbl">Manual</div></div>
+  </div>
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; text-align:center">
+    <p style="font-size:14px; color:var(--text-dim); margin-bottom:16px">Voucher Sync co nhieu tinh nang (fetch merchants, auto sync, cleanup). Bam nut o tren de mo full panel.</p>
+    <a href="{{ url_for('admin_voucher_sync') }}" class="btn btn-primary">Go to Voucher Sync</a>
+  </div>
+{% endif %}
+</div>
+{% endblock %}

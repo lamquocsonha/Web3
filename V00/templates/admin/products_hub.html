@@ -1,0 +1,190 @@
+{% extends "admin/base.html" %}
+{% block title %}Products{% endblock %}
+{% block breadcrumb %}Products{% endblock %}
+{% block content %}
+<style>
+.hub-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:24px }
+.hub-tab { flex:1; padding:11px 18px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; color:var(--text-dim); border:none; background:transparent; font-family:inherit; transition:all .2s }
+.hub-tab:hover { background:var(--surface2); color:var(--text) }
+.hub-tab.active { background:var(--accent); color:#fff }
+.hub-panel { display:none }
+.hub-panel.active { display:block }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.stat-val { font-size:26px; font-weight:800 }
+.stat-lbl { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+.filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center }
+.filter-bar select, .filter-bar input { padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface); color:var(--text); font-family:inherit }
+.tbl-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.tbl-wrap table { width:100%; border-collapse:collapse }
+.tbl-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.tbl-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.tbl-wrap tr:last-child td { border:none }
+.tbl-wrap tr:hover td { background:var(--surface2) }
+.btn { padding:8px 18px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.btn-primary { background:var(--accent); color:#fff }
+.btn-ghost { background:var(--surface2); color:var(--text) }
+.btn-danger { background:rgba(239,68,68,.1); color:#ef4444 }
+.btn-success { background:#d1fae5; color:#065f46 }
+.empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:5px; font-weight:700 }
+.pag { display:flex; gap:4px; margin-top:16px }
+.pag a { padding:6px 12px; border:1px solid var(--border); border-radius:6px; text-decoration:none; font-size:14px; color:var(--text) }
+.pag a.current { background:var(--accent); color:#fff; border-color:var(--accent) }
+</style>
+
+<div class="hub-tabs">
+  <button class="hub-tab {% if active_tab=='products' %}active{% endif %}" onclick="location.href='?tab=products'">Products</button>
+  <button class="hub-tab {% if active_tab=='affiliate' %}active{% endif %}" onclick="location.href='?tab=affiliate'">Affiliate</button>
+  <button class="hub-tab {% if active_tab=='hotdeals' %}active{% endif %}" onclick="location.href='?tab=hotdeals'">Hot Deals</button>
+  <button class="hub-tab {% if active_tab=='banners' %}active{% endif %}" onclick="location.href='?tab=banners'">AT Banners</button>
+</div>
+
+<!-- ══ PRODUCTS TAB ══ -->
+<div class="hub-panel {% if active_tab=='products' %}active{% endif %}">
+{% if active_tab == 'products' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Products</h2>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_product_new') }}" class="btn btn-primary">+ New</a>
+      <a href="{{ url_for('admin_products_import_csv') }}" class="btn btn-ghost">Import CSV</a>
+      <a href="{{ url_for('admin_products_datafeeds') }}" class="btn btn-ghost">Datafeeds</a>
+    </div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val">{{ total }}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ active }}</div><div class="stat-lbl">Active</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="stat-lbl">Clicks</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#f59e0b">{{ "{:,}".format(total_conv) }}</div><div class="stat-lbl">Conversions</div></div>
+  </div>
+  <form class="filter-bar" method="GET">
+    <input type="hidden" name="tab" value="products">
+    <select name="vertical" onchange="this.form.submit()">
+      <option value="all">All Verticals</option>
+      {% for v in verticals %}<option value="{{ v.slug }}" {% if f_vertical==v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>{% endfor %}
+    </select>
+    <select name="network" onchange="this.form.submit()">
+      <option value="all">All Networks</option>
+      {% for n in networks %}<option value="{{ n }}" {% if f_network==n %}selected{% endif %}>{{ n }}</option>{% endfor %}
+    </select>
+    <select name="status" onchange="this.form.submit()">
+      <option value="all">All Status</option>
+      <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+    <input type="text" name="q" value="{{ f_search }}" placeholder="Search..." style="min-width:180px">
+    <button type="submit" class="btn btn-ghost">Filter</button>
+  </form>
+  {% if products %}
+  <div class="tbl-wrap"><table><thead><tr><th>Product</th><th>Network</th><th>Price</th><th>Clicks</th><th>Conv</th><th>Status</th><th></th></tr></thead><tbody>
+    {% for p in products %}<tr>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        {% if p.image_url %}<img src="{{ p.image_url }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">{% endif %}
+        <div><strong style="font-size:14px">{{ p.product_name[:50] }}</strong></div>
+      </div></td>
+      <td><span class="badge" style="background:var(--accent-dim);color:var(--accent)">{{ p.network }}</span></td>
+      <td style="font-weight:700">{{ "{:,.0f}".format(p.price or 0) }}</td>
+      <td>{{ p.clicks or 0 }}</td>
+      <td>{{ p.conversions or 0 }}</td>
+      <td>{% if p.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Active</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">Off</span>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('admin_product_edit', pid=p.id) }}" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_product_toggle', pid=p.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% if total_pages > 1 %}
+  <div class="pag">{% for pg in range(1, total_pages + 1) %}<a href="?tab=products&page={{ pg }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}" {% if pg == page %}class="current"{% endif %}>{{ pg }}</a>{% endfor %}</div>
+  {% endif %}
+  {% else %}
+  <div class="empty"><h3>No products found</h3></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══ AFFILIATE TAB ══ -->
+<div class="hub-panel {% if active_tab=='affiliate' %}active{% endif %}">
+{% if active_tab == 'affiliate' %}
+  <h2 style="font-size:18px;margin-bottom:16px">Affiliate Networks</h2>
+  <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-box"><div class="stat-val">{{ total_links }}</div><div class="stat-lbl">Total Links</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="stat-lbl">Total Clicks</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#f59e0b">{{ "{:,}".format(total_conv) }}</div><div class="stat-lbl">Conversions</div></div>
+  </div>
+  {% if net_stats %}
+  <div class="tbl-wrap"><table><thead><tr><th>Network</th><th>Links</th><th>Clicks</th><th>Conversions</th><th>CTR</th></tr></thead><tbody>
+    {% for n in net_stats %}<tr>
+      <td><strong>{{ n.name }}</strong></td>
+      <td>{{ n.count }}</td>
+      <td>{{ "{:,}".format(n.clicks) }}</td>
+      <td>{{ "{:,}".format(n.conv) }}</td>
+      <td>{{ "%.1f"|format(n.conv / n.clicks * 100 if n.clicks > 0 else 0) }}%</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty"><h3>No affiliate data</h3></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══ HOT DEALS TAB ══ -->
+<div class="hub-panel {% if active_tab=='hotdeals' %}active{% endif %}">
+{% if active_tab == 'hotdeals' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Hot Deals ({{ deals|length }})</h2>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_hotdeals_upload') }}" class="btn btn-primary">Upload Deals</a>
+      <form method="POST" action="{{ url_for('admin_hotdeals_delete_all') }}" style="display:inline"><button type="submit" class="btn btn-danger" onclick="return confirm('Delete ALL deals?')">Delete All</button></form>
+    </div>
+  </div>
+  {% if deals %}
+  <div class="tbl-wrap"><table><thead><tr><th>Deal</th><th>Price</th><th>Discount</th><th>Active</th><th></th></tr></thead><tbody>
+    {% for d in deals %}<tr>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        {% if d.image_url %}<img src="{{ d.image_url }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">{% endif %}
+        <strong>{{ d.title[:50] }}</strong>
+      </div></td>
+      <td style="font-weight:700;color:#ef4444">{{ "{:,.0f}".format(d.final_price or d.price or 0) }}</td>
+      <td>{% if d.discount_percent %}<span class="badge" style="background:#fef3c7;color:#92400e">-{{ d.discount_percent }}%</span>{% endif %}</td>
+      <td>{% if d.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+      <td>
+        <form method="POST" action="{{ url_for('admin_hotdeal_toggle', deal_id=d.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
+        <form method="POST" action="{{ url_for('admin_hotdeal_delete', deal_id=d.id) }}" style="display:inline"><button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Delete?')">Del</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty"><h3>No hot deals</h3><p>Upload deals to get started.</p></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══ AT BANNERS TAB ══ -->
+<div class="hub-panel {% if active_tab=='banners' %}active{% endif %}">
+{% if active_tab == 'banners' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">AccessTrade Banners ({{ banners|length }})</h2>
+    <div style="display:flex;gap:8px">
+      <form method="POST" action="{{ url_for('admin_at_banners_sync') }}"><button type="submit" class="btn btn-primary">Sync Banners</button></form>
+      <form method="POST" action="{{ url_for('admin_at_banners_delete_all') }}" style="display:inline"><button type="submit" class="btn btn-danger" onclick="return confirm('Delete ALL?')">Delete All</button></form>
+    </div>
+  </div>
+  {% if banners %}
+  <div class="tbl-wrap"><table><thead><tr><th>Banner</th><th>Size</th><th>Clicks</th><th>Active</th><th></th></tr></thead><tbody>
+    {% for b in banners %}<tr>
+      <td><strong>{{ b.name[:50] }}</strong></td>
+      <td>{{ b.width }}x{{ b.height }}</td>
+      <td>{{ b.clicks or 0 }}</td>
+      <td>{% if b.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+      <td>
+        <form method="POST" action="{{ url_for('admin_at_banner_toggle', banner_id=b.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
+        <form method="POST" action="{{ url_for('admin_at_banner_delete', banner_id=b.id) }}" style="display:inline"><button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:13px" onclick="return confirm('Delete?')">Del</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty"><h3>No banners</h3><p>Sync from AccessTrade to get started.</p></div>
+  {% endif %}
+{% endif %}
+</div>
+{% endblock %}

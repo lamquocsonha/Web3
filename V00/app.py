@@ -609,12 +609,23 @@ def admin_delete_link(lid):
 # =============================================
 @app.route('/admin/monetization')
 def admin_monetization():
-    """Unified Monetization Hub — Products, Hotels, Vouchers, HotDeals, Locations"""
+    """Redirect old monetization URL to products hub"""
+    tab = request.args.get('tab', 'products')
+    if tab in ('hotels',):
+        return redirect(url_for('admin_hotels_hub'))
+    elif tab in ('vouchers',):
+        return redirect(url_for('admin_vouchers_hub'))
+    return redirect(url_for('admin_products_hub'))
+
+
+@app.route('/admin/products-hub')
+def admin_products_hub():
+    """Products Hub — Products, Affiliate, Hot Deals, AT Banners"""
+    from sqlalchemy import func as sqlfunc
     tab = request.args.get('tab', 'products')
     ctx = {'active_tab': tab}
 
     if tab == 'products':
-        from sqlalchemy import func as sqlfunc
         f_vertical = request.args.get('vertical', 'all')
         f_network = request.args.get('network', 'all')
         f_status = request.args.get('status', 'all')
@@ -634,7 +645,7 @@ def admin_monetization():
         if f_search:
             query = query.filter(AffiliateLink.product_name.ilike(f'%{f_search}%'))
 
-        total = query.count()
+        total_q = query.count()
         products = query.order_by(AffiliateLink.created_at.desc()).offset((page - 1) * per_page).limit(per_page).all()
         verticals = Vertical.query.order_by(Vertical.name).all()
         networks = db.session.query(AffiliateLink.network).distinct().all()
@@ -647,10 +658,38 @@ def admin_monetization():
         ctx.update(products=products, verticals=verticals, networks=[n[0] for n in networks],
                    f_vertical=f_vertical, f_network=f_network, f_status=f_status, f_search=f_search,
                    total=total_all, active=active, total_clicks=total_clicks, total_conv=total_conv,
-                   page=page, total_pages=(total + per_page - 1) // per_page, pagination=total)
+                   page=page, total_pages=(total_q + per_page - 1) // per_page)
 
-    elif tab == 'hotels':
-        from sqlalchemy import func as sqlfunc
+    elif tab == 'affiliate':
+        networks = db.session.query(
+            AffiliateLink.network, sqlfunc.count(AffiliateLink.id),
+            sqlfunc.sum(AffiliateLink.clicks), sqlfunc.sum(AffiliateLink.conversions)
+        ).group_by(AffiliateLink.network).all()
+        net_stats = [{'name': n[0], 'count': n[1], 'clicks': n[2] or 0, 'conv': n[3] or 0} for n in networks]
+        total_clicks = sum(n['clicks'] for n in net_stats)
+        total_conv = sum(n['conv'] for n in net_stats)
+        total_links = sum(n['count'] for n in net_stats)
+        ctx.update(net_stats=net_stats, total_clicks=total_clicks, total_conv=total_conv, total_links=total_links)
+
+    elif tab == 'hotdeals':
+        deals = HotDeal.query.order_by(HotDeal.created_at.desc()).all()
+        ctx.update(deals=deals, now=datetime.utcnow())
+
+    elif tab == 'banners':
+        banners = AccessTradeBanner.query.order_by(AccessTradeBanner.created_at.desc()).all()
+        ctx.update(banners=banners, now=datetime.utcnow())
+
+    return render_template('admin/products_hub.html', **ctx)
+
+
+@app.route('/admin/hotels-hub')
+def admin_hotels_hub():
+    """Hotels Hub — Hotels, Hotel Sync, Attractions"""
+    from sqlalchemy import func as sqlfunc
+    tab = request.args.get('tab', 'hotels')
+    ctx = {'active_tab': tab}
+
+    if tab == 'hotels':
         f_dest = request.args.get('dest', 'all')
         f_stars = request.args.get('stars', 'all')
         f_status = request.args.get('status', 'all')
@@ -681,8 +720,44 @@ def admin_monetization():
                    total=total, active_h=active_h, no_image=no_image, total_clicks=total_clicks,
                    page=page, total_pages=(total_filtered + per_page - 1) // per_page)
 
-    elif tab == 'vouchers':
-        from sqlalchemy import func as sqlfunc
+    elif tab == 'sync':
+        # Hotel sync data - basic stats
+        total_hotels = Hotel.query.count()
+        total_agoda = Hotel.query.filter_by(source='agoda').count()
+        total_active = Hotel.query.filter_by(is_active=True).count()
+        ctx.update(total_hotels=total_hotels, total_agoda=total_agoda, total_active=total_active)
+
+    elif tab == 'attractions':
+        f_dest = request.args.get('dest', 'all')
+        f_cat = request.args.get('cat', 'all')
+
+        query = Attraction.query
+        if f_dest != 'all':
+            query = query.filter_by(destination=f_dest)
+        if f_cat != 'all':
+            query = query.filter_by(category=f_cat)
+
+        items = query.order_by(Attraction.created_at.desc()).all()
+        destinations = db.session.query(Attraction.destination).distinct().all()
+        cats = db.session.query(Attraction.category).distinct().all()
+        total = Attraction.query.count()
+        active_a = Attraction.query.filter_by(is_active=True).count()
+
+        ctx.update(items=items, destinations=[d[0] for d in destinations if d[0]],
+                   cats=[c[0] for c in cats if c[0]],
+                   f_dest=f_dest, f_cat=f_cat, total=total, active_a=active_a)
+
+    return render_template('admin/hotels_hub.html', **ctx)
+
+
+@app.route('/admin/vouchers-hub')
+def admin_vouchers_hub():
+    """Vouchers Hub — Vouchers, Voucher Widgets, Voucher Sync"""
+    from sqlalchemy import func as sqlfunc
+    tab = request.args.get('tab', 'vouchers')
+    ctx = {'active_tab': tab}
+
+    if tab == 'vouchers':
         f_cat = request.args.get('cat', 'all')
         f_merchant = request.args.get('merchant', 'all')
         f_status = request.args.get('status', 'all')
@@ -705,37 +780,22 @@ def admin_monetization():
         active_v = Voucher.query.filter_by(is_active=True).count()
         total_clicks = db.session.query(sqlfunc.sum(Voucher.clicks)).scalar() or 0
 
-        ctx.update(items=items, merchants=[m[0] for m in merchants], cats=[c[0] for c in cats],
+        ctx.update(items=items, merchants=[m[0] for m in merchants if m[0]],
+                   cats=[c[0] for c in cats if c[0]],
                    f_cat=f_cat, f_merchant=f_merchant, f_status=f_status,
                    total=total, active_v=active_v, total_clicks=total_clicks)
 
-    elif tab == 'hotdeals':
-        from datetime import datetime as dt
-        deals = HotDeal.query.order_by(HotDeal.created_at.desc()).all()
-        banners = AccessTradeBanner.query.order_by(AccessTradeBanner.created_at.desc()).all()
-        ctx.update(deals=deals, banners=banners, now=dt.utcnow())
+    elif tab == 'widgets':
+        widgets = VoucherWidget.query.all()
+        ctx.update(widgets=widgets)
 
-    elif tab == 'locations':
-        f_province = request.args.get('province', 'all')
-        f_level = request.args.get('level', 'all')
-        f_search = request.args.get('q', '')
+    elif tab == 'sync':
+        total_synced = Voucher.query.filter_by(source='accesstrade').count()
+        total_active = Voucher.query.filter_by(is_active=True).count()
+        total_manual = Voucher.query.filter_by(source='manual').count()
+        ctx.update(total_synced=total_synced, total_active=total_active, total_manual=total_manual)
 
-        query = WardCommune.query
-        if f_province != 'all':
-            query = query.filter_by(province_name=f_province)
-        if f_level != 'all':
-            query = query.filter_by(level=f_level)
-        if f_search:
-            query = query.filter(WardCommune.name.ilike(f'%{f_search}%'))
-
-        wards = query.order_by(WardCommune.province_name, WardCommune.name).all()
-        provinces = db.session.query(WardCommune.province_name).distinct().order_by(WardCommune.province_name).all()
-        total = WardCommune.query.count()
-
-        ctx.update(wards=wards, provinces=[p[0] for p in provinces], total=total,
-                   f_province=f_province, f_level=f_level, f_search=f_search)
-
-    return render_template('admin/monetization_hub.html', **ctx)
+    return render_template('admin/vouchers_hub.html', **ctx)
 
 # =============================================
 # ADMIN — AFFILIATE HUB

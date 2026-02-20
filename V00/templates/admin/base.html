@@ -33,8 +33,14 @@
       <a href="{{ url_for('admin_content_hub') }}" class="sb-link {% if 'content_hub' in (request.endpoint or '') or 'article' in (request.endpoint or '') or 'feedback' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#128218;</span> Content
       </a>
-      <a href="{{ url_for('admin_monetization') }}" class="sb-link {% if 'monetization' in (request.endpoint or '') or 'product' in (request.endpoint or '') or 'hotel' in (request.endpoint or '') or 'voucher' in (request.endpoint or '') or 'hotdeal' in (request.endpoint or '') or 'attraction' in (request.endpoint or '') or 'affiliate' in (request.endpoint or '') or 'at_banner' in (request.endpoint or '') or 'ward' in (request.endpoint or '') %}active{% endif %}">
-        <span class="sb-icon">&#128176;</span> Monetization
+      <a href="{{ url_for('admin_products_hub') }}" class="sb-link {% if 'products_hub' in (request.endpoint or '') or 'product' in (request.endpoint or '') or 'affiliate' in (request.endpoint or '') or 'hotdeal' in (request.endpoint or '') or 'at_banner' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#128230;</span> Products
+      </a>
+      <a href="{{ url_for('admin_hotels_hub') }}" class="sb-link {% if 'hotels_hub' in (request.endpoint or '') or 'hotel' in (request.endpoint or '') or 'attraction' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#127976;</span> Hotels
+      </a>
+      <a href="{{ url_for('admin_vouchers_hub') }}" class="sb-link {% if 'vouchers_hub' in (request.endpoint or '') or 'voucher' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#127915;</span> Vouchers
       </a>
       <a href="{{ url_for('admin_seo_hub') }}" class="sb-link {% if 'seo' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#128269;</span> SEO
