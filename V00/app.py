@@ -646,7 +646,7 @@ def admin_products_hub():
             query = query.filter(AffiliateLink.product_name.ilike(f'%{f_search}%'))
 
         total_q = query.count()
-        products = query.order_by(AffiliateLink.created_at.desc()).offset((page - 1) * per_page).limit(per_page).all()
+        products = query.order_by(AffiliateLink.id.desc()).offset((page - 1) * per_page).limit(per_page).all()
         verticals = Vertical.query.order_by(Vertical.name).all()
         networks = db.session.query(AffiliateLink.network).distinct().all()
 
