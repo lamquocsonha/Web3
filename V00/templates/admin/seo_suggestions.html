@@ -1,0 +1,127 @@
+{% extends "admin/base.html" %}
+{% block title %}SEO Inline Suggestions{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> <a href="{{ url_for('admin_seo_dashboard') }}">SEO</a> <span class="sep">›</span> Suggestions
+{% endblock %}
+{% block content %}
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+  <div>
+    <h1 style="margin:0;font-size:1.5rem">Inline Suggestions</h1>
+    <p style="color:var(--muted);margin:4px 0 0">Gợi ý bài viết dạng quote, hiển thị ở vị trí 1/3 bài viết — {{ suggestions|length }} suggestions</p>
+  </div>
+  <a href="{{ url_for('admin_seo_scan') }}" class="btn btn-outline" style="padding:8px 14px;border-radius:8px;text-decoration:none;border:1px solid var(--border);color:var(--text)">Re-scan to Generate</a>
+</div>
+
+<!-- Navigation Tabs -->
+<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:12px">
+  <a href="{{ url_for('admin_seo_dashboard') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Dashboard</a>
+  <a href="{{ url_for('admin_seo_keywords') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Keywords</a>
+  <a href="{{ url_for('admin_seo_instances') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Instances</a>
+  <a href="{{ url_for('admin_seo_suggestions') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;background:var(--accent);color:#fff;font-weight:600">Suggestions</a>
+  <a href="{{ url_for('admin_seo_auto_generate') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Auto Generate</a>
+  <a href="{{ url_for('admin_seo_scan') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Scan & Build</a>
+</div>
+
+<!-- Filter -->
+<div style="margin-bottom:20px">
+  <form method="GET" style="display:flex;gap:8px;align-items:center">
+    <select name="vertical" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+      <option value="">All Verticals</option>
+      {% for v in verticals %}
+      <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" style="padding:6px 14px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer">Filter</button>
+    {% if filter_v %}
+    <a href="{{ url_for('admin_seo_suggestions') }}" style="color:var(--muted);font-size:0.85rem">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Manual Add Suggestion -->
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px">
+  <h2 style="margin:0 0 14px;font-size:1rem">Add Manual Suggestion</h2>
+  <form method="POST" action="{{ url_for('admin_seo_suggestion_add') }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+    <div style="flex:1;min-width:150px">
+      <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">Vertical *</label>
+      <select name="vertical_slug" required style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)">
+        <option value="">Chọn vertical</option>
+        {% for v in verticals %}
+        <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex:2;min-width:180px">
+      <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">Source Article Slug *</label>
+      <input type="text" name="source_slug" required placeholder="bai-viet-nguon" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)">
+    </div>
+    <div style="flex:2;min-width:180px">
+      <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">Target Article Slug *</label>
+      <input type="text" name="target_slug" required placeholder="bai-viet-goi-y" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)">
+    </div>
+    <button type="submit" style="padding:8px 18px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:600;white-space:nowrap">+ Add</button>
+  </form>
+</div>
+
+<!-- Grouped Suggestions -->
+{% for key, group in grouped.items() %}
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div>
+      <span style="background:#f0f0f0;padding:2px 8px;border-radius:4px;font-size:0.72rem;color:#666">{{ group.source_type }}</span>
+      <strong style="margin-left:6px">{{ group.source_title }}</strong>
+      <span style="color:var(--muted);font-size:0.8rem;margin-left:6px">({{ group.source_slug }})</span>
+    </div>
+    <span style="font-size:0.8rem;color:var(--muted)">{{ group.items|length }} suggestion{{ 's' if group.items|length > 1 else '' }}</span>
+  </div>
+
+  <!-- Preview: quote style block -->
+  <div style="border-left:4px solid var(--accent);background:rgba(108,92,231,0.06);border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:10px">
+    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:8px">Bài viết liên quan</div>
+    {% for item in group.items %}
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;margin-bottom:4px;border-radius:6px;background:rgba(255,255,255,0.7){% if item.status == 'removed' %};opacity:0.4{% endif %}">
+      <div style="flex:1;display:flex;align-items:center;gap:8px">
+        <span style="font-size:0.85rem">→</span>
+        <span style="font-size:0.88rem;font-weight:500">{{ item.anchor_text[:50] }}{% if item.anchor_text|length > 50 %}...{% endif %}</span>
+        <span style="font-size:0.72rem;color:var(--muted)">({{ item.target_slug }})</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+        {% if item.status == 'active' %}
+        <span style="color:#27ae60;font-size:0.75rem;font-weight:600">Active</span>
+        {% else %}
+        <span style="color:#e74c3c;font-size:0.75rem">Removed</span>
+        {% endif %}
+        <form method="POST" action="{{ url_for('admin_seo_suggestion_toggle', sid=item.id) }}" style="display:inline">
+          <button type="submit" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:0.72rem;color:var(--text)">
+            {% if item.status == 'active' %}Disable{% else %}Enable{% endif %}
+          </button>
+        </form>
+        <form method="POST" action="{{ url_for('admin_seo_suggestion_delete', sid=item.id) }}" style="display:inline" onsubmit="return confirm('Delete this suggestion?')">
+          <button type="submit" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:0.75rem;padding:0">Del</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+{% if not grouped %}
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--muted)">
+  <p style="margin:0 0 8px;font-size:1.1rem">No inline suggestions yet</p>
+  <p style="margin:0">Use <a href="{{ url_for('admin_seo_scan') }}" style="color:var(--accent)">Scan & Build</a> to auto-generate suggestions, or add them manually above.</p>
+</div>
+{% endif %}
+
+<!-- Info box -->
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:24px">
+  <h3 style="margin:0 0 8px;font-size:0.95rem">How Inline Suggestions work</h3>
+  <ul style="margin:0;padding:0 0 0 18px;color:var(--muted);font-size:0.85rem;line-height:1.8">
+    <li>Each article shows 1-3 suggested articles at the <strong>1/3 position</strong> of the content</li>
+    <li>Displayed as a <strong>quote-style block</strong> with left border accent</li>
+    <li>Auto-generated from articles in the same category/zone/tier during <strong>Scan & Build</strong></li>
+    <li>Can also be added manually using the form above</li>
+    <li>Old articles automatically get suggestions to newer articles after re-scanning</li>
+  </ul>
+</div>
+{% endblock %}

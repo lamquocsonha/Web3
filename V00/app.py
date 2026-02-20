@@ -1390,6 +1390,54 @@ def admin_seo_scan():
                             db.session.add(inst)
                             created += 1
 
+        # Auto-generate inline suggestions (article → article, same vertical)
+        if scan_scope in ('articles', 'all'):
+            all_articles = Article.query.filter_by(vertical_slug=target_vertical, status='published').all()
+            for art in all_articles:
+                # Find articles to suggest: same category or same tier, different article
+                candidates = [c for c in all_articles if c.id != art.id and (
+                    (c.category and c.category == art.category) or
+                    (c.related_zone_slug and c.related_zone_slug == art.related_zone_slug) or
+                    c.tier == art.tier
+                )]
+                # Pick up to 3, prioritize same category first
+                same_cat = [c for c in candidates if c.category and c.category == art.category]
+                same_zone = [c for c in candidates if c.related_zone_slug and c.related_zone_slug == art.related_zone_slug and c not in same_cat]
+                rest = [c for c in candidates if c not in same_cat and c not in same_zone]
+                picks = (same_cat + same_zone + rest)[:3]
+
+                for target_art in picks:
+                    existing = BacklinkInstance.query.filter_by(
+                        source_type='article', source_id=art.id,
+                        target_type='article', target_slug=target_art.slug,
+                        link_type='suggest'
+                    ).first()
+                    if not existing:
+                        # Use or create a generic keyword for this target
+                        generic_kw = BacklinkKeyword.query.filter_by(
+                            vertical_slug=target_vertical, target_type='article',
+                            target_slug=target_art.slug, keyword=target_art.title
+                        ).first()
+                        if not generic_kw:
+                            generic_kw = BacklinkKeyword(
+                                vertical_slug=target_vertical, keyword=target_art.title,
+                                target_type='article', target_slug=target_art.slug,
+                                target_title=target_art.title, priority=5
+                            )
+                            db.session.add(generic_kw)
+                            db.session.flush()
+
+                        inst = BacklinkInstance(
+                            keyword_id=generic_kw.id,
+                            source_type='article', source_id=art.id,
+                            source_slug=art.slug, source_title=art.title,
+                            target_type='article', target_slug=target_art.slug,
+                            link_type='suggest',
+                            anchor_text=target_art.title
+                        )
+                        db.session.add(inst)
+                        created += 1
+
         # Scan parts
         if scan_scope in ('parts', 'all'):
             zones = Zone.query.join(Segment).join(Vertical).filter(Vertical.slug == target_vertical).all()
@@ -1427,6 +1475,106 @@ def admin_seo_scan():
         return redirect(url_for('admin_seo_instances', vertical=target_vertical))
 
     return render_template('admin/seo_scan.html', verticals=verticals)
+
+@app.route('/admin/seo/suggestions')
+def admin_seo_suggestions():
+    """Manage inline article suggestions (quote-style blocks inside articles)."""
+    filter_v = request.args.get('vertical', '')
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    query = BacklinkInstance.query.filter_by(link_type='suggest')
+    if filter_v:
+        query = query.join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == filter_v)
+
+    suggestions = query.order_by(BacklinkInstance.created_at.desc()).all()
+
+    # Group by source article for display
+    grouped = {}
+    for s in suggestions:
+        key = f'{s.source_type}:{s.source_id}'
+        if key not in grouped:
+            grouped[key] = {'source_title': s.source_title, 'source_slug': s.source_slug, 'source_type': s.source_type, 'items': []}
+        grouped[key]['items'].append(s)
+
+    return render_template('admin/seo_suggestions.html',
+        suggestions=suggestions, grouped=grouped,
+        verticals=verticals, filter_v=filter_v)
+
+@app.route('/admin/seo/suggestion/add', methods=['POST'])
+def admin_seo_suggestion_add():
+    """Manually add an inline suggestion: source article → target article."""
+    vertical_slug = request.form.get('vertical_slug', '')
+    source_slug = request.form.get('source_slug', '').strip()
+    target_slug = request.form.get('target_slug', '').strip()
+
+    if not source_slug or not target_slug or not vertical_slug:
+        flash('All fields are required.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    source = Article.query.filter_by(slug=source_slug, vertical_slug=vertical_slug).first()
+    target = Article.query.filter_by(slug=target_slug, vertical_slug=vertical_slug).first()
+
+    if not source or not target:
+        flash('Source or target article not found.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    if source.id == target.id:
+        flash('Cannot suggest an article to itself.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    # Check duplicate
+    existing = BacklinkInstance.query.filter_by(
+        source_type='article', source_id=source.id,
+        target_type='article', target_slug=target_slug,
+        link_type='suggest'
+    ).first()
+    if existing:
+        flash('This suggestion already exists.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    # Find or create keyword
+    kw = BacklinkKeyword.query.filter_by(
+        vertical_slug=vertical_slug, target_type='article',
+        target_slug=target_slug, keyword=target.title
+    ).first()
+    if not kw:
+        kw = BacklinkKeyword(
+            vertical_slug=vertical_slug, keyword=target.title,
+            target_type='article', target_slug=target_slug,
+            target_title=target.title, priority=5
+        )
+        db.session.add(kw)
+        db.session.flush()
+
+    inst = BacklinkInstance(
+        keyword_id=kw.id,
+        source_type='article', source_id=source.id,
+        source_slug=source.slug, source_title=source.title,
+        target_type='article', target_slug=target.slug,
+        link_type='suggest',
+        anchor_text=target.title
+    )
+    db.session.add(inst)
+    db.session.commit()
+    flash(f'Suggestion added: "{source.title[:30]}..." → "{target.title[:30]}..."', 'success')
+    return redirect(url_for('admin_seo_suggestions', vertical=vertical_slug))
+
+@app.route('/admin/seo/suggestion/<int:sid>/delete', methods=['POST'])
+def admin_seo_suggestion_delete(sid):
+    """Delete an inline suggestion."""
+    inst = BacklinkInstance.query.filter_by(id=sid, link_type='suggest').first_or_404()
+    db.session.delete(inst)
+    db.session.commit()
+    flash('Suggestion removed.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_suggestions'))
+
+@app.route('/admin/seo/suggestion/<int:sid>/toggle', methods=['POST'])
+def admin_seo_suggestion_toggle(sid):
+    """Toggle active/removed for a suggestion."""
+    inst = BacklinkInstance.query.filter_by(id=sid, link_type='suggest').first_or_404()
+    inst.status = 'removed' if inst.status == 'active' else 'active'
+    db.session.commit()
+    return redirect(request.referrer or url_for('admin_seo_suggestions'))
 
 @app.route('/admin/seo/bulk-action', methods=['POST'])
 def admin_seo_bulk_action():
@@ -6444,9 +6592,23 @@ def vertical_article(vertical_slug, slug):
         BacklinkKeyword.is_active == True
     ).limit(5).all()
 
+    # Inline suggestions (quote-style, inserted at 1/3 of article)
+    suggest_instances = BacklinkInstance.query.filter_by(
+        source_type='article', source_id=a.id,
+        link_type='suggest', status='active'
+    ).limit(3).all()
+    # Resolve to actual Article objects
+    inline_suggests = []
+    for si in suggest_instances:
+        if si.target_type == 'article':
+            sa = Article.query.filter_by(slug=si.target_slug, vertical_slug=vertical_slug, status='published').first()
+            if sa:
+                inline_suggests.append(sa)
+
     return render_template('shared/article.html', vertical=v, article=a, related=related, featured=featured,
         carousel_items=carousel_items, banners=banners,
-        article_content_with_backlinks=article_content, outtext_links=outtext_links)
+        article_content_with_backlinks=article_content, outtext_links=outtext_links,
+        inline_suggests=inline_suggests)
 
 @app.route('/article/<int:article_id>/feedback', methods=['POST'])
 def submit_article_feedback(article_id):

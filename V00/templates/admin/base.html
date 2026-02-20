@@ -109,6 +109,9 @@
           <a href="{{ url_for('admin_seo_instances') }}" class="sb-link sb-sub {% if 'seo_instance' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#128279;</span> Instances
           </a>
+          <a href="{{ url_for('admin_seo_suggestions') }}" class="sb-link sb-sub {% if 'seo_suggestion' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128172;</span> Suggestions
+          </a>
           <a href="{{ url_for('admin_seo_auto_generate') }}" class="sb-link sb-sub {% if 'seo_auto_generate' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#9889;</span> Auto Generate
           </a>

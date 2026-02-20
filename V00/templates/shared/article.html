@@ -32,16 +32,40 @@
     </div>
     {% endif %}
 
-    <!-- Content with carousel in the middle -->
+    <!-- Content with inline suggestions and carousel -->
     <article class="article-body">
       {% if article_content_with_backlinks or article.content %}
         {% set bl_content = article_content_with_backlinks if article_content_with_backlinks else article.content %}
         {% set paragraphs = bl_content.split('</p>') %}
         {% set total = paragraphs|length %}
+        {% set third = (total // 3)|int %}
         {% set mid = (total // 2)|int %}
 
-        {# First half #}
-        {% for i in range(mid) %}
+        {# First 1/3 #}
+        {% for i in range(third) %}
+          {% if paragraphs[i].strip() %}
+            {{ paragraphs[i]|safe }}</p>
+          {% endif %}
+        {% endfor %}
+
+        {# Inline Suggestion Block — quote style at 1/3 position #}
+        {% if inline_suggests %}
+        <div class="inline-suggest-block">
+          <div class="inline-suggest-label">Bài viết liên quan</div>
+          {% for sg in inline_suggests %}
+          <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=sg.slug) }}" class="inline-suggest-item">
+            <span class="inline-suggest-icon">
+              {% if sg.tier == 'nganh' %}🏭{% elif sg.tier == 'chung' %}⚙️{% else %}🔍{% endif %}
+            </span>
+            <span class="inline-suggest-text">{{ sg.title }}</span>
+            <span class="inline-suggest-arrow">→</span>
+          </a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {# Middle section (1/3 to mid) #}
+        {% for i in range(third, mid) %}
           {% if paragraphs[i].strip() %}
             {{ paragraphs[i]|safe }}</p>
           {% endif %}
@@ -71,7 +95,7 @@
         </div>
         {% endif %}
 
-        {# Second half #}
+        {# Last section (mid to end) #}
         {% for i in range(mid, total) %}
           {% if paragraphs[i].strip() %}
             {{ paragraphs[i]|safe }}{% if not paragraphs[i].endswith('</p>') %}</p>{% endif %}
