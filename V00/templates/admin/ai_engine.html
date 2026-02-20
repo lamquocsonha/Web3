@@ -528,7 +528,7 @@ function switchMainTab(tab) {
   const panel = document.getElementById('mainTab-' + tab);
   if (panel) panel.classList.add('active');
   // Navigate to load data for lazy tabs
-  if (['calendar','rules','health'].includes(tab) && !panel.dataset.loaded) {
+  if (['pipeline','calendar','rules','health'].includes(tab) && !panel.dataset.loaded) {
     window.location.href = '?tab=' + tab;
   }
   history.replaceState(null, '', '?tab=' + tab);
