@@ -68,7 +68,7 @@
   <a class="th-tab {% if active_tab=='video' %}active{% endif %}" href="{{ url_for('admin_tools', tab='video') }}">
     &#127909; Video
   </a>
-  <a class="th-tab {% if active_tab in ('vouchers','widgets','sync') %}active{% endif %}" href="{{ url_for('admin_tools', tab='vouchers') }}">
+  <a class="th-tab {% if active_tab=='vouchers' %}active{% endif %}" href="{{ url_for('admin_tools', tab='vouchers') }}">
     &#127915; Vouchers
   </a>
   <a class="th-tab {% if active_tab=='seed' %}active{% endif %}" href="{{ url_for('admin_tools', tab='seed') }}">
@@ -222,19 +222,12 @@
 {% endif %}
 
 <!-- ══════════════════════════════════════════════
-     TAB: VOUCHERS (with sub-tabs)
+     TAB: VOUCHERS (all-in-one)
      ══════════════════════════════════════════════ -->
-{% if active_tab in ('vouchers','widgets','sync') %}
+{% if active_tab == 'vouchers' %}
 <div class="th-panel active">
-  <!-- Sub-tabs -->
-  <div style="display:flex;gap:2px;background:var(--surface2);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content">
-    <a href="{{ url_for('admin_tools', tab='vouchers') }}" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;{% if active_tab=='vouchers' %}background:var(--accent);color:#fff{% else %}color:var(--text-dim){% endif %}">Vouchers</a>
-    <a href="{{ url_for('admin_tools', tab='widgets') }}" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;{% if active_tab=='widgets' %}background:var(--accent);color:#fff{% else %}color:var(--text-dim){% endif %}">Widgets</a>
-    <a href="{{ url_for('admin_tools', tab='sync') }}" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;{% if active_tab=='sync' %}background:var(--accent);color:#fff{% else %}color:var(--text-dim){% endif %}">Sync</a>
-  </div>
 
-  {% if active_tab == 'vouchers' %}
-  <!-- Vouchers list -->
+  <!-- ── SECTION 1: Voucher List ── -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <h2 style="margin:0;font-size:18px">Vouchers</h2>
     <div style="display:flex;gap:8px">
@@ -243,9 +236,9 @@
     </div>
   </div>
   <div class="th-stat-grid" style="grid-template-columns:repeat(3,1fr)">
-    <div class="th-stat"><div class="th-stat-val">{{ total }}</div><div class="th-stat-label">Total</div></div>
-    <div class="th-stat"><div class="th-stat-val" style="color:#22c55e">{{ active_v }}</div><div class="th-stat-label">Active</div></div>
-    <div class="th-stat"><div class="th-stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="th-stat-label">Clicks</div></div>
+    <div class="th-stat"><div class="th-stat-val">{{ v_total }}</div><div class="th-stat-label">Total</div></div>
+    <div class="th-stat"><div class="th-stat-val" style="color:#22c55e">{{ v_active }}</div><div class="th-stat-label">Active</div></div>
+    <div class="th-stat"><div class="th-stat-val" style="color:#3b82f6">{{ "{:,}".format(v_clicks) }}</div><div class="th-stat-label">Clicks</div></div>
   </div>
   <form style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center" method="GET">
     <input type="hidden" name="tab" value="vouchers">
@@ -282,10 +275,11 @@
   <div class="th-empty"><div class="th-empty-icon">&#127915;</div><h3 style="font-size:17px;margin-bottom:6px">No vouchers found</h3></div>
   {% endif %}
 
-  {% elif active_tab == 'widgets' %}
-  <!-- Widgets -->
+  <hr style="border:none;border-top:1px solid var(--border);margin:32px 0">
+
+  <!-- ── SECTION 2: Widgets ── -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h2 style="margin:0;font-size:18px">Voucher Widgets</h2>
+    <h2 style="margin:0;font-size:18px">Widgets</h2>
     <a href="{{ url_for('admin_voucher_widget_new') }}" class="th-btn th-btn-primary">+ New Widget</a>
   </div>
   {% if widgets %}
@@ -302,24 +296,146 @@
     </tr>{% endfor %}
   </tbody></table></div>
   {% else %}
-  <div class="th-empty"><div class="th-empty-icon">&#128296;</div><h3 style="font-size:17px;margin-bottom:6px">No widgets</h3><p style="font-size:14px">Create a voucher widget to display vouchers on your site.</p></div>
+  <div style="text-align:center;padding:20px;color:var(--text-dim);font-size:14px">No widgets yet</div>
   {% endif %}
 
-  {% elif active_tab == 'sync' %}
-  <!-- Sync -->
+  <hr style="border:none;border-top:1px solid var(--border);margin:32px 0">
+
+  <!-- ── SECTION 3: Voucher Sync (AccessTrade) ── -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <h2 style="margin:0;font-size:18px">Voucher Sync</h2>
-    <a href="{{ url_for('admin_voucher_sync') }}" class="th-btn th-btn-primary">Open Full Sync Panel</a>
+    <div style="display:flex;gap:8px">
+      <button class="th-btn th-btn-primary" onclick="runSyncNow()" id="btnRunSync" {{ 'disabled' if not api_connected }} style="background:#22c55e">Sync ngay</button>
+      <button class="th-btn" style="background:rgba(239,68,68,.1);color:#ef4444" onclick="cleanupExpired()" id="btnCleanup">Xoa het han</button>
+    </div>
   </div>
-  <div class="th-stat-grid" style="grid-template-columns:repeat(3,1fr)">
-    <div class="th-stat"><div class="th-stat-val">{{ total_synced }}</div><div class="th-stat-label">Synced</div></div>
-    <div class="th-stat"><div class="th-stat-val" style="color:#22c55e">{{ total_active }}</div><div class="th-stat-label">Active</div></div>
-    <div class="th-stat"><div class="th-stat-val" style="color:#3b82f6">{{ total_manual }}</div><div class="th-stat-label">Manual</div></div>
+
+  <!-- Sync stats -->
+  <div class="th-stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="th-stat">
+      <div class="th-stat-val" style="font-size:18px">{% if api_connected %}<span style="color:#22c55e">Connected</span>{% else %}<span style="color:#ef4444">Chua ket noi</span>{% endif %}</div>
+      <div class="th-stat-label">API Status</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val">{{ sync_total_synced }} <small style="font-size:14px;color:var(--text-dim)">({{ sync_total_active }} active)</small></div>
+      <div class="th-stat-label">Tu API</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#3b82f6">{{ sync_total_manual }}</div>
+      <div class="th-stat-label">Thu cong</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="font-size:16px">{{ last_sync or 'Chua sync' }}</div>
+      <div class="th-stat-label">Lan sync cuoi</div>
+      {% if last_sync_count != '0' %}<div style="font-size:12px;color:var(--text-dim);margin-top:2px">+{{ last_sync_count }} voucher</div>{% endif %}
+    </div>
   </div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center">
-    <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">Voucher Sync co nhieu tinh nang (fetch merchants, auto sync, cleanup). Bam nut o tren de mo full panel.</p>
-    <a href="{{ url_for('admin_voucher_sync') }}" class="th-btn th-btn-primary">Go to Voucher Sync</a>
+
+  {% if not api_connected %}
+  <div style="padding:14px 18px;border-radius:10px;margin-bottom:20px;display:flex;align-items:center;gap:10px;background:rgba(241,196,15,0.1);border:1px solid rgba(241,196,15,0.3)">
+    <span style="font-size:18px">&#9888;</span>
+    <div><strong>AccessTrade API chua cau hinh</strong> — Vao <a href="{{ url_for('admin_settings') }}">Settings</a> de nhap API Key.</div>
   </div>
+  {% endif %}
+
+  <!-- Auto-Sync Settings -->
+  <div style="margin-bottom:20px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:12px">
+    <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px">
+        <input type="checkbox" id="autoSyncToggle" {{ 'checked' if auto_sync_enabled }}>
+        Tu dong dong bo
+      </label>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:14px;font-weight:600">Chu ky:</label>
+        <select id="syncInterval" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text)">
+          <option value="1" {{ 'selected' if sync_interval == '1' }}>1 gio</option>
+          <option value="3" {{ 'selected' if sync_interval == '3' }}>3 gio</option>
+          <option value="6" {{ 'selected' if sync_interval == '6' }}>6 gio</option>
+          <option value="12" {{ 'selected' if sync_interval == '12' }}>12 gio</option>
+          <option value="24" {{ 'selected' if sync_interval == '24' }}>24 gio</option>
+        </select>
+      </div>
+      <button class="th-btn th-btn-ghost" onclick="saveAutoSync()">Luu</button>
+      <span id="autoSaveStatus" style="font-size:14px;color:#22c55e;display:none">Da luu</span>
+    </div>
+  </div>
+
+  <!-- Source Tabs + Fetch -->
+  <div style="margin-bottom:20px">
+    <div style="display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:16px">
+      <button class="th-sync-tab active" data-tab="all" onclick="switchSyncTab('all')" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-dim);border-bottom:3px solid transparent">All Offers</button>
+      <button class="th-sync-tab" data-tab="hot" onclick="switchSyncTab('hot')" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-dim);border-bottom:3px solid transparent">Hot Coupons</button>
+      <button class="th-sync-tab" data-tab="expiring" onclick="switchSyncTab('expiring')" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-dim);border-bottom:3px solid transparent">Sap het han</button>
+      <button class="th-sync-tab" data-tab="url" onclick="switchSyncTab('url')" style="padding:10px 18px;border:none;background:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-dim);border-bottom:3px solid transparent">Tim theo URL</button>
+    </div>
+
+    <div class="th-sync-content" id="syncTabAll">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <select id="merchantFilter" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);min-width:180px">
+          <option value="">Tat ca Merchant</option>
+        </select>
+        <button class="th-btn th-btn-primary" onclick="fetchOffers()" id="btnFetch" {{ 'disabled' if not api_connected }}>Xem Offers</button>
+      </div>
+    </div>
+    <div class="th-sync-content" id="syncTabHot" style="display:none">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <select id="hotPeriod" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)">
+          <option value="1">Hot tuan nay</option>
+          <option value="2">Hot thang nay</option>
+        </select>
+        <button class="th-btn th-btn-primary" onclick="fetchHotCoupons()" id="btnFetchHot" {{ 'disabled' if not api_connected }}>Xem Hot Coupons</button>
+      </div>
+    </div>
+    <div class="th-sync-content" id="syncTabExpiring" style="display:none">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="th-btn th-btn-primary" onclick="fetchExpiring()" id="btnFetchExpiring" {{ 'disabled' if not api_connected }}>Xem KM sap het han</button>
+        <span style="font-size:13px;color:var(--text-dim)">Lay cac khuyen mai sap het han tu AccessTrade</span>
+      </div>
+    </div>
+    <div class="th-sync-content" id="syncTabUrl" style="display:none">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="searchUrl" placeholder="Dan link san pham Shopee/Tiki..." style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);flex:1;min-width:300px">
+        <button class="th-btn th-btn-primary" onclick="searchByUrl()" id="btnSearchUrl" {{ 'disabled' if not api_connected }}>Tim ma giam gia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fetch results -->
+  <div id="fetchResults" style="display:none;margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+      <h3 id="fetchTitle" style="margin:0;font-size:16px">Offers tu AccessTrade</h3>
+      <div style="display:flex;gap:8px">
+        <button class="th-btn th-btn-ghost" onclick="selectAll()">Chon tat ca moi</button>
+        <button class="th-btn th-btn-primary" onclick="importSelected()" id="btnImport" disabled>Import da chon (<span id="selectedCount">0</span>)</button>
+      </div>
+    </div>
+    <div id="offersContainer"></div>
+  </div>
+
+  <!-- Sync status -->
+  <div id="syncStatus" style="display:none;margin-bottom:16px;padding:14px 18px;border-radius:10px;font-size:14px"></div>
+
+  {% if last_sync_error %}
+  <div style="padding:12px 16px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:8px;margin-bottom:16px;font-size:14px;color:#ef4444">
+    <strong>Loi lan sync cuoi:</strong> {{ last_sync_error }}
+  </div>
+  {% endif %}
+
+  <!-- Recent synced vouchers -->
+  {% if recent_synced %}
+  <h3 style="margin:0 0 12px;font-size:16px">Voucher gan day tu API ({{ sync_total_synced }})</h3>
+  <div class="th-table-wrap"><table><thead><tr><th>Code</th><th>Title</th><th>Merchant</th><th>Discount</th><th>Min Order</th><th>Valid To</th><th>Status</th><th></th></tr></thead><tbody>
+    {% for v in recent_synced %}<tr style="{{ 'opacity:0.5' if not v.is_valid() }}">
+      <td><code style="font-size:13px">{{ v.code[:20] }}{% if v.code|length > 20 %}..{% endif %}</code></td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ v.title }}">{{ v.title[:35] }}{% if v.title|length > 35 %}..{% endif %}</td>
+      <td style="white-space:nowrap">{{ v.icon }} {{ v.merchant[:15] }}</td>
+      <td>{{ v.get_discount_text() }}</td>
+      <td style="font-size:13px">{% if v.min_order and v.min_order > 0 %}{{ '{:,.0f}'.format(v.min_order) }}d{% else %}-{% endif %}</td>
+      <td style="font-size:13px">{{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '-' }}</td>
+      <td>{% if v.is_valid() %}<span class="th-badge" style="background:#d1fae5;color:#065f46">Active</span>{% else %}<span class="th-badge" style="background:var(--surface2);color:var(--text-dim)">Expired</span>{% endif %}</td>
+      <td><a href="{{ url_for('admin_voucher_edit', vid=v.id) }}" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
   {% endif %}
 </div>
 {% endif %}
@@ -382,22 +498,270 @@
 </div>
 {% endif %}
 
+<style>
+.th-sync-tab.active { color:var(--accent,#6366f1); border-bottom-color:var(--accent,#6366f1) }
+.th-sync-tab:hover { color:var(--text) }
+.offer-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; margin-bottom:12px }
+.offer-card.imported { opacity:0.5 }
+.offer-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap }
+.offer-merchant { font-weight:700; font-size:15px }
+.offer-name { font-size:14px; color:var(--text-dim); flex:1; min-width:150px }
+.offer-dates { font-size:12px; color:var(--text-dim) }
+.offer-status { font-size:12px; padding:3px 8px; border-radius:6px; font-weight:600 }
+.offer-status.new { background:rgba(34,197,94,0.1); color:#22c55e }
+.offer-status.exists { background:rgba(239,68,68,0.1); color:#ef4444 }
+.offer-meta { display:flex; gap:8px; flex-wrap:wrap; font-size:12px; margin-bottom:8px }
+.offer-meta-tag { padding:2px 8px; border-radius:4px; background:var(--surface2); font-weight:500 }
+.offer-meta-tag.discount { color:#22c55e; background:rgba(34,197,94,0.1) }
+.offer-meta-tag.spend { color:#f59e0b; background:rgba(245,158,11,0.1) }
+.offer-meta-tag.usage { color:#3b82f6; background:rgba(59,130,246,0.1) }
+.offer-meta-tag.time { color:#8b5cf6; background:rgba(139,92,246,0.1) }
+.coupon-row { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface2); border-radius:6px; margin-top:6px; font-size:14px }
+.coupon-row code { font-family:'DM Mono',monospace; font-weight:600; font-size:13px; padding:2px 8px; background:var(--surface); border:1px dashed var(--border); border-radius:4px }
+.coupon-row .coupon-desc { flex:1; color:var(--text-dim); font-size:13px }
+.coupon-check { width:18px; height:18px; accent-color:var(--accent) }
+</style>
+
 <script>
 // Collapsible tree nodes
 document.querySelectorAll('.th-tree-vertical').forEach(node => {
   const header = node.querySelector('.th-tree-header');
   const children = node.querySelector('.th-tree-children');
   if (header && children) {
-    // Start expanded
     children.style.display = 'block';
     header.addEventListener('click', () => {
-      if (children.style.display === 'none') {
-        children.style.display = 'block';
-      } else {
-        children.style.display = 'none';
-      }
+      children.style.display = children.style.display === 'none' ? 'block' : 'none';
     });
   }
 });
+
+// ── Voucher Sync JS ──
+let fetchedOffers = [];
+let merchantsLoaded = false;
+
+function showStatus(msg, type) {
+  const el = document.getElementById('syncStatus');
+  if (!el) return;
+  el.style.display = 'block';
+  el.style.background = type === 'error' ? 'rgba(239,68,68,0.1)' : type === 'success' ? 'rgba(34,197,94,0.1)' : 'rgba(59,130,246,0.1)';
+  el.style.borderLeft = '4px solid ' + (type === 'error' ? '#ef4444' : type === 'success' ? '#22c55e' : '#3b82f6');
+  el.innerHTML = msg;
+  if (type !== 'loading') setTimeout(() => el.style.display = 'none', 8000);
+}
+
+function switchSyncTab(tab) {
+  document.querySelectorAll('.th-sync-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.th-sync-content').forEach(t => t.style.display = 'none');
+  document.querySelector(`.th-sync-tab[data-tab="${tab}"]`).classList.add('active');
+  const map = {all:'syncTabAll', hot:'syncTabHot', expiring:'syncTabExpiring', url:'syncTabUrl'};
+  document.getElementById(map[tab]).style.display = 'block';
+}
+
+async function loadMerchants() {
+  if (merchantsLoaded) return;
+  try {
+    const resp = await fetch('/admin/voucher-sync/merchants');
+    const data = await resp.json();
+    const sel = document.getElementById('merchantFilter');
+    if (!sel) return;
+    (data.merchants || []).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.login_name || m.id;
+      opt.textContent = `${m.display_name} (${m.total_offer})`;
+      sel.appendChild(opt);
+    });
+    merchantsLoaded = true;
+  } catch(e) {}
+}
+
+async function fetchOffers() {
+  const btn = document.getElementById('btnFetch');
+  const merchant = document.getElementById('merchantFilter').value;
+  btn.disabled = true; btn.textContent = 'Dang lay...';
+  showStatus('Dang ket noi AccessTrade API...', 'loading');
+  try {
+    const body = { source: 'all' };
+    if (merchant) body.merchant = merchant;
+    const resp = await fetch('/admin/voucher-sync/fetch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+    const data = await resp.json();
+    if (data.error) { showStatus(data.error, 'error'); return; }
+    fetchedOffers = data.offers || [];
+    document.getElementById('fetchTitle').textContent = `${data.total_offers} Offers — ${data.total_coupons} Coupons (${data.existing_count} da import)`;
+    renderOffers(fetchedOffers);
+    document.getElementById('fetchResults').style.display = 'block';
+    showStatus(`Da tim thay ${data.total_offers} offers voi ${data.total_coupons} coupons`, 'success');
+  } catch(e) { showStatus('Loi ket noi: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Xem Offers'; }
+}
+
+async function fetchHotCoupons() {
+  const btn = document.getElementById('btnFetchHot');
+  const period = document.getElementById('hotPeriod').value;
+  btn.disabled = true; btn.textContent = 'Dang lay...';
+  showStatus('Dang lay hot coupons...', 'loading');
+  try {
+    const resp = await fetch('/admin/voucher-sync/fetch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ source:'hot', period:parseInt(period) }) });
+    const data = await resp.json();
+    if (data.error) { showStatus(data.error, 'error'); return; }
+    fetchedOffers = data.offers || [];
+    document.getElementById('fetchTitle').textContent = `${data.total_offers} Hot Coupons — ${data.total_coupons} ma (${data.existing_count} da import)`;
+    renderOffers(fetchedOffers);
+    document.getElementById('fetchResults').style.display = 'block';
+    showStatus(`Da tim thay ${data.total_offers} hot coupons`, 'success');
+  } catch(e) { showStatus('Loi: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Xem Hot Coupons'; }
+}
+
+async function fetchExpiring() {
+  const btn = document.getElementById('btnFetchExpiring');
+  btn.disabled = true; btn.textContent = 'Dang lay...';
+  showStatus('Dang lay KM sap het han...', 'loading');
+  try {
+    const resp = await fetch('/admin/voucher-sync/fetch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ source:'expiring' }) });
+    const data = await resp.json();
+    if (data.error) { showStatus(data.error, 'error'); return; }
+    fetchedOffers = data.offers || [];
+    document.getElementById('fetchTitle').textContent = `${data.total_offers} KM sap het han — ${data.total_coupons} ma (${data.existing_count} da import)`;
+    renderOffers(fetchedOffers);
+    document.getElementById('fetchResults').style.display = 'block';
+    showStatus(`Da tim thay ${data.total_offers} KM sap het han`, 'success');
+  } catch(e) { showStatus('Loi: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Xem KM sap het han'; }
+}
+
+async function searchByUrl() {
+  const url = document.getElementById('searchUrl').value.trim();
+  if (!url) { showStatus('Vui long nhap link san pham', 'error'); return; }
+  const btn = document.getElementById('btnSearchUrl');
+  btn.disabled = true; btn.textContent = 'Dang tim...';
+  showStatus('Dang tim ma giam gia...', 'loading');
+  try {
+    const resp = await fetch('/admin/voucher-sync/fetch', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ source:'url', product_url:url }) });
+    const data = await resp.json();
+    if (data.error) { showStatus(data.error, 'error'); return; }
+    fetchedOffers = data.offers || [];
+    document.getElementById('fetchTitle').textContent = `${data.total_offers} ma giam gia cho san pham (${data.existing_count} da import)`;
+    renderOffers(fetchedOffers);
+    document.getElementById('fetchResults').style.display = 'block';
+    showStatus(`Tim thay ${data.total_offers} coupons`, 'success');
+  } catch(e) { showStatus('Loi: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Tim ma giam gia'; }
+}
+
+function fmtNum(n) { return n == null ? '' : Number(n).toLocaleString('vi-VN'); }
+
+function renderOffers(offers) {
+  const container = document.getElementById('offersContainer');
+  if (!offers.length) { container.innerHTML = '<p style="color:var(--text-dim)">Khong tim thay offer nao.</p>'; return; }
+  let html = '';
+  for (const o of offers) {
+    const isImported = o.already_imported;
+    html += `<div class="offer-card ${isImported ? 'imported' : ''}">
+      <div class="offer-header">
+        <span class="offer-merchant">${o.merchant}</span>
+        <span class="offer-name">${o.offer_name}</span>
+        <span class="offer-status ${isImported ? 'exists' : 'new'}">${isImported ? 'Da import' : 'Moi'}</span>
+        <span class="offer-dates">${o.start_date ? o.start_date.substring(0,10) : ''} → ${o.end_date ? o.end_date.substring(0,10) : ''}</span>
+      </div>`;
+    const tags = [];
+    if (o.discount_value) tags.push(`<span class="offer-meta-tag discount">Giam ${fmtNum(o.discount_value)}d</span>`);
+    if (o.discount_percentage) tags.push(`<span class="offer-meta-tag discount">Giam ${o.discount_percentage}%</span>`);
+    if (o.min_spend) tags.push(`<span class="offer-meta-tag spend">Don toi thieu ${fmtNum(o.min_spend)}d</span>`);
+    if (o.max_value) tags.push(`<span class="offer-meta-tag spend">Giam toi da ${fmtNum(o.max_value)}d</span>`);
+    if (o.percentage_used != null) tags.push(`<span class="offer-meta-tag usage">Da dung ${o.percentage_used}%</span>`);
+    if (o.time_left) tags.push(`<span class="offer-meta-tag time">${o.time_left}</span>`);
+    if (o.category) tags.push(`<span class="offer-meta-tag">${o.category}</span>`);
+    if (tags.length) html += `<div class="offer-meta">${tags.join('')}</div>`;
+    if (o.description) html += `<div style="font-size:13px;color:var(--text-dim);margin-bottom:8px">${o.description.substring(0,150)}${o.description.length > 150 ? '...' : ''}</div>`;
+    if (o.coupons && o.coupons.length) {
+      for (const c of o.coupons) {
+        const cI = c.already_imported;
+        html += `<div class="coupon-row">
+          <input type="checkbox" class="coupon-check" data-offer='${JSON.stringify({offer_id:o.offer_id,code:c.code,merchant:o.merchant,title:c.description||o.offer_name,description:o.description,aff_link:o.aff_link,start_date:c.start_date||o.start_date,end_date:c.end_date||o.end_date,discount_value:o.discount_value,discount_percentage:o.discount_percentage,min_spend:o.min_spend,max_value:o.max_value}).replace(/'/g,"&#39;")}' ${cI?'disabled':''} onchange="updateCount()">
+          <code>${c.code||'-'}</code>
+          <span class="coupon-desc">${c.description||o.offer_name}</span>
+          ${c.discount?'<span style="font-weight:600;font-size:13px">'+c.discount+'</span>':''}
+          ${c.remain!=null?'<span style="font-size:11px;color:#3b82f6">con '+c.remain+'</span>':''}
+          ${c.time_left?'<span style="font-size:11px;color:#8b5cf6">'+c.time_left+'</span>':''}
+          ${cI?'<span style="font-size:12px;color:#ef4444">da co</span>':''}
+        </div>`;
+      }
+    } else {
+      html += `<div class="coupon-row">
+        <input type="checkbox" class="coupon-check" data-offer='${JSON.stringify({offer_id:o.offer_id,code:'',merchant:o.merchant,title:o.offer_name,description:o.description,aff_link:o.aff_link,start_date:o.start_date,end_date:o.end_date,discount_value:o.discount_value,discount_percentage:o.discount_percentage,min_spend:o.min_spend,max_value:o.max_value}).replace(/'/g,"&#39;")}' ${isImported?'disabled':''} onchange="updateCount()">
+        <span class="coupon-desc">Deal: ${o.offer_name}</span>
+        ${isImported?'<span style="font-size:12px;color:#ef4444">da co</span>':''}
+      </div>`;
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+  updateCount();
+}
+
+function selectAll() { document.querySelectorAll('.coupon-check:not(:disabled)').forEach(cb => cb.checked = true); updateCount(); }
+function updateCount() {
+  const n = document.querySelectorAll('.coupon-check:checked').length;
+  const el = document.getElementById('selectedCount'); if(el) el.textContent = n;
+  const btn = document.getElementById('btnImport'); if(btn) btn.disabled = n === 0;
+}
+
+async function importSelected() {
+  const cbs = document.querySelectorAll('.coupon-check:checked');
+  if (!cbs.length) return;
+  const selected = [];
+  cbs.forEach(cb => { try { selected.push(JSON.parse(cb.dataset.offer)); } catch(e) {} });
+  const btn = document.getElementById('btnImport');
+  btn.disabled = true; btn.textContent = 'Dang import...';
+  showStatus(`Dang import ${selected.length} voucher...`, 'loading');
+  try {
+    const resp = await fetch('/admin/voucher-sync/import', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({selected}) });
+    const data = await resp.json();
+    if (data.error) { showStatus(data.error, 'error'); return; }
+    showStatus(data.message + (data.errors?.length ? '<br>Loi: ' + data.errors.join(', ') : ''), 'success');
+    setTimeout(() => location.reload(), 2000);
+  } catch(e) { showStatus('Loi: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Import da chon'; }
+}
+
+async function runSyncNow() {
+  const btn = document.getElementById('btnRunSync');
+  btn.disabled = true; btn.textContent = 'Dang sync...';
+  showStatus('Dang dong bo toan bo tu AccessTrade...', 'loading');
+  try {
+    const resp = await fetch('/admin/voucher-sync/run', { method:'POST' });
+    const data = await resp.json();
+    if (data.error) { showStatus(data.error, 'error'); return; }
+    showStatus(data.message, 'success');
+    setTimeout(() => location.reload(), 2000);
+  } catch(e) { showStatus('Loi: ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Sync ngay'; }
+}
+
+async function cleanupExpired() {
+  if (!confirm('Xoa tat ca voucher API da het han?')) return;
+  const btn = document.getElementById('btnCleanup');
+  btn.disabled = true;
+  try {
+    const resp = await fetch('/admin/voucher-sync/cleanup', { method:'POST' });
+    const data = await resp.json();
+    showStatus(data.message, 'success');
+    setTimeout(() => location.reload(), 1500);
+  } catch(e) { showStatus('Loi: ' + e.message, 'error'); }
+  finally { btn.disabled = false; }
+}
+
+async function saveAutoSync() {
+  const enabled = document.getElementById('autoSyncToggle')?.checked;
+  const interval = document.getElementById('syncInterval')?.value;
+  try {
+    await fetch('/admin/voucher-sync/auto', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({enabled,interval}) });
+    const s = document.getElementById('autoSaveStatus');
+    if(s) { s.style.display = 'inline'; setTimeout(() => s.style.display = 'none', 3000); }
+  } catch(e) { alert('Loi: ' + e.message); }
+}
+
+// Load merchants when on voucher tab
+if (document.getElementById('merchantFilter')) document.addEventListener('DOMContentLoaded', loadMerchants);
 </script>
 {% endblock %}
