@@ -39,16 +39,13 @@
       <a href="{{ url_for('admin_hotels_hub') }}" class="sb-link {% if 'hotels_hub' in (request.endpoint or '') or 'hotel' in (request.endpoint or '') or 'attraction' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#127976;</span> Hotels
       </a>
-      <a href="{{ url_for('admin_vouchers_hub') }}" class="sb-link {% if 'vouchers_hub' in (request.endpoint or '') or 'voucher' in (request.endpoint or '') %}active{% endif %}">
-        <span class="sb-icon">&#127915;</span> Vouchers
-      </a>
       <a href="{{ url_for('admin_seo_hub') }}" class="sb-link {% if 'seo' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#128269;</span> SEO
       </a>
       <a href="{{ url_for('admin_ai_engine') }}" class="sb-link {% if 'ai_engine' in (request.endpoint or '') or 'ai_center' in (request.endpoint or '') or 'gap_analysis' in (request.endpoint or '') or 'content_queue' in (request.endpoint or '') or 'content_calendar' in (request.endpoint or '') or 'auto_rules' in (request.endpoint or '') or 'ai_scan_gaps' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#9889;</span> AI Engine
       </a>
-      <a href="{{ url_for('admin_tools') }}" class="sb-link {% if 'tools' in (request.endpoint or '') or 'video' in (request.endpoint or '') or 'analytics' in (request.endpoint or '') or 'seed_data' in (request.endpoint or '') %}active{% endif %}">
+      <a href="{{ url_for('admin_tools') }}" class="sb-link {% if 'tools' in (request.endpoint or '') or 'video' in (request.endpoint or '') or 'analytics' in (request.endpoint or '') or 'seed_data' in (request.endpoint or '') or 'voucher' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#128295;</span> Tools
       </a>
       <a href="{{ url_for('admin_settings') }}" class="sb-link {% if 'settings' in (request.endpoint or '') %}active{% endif %}">

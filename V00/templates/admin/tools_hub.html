@@ -68,6 +68,9 @@
   <a class="th-tab {% if active_tab=='video' %}active{% endif %}" href="{{ url_for('admin_tools', tab='video') }}">
     &#127909; Video
   </a>
+  <a class="th-tab {% if active_tab in ('vouchers','widgets','sync') %}active{% endif %}" href="{{ url_for('admin_tools', tab='vouchers') }}">
+    &#127915; Vouchers
+  </a>
   <a class="th-tab {% if active_tab=='seed' %}active{% endif %}" href="{{ url_for('admin_tools', tab='seed') }}">
     &#127793; Seed Data
   </a>
@@ -213,6 +216,109 @@
     <div class="th-empty-icon">&#127909;</div>
     <h3 style="font-size:17px;margin-bottom:6px">No videos yet</h3>
     <p style="font-size:14px">Create your first video project to get started.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════
+     TAB: VOUCHERS (with sub-tabs)
+     ══════════════════════════════════════════════ -->
+{% if active_tab in ('vouchers','widgets','sync') %}
+<div class="th-panel active">
+  <!-- Sub-tabs -->
+  <div style="display:flex;gap:2px;background:var(--surface2);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content">
+    <a href="{{ url_for('admin_tools', tab='vouchers') }}" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;{% if active_tab=='vouchers' %}background:var(--accent);color:#fff{% else %}color:var(--text-dim){% endif %}">Vouchers</a>
+    <a href="{{ url_for('admin_tools', tab='widgets') }}" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;{% if active_tab=='widgets' %}background:var(--accent);color:#fff{% else %}color:var(--text-dim){% endif %}">Widgets</a>
+    <a href="{{ url_for('admin_tools', tab='sync') }}" style="padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;{% if active_tab=='sync' %}background:var(--accent);color:#fff{% else %}color:var(--text-dim){% endif %}">Sync</a>
+  </div>
+
+  {% if active_tab == 'vouchers' %}
+  <!-- Vouchers list -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Vouchers</h2>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_voucher_new') }}" class="th-btn th-btn-primary">+ New Voucher</a>
+      <form method="POST" action="{{ url_for('admin_vouchers_bulk_delete') }}" style="display:inline"><button type="submit" class="th-btn" style="background:rgba(239,68,68,.1);color:#ef4444" onclick="return confirm('Delete selected?')">Bulk Delete</button></form>
+    </div>
+  </div>
+  <div class="th-stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="th-stat"><div class="th-stat-val">{{ total }}</div><div class="th-stat-label">Total</div></div>
+    <div class="th-stat"><div class="th-stat-val" style="color:#22c55e">{{ active_v }}</div><div class="th-stat-label">Active</div></div>
+    <div class="th-stat"><div class="th-stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="th-stat-label">Clicks</div></div>
+  </div>
+  <form style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center" method="GET">
+    <input type="hidden" name="tab" value="vouchers">
+    <select name="cat" onchange="this.form.submit()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit">
+      <option value="all">All Categories</option>
+      {% for c in cats %}<option value="{{ c }}" {% if f_cat==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+    <select name="merchant" onchange="this.form.submit()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit">
+      <option value="all">All Merchants</option>
+      {% for m in merchants %}<option value="{{ m }}" {% if f_merchant==m %}selected{% endif %}>{{ m }}</option>{% endfor %}
+    </select>
+    <select name="status" onchange="this.form.submit()" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit">
+      <option value="all">All Status</option>
+      <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+  </form>
+  {% if items %}
+  <div class="th-table-wrap"><table><thead><tr><th>Voucher</th><th>Merchant</th><th>Category</th><th>Discount</th><th>Clicks</th><th>Active</th><th></th></tr></thead><tbody>
+    {% for v in items %}<tr>
+      <td><strong>{{ v.title[:50] }}</strong></td>
+      <td>{{ v.merchant }}</td>
+      <td><span class="th-badge" style="background:var(--accent-dim,rgba(99,102,241,.1));color:var(--accent)">{{ v.category }}</span></td>
+      <td style="font-weight:700;color:#ef4444">{{ v.get_discount_text() or '-' }}</td>
+      <td>{{ v.clicks or 0 }}</td>
+      <td>{% if v.is_active %}<span class="th-badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="th-badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('admin_voucher_edit', vid=v.id) }}" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_voucher_delete', vid=v.id) }}" style="display:inline"><button type="submit" class="th-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" onclick="return confirm('Delete?')">Del</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="th-empty"><div class="th-empty-icon">&#127915;</div><h3 style="font-size:17px;margin-bottom:6px">No vouchers found</h3></div>
+  {% endif %}
+
+  {% elif active_tab == 'widgets' %}
+  <!-- Widgets -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Voucher Widgets</h2>
+    <a href="{{ url_for('admin_voucher_widget_new') }}" class="th-btn th-btn-primary">+ New Widget</a>
+  </div>
+  {% if widgets %}
+  <div class="th-table-wrap"><table><thead><tr><th>Name</th><th>Placement</th><th>Network</th><th>Active</th><th></th></tr></thead><tbody>
+    {% for w in widgets %}<tr>
+      <td><strong>{{ w.name }}</strong></td>
+      <td><span class="th-badge" style="background:var(--accent-dim,rgba(99,102,241,.1));color:var(--accent)">{{ w.placement or '-' }}</span></td>
+      <td>{{ w.network or '-' }}</td>
+      <td>{% if w.is_active %}<span class="th-badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="th-badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('admin_voucher_widget_edit', wid=w.id) }}" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_voucher_widget_toggle', wid=w.id) }}" style="display:inline"><button type="submit" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="th-empty"><div class="th-empty-icon">&#128296;</div><h3 style="font-size:17px;margin-bottom:6px">No widgets</h3><p style="font-size:14px">Create a voucher widget to display vouchers on your site.</p></div>
+  {% endif %}
+
+  {% elif active_tab == 'sync' %}
+  <!-- Sync -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Voucher Sync</h2>
+    <a href="{{ url_for('admin_voucher_sync') }}" class="th-btn th-btn-primary">Open Full Sync Panel</a>
+  </div>
+  <div class="th-stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="th-stat"><div class="th-stat-val">{{ total_synced }}</div><div class="th-stat-label">Synced</div></div>
+    <div class="th-stat"><div class="th-stat-val" style="color:#22c55e">{{ total_active }}</div><div class="th-stat-label">Active</div></div>
+    <div class="th-stat"><div class="th-stat-val" style="color:#3b82f6">{{ total_manual }}</div><div class="th-stat-label">Manual</div></div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center">
+    <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px">Voucher Sync co nhieu tinh nang (fetch merchants, auto sync, cleanup). Bam nut o tren de mo full panel.</p>
+    <a href="{{ url_for('admin_voucher_sync') }}" class="th-btn th-btn-primary">Go to Voucher Sync</a>
   </div>
   {% endif %}
 </div>

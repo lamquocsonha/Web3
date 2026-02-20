@@ -794,50 +794,9 @@ def admin_hotels_hub():
 
 @app.route('/admin/vouchers-hub')
 def admin_vouchers_hub():
-    """Vouchers Hub — Vouchers, Voucher Widgets, Voucher Sync"""
-    from sqlalchemy import func as sqlfunc
+    """Redirect to Tools Hub vouchers tab"""
     tab = request.args.get('tab', 'vouchers')
-    ctx = {'active_tab': tab}
-
-    if tab == 'vouchers':
-        f_cat = request.args.get('cat', 'all')
-        f_merchant = request.args.get('merchant', 'all')
-        f_status = request.args.get('status', 'all')
-
-        query = Voucher.query
-        if f_cat != 'all':
-            query = query.filter_by(category=f_cat)
-        if f_merchant != 'all':
-            query = query.filter_by(merchant=f_merchant)
-        if f_status == 'active':
-            query = query.filter_by(is_active=True)
-        elif f_status == 'inactive':
-            query = query.filter_by(is_active=False)
-
-        items = query.order_by(Voucher.created_at.desc()).all()
-        merchants = db.session.query(Voucher.merchant).distinct().all()
-        cats = db.session.query(Voucher.category).distinct().all()
-
-        total = Voucher.query.count()
-        active_v = Voucher.query.filter_by(is_active=True).count()
-        total_clicks = db.session.query(sqlfunc.sum(Voucher.clicks)).scalar() or 0
-
-        ctx.update(items=items, merchants=[m[0] for m in merchants if m[0]],
-                   cats=[c[0] for c in cats if c[0]],
-                   f_cat=f_cat, f_merchant=f_merchant, f_status=f_status,
-                   total=total, active_v=active_v, total_clicks=total_clicks)
-
-    elif tab == 'widgets':
-        widgets = VoucherWidget.query.all()
-        ctx.update(widgets=widgets)
-
-    elif tab == 'sync':
-        total_synced = Voucher.query.filter_by(sync_mode='api').count()
-        total_active = Voucher.query.filter_by(is_active=True).count()
-        total_manual = Voucher.query.filter_by(sync_mode='manual').count()
-        ctx.update(total_synced=total_synced, total_active=total_active, total_manual=total_manual)
-
-    return render_template('admin/vouchers_hub.html', **ctx)
+    return redirect(url_for('admin_tools', tab=tab))
 
 # =============================================
 # ADMIN — AFFILIATE HUB
@@ -1091,7 +1050,7 @@ def admin_content_delete(cid):
 # =============================================
 @app.route('/admin/tools')
 def admin_tools():
-    """Unified Tools Hub — Analytics, Video, Seed Data in tabs"""
+    """Unified Tools Hub — Analytics, Video, Vouchers, Seed Data in tabs"""
     tab = request.args.get('tab', 'analytics')
     ctx = {'active_tab': tab}
 
@@ -1123,6 +1082,41 @@ def admin_tools():
         total_views = db.session.query(db.func.sum(VideoPublish.views)).scalar() or 0
         total_published = VideoPublish.query.filter_by(status='published').count()
         ctx.update(videos=videos, channels=channels, total_views=total_views, total_published=total_published)
+
+    elif tab == 'vouchers':
+        from sqlalchemy import func as sqlfunc
+        f_cat = request.args.get('cat', 'all')
+        f_merchant = request.args.get('merchant', 'all')
+        f_status = request.args.get('status', 'all')
+        query = Voucher.query
+        if f_cat != 'all':
+            query = query.filter_by(category=f_cat)
+        if f_merchant != 'all':
+            query = query.filter_by(merchant=f_merchant)
+        if f_status == 'active':
+            query = query.filter_by(is_active=True)
+        elif f_status == 'inactive':
+            query = query.filter_by(is_active=False)
+        items = query.order_by(Voucher.created_at.desc()).all()
+        merchants = db.session.query(Voucher.merchant).distinct().all()
+        cats = db.session.query(Voucher.category).distinct().all()
+        total = Voucher.query.count()
+        active_v = Voucher.query.filter_by(is_active=True).count()
+        total_clicks = db.session.query(sqlfunc.sum(Voucher.clicks)).scalar() or 0
+        ctx.update(items=items, merchants=[m[0] for m in merchants if m[0]],
+                   cats=[c[0] for c in cats if c[0]],
+                   f_cat=f_cat, f_merchant=f_merchant, f_status=f_status,
+                   total=total, active_v=active_v, total_clicks=total_clicks)
+
+    elif tab == 'widgets':
+        widgets = VoucherWidget.query.all()
+        ctx.update(widgets=widgets)
+
+    elif tab == 'sync':
+        total_synced = Voucher.query.filter_by(sync_mode='api').count()
+        total_active = Voucher.query.filter_by(is_active=True).count()
+        total_manual = Voucher.query.filter_by(sync_mode='manual').count()
+        ctx.update(total_synced=total_synced, total_active=total_active, total_manual=total_manual)
 
     elif tab == 'seed':
         verticals = Vertical.query.all()
