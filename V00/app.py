@@ -793,12 +793,44 @@ def admin_content():
 def admin_content_generate():
     verticals = Vertical.query.all()
     if request.method == 'POST':
+        title = request.form['title']
+        prompt_text = request.form.get('prompt', '')
+        ai_provider = request.form.get('ai_provider', 'openai')
+        vertical_slug = request.form.get('vertical_slug', '')
+
+        # Try real AI generation
+        result_text = ''
+        tokens_used = 0
+        cost_vnd = 0
+        try:
+            from ai_service import generate_article, build_context_custom
+            vertical_name = vertical_slug or 'General'
+            for v in verticals:
+                if v.slug == vertical_slug:
+                    vertical_name = v.name
+                    break
+            context = build_context_custom(
+                vertical_name=vertical_name,
+                topic=title,
+                keywords=prompt_text[:200] if prompt_text else title,
+                tone='seo',
+                word_count='1200',
+            )
+            gen = generate_article('custom', context)
+            result_text = gen.get('content', '')
+            tokens_used = gen.get('tokens_used', 0)
+            cost_vnd = gen.get('cost_vnd', 0)
+        except Exception as e:
+            result_text = f'[AI generation failed: {str(e)}]\n\nPrompt was: {prompt_text}'
+            tokens_used = 0
+            cost_vnd = 0
+
         ai = AIContent(
-            title=request.form['title'], content_type=request.form.get('content_type','article'),
-            ai_provider=request.form.get('ai_provider','openai'), prompt=request.form.get('prompt',''),
-            result='[AI content will be generated here when API is connected]',
-            status='draft', vertical_slug=request.form.get('vertical_slug',''),
-            cost_tokens=random.randint(500,2000), cost_vnd=random.randint(800,2000)
+            title=title, content_type=request.form.get('content_type','article'),
+            ai_provider=ai_provider, prompt=prompt_text,
+            result=result_text,
+            status='draft', vertical_slug=vertical_slug,
+            cost_tokens=tokens_used, cost_vnd=cost_vnd
         )
         db.session.add(ai)
         db.session.commit()
@@ -6159,16 +6191,35 @@ def admin_content_queue_add():
 
 @app.route('/admin/content-queue/<int:qid>/action', methods=['POST'])
 def admin_content_queue_action(qid):
-    """Approve/Skip/Edit queue item"""
+    """Approve/Skip/Edit/Generate/Publish queue item"""
     item = ContentQueue.query.get_or_404(qid)
     action = request.form.get('action', '')
     if action == 'approve':
         item.status = 'review'
     elif action == 'skip':
         item.status = 'skipped'
+    elif action == 'generate':
+        # Generate AI content for this item
+        from ai_service import generate_from_queue_item
+        try:
+            result = generate_from_queue_item(item)
+            flash(f'Generated: {result["title"]} ({result["word_count"]} words)', 'success')
+        except Exception as e:
+            flash(f'Generation failed: {str(e)}', 'danger')
+        return redirect(url_for('admin_content_queue'))
     elif action == 'publish':
-        item.status = 'published'
-        item.published_at = datetime.utcnow()
+        # Publish as Article
+        if item.generated_content:
+            from ai_service import publish_queue_item
+            try:
+                article = publish_queue_item(item)
+                flash(f'Published: {article.title}', 'success')
+            except Exception as e:
+                flash(f'Publish failed: {str(e)}', 'danger')
+            return redirect(url_for('admin_content_queue'))
+        else:
+            item.status = 'published'
+            item.published_at = datetime.utcnow()
     elif action == 'edit':
         item.topic = request.form.get('topic', item.topic)
         item.keywords = request.form.get('keywords', item.keywords)
@@ -6248,6 +6299,125 @@ def _generate_gap_suggestions(vertical, coverage, empty_zones, articles_count):
         suggestions.append({'priority': 'low', 'text': f'{vertical.name} looking good! Consider seasonal content.', 'action': 'seasonal'})
 
     return suggestions
+
+
+# =============================================
+# AI CONTENT PIPELINE — Scan, Generate, Publish
+# =============================================
+
+@app.route('/admin/ai/scan-gaps')
+def admin_ai_scan_gaps():
+    """Enhanced gap analysis with cross-vertical comparison and per-tier breakdown"""
+    from ai_service import scan_all_gaps
+    results = scan_all_gaps()
+
+    # Overall stats
+    total_possible = sum(r['total_possible'] for r in results)
+    total_existing = sum(r['existing_articles'] for r in results)
+    overall_coverage = round(total_existing / total_possible * 100, 1) if total_possible > 0 else 0
+
+    # Per-tier totals across all verticals
+    tier_totals = {'nganh': {'total': 0, 'existing': 0}, 'chung': {'total': 0, 'existing': 0}, 'chi-tiet': {'total': 0, 'existing': 0}}
+    for r in results:
+        for tier_name, tier_data in r['tier_breakdown'].items():
+            tier_totals[tier_name]['total'] += tier_data['total']
+            tier_totals[tier_name]['existing'] += tier_data['existing']
+
+    return render_template('admin/ai_gap_scan.html',
+        results=results,
+        overall_coverage=overall_coverage,
+        total_possible=total_possible,
+        total_existing=total_existing,
+        tier_totals=tier_totals)
+
+
+@app.route('/admin/ai/auto-fill', methods=['POST'])
+def admin_ai_auto_fill():
+    """Auto-populate ContentQueue with gaps from scan"""
+    from ai_service import auto_fill_queue
+    vertical_id = request.form.get('vertical_id', type=int)
+    max_items = request.form.get('max_items', 10, type=int)
+    created = auto_fill_queue(vertical_id=vertical_id, max_items=max_items)
+    flash(f'Added {len(created)} items to content queue', 'success')
+    return redirect(url_for('admin_content_queue'))
+
+
+@app.route('/admin/ai/generate/<int:qid>', methods=['POST'])
+def admin_ai_generate(qid):
+    """Generate article content for a specific queue item"""
+    from ai_service import generate_from_queue_item
+    item = ContentQueue.query.get_or_404(qid)
+    try:
+        result = generate_from_queue_item(item)
+        flash(f'Generated: {result["title"]} ({result["word_count"]} words)', 'success')
+    except Exception as e:
+        flash(f'Generation failed: {str(e)}', 'danger')
+    return redirect(url_for('admin_content_queue'))
+
+
+@app.route('/admin/ai/publish/<int:qid>', methods=['POST'])
+def admin_ai_publish(qid):
+    """Publish a generated queue item as an Article"""
+    from ai_service import publish_queue_item
+    item = ContentQueue.query.get_or_404(qid)
+    try:
+        article = publish_queue_item(item)
+        flash(f'Published article: {article.title}', 'success')
+    except Exception as e:
+        flash(f'Publish failed: {str(e)}', 'danger')
+    return redirect(url_for('admin_content_queue'))
+
+
+@app.route('/admin/ai/batch-generate', methods=['POST'])
+def admin_ai_batch_generate():
+    """Generate content for all pending/approved queue items"""
+    from ai_service import generate_from_queue_item
+    items = ContentQueue.query.filter(ContentQueue.status.in_(['pending', 'review'])).limit(5).all()
+    success = 0
+    errors = 0
+    for item in items:
+        if item.generated_content:
+            continue  # Skip already generated
+        try:
+            generate_from_queue_item(item)
+            success += 1
+        except Exception as e:
+            errors += 1
+    flash(f'Batch generate: {success} success, {errors} errors', 'success' if errors == 0 else 'warning')
+    return redirect(url_for('admin_content_queue'))
+
+
+@app.route('/admin/ai/auto-run', methods=['POST'])
+def admin_ai_auto_run():
+    """Full pipeline: scan gaps → fill queue → generate → optionally publish"""
+    from ai_service import auto_fill_queue, generate_from_queue_item, publish_queue_item
+    vertical_id = request.form.get('vertical_id', type=int)
+    auto_publish = request.form.get('auto_publish') == '1'
+    max_items = request.form.get('max_items', 5, type=int)
+
+    # Step 1: Fill queue
+    created = auto_fill_queue(vertical_id=vertical_id, max_items=max_items)
+
+    # Step 2: Generate content
+    generated = 0
+    published = 0
+    errors = 0
+    for item in created:
+        try:
+            generate_from_queue_item(item)
+            generated += 1
+            # Step 3: Auto-publish if enabled
+            if auto_publish:
+                rule = AutoContentRule.query.filter_by(vertical_id=item.vertical_id, is_active=True).first()
+                if rule and rule.auto_publish:
+                    publish_queue_item(item)
+                    published += 1
+        except Exception as e:
+            errors += 1
+
+    flash(f'Auto-run: {len(created)} queued, {generated} generated, {published} published, {errors} errors',
+          'success' if errors == 0 else 'warning')
+    return redirect(url_for('admin_ai_scan_gaps'))
 
 
 # =============================================

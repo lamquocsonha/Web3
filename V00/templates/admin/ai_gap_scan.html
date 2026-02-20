@@ -1,0 +1,256 @@
+{% extends "admin/base.html" %}
+{% block title %}AI Gap Scanner{% endblock %}
+{% block breadcrumb %}AI Engine &rsaquo; Gap Scanner{% endblock %}
+{% block content %}
+<style>
+.scan-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px }
+.scan-header h1 { margin:0 }
+.scan-actions { display:flex; gap:10px }
+
+/* Overall health */
+.health-banner { background:linear-gradient(135deg, var(--accent-dim), rgba(59,130,246,.06)); border:2px solid var(--accent); border-radius:14px; padding:24px 28px; margin-bottom:28px; display:flex; align-items:center; gap:24px }
+.health-score { font-size:52px; font-weight:900; color:var(--accent); line-height:1 }
+.health-info h3 { font-size:18px; font-weight:700; margin-bottom:4px }
+.health-info p { font-size:14px; color:var(--text-dim) }
+
+/* Tier comparison bar */
+.tier-compare { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:32px }
+.tier-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; text-align:center }
+.tier-card-title { font-size:14px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px }
+.tier-card-nums { display:flex; align-items:baseline; justify-content:center; gap:6px }
+.tier-card-existing { font-size:32px; font-weight:900; color:#22c55e }
+.tier-card-sep { font-size:18px; color:var(--text-dim) }
+.tier-card-total { font-size:20px; font-weight:600; color:var(--text-dim) }
+.tier-bar { height:8px; background:var(--surface2); border-radius:99px; margin-top:10px; overflow:hidden }
+.tier-fill { height:100%; border-radius:99px }
+
+/* Cross-vertical ranking */
+.rank-table { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:32px }
+.rank-table table { width:100%; border-collapse:collapse }
+.rank-table th { padding:14px 16px; text-align:left; font-size:14px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.rank-table td { padding:14px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.rank-table tr:last-child td { border:none }
+.rank-table tr:hover td { background:var(--surface2) }
+
+.rank-num { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; font-weight:800; font-size:14px }
+.rank-1 { background:#fef2f2; color:#dc2626 }
+.rank-2 { background:#fef3c7; color:#d97706 }
+.rank-3 { background:#dbeafe; color:#2563eb }
+.rank-ok { background:#d1fae5; color:#059669 }
+
+.priority-bar { display:inline-block; height:6px; border-radius:99px; min-width:20px; vertical-align:middle }
+
+.coverage-badge { display:inline-block; font-size:14px; padding:4px 12px; border-radius:8px; font-weight:700 }
+.coverage-low { background:#fef2f2; color:#dc2626 }
+.coverage-mid { background:#fef3c7; color:#d97706 }
+.coverage-high { background:#d1fae5; color:#059669 }
+
+/* Per-vertical detail cards */
+.v-detail { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; margin-bottom:20px; transition:all .2s }
+.v-detail:hover { box-shadow:0 4px 20px rgba(0,0,0,.08) }
+.v-detail-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px }
+.v-detail-title { display:flex; align-items:center; gap:12px }
+.v-detail-title h3 { font-size:20px; font-weight:700; margin-bottom:2px }
+.v-detail-title span { font-size:14px; color:var(--text-dim) }
+.v-detail-score { text-align:right }
+.v-detail-score .score { font-size:36px; font-weight:900 }
+.v-detail-score .label { font-size:14px; color:var(--text-dim) }
+
+.tier-breakdown { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px }
+.tier-box { background:var(--surface2); border-radius:10px; padding:14px; text-align:center }
+.tier-box-name { font-size:14px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px }
+.tier-box-nums { font-size:14px; font-weight:600 }
+.tier-box-nums .done { color:#22c55e; font-size:20px; font-weight:800 }
+.tier-box-nums .miss { color:#ef4444 }
+
+.gap-list { margin-top:16px }
+.gap-list h4 { font-size:14px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px }
+.gap-item { display:inline-flex; align-items:center; gap:6px; font-size:14px; padding:5px 12px; border-radius:8px; margin:0 6px 6px 0; font-weight:500; background:var(--surface2) }
+.gap-item.nganh { border-left:3px solid #dc2626 }
+.gap-item.chung { border-left:3px solid #d97706 }
+.gap-item.chi-tiet { border-left:3px solid #3b82f6 }
+
+.v-detail-actions { display:flex; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border) }
+
+.btn { padding:8px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s }
+.btn-primary { background:var(--accent); color:#fff }
+.btn-primary:hover { opacity:.9 }
+.btn-warning { background:#fef3c7; color:#92400e }
+.btn-warning:hover { background:#fde68a }
+.btn-danger { background:#fef2f2; color:#dc2626 }
+.btn-danger:hover { background:#fecaca }
+.btn-success { background:#d1fae5; color:#065f46 }
+.btn-success:hover { background:#a7f3d0 }
+.btn-ghost { background:var(--surface2); color:var(--text) }
+.btn-ghost:hover { background:var(--border) }
+</style>
+
+<div class="scan-header">
+  <h1 class="page-title">AI Gap Scanner</h1>
+  <div class="scan-actions">
+    <a href="{{ url_for('admin_gap_analysis') }}" class="btn btn-ghost">Old Gap Analysis</a>
+    <a href="{{ url_for('admin_content_queue') }}" class="btn btn-ghost">Content Queue</a>
+    <form method="POST" action="{{ url_for('admin_ai_auto_fill') }}" style="display:inline">
+      <input type="hidden" name="max_items" value="10">
+      <button type="submit" class="btn btn-primary">Auto-Fill Queue (All)</button>
+    </form>
+  </div>
+</div>
+
+<!-- Overall Health Banner -->
+<div class="health-banner">
+  <div class="health-score">{{ overall_coverage }}%</div>
+  <div class="health-info">
+    <h3>Overall Article Coverage</h3>
+    <p>{{ results|length }} verticals &bull; {{ total_existing }} articles written / {{ total_possible }} positions possible &bull; {{ total_possible - total_existing }} gaps remaining</p>
+  </div>
+</div>
+
+<!-- Tier Comparison -->
+<div class="tier-compare">
+  {% for tier_name, tier_label in [('nganh', 'Nganh (Industry)'), ('chung', 'Chung (Guide)'), ('chi-tiet', 'Chi Tiet (Review)')] %}
+  {% set t = tier_totals[tier_name] %}
+  {% set pct = (t.existing / t.total * 100)|round|int if t.total > 0 else 0 %}
+  <div class="tier-card">
+    <div class="tier-card-title">{{ tier_label }}</div>
+    <div class="tier-card-nums">
+      <span class="tier-card-existing">{{ t.existing }}</span>
+      <span class="tier-card-sep">/</span>
+      <span class="tier-card-total">{{ t.total }}</span>
+    </div>
+    <div class="tier-bar">
+      <div class="tier-fill" style="width:{{ pct }}%;background:{% if pct >= 70 %}#22c55e{% elif pct >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Cross-Vertical Ranking Table -->
+<div class="rank-table">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:50px">Rank</th>
+        <th>Vertical</th>
+        <th style="text-align:center">Coverage</th>
+        <th style="text-align:center">Nganh</th>
+        <th style="text-align:center">Chung</th>
+        <th style="text-align:center">Chi Tiet</th>
+        <th style="text-align:center">Priority</th>
+        <th style="text-align:center">Gaps</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      {% set rank = loop.index %}
+      <tr>
+        <td>
+          <span class="rank-num {% if rank == 1 %}rank-1{% elif rank == 2 %}rank-2{% elif rank == 3 %}rank-3{% else %}rank-ok{% endif %}">{{ rank }}</span>
+        </td>
+        <td>
+          <strong>{{ r.vertical.icon }} {{ r.vertical.name }}</strong>
+        </td>
+        <td style="text-align:center">
+          <span class="coverage-badge {% if r.coverage_pct >= 70 %}coverage-high{% elif r.coverage_pct >= 30 %}coverage-mid{% else %}coverage-low{% endif %}">{{ r.coverage_pct }}%</span>
+        </td>
+        <td style="text-align:center;font-size:14px">
+          <span style="color:#22c55e;font-weight:700">{{ r.tier_breakdown.nganh.existing }}</span><span style="color:var(--text-dim)">/{{ r.tier_breakdown.nganh.total }}</span>
+        </td>
+        <td style="text-align:center;font-size:14px">
+          <span style="color:#22c55e;font-weight:700">{{ r.tier_breakdown.chung.existing }}</span><span style="color:var(--text-dim)">/{{ r.tier_breakdown.chung.total }}</span>
+        </td>
+        <td style="text-align:center;font-size:14px">
+          <span style="color:#22c55e;font-weight:700">{{ r.tier_breakdown['chi-tiet'].existing }}</span><span style="color:var(--text-dim)">/{{ r.tier_breakdown['chi-tiet'].total }}</span>
+        </td>
+        <td style="text-align:center">
+          <span class="priority-bar" style="width:{{ r.priority_score }}px;background:{% if r.priority_score >= 70 %}#ef4444{% elif r.priority_score >= 40 %}#f59e0b{% else %}#22c55e{% endif %}"></span>
+          <span style="font-size:14px;font-weight:600;margin-left:6px">{{ r.priority_score }}</span>
+        </td>
+        <td style="text-align:center">
+          <span style="font-size:14px;font-weight:700;color:#ef4444">{{ r.top_gaps|length }}</span>
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('admin_ai_auto_fill') }}" style="display:inline">
+            <input type="hidden" name="vertical_id" value="{{ r.vertical.id }}">
+            <input type="hidden" name="max_items" value="10">
+            <button type="submit" class="btn btn-warning" style="padding:5px 12px;font-size:14px">Fill Gaps</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Per-Vertical Detail Cards -->
+{% for r in results %}
+<div class="v-detail" id="v-{{ r.vertical.slug }}">
+  <div class="v-detail-header">
+    <div class="v-detail-title">
+      <span style="font-size:36px">{{ r.vertical.icon }}</span>
+      <div>
+        <h3>{{ r.vertical.name }}</h3>
+        <span>{{ r.existing_articles }} articles / {{ r.total_possible }} positions</span>
+      </div>
+    </div>
+    <div class="v-detail-score">
+      <div class="score" style="color:{% if r.coverage_pct >= 70 %}#22c55e{% elif r.coverage_pct >= 30 %}#f59e0b{% else %}#ef4444{% endif %}">{{ r.coverage_pct }}%</div>
+      <div class="label">coverage</div>
+    </div>
+  </div>
+
+  <!-- Tier Breakdown -->
+  <div class="tier-breakdown">
+    {% for tier_name, tier_label in [('nganh', 'Nganh (Segment)'), ('chung', 'Chung (Zone)'), ('chi-tiet', 'Chi Tiet (Part)')] %}
+    {% set td = r.tier_breakdown[tier_name] %}
+    <div class="tier-box">
+      <div class="tier-box-name">{{ tier_label }}</div>
+      <div class="tier-box-nums">
+        <span class="done">{{ td.existing }}</span> / {{ td.total }}
+        {% if td.missing > 0 %}<span class="miss">({{ td.missing }} missing)</span>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Top Gaps -->
+  {% if r.top_gaps %}
+  <div class="gap-list">
+    <h4>Top Content Gaps ({{ r.top_gaps|length }})</h4>
+    {% for g in r.top_gaps[:12] %}
+    <span class="gap-item {{ g.tier }}">
+      <strong>{{ g.tier|upper }}</strong> {{ g.target_name }}
+    </span>
+    {% endfor %}
+    {% if r.top_gaps|length > 12 %}
+    <span class="gap-item" style="background:var(--surface);border:1px solid var(--border)">+{{ r.top_gaps|length - 12 }} more</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Actions -->
+  <div class="v-detail-actions">
+    <form method="POST" action="{{ url_for('admin_ai_auto_fill') }}" style="display:inline">
+      <input type="hidden" name="vertical_id" value="{{ r.vertical.id }}">
+      <input type="hidden" name="max_items" value="10">
+      <button type="submit" class="btn btn-primary">Fill {{ r.vertical.name }} Queue</button>
+    </form>
+    <form method="POST" action="{{ url_for('admin_ai_auto_run') }}" style="display:inline" onclick="return confirm('This will scan, generate AI articles, and optionally auto-publish. Continue?')">
+      <input type="hidden" name="vertical_id" value="{{ r.vertical.id }}">
+      <input type="hidden" name="max_items" value="3">
+      <button type="submit" class="btn btn-success">Auto-Run (3 articles)</button>
+    </form>
+    <a href="{{ url_for('admin_auto_rules') }}" class="btn btn-ghost">Configure Rules</a>
+  </div>
+</div>
+{% endfor %}
+
+{% if not results %}
+<div style="text-align:center;padding:60px 20px;color:var(--text-dim)">
+  <div style="font-size:48px;margin-bottom:16px">&#128269;</div>
+  <h3 style="font-size:18px;margin-bottom:8px">No verticals to scan</h3>
+  <p style="font-size:14px">Create and publish verticals first to see gap analysis.</p>
+</div>
+{% endif %}
+{% endblock %}

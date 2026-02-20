@@ -143,6 +143,9 @@
           <a href="{{ url_for('admin_gap_analysis') }}" class="sb-link sb-sub {% if 'gap_analysis' in (request.endpoint or '') %}active{% endif %}">
             <span class="sb-icon">&#128200;</span> Gap Analysis
           </a>
+          <a href="{{ url_for('admin_ai_scan_gaps') }}" class="sb-link sb-sub {% if 'ai_scan_gaps' in (request.endpoint or '') %}active{% endif %}">
+            <span class="sb-icon">&#128161;</span> AI Gap Scanner
+          </a>
         </div>
       </div>
 
