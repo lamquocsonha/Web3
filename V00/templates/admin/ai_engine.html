@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}AI Engine{% endblock %}
-{% block breadcrumb %}AI Engine{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> AI Engine{% endblock %}
 {% block content %}
 <style>
 /* ── Top Tabs ── */

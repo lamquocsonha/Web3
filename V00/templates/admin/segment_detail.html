@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}{{ segment.name }}{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_vertical_detail', vid=segment.vertical.id) }}">{{ segment.vertical.name }}</a><span class="sep">></span>{{ segment.name }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span><a href="{{ url_for('admin_vertical_detail', vid=segment.vertical.id) }}">{{ segment.vertical.name }}</a><span class="sep">›</span>{{ segment.name }}{% endblock %}
 {% block content %}
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0">{{ segment.icon }} {{ segment.name }}</h1>

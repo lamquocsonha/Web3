@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}AI Pipeline{% endblock %}
-{% block breadcrumb %}AI Engine &rsaquo; Pipeline{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> <a href="{{ url_for('admin_ai_engine') }}">AI Engine</a><span class="sep">›</span> Pipeline{% endblock %}
 {% block content %}
 <style>
 /* ── Pipeline Steps ── */

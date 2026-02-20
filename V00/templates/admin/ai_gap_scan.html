@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}AI Gap Scanner{% endblock %}
-{% block breadcrumb %}AI Engine &rsaquo; Gap Scanner{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> <a href="{{ url_for('admin_ai_engine') }}">AI Engine</a><span class="sep">›</span> Gap Scanner{% endblock %}
 {% block content %}
 <style>
 .scan-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px }

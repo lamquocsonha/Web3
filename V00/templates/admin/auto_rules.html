@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}Auto Rules{% endblock %}
-{% block breadcrumb %}AI Engine &rsaquo; Auto Rules{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> <a href="{{ url_for('admin_ai_engine') }}">AI Engine</a><span class="sep">›</span> Auto Rules{% endblock %}
 {% block content %}
 <style>
 .rules-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px }

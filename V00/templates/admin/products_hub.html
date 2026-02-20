@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}Products{% endblock %}
-{% block breadcrumb %}Products{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> Products{% endblock %}
 {% block content %}
 <style>
 .hub-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:24px }

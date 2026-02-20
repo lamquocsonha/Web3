@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}{% if hotel %}Edit Hotel{% else %}New Hotel{% endif %}{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_hotels') }}">Hotels</a><span class="sep">></span>{% if hotel %}Edit{% else %}New{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span><a href="{{ url_for('admin_hotels') }}">Hotels</a><span class="sep">›</span>{% if hotel %}Edit{% else %}New{% endif %}{% endblock %}
 {% block content %}
 <h1 class="page-title">🏨 {% if hotel %}Edit: {{ hotel.name[:40] }}{% else %}Add Hotel{% endif %}</h1>
 

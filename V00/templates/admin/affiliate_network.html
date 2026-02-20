@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}{{ network.name }}{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_affiliate') }}">Affiliate Hub</a><span class="sep">></span>{{ network.name }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span><a href="{{ url_for('admin_affiliate') }}">Affiliate Hub</a><span class="sep">›</span>{{ network.name }}{% endblock %}
 {% block content %}
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0;color:{{ network.color }}">{{ network.icon }} {{ network.name }}</h1>

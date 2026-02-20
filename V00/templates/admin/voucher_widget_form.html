@@ -1,5 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}{{ 'Edit' if widget else 'New' }} Voucher Widget{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> <a href="{{ url_for('admin_vouchers') }}">Vouchers</a><span class="sep">›</span> {% if widget %}Edit Widget{% else %}New Widget{% endif %}{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>{{ '✏️ Edit' if widget else '➕ New' }} Voucher Widget</h1>
