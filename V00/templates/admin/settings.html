@@ -9,6 +9,7 @@
   <button class="stab-btn {% if active_tab=='general' %}active{% endif %}" data-tab="general">General</button>
   <button class="stab-btn {% if active_tab=='api' %}active{% endif %}" data-tab="api">API Keys</button>
   <button class="stab-btn {% if active_tab=='styles' %}active{% endif %}" data-tab="styles">Styles</button>
+  <button class="stab-btn {% if active_tab=='database' %}active{% endif %}" data-tab="database">Database</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -347,6 +348,140 @@
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
+<!-- TAB: DATABASE                                -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="stab-panel {% if active_tab=='database' %}active{% endif %}" id="tab-database">
+
+  <!-- DB Info -->
+  <div class="scard">
+    <h3 class="scard-title">Database Info</h3>
+    <div class="db-info-grid">
+      <div class="db-info-item">
+        <span class="db-info-label">Engine</span>
+        <span class="db-info-val">SQLite</span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">File</span>
+        <span class="db-info-val"><code>instance/unilab.db</code></span>
+      </div>
+      {% if db_info %}
+      <div class="db-info-item">
+        <span class="db-info-label">Kich thuoc</span>
+        <span class="db-info-val">{{ db_info.size_display }}</span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">So bang</span>
+        <span class="db-info-val">{{ db_info.table_count }}</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Table List -->
+  {% if db_info and db_info.tables %}
+  <div class="scard">
+    <h3 class="scard-title">Cac bang trong Database</h3>
+    <div class="table-wrap">
+      <table class="data-table" style="font-size:14px">
+        <thead>
+          <tr><th>Bang</th><th>So cot</th><th>So dong</th><th>Trang thai</th></tr>
+        </thead>
+        <tbody>
+          {% for t in db_info.tables %}
+          <tr>
+            <td><code>{{ t.name }}</code></td>
+            <td>{{ t.columns }}</td>
+            <td>{{ t.rows }}</td>
+            <td>
+              {% if t.status == 'ok' %}
+              <span style="color:#22c55e;font-weight:600">OK</span>
+              {% elif t.status == 'missing' %}
+              <span style="color:#f59e0b;font-weight:600">Chua tao</span>
+              {% else %}
+              <span style="color:#ef4444;font-weight:600">Loi</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Actions -->
+  <div class="scard">
+    <h3 class="scard-title">Cap nhat Database</h3>
+    <p class="scard-desc">Khi cap nhat code moi (them model, them cot), bam nut ben duoi de cap nhat schema database ma khong mat data cu.</p>
+
+    <div class="db-actions">
+      <div class="db-action-card">
+        <div class="db-action-header">
+          <span class="db-action-icon" style="background:rgba(34,197,94,0.1);color:#22c55e">+</span>
+          <div>
+            <strong>Cap nhat Schema</strong>
+            <p>Them bang moi va cot moi vao database hien tai. Data cu khong bi anh huong.</p>
+          </div>
+        </div>
+        <form method="POST" action="{{ url_for('admin_settings_database') }}">
+          <input type="hidden" name="action" value="update_schema">
+          <button type="submit" class="btn btn-primary">Cap nhat Schema</button>
+        </form>
+      </div>
+
+      <div class="db-action-card">
+        <div class="db-action-header">
+          <span class="db-action-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b">&#8635;</span>
+          <div>
+            <strong>Sua chua Database</strong>
+            <p>Xoa file WAL/SHM va chay lai migration. Dung khi gap loi "malformed database".</p>
+          </div>
+        </div>
+        <form method="POST" action="{{ url_for('admin_settings_database') }}">
+          <input type="hidden" name="action" value="repair">
+          <button type="submit" class="btn" style="background:var(--surface2);color:var(--text)">Sua chua</button>
+        </form>
+      </div>
+
+      <div class="db-action-card" style="border-color:rgba(239,68,68,0.3)">
+        <div class="db-action-header">
+          <span class="db-action-icon" style="background:rgba(239,68,68,0.1);color:#ef4444">!</span>
+          <div>
+            <strong>Reset Database</strong>
+            <p>Xoa toan bo database va tao lai tu dau. Data cu se duoc backup thanh file <code>.backup</code>.</p>
+          </div>
+        </div>
+        <form method="POST" action="{{ url_for('admin_settings_database') }}" onsubmit="return confirm('Ban co chac chan muon RESET database? Toan bo data se bi xoa (file backup se duoc tao).')">
+          <input type="hidden" name="action" value="reset">
+          <button type="submit" class="btn" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3)">Reset Database</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% if db_info and db_info.backups %}
+  <div class="scard">
+    <h3 class="scard-title">File Backup</h3>
+    <div class="table-wrap">
+      <table class="data-table" style="font-size:14px">
+        <thead><tr><th>File</th><th>Kich thuoc</th><th>Ngay tao</th></tr></thead>
+        <tbody>
+          {% for b in db_info.backups %}
+          <tr>
+            <td><code>{{ b.name }}</code></td>
+            <td>{{ b.size_display }}</td>
+            <td>{{ b.modified }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
 <!-- STYLE EDITOR MODAL                          -->
 <!-- ═══════════════════════════════════════════ -->
 <div class="modal-overlay" id="styleModal" style="display:none">
@@ -495,6 +630,19 @@
 .se-color-item label { font-size:14px; font-weight:600; color:var(--text-dim); }
 .se-color-item input[type="color"] { width:100%; height:36px; border:1px solid var(--border); border-radius:6px; cursor:pointer; padding:2px; }
 .se-color-val { font-size:14px; color:var(--text-dim); font-family:'DM Mono',monospace; }
+
+/* ═══ DATABASE TAB ═══ */
+.db-info-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
+.db-info-item { background:var(--surface2); border-radius:8px; padding:12px 16px; }
+.db-info-label { display:block; font-size:12px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px; }
+.db-info-val { font-size:15px; font-weight:600; }
+.db-info-val code { font-size:13px; padding:2px 6px; background:var(--bg); border-radius:4px; }
+.db-actions { display:flex; flex-direction:column; gap:16px; margin-top:16px; }
+.db-action-card { border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:flex; justify-content:space-between; align-items:center; gap:20px; }
+.db-action-header { display:flex; gap:14px; align-items:flex-start; flex:1; }
+.db-action-header p { color:var(--text-dim); margin:4px 0 0; font-size:14px; line-height:1.5; }
+.db-action-header strong { font-size:15px; }
+.db-action-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:700; flex-shrink:0; }
 </style>
 
 <script>

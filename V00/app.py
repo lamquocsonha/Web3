@@ -905,10 +905,12 @@ def admin_settings():
         custom_names = set(json.loads(custom_raw).keys())
     except:
         custom_names = set()
+    db_info = _get_db_info() if tab == 'database' else None
     return render_template('admin/settings.html', settings=settings, styles=styles,
                            active_tab=tab, custom_names=custom_names,
                            default_names=set(THEME_STYLES.keys()),
-                           available_fonts=AVAILABLE_FONTS)
+                           available_fonts=AVAILABLE_FONTS,
+                           db_info=db_info)
 
 @app.route('/admin/settings/styles', methods=['POST'])
 def admin_settings_styles():
@@ -944,6 +946,114 @@ def admin_settings_styles():
         flash(f'Style "{name}" saved!', 'success')
 
     return redirect(url_for('admin_settings', tab='styles'))
+
+# ═══════════════════════════════════════════
+# DATABASE MANAGEMENT
+# ═══════════════════════════════════════════
+def _get_db_info():
+    """Get database info for the settings page."""
+    import glob as glob_mod
+    db_path = os.path.join(app.instance_path, 'unilab.db')
+    info = {'size_display': '—', 'table_count': 0, 'tables': [], 'backups': []}
+
+    # File size
+    if os.path.exists(db_path):
+        size_bytes = os.path.getsize(db_path)
+        if size_bytes < 1024:
+            info['size_display'] = f'{size_bytes} B'
+        elif size_bytes < 1024*1024:
+            info['size_display'] = f'{size_bytes/1024:.1f} KB'
+        else:
+            info['size_display'] = f'{size_bytes/(1024*1024):.1f} MB'
+
+    # Get all model table names from SQLAlchemy metadata
+    model_tables = sorted(db.metadata.tables.keys())
+
+    # Check each table
+    for tname in model_tables:
+        tinfo = {'name': tname, 'columns': 0, 'rows': 0, 'status': 'missing'}
+        try:
+            cols = _get_table_columns(tname)
+            if cols:
+                tinfo['columns'] = len(cols)
+                tinfo['status'] = 'ok'
+                row_count = db.session.execute(db.text(f"SELECT COUNT(*) FROM [{tname}]")).scalar()
+                tinfo['rows'] = row_count or 0
+        except Exception:
+            tinfo['status'] = 'error'
+        info['tables'].append(tinfo)
+
+    info['table_count'] = sum(1 for t in info['tables'] if t['status'] == 'ok')
+
+    # Find backup files
+    backup_pattern = os.path.join(app.instance_path, 'unilab.db.backup*')
+    for fpath in sorted(glob_mod.glob(backup_pattern), reverse=True):
+        bsize = os.path.getsize(fpath)
+        if bsize < 1024*1024:
+            bsize_str = f'{bsize/1024:.1f} KB'
+        else:
+            bsize_str = f'{bsize/(1024*1024):.1f} MB'
+        mtime = datetime.fromtimestamp(os.path.getmtime(fpath)).strftime('%Y-%m-%d %H:%M')
+        info['backups'].append({'name': os.path.basename(fpath), 'size_display': bsize_str, 'modified': mtime})
+
+    return info
+
+@app.route('/admin/settings/database', methods=['POST'])
+def admin_settings_database():
+    action = request.form.get('action', '')
+
+    if action == 'update_schema':
+        try:
+            db.create_all()
+            _run_schema_migration()
+            flash('Schema da duoc cap nhat thanh cong!', 'success')
+        except Exception as e:
+            flash(f'Loi cap nhat schema: {e}', 'error')
+
+    elif action == 'repair':
+        db_path = os.path.join(app.instance_path, 'unilab.db')
+        try:
+            db.session.remove()
+            db.engine.dispose()
+            # Remove WAL/SHM files
+            removed = []
+            for ext in ['-wal', '-shm']:
+                wal_path = db_path + ext
+                if os.path.exists(wal_path):
+                    os.remove(wal_path)
+                    removed.append(ext)
+            db.create_all()
+            _run_schema_migration()
+            if removed:
+                flash(f'Sua chua thanh cong! Da xoa file {", ".join(removed)} va cap nhat schema.', 'success')
+            else:
+                flash('Database binh thuong, da chay lai migration.', 'success')
+        except Exception as e:
+            flash(f'Loi sua chua: {e}', 'error')
+
+    elif action == 'reset':
+        import shutil
+        db_path = os.path.join(app.instance_path, 'unilab.db')
+        try:
+            db.session.remove()
+            db.engine.dispose()
+            # Backup with timestamp
+            if os.path.exists(db_path):
+                ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+                backup_path = f'{db_path}.backup_{ts}'
+                shutil.copy2(db_path, backup_path)
+                os.remove(db_path)
+                for ext in ['-wal', '-shm']:
+                    p = db_path + ext
+                    if os.path.exists(p):
+                        os.remove(p)
+            db.create_all()
+            _run_schema_migration()
+            flash('Database da duoc reset! Data cu da backup.', 'success')
+        except Exception as e:
+            flash(f'Loi reset database: {e}', 'error')
+
+    return redirect(url_for('admin_settings', tab='database'))
 
 @app.route('/admin/toggle-mode', methods=['POST'])
 def admin_toggle_mode():
