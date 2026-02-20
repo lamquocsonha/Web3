@@ -266,9 +266,12 @@ def inject_globals():
         except Exception:
             pass
 
+        _now = datetime.utcnow()
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
-            'now': datetime.utcnow(),
+            'now': _now,
+            'current_month': _now.month,
+            'current_year': _now.year,
             'THEME_STYLES': get_theme_styles(),
             'site_mode': site_mode,
             'site_logo_url': logo_url,
@@ -286,7 +289,8 @@ def inject_globals():
             'at_banners_sidebar': at_banners_sidebar,
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1', 'hotdeals_active': [], 'hotdeal_show_shop': '1', 'hotdeal_show_voucher': '1', 'at_banners_hotdeal': [], 'at_banners_sidebar': []}
+        _fallback_now = datetime.utcnow()
+        return {'sidebar_verticals': [], 'now': _fallback_now, 'current_month': _fallback_now.month, 'current_year': _fallback_now.year, 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1', 'hotdeals_active': [], 'hotdeal_show_shop': '1', 'hotdeal_show_voucher': '1', 'at_banners_hotdeal': [], 'at_banners_sidebar': []}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
