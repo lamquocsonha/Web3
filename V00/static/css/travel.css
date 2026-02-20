@@ -1353,12 +1353,12 @@ body {
 
 /* Search Form */
 .tz-search-form { padding: 16px 20px; }
-.tz-sf-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-.tz-sf-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
-.tz-sf-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.tz-sf-row { display: flex; gap: 12px; align-items: flex-end; }
+.tz-sf-field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.tz-sf-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
 [data-mode="light"] .tz-sf-field label { color: #9ca3af; }
 [data-mode="dark"] .tz-sf-field label { color: #64748b; }
-.tz-sf-dest { flex: 2; min-width: 180px; }
+.tz-sf-dest { flex: 1.5; }
 .tz-sf-sm { flex: 0; min-width: 80px; }
 .tz-sf-input { padding: 10px 12px; border-radius: 8px; font-size: 13px; font-family: 'Manrope', sans-serif; width: 100%; box-sizing: border-box; }
 [data-mode="light"] .tz-sf-input { background: #f9fafb; border: 1px solid #e5e7eb; color: #111827; }
@@ -1383,32 +1383,68 @@ body {
 [data-mode="dark"] .tz-sf-btn:hover { background: #7c3aed; }
 
 /* ── Price Range ── */
-.tz-sf-price { flex: 2; min-width: 200px; }
-.price-range-box { display: flex; flex-direction: column; gap: 4px; }
-.price-row { display: flex; align-items: center; gap: 4px; }
-.pr-input { flex: 1; min-width: 0; padding: 10px 8px; border-radius: 8px; font-size: 12px; font-family: 'Manrope', sans-serif; text-align: center; box-sizing: border-box; }
+.tz-sf-price { flex: 1.8; min-width: 0; }
+.price-range-box { display: flex; flex-direction: column; gap: 6px; }
+.price-row { display: flex; align-items: center; gap: 6px; width: 100%; }
+.pr-input {
+  flex: 1 1 0; min-width: 0; width: 0;
+  padding: 10px 6px; border-radius: 8px;
+  font-size: 12px; font-family: 'Manrope', sans-serif;
+  text-align: center; box-sizing: border-box;
+}
 [data-mode="light"] .pr-input { background: #f9fafb; border: 1px solid #e5e7eb; color: #111827; }
-[data-mode="light"] .pr-input:focus { border-color: #0891b2; outline: none; box-shadow: 0 0 0 3px rgba(8,145,178,0.1); }
+[data-mode="light"] .pr-input:focus { border-color: #0891b2; outline: none; box-shadow: 0 0 0 2px rgba(8,145,178,0.12); }
 [data-mode="dark"] .pr-input { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: #f1f5f9; }
 [data-mode="dark"] .pr-input:focus { border-color: #8b5cf6; outline: none; }
-.pr-input::placeholder { font-size: 11px; opacity: 0.5; }
-.pr-dash { color: #9ca3af; font-size: 12px; flex-shrink: 0; }
-.pr-slider-wrap { position: relative; height: 18px; margin: 0 2px; }
-.pr-track-bg { position: absolute; top: 7px; left: 0; right: 0; height: 4px; border-radius: 2px; }
+.pr-input::placeholder { font-size: 11px; opacity: 0.45; }
+.pr-dash { color: #9ca3af; font-size: 14px; flex-shrink: 0; line-height: 1; }
+
+/* Dual range slider */
+.pr-slider-wrap { position: relative; height: 20px; }
+.pr-track-bg {
+  position: absolute; top: 8px; left: 0; right: 0;
+  height: 4px; border-radius: 2px; z-index: 0;
+}
 [data-mode="light"] .pr-track-bg { background: #e5e7eb; }
-[data-mode="dark"] .pr-track-bg { background: rgba(255,255,255,0.08); }
-.pr-track-fill { position: absolute; top: 7px; height: 4px; border-radius: 2px; pointer-events: none; }
+[data-mode="dark"] .pr-track-bg { background: rgba(255,255,255,0.1); }
+.pr-track-fill {
+  position: absolute; top: 8px; height: 4px;
+  border-radius: 2px; pointer-events: none; z-index: 1;
+}
 [data-mode="light"] .pr-track-fill { background: #0891b2; }
 [data-mode="dark"] .pr-track-fill { background: #8b5cf6; }
-.pr-slider { position: absolute; top: 0; left: 0; width: 100%; margin: 0; -webkit-appearance: none; appearance: none; background: transparent; pointer-events: none; height: 18px; }
-.pr-slider::-webkit-slider-runnable-track { height: 4px; background: transparent; }
-.pr-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; margin-top: -5px; pointer-events: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+.pr-slider {
+  position: absolute; top: 0; left: 0; width: 100%;
+  margin: 0; padding: 0; height: 20px;
+  -webkit-appearance: none; appearance: none;
+  background: none; pointer-events: none; z-index: 2;
+}
+.pr-slider::-webkit-slider-runnable-track {
+  width: 100%; height: 4px; background: transparent; border: none;
+}
+.pr-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid #fff; cursor: pointer;
+  margin-top: -6px; pointer-events: auto;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  position: relative; z-index: 3;
+}
 [data-mode="light"] .pr-slider::-webkit-slider-thumb { background: #0891b2; }
 [data-mode="dark"] .pr-slider::-webkit-slider-thumb { background: #8b5cf6; }
-.pr-slider::-moz-range-track { height: 4px; background: transparent; border: none; }
-.pr-slider::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; pointer-events: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+.pr-slider::-moz-range-track {
+  width: 100%; height: 4px; background: transparent; border: none;
+}
+.pr-slider::-moz-range-thumb {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid #fff; cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
 [data-mode="light"] .pr-slider::-moz-range-thumb { background: #0891b2; }
 [data-mode="dark"] .pr-slider::-moz-range-thumb { background: #8b5cf6; }
+/* Ensure top slider thumb is grabbable when overlapping */
+#priceSliderMax { z-index: 3; }
 
 /* ── Results Header ── */
 .tz-results-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
@@ -1529,8 +1565,8 @@ body {
 @media (max-width: 768px) {
   .tz-hotel-card { flex-direction: column; }
   .tz-hc-img { width: 100%; min-height: 160px; }
-  .tz-sf-row { flex-direction: column; }
-  .tz-sf-field, .tz-sf-dest, .tz-sf-sm { min-width: 100%; }
+  .tz-sf-row { flex-direction: column; gap: 10px; }
+  .tz-sf-field, .tz-sf-dest, .tz-sf-price, .tz-sf-sm { min-width: 100% !important; flex: none !important; }
   .tz-dest-grid { grid-template-columns: 1fr 1fr; }
   .tz-search-tabs { overflow-x: auto; }
   .tz-tab { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
