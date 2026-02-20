@@ -121,33 +121,10 @@
         </div>
       </div>
 
-      <!-- AI Engine Dropdown -->
-      <div class="sb-dropdown">
-        <div class="sb-dropdown-header">
-          <span class="sb-icon">&#9889;</span> AI Engine
-          <span class="sb-arrow">›</span>
-        </div>
-        <div class="sb-dropdown-content">
-          <a href="{{ url_for('admin_ai_center') }}" class="sb-link sb-sub {% if 'ai_center' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
-            <span class="sb-icon">&#129302;</span> AI Control Center
-          </a>
-          <a href="{{ url_for('admin_content_calendar') }}" class="sb-link sb-sub {% if 'content_calendar' in (request.endpoint or '') or 'content_event' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128197;</span> Calendar
-          </a>
-          <a href="{{ url_for('admin_auto_rules') }}" class="sb-link sb-sub {% if 'auto_rules' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#9881;</span> Auto Rules
-          </a>
-          <a href="{{ url_for('admin_content_queue') }}" class="sb-link sb-sub {% if 'content_queue' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128203;</span> Queue
-          </a>
-          <a href="{{ url_for('admin_gap_analysis') }}" class="sb-link sb-sub {% if 'gap_analysis' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128200;</span> Gap Analysis
-          </a>
-          <a href="{{ url_for('admin_ai_scan_gaps') }}" class="sb-link sb-sub {% if 'ai_scan_gaps' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128161;</span> AI Gap Scanner
-          </a>
-        </div>
-      </div>
+      <!-- AI Engine (single link — all tabs inside one page) -->
+      <a href="{{ url_for('admin_ai_engine') }}" class="sb-link {% if 'ai_engine' in (request.endpoint or '') or 'ai_center' in (request.endpoint or '') or 'gap_analysis' in (request.endpoint or '') or 'content_queue' in (request.endpoint or '') or 'content_calendar' in (request.endpoint or '') or 'auto_rules' in (request.endpoint or '') or 'ai_scan_gaps' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#9889;</span> AI Engine
+      </a>
 
       <!-- Tools Dropdown -->
       <div class="sb-dropdown">

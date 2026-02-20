@@ -1,0 +1,561 @@
+{% extends "admin/base.html" %}
+{% block title %}AI Engine{% endblock %}
+{% block breadcrumb %}AI Engine{% endblock %}
+{% block content %}
+<style>
+/* ── Top Tabs ── */
+.ai-top-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:28px; overflow-x:auto }
+.ai-top-tab { flex:1; padding:12px 20px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; color:var(--text-dim); border:none; background:transparent; font-family:inherit }
+.ai-top-tab:hover { background:var(--surface2); color:var(--text) }
+.ai-top-tab.active { background:var(--accent); color:#fff }
+.ai-top-tab .tab-badge { display:inline-block; font-size:12px; padding:1px 7px; border-radius:99px; font-weight:800; margin-left:6px; vertical-align:middle }
+.ai-top-tab.active .tab-badge { background:rgba(255,255,255,.25); color:#fff }
+
+.ai-tab-panel { display:none }
+.ai-tab-panel.active { display:block }
+
+/* ── Pipeline Sub-steps ── */
+.pipe-steps { display:flex; align-items:center; gap:0; margin-bottom:28px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; overflow-x:auto }
+.pipe-step { flex:1; display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:8px; cursor:pointer; transition:all .2s }
+.pipe-step:hover { background:var(--surface2) }
+.pipe-step.active { background:var(--accent-dim); border:1px solid var(--accent) }
+.pipe-step-num { width:28px; height:28px; border-radius:50%; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex-shrink:0 }
+.pipe-step.active .pipe-step-num { background:var(--accent); color:#fff }
+.pipe-step-title { font-size:14px; font-weight:700 }
+.pipe-step-desc { font-size:13px; color:var(--text-dim) }
+.pipe-arrow { font-size:16px; color:var(--text-dim); flex-shrink:0; padding:0 2px }
+
+.pipe-panel { display:none }
+.pipe-panel.active { display:block }
+
+/* ── Common ── */
+.btn { padding:8px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.btn-primary { background:var(--accent); color:#fff }
+.btn-primary:hover { opacity:.9 }
+.btn-success { background:#d1fae5; color:#065f46 }
+.btn-success:hover { background:#a7f3d0 }
+.btn-warning { background:#fef3c7; color:#92400e }
+.btn-warning:hover { background:#fde68a }
+.btn-danger { background:rgba(239,68,68,.1); color:#ef4444 }
+.btn-ghost { background:var(--surface2); color:var(--text) }
+.btn-ghost:hover { background:var(--border) }
+
+.p-stat-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px }
+.p-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.p-stat-val { font-size:26px; font-weight:800 }
+.p-stat-label { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+
+.gap-cards { display:grid; gap:14px }
+.gap-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 22px; transition:box-shadow .2s }
+.gap-card:hover { box-shadow:0 4px 20px rgba(0,0,0,.06) }
+
+.q-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.q-table-wrap table { width:100%; border-collapse:collapse }
+.q-table-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.q-table-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.q-table-wrap tr:last-child td { border:none }
+.q-table-wrap tr:hover td { background:var(--surface2) }
+
+.q-badge { display:inline-block; font-size:13px; padding:3px 10px; border-radius:6px; font-weight:700 }
+.q-actions { display:flex; gap:6px }
+.q-btn { padding:5px 12px; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit }
+.q-btn.gen { background:var(--accent); color:#fff }
+.q-btn.pub { background:#d1fae5; color:#065f46 }
+.q-btn.skip { background:#fef3c7; color:#92400e }
+.q-btn.del { background:rgba(239,68,68,.1); color:#ef4444 }
+
+.run-panel { background:linear-gradient(135deg, var(--accent-dim), rgba(59,130,246,.04)); border:2px solid var(--accent); border-radius:14px; padding:24px; margin-bottom:24px }
+.run-panel h3 { font-size:17px; font-weight:700; margin-bottom:14px }
+.run-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px }
+.run-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px }
+.run-card h4 { font-size:14px; font-weight:700; margin-bottom:6px }
+.run-card p { font-size:13px; color:var(--text-dim); margin-bottom:12px }
+
+.cov-bar { height:8px; background:var(--surface2); border-radius:99px; overflow:hidden; width:140px }
+.cov-fill { height:100%; border-radius:99px }
+
+.gap-tag { font-size:12px; padding:2px 8px; border-radius:5px; background:rgba(239,68,68,.07); color:#ef4444; font-weight:500 }
+
+.empty-state { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.empty-state-icon { font-size:42px; margin-bottom:10px }
+
+/* ── Calendar ── */
+.cal-nav { display:flex; align-items:center; gap:12px }
+.cal-nav a { padding:8px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); text-decoration:none; font-weight:600; font-size:15px }
+.cal-month { font-size:24px; font-weight:700; min-width:200px; text-align:center }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border); border-radius:12px; overflow:hidden; margin-bottom:24px }
+.cal-day-header { background:var(--surface2); padding:10px 8px; text-align:center; font-weight:700; font-size:13px; color:var(--text-dim) }
+.cal-cell { background:var(--surface); min-height:100px; padding:6px; position:relative }
+.cal-cell:hover { background:var(--surface2) }
+.cal-cell.other-month { opacity:.3 }
+.cal-cell.today { background:var(--accent-dim); box-shadow:inset 0 -3px 0 var(--accent) }
+.cal-date { font-size:13px; font-weight:700; margin-bottom:4px }
+.cal-event { font-size:12px; padding:2px 5px; border-radius:3px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.cal-event.holiday { background:#fef3c7; color:#92400e }
+.cal-event.seasonal { background:#dbeafe; color:#1e40af }
+.cal-event.trending { background:#fce7f3; color:#9d174d }
+.cal-event.custom { background:#d1fae5; color:#065f46 }
+.cal-event.queue { background:var(--accent-dim); color:var(--accent); border-left:2px solid var(--accent) }
+
+.cal-sidebar { display:grid; grid-template-columns:1fr 1fr; gap:20px }
+.cal-panel { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px }
+.cal-panel h3 { font-size:16px; font-weight:700; margin-bottom:14px }
+.event-list { list-style:none; padding:0; margin:0 }
+.event-list li { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px }
+.event-list li:last-child { border:none }
+
+/* ── Rules ── */
+.rules-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:18px }
+.rule-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:22px }
+.rule-form { display:grid; gap:12px }
+.rule-row { display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.rule-field label { display:block; font-size:13px; font-weight:700; color:var(--text-dim); margin-bottom:4px; text-transform:uppercase; letter-spacing:.5px }
+.rule-field select, .rule-field input[type=number], .rule-field textarea { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit; box-sizing:border-box }
+.rule-field textarea { resize:vertical; min-height:44px }
+
+/* ── Modal ── */
+.modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.5); z-index:999; align-items:center; justify-content:center }
+.modal-overlay.show { display:flex }
+.modal-box { background:var(--surface); border-radius:16px; padding:28px; width:100%; max-width:500px; box-shadow:0 20px 60px rgba(0,0,0,.3) }
+.modal-box h3 { font-size:18px; font-weight:700; margin-bottom:18px }
+.form-row { margin-bottom:14px }
+.form-row label { display:block; font-size:14px; font-weight:600; margin-bottom:5px; color:var(--text-dim) }
+.form-row input, .form-row select, .form-row textarea { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit; box-sizing:border-box }
+
+@media(max-width:768px) {
+  .p-stat-grid { grid-template-columns:repeat(2,1fr) }
+  .cal-sidebar { grid-template-columns:1fr }
+  .rules-grid { grid-template-columns:1fr }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════
+     TOP-LEVEL TABS
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-top-tabs">
+  <button class="ai-top-tab {% if active_tab=='pipeline' %}active{% endif %}" onclick="switchMainTab('pipeline')">
+    Pipeline
+    {% if active_tab=='pipeline' and queue_stats %}
+    <span class="tab-badge" style="background:rgba(239,68,68,.15);color:#ef4444">{{ queue_stats.pending }}</span>
+    {% endif %}
+  </button>
+  <button class="ai-top-tab {% if active_tab=='calendar' %}active{% endif %}" onclick="switchMainTab('calendar')">Calendar</button>
+  <button class="ai-top-tab {% if active_tab=='rules' %}active{% endif %}" onclick="switchMainTab('rules')">Auto Rules</button>
+  <button class="ai-top-tab {% if active_tab=='health' %}active{% endif %}" onclick="switchMainTab('health')">Health Check</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: PIPELINE (Scan → Queue → Generate → Publish)
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-tab-panel {% if active_tab=='pipeline' %}active{% endif %}" id="mainTab-pipeline">
+
+{% if analysis is defined %}
+{% set total_coverage = (analysis|map(attribute='coverage')|list|sum / analysis|length)|round|int if analysis else 0 %}
+{% set total_articles = analysis|map(attribute='articles_count')|list|sum %}
+{% set total_gaps = analysis|map(attribute='total_zones')|list|sum - analysis|map(attribute='zones_with_content')|list|sum %}
+
+<!-- Pipeline Sub-Steps -->
+<div class="pipe-steps" id="pipeSteps">
+  <div class="pipe-step active" data-panel="scan" onclick="switchPipe('scan')">
+    <span class="pipe-step-num">1</span>
+    <div><div class="pipe-step-title">Scan Gaps</div><div class="pipe-step-desc">{{ total_gaps }} gaps</div></div>
+  </div>
+  <span class="pipe-arrow">&rarr;</span>
+  <div class="pipe-step" data-panel="queue" onclick="switchPipe('queue')">
+    <span class="pipe-step-num">2</span>
+    <div><div class="pipe-step-title">Queue</div><div class="pipe-step-desc">{{ queue_stats.pending }} pending</div></div>
+  </div>
+  <span class="pipe-arrow">&rarr;</span>
+  <div class="pipe-step" data-panel="generate" onclick="switchPipe('generate')">
+    <span class="pipe-step-num">3</span>
+    <div><div class="pipe-step-title">Generate</div><div class="pipe-step-desc">{{ queue_stats.review }} ready</div></div>
+  </div>
+  <span class="pipe-arrow">&rarr;</span>
+  <div class="pipe-step" data-panel="publish" onclick="switchPipe('publish')">
+    <span class="pipe-step-num">4</span>
+    <div><div class="pipe-step-title">Publish</div><div class="pipe-step-desc">{{ queue_stats.published }} done</div></div>
+  </div>
+</div>
+
+<!-- ── SCAN ── -->
+<div class="pipe-panel active" id="pipe-scan">
+  <div class="run-panel">
+    <h3>Quick Actions</h3>
+    <div class="run-grid">
+      <div class="run-card">
+        <h4>Auto-Fill Queue</h4>
+        <p>Scan gaps va them vao Queue.</p>
+        <form method="POST" action="{{ url_for('admin_ai_auto_fill') }}"><input type="hidden" name="max_items" value="10"><button type="submit" class="btn btn-primary">Fill Queue (10)</button></form>
+      </div>
+      <div class="run-card">
+        <h4>Batch Generate</h4>
+        <p>Generate cho tat ca pending items.</p>
+        <form method="POST" action="{{ url_for('admin_ai_batch_generate') }}"><button type="submit" class="btn btn-warning" onclick="return confirm('Generate AI content?')">Batch Generate</button></form>
+      </div>
+      <div class="run-card">
+        <h4>Full Auto-Run</h4>
+        <p>Scan &rarr; Fill &rarr; Generate &rarr; Publish.</p>
+        <form method="POST" action="{{ url_for('admin_ai_auto_run') }}"><input type="hidden" name="max_items" value="5"><input type="hidden" name="auto_publish" value="1"><button type="submit" class="btn btn-success" onclick="return confirm('Chay full pipeline?')">Full Auto-Run</button></form>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-stat-grid">
+    <div class="p-stat"><div class="p-stat-val">{{ analysis|length }}</div><div class="p-stat-label">Verticals</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:{% if total_coverage >= 70 %}#22c55e{% elif total_coverage >= 40 %}#f59e0b{% else %}#ef4444{% endif %}">{{ total_coverage }}%</div><div class="p-stat-label">Coverage</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:#ef4444">{{ total_gaps }}</div><div class="p-stat-label">Gaps</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:#3b82f6">{{ total_articles }}</div><div class="p-stat-label">Articles</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:#f59e0b">{{ queue_stats.pending }}</div><div class="p-stat-label">In Queue</div></div>
+  </div>
+
+  {% if analysis %}
+  <div class="gap-cards">
+    {% for a in analysis %}
+    <div class="gap-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:26px">{{ a.vertical.icon }}</span>
+          <div><strong style="font-size:16px">{{ a.vertical.name }}</strong><div style="font-size:13px;color:var(--text-dim)">{{ a.articles_count }} articles &bull; {{ a.total_zones }} zones</div></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:14px;font-weight:700;color:{% if a.coverage >= 70 %}#22c55e{% elif a.coverage >= 40 %}#f59e0b{% else %}#ef4444{% endif %}">{{ a.coverage }}%</div>
+          <div class="cov-bar"><div class="cov-fill" style="width:{{ a.coverage }}%;background:{% if a.coverage >= 70 %}#22c55e{% elif a.coverage >= 40 %}#f59e0b{% else %}#ef4444{% endif %}"></div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--text-dim);margin-bottom:10px">
+        <span><strong style="color:var(--text)">{{ a.zones_with_content }}</strong>/{{ a.total_zones }} zones</span>
+        <span><strong style="color:#ef4444">{{ a.total_zones - a.zones_with_content }}</strong> gaps</span>
+        <span><strong>{{ a.queue_pending }}</strong> pending</span>
+        <span><strong>{{ a.queue_review }}</strong> review</span>
+        <span>Rules: <strong style="color:{% if a.has_rule %}#22c55e{% else %}var(--text-dim){% endif %}">{% if a.has_rule %}ON{% else %}OFF{% endif %}</strong></span>
+      </div>
+      {% if a.empty_zones %}
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">
+        {% for ez in a.empty_zones %}<span class="gap-tag">{{ ez.segment }} &rsaquo; {{ ez.zone }}</span>{% endfor %}
+        {% if a.total_zones - a.zones_with_content > 5 %}<span class="gap-tag" style="background:var(--surface2);color:var(--text-dim)">+{{ a.total_zones - a.zones_with_content - 5 }} more</span>{% endif %}
+      </div>
+      {% endif %}
+      <div style="display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--border)">
+        <form method="POST" action="{{ url_for('admin_ai_auto_fill') }}" style="display:inline"><input type="hidden" name="vertical_id" value="{{ a.vertical.id }}"><input type="hidden" name="max_items" value="10"><button type="submit" class="btn btn-primary" style="font-size:13px;padding:6px 14px">Fill Queue</button></form>
+        <form method="POST" action="{{ url_for('admin_ai_auto_run') }}" style="display:inline"><input type="hidden" name="vertical_id" value="{{ a.vertical.id }}"><input type="hidden" name="max_items" value="3"><button type="submit" class="btn btn-success" style="font-size:13px;padding:6px 14px" onclick="return confirm('Auto-run 3 bai?')">Auto-Run (3)</button></form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state"><div class="empty-state-icon">&#128269;</div><h3 style="font-size:17px;margin-bottom:6px">Chua co vertical</h3><p style="font-size:14px">Tao va publish verticals truoc.</p></div>
+  {% endif %}
+</div>
+
+<!-- ── QUEUE ── -->
+<div class="pipe-panel" id="pipe-queue">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <h2 style="margin:0;font-size:18px;font-weight:700">Content Queue — Pending</h2>
+    <button class="btn btn-primary" onclick="openModal('addTopicModal')">+ Them Topic</button>
+  </div>
+  {% set pending_items = queue_items|selectattr('status','equalto','pending')|list %}
+  {% if pending_items %}
+  <div class="q-table-wrap"><table><thead><tr><th>Topic</th><th>Vertical</th><th>Layer</th><th>Actions</th></tr></thead><tbody>
+    {% for q in pending_items %}<tr>
+      <td><strong>{{ q.topic }}</strong>{% if q.keywords %}<div style="font-size:12px;color:var(--text-dim)">{{ q.keywords[:60] }}</div>{% endif %}</td>
+      <td>{% if q.vertical %}{{ q.vertical.icon }} {{ q.vertical.name }}{% else %}-{% endif %}</td>
+      <td><span class="q-badge" style="background:var(--accent-dim);color:var(--accent)">{{ q.knowledge_layer }}</span></td>
+      <td><div class="q-actions">
+        <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline"><input type="hidden" name="action" value="generate"><button type="submit" class="q-btn gen">Generate</button></form>
+        <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline"><input type="hidden" name="action" value="skip"><button type="submit" class="q-btn skip">Skip</button></form>
+        <form method="POST" action="{{ url_for('admin_content_queue_delete', qid=q.id) }}" style="display:inline"><button type="submit" class="q-btn del" onclick="return confirm('Xoa?')">&#10005;</button></form>
+      </div></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  <form method="POST" action="{{ url_for('admin_ai_batch_generate') }}"><button type="submit" class="btn btn-primary" onclick="return confirm('Generate AI cho {{ pending_items|length }} items?')">Generate All ({{ pending_items|length }})</button></form>
+  {% else %}
+  <div class="empty-state"><div class="empty-state-icon">&#128203;</div><h3 style="font-size:17px;margin-bottom:6px">Queue trong</h3><p style="font-size:14px">Bam "Fill Queue" o tab Scan de them topics.</p><button class="btn btn-primary" style="margin-top:12px" onclick="openModal('addTopicModal')">+ Them Topic</button></div>
+  {% endif %}
+</div>
+
+<!-- ── GENERATE ── -->
+<div class="pipe-panel" id="pipe-generate">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:18px">Generated — Review & Publish</h2>
+  {% set review_items = queue_items|selectattr('status','equalto','review')|list %}
+  {% if review_items %}
+  <div class="q-table-wrap"><table><thead><tr><th>Topic</th><th>Vertical</th><th>Words</th><th>Actions</th></tr></thead><tbody>
+    {% for q in review_items %}<tr>
+      <td><strong>{{ q.topic }}</strong></td>
+      <td>{% if q.vertical %}{{ q.vertical.icon }} {{ q.vertical.name }}{% else %}-{% endif %}</td>
+      <td style="font-weight:700">{{ q.word_count if q.word_count else '-' }}</td>
+      <td><div class="q-actions">
+        <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline"><input type="hidden" name="action" value="publish"><button type="submit" class="q-btn pub">Publish</button></form>
+        <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline"><input type="hidden" name="action" value="skip"><button type="submit" class="q-btn skip">Skip</button></form>
+      </div></td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty-state"><div class="empty-state-icon">&#9997;</div><h3 style="font-size:17px;margin-bottom:6px">Chua co bai generate</h3><p style="font-size:14px">Quay lai Queue va bam Generate.</p></div>
+  {% endif %}
+</div>
+
+<!-- ── PUBLISH ── -->
+<div class="pipe-panel" id="pipe-publish">
+  <h2 style="font-size:18px;font-weight:700;margin-bottom:18px">Published ({{ queue_stats.published }})</h2>
+  {% set published_items = queue_items|selectattr('status','equalto','published')|list %}
+  {% if published_items %}
+  <div class="q-table-wrap"><table><thead><tr><th>Topic</th><th>Vertical</th><th>Words</th><th>Published</th></tr></thead><tbody>
+    {% for q in published_items %}<tr>
+      <td><strong>{{ q.topic }}</strong></td>
+      <td>{% if q.vertical %}{{ q.vertical.icon }} {{ q.vertical.name }}{% else %}-{% endif %}</td>
+      <td style="font-weight:700">{{ q.word_count if q.word_count else '-' }}</td>
+      <td style="font-size:13px;color:var(--text-dim)">{{ q.published_at.strftime('%d/%m/%Y %H:%M') if q.published_at else '-' }}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty-state"><div class="empty-state-icon">&#127881;</div><h3 style="font-size:17px;margin-bottom:6px">Chua co bai published</h3><p style="font-size:14px">Generate roi Publish tu tab truoc.</p></div>
+  {% endif %}
+</div>
+
+{% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: CALENDAR
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-tab-panel {% if active_tab=='calendar' %}active{% endif %}" id="mainTab-calendar">
+{% if active_tab == 'calendar' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div class="cal-nav">
+      <a href="?tab=calendar&year={{ prev_year }}&month={{ prev_month }}">&larr;</a>
+      <span class="cal-month">{{ month_name }} {{ year }}</span>
+      <a href="?tab=calendar&year={{ next_year }}&month={{ next_month }}">&rarr;</a>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('eventModal')">+ Them Event</button>
+  </div>
+
+  <div class="cal-grid">
+    {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}<div class="cal-day-header">{{ d }}</div>{% endfor %}
+    {% for week in weeks %}{% for day in week %}
+    <div class="cal-cell {% if day.month != month %}other-month{% endif %} {% if day == today %}today{% endif %}">
+      <div class="cal-date">{{ day.day }}</div>
+      {% if day in date_events %}{% for item in date_events[day][:3] %}
+        {% if item.type == 'event' %}<div class="cal-event {{ item.obj.event_type }}">{{ item.obj.icon }} {{ item.obj.name }}</div>
+        {% else %}<div class="cal-event queue">{{ item.obj.topic[:20] }}</div>{% endif %}
+      {% endfor %}{% if date_events[day]|length > 3 %}<div style="font-size:11px;color:var(--text-dim)">+{{ date_events[day]|length - 3 }}</div>{% endif %}{% endif %}
+    </div>
+    {% endfor %}{% endfor %}
+  </div>
+
+  <div class="cal-sidebar">
+    <div class="cal-panel">
+      <h3>Events</h3>
+      {% if events %}<ul class="event-list">{% for e in events[:8] %}<li>
+        <span>{{ e.icon }}</span>
+        <div style="flex:1"><div style="font-weight:600;font-size:14px">{{ e.name }}</div><div style="font-size:13px;color:var(--text-dim)">{{ e.start_date.strftime('%d/%m') }}{% if e.end_date %} - {{ e.end_date.strftime('%d/%m') }}{% endif %}</div></div>
+        <form method="POST" action="{{ url_for('admin_content_event_delete', eid=e.id) }}" style="display:inline"><button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px" onclick="return confirm('Xoa?')">&#10005;</button></form>
+      </li>{% endfor %}</ul>
+      {% else %}<p style="color:var(--text-dim);font-size:14px">Chua co event thang nay.</p>{% endif %}
+    </div>
+    <div class="cal-panel">
+      <h3>Scheduled Content</h3>
+      {% if cal_queue %}<ul class="event-list">{% for q in cal_queue[:8] %}<li>
+        <span style="font-size:12px;padding:2px 6px;border-radius:4px;background:var(--accent-dim);color:var(--accent);font-weight:700">{{ q.knowledge_layer }}</span>
+        <div style="flex:1"><div style="font-weight:600;font-size:13px">{{ q.topic[:35] }}</div></div>
+        <span class="q-badge" style="font-size:11px;background:{% if q.status=='pending' %}#fef3c7;color:#92400e{% elif q.status=='review' %}#dbeafe;color:#1e40af{% else %}#d1fae5;color:#065f46{% endif %}">{{ q.status }}</span>
+      </li>{% endfor %}</ul>
+      {% else %}<p style="color:var(--text-dim);font-size:14px">Chua co content scheduled.</p>{% endif %}
+    </div>
+  </div>
+
+  <!-- Add Event Modal -->
+  <div class="modal-overlay" id="eventModal">
+    <div class="modal-box">
+      <h3>Them Event</h3>
+      <form method="POST" action="{{ url_for('admin_content_event_save') }}">
+        <div class="form-row"><label>Ten</label><input type="text" name="name" required placeholder="VD: Tet, Black Friday..."></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-row"><label>Loai</label><select name="event_type"><option value="holiday">Holiday</option><option value="seasonal">Seasonal</option><option value="trending">Trending</option><option value="custom">Custom</option></select></div>
+          <div class="form-row"><label>Icon</label><input type="text" name="icon" placeholder="emoji"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-row"><label>Bat dau</label><input type="date" name="start_date" required></div>
+          <div class="form-row"><label>Ket thuc</label><input type="date" name="end_date"></div>
+        </div>
+        <div class="form-row"><label>Keywords</label><textarea name="keywords" rows="2" placeholder="tu khoa cho AI content"></textarea></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-row"><label>Verticals</label><select name="verticals"><option value="all">All</option>{% for v in verticals %}<option value="{{ v.slug }}">{{ v.icon }} {{ v.name }}</option>{% endfor %}</select></div>
+          <div class="form-row"><label>Lap lai</label><select name="recurrence"><option value="yearly">Hang nam</option><option value="one-time">1 lan</option></select></div>
+        </div>
+        <div class="form-row"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="auto_generate" checked style="width:18px;height:18px"> Auto-generate content</label></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button type="submit" class="btn btn-primary">Luu</button>
+          <button type="button" class="btn btn-ghost" onclick="closeModal('eventModal')">Huy</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% else %}
+  <p style="color:var(--text-dim);text-align:center;padding:40px">Loading calendar...</p>
+{% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: AUTO RULES
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-tab-panel {% if active_tab=='rules' %}active{% endif %}" id="mainTab-rules">
+{% if active_tab == 'rules' %}
+  <div style="background:linear-gradient(135deg, var(--accent-dim), rgba(59,130,246,.08)); border:1px solid var(--accent); border-radius:12px; padding:18px 22px; margin-bottom:24px; display:flex; align-items:center; gap:12px; font-size:14px">
+    <span style="font-size:26px">&#9889;</span>
+    <div><strong>Cau hinh AI auto-generate cho tung vertical.</strong> Frequency, tone, keywords, auto-publish.</div>
+  </div>
+  <div class="rules-grid">
+    {% for v in verticals %}
+    {% set rule = rules_map.get(v.id) %}
+    <div class="rule-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:24px">{{ v.icon }}</span><strong style="font-size:16px">{{ v.name }}</strong></div>
+        {% if rule and rule.is_active %}<span style="font-size:13px;padding:3px 10px;border-radius:99px;font-weight:700;background:#d1fae5;color:#065f46">Active</span>
+        {% else %}<span style="font-size:13px;padding:3px 10px;border-radius:99px;font-weight:700;background:var(--surface2);color:var(--text-dim)">Inactive</span>{% endif %}
+      </div>
+      <form method="POST" action="{{ url_for('admin_auto_rules_save') }}">
+        <input type="hidden" name="vertical_id" value="{{ v.id }}">
+        <div class="rule-form">
+          <div class="rule-row">
+            <div class="rule-field"><label>Frequency</label><select name="frequency"><option value="daily" {% if rule and rule.frequency=='daily' %}selected{% endif %}>Daily</option><option value="3x_week" {% if rule and rule.frequency=='3x_week' %}selected{% endif %}>3x/Week</option><option value="weekly" {% if rule and rule.frequency=='weekly' %}selected{% endif %}>Weekly</option></select></div>
+            <div class="rule-field"><label>Bai/Ngay</label><input type="number" name="articles_per_day" value="{{ rule.articles_per_day if rule else 1 }}" min="1" max="10"></div>
+          </div>
+          <div class="rule-row">
+            <div class="rule-field"><label>Knowledge</label><select name="knowledge_layer"><option value="auto" {% if rule and rule.knowledge_layer=='auto' %}selected{% endif %}>Auto</option><option value="L1" {% if rule and rule.knowledge_layer=='L1' %}selected{% endif %}>L1</option><option value="L2" {% if rule and rule.knowledge_layer=='L2' %}selected{% endif %}>L2</option><option value="L3" {% if rule and rule.knowledge_layer=='L3' %}selected{% endif %}>L3</option><option value="L4" {% if rule and rule.knowledge_layer=='L4' %}selected{% endif %}>L4</option></select></div>
+            <div class="rule-field"><label>Tone</label><select name="tone"><option value="seo" {% if rule and rule.tone=='seo' %}selected{% endif %}>SEO</option><option value="casual" {% if rule and rule.tone=='casual' %}selected{% endif %}>Casual</option><option value="professional" {% if rule and rule.tone=='professional' %}selected{% endif %}>Professional</option></select></div>
+          </div>
+          <div class="rule-field"><label>Focus Keywords</label><textarea name="focus_keywords" rows="2" placeholder="tu khoa uu tien...">{{ rule.focus_keywords if rule else '' }}</textarea></div>
+          <div class="rule-field"><label>Topics to Avoid</label><textarea name="topics_to_avoid" rows="2" placeholder="topics khong muon...">{{ rule.topics_to_avoid if rule else '' }}</textarea></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:6px;font-size:14px"><input type="checkbox" name="is_active" {% if rule and rule.is_active %}checked{% endif %} style="width:16px;height:16px"> Enable</label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:14px"><input type="checkbox" name="auto_publish" {% if rule and rule.auto_publish %}checked{% endif %} style="width:16px;height:16px"> Auto-Publish</label>
+          </div>
+          <div><button type="submit" class="btn btn-primary">Save</button></div>
+        </div>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% if not verticals %}
+  <div class="empty-state"><div class="empty-state-icon">&#9881;</div><h3 style="font-size:17px">Chua co vertical</h3></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: HEALTH CHECK
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-tab-panel {% if active_tab=='health' %}active{% endif %}" id="mainTab-health">
+{% if active_tab == 'health' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+    <div>
+      <h2 style="margin:0 0 4px;font-size:20px;font-weight:700">Health Check</h2>
+      <p style="margin:0;font-size:14px;color:var(--text-dim)">Tong quan suc khoe san pham, bai viet, verticals</p>
+    </div>
+    <div style="text-align:center;padding:10px 20px;border-radius:12px;{% if health_score >= 80 %}background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3){% elif health_score >= 50 %}background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3){% else %}background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3){% endif %}">
+      <div style="font-size:13px;color:var(--text-dim)">Score</div>
+      <div style="font-size:28px;font-weight:800;{% if health_score >= 80 %}color:#22c55e{% elif health_score >= 50 %}color:#f59e0b{% else %}color:#ef4444{% endif %}">{{ health_score }}%</div>
+    </div>
+  </div>
+
+  <div class="p-stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="p-stat"><div class="p-stat-val">{{ "{:,}".format(total_products) }}</div><div class="p-stat-label">San pham</div></div>
+    <div class="p-stat"><div class="p-stat-val">{{ total_articles }}</div><div class="p-stat-label">Bai viet</div></div>
+    <div class="p-stat"><div class="p-stat-val">{{ ai_articles }}</div><div class="p-stat-label">AI Generated</div></div>
+    <div class="p-stat"><div class="p-stat-val">{{ vert_health|length }}</div><div class="p-stat-label">Verticals</div></div>
+  </div>
+
+  <!-- Issues -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px">
+    {% for label, val, color in [
+      ('URL trung lap', dup_urls, '#ef4444'),
+      ('Thieu hinh', no_image, '#f59e0b'),
+      ('Gia = 0', zero_price, '#f59e0b'),
+      ('Link nghi ngo', suspect_links, '#ef4444'),
+      ('Bai mong', thin_articles, '#f59e0b'),
+      ('Bai 0 view', zero_view_articles, '#6b7280'),
+      ('Bai khong SP', no_product_articles, '#6b7280'),
+      ('SP khong click', stale_products, '#6b7280'),
+    ] %}
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:14px;font-weight:600">{{ label }}</span>
+      <span style="font-size:20px;font-weight:800;color:{% if val > 0 %}{{ color }}{% else %}#22c55e{% endif %}">{{ val }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Vertical Health -->
+  {% if vert_health %}
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Per Vertical</h3>
+  <div class="q-table-wrap"><table><thead><tr><th>Vertical</th><th>SP</th><th>Bai viet</th><th>Parts</th><th>Parts trong</th></tr></thead><tbody>
+    {% for vh in vert_health %}<tr>
+      <td><strong>{{ vh.icon }} {{ vh.name }}</strong></td>
+      <td>{{ vh.products }}</td>
+      <td>{{ vh.articles }}</td>
+      <td>{{ vh.parts }}</td>
+      <td style="color:{% if vh.parts_empty > 0 %}#ef4444{% else %}#22c55e{% endif %};font-weight:700">{{ vh.parts_empty }}</td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     ADD TOPIC MODAL (shared)
+     ══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="addTopicModal">
+  <div class="modal-box">
+    <h3>Them Topic vao Queue</h3>
+    <form method="POST" action="{{ url_for('admin_content_queue_add') }}">
+      <div class="form-row"><label>Topic</label><input type="text" name="topic" required placeholder="VD: Top 10 ma phanh tot nhat..."></div>
+      <div class="form-row"><label>Vertical</label><select name="vertical_id" required>{% for v in verticals %}<option value="{{ v.id }}">{{ v.icon }} {{ v.name }}</option>{% endfor %}</select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-row"><label>Layer</label><select name="knowledge_layer"><option value="L1">L1</option><option value="L2" selected>L2</option><option value="L3">L3</option><option value="L4">L4</option></select></div>
+        <div class="form-row"><label>Schedule</label><input type="datetime-local" name="scheduled_at"></div>
+      </div>
+      <div class="form-row"><label>Keywords</label><textarea name="keywords" rows="2" placeholder="tu khoa 1, tu khoa 2..."></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:16px"><button type="submit" class="btn btn-primary">Them</button><button type="button" class="btn btn-ghost" onclick="closeModal('addTopicModal')">Huy</button></div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Main tabs
+function switchMainTab(tab) {
+  document.querySelectorAll('.ai-top-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ai-tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.closest('.ai-top-tab').classList.add('active');
+  const panel = document.getElementById('mainTab-' + tab);
+  if (panel) panel.classList.add('active');
+  // Navigate to load data for lazy tabs
+  if (['calendar','rules','health'].includes(tab) && !panel.dataset.loaded) {
+    window.location.href = '?tab=' + tab;
+  }
+  history.replaceState(null, '', '?tab=' + tab);
+}
+
+// Pipeline sub-steps
+function switchPipe(name) {
+  document.querySelectorAll('.pipe-step').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.pipe-panel').forEach(p => p.classList.remove('active'));
+  const step = document.querySelector('.pipe-step[data-panel="' + name + '"]');
+  if (step) step.classList.add('active');
+  const panel = document.getElementById('pipe-' + name);
+  if (panel) panel.classList.add('active');
+}
+
+// Restore pipeline step from URL
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const step = params.get('step');
+  if (step && document.getElementById('pipe-' + step)) switchPipe(step);
+})();
+
+// Modal
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); });
+});
+</script>
+{% endblock %}

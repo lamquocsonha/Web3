@@ -2361,8 +2361,173 @@ def admin_products_bulk_delete():
 # AI CONTROL CENTER - Unified AI Operations Hub
 # =============================================
 
+@app.route('/admin/ai-engine')
+def admin_ai_engine():
+    """Unified AI Engine — all AI features in one tabbed page"""
+    tab = request.args.get('tab', 'pipeline')
+    verticals = Vertical.query.filter_by(status='published').order_by(Vertical.name).all()
+
+    ctx = {'active_tab': tab, 'verticals': verticals}
+
+    if tab == 'pipeline':
+        # Reuse gap analysis logic
+        analysis = []
+        for v in verticals:
+            segments = Segment.query.filter_by(vertical_id=v.id).all()
+            total_zones = 0
+            zones_with_content = 0
+            empty_zones = []
+            for seg in segments:
+                zones = Zone.query.filter_by(segment_id=seg.id).all()
+                for z in zones:
+                    total_zones += 1
+                    parts_count = Part.query.filter_by(zone_id=z.id).count()
+                    has_seo = bool(z.seo_content and len(z.seo_content.strip()) > 50)
+                    if parts_count > 0 or has_seo:
+                        zones_with_content += 1
+                    else:
+                        empty_zones.append({'segment': seg.name, 'zone': z.name, 'zone_id': z.id})
+            articles_count = Article.query.filter_by(vertical_slug=v.slug, status='published').count()
+            queue_pending = ContentQueue.query.filter_by(vertical_id=v.id, status='pending').count()
+            queue_review = ContentQueue.query.filter_by(vertical_id=v.id, status='review').count()
+            rule = AutoContentRule.query.filter_by(vertical_id=v.id).first()
+            coverage = round(zones_with_content / total_zones * 100) if total_zones > 0 else 0
+            analysis.append({
+                'vertical': v, 'total_zones': total_zones, 'zones_with_content': zones_with_content,
+                'coverage': coverage, 'empty_zones': empty_zones[:5], 'articles_count': articles_count,
+                'queue_pending': queue_pending, 'queue_review': queue_review,
+                'has_rule': rule is not None and rule.is_active if rule else False,
+            })
+        queue_items = ContentQueue.query.order_by(ContentQueue.created_at.desc()).limit(50).all()
+        ctx.update(analysis=analysis, queue_items=queue_items, queue_stats={
+            'pending': ContentQueue.query.filter_by(status='pending').count(),
+            'review': ContentQueue.query.filter_by(status='review').count(),
+            'published': ContentQueue.query.filter_by(status='published').count(),
+            'total': ContentQueue.query.count(),
+        })
+
+    elif tab == 'calendar':
+        import calendar as cal_mod
+        year = request.args.get('year', date.today().year, type=int)
+        month = request.args.get('month', date.today().month, type=int)
+        first_day = date(year, month, 1)
+        days_in_month = cal_mod.monthrange(year, month)[1]
+        last_day = date(year, month, days_in_month)
+        events = ContentEvent.query.filter(
+            ContentEvent.start_date <= last_day,
+            db.or_(ContentEvent.end_date >= first_day, ContentEvent.end_date.is_(None)),
+            ContentEvent.is_active == True
+        ).all()
+        cal_queue = ContentQueue.query.filter(
+            ContentQueue.scheduled_at >= datetime(year, month, 1),
+            ContentQueue.scheduled_at <= datetime(year, month, days_in_month, 23, 59, 59)
+        ).all()
+        cal = cal_mod.Calendar(firstweekday=0)
+        weeks = cal.monthdatescalendar(year, month)
+        date_events = {}
+        for e in events:
+            d = e.start_date
+            end = e.end_date or e.start_date
+            while d <= end and d <= last_day:
+                if d >= first_day:
+                    date_events.setdefault(d, []).append({'type': 'event', 'obj': e})
+                d += timedelta(days=1)
+        for q in cal_queue:
+            if q.scheduled_at:
+                qd = q.scheduled_at.date()
+                date_events.setdefault(qd, []).append({'type': 'queue', 'obj': q})
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+        ctx.update(year=year, month=month, weeks=weeks, date_events=date_events,
+                   events=events, cal_queue=cal_queue,
+                   prev_year=prev_year, prev_month=prev_month,
+                   next_year=next_year, next_month=next_month,
+                   month_name=cal_mod.month_name[month], today=date.today())
+
+    elif tab == 'rules':
+        rules = AutoContentRule.query.all()
+        ctx.update(rules_map={r.vertical_id: r for r in rules})
+
+    elif tab == 'health':
+        # AI Control Center health data
+        from sqlalchemy import func
+        openai_key = SiteSettings.get('openai_key')
+        claude_key = SiteSettings.get('claude_key')
+        total_products = AffiliateLink.query.count()
+        active_products = AffiliateLink.query.filter_by(is_active=True).count()
+        dup_sub = db.session.query(
+            AffiliateLink.url, func.count(AffiliateLink.id).label('cnt')
+        ).group_by(AffiliateLink.url).having(func.count(AffiliateLink.id) > 1).subquery()
+        dup_urls = db.session.query(func.count()).select_from(dup_sub).scalar() or 0
+        no_image = AffiliateLink.query.filter(
+            db.or_(AffiliateLink.image_url == '', AffiliateLink.image_url == None)
+        ).count()
+        zero_price = AffiliateLink.query.filter(
+            db.or_(AffiliateLink.price == 0, AffiliateLink.price == None)
+        ).count()
+        stale_products = AffiliateLink.query.filter(AffiliateLink.clicks == 0).count()
+        suspect_links = AffiliateLink.query.filter(
+            AffiliateLink.clicks > 10, AffiliateLink.conversions == 0
+        ).count()
+        inactive_products = AffiliateLink.query.filter_by(is_active=False).count()
+        total_articles = Article.query.count()
+        thin_articles = Article.query.filter(
+            db.or_(func.length(Article.content) < 500, Article.content == '', Article.content == None)
+        ).count()
+        zero_view_articles = Article.query.filter(
+            db.or_(Article.views == 0, Article.views == None)
+        ).count()
+        no_product_articles = Article.query.filter(
+            db.or_(Article.embed_code == '', Article.embed_code == None)
+        ).count()
+        ai_articles = Article.query.filter_by(ai_generated=True).count()
+        issues_total = dup_urls + no_image + zero_price + suspect_links + thin_articles
+        health_score = max(0, 100 - min(issues_total, 100))
+
+        vert_health = []
+        for v in verticals:
+            prod_count = db.session.query(AffiliateLink).join(Part).join(Zone).join(Segment).filter(
+                Segment.vertical_id == v.id).count()
+            art_count = Article.query.filter_by(vertical_slug=v.slug).count()
+            part_count = db.session.query(Part).join(Zone).join(Segment).filter(
+                Segment.vertical_id == v.id).count()
+            parts_no_prod = db.session.query(Part).join(Zone).join(Segment).filter(
+                Segment.vertical_id == v.id
+            ).outerjoin(AffiliateLink).filter(AffiliateLink.id == None).count()
+            vert_health.append({
+                'id': v.id, 'name': v.name, 'icon': v.icon, 'slug': v.slug,
+                'products': prod_count, 'articles': art_count,
+                'parts': part_count, 'parts_empty': parts_no_prod,
+                'status': v.status
+            })
+        networks = db.session.query(
+            AffiliateLink.network, func.count(AffiliateLink.id),
+            func.sum(AffiliateLink.clicks), func.sum(AffiliateLink.conversions)
+        ).group_by(AffiliateLink.network).all()
+        net_stats = [{'name': n[0], 'count': n[1], 'clicks': n[2] or 0, 'conv': n[3] or 0} for n in networks]
+
+        ctx.update(has_ai=bool(openai_key or claude_key), health_score=health_score,
+                   total_products=total_products, active_products=active_products,
+                   dup_urls=dup_urls, no_image=no_image, zero_price=zero_price,
+                   stale_products=stale_products, suspect_links=suspect_links,
+                   inactive_products=inactive_products,
+                   total_articles=total_articles, thin_articles=thin_articles,
+                   zero_view_articles=zero_view_articles, no_product_articles=no_product_articles,
+                   ai_articles=ai_articles, vert_health=vert_health, net_stats=net_stats)
+
+    return render_template('admin/ai_engine.html', **ctx)
+
+
+# Keep old routes as redirects
 @app.route('/admin/ai-center')
 def admin_ai_center():
+    """Redirect to unified AI Engine — health tab"""
+    return redirect(url_for('admin_ai_engine', tab='health'))
+
+@app.route('/admin/ai-center-legacy')
+def admin_ai_center_legacy():
     """Unified AI Control Center - all AI operations in one place"""
     from sqlalchemy import func
 
@@ -6135,7 +6300,7 @@ def admin_content_event_save():
     event.is_active = True
     db.session.commit()
     flash(f'Event saved: {event.name}', 'success')
-    return redirect(url_for('admin_content_calendar'))
+    return redirect(url_for('admin_ai_engine', tab='calendar'))
 
 
 @app.route('/admin/content-calendar/event/<int:eid>/delete', methods=['POST'])
@@ -6145,7 +6310,7 @@ def admin_content_event_delete(eid):
     db.session.delete(e)
     db.session.commit()
     flash('Event deleted', 'success')
-    return redirect(url_for('admin_content_calendar'))
+    return redirect(url_for('admin_ai_engine', tab='calendar'))
 
 
 @app.route('/admin/auto-rules')
@@ -6176,7 +6341,7 @@ def admin_auto_rules_save():
     rule.focus_keywords = request.form.get('focus_keywords', '')
     db.session.commit()
     flash(f'Rules saved for vertical', 'success')
-    return redirect(url_for('admin_auto_rules'))
+    return redirect(url_for('admin_ai_engine', tab='rules'))
 
 
 @app.route('/admin/content-queue')
@@ -6226,7 +6391,7 @@ def admin_content_queue_add():
     db.session.add(item)
     db.session.commit()
     flash(f'Added to queue: {item.topic}', 'success')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/content-queue/<int:qid>/action', methods=['POST'])
@@ -6246,7 +6411,7 @@ def admin_content_queue_action(qid):
             flash(f'Generated: {result["title"]} ({result["word_count"]} words)', 'success')
         except Exception as e:
             flash(f'Generation failed: {str(e)}', 'danger')
-        return redirect(url_for('admin_content_queue'))
+        return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
     elif action == 'publish':
         # Publish as Article
         if item.generated_content:
@@ -6256,7 +6421,7 @@ def admin_content_queue_action(qid):
                 flash(f'Published: {article.title}', 'success')
             except Exception as e:
                 flash(f'Publish failed: {str(e)}', 'danger')
-            return redirect(url_for('admin_content_queue'))
+            return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
         else:
             item.status = 'published'
             item.published_at = datetime.utcnow()
@@ -6265,7 +6430,7 @@ def admin_content_queue_action(qid):
         item.keywords = request.form.get('keywords', item.keywords)
         item.knowledge_layer = request.form.get('knowledge_layer', item.knowledge_layer)
     db.session.commit()
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/content-queue/<int:qid>/delete', methods=['POST'])
@@ -6275,14 +6440,15 @@ def admin_content_queue_delete(qid):
     db.session.delete(item)
     db.session.commit()
     flash('Queue item deleted', 'success')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/gap-analysis')
 def admin_gap_analysis():
-    """Gap Analysis - AI analyzes content gaps and suggests auto-fill"""
+    """Unified AI Pipeline — Scan gaps, view queue, generate, publish — all in one page"""
     verticals = Vertical.query.filter_by(status='published').order_by(Vertical.name).all()
 
+    # ── Gap analysis per vertical ──
     analysis = []
     for v in verticals:
         segments = Segment.query.filter_by(vertical_id=v.id).all()
@@ -6303,6 +6469,7 @@ def admin_gap_analysis():
 
         articles_count = Article.query.filter_by(vertical_slug=v.slug, status='published').count()
         queue_pending = ContentQueue.query.filter_by(vertical_id=v.id, status='pending').count()
+        queue_review = ContentQueue.query.filter_by(vertical_id=v.id, status='review').count()
         rule = AutoContentRule.query.filter_by(vertical_id=v.id).first()
 
         coverage = round(zones_with_content / total_zones * 100) if total_zones > 0 else 0
@@ -6315,11 +6482,23 @@ def admin_gap_analysis():
             'empty_zones': empty_zones[:5],
             'articles_count': articles_count,
             'queue_pending': queue_pending,
+            'queue_review': queue_review,
             'has_rule': rule is not None and rule.is_active if rule else False,
             'suggestions': _generate_gap_suggestions(v, coverage, empty_zones, articles_count)
         })
 
-    return render_template('admin/gap_analysis.html', analysis=analysis, verticals=verticals)
+    # ── Queue items (for pipeline panel) ──
+    queue_items = ContentQueue.query.order_by(ContentQueue.created_at.desc()).limit(50).all()
+    queue_stats = {
+        'pending': ContentQueue.query.filter_by(status='pending').count(),
+        'review': ContentQueue.query.filter_by(status='review').count(),
+        'published': ContentQueue.query.filter_by(status='published').count(),
+        'total': ContentQueue.query.count(),
+    }
+
+    return render_template('admin/gap_analysis.html',
+        analysis=analysis, verticals=verticals,
+        queue_items=queue_items, queue_stats=queue_stats)
 
 
 def _generate_gap_suggestions(vertical, coverage, empty_zones, articles_count):
@@ -6379,7 +6558,7 @@ def admin_ai_auto_fill():
     max_items = request.form.get('max_items', 10, type=int)
     created = auto_fill_queue(vertical_id=vertical_id, max_items=max_items)
     flash(f'Added {len(created)} items to content queue', 'success')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/ai/generate/<int:qid>', methods=['POST'])
@@ -6392,7 +6571,7 @@ def admin_ai_generate(qid):
         flash(f'Generated: {result["title"]} ({result["word_count"]} words)', 'success')
     except Exception as e:
         flash(f'Generation failed: {str(e)}', 'danger')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/ai/publish/<int:qid>', methods=['POST'])
@@ -6405,7 +6584,7 @@ def admin_ai_publish(qid):
         flash(f'Published article: {article.title}', 'success')
     except Exception as e:
         flash(f'Publish failed: {str(e)}', 'danger')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/ai/batch-generate', methods=['POST'])
@@ -6424,7 +6603,7 @@ def admin_ai_batch_generate():
         except Exception as e:
             errors += 1
     flash(f'Batch generate: {success} success, {errors} errors', 'success' if errors == 0 else 'warning')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/ai/auto-run', methods=['POST'])
@@ -6457,7 +6636,7 @@ def admin_ai_auto_run():
 
     flash(f'Auto-run: {len(created)} queued, {generated} generated, {published} published, {errors} errors',
           'success' if errors == 0 else 'warning')
-    return redirect(url_for('admin_ai_scan_gaps'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline'))
 
 
 # =============================================
