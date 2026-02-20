@@ -5571,9 +5571,11 @@ def admin_hotdeals():
     now = datetime.utcnow()
     return render_template('admin/hotdeals.html', deals=deals, now=now)
 
-@app.route('/admin/hotdeals/upload', methods=['POST'])
+@app.route('/admin/hotdeals/upload', methods=['GET', 'POST'])
 def admin_hotdeals_upload():
     """Upload Hot_deal.xlsx and import data into HotDeal table"""
+    if request.method == 'GET':
+        return redirect(url_for('admin_hotdeals'))
     file = request.files.get('file')
     if not file or not file.filename.endswith(('.xlsx', '.xls')):
         flash('Vui long chon file Excel (.xlsx)', 'error')
