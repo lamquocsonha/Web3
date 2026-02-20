@@ -148,6 +148,7 @@
     <!-- Leaflet Map (hidden by default, shown when "Bản đồ" is clicked) -->
     <div class="leaflet-map-wrap" id="mapWrap">
       <div id="hotelLeafletMap"></div>
+      <button type="button" id="locateMeBtn" onclick="locateMe()" title="Định vị vị trí hiện tại của bạn" style="position:absolute;top:80px;right:10px;z-index:1000;background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:4px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 5px rgba(0,0,0,.15)" aria-label="Định vị vị trí hiện tại">📍</button>
     </div>
 
     <!-- DB Hotels -->
@@ -216,6 +217,7 @@
     <!-- Leaflet Map (hidden by default) -->
     <div class="leaflet-map-wrap" id="mapWrap">
       <div id="hotelLeafletMap"></div>
+      <button type="button" id="locateMeBtn" onclick="locateMe()" title="Định vị vị trí hiện tại của bạn" style="position:absolute;top:80px;right:10px;z-index:1000;background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:4px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 5px rgba(0,0,0,.15)" aria-label="Định vị vị trí hiện tại">📍</button>
     </div>
 
     <div class="tz-dest-grid" id="hotelList">
@@ -459,11 +461,44 @@ function addMarkersToMap(markers) {
       + '<div style="font-size:11px;margin-bottom:4px">' + starsHtml + (h.rating ? ' <span style="background:#004fac;color:#fff;padding:1px 5px;border-radius:3px;font-size:11px;font-weight:700">' + h.rating + '</span>' : '') + '</div>'
       + (h.address ? '<div style="font-size:11px;color:#888;margin-bottom:6px">📍 ' + h.address + '</div>' : '')
       + (priceDisplay ? '<div style="font-size:15px;font-weight:800;color:#c45d3e">' + priceDisplay + '<span style="font-size:11px;font-weight:400;color:#999"> /đêm</span></div>' : '')
-      + '<a href="' + (h.url || '#') + '" target="_blank" rel="nofollow" style="display:block;text-align:center;margin-top:8px;font-size:12px;font-weight:600;color:#fff;background:#c45d3e;padding:6px 10px;border-radius:6px;text-decoration:none">Xem giá &rarr;</a>'
+      + '<a href="' + (h.url || '#') + '" target="_blank" rel="nofollow" style="display:block;text-align:center;margin-top:8px;font-size:12px;font-weight:600;color:#fff;background:#c45d3e;padding:6px 10px;border-radius:6px;text-decoration:none">Tìm giá tốt &rarr;</a>'
       + '</div></div>';
     var marker = L.marker([h.lat, h.lng], {icon: icon}).addTo(_leafletMap).bindPopup(popup, {maxWidth:280});
     _allMarkers.push(marker);
   });
+}
+var _locateMarker = null;
+var _locateCircle = null;
+function locateMe() {
+  if (!_leafletMap) { initLeafletMap(); }
+  if (!navigator.geolocation) { alert('Trình duyệt không hỗ trợ định vị.'); return; }
+  var btn = document.getElementById('locateMeBtn');
+  btn.style.opacity = '0.5';
+  btn.textContent = '⏳';
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var lat = pos.coords.latitude;
+    var lng = pos.coords.longitude;
+    var acc = pos.coords.accuracy;
+    if (_locateMarker) { _leafletMap.removeLayer(_locateMarker); }
+    if (_locateCircle) { _leafletMap.removeLayer(_locateCircle); }
+    _locateMarker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: 'locate-me-icon',
+        html: '<div style="width:16px;height:16px;background:#4285f4;border:3px solid #fff;border-radius:50%;box-shadow:0 0 6px rgba(66,133,244,.6)"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      })
+    }).addTo(_leafletMap).bindPopup('<div style="text-align:center;font-size:13px;font-weight:600">📍 Vị trí của bạn</div>').openPopup();
+    _locateCircle = L.circle([lat, lng], { radius: acc, color: '#4285f4', fillColor: '#4285f4', fillOpacity: 0.1, weight: 1 }).addTo(_leafletMap);
+    _leafletMap.setView([lat, lng], 14);
+    btn.style.opacity = '1';
+    btn.textContent = '📍';
+  }, function(err) {
+    btn.style.opacity = '1';
+    btn.textContent = '📍';
+    if (err.code === 1) alert('Bạn đã từ chối quyền truy cập vị trí.');
+    else alert('Không thể xác định vị trí. Vui lòng thử lại.');
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
 }
 // Agoda API live search
 {% if agoda_enabled and destination %}
