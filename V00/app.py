@@ -6331,10 +6331,9 @@ def robots_txt():
 def travel_hotels():
     v = Vertical.query.filter_by(slug='travel').first_or_404()
     destination = request.args.get('destination', '')
-    checkin = request.args.get('checkin', '')
-    checkout = request.args.get('checkout', '')
-    guests = request.args.get('guests', '2')
     stars = request.args.get('stars', '')
+    price_min = request.args.get('price_min', '')
+    price_max = request.args.get('price_max', '')
 
     agoda_enabled = SiteSettings.get('agoda_enabled', '0') == '1'
     api_status = 'configured' if agoda_enabled else 'local_db'
@@ -6354,6 +6353,10 @@ def travel_hotels():
         )
         if stars:
             q = q.filter(Hotel.stars == int(stars))
+        if price_min:
+            q = q.filter(Hotel.price_from >= int(price_min))
+        if price_max:
+            q = q.filter(Hotel.price_from <= int(price_max))
         hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).all()
 
     # Popular destinations from DB + Agoda city list
@@ -6398,8 +6401,8 @@ def travel_hotels():
 
     return render_template('travel/hotels.html', vertical=v, hotels=hotels,
         destination=destination, destination_display=destination_display, city_slug=city_slug,
-        checkin=checkin, checkout=checkout, guests=guests,
-        stars=stars, api_status=api_status, agoda_enabled=agoda_enabled, popular=popular,
+        stars=stars, price_min=price_min, price_max=price_max,
+        api_status=api_status, agoda_enabled=agoda_enabled, popular=popular,
         hotel_markers=hotel_markers, province_center=province_center)
 
 

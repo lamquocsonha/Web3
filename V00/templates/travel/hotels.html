@@ -31,27 +31,32 @@
         <div class="tz-sf-display">{% if destination %}<span class="tz-dest-tag">{{ destination }} <a href="{{ url_for('travel_hotels') }}" class="tz-dest-x">×</a></span>{% else %}<span class="tz-dest-hint">Chọn tỉnh thành trên bản đồ</span>{% endif %}</div>
       </div>
       <div class="tz-sf-field">
-        <label>Danh mục</label>
+        <label>Tiêu chuẩn sao</label>
         <select name="stars" class="tz-sf-input">
           <option value="">Tất cả</option>
           {% for s in [3,4,5] %}<option value="{{ s }}" {{ 'selected' if stars==s|string }}>{{ s }} sao</option>{% endfor %}
         </select>
       </div>
-      <div class="tz-sf-field">
-        <label>Check-in</label>
-        <input type="date" name="checkin" value="{{ checkin }}" class="tz-sf-input">
+      <div class="tz-sf-field tz-sf-price">
+        <label>Khoảng giá</label>
+        <div class="price-range-wrap">
+          <div class="price-inputs">
+            <input type="number" name="price_min" id="priceMin" class="tz-sf-input price-input" placeholder="Từ" value="{{ price_min }}" min="0" max="50000000" step="100000">
+            <span class="price-sep">—</span>
+            <input type="number" name="price_max" id="priceMax" class="tz-sf-input price-input" placeholder="Đến" value="{{ price_max }}" min="0" max="50000000" step="100000">
+          </div>
+          <div class="price-slider-wrap">
+            <div class="price-slider-track" id="priceTrack"></div>
+            <input type="range" id="priceSliderMin" class="price-slider" min="0" max="50000000" step="100000" value="{{ price_min or 0 }}">
+            <input type="range" id="priceSliderMax" class="price-slider" min="0" max="50000000" step="100000" value="{{ price_max or 50000000 }}">
+          </div>
+          <div class="price-labels">
+            <span id="priceLabelMin">{{ '{:,.0f}'.format((price_min or 0)|int) }}đ</span>
+            <span id="priceLabelMax">{{ '{:,.0f}'.format((price_max or 50000000)|int) }}đ</span>
+          </div>
+        </div>
       </div>
-      <div class="tz-sf-field">
-        <label>Check-out</label>
-        <input type="date" name="checkout" value="{{ checkout }}" class="tz-sf-input">
-      </div>
-      <div class="tz-sf-field tz-sf-sm">
-        <label>Khách</label>
-        <select name="guests" class="tz-sf-input">
-          {% for n in range(1,6) %}<option value="{{ n }}" {{ 'selected' if guests==n|string }}>{{ n }}</option>{% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="tz-sf-btn">🔍 Tìm kiếm</button>
+      <button type="submit" class="tz-sf-btn">🔍 Tìm</button>
     </div>
   </form>
 </div>
@@ -607,5 +612,56 @@ function locateMe() {
     });
 })();
 {% endif %}
+
+/* ── Price Range Slider Sync ── */
+(function() {
+  var sliderMin = document.getElementById('priceSliderMin');
+  var sliderMax = document.getElementById('priceSliderMax');
+  var inputMin = document.getElementById('priceMin');
+  var inputMax = document.getElementById('priceMax');
+  var labelMin = document.getElementById('priceLabelMin');
+  var labelMax = document.getElementById('priceLabelMax');
+  var track = document.getElementById('priceTrack');
+  if (!sliderMin || !sliderMax) return;
+
+  var MAX = 50000000;
+  function fmt(v) { return Number(v).toLocaleString('vi-VN') + 'đ'; }
+
+  function updateTrack() {
+    var lo = parseInt(sliderMin.value), hi = parseInt(sliderMax.value);
+    var pctL = (lo / MAX) * 100, pctR = (hi / MAX) * 100;
+    track.style.left = pctL + '%';
+    track.style.width = (pctR - pctL) + '%';
+  }
+
+  function syncFromSliders() {
+    var lo = parseInt(sliderMin.value), hi = parseInt(sliderMax.value);
+    if (lo > hi) { sliderMin.value = hi; lo = hi; }
+    inputMin.value = lo || '';
+    inputMax.value = hi >= MAX ? '' : hi;
+    labelMin.textContent = fmt(lo);
+    labelMax.textContent = hi >= MAX ? '50M+' : fmt(hi);
+    updateTrack();
+  }
+
+  function syncFromInputs() {
+    var lo = parseInt(inputMin.value) || 0;
+    var hi = parseInt(inputMax.value) || MAX;
+    if (lo > hi) lo = hi;
+    sliderMin.value = lo;
+    sliderMax.value = hi;
+    labelMin.textContent = fmt(lo);
+    labelMax.textContent = hi >= MAX ? '50M+' : fmt(hi);
+    updateTrack();
+  }
+
+  sliderMin.addEventListener('input', syncFromSliders);
+  sliderMax.addEventListener('input', syncFromSliders);
+  inputMin.addEventListener('change', syncFromInputs);
+  inputMax.addEventListener('change', syncFromInputs);
+
+  // Init
+  updateTrack();
+})();
 </script>
 {% endblock %}
