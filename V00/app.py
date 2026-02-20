@@ -723,7 +723,7 @@ def admin_hotels_hub():
     elif tab == 'sync':
         # Hotel sync data - basic stats
         total_hotels = Hotel.query.count()
-        total_agoda = Hotel.query.filter_by(source='agoda').count()
+        total_agoda = Hotel.query.filter_by(source='agoda_api').count()
         total_active = Hotel.query.filter_by(is_active=True).count()
         ctx.update(total_hotels=total_hotels, total_agoda=total_agoda, total_active=total_active)
 
@@ -737,7 +737,7 @@ def admin_hotels_hub():
         if f_cat != 'all':
             query = query.filter_by(category=f_cat)
 
-        items = query.order_by(Attraction.created_at.desc()).all()
+        items = query.order_by(Attraction.id.desc()).all()
         destinations = db.session.query(Attraction.destination).distinct().all()
         cats = db.session.query(Attraction.category).distinct().all()
         total = Attraction.query.count()

@@ -201,8 +201,8 @@
         <tr>
           <td><strong>{{ v.title or 'Untitled' }}</strong></td>
           <td>
-            {% if v.vertical %}
-              <span style="font-size:14px">{{ v.vertical.icon }} {{ v.vertical.name }}</span>
+            {% if v.vertical_slug %}
+              <span style="font-size:14px">{{ v.vertical_slug }}</span>
             {% else %}
               <span style="color:var(--text-dim)">-</span>
             {% endif %}
@@ -279,7 +279,7 @@
             {% if zd.parts %}
             <div class="th-tree-parts">
               {% for p in zd.parts %}
-              <span class="th-tree-part">{{ p.name }}</span>
+              <span class="th-tree-part">{{ p.name_vi }}</span>
               {% endfor %}
             </div>
             {% endif %}
