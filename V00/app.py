@@ -794,8 +794,59 @@ def admin_hotels_hub():
 
 @app.route('/admin/vouchers-hub')
 def admin_vouchers_hub():
-    """Redirect to Tools Hub vouchers tab"""
-    return redirect(url_for('admin_tools', tab='vouchers'))
+    """Standalone Voucher Hub with sub-tabs: vouchers, widgets, sync"""
+    tab = request.args.get('tab', 'vouchers')
+    ctx = dict(active_tab=tab)
+
+    if tab == 'vouchers':
+        from sqlalchemy import func as sqlfunc
+        f_cat = request.args.get('cat', 'all')
+        f_merchant = request.args.get('merchant', 'all')
+        f_status = request.args.get('status', 'all')
+        query = Voucher.query
+        if f_cat != 'all':
+            query = query.filter_by(category=f_cat)
+        if f_merchant != 'all':
+            query = query.filter_by(merchant=f_merchant)
+        if f_status == 'active':
+            query = query.filter_by(is_active=True)
+        elif f_status == 'inactive':
+            query = query.filter_by(is_active=False)
+        items = query.order_by(Voucher.created_at.desc()).all()
+        merchants_q = db.session.query(Voucher.merchant).distinct().all()
+        cats_q = db.session.query(Voucher.category).distinct().all()
+        ctx.update(items=items, merchants=[m[0] for m in merchants_q if m[0]],
+                   cats=[c[0] for c in cats_q if c[0]],
+                   f_cat=f_cat, f_merchant=f_merchant, f_status=f_status,
+                   v_total=Voucher.query.count(),
+                   v_active=Voucher.query.filter_by(is_active=True).count(),
+                   v_clicks=db.session.query(sqlfunc.sum(Voucher.clicks)).scalar() or 0)
+
+    elif tab == 'widgets':
+        ctx.update(widgets=VoucherWidget.query.all())
+
+    elif tab == 'sync':
+        from accesstrade_integration import get_accesstrade_api
+        api = get_accesstrade_api()
+        api_connected = api is not None
+        sync_total_synced = Voucher.query.filter_by(sync_mode='api').count()
+        try:
+            sync_total_active = _voucher_valid_filter(Voucher.query.filter_by(sync_mode='api')).count()
+        except Exception:
+            sync_total_active = Voucher.query.filter_by(sync_mode='api', is_active=True).count()
+        ctx.update(
+            api_connected=api_connected,
+            sync_total_synced=sync_total_synced,
+            sync_total_active=sync_total_active,
+            sync_total_manual=Voucher.query.filter_by(sync_mode='manual').count(),
+            auto_sync_enabled=SiteSettings.get('voucher_auto_sync', 'off') == 'on',
+            sync_interval=SiteSettings.get('voucher_sync_interval', '6'),
+            last_sync=SiteSettings.get('voucher_last_sync', ''),
+            last_sync_count=SiteSettings.get('voucher_last_sync_count', '0'),
+            last_sync_error=SiteSettings.get('voucher_last_sync_error', ''),
+            recent_synced=Voucher.query.filter_by(sync_mode='api').order_by(Voucher.created_at.desc()).limit(20).all())
+
+    return render_template('admin/voucher_hub.html', **ctx)
 
 # =============================================
 # ADMIN — AFFILIATE HUB
@@ -1049,7 +1100,7 @@ def admin_content_delete(cid):
 # =============================================
 @app.route('/admin/tools')
 def admin_tools():
-    """Unified Tools Hub — Analytics, Video, Vouchers, Seed Data in tabs"""
+    """Unified Tools Hub — Analytics, Video, Seed Data in tabs"""
     tab = request.args.get('tab', 'analytics')
     ctx = {'active_tab': tab}
 
@@ -1083,55 +1134,7 @@ def admin_tools():
         ctx.update(videos=videos, channels=channels, total_views=total_views, total_published=total_published)
 
     elif tab == 'vouchers':
-        from sqlalchemy import func as sqlfunc
-        # Voucher list with filters
-        f_cat = request.args.get('cat', 'all')
-        f_merchant = request.args.get('merchant', 'all')
-        f_status = request.args.get('status', 'all')
-        query = Voucher.query
-        if f_cat != 'all':
-            query = query.filter_by(category=f_cat)
-        if f_merchant != 'all':
-            query = query.filter_by(merchant=f_merchant)
-        if f_status == 'active':
-            query = query.filter_by(is_active=True)
-        elif f_status == 'inactive':
-            query = query.filter_by(is_active=False)
-        items = query.order_by(Voucher.created_at.desc()).all()
-        merchants_q = db.session.query(Voucher.merchant).distinct().all()
-        cats_q = db.session.query(Voucher.category).distinct().all()
-        v_total = Voucher.query.count()
-        v_active = Voucher.query.filter_by(is_active=True).count()
-        v_clicks = db.session.query(sqlfunc.sum(Voucher.clicks)).scalar() or 0
-        # Widgets
-        widgets = VoucherWidget.query.all()
-        # Sync data
-        from accesstrade_integration import get_accesstrade_api
-        api = get_accesstrade_api()
-        api_connected = api is not None
-        sync_total_synced = Voucher.query.filter_by(sync_mode='api').count()
-        try:
-            sync_total_active = _voucher_valid_filter(Voucher.query.filter_by(sync_mode='api')).count()
-        except Exception:
-            sync_total_active = Voucher.query.filter_by(sync_mode='api', is_active=True).count()
-        sync_total_manual = Voucher.query.filter_by(sync_mode='manual').count()
-        auto_sync_enabled = SiteSettings.get('voucher_auto_sync', 'off') == 'on'
-        sync_interval = SiteSettings.get('voucher_sync_interval', '6')
-        last_sync = SiteSettings.get('voucher_last_sync', '')
-        last_sync_count = SiteSettings.get('voucher_last_sync_count', '0')
-        last_sync_error = SiteSettings.get('voucher_last_sync_error', '')
-        recent_synced = Voucher.query.filter_by(sync_mode='api').order_by(Voucher.created_at.desc()).limit(20).all()
-        ctx.update(items=items, merchants=[m[0] for m in merchants_q if m[0]],
-                   cats=[c[0] for c in cats_q if c[0]],
-                   f_cat=f_cat, f_merchant=f_merchant, f_status=f_status,
-                   v_total=v_total, v_active=v_active, v_clicks=v_clicks,
-                   widgets=widgets,
-                   api_connected=api_connected,
-                   sync_total_synced=sync_total_synced, sync_total_active=sync_total_active,
-                   sync_total_manual=sync_total_manual,
-                   auto_sync_enabled=auto_sync_enabled, sync_interval=sync_interval,
-                   last_sync=last_sync, last_sync_count=last_sync_count,
-                   last_sync_error=last_sync_error, recent_synced=recent_synced)
+        return redirect(url_for('admin_vouchers_hub'))
 
     elif tab == 'seed':
         verticals = Vertical.query.all()
