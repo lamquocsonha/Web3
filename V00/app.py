@@ -8145,7 +8145,31 @@ def _run_schema_migration():
 
 
 if __name__ == '__main__':
-    import os, shutil
+    import os, shutil, time, gc
+
+    def _force_close_db():
+        """Force-close all SQLAlchemy connections and release file handles."""
+        db.session.remove()
+        db.engine.dispose()
+        gc.collect()
+        time.sleep(0.5)  # Give OS time to release file locks (Windows)
+
+    def _remove_db_file(db_path):
+        """Remove DB file with retry for Windows file locking."""
+        for attempt in range(4):
+            try:
+                os.remove(db_path)
+                return True
+            except PermissionError:
+                gc.collect()
+                time.sleep(1 * (attempt + 1))
+        # Fallback: rename instead of delete
+        try:
+            ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+            os.rename(db_path, db_path + f'.old_{ts}')
+            return True
+        except Exception:
+            return False
 
     def _safe_init_db():
         """Initialize database with auto-recovery on schema errors."""
@@ -8173,8 +8197,7 @@ if __name__ == '__main__':
             if 'malformed' in err_msg or 'no such table' in err_msg or 'OperationalError' in err_msg:
                 print(f'[!] Database schema error: {err_msg}')
                 print('[*] Attempting dump-rebuild repair...')
-                db.session.remove()
-                db.engine.dispose()
+                _force_close_db()
                 try:
                     from db_backup import repair_database, create_backup
                     repair = repair_database(app)
@@ -8186,22 +8209,27 @@ if __name__ == '__main__':
                     else:
                         print(f'[!] Repair failed: {repair["errors"]}')
                         print('[*] Creating fresh database (corrupted DB saved in backups/)...')
-                        db.session.remove()
-                        db.engine.dispose()
+                        _force_close_db()
                         if os.path.exists(db_path):
-                            os.remove(db_path)
+                            if not _remove_db_file(db_path):
+                                print(f'[!] Cannot remove locked DB. Close other apps using it and restart.')
+                                return
                         db.create_all()
                         _run_schema_migration()
                         print('[*] Fresh database created. Run seed_data to restore content.')
                 except Exception as e2:
                     print(f'[!] Full recovery failed: {e2}')
                     # Last resort: fresh DB
-                    db.session.remove()
-                    db.engine.dispose()
+                    _force_close_db()
                     if os.path.exists(db_path):
                         ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-                        shutil.copy2(db_path, db_path + f'.crashed_{ts}')
-                        os.remove(db_path)
+                        try:
+                            shutil.copy2(db_path, db_path + f'.crashed_{ts}')
+                        except Exception:
+                            pass
+                        if not _remove_db_file(db_path):
+                            print(f'[!] Cannot remove locked DB. Close other apps using it and restart.')
+                            return
                     db.create_all()
                     _run_schema_migration()
                     print('[*] Fresh database created (emergency).')
