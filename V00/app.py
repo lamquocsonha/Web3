@@ -605,6 +605,139 @@ def admin_delete_link(lid):
     return redirect(url_for('admin_part_edit', pid=pid))
 
 # =============================================
+# ADMIN — MONETIZATION HUB (unified)
+# =============================================
+@app.route('/admin/monetization')
+def admin_monetization():
+    """Unified Monetization Hub — Products, Hotels, Vouchers, HotDeals, Locations"""
+    tab = request.args.get('tab', 'products')
+    ctx = {'active_tab': tab}
+
+    if tab == 'products':
+        from sqlalchemy import func as sqlfunc
+        f_vertical = request.args.get('vertical', 'all')
+        f_network = request.args.get('network', 'all')
+        f_status = request.args.get('status', 'all')
+        f_search = request.args.get('q', '')
+        page = request.args.get('page', 1, type=int)
+        per_page = 50
+
+        query = AffiliateLink.query
+        if f_vertical != 'all':
+            query = query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == f_vertical)
+        if f_network != 'all':
+            query = query.filter_by(network=f_network)
+        if f_status == 'active':
+            query = query.filter_by(is_active=True)
+        elif f_status == 'inactive':
+            query = query.filter_by(is_active=False)
+        if f_search:
+            query = query.filter(AffiliateLink.product_name.ilike(f'%{f_search}%'))
+
+        total = query.count()
+        products = query.order_by(AffiliateLink.created_at.desc()).offset((page - 1) * per_page).limit(per_page).all()
+        verticals = Vertical.query.order_by(Vertical.name).all()
+        networks = db.session.query(AffiliateLink.network).distinct().all()
+
+        total_all = AffiliateLink.query.count()
+        active = AffiliateLink.query.filter_by(is_active=True).count()
+        total_clicks = db.session.query(sqlfunc.sum(AffiliateLink.clicks)).scalar() or 0
+        total_conv = db.session.query(sqlfunc.sum(AffiliateLink.conversions)).scalar() or 0
+
+        ctx.update(products=products, verticals=verticals, networks=[n[0] for n in networks],
+                   f_vertical=f_vertical, f_network=f_network, f_status=f_status, f_search=f_search,
+                   total=total_all, active=active, total_clicks=total_clicks, total_conv=total_conv,
+                   page=page, total_pages=(total + per_page - 1) // per_page, pagination=total)
+
+    elif tab == 'hotels':
+        from sqlalchemy import func as sqlfunc
+        f_dest = request.args.get('dest', 'all')
+        f_stars = request.args.get('stars', 'all')
+        f_status = request.args.get('status', 'all')
+        page = request.args.get('page', 1, type=int)
+        per_page = 50
+
+        query = Hotel.query
+        if f_dest != 'all':
+            query = query.filter_by(destination=f_dest)
+        if f_stars != 'all':
+            query = query.filter_by(stars=int(f_stars))
+        if f_status == 'active':
+            query = query.filter_by(is_active=True)
+        elif f_status == 'inactive':
+            query = query.filter_by(is_active=False)
+
+        total_filtered = query.count()
+        hotels = query.order_by(Hotel.id.desc()).offset((page - 1) * per_page).limit(per_page).all()
+        destinations = db.session.query(Hotel.destination).distinct().order_by(Hotel.destination).all()
+
+        total = Hotel.query.count()
+        active_h = Hotel.query.filter_by(is_active=True).count()
+        no_image = Hotel.query.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
+        total_clicks = db.session.query(sqlfunc.sum(Hotel.clicks)).scalar() or 0
+
+        ctx.update(hotels=hotels, destinations=[d[0] for d in destinations],
+                   f_dest=f_dest, f_stars=f_stars, f_status=f_status,
+                   total=total, active_h=active_h, no_image=no_image, total_clicks=total_clicks,
+                   page=page, total_pages=(total_filtered + per_page - 1) // per_page)
+
+    elif tab == 'vouchers':
+        from sqlalchemy import func as sqlfunc
+        f_cat = request.args.get('cat', 'all')
+        f_merchant = request.args.get('merchant', 'all')
+        f_status = request.args.get('status', 'all')
+
+        query = Voucher.query
+        if f_cat != 'all':
+            query = query.filter_by(category=f_cat)
+        if f_merchant != 'all':
+            query = query.filter_by(merchant=f_merchant)
+        if f_status == 'active':
+            query = query.filter_by(is_active=True)
+        elif f_status == 'inactive':
+            query = query.filter_by(is_active=False)
+
+        items = query.order_by(Voucher.created_at.desc()).all()
+        merchants = db.session.query(Voucher.merchant).distinct().all()
+        cats = db.session.query(Voucher.category).distinct().all()
+
+        total = Voucher.query.count()
+        active_v = Voucher.query.filter_by(is_active=True).count()
+        total_clicks = db.session.query(sqlfunc.sum(Voucher.clicks)).scalar() or 0
+
+        ctx.update(items=items, merchants=[m[0] for m in merchants], cats=[c[0] for c in cats],
+                   f_cat=f_cat, f_merchant=f_merchant, f_status=f_status,
+                   total=total, active_v=active_v, total_clicks=total_clicks)
+
+    elif tab == 'hotdeals':
+        from datetime import datetime as dt
+        deals = HotDeal.query.order_by(HotDeal.created_at.desc()).all()
+        banners = AccessTradeBanner.query.order_by(AccessTradeBanner.created_at.desc()).all()
+        ctx.update(deals=deals, banners=banners, now=dt.utcnow())
+
+    elif tab == 'locations':
+        f_province = request.args.get('province', 'all')
+        f_level = request.args.get('level', 'all')
+        f_search = request.args.get('q', '')
+
+        query = WardCommune.query
+        if f_province != 'all':
+            query = query.filter_by(province_name=f_province)
+        if f_level != 'all':
+            query = query.filter_by(level=f_level)
+        if f_search:
+            query = query.filter(WardCommune.name.ilike(f'%{f_search}%'))
+
+        wards = query.order_by(WardCommune.province_name, WardCommune.name).all()
+        provinces = db.session.query(WardCommune.province_name).distinct().order_by(WardCommune.province_name).all()
+        total = WardCommune.query.count()
+
+        ctx.update(wards=wards, provinces=[p[0] for p in provinces], total=total,
+                   f_province=f_province, f_level=f_level, f_search=f_search)
+
+    return render_template('admin/monetization_hub.html', **ctx)
+
+# =============================================
 # ADMIN — AFFILIATE HUB
 # =============================================
 @app.route('/admin/affiliate')
@@ -850,6 +983,66 @@ def admin_content_delete(cid):
     db.session.commit()
     flash('Da xoa content', 'success')
     return redirect(url_for('admin_content'))
+
+# =============================================
+# ADMIN — TOOLS HUB (unified page)
+# =============================================
+@app.route('/admin/tools')
+def admin_tools():
+    """Unified Tools Hub — Video, Analytics, Settings, Seed Data in tabs"""
+    tab = request.args.get('tab', 'analytics')
+    ctx = {'active_tab': tab}
+
+    if tab == 'analytics':
+        from sqlalchemy import func as sqlfunc
+        verticals = Vertical.query.all()
+        vertical_stats = []
+        for v in verticals:
+            products = db.session.query(AffiliateLink).join(Part).join(Zone).join(Segment).filter(Segment.vertical_id == v.id)
+            clicks = sum(p.clicks or 0 for p in products.all())
+            conversions = sum(p.conversions or 0 for p in products.all())
+            articles = Article.query.filter_by(vertical_slug=v.slug).count()
+            views = db.session.query(sqlfunc.sum(Article.views)).filter(Article.vertical_slug == v.slug).scalar() or 0
+            vertical_stats.append({
+                'vertical': v, 'clicks': clicks, 'conversions': conversions,
+                'articles': articles, 'views': views
+            })
+        totals = {
+            'clicks': sum(vs['clicks'] for vs in vertical_stats),
+            'conversions': sum(vs['conversions'] for vs in vertical_stats),
+            'articles': sum(vs['articles'] for vs in vertical_stats),
+            'views': sum(vs['views'] for vs in vertical_stats),
+        }
+        ctx.update(verticals=verticals, vertical_stats=vertical_stats, totals=totals)
+
+    elif tab == 'video':
+        videos = VideoProject.query.order_by(VideoProject.created_at.desc()).limit(50).all()
+        channels = SocialChannel.query.all()
+        total_views = db.session.query(db.func.sum(VideoPublish.views)).scalar() or 0
+        total_published = VideoPublish.query.filter_by(status='published').count()
+        ctx.update(videos=videos, channels=channels, total_views=total_views, total_published=total_published)
+
+    elif tab == 'settings':
+        # Redirect to settings page (it's too complex with its own sub-tabs)
+        pass
+
+    elif tab == 'seed':
+        verticals = Vertical.query.all()
+        verticals_data = []
+        for v in verticals:
+            segments = Segment.query.filter_by(vertical_id=v.id).all()
+            segs = []
+            for s in segments:
+                zones = Zone.query.filter_by(segment_id=s.id).all()
+                zs = []
+                for z in zones:
+                    parts = Part.query.filter_by(zone_id=z.id).all()
+                    zs.append({'zone': z, 'parts': parts})
+                segs.append({'segment': s, 'zones': zs})
+            verticals_data.append({'vertical': v, 'segments': segs})
+        ctx.update(verticals_data=verticals_data)
+
+    return render_template('admin/tools_hub.html', **ctx)
 
 # =============================================
 # ADMIN — ANALYTICS
@@ -1251,6 +1444,82 @@ def backlinks_filter(content, vertical_slug='', source_type='', source_id=0, sou
     """Jinja filter to inject backlinks into article content."""
     result = _inject_backlinks(content, vertical_slug, source_type, source_id, source_slug)
     return Markup(result)
+
+@app.route('/admin/seo-hub')
+def admin_seo_hub():
+    """Unified SEO Hub — Dashboard, Keywords, Instances, Suggestions in tabs"""
+    tab = request.args.get('tab', 'dashboard')
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    ctx = {'active_tab': tab, 'verticals': verticals}
+
+    if tab == 'dashboard':
+        from sqlalchemy import func as sqlfunc
+        filter_v = request.args.get('vertical', 'all')
+        total_keywords = BacklinkKeyword.query.count()
+        active_keywords = BacklinkKeyword.query.filter_by(is_active=True).count()
+        total_instances = BacklinkInstance.query.count()
+        active_instances = BacklinkInstance.query.filter_by(status='active').count()
+        total_clicks = db.session.query(sqlfunc.sum(BacklinkInstance.clicks)).scalar() or 0
+        v_stats = []
+        for v in verticals:
+            kw_count = BacklinkKeyword.query.filter_by(vertical_slug=v.slug).count()
+            inst_count = BacklinkInstance.query.join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == v.slug).count()
+            clicks = db.session.query(sqlfunc.sum(BacklinkInstance.clicks)).join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == v.slug).scalar() or 0
+            v_stats.append({'vertical': v, 'keywords': kw_count, 'instances': inst_count, 'clicks': clicks})
+        recent = BacklinkInstance.query.order_by(BacklinkInstance.created_at.desc()).limit(20).all()
+        ctx.update(filter_v=filter_v, total_keywords=total_keywords, active_keywords=active_keywords,
+                   total_instances=total_instances, active_instances=active_instances,
+                   total_clicks=total_clicks, v_stats=v_stats, recent=recent)
+
+    elif tab == 'keywords':
+        filter_v = request.args.get('vertical', 'all')
+        filter_type = request.args.get('type', 'all')
+        q = request.args.get('q', '')
+        query = BacklinkKeyword.query
+        if filter_v != 'all':
+            query = query.filter_by(vertical_slug=filter_v)
+        if filter_type != 'all':
+            query = query.filter_by(target_type=filter_type)
+        if q:
+            query = query.filter(BacklinkKeyword.keyword.ilike(f'%{q}%'))
+        keywords = query.order_by(BacklinkKeyword.priority.desc()).all()
+        ctx.update(keywords=keywords, filter_v=filter_v, filter_type=filter_type, q=q)
+
+    elif tab == 'instances':
+        filter_v = request.args.get('vertical', 'all')
+        filter_type = request.args.get('type', 'all')
+        filter_status = request.args.get('status', 'all')
+        query = BacklinkInstance.query.join(BacklinkKeyword)
+        if filter_v != 'all':
+            query = query.filter(BacklinkKeyword.vertical_slug == filter_v)
+        if filter_type != 'all':
+            query = query.filter(BacklinkInstance.link_type == filter_type)
+        if filter_status != 'all':
+            query = query.filter(BacklinkInstance.status == filter_status)
+        instances = query.order_by(BacklinkInstance.created_at.desc()).all()
+        ctx.update(instances=instances, filter_v=filter_v, filter_type=filter_type, filter_status=filter_status)
+
+    elif tab == 'suggestions':
+        filter_v = request.args.get('vertical', 'all')
+        query = BacklinkInstance.query.filter_by(link_type='suggest')
+        if filter_v != 'all':
+            query = query.join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == filter_v)
+        suggestions = query.all()
+        grouped = {}
+        for s in suggestions:
+            key = f"{s.source_type}:{s.source_id}"
+            if key not in grouped:
+                grouped[key] = {'source_title': s.source_title, 'source_slug': s.source_slug, 'source_type': s.source_type, 'items': []}
+            grouped[key]['items'].append(s)
+        ctx.update(suggestions=suggestions, grouped=grouped, filter_v=filter_v)
+
+    elif tab == 'scan':
+        pass  # Scan page is mostly client-side with form POSTs
+
+    elif tab == 'auto':
+        pass  # Auto generate page is mostly forms
+
+    return render_template('admin/seo_hub.html', **ctx)
 
 @app.route('/admin/seo')
 def admin_seo_dashboard():
@@ -2021,6 +2290,69 @@ Keep responses concise and actionable."""
         return jsonify({
             'response': f'Có lỗi xảy ra: {str(e)}'
         }), 500
+
+# =============================================
+# ADMIN — CONTENT HUB (Unified: Articles + Feedbacks + AI Content)
+# =============================================
+@app.route('/admin/content-hub')
+def admin_content_hub():
+    """Unified Content Hub — Articles, Feedbacks, AI Content in tabs"""
+    tab = request.args.get('tab', 'articles')
+    ctx = {'active_tab': tab}
+
+    if tab == 'articles':
+        # Copy logic from admin_articles
+        vertical_filter = request.args.get('vertical', 'all')
+        tier_filter = request.args.get('tier', 'all')
+        search_q = request.args.get('q', '')
+        sort_col = request.args.get('sort', 'created_at')
+        sort_order = request.args.get('order', 'desc')
+
+        query = Article.query
+        if vertical_filter != 'all':
+            query = query.filter_by(vertical_slug=vertical_filter)
+        if tier_filter != 'all':
+            query = query.filter_by(tier=tier_filter)
+        if search_q:
+            query = query.filter(db.or_(Article.title.ilike(f'%{search_q}%'), Article.slug.ilike(f'%{search_q}%')))
+
+        sort_attr = getattr(Article, sort_col, Article.created_at)
+        if sort_order == 'asc':
+            query = query.order_by(sort_attr.asc())
+        else:
+            query = query.order_by(sort_attr.desc())
+
+        articles = query.all()
+        verticals = Vertical.query.order_by(Vertical.name).all()
+        stats = {
+            'total': Article.query.count(),
+            'nganh': Article.query.filter_by(tier='nganh').count(),
+            'chung': Article.query.filter_by(tier='chung').count(),
+            'chi_tiet': Article.query.filter_by(tier='chi-tiet').count(),
+        }
+        ctx.update(articles=articles, verticals=verticals, stats=stats,
+                   current_vertical=vertical_filter, current_tier=tier_filter,
+                   current_search=search_q, current_sort=sort_col, current_order=sort_order)
+
+    elif tab == 'feedbacks':
+        status_filter = request.args.get('status', 'all')
+        query = ArticleFeedback.query
+        if status_filter != 'all':
+            query = query.filter_by(status=status_filter)
+        feedbacks = query.order_by(ArticleFeedback.created_at.desc()).all()
+        ctx.update(feedbacks=feedbacks, status_filter=status_filter,
+                   pending_count=ArticleFeedback.query.filter_by(status='pending').count(),
+                   reviewed_count=ArticleFeedback.query.filter_by(status='reviewed').count(),
+                   resolved_count=ArticleFeedback.query.filter_by(status='resolved').count(),
+                   dismissed_count=ArticleFeedback.query.filter_by(status='dismissed').count())
+
+    elif tab == 'ai_content':
+        contents = AIContent.query.order_by(AIContent.created_at.desc()).all()
+        from sqlalchemy import func as sqlfunc
+        total_cost = db.session.query(sqlfunc.sum(AIContent.cost_vnd)).scalar() or 0
+        ctx.update(contents=contents, total_cost=total_cost)
+
+    return render_template('admin/content_hub.html', **ctx)
 
 # =============================================
 # ADMIN — ARTICLES (Knowledge Base)

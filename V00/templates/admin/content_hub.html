@@ -1,0 +1,366 @@
+{% extends "admin/base.html" %}
+{% block title %}Content Hub{% endblock %}
+{% block breadcrumb %}Content{% endblock %}
+{% block content %}
+<style>
+/* ── Top Tabs (matches AI Engine pattern) ── */
+.ai-top-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:28px; overflow-x:auto }
+.ai-top-tab { flex:1; padding:12px 20px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; color:var(--text-dim); border:none; background:transparent; font-family:inherit }
+.ai-top-tab:hover { background:var(--surface2); color:var(--text) }
+.ai-top-tab.active { background:var(--accent); color:#fff }
+.ai-top-tab .tab-badge { display:inline-block; font-size:12px; padding:1px 7px; border-radius:99px; font-weight:800; margin-left:6px; vertical-align:middle }
+.ai-top-tab.active .tab-badge { background:rgba(255,255,255,.25); color:#fff }
+.ai-top-tab .tab-badge.warn { background:rgba(245,158,11,.15); color:#f59e0b }
+.ai-top-tab.active .tab-badge.warn { background:rgba(255,255,255,.25); color:#fff }
+
+.ai-tab-panel { display:none }
+.ai-tab-panel.active { display:block }
+
+/* ── Stat Grid ── */
+.ch-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px }
+.ch-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.ch-stat-val { font-size:26px; font-weight:800 }
+.ch-stat-label { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+
+/* ── Filter Bar ── */
+.ch-filter-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; padding:14px 18px; background:var(--surface); border:1px solid var(--border); border-radius:12px }
+.ch-filter-bar select, .ch-filter-bar input[type=text] { padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit }
+.ch-filter-bar select { min-width:140px }
+.ch-filter-bar input[type=text] { flex:1; min-width:180px }
+
+/* ── Table ── */
+.ch-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.ch-table-wrap table { width:100%; border-collapse:collapse }
+.ch-table-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.ch-table-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.ch-table-wrap tr:last-child td { border:none }
+.ch-table-wrap tr:hover td { background:var(--surface2) }
+
+/* ── Badges ── */
+.ch-badge { display:inline-block; font-size:13px; padding:3px 10px; border-radius:6px; font-weight:700 }
+.ch-badge-pending { background:rgba(245,158,11,.1); color:#f59e0b }
+.ch-badge-reviewed { background:rgba(59,130,246,.1); color:#3b82f6 }
+.ch-badge-resolved { background:rgba(34,197,94,.1); color:#22c55e }
+.ch-badge-dismissed { background:var(--surface2); color:var(--text-dim) }
+.ch-badge-published { background:rgba(34,197,94,.1); color:#22c55e }
+.ch-badge-draft { background:rgba(245,158,11,.1); color:#f59e0b }
+.ch-badge-nganh { background:rgba(59,130,246,.1); color:#3b82f6 }
+.ch-badge-chung { background:rgba(34,197,94,.1); color:#22c55e }
+.ch-badge-chi-tiet { background:rgba(168,85,247,.1); color:#a855f7 }
+
+/* ── Buttons ── */
+.ch-btn { padding:8px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.ch-btn-primary { background:var(--accent); color:#fff }
+.ch-btn-primary:hover { opacity:.9 }
+.ch-btn-sm { padding:5px 12px; font-size:13px; border-radius:6px }
+.ch-btn-ghost { background:var(--surface2); color:var(--text) }
+.ch-btn-ghost:hover { background:var(--border) }
+.ch-btn-danger { background:rgba(239,68,68,.1); color:#ef4444; border:none; cursor:pointer; font-family:inherit; font-weight:600 }
+.ch-btn-danger:hover { background:rgba(239,68,68,.2) }
+
+/* ── Empty State ── */
+.ch-empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.ch-empty-icon { font-size:42px; margin-bottom:10px }
+
+/* ── Status filter tabs ── */
+.ch-status-tabs { display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap }
+.ch-status-tab { padding:8px 16px; border-radius:8px; font-size:14px; font-weight:600; color:var(--text-dim); text-decoration:none; background:var(--surface); border:1px solid var(--border); transition:all .15s }
+.ch-status-tab:hover { background:var(--surface2); color:var(--text) }
+.ch-status-tab.active { background:var(--accent); color:#fff; border-color:var(--accent) }
+
+/* ── Sort link ── */
+.ch-sort { color:var(--text-dim); text-decoration:none }
+.ch-sort:hover { color:var(--text) }
+.ch-sort.active { color:var(--accent); font-weight:800 }
+
+@media(max-width:768px) {
+  .ch-stat-grid { grid-template-columns:repeat(2,1fr) }
+  .ch-filter-bar { flex-direction:column }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════
+     TOP-LEVEL TABS
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-top-tabs">
+  <button class="ai-top-tab {% if active_tab=='articles' %}active{% endif %}" onclick="switchMainTab('articles')">
+    Articles
+    {% if active_tab=='articles' and stats is defined %}
+    <span class="tab-badge" style="background:rgba(59,130,246,.15);color:#3b82f6">{{ stats.total }}</span>
+    {% endif %}
+  </button>
+  <button class="ai-top-tab {% if active_tab=='feedbacks' %}active{% endif %}" onclick="switchMainTab('feedbacks')">
+    Feedbacks
+    {% if active_tab=='feedbacks' and pending_count is defined and pending_count > 0 %}
+    <span class="tab-badge warn">{{ pending_count }}</span>
+    {% endif %}
+  </button>
+  <button class="ai-top-tab {% if active_tab=='ai_content' %}active{% endif %}" onclick="switchMainTab('ai_content')">
+    AI Content
+    {% if active_tab=='ai_content' and contents is defined %}
+    <span class="tab-badge" style="background:rgba(168,85,247,.15);color:#a855f7">{{ contents|length }}</span>
+    {% endif %}
+  </button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: ARTICLES
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-tab-panel {% if active_tab=='articles' %}active{% endif %}" id="mainTab-articles">
+{% if active_tab == 'articles' %}
+
+  <!-- Stats -->
+  <div class="ch-stat-grid">
+    <div class="ch-stat"><div class="ch-stat-val">{{ stats.total }}</div><div class="ch-stat-label">Total</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#3b82f6">{{ stats.nganh }}</div><div class="ch-stat-label">Nganh</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#22c55e">{{ stats.chung }}</div><div class="ch-stat-label">Chung</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#a855f7">{{ stats.chi_tiet }}</div><div class="ch-stat-label">Chi tiet</div></div>
+  </div>
+
+  <!-- Filter Bar -->
+  <form method="GET" action="{{ url_for('admin_content_hub') }}">
+    <input type="hidden" name="tab" value="articles">
+    <div class="ch-filter-bar">
+      <select name="vertical" onchange="this.form.submit()">
+        <option value="all">All Verticals</option>
+        {% for v in verticals %}
+        <option value="{{ v.slug }}" {% if current_vertical == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="tier" onchange="this.form.submit()">
+        <option value="all">All Tiers</option>
+        <option value="nganh" {% if current_tier == 'nganh' %}selected{% endif %}>Nganh</option>
+        <option value="chung" {% if current_tier == 'chung' %}selected{% endif %}>Chung</option>
+        <option value="chi-tiet" {% if current_tier == 'chi-tiet' %}selected{% endif %}>Chi tiet</option>
+      </select>
+      <input type="text" name="q" value="{{ current_search }}" placeholder="Search title or slug...">
+      <button type="submit" class="ch-btn ch-btn-primary ch-btn-sm">Search</button>
+      <a href="{{ url_for('admin_article_new') }}" class="ch-btn ch-btn-primary" style="margin-left:auto">+ New Article</a>
+    </div>
+  </form>
+
+  <!-- Articles Table -->
+  {% if articles %}
+  <div class="ch-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>
+            <a class="ch-sort {% if current_sort=='title' %}active{% endif %}" href="?tab=articles&vertical={{ current_vertical }}&tier={{ current_tier }}&q={{ current_search }}&sort=title&order={% if current_sort=='title' and current_order=='asc' %}desc{% else %}asc{% endif %}">
+              Title {% if current_sort=='title' %}{% if current_order=='asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+            </a>
+          </th>
+          <th>Vertical</th>
+          <th>Tier</th>
+          <th>Status</th>
+          <th>
+            <a class="ch-sort {% if current_sort=='views' %}active{% endif %}" href="?tab=articles&vertical={{ current_vertical }}&tier={{ current_tier }}&q={{ current_search }}&sort=views&order={% if current_sort=='views' and current_order=='asc' %}desc{% else %}asc{% endif %}">
+              Views {% if current_sort=='views' %}{% if current_order=='asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+            </a>
+          </th>
+          <th>
+            <a class="ch-sort {% if current_sort=='created_at' %}active{% endif %}" href="?tab=articles&vertical={{ current_vertical }}&tier={{ current_tier }}&q={{ current_search }}&sort=created_at&order={% if current_sort=='created_at' and current_order=='asc' %}desc{% else %}asc{% endif %}">
+              Created {% if current_sort=='created_at' %}{% if current_order=='asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+            </a>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in articles %}
+        <tr>
+          <td style="max-width:320px">
+            <strong>{{ a.title[:55] }}{% if a.title|length > 55 %}...{% endif %}</strong>
+            {% if a.ai_generated %}<span style="font-size:11px;padding:1px 5px;border-radius:4px;background:rgba(168,85,247,.1);color:#a855f7;margin-left:4px">AI</span>{% endif %}
+          </td>
+          <td style="font-size:13px">{{ a.vertical_slug or '-' }}</td>
+          <td>
+            <span class="ch-badge ch-badge-{{ a.tier }}">{{ a.tier }}</span>
+          </td>
+          <td>
+            <span class="ch-badge ch-badge-{{ a.status }}">{{ a.status }}</span>
+          </td>
+          <td style="font-family:'DM Mono';font-size:13px">{{ a.views }}</td>
+          <td style="font-size:13px;color:var(--text-dim)">{{ a.created_at.strftime('%d/%m/%Y') }}</td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{{ url_for('admin_article_edit', aid=a.id) }}" class="ch-btn ch-btn-ghost ch-btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('admin_article_delete', aid=a.id) }}" style="display:inline" onsubmit="return confirm('Delete this article?')">
+                <button type="submit" class="ch-btn-danger ch-btn-sm" style="padding:5px 10px;border-radius:6px;font-size:13px">&#10005;</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:13px;color:var(--text-dim)">Showing {{ articles|length }} article{{ 's' if articles|length != 1 else '' }}</div>
+  {% else %}
+  <div class="ch-empty">
+    <div class="ch-empty-icon">&#128218;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No articles found</h3>
+    <p style="font-size:14px">Try adjusting your filters or create a new article.</p>
+    <a href="{{ url_for('admin_article_new') }}" class="ch-btn ch-btn-primary" style="margin-top:12px">+ New Article</a>
+  </div>
+  {% endif %}
+
+{% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: FEEDBACKS
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-tab-panel {% if active_tab=='feedbacks' %}active{% endif %}" id="mainTab-feedbacks">
+{% if active_tab == 'feedbacks' %}
+
+  <!-- Stats -->
+  <div class="ch-stat-grid">
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#f59e0b">{{ pending_count }}</div><div class="ch-stat-label">Pending</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#3b82f6">{{ reviewed_count }}</div><div class="ch-stat-label">Reviewed</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#22c55e">{{ resolved_count }}</div><div class="ch-stat-label">Resolved</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#6b7280">{{ dismissed_count }}</div><div class="ch-stat-label">Dismissed</div></div>
+  </div>
+
+  <!-- Status Filter -->
+  <div class="ch-status-tabs">
+    <a href="?tab=feedbacks&status=all" class="ch-status-tab {% if status_filter == 'all' %}active{% endif %}">All ({{ pending_count + reviewed_count + resolved_count + dismissed_count }})</a>
+    <a href="?tab=feedbacks&status=pending" class="ch-status-tab {% if status_filter == 'pending' %}active{% endif %}">Pending ({{ pending_count }})</a>
+    <a href="?tab=feedbacks&status=reviewed" class="ch-status-tab {% if status_filter == 'reviewed' %}active{% endif %}">Reviewed ({{ reviewed_count }})</a>
+    <a href="?tab=feedbacks&status=resolved" class="ch-status-tab {% if status_filter == 'resolved' %}active{% endif %}">Resolved ({{ resolved_count }})</a>
+    <a href="?tab=feedbacks&status=dismissed" class="ch-status-tab {% if status_filter == 'dismissed' %}active{% endif %}">Dismissed ({{ dismissed_count }})</a>
+  </div>
+
+  <!-- Feedbacks Table -->
+  {% if feedbacks %}
+  <div class="ch-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Article</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fb in feedbacks %}
+        <tr>
+          <td style="max-width:250px">
+            <strong style="font-size:14px">{{ fb.article.title[:45] }}{% if fb.article.title|length > 45 %}...{% endif %}</strong>
+            <div style="font-size:12px;color:var(--text-dim)">{{ fb.article.vertical_slug|upper }}</div>
+          </td>
+          <td>
+            <span class="ch-badge" style="{% if fb.feedback_type == 'inaccurate' %}background:rgba(239,68,68,.1);color:#ef4444{% elif fb.feedback_type == 'outdated' %}background:rgba(245,158,11,.1);color:#f59e0b{% elif fb.feedback_type == 'incomplete' %}background:rgba(59,130,246,.1);color:#3b82f6{% elif fb.feedback_type == 'misleading' %}background:rgba(245,158,11,.1);color:#f59e0b{% else %}background:var(--surface2);color:var(--text-dim){% endif %}">
+              {{ fb.feedback_type }}
+            </span>
+          </td>
+          <td style="max-width:220px;font-size:13px;color:var(--text-dim)">
+            {{ fb.description[:70] if fb.description else '(No description)' }}{% if fb.description and fb.description|length > 70 %}...{% endif %}
+          </td>
+          <td>
+            <span class="ch-badge ch-badge-{{ fb.status }}">{{ fb.status }}</span>
+          </td>
+          <td style="font-size:13px;color:var(--text-dim)">{{ fb.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>
+            <a href="{{ url_for('admin_feedback_detail', fid=fb.id) }}" class="ch-btn ch-btn-ghost ch-btn-sm">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:13px;color:var(--text-dim)">Showing {{ feedbacks|length }} feedback{{ 's' if feedbacks|length != 1 else '' }}</div>
+  {% else %}
+  <div class="ch-empty">
+    <div class="ch-empty-icon">&#128221;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No feedbacks found</h3>
+    <p style="font-size:14px">Feedbacks from readers will appear here.</p>
+  </div>
+  {% endif %}
+
+{% endif %}
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: AI CONTENT
+     ══════════════════════════════════════════════════════ -->
+<div class="ai-tab-panel {% if active_tab=='ai_content' %}active{% endif %}" id="mainTab-ai_content">
+{% if active_tab == 'ai_content' %}
+
+  <!-- Stats -->
+  <div class="ch-stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="ch-stat"><div class="ch-stat-val">{{ contents|length }}</div><div class="ch-stat-label">Total Generated</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#a855f7">{{ contents|selectattr('content_type','eq','article')|list|length }}</div><div class="ch-stat-label">Articles</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="font-size:20px">{{ "{:,.0f}".format(total_cost) }}d</div><div class="ch-stat-label">Total Cost</div></div>
+  </div>
+
+  <div style="margin-bottom:20px">
+    <a href="{{ url_for('admin_content_generate') }}" class="ch-btn ch-btn-primary">+ Generate New</a>
+  </div>
+
+  <!-- AI Content Table -->
+  {% if contents %}
+  <div class="ch-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Provider</th>
+          <th>Tokens</th>
+          <th>Cost</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in contents %}
+        <tr>
+          <td style="max-width:280px">
+            <a href="{{ url_for('admin_content_detail', cid=c.id) }}" style="color:var(--text);text-decoration:none">
+              <strong>{{ c.title[:45] }}{% if c.title|length > 45 %}...{% endif %}</strong>
+            </a>
+            {% if c.vertical_slug %}<div style="font-size:12px;color:var(--text-dim)">{{ c.vertical_slug }}</div>{% endif %}
+          </td>
+          <td><span class="ch-badge" style="background:var(--surface2);color:var(--text-dim)">{{ c.content_type }}</span></td>
+          <td style="font-family:'DM Mono';font-size:13px">{{ c.ai_provider or '-' }}</td>
+          <td style="font-family:'DM Mono';font-size:13px">{{ "{:,}".format(c.cost_tokens) if c.cost_tokens else '-' }}</td>
+          <td style="font-family:'DM Mono';font-size:13px">{{ "{:,.0f}".format(c.cost_vnd) }}d</td>
+          <td><span class="ch-badge ch-badge-{{ c.status }}">{{ c.status }}</span></td>
+          <td style="font-size:13px;color:var(--text-dim)">{{ c.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{{ url_for('admin_content_detail', cid=c.id) }}" class="ch-btn ch-btn-ghost ch-btn-sm">View</a>
+              <form method="POST" action="{{ url_for('admin_content_delete', cid=c.id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+                <button type="submit" class="ch-btn-danger ch-btn-sm" style="padding:5px 10px;border-radius:6px;font-size:13px">&#10005;</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:13px;color:var(--text-dim)">Showing {{ contents|length }} generated content item{{ 's' if contents|length != 1 else '' }}</div>
+  {% else %}
+  <div class="ch-empty">
+    <div class="ch-empty-icon">&#129302;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No AI content yet</h3>
+    <p style="font-size:14px">Generate your first article with AI.</p>
+    <a href="{{ url_for('admin_content_generate') }}" class="ch-btn ch-btn-primary" style="margin-top:12px">+ Generate New</a>
+  </div>
+  {% endif %}
+
+{% endif %}
+</div>
+
+<script>
+function switchMainTab(tab) {
+  window.location.href = '?tab=' + tab;
+}
+</script>
+{% endblock %}

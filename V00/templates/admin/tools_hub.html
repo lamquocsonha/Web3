@@ -1,0 +1,322 @@
+{% extends "admin/base.html" %}
+{% block title %}Tools{% endblock %}
+{% block breadcrumb %}Tools{% endblock %}
+{% block content %}
+<style>
+/* ── Top Tabs (same pattern as AI Engine) ── */
+.th-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:28px; overflow-x:auto }
+.th-tab { flex:1; padding:12px 20px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; color:var(--text-dim); border:none; background:transparent; font-family:inherit; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px }
+.th-tab:hover { background:var(--surface2); color:var(--text) }
+.th-tab.active { background:var(--accent); color:#fff }
+
+.th-panel { display:none }
+.th-panel.active { display:block }
+
+/* ── Stats Grid ── */
+.th-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px }
+.th-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.th-stat-val { font-size:26px; font-weight:800 }
+.th-stat-label { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+
+/* ── Table ── */
+.th-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.th-table-wrap table { width:100%; border-collapse:collapse }
+.th-table-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.th-table-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.th-table-wrap tr:last-child td { border:none }
+.th-table-wrap tr:hover td { background:var(--surface2) }
+
+/* ── Buttons ── */
+.th-btn { padding:8px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.th-btn-primary { background:var(--accent); color:#fff }
+.th-btn-primary:hover { opacity:.9 }
+.th-btn-ghost { background:var(--surface2); color:var(--text) }
+.th-btn-ghost:hover { background:var(--border) }
+
+/* ── Badges ── */
+.th-badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:6px; font-weight:700 }
+
+/* ── Tree View ── */
+.th-tree { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px }
+.th-tree-vertical { margin-bottom:20px }
+.th-tree-vertical:last-child { margin-bottom:0 }
+.th-tree-header { display:flex; align-items:center; gap:10px; padding:10px 0; cursor:pointer; font-weight:700; font-size:16px }
+.th-tree-header:hover { color:var(--accent) }
+.th-tree-segment { margin-left:24px; padding:6px 0; border-left:2px solid var(--border); padding-left:16px }
+.th-tree-seg-name { font-weight:600; font-size:14px; margin-bottom:4px; color:var(--text) }
+.th-tree-zone { margin-left:20px; padding:4px 0; border-left:2px solid var(--surface2); padding-left:14px }
+.th-tree-zone-name { font-size:13px; font-weight:600; color:var(--text-dim) }
+.th-tree-parts { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; margin-left:16px }
+.th-tree-part { font-size:12px; padding:2px 8px; border-radius:5px; background:var(--surface2); color:var(--text-dim) }
+
+/* ── Settings card ── */
+.th-settings-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:40px; text-align:center; max-width:480px; margin:40px auto }
+.th-settings-icon { font-size:48px; margin-bottom:16px }
+.th-settings-card h3 { font-size:20px; font-weight:700; margin-bottom:8px }
+.th-settings-card p { font-size:14px; color:var(--text-dim); margin-bottom:24px }
+
+/* ── Empty state ── */
+.th-empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.th-empty-icon { font-size:42px; margin-bottom:10px }
+
+@media(max-width:768px) {
+  .th-stat-grid { grid-template-columns:repeat(2,1fr) }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════
+     TOP-LEVEL TABS (server-side via ?tab=X)
+     ══════════════════════════════════════════════ -->
+<div class="th-tabs">
+  <a class="th-tab {% if active_tab=='analytics' %}active{% endif %}" href="{{ url_for('admin_tools', tab='analytics') }}">
+    &#128200; Analytics
+  </a>
+  <a class="th-tab {% if active_tab=='video' %}active{% endif %}" href="{{ url_for('admin_tools', tab='video') }}">
+    &#127909; Video
+  </a>
+  <a class="th-tab {% if active_tab=='settings' %}active{% endif %}" href="{{ url_for('admin_tools', tab='settings') }}">
+    &#9881; Settings
+  </a>
+  <a class="th-tab {% if active_tab=='seed' %}active{% endif %}" href="{{ url_for('admin_tools', tab='seed') }}">
+    &#127793; Seed Data
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TAB: ANALYTICS
+     ══════════════════════════════════════════════ -->
+{% if active_tab == 'analytics' %}
+<div class="th-panel active">
+  <!-- Stats grid -->
+  <div class="th-stat-grid">
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#8b5cf6">{{ "{:,}".format(totals.clicks) }}</div>
+      <div class="th-stat-label">Total Clicks</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#22c55e">{{ "{:,}".format(totals.conversions) }}</div>
+      <div class="th-stat-label">Total Conversions</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#3b82f6">{{ "{:,}".format(totals.articles) }}</div>
+      <div class="th-stat-label">Total Articles</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#f59e0b">{{ "{:,}".format(totals.views) }}</div>
+      <div class="th-stat-label">Total Views</div>
+    </div>
+  </div>
+
+  <!-- Per-vertical stats table -->
+  {% if vertical_stats %}
+  <div class="th-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th style="text-align:right">Clicks</th>
+          <th style="text-align:right">Conversions</th>
+          <th style="text-align:right">Articles</th>
+          <th style="text-align:right">Views</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for vs in vertical_stats %}
+        <tr>
+          <td>
+            <span style="font-size:18px">{{ vs.vertical.icon }}</span>
+            <strong style="margin-left:6px">{{ vs.vertical.name }}</strong>
+            <span style="font-size:12px;color:var(--text-dim);margin-left:4px">({{ vs.vertical.slug }})</span>
+          </td>
+          <td style="text-align:right;font-family:'DM Mono';color:#8b5cf6;font-weight:600">{{ "{:,}".format(vs.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#22c55e;font-weight:600">{{ "{:,}".format(vs.conversions) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(vs.articles) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(vs.views) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;border-top:2px solid var(--border)">
+          <td>Total</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#8b5cf6">{{ "{:,}".format(totals.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#22c55e">{{ "{:,}".format(totals.conversions) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(totals.articles) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(totals.views) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% else %}
+  <div class="th-empty">
+    <div class="th-empty-icon">&#128200;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No verticals yet</h3>
+    <p style="font-size:14px">Create verticals first to see analytics.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════
+     TAB: VIDEO
+     ══════════════════════════════════════════════ -->
+{% if active_tab == 'video' %}
+<div class="th-panel active">
+  <!-- Stats -->
+  <div class="th-stat-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="th-stat">
+      <div class="th-stat-val">{{ videos|length }}</div>
+      <div class="th-stat-label">Total Videos</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#22c55e">{{ total_published }}</div>
+      <div class="th-stat-label">Published</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#3b82f6">{{ "{:,}".format(total_views) }}</div>
+      <div class="th-stat-label">Total Views</div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div style="display:flex;gap:10px;margin-bottom:20px">
+    <a href="{{ url_for('admin_video') }}" class="th-btn th-btn-primary">+ Create Video</a>
+    <a href="{{ url_for('admin_video_channels') }}" class="th-btn th-btn-ghost">Manage Channels</a>
+  </div>
+
+  <!-- Video list table -->
+  {% if videos %}
+  <div class="th-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Channel</th>
+          <th>Status</th>
+          <th style="text-align:right">Views</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in videos %}
+        <tr>
+          <td><strong>{{ v.title or 'Untitled' }}</strong></td>
+          <td>
+            {% if v.vertical %}
+              <span style="font-size:14px">{{ v.vertical.icon }} {{ v.vertical.name }}</span>
+            {% else %}
+              <span style="color:var(--text-dim)">-</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="th-badge" style="{% if v.status == 'published' %}background:#d1fae5;color:#065f46{% elif v.status == 'draft' %}background:#fef3c7;color:#92400e{% elif v.status == 'rendering' %}background:#dbeafe;color:#1e40af{% else %}background:var(--surface2);color:var(--text-dim){% endif %}">{{ v.status or 'draft' }}</span>
+          </td>
+          <td style="text-align:right;font-family:'DM Mono'">-</td>
+          <td style="font-size:13px;color:var(--text-dim)">{{ v.created_at.strftime('%d/%m/%Y') if v.created_at else '-' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="th-empty">
+    <div class="th-empty-icon">&#127909;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No videos yet</h3>
+    <p style="font-size:14px">Create your first video project to get started.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════
+     TAB: SETTINGS
+     ══════════════════════════════════════════════ -->
+{% if active_tab == 'settings' %}
+<div class="th-panel active">
+  <div class="th-settings-card">
+    <div class="th-settings-icon">&#9881;</div>
+    <h3>Site Settings</h3>
+    <p>Settings has its own dedicated page with multiple sub-tabs for branding, styles, database, and more.</p>
+    <a href="{{ url_for('admin_settings') }}" class="th-btn th-btn-primary" style="font-size:16px;padding:12px 32px">
+      Open Settings
+    </a>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════
+     TAB: SEED DATA
+     ══════════════════════════════════════════════ -->
+{% if active_tab == 'seed' %}
+<div class="th-panel active">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <h2 style="margin:0 0 4px;font-size:18px;font-weight:700">Data Structure</h2>
+      <p style="margin:0;font-size:13px;color:var(--text-dim)">Verticals &rsaquo; Segments &rsaquo; Zones &rsaquo; Parts</p>
+    </div>
+    <a href="{{ url_for('admin_seed_data') }}" class="th-btn th-btn-primary">Seed Data Manager</a>
+  </div>
+
+  {% if verticals_data %}
+  <div class="th-tree">
+    {% for vd in verticals_data %}
+    <div class="th-tree-vertical">
+      <div class="th-tree-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span style="font-size:22px">{{ vd.vertical.icon }}</span>
+        <span>{{ vd.vertical.name }}</span>
+        <span style="font-size:13px;color:var(--text-dim);font-weight:400;margin-left:auto">
+          {{ vd.segments|length }} segments
+        </span>
+      </div>
+      <div class="th-tree-children">
+        {% for sd in vd.segments %}
+        <div class="th-tree-segment">
+          <div class="th-tree-seg-name">{{ sd.segment.name }}</div>
+          {% for zd in sd.zones %}
+          <div class="th-tree-zone">
+            <div class="th-tree-zone-name">{{ zd.zone.name }}
+              {% if zd.parts %}<span style="font-size:12px;color:var(--text-dim);font-weight:400">({{ zd.parts|length }} parts)</span>{% endif %}
+            </div>
+            {% if zd.parts %}
+            <div class="th-tree-parts">
+              {% for p in zd.parts %}
+              <span class="th-tree-part">{{ p.name }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="th-empty">
+    <div class="th-empty-icon">&#127793;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No verticals yet</h3>
+    <p style="font-size:14px">Use the Seed Data Manager to populate your database.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<script>
+// Collapsible tree nodes
+document.querySelectorAll('.th-tree-vertical').forEach(node => {
+  const header = node.querySelector('.th-tree-header');
+  const children = node.querySelector('.th-tree-children');
+  if (header && children) {
+    // Start expanded
+    children.style.display = 'block';
+    header.addEventListener('click', () => {
+      if (children.style.display === 'none') {
+        children.style.display = 'block';
+      } else {
+        children.style.display = 'none';
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
