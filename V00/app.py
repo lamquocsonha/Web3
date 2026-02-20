@@ -15,11 +15,14 @@ db.init_app(app)
 
 # Set SQLite pragmas for better concurrency (WAL + busy_timeout)
 def _set_sqlite_pragmas(dbapi_conn, connection_record):
-    cursor = dbapi_conn.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA busy_timeout=30000")
-    cursor.execute("PRAGMA synchronous=NORMAL")
-    cursor.close()
+    try:
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
+    except Exception:
+        pass  # Ignore pragma errors on malformed/new databases
 
 from sqlalchemy import event
 with app.app_context():
@@ -6985,13 +6988,18 @@ def _table_exists(table_name):
 def _ensure_column(table_name, col_name, col_def, existing_cols):
     """Add column if missing. Returns True if added."""
     if col_name not in existing_cols:
-        print(f'  [+] Adding {table_name}.{col_name}')
-        db.session.execute(db.text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_def}"))
-        return True
+        try:
+            print(f'  [+] Adding {table_name}.{col_name}')
+            db.session.execute(db.text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_def}"))
+            return True
+        except Exception as e:
+            print(f'  [!] Failed to add {table_name}.{col_name}: {e}')
+            return False
     return False
 
 def _run_schema_migration():
-    """Fast schema migration — uses PRAGMA to batch-check columns."""
+    """Fast schema migration — uses PRAGMA to batch-check columns.
+    Resilient: each migration step is independent, failures don't block others."""
     import time
     t0 = time.time()
     print('[*] Checking database schema...')
@@ -7209,13 +7217,56 @@ def _run_schema_migration():
 
 
 if __name__ == '__main__':
-    import os
+    import os, shutil
+
+    def _safe_init_db():
+        """Initialize database with auto-recovery on schema errors."""
+        db_path = os.path.join(app.instance_path, 'unilab.db')
+        try:
+            db.create_all()
+            _run_schema_migration()
+            print('[*] Database ready.')
+        except Exception as e:
+            err_msg = str(e)
+            if 'malformed' in err_msg or 'no such table' in err_msg or 'OperationalError' in err_msg:
+                print(f'[!] Database schema error: {err_msg}')
+                print('[*] Attempting auto-recovery...')
+                # Close all connections to release the file
+                db.session.remove()
+                db.engine.dispose()
+                # Backup the old database
+                if os.path.exists(db_path):
+                    backup_path = db_path + '.backup'
+                    shutil.copy2(db_path, backup_path)
+                    print(f'[*] Backed up old database to {backup_path}')
+                    # Remove WAL/SHM files if they exist (these can cause malformed errors)
+                    for ext in ['-wal', '-shm']:
+                        wal_path = db_path + ext
+                        if os.path.exists(wal_path):
+                            os.remove(wal_path)
+                            print(f'  [+] Removed {wal_path}')
+                # Try again — removing WAL/SHM often fixes "malformed" errors
+                try:
+                    db.create_all()
+                    _run_schema_migration()
+                    print('[*] Recovery successful! Database ready.')
+                except Exception as e2:
+                    print(f'[!] Recovery failed: {e2}')
+                    print('[*] Creating fresh database (old data backed up)...')
+                    db.session.remove()
+                    db.engine.dispose()
+                    if os.path.exists(db_path):
+                        os.remove(db_path)
+                    db.create_all()
+                    _run_schema_migration()
+                    print('[*] Fresh database created. Run seed_data to restore content.')
+            else:
+                raise
 
     # Only init DB once (skip on Werkzeug reloader child process)
     if not os.environ.get('WERKZEUG_RUN_MAIN'):
         with app.app_context():
-            db.create_all()
-            _run_schema_migration()
+            _safe_init_db()
 
         # Auto-open browser after server is ready (only once, not on reload)
         import threading, webbrowser
