@@ -352,7 +352,67 @@
 <!-- ═══════════════════════════════════════════ -->
 <div class="stab-panel {% if active_tab=='database' %}active{% endif %}" id="tab-database">
 
-  <!-- DB Info -->
+  <!-- DB Health Status -->
+  {% if db_info and db_info.health %}
+  {% set h = db_info.health %}
+  <div class="scard" style="{% if h.integrity and h.integrity.ok %}border-left:4px solid #22c55e{% else %}border-left:4px solid #ef4444{% endif %}">
+    <h3 class="scard-title">Tinh trang Database</h3>
+    <div class="db-info-grid">
+      <div class="db-info-item">
+        <span class="db-info-label">Integrity</span>
+        <span class="db-info-val">
+          {% if h.integrity and h.integrity.ok %}
+          <span style="color:#22c55e;font-weight:700">HEALTHY</span>
+          <span style="color:var(--text-dim);font-size:14px">({{ h.integrity.duration_ms }}ms)</span>
+          {% else %}
+          <span style="color:#ef4444;font-weight:700">CORRUPTED</span>
+          {% if h.integrity and h.integrity.errors %}
+          <span style="color:var(--text-dim);font-size:14px">{{ h.integrity.errors[0][:60] }}</span>
+          {% endif %}
+          {% endif %}
+        </span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">Kich thuoc</span>
+        <span class="db-info-val">{{ h.size_display }}</span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">Journal Mode</span>
+        <span class="db-info-val">{{ h.journal_mode|upper }}</span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">Fragmentation</span>
+        <span class="db-info-val" style="{% if h.fragmentation_pct > 20 %}color:#f59e0b{% endif %}">{{ h.fragmentation_pct }}%</span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">WAL File</span>
+        <span class="db-info-val">{% if h.wal_exists %}Active{% else %}None{% endif %}</span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">So bang</span>
+        <span class="db-info-val">{{ db_info.table_count }}</span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">Backup gan nhat</span>
+        <span class="db-info-val">
+          {% if h.last_backup %}
+          {{ h.last_backup }}
+          <span style="font-size:14px;color:{% if h.backup_age_hours and h.backup_age_hours > 48 %}#ef4444{% elif h.backup_age_hours and h.backup_age_hours > 24 %}#f59e0b{% else %}#22c55e{% endif %}">
+            ({{ h.backup_age_hours }}h ago)
+          </span>
+          {% else %}
+          <span style="color:#ef4444">Chua co backup!</span>
+          {% endif %}
+        </span>
+      </div>
+      <div class="db-info-item">
+        <span class="db-info-label">So backups</span>
+        <span class="db-info-val">{{ h.backups|length }}</span>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <!-- Fallback: basic info -->
   <div class="scard">
     <h3 class="scard-title">Database Info</h3>
     <div class="db-info-grid">
@@ -376,6 +436,7 @@
       {% endif %}
     </div>
   </div>
+  {% endif %}
 
   <!-- Table List -->
   {% if db_info and db_info.tables %}
@@ -409,10 +470,28 @@
   </div>
   {% endif %}
 
-  <!-- Actions -->
+  <!-- Quick Actions -->
   <div class="scard">
-    <h3 class="scard-title">Cap nhat Database</h3>
-    <p class="scard-desc">Khi cap nhat code moi (them model, them cot), bam nut ben duoi de cap nhat schema database ma khong mat data cu.</p>
+    <h3 class="scard-title">Thao tac nhanh</h3>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+      <form method="POST" action="{{ url_for('admin_settings_database') }}" style="display:inline">
+        <input type="hidden" name="action" value="backup">
+        <button type="submit" class="btn btn-primary">Backup ngay</button>
+      </form>
+      <form method="POST" action="{{ url_for('admin_settings_database') }}" style="display:inline">
+        <input type="hidden" name="action" value="integrity_check">
+        <button type="submit" class="btn" style="background:var(--surface2);color:var(--text)">Kiem tra Integrity</button>
+      </form>
+      <form method="POST" action="{{ url_for('admin_settings_database') }}" style="display:inline">
+        <input type="hidden" name="action" value="vacuum">
+        <button type="submit" class="btn" style="background:var(--surface2);color:var(--text)">VACUUM (giam dung luong)</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Maintenance Actions -->
+  <div class="scard">
+    <h3 class="scard-title">Bao tri Database</h3>
 
     <div class="db-actions">
       <div class="db-action-card">
@@ -433,13 +512,13 @@
         <div class="db-action-header">
           <span class="db-action-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b">&#8635;</span>
           <div>
-            <strong>Sua chua Database</strong>
-            <p>Xoa file WAL/SHM va chay lai migration. Dung khi gap loi "malformed database".</p>
+            <strong>Sua chua Database (Dump &amp; Rebuild)</strong>
+            <p>Tu dong backup truoc, sau do dump toan bo data va rebuild database moi. Giu nguyen du lieu.</p>
           </div>
         </div>
-        <form method="POST" action="{{ url_for('admin_settings_database') }}">
+        <form method="POST" action="{{ url_for('admin_settings_database') }}" onsubmit="return confirm('Bat dau sua chua database? Data se duoc backup truoc khi sua.')">
           <input type="hidden" name="action" value="repair">
-          <button type="submit" class="btn" style="background:var(--surface2);color:var(--text)">Sua chua</button>
+          <button type="submit" class="btn" style="background:rgba(245,158,11,0.1);color:#92400e;border:1px solid rgba(245,158,11,0.3)">Sua chua</button>
         </form>
       </div>
 
@@ -448,10 +527,10 @@
           <span class="db-action-icon" style="background:rgba(239,68,68,0.1);color:#ef4444">!</span>
           <div>
             <strong>Reset Database</strong>
-            <p>Xoa toan bo database va tao lai tu dau. Data cu se duoc backup thanh file <code>.backup</code>.</p>
+            <p>Xoa toan bo database va tao lai tu dau. Data cu se duoc backup vao thu muc <code>backups/</code>.</p>
           </div>
         </div>
-        <form method="POST" action="{{ url_for('admin_settings_database') }}" onsubmit="return confirm('Ban co chac chan muon RESET database? Toan bo data se bi xoa (file backup se duoc tao).')">
+        <form method="POST" action="{{ url_for('admin_settings_database') }}" onsubmit="return confirm('Ban co chac chan muon RESET database? Toan bo data se bi xoa (backup se duoc tao truoc).')">
           <input type="hidden" name="action" value="reset">
           <button type="submit" class="btn" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3)">Reset Database</button>
         </form>
@@ -459,25 +538,37 @@
     </div>
   </div>
 
-  {% if db_info and db_info.backups %}
+  <!-- Backups with Restore -->
+  {% set all_backups = db_info.backups if db_info else [] %}
   <div class="scard">
-    <h3 class="scard-title">File Backup</h3>
+    <h3 class="scard-title">Danh sach Backup ({{ all_backups|length }})</h3>
+    {% if all_backups %}
+    <p class="scard-desc">Tu dong giu toi da 10 ban backup moi nhat. Backup cu hon se tu dong xoa.</p>
     <div class="table-wrap">
       <table class="data-table" style="font-size:14px">
-        <thead><tr><th>File</th><th>Kich thuoc</th><th>Ngay tao</th></tr></thead>
+        <thead><tr><th>File</th><th>Kich thuoc</th><th>Ngay tao</th><th>Restore</th></tr></thead>
         <tbody>
-          {% for b in db_info.backups %}
+          {% for b in all_backups %}
           <tr>
             <td><code>{{ b.name }}</code></td>
             <td>{{ b.size_display }}</td>
             <td>{{ b.modified }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('admin_settings_database') }}" style="display:inline" onsubmit="return confirm('Restore tu backup {{ b.name }}? Database hien tai se duoc backup truoc khi restore.')">
+                <input type="hidden" name="action" value="restore">
+                <input type="hidden" name="backup_name" value="{{ b.name }}">
+                <button type="submit" class="btn" style="padding:4px 12px;font-size:14px;background:rgba(59,130,246,0.1);color:#2563eb;border:1px solid rgba(59,130,246,0.3)">Restore</button>
+              </form>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+    {% else %}
+    <p style="color:var(--text-dim);font-size:14px">Chua co backup nao. Bam "Backup ngay" de tao backup dau tien.</p>
+    {% endif %}
   </div>
-  {% endif %}
 
 </div>
 

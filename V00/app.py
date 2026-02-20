@@ -983,20 +983,26 @@ def admin_settings_styles():
 # DATABASE MANAGEMENT
 # ═══════════════════════════════════════════
 def _get_db_info():
-    """Get database info for the settings page."""
-    import glob as glob_mod
-    db_path = os.path.join(app.instance_path, 'unilab.db')
-    info = {'size_display': '—', 'table_count': 0, 'tables': [], 'backups': []}
+    """Get database info for the settings page — includes health report."""
+    info = {'size_display': '—', 'table_count': 0, 'tables': [], 'backups': [], 'health': None}
 
-    # File size
-    if os.path.exists(db_path):
-        size_bytes = os.path.getsize(db_path)
-        if size_bytes < 1024:
-            info['size_display'] = f'{size_bytes} B'
-        elif size_bytes < 1024*1024:
-            info['size_display'] = f'{size_bytes/1024:.1f} KB'
-        else:
-            info['size_display'] = f'{size_bytes/(1024*1024):.1f} MB'
+    # Health report from db_backup
+    try:
+        from db_backup import get_health_report
+        health = get_health_report(app)
+        info['health'] = health
+        info['size_display'] = health['size_display']
+        info['backups'] = health['backups']
+    except:
+        db_path = os.path.join(app.instance_path, 'unilab.db')
+        if os.path.exists(db_path):
+            size_bytes = os.path.getsize(db_path)
+            if size_bytes < 1024:
+                info['size_display'] = f'{size_bytes} B'
+            elif size_bytes < 1024*1024:
+                info['size_display'] = f'{size_bytes/1024:.1f} KB'
+            else:
+                info['size_display'] = f'{size_bytes/(1024*1024):.1f} MB'
 
     # Get all model table names from SQLAlchemy metadata
     model_tables = sorted(db.metadata.tables.keys())
@@ -1017,17 +1023,6 @@ def _get_db_info():
 
     info['table_count'] = sum(1 for t in info['tables'] if t['status'] == 'ok')
 
-    # Find backup files
-    backup_pattern = os.path.join(app.instance_path, 'unilab.db.backup*')
-    for fpath in sorted(glob_mod.glob(backup_pattern), reverse=True):
-        bsize = os.path.getsize(fpath)
-        if bsize < 1024*1024:
-            bsize_str = f'{bsize/1024:.1f} KB'
-        else:
-            bsize_str = f'{bsize/(1024*1024):.1f} MB'
-        mtime = datetime.fromtimestamp(os.path.getmtime(fpath)).strftime('%Y-%m-%d %H:%M')
-        info['backups'].append({'name': os.path.basename(fpath), 'size_display': bsize_str, 'modified': mtime})
-
     return info
 
 @app.route('/admin/settings/database', methods=['POST'])
@@ -1042,38 +1037,83 @@ def admin_settings_database():
         except Exception as e:
             flash(f'Loi cap nhat schema: {e}', 'error')
 
+    elif action == 'backup':
+        from db_backup import create_backup
+        result = create_backup(app, label='manual')
+        if result:
+            flash(f'Backup thanh cong: {result["name"]} ({result["size_display"]})', 'success')
+        else:
+            flash('Backup that bai!', 'error')
+
+    elif action == 'integrity_check':
+        from db_backup import check_integrity
+        result = check_integrity(app)
+        if result['ok']:
+            flash(f'Database HEALTHY ({result["duration_ms"]}ms)', 'success')
+        else:
+            flash(f'Database co LOI: {"; ".join(result["errors"][:3])}', 'error')
+
     elif action == 'repair':
-        db_path = os.path.join(app.instance_path, 'unilab.db')
-        try:
-            db.session.remove()
-            db.engine.dispose()
-            # Remove WAL/SHM files
-            removed = []
-            for ext in ['-wal', '-shm']:
-                wal_path = db_path + ext
-                if os.path.exists(wal_path):
-                    os.remove(wal_path)
-                    removed.append(ext)
-            db.create_all()
-            _run_schema_migration()
-            if removed:
-                flash(f'Sua chua thanh cong! Da xoa file {", ".join(removed)} va cap nhat schema.', 'success')
+        from db_backup import repair_database, create_backup
+        # Always backup before repair
+        create_backup(app, label='pre_repair')
+        result = repair_database(app)
+        if result['success']:
+            method = result['method']
+            tables = result['tables_recovered']
+            rows = result['rows_recovered']
+            if method == 'wal_cleanup':
+                flash('Sua chua thanh cong! Da xoa WAL/SHM files.', 'success')
             else:
-                flash('Database binh thuong, da chay lai migration.', 'success')
-        except Exception as e:
-            flash(f'Loi sua chua: {e}', 'error')
+                flash(f'Sua chua thanh cong qua {method}! Phuc hoi {tables} bang, {rows} dong du lieu.', 'success')
+            # Re-run migration after repair
+            try:
+                db.create_all()
+                _run_schema_migration()
+            except:
+                pass
+        else:
+            flash(f'Sua chua that bai: {"; ".join(result["errors"][:2])}. Thu restore tu backup.', 'error')
+
+    elif action == 'restore':
+        backup_name = request.form.get('backup_name', '')
+        from db_backup import restore_from_backup, list_backups
+        # Find the backup by name
+        backup_path = None
+        for b in list_backups(app):
+            if b['name'] == backup_name:
+                backup_path = b['path']
+                break
+        if backup_path:
+            result = restore_from_backup(app, backup_path)
+            if result['success']:
+                # Re-run migration after restore
+                try:
+                    db.create_all()
+                    _run_schema_migration()
+                except:
+                    pass
+                flash(result['message'], 'success')
+            else:
+                flash(result['message'], 'error')
+        else:
+            flash(f'Khong tim thay backup: {backup_name}', 'error')
+
+    elif action == 'vacuum':
+        from db_backup import vacuum_database
+        result = vacuum_database(app)
+        flash(result['message'], 'success' if result['success'] else 'error')
 
     elif action == 'reset':
         import shutil
+        from db_backup import create_backup
         db_path = os.path.join(app.instance_path, 'unilab.db')
         try:
+            # Proper backup before reset
+            create_backup(app, label='pre_reset')
             db.session.remove()
             db.engine.dispose()
-            # Backup with timestamp
             if os.path.exists(db_path):
-                ts = datetime.now().strftime('%Y%m%d_%H%M%S')
-                backup_path = f'{db_path}.backup_{ts}'
-                shutil.copy2(db_path, backup_path)
                 os.remove(db_path)
                 for ext in ['-wal', '-shm']:
                     p = db_path + ext
@@ -1081,7 +1121,7 @@ def admin_settings_database():
                         os.remove(p)
             db.create_all()
             _run_schema_migration()
-            flash('Database da duoc reset! Data cu da backup.', 'success')
+            flash('Database da duoc reset! Data cu da backup trong thu muc backups/.', 'success')
         except Exception as e:
             flash(f'Loi reset database: {e}', 'error')
 
@@ -7505,6 +7545,20 @@ if __name__ == '__main__':
     def _safe_init_db():
         """Initialize database with auto-recovery on schema errors."""
         db_path = os.path.join(app.instance_path, 'unilab.db')
+
+        # Step 1: If DB exists, run integrity check + auto-repair
+        if os.path.exists(db_path):
+            try:
+                from db_backup import startup_check
+                health = startup_check(app)
+                if health['action'] != 'none':
+                    print(f'[DB] {health["details"]}')
+                if not health['healthy']:
+                    print(f'[!] DB unhealthy but continuing — will try create_all...')
+            except Exception as e:
+                print(f'[!] Startup check error: {e}')
+
+        # Step 2: Normal schema init
         try:
             db.create_all()
             _run_schema_migration()
@@ -7513,36 +7567,39 @@ if __name__ == '__main__':
             err_msg = str(e)
             if 'malformed' in err_msg or 'no such table' in err_msg or 'OperationalError' in err_msg:
                 print(f'[!] Database schema error: {err_msg}')
-                print('[*] Attempting auto-recovery...')
-                # Close all connections to release the file
+                print('[*] Attempting dump-rebuild repair...')
                 db.session.remove()
                 db.engine.dispose()
-                # Backup the old database
-                if os.path.exists(db_path):
-                    backup_path = db_path + '.backup'
-                    shutil.copy2(db_path, backup_path)
-                    print(f'[*] Backed up old database to {backup_path}')
-                    # Remove WAL/SHM files if they exist (these can cause malformed errors)
-                    for ext in ['-wal', '-shm']:
-                        wal_path = db_path + ext
-                        if os.path.exists(wal_path):
-                            os.remove(wal_path)
-                            print(f'  [+] Removed {wal_path}')
-                # Try again — removing WAL/SHM often fixes "malformed" errors
                 try:
-                    db.create_all()
-                    _run_schema_migration()
-                    print('[*] Recovery successful! Database ready.')
+                    from db_backup import repair_database, create_backup
+                    repair = repair_database(app)
+                    if repair['success']:
+                        print(f'[*] Repair OK via {repair["method"]}: {repair["tables_recovered"]} tables, {repair["rows_recovered"]} rows')
+                        db.create_all()
+                        _run_schema_migration()
+                        print('[*] Database ready after repair.')
+                    else:
+                        print(f'[!] Repair failed: {repair["errors"]}')
+                        print('[*] Creating fresh database (corrupted DB saved in backups/)...')
+                        db.session.remove()
+                        db.engine.dispose()
+                        if os.path.exists(db_path):
+                            os.remove(db_path)
+                        db.create_all()
+                        _run_schema_migration()
+                        print('[*] Fresh database created. Run seed_data to restore content.')
                 except Exception as e2:
-                    print(f'[!] Recovery failed: {e2}')
-                    print('[*] Creating fresh database (old data backed up)...')
+                    print(f'[!] Full recovery failed: {e2}')
+                    # Last resort: fresh DB
                     db.session.remove()
                     db.engine.dispose()
                     if os.path.exists(db_path):
+                        ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        shutil.copy2(db_path, db_path + f'.crashed_{ts}')
                         os.remove(db_path)
                     db.create_all()
                     _run_schema_migration()
-                    print('[*] Fresh database created. Run seed_data to restore content.')
+                    print('[*] Fresh database created (emergency).')
             else:
                 raise
 
