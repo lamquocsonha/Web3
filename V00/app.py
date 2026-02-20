@@ -790,9 +790,9 @@ def admin_vouchers_hub():
         ctx.update(widgets=widgets)
 
     elif tab == 'sync':
-        total_synced = Voucher.query.filter_by(source='accesstrade').count()
+        total_synced = Voucher.query.filter_by(sync_mode='api').count()
         total_active = Voucher.query.filter_by(is_active=True).count()
-        total_manual = Voucher.query.filter_by(source='manual').count()
+        total_manual = Voucher.query.filter_by(sync_mode='manual').count()
         ctx.update(total_synced=total_synced, total_active=total_active, total_manual=total_manual)
 
     return render_template('admin/vouchers_hub.html', **ctx)
