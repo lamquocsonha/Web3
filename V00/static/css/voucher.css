@@ -276,6 +276,7 @@
   padding-top: 12px;
   border-top: 1px dashed var(--border);
   position: relative;
+  z-index: 2;
 }
 
 .v-feat-code {
@@ -301,11 +302,14 @@
 }
 
 /* Featured card — sticker & border follow card color */
-.v-feat-card .vc-sticker {
-  background: var(--card-color, #e74c3c);
-}
 .v-feat-card .vc-code-wrap {
   border-color: var(--card-color, #e74c3c);
+  position: relative;
+  z-index: 2;
+}
+.v-feat-card .vc-sticker {
+  background: var(--card-color, #e74c3c);
+  min-width: max-content;
 }
 .v-feat-card .vc-code-wrap:hover {
   border-color: var(--card-color, #e74c3c);

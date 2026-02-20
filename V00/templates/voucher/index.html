@@ -68,7 +68,7 @@
       <button class="v-feat-arrow v-feat-arrow-left" id="featPrev" aria-label="Trước">&#8249;</button>
       <div class="v-featured-grid" id="featuredGrid">
         {% for v in featured[:6] %}
-        <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color }}">
+        <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color or '#e74c3c' }}">
           <div class="v-feat-top">
             <span class="v-feat-discount">{{ v.get_discount_text() }}</span>
             <span class="v-feat-exp">HSD {{ v.valid_to.strftime('%d/%m') if v.valid_to else '—' }}</span>
