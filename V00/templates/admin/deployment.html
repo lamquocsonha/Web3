@@ -2,201 +2,115 @@
 {% block title %}Deployment Flow{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Deployment{% endblock %}
 {% block content %}
-<h1 class="page-title">🚀 Hướng dẫn Deploy UniLab lên Server</h1>
-<p style="font-size:14px;color:var(--text-dim);margin:-12px 0 24px">Chi tiết từng bước cho người mới, không cần kinh nghiệm Python</p>
+<h1 class="page-title">🚀 Deploy UniLab chung với TripZone (CentOS 7)</h1>
+<p style="font-size:14px;color:var(--text-dim);margin:-12px 0 24px">Server Vultr đã có TripZone — thêm UniLab chạy song song, không ảnh hưởng nhau</p>
 
 <div style="max-width:1100px">
 
-  <!-- WordPress vs Python Comparison -->
+  <!-- Architecture Overview -->
   <div style="background:linear-gradient(135deg,rgba(52,211,153,0.05),rgba(16,185,129,0.1));border:2px solid rgba(16,185,129,0.3);border-radius:var(--radius);padding:24px;margin-bottom:24px">
-    <h3 style="font-size:15px;margin-bottom:12px;color:#10b981">💡 So sánh: WordPress vs Python (Flask)</h3>
+    <h3 style="font-size:15px;margin-bottom:12px;color:#10b981">🏗️ Kiến trúc: 2 app trên 1 server</h3>
     <div class="table-wrap">
       <table class="data-table" style="font-size:14px">
-        <thead><tr><th>Khía cạnh</th><th style="color:#f59e0b">WordPress</th><th style="color:#3b82f6">Python Flask (UniLab)</th></tr></thead>
+        <thead><tr><th>Thành phần</th><th style="color:#f59e0b">TripZone (đã chạy)</th><th style="color:#3b82f6">UniLab (sắp deploy)</th></tr></thead>
         <tbody>
           <tr>
-            <td><strong>Server</strong></td>
-            <td>Apache/Nginx + PHP</td>
-            <td>Nginx + Gunicorn (tương tự PHP-FPM)</td>
+            <td><strong>Loại app</strong></td>
+            <td>WordPress / PHP</td>
+            <td>Python Flask</td>
+          </tr>
+          <tr>
+            <td><strong>Web server</strong></td>
+            <td>Nginx (port 80/443)</td>
+            <td>Nginx reverse proxy → Gunicorn</td>
+          </tr>
+          <tr>
+            <td><strong>Backend</strong></td>
+            <td>PHP-FPM</td>
+            <td>Gunicorn (127.0.0.1:8000)</td>
           </tr>
           <tr>
             <td><strong>Database</strong></td>
-            <td>MySQL (cần tạo DB riêng)</td>
-            <td>SQLite (file sẵn, không cần setup)</td>
+            <td>MySQL</td>
+            <td>SQLite (file, không cần setup)</td>
           </tr>
           <tr>
-            <td><strong>Upload code</strong></td>
-            <td>FTP/cPanel File Manager</td>
-            <td>Git hoặc SFTP (giống WP)</td>
+            <td><strong>Thư mục</strong></td>
+            <td>/var/www/tripzone (hoặc tương tự)</td>
+            <td>/var/www/unilab</td>
           </tr>
           <tr>
-            <td><strong>Cài đặt</strong></td>
-            <td>Chạy installer /wp-admin/install.php</td>
-            <td>Chạy script deploy.sh (1 lần)</td>
+            <td><strong>Domain</strong></td>
+            <td>tripzone.vn (giữ nguyên)</td>
+            <td>unilab.vn (domain mới)</td>
           </tr>
           <tr>
-            <td><strong>Cấu hình domain</strong></td>
-            <td>wp-config.php + .htaccess</td>
-            <td>Nginx config (tự động bởi script)</td>
+            <td><strong>Nginx config</strong></td>
+            <td>/etc/nginx/conf.d/tripzone.conf</td>
+            <td>/etc/nginx/conf.d/unilab.conf</td>
           </tr>
-          <tr>
-            <td><strong>SSL</strong></td>
-            <td>cPanel AutoSSL hoặc plugin</td>
-            <td>Let's Encrypt (tự động)</td>
-          </tr>
-          <tr style="background:rgba(59,130,246,0.05)">
-            <td><strong>Khó khăn</strong></td>
-            <td style="color:#22c55e">⭐⭐ Dễ (có giao diện)</td>
-            <td style="color:#f59e0b">⭐⭐⭐ Trung bình (dùng terminal)</td>
+          <tr style="background:rgba(34,197,94,0.05)">
+            <td><strong>Ảnh hưởng lẫn nhau?</strong></td>
+            <td colspan="2" style="color:#22c55e;text-align:center"><strong>KHÔNG — mỗi app chạy độc lập, Nginx phân biệt bằng domain</strong></td>
           </tr>
         </tbody>
       </table>
     </div>
     <p style="font-size:14px;color:var(--text-dim);margin-top:12px;line-height:1.6">
-      <strong style="color:#10b981">📌 Tóm lại:</strong> Python deploy khó hơn WordPress một chút vì phải dùng terminal commands,
-      nhưng script tự động đã lo hết phần phức tạp. Anh chỉ cần copy-paste commands và nhập domain khi được hỏi.
+      <strong style="color:#10b981">📌 Cách hoạt động:</strong> Nginx nhận tất cả request trên port 80/443.
+      Dựa vào domain, Nginx chuyển request đến đúng backend: TripZone → PHP-FPM, UniLab → Gunicorn port 8000.
+      Hai app hoàn toàn tách biệt, không ảnh hưởng nhau.
     </p>
   </div>
 
-  <!-- Prerequisites -->
+  <!-- Server Info -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <h3 style="font-size:15px;margin-bottom:12px">📋 Cần chuẩn bị gì?</h3>
+    <h3 style="font-size:15px;margin-bottom:12px">📋 Server hiện tại</h3>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
       <div style="padding:16px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:8px">
         <div style="font-size:24px;margin-bottom:8px">🖥️</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:4px">1. Server Vultr</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Vultr VPS</div>
         <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
-          VPS chạy Ubuntu 22.04<br>
-          Giống như shared hosting nhưng có full quyền root
+          CentOS 7, 4 vCPU, 8GB RAM<br>
+          TripZone đã chạy ổn định
         </div>
       </div>
       <div style="padding:16px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px">
         <div style="font-size:24px;margin-bottom:8px">🌐</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:4px">2. Domain</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Domain UniLab</div>
         <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
-          Domain đã mua (VD: unilab.vn)<br>
-          Giống WP, cần trỏ DNS về IP server
+          Cần 1 domain mới (VD: unilab.vn)<br>
+          Trỏ DNS A record về IP server
         </div>
       </div>
       <div style="padding:16px;background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:8px">
         <div style="font-size:24px;margin-bottom:8px">💻</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:4px">3. SSH Client</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">SSH Access</div>
         <div style="font-size:14px;color:var(--text-dim);line-height:1.5">
-          Windows: PuTTY hoặc CMD<br>
-          Mac/Linux: Terminal sẵn có
+          Đã có sẵn từ TripZone<br>
+          ssh root@IP_SERVER
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Step 1: Create Server -->
+  <!-- Step 1: DNS for new domain -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="width:32px;height:32px;background:#3b82f6;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">1</div>
-      <h3 style="font-size:15px;margin:0">Tạo Server trên Vultr</h3>
-    </div>
-
-    <div style="font-size:14px;line-height:1.8;color:var(--text)">
-      <div style="background:rgba(59,130,246,0.05);padding:16px;border-radius:8px;margin-bottom:16px;border-left:3px solid #3b82f6">
-        <strong style="color:#3b82f6">💭 Giải thích cho người dùng WordPress:</strong><br>
-        <span style="font-size:14px;color:var(--text-dim)">
-          Shared hosting WordPress = nhà chung cư (bạn share tài nguyên với người khác)<br>
-          VPS Vultr = căn hộ riêng (bạn có toàn quyền, cài gì cũng được)<br>
-          → Cần VPS vì Python app không chạy được trên shared hosting thông thường
-        </span>
-      </div>
-
-      <strong>Bước 1.1: Đăng ký tài khoản Vultr</strong>
-      <ul style="margin:8px 0 16px;padding-left:20px">
-        <li>Vào <a href="https://www.vultr.com" target="_blank" style="color:#3b82f6">vultr.com</a> → Sign Up</li>
-        <li>Verify email → Nạp tiền tối thiểu $10 (dùng được 2 tháng với plan $6/tháng)</li>
-        <li>Thanh toán: Credit card, PayPal, hoặc Bitcoin</li>
-      </ul>
-
-      <strong>Bước 1.2: Deploy Instance (tạo server)</strong>
-      <div style="background:var(--code-bg);padding:16px;border-radius:8px;margin:12px 0;border:1px solid var(--border)">
-        <div style="font-size:14px;margin-bottom:8px"><strong>Các lựa chọn khi tạo server:</strong></div>
-        <table style="width:100%;font-size:14px;line-height:2">
-          <tr><td style="color:var(--text-dim);width:180px">Choose Server</td><td><strong style="color:#22c55e">Cloud Compute - Shared CPU</strong></td></tr>
-          <tr><td style="color:var(--text-dim)">Location</td><td><strong style="color:#22c55e">Singapore</strong> (gần VN nhất, ping ~50ms)</td></tr>
-          <tr><td style="color:var(--text-dim)">Server Image</td><td><strong style="color:#22c55e">Ubuntu 22.04 LTS x64</strong></td></tr>
-          <tr><td style="color:var(--text-dim)">Server Size</td><td><strong style="color:#22c55e">$6/month</strong> → 1 vCPU, 1GB RAM, 25GB SSD, 1TB bandwidth</td></tr>
-          <tr><td style="color:var(--text-dim)">Additional Features</td><td>Không cần chọn gì (để trống)</td></tr>
-          <tr><td style="color:var(--text-dim)">Server Hostname</td><td>Đặt tên gì cũng được, VD: <code style="background:rgba(0,0,0,0.1);padding:2px 6px">unilab-production</code></td></tr>
-        </table>
-      </div>
-      <p style="font-size:14px;color:var(--text-dim);margin:8px 0">
-        ⏱️ Server sẽ được setup trong <strong>1-2 phút</strong>. Vultr sẽ gửi email với:
-      </p>
-      <div style="background:rgba(34,197,94,0.05);padding:12px;border-radius:8px;font-family:'DM Mono';font-size:14px;border:1px solid rgba(34,197,94,0.2)">
-        IP Address: <strong style="color:#22c55e">123.456.789.012</strong><br>
-        Username: <strong>root</strong><br>
-        Password: <strong style="color:#ef4444">AbC123XyZ!</strong> (password tự động, rất phức tạp)
-      </div>
-      <p style="font-size:14px;color:#ef4444;margin:8px 0">
-        🔐 <strong>Quan trọng:</strong> Copy password này lưu lại, sẽ dùng để SSH vào server
-      </p>
-
-      <strong style="display:block;margin-top:16px">Bước 1.3: Kết nối SSH vào server</strong>
-      <p style="font-size:14px;color:var(--text-dim);margin:8px 0">
-        SSH = cách để điều khiển server từ xa qua terminal (giống TeamViewer nhưng dùng text commands)
-      </p>
-
-      <div style="margin:12px 0">
-        <div style="background:rgba(59,130,246,0.05);padding:12px;border-radius:8px 8px 0 0;border:1px solid rgba(59,130,246,0.2);border-bottom:0">
-          <strong style="font-size:14px">💻 Windows (dùng CMD hoặc PowerShell):</strong>
-        </div>
-        <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-          <span style="color:#6b7280"># Nhấn Windows + R, gõ "cmd", Enter</span><br>
-          ssh root@<span style="color:#22c55e">123.456.789.012</span><br><br>
-          <span style="color:#6b7280"># Lần đầu sẽ hỏi: Are you sure you want to continue connecting?</span><br>
-          <span style="color:#6b7280"># Gõ: yes (rồi Enter)</span><br><br>
-          <span style="color:#6b7280"># Sau đó paste password (Ctrl+V không work, phải chuột phải → Paste)</span><br>
-          <span style="color:#6b7280"># Password không hiện gì khi gõ, nhưng vẫn nhập được, Enter là xong</span>
-        </div>
-      </div>
-
-      <div style="background:rgba(34,197,94,0.05);padding:12px;border-radius:8px;margin:12px 0;border:1px solid rgba(34,197,94,0.2)">
-        <strong style="font-size:14px;color:#22c55e">✅ Kết nối thành công khi thấy:</strong>
-        <div style="font-family:'DM Mono';font-size:14px;margin-top:6px;color:var(--text-dim)">
-          Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 5.15.0-88-generic x86_64)<br>
-          root@unilab-production:~#
-        </div>
-        <p style="font-size:14px;color:var(--text-dim);margin:6px 0 0">
-          Dòng <code>root@...</code> = đã vào server, giờ commands gõ ở đây sẽ chạy trên server
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Step 2: DNS Configuration -->
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="width:32px;height:32px;background:#8b5cf6;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">2</div>
-      <h3 style="font-size:15px;margin:0">Trỏ Domain về Server</h3>
+      <div style="width:32px;height:32px;background:#8b5cf6;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">1</div>
+      <h3 style="font-size:15px;margin:0">Trỏ Domain UniLab về Server</h3>
     </div>
 
     <div style="font-size:14px;line-height:1.8;color:var(--text)">
       <div style="background:rgba(139,92,246,0.05);padding:16px;border-radius:8px;margin-bottom:16px;border-left:3px solid #8b5cf6">
-        <strong style="color:#8b5cf6">💭 Giải thích cho người dùng WordPress:</strong><br>
+        <strong style="color:#8b5cf6">💡 Lưu ý:</strong><br>
         <span style="font-size:14px;color:var(--text-dim)">
-          Giống hệt khi trỏ domain về shared hosting WordPress, chỉ khác là thay vì trỏ về Nameserver (ns1.hosting.com),
-          bây giờ trỏ trực tiếp về IP server VPS (123.456.789.012)
+          Dùng cùng IP server với TripZone. Nginx sẽ phân biệt traffic bằng domain name (server_name).
+          TripZone và UniLab cùng IP nhưng khác domain → không xung đột.
         </span>
       </div>
 
-      <strong>Bước 2.1: Lấy IP server</strong>
-      <ul style="margin:8px 0 16px;padding-left:20px">
-        <li>Vào Vultr dashboard → Products → Click vào server vừa tạo</li>
-        <li>Copy <strong>IP Address</strong> (VD: 123.456.789.012)</li>
-      </ul>
-
-      <strong>Bước 2.2: Vào quản lý DNS của domain</strong>
-      <p style="font-size:14px;color:var(--text-dim);margin:8px 0">
-        Tùy nơi mua domain (GoDaddy, Namecheap, etc.), vào mục <strong>DNS Management</strong> hoặc <strong>DNS Settings</strong>
-      </p>
-
-      <strong style="display:block;margin-top:16px">Bước 2.3: Thêm DNS Records</strong>
+      <strong>Vào quản lý DNS của domain UniLab, thêm A records:</strong>
       <div style="margin:12px 0">
         <div class="table-wrap">
           <table class="data-table" style="font-size:14px">
@@ -213,235 +127,252 @@
               <tr>
                 <td><code style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:2px 6px;font-size:14px">A</code></td>
                 <td><strong>@</strong></td>
-                <td style="color:#22c55e;font-family:'DM Mono'">123.456.789.012</td>
+                <td style="color:#22c55e;font-family:'DM Mono'">IP_SERVER_VULTR</td>
                 <td>3600</td>
                 <td style="font-size:14px">unilab.vn (domain gốc)</td>
               </tr>
               <tr>
                 <td><code style="background:rgba(59,130,246,0.1);color:#3b82f6;padding:2px 6px;font-size:14px">A</code></td>
                 <td><strong>www</strong></td>
-                <td style="color:#22c55e;font-family:'DM Mono'">123.456.789.012</td>
+                <td style="color:#22c55e;font-family:'DM Mono'">IP_SERVER_VULTR</td>
                 <td>3600</td>
                 <td style="font-size:14px">www.unilab.vn</td>
-              </tr>
-              <tr style="background:rgba(34,197,94,0.05)">
-                <td><code style="background:rgba(34,197,94,0.2);color:#10b981;padding:2px 6px;font-size:14px">A</code></td>
-                <td><strong>*</strong></td>
-                <td style="color:#22c55e;font-family:'DM Mono'">123.456.789.012</td>
-                <td>3600</td>
-                <td style="font-size:14px">bike.unilab.vn, car.unilab.vn,... (wildcard)</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <div style="background:rgba(245,158,11,0.05);padding:12px;border-radius:8px;margin:12px 0;border:1px solid rgba(245,158,11,0.2)">
-        <strong style="font-size:14px;color:#f59e0b">⏱️ Thời gian DNS lan truyền:</strong>
-        <ul style="font-size:14px;color:var(--text-dim);margin:6px 0 0;padding-left:20px;line-height:1.6">
-          <li><strong>5-30 phút:</strong> Thường DNS đã hoạt động (70% trường hợp)</li>
-          <li><strong>1-2 giờ:</strong> Chắc chắn hoạt động toàn cầu (95%)</li>
-          <li><strong>Tối đa 24-48 giờ:</strong> Trường hợp hiếm, DNS server chậm update</li>
-        </ul>
+      <strong>Kiểm tra DNS đã trỏ đúng:</strong>
+      <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
+        ping unilab.vn<br>
+        <span style="color:#6b7280"># Phải thấy IP trùng với server Vultr (cùng IP với TripZone)</span>
       </div>
 
-      <strong style="display:block;margin-top:16px">Bước 2.4: Kiểm tra DNS đã trỏ đúng chưa</strong>
-      <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-        <span style="color:#6b7280"># Windows (CMD) hoặc Mac (Terminal):</span><br>
-        ping unilab.vn<br><br>
-        <span style="color:#6b7280"># Nếu thấy IP của server Vultr = thành công</span><br>
-        <span style="color:#22c55e">Reply from 123.456.789.012: bytes=32 time=50ms TTL=64</span>
+      <div style="background:rgba(245,158,11,0.05);padding:12px;border-radius:8px;margin:12px 0;border:1px solid rgba(245,158,11,0.2)">
+        <strong style="font-size:14px;color:#f59e0b">⏱️ DNS thường mất 5-30 phút để có hiệu lực. Có thể deploy song song trong khi chờ.</strong>
       </div>
     </div>
   </div>
 
-  <!-- Step 3: Upload Code -->
+  <!-- Step 2: Upload Code -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="width:32px;height:32px;background:#10b981;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">3</div>
-      <h3 style="font-size:15px;margin:0">Upload Code lên Server</h3>
+      <div style="width:32px;height:32px;background:#10b981;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">2</div>
+      <h3 style="font-size:15px;margin:0">Upload Code UniLab lên Server</h3>
     </div>
 
     <div style="font-size:14px;line-height:1.8;color:var(--text)">
       <div style="background:rgba(16,185,129,0.05);padding:16px;border-radius:8px;margin-bottom:16px;border-left:3px solid #10b981">
-        <strong style="color:#10b981">💭 Giải thích cho người dùng WordPress:</strong><br>
-        <span style="font-size:14px;color:var(--text-dim)">
-          WordPress: Upload qua FTP (FileZilla) hoặc cPanel File Manager<br>
-          Python: Dùng Git (như GitHub Desktop) hoặc SFTP (giống FTP)<br>
-          → Git nhanh hơn và pro hơn, nhưng SFTP cũng OK nếu quen
-        </span>
+        <strong style="color:#10b981">📂 Cấu trúc thư mục trên server:</strong>
+        <div style="font-family:'DM Mono';font-size:14px;margin-top:8px;color:var(--text-dim);line-height:1.6">
+          /var/www/<br>
+          ├── tripzone/&nbsp;&nbsp;&nbsp;<span style="color:#f59e0b">← TripZone (giữ nguyên, không đụng)</span><br>
+          └── unilab/&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#3b82f6">← UniLab (tạo mới)</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;├── app.py<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;├── models.py<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;├── deploy.sh<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;├── requirements.txt<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;├── templates/<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;└── static/
+        </div>
       </div>
 
-      <strong>Option 1: Dùng Git (Khuyên dùng - nhanh nhất)</strong>
+      <strong>Option 1: Dùng SCP (nhanh nhất)</strong>
       <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-        <span style="color:#6b7280"># Đảm bảo đang SSH vào server (thấy root@...)</span><br>
-        <span style="color:#6b7280"># Nếu chưa SSH, quay lại Bước 1.3</span><br><br>
-
-        <span style="color:#6b7280"># Cài Git (lần đầu tiên):</span><br>
-        apt update && apt install -y git<br><br>
-
-        <span style="color:#6b7280"># Clone code từ repository (thay YOUR_REPO_URL bằng link repo của anh):</span><br>
-        git clone <span style="color:#22c55e">https://github.com/username/Web3.git</span> /var/www/unilab<br><br>
-
-        <span style="color:#6b7280"># Vào thư mục code:</span><br>
-        cd /var/www/unilab/V00
+        <span style="color:#6b7280"># Từ máy local (chưa SSH vào server), chạy:</span><br><br>
+        <span style="color:#6b7280"># Tạo thư mục trên server:</span><br>
+        ssh root@IP_SERVER "mkdir -p /var/www/unilab"<br><br>
+        <span style="color:#6b7280"># Upload toàn bộ thư mục V00 lên server:</span><br>
+        scp -r V00/* root@IP_SERVER:/var/www/unilab/
       </div>
 
-      <strong style="display:block;margin-top:16px">Option 2: Dùng SFTP (quen thuộc với người dùng WP)</strong>
-      <ul style="margin:8px 0;padding-left:20px;font-size:14px">
-        <li>Dùng FileZilla, WinSCP, hoặc Cyberduck</li>
-        <li>Protocol: <strong>SFTP</strong>, Host: <strong>IP server</strong>, Port: <strong>22</strong>, User: <strong>root</strong>, Password: <strong>(password Vultr)</strong></li>
-        <li>Upload thư mục <code>V00</code> vào <code>/var/www/unilab/</code> trên server</li>
-      </ul>
+      <strong style="display:block;margin-top:16px">Option 2: Dùng Git</strong>
+      <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
+        <span style="color:#6b7280"># SSH vào server:</span><br>
+        ssh root@IP_SERVER<br><br>
+        <span style="color:#6b7280"># Cài git (nếu chưa có):</span><br>
+        yum install -y git<br><br>
+        <span style="color:#6b7280"># Clone repo:</span><br>
+        git clone <span style="color:#22c55e">https://github.com/username/Web3.git</span> /tmp/web3<br>
+        cp -r /tmp/web3/V00/* /var/www/unilab/<br>
+        rm -rf /tmp/web3
+      </div>
 
       <div style="background:rgba(34,197,94,0.05);padding:12px;border-radius:8px;margin:12px 0;border:1px solid rgba(34,197,94,0.2)">
         <strong style="font-size:14px;color:#22c55e">✅ Upload thành công khi:</strong>
         <div style="font-family:'DM Mono';font-size:14px;margin-top:6px">
-          <span style="color:#6b7280"># Chạy lệnh này để kiểm tra:</span><br>
-          ls -la /var/www/unilab/V00<br><br>
-          <span style="color:#6b7280"># Phải thấy các file: app.py, models.py, templates/, static/, ...</span>
+          ls /var/www/unilab/<br>
+          <span style="color:#6b7280"># Phải thấy: app.py  deploy.sh  models.py  requirements.txt  static  templates ...</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Step 4: Run Deploy Script -->
+  <!-- Step 3: Run Deploy Script -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="width:32px;height:32px;background:#ef4444;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">4</div>
-      <h3 style="font-size:15px;margin:0">Chạy Script Deploy Tự Động</h3>
+      <div style="width:32px;height:32px;background:#ef4444;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">3</div>
+      <h3 style="font-size:15px;margin:0">Chạy Script Deploy</h3>
     </div>
 
     <div style="font-size:14px;line-height:1.8;color:var(--text)">
       <div style="background:rgba(239,68,68,0.05);padding:16px;border-radius:8px;margin-bottom:16px;border-left:3px solid #ef4444">
-        <strong style="color:#ef4444">💭 Giải thích cho người dùng WordPress:</strong><br>
+        <strong style="color:#ef4444">⚠️ Quan trọng:</strong><br>
         <span style="font-size:14px;color:var(--text-dim)">
-          WordPress: Truy cập yoursite.com/wp-admin/install.php → click Next → Next → Install<br>
-          Python: Chạy 1 script bash → script tự động cài hết (Python, Nginx, database, SSL,...)<br>
-          → Giống installer WP nhưng chạy qua terminal thay vì trình duyệt
+          Script deploy.sh đã được viết riêng cho CentOS 7 và sẽ <strong>không ảnh hưởng TripZone</strong>.<br>
+          Script chỉ tạo thêm: virtual environment Python, Gunicorn service (port 8000), Nginx config mới.
         </span>
       </div>
 
-      <strong>Bước 4.1: Vào thư mục code và chạy deploy.sh</strong>
+      <strong>SSH vào server và chạy:</strong>
       <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-        <span style="color:#6b7280"># Đảm bảo đang SSH vào server</span><br>
-        cd /var/www/unilab/V00<br><br>
-
-        <span style="color:#6b7280"># Chạy deployment script (thêm quyền execute trước):</span><br>
+        ssh root@IP_SERVER<br><br>
+        cd /var/www/unilab<br>
         chmod +x deploy.sh<br>
         sudo bash deploy.sh
       </div>
 
       <div style="background:rgba(59,130,246,0.05);padding:16px;border-radius:8px;margin:16px 0;border:1px solid rgba(59,130,246,0.2)">
-        <strong style="font-size:14px;color:#3b82f6">🔄 Script sẽ tự động làm gì?</strong>
+        <strong style="font-size:14px;color:#3b82f6">🔄 Script tự động làm 7 bước:</strong>
         <ol style="font-size:14px;color:var(--text-dim);margin:8px 0 0;padding-left:20px;line-height:1.8">
-          <li>Update Ubuntu và cài Python 3, pip, venv</li>
-          <li>Cài Nginx (web server, giống Apache trong WP)</li>
-          <li>Tạo virtual environment Python (môi trường riêng cho app)</li>
-          <li>Cài tất cả dependencies từ requirements.txt</li>
-          <li>Setup Gunicorn service (chạy Flask app 24/7)</li>
-          <li>Configure Nginx làm reverse proxy</li>
-          <li>Chạy database migrations và seed data</li>
-          <li>Start services và enable auto-start khi reboot</li>
+          <li><strong>Kiểm tra Python</strong> — Cài Python 3.8+ nếu CentOS 7 chỉ có 3.6</li>
+          <li><strong>Chuẩn bị thư mục</strong> — Kiểm tra source code tại /var/www/unilab</li>
+          <li><strong>Virtual environment</strong> — Tạo venv riêng + cài dependencies (Flask, Gunicorn,...)</li>
+          <li><strong>Database</strong> — Khởi tạo SQLite database (instance/unilab.db)</li>
+          <li><strong>Systemd service</strong> — Tạo unilab.service chạy Gunicorn trên port 8000</li>
+          <li><strong>Nginx config</strong> — Tạo /etc/nginx/conf.d/unilab.conf (hỏi domain)</li>
+          <li><strong>Khởi động</strong> — Start UniLab service + reload Nginx</li>
         </ol>
-        <p style="font-size:14px;color:var(--text-dim);margin:8px 0 0">
-          ⏱️ Toàn bộ quá trình: <strong>3-5 phút</strong>
-        </p>
       </div>
 
-      <strong>Bước 4.2: Nhập domain khi được hỏi</strong>
-      <p style="font-size:14px;color:var(--text-dim);margin:8px 0">
-        Giữa quá trình deploy, script sẽ hỏi domain:
-      </p>
+      <strong>Khi script hỏi domain:</strong>
       <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-        [?] Enter your domain name (or press Enter to skip): <span style="color:#22c55e">unilab.vn</span><br>
-        <span style="color:#6b7280"># Gõ domain rồi nhấn Enter</span><br>
-        <span style="color:#6b7280"># Nếu chưa có domain, nhấn Enter để skip (dùng IP tạm)</span>
+        <span style="color:#f59e0b">Nhập domain cho UniLab (VD: unilab.vn):</span><br>
+        > <span style="color:#22c55e">unilab.vn</span><br><br>
+        <span style="color:#6b7280"># Gõ domain rồi nhấn Enter</span>
       </div>
 
-      <strong style="display:block;margin-top:16px">Bước 4.3: Setup SSL (tùy chọn)</strong>
+      <strong style="display:block;margin-top:16px">Khi script hỏi SSL:</strong>
       <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-        [?] Do you want to setup SSL with Let's Encrypt? (y/n): <span style="color:#22c55e">y</span><br>
-        <span style="color:#6b7280"># Gõ 'y' nếu DNS đã trỏ đúng (đợi 30 phút sau khi setup DNS)</span><br>
-        <span style="color:#6b7280"># Gõ 'n' nếu muốn dùng HTTP tạm (setup SSL sau cũng được)</span>
+        <span style="color:#f59e0b">Cài SSL (Let's Encrypt)? (y/n)</span><br>
+        > <span style="color:#22c55e">y</span><br><br>
+        <span style="color:#6b7280"># Gõ 'y' nếu DNS đã trỏ đúng (chờ ít nhất 30 phút sau khi setup DNS)</span><br>
+        <span style="color:#6b7280"># Gõ 'n' nếu muốn dùng HTTP tạm</span>
       </div>
 
       <div style="background:rgba(34,197,94,0.05);padding:16px;border-radius:8px;margin:16px 0;border:1px solid rgba(34,197,94,0.2)">
         <strong style="font-size:14px;color:#22c55e">✅ Deploy thành công khi thấy:</strong>
         <div style="font-family:'DM Mono';font-size:14px;margin-top:8px;color:var(--text-dim);line-height:1.8">
-          ==================================================<br>
-          ✅ Deployment completed successfully!<br>
-          ==================================================<br>
+          ══════════════════════════════════════════<br>
+          &nbsp;&nbsp;Deploy thành công!<br>
+          ══════════════════════════════════════════<br>
           <br>
-          📍 Your app is running at:<br>
-          <span style="color:#22c55e">   https://unilab.vn</span> (if SSL enabled)<br>
-          <span style="color:#22c55e">   http://unilab.vn</span> (if no SSL)<br>
+          &nbsp;&nbsp;UniLab: &nbsp;&nbsp;http://127.0.0.1:8000<br>
+          &nbsp;&nbsp;Website: &nbsp;http://unilab.vn<br>
           <br>
-          🔧 Management commands:<br>
-          <span style="color:#3b82f6">   systemctl status unilab</span>  - Check app status<br>
-          <span style="color:#3b82f6">   systemctl restart unilab</span> - Restart app<br>
-          <span style="color:#3b82f6">   journalctl -u unilab -f</span>  - View logs<br>
+          &nbsp;&nbsp;<span style="color:#3b82f6">TripZone vẫn chạy bình thường — không bị ảnh hưởng</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Step 5: Verify -->
+  <!-- Step 4: Verify both sites -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="width:32px;height:32px;background:#f59e0b;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">5</div>
-      <h3 style="font-size:15px;margin:0">Kiểm tra Site Đã Live</h3>
+      <div style="width:32px;height:32px;background:#f59e0b;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">4</div>
+      <h3 style="font-size:15px;margin:0">Kiểm tra cả 2 site hoạt động</h3>
     </div>
 
     <div style="font-size:14px;line-height:1.8;color:var(--text)">
-      <strong>Bước 5.1: Test trên trình duyệt</strong>
+      <strong>Bước 4.1: Test trên trình duyệt</strong>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:12px 0">
-        <div style="padding:12px;background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:8px">
-          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Homepage</div>
-          <a href="/" target="_blank" style="font-family:'DM Mono';font-size:14px;color:#22c55e;text-decoration:none">
-            https://unilab.vn
-          </a>
-          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải thấy: Newspaper theme với articles</div>
-        </div>
-        <div style="padding:12px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px">
-          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Admin Dashboard</div>
-          <a href="/admin" target="_blank" style="font-family:'DM Mono';font-size:14px;color:#8b5cf6;text-decoration:none">
-            https://unilab.vn/admin
-          </a>
-          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải thấy: Admin dashboard (giống trang này)</div>
-        </div>
-        <div style="padding:12px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:8px">
-          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Robots.txt (Block Google)</div>
-          <a href="/robots.txt" target="_blank" style="font-family:'DM Mono';font-size:14px;color:#ef4444;text-decoration:none">
-            https://unilab.vn/robots.txt
-          </a>
-          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải thấy: User-agent: * | Disallow: /</div>
+        <div style="padding:12px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
+          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">TripZone (cũ — phải vẫn OK)</div>
+          <div style="font-family:'DM Mono';font-size:14px;color:#f59e0b">https://tripzone.vn</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải hoạt động bình thường, không bị ảnh hưởng</div>
         </div>
         <div style="padding:12px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:8px">
-          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Vertical (bike)</div>
-          <a href="/bike" target="_blank" style="font-family:'DM Mono';font-size:14px;color:#3b82f6;text-decoration:none">
-            https://unilab.vn/bike
-          </a>
-          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải thấy: Trang bike với articles và sidebar</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">UniLab (mới)</div>
+          <div style="font-family:'DM Mono';font-size:14px;color:#3b82f6">https://unilab.vn</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải thấy trang UniLab homepage</div>
+        </div>
+        <div style="padding:12px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px">
+          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">UniLab Admin</div>
+          <div style="font-family:'DM Mono';font-size:14px;color:#8b5cf6">https://unilab.vn/admin</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải thấy Admin Dashboard (giống trang này)</div>
+        </div>
+        <div style="padding:12px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:8px">
+          <div style="font-size:14px;color:var(--text-dim);margin-bottom:4px">Robots.txt</div>
+          <div style="font-family:'DM Mono';font-size:14px;color:#ef4444">https://unilab.vn/robots.txt</div>
+          <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Phải thấy: User-agent: * | Disallow: /</div>
         </div>
       </div>
 
-      <strong style="display:block;margin-top:16px">Bước 5.2: Check services đang chạy</strong>
+      <strong style="display:block;margin-top:16px">Bước 4.2: Check services trên server</strong>
       <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-        <span style="color:#6b7280"># SSH vào server, chạy:</span><br>
-        systemctl status unilab<br><br>
-        <span style="color:#6b7280"># Phải thấy:</span><br>
-        <span style="color:#22c55e">● unilab.service - Unilab Flask Application</span><br>
-        <span style="color:#22c55e">   Active: active (running) since ...</span>
+        <span style="color:#6b7280"># Kiểm tra UniLab service:</span><br>
+        systemctl status unilab<br>
+        <span style="color:#22c55e">● unilab.service - UniLab Flask App (Gunicorn)</span><br>
+        <span style="color:#22c55e">&nbsp;&nbsp;&nbsp;Active: active (running)</span><br><br>
+        <span style="color:#6b7280"># Kiểm tra Nginx (phục vụ cả 2 site):</span><br>
+        systemctl status nginx<br>
+        <span style="color:#22c55e">● nginx.service - nginx</span><br>
+        <span style="color:#22c55e">&nbsp;&nbsp;&nbsp;Active: active (running)</span><br><br>
+        <span style="color:#6b7280"># Kiểm tra config Nginx không lỗi:</span><br>
+        nginx -t<br>
+        <span style="color:#22c55e">nginx: configuration file /etc/nginx/nginx.conf test is successful</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- How Nginx routes traffic -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+    <h3 style="font-size:15px;margin-bottom:16px;color:#3b82f6">🔀 Nginx phân luồng traffic thế nào?</h3>
+
+    <div style="font-size:14px;line-height:1.8;color:var(--text)">
+      <p style="color:var(--text-dim);margin-bottom:16px">
+        Cả 2 site dùng chung 1 Nginx. Nginx dựa vào <strong>domain name</strong> trong request để chuyển đến đúng backend.
+        Mỗi site có 1 file config riêng trong <code>/etc/nginx/conf.d/</code>:
+      </p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="background:rgba(245,158,11,0.1);padding:8px 12px;border-radius:8px 8px 0 0;font-weight:600;color:#f59e0b;font-size:14px">
+            /etc/nginx/conf.d/tripzone.conf
+          </div>
+          <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-family:'DM Mono';font-size:13px;border:1px solid var(--border);border-top:0">
+            server {<br>
+            &nbsp;&nbsp;listen 80;<br>
+            &nbsp;&nbsp;server_name <span style="color:#f59e0b">tripzone.vn</span>;<br>
+            &nbsp;&nbsp;...<br>
+            &nbsp;&nbsp;<span style="color:#6b7280"># → PHP-FPM backend</span><br>
+            }
+          </div>
+        </div>
+        <div>
+          <div style="background:rgba(59,130,246,0.1);padding:8px 12px;border-radius:8px 8px 0 0;font-weight:600;color:#3b82f6;font-size:14px">
+            /etc/nginx/conf.d/unilab.conf
+          </div>
+          <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-family:'DM Mono';font-size:13px;border:1px solid var(--border);border-top:0">
+            server {<br>
+            &nbsp;&nbsp;listen 80;<br>
+            &nbsp;&nbsp;server_name <span style="color:#3b82f6">unilab.vn</span>;<br>
+            &nbsp;&nbsp;...<br>
+            &nbsp;&nbsp;location / {<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;proxy_pass <span style="color:#22c55e">http://127.0.0.1:8000</span>;<br>
+            &nbsp;&nbsp;}<br>
+            }
+          </div>
+        </div>
       </div>
 
-      <strong style="display:block;margin-top:16px">Bước 5.3: Xem logs realtime (nếu có lỗi)</strong>
-      <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
-        <span style="color:#6b7280"># Xem logs của Flask app:</span><br>
-        journalctl -u unilab -f<br><br>
-        <span style="color:#6b7280"># Xem logs của Nginx:</span><br>
-        tail -f /var/log/nginx/error.log<br><br>
-        <span style="color:#6b7280"># Thoát xem logs: nhấn Ctrl + C</span>
+      <div style="background:rgba(34,197,94,0.05);padding:12px;border-radius:8px;margin-top:16px;border:1px solid rgba(34,197,94,0.2)">
+        <strong style="font-size:14px;color:#22c55e">Request flow:</strong>
+        <div style="font-size:14px;color:var(--text-dim);margin-top:4px">
+          User → <strong>tripzone.vn</strong> → Nginx → PHP-FPM → TripZone response<br>
+          User → <strong>unilab.vn</strong> → Nginx → Gunicorn :8000 → UniLab response
+        </div>
       </div>
     </div>
   </div>
@@ -452,36 +383,52 @@
 
     <div style="margin-bottom:16px">
       <div style="background:rgba(239,68,68,0.05);padding:12px;border-radius:8px 8px 0 0;border:1px solid rgba(239,68,68,0.2);border-bottom:0">
-        <strong style="font-size:14px">❌ Lỗi: Site không load (502 Bad Gateway)</strong>
+        <strong style="font-size:14px">❌ UniLab 502 Bad Gateway</strong>
       </div>
       <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-size:14px;border:1px solid var(--border)">
-        <div style="color:var(--text-dim);margin-bottom:8px">Nguyên nhân: Flask app chưa chạy hoặc bị crash</div>
+        <div style="color:var(--text-dim);margin-bottom:8px">Gunicorn chưa chạy hoặc bị crash</div>
         <div style="font-family:'DM Mono';font-size:14px">
-          <span style="color:#6b7280"># Kiểm tra:</span><br>
-          systemctl status unilab<br><br>
-          <span style="color:#6b7280"># Nếu inactive → restart:</span><br>
-          systemctl restart unilab<br><br>
-          <span style="color:#6b7280"># Xem lỗi gì:</span><br>
-          journalctl -u unilab -n 50
+          systemctl status unilab<br>
+          <span style="color:#6b7280"># Nếu inactive/failed:</span><br>
+          systemctl restart unilab<br>
+          journalctl -u unilab -n 50 <span style="color:#6b7280"># Xem lỗi</span>
         </div>
       </div>
     </div>
 
     <div style="margin-bottom:16px">
       <div style="background:rgba(245,158,11,0.05);padding:12px;border-radius:8px 8px 0 0;border:1px solid rgba(245,158,11,0.2);border-bottom:0">
-        <strong style="font-size:14px">⚠️ Lỗi: SSL certificate không tạo được</strong>
+        <strong style="font-size:14px">⚠️ TripZone bị ảnh hưởng sau deploy</strong>
       </div>
       <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-size:14px;border:1px solid var(--border)">
-        <div style="color:var(--text-dim);margin-bottom:8px">Nguyên nhân: DNS chưa trỏ đúng hoặc port 80/443 bị block</div>
+        <div style="color:var(--text-dim);margin-bottom:8px">Rất hiếm — thường do Nginx config bị syntax error</div>
+        <div style="font-family:'DM Mono';font-size:14px">
+          <span style="color:#6b7280"># Test config Nginx:</span><br>
+          nginx -t<br><br>
+          <span style="color:#6b7280"># Nếu lỗi, xem file config UniLab:</span><br>
+          cat /etc/nginx/conf.d/unilab.conf<br><br>
+          <span style="color:#6b7280"># Tạm tắt UniLab config nếu cần khôi phục TripZone:</span><br>
+          mv /etc/nginx/conf.d/unilab.conf /etc/nginx/conf.d/unilab.conf.bak<br>
+          systemctl reload nginx<br>
+          <span style="color:#6b7280"># → TripZone sẽ hoạt động lại ngay</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div style="background:rgba(245,158,11,0.05);padding:12px;border-radius:8px 8px 0 0;border:1px solid rgba(245,158,11,0.2);border-bottom:0">
+        <strong style="font-size:14px">⚠️ SSL certificate lỗi</strong>
+      </div>
+      <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-size:14px;border:1px solid var(--border)">
+        <div style="color:var(--text-dim);margin-bottom:8px">DNS chưa trỏ đúng hoặc port 80 bị block</div>
         <div style="font-family:'DM Mono';font-size:14px">
           <span style="color:#6b7280"># Kiểm tra DNS:</span><br>
-          ping unilab.vn<br>
-          <span style="color:#6b7280"># Phải thấy IP của server Vultr</span><br><br>
-          <span style="color:#6b7280"># Kiểm tra firewall:</span><br>
-          ufw status<br>
-          <span style="color:#6b7280"># Nếu active → allow ports:</span><br>
-          ufw allow 80/tcp<br>
-          ufw allow 443/tcp<br><br>
+          ping unilab.vn<br><br>
+          <span style="color:#6b7280"># Kiểm tra firewall (CentOS 7 dùng firewalld):</span><br>
+          firewall-cmd --list-all<br>
+          firewall-cmd --permanent --add-service=http<br>
+          firewall-cmd --permanent --add-service=https<br>
+          firewall-cmd --reload<br><br>
           <span style="color:#6b7280"># Setup SSL lại:</span><br>
           certbot --nginx -d unilab.vn -d www.unilab.vn
         </div>
@@ -490,92 +437,102 @@
 
     <div style="margin-bottom:16px">
       <div style="background:rgba(59,130,246,0.05);padding:12px;border-radius:8px 8px 0 0;border:1px solid rgba(59,130,246,0.2);border-bottom:0">
-        <strong style="font-size:14px">💡 Lỗi: Database bị lỗi hoặc thiếu bảng</strong>
+        <strong style="font-size:14px">💡 Python version quá cũ (CentOS 7 mặc định 3.6)</strong>
       </div>
       <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-size:14px;border:1px solid var(--border)">
-        <div style="color:var(--text-dim);margin-bottom:8px">Nguyên nhân: File unilab.db chưa có hoặc schema sai</div>
+        <div style="color:var(--text-dim);margin-bottom:8px">deploy.sh tự xử lý, nhưng nếu cần cài thủ công:</div>
         <div style="font-family:'DM Mono';font-size:14px">
-          <span style="color:#6b7280"># Vào thư mục app:</span><br>
-          cd /var/www/unilab/V00<br><br>
-          <span style="color:#6b7280"># Activate virtual environment:</span><br>
-          source venv/bin/activate<br><br>
-          <span style="color:#6b7280"># Chạy lại seed data:</span><br>
-          python scripts/seed_sidebar_data.py<br><br>
-          <span style="color:#6b7280"># Restart app:</span><br>
-          systemctl restart unilab
+          yum install -y centos-release-scl<br>
+          yum install -y rh-python311<br>
+          <span style="color:#6b7280"># Hoặc:</span><br>
+          yum install -y epel-release<br>
+          yum install -y python3 python3-pip python3-devel
         </div>
       </div>
     </div>
 
     <div>
       <div style="background:rgba(139,92,246,0.05);padding:12px;border-radius:8px 8px 0 0;border:1px solid rgba(139,92,246,0.2);border-bottom:0">
-        <strong style="font-size:14px">🔄 Lỗi: Code update nhưng site không thay đổi</strong>
+        <strong style="font-size:14px">🔄 Code update nhưng site không thay đổi</strong>
       </div>
       <div style="background:var(--code-bg);padding:12px;border-radius:0 0 8px 8px;font-size:14px;border:1px solid var(--border)">
-        <div style="color:var(--text-dim);margin-bottom:8px">Nguyên nhân: Gunicorn cache code cũ, cần restart</div>
+        <div style="color:var(--text-dim);margin-bottom:8px">Gunicorn cache code cũ, cần restart</div>
         <div style="font-family:'DM Mono';font-size:14px">
-          <span style="color:#6b7280"># Pull code mới:</span><br>
-          cd /var/www/unilab/V00<br>
-          git pull origin main<br><br>
-          <span style="color:#6b7280"># Restart để load code mới:</span><br>
-          systemctl restart unilab<br><br>
-          <span style="color:#6b7280"># Clear browser cache (Ctrl + F5) và test lại</span>
+          cd /var/www/unilab<br>
+          <span style="color:#6b7280"># Upload code mới (SCP hoặc git pull)</span><br>
+          systemctl restart unilab<br>
+          <span style="color:#6b7280"># Clear browser cache: Ctrl + F5</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Maintenance Commands -->
+  <!-- Management Commands -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-    <h3 style="font-size:15px;margin-bottom:16px">🛠️ Commands hữu ích (copy-paste được luôn)</h3>
+    <h3 style="font-size:15px;margin-bottom:16px">🛠️ Commands quản lý (copy-paste được luôn)</h3>
 
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-      <div style="background:rgba(34,197,94,0.05);padding:12px;border:1px solid rgba(34,197,94,0.2);border-radius:8px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px">📊 Xem trạng thái services</div>
+      <div style="padding:12px;background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">📊 Trạng thái services</div>
         <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
           systemctl status unilab<br>
           systemctl status nginx
         </div>
       </div>
 
-      <div style="background:rgba(59,130,246,0.05);padding:12px;border:1px solid rgba(59,130,246,0.2);border-radius:8px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px">🔄 Restart services</div>
+      <div style="padding:12px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">🔄 Restart UniLab</div>
         <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
           systemctl restart unilab<br>
-          systemctl restart nginx
+          <span style="color:#6b7280"># TripZone không bị ảnh hưởng</span>
         </div>
       </div>
 
-      <div style="background:rgba(139,92,246,0.05);padding:12px;border:1px solid rgba(139,92,246,0.2);border-radius:8px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px">📝 Xem logs realtime</div>
+      <div style="padding:12px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">📝 Xem logs UniLab</div>
         <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
           journalctl -u unilab -f<br>
-          tail -f /var/log/nginx/error.log
+          <span style="color:#6b7280"># Thoát: Ctrl + C</span>
         </div>
       </div>
 
-      <div style="background:rgba(245,158,11,0.05);padding:12px;border:1px solid rgba(245,158,11,0.2);border-radius:8px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px">🔄 Update code từ Git</div>
+      <div style="padding:12px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">📝 Xem logs Nginx</div>
         <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
-          cd /var/www/unilab/V00<br>
-          git pull origin main<br>
+          tail -f /var/log/nginx/error.log<br>
+          tail -f /var/log/nginx/access.log
+        </div>
+      </div>
+
+      <div style="padding:12px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">🔄 Update code UniLab</div>
+        <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
+          <span style="color:#6b7280"># Upload code mới rồi:</span><br>
           systemctl restart unilab
         </div>
       </div>
 
-      <div style="background:rgba(239,68,68,0.05);padding:12px;border:1px solid rgba(239,68,68,0.2);border-radius:8px">
+      <div style="padding:12px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">🔧 Sửa Nginx config</div>
+        <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
+          nano /etc/nginx/conf.d/unilab.conf<br>
+          nginx -t && systemctl reload nginx
+        </div>
+      </div>
+
+      <div style="padding:12px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:8px">
         <div style="font-size:14px;font-weight:600;margin-bottom:6px">🚫 Block Google (robots.txt)</div>
         <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
-          nano /var/www/unilab/V00/static/robots.txt<br>
+          nano /var/www/unilab/static/robots.txt<br>
           <span style="color:#6b7280"># User-agent: * | Disallow: /</span>
         </div>
       </div>
 
-      <div style="background:rgba(16,185,129,0.05);padding:12px;border:1px solid rgba(16,185,129,0.2);border-radius:8px">
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px">✅ Allow Google index (khi ready)</div>
+      <div style="padding:12px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">💾 Backup database</div>
         <div style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">
-          nano /var/www/unilab/V00/static/robots.txt<br>
-          <span style="color:#6b7280"># User-agent: * | Allow: /</span>
+          cp /var/www/unilab/instance/unilab.db<br>
+          &nbsp;&nbsp;/var/www/unilab/instance/unilab.db.bak
         </div>
       </div>
     </div>
@@ -583,45 +540,43 @@
 
   <!-- Summary Checklist -->
   <div style="background:linear-gradient(135deg,rgba(34,197,94,0.05),rgba(16,185,129,0.1));border:2px solid rgba(16,185,129,0.3);border-radius:var(--radius);padding:24px">
-    <h3 style="font-size:15px;margin-bottom:16px;color:#10b981">✅ Checklist Deployment</h3>
+    <h3 style="font-size:15px;margin-bottom:16px;color:#10b981">✅ Checklist Deploy UniLab chung TripZone</h3>
     <div style="display:grid;grid-template-columns:1fr;gap:8px">
       <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
         <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ Tạo server Vultr ($6/month, Ubuntu 22.04, Singapore)</span>
+        <span style="font-size:14px">Trỏ DNS domain UniLab về IP server (cùng IP với TripZone)</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
         <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ SSH vào server thành công (thấy root@...)</span>
+        <span style="font-size:14px">SSH vào server thành công</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
         <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ Trỏ DNS domain về IP server (A records: @, www, *)</span>
+        <span style="font-size:14px">Upload source code vào /var/www/unilab</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
         <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ Upload code lên /var/www/unilab/V00 (Git hoặc SFTP)</span>
+        <span style="font-size:14px">Chạy deploy.sh — nhập domain khi hỏi</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
         <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ Chạy deploy.sh và nhập domain khi hỏi</span>
+        <span style="font-size:14px">Setup SSL với Let's Encrypt (sau khi DNS đã OK)</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
         <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ Setup SSL với Let's Encrypt (nếu DNS đã OK)</span>
+        <span style="font-size:14px">Test UniLab: homepage + admin + robots.txt</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
         <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ Test site trên browser (homepage, admin, robots.txt)</span>
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;padding:10px;background:rgba(255,255,255,0.7);border-radius:6px;cursor:pointer">
-        <input type="checkbox" style="width:16px;height:16px">
-        <span style="font-size:14px">✅ Verify robots.txt đang block Google (User-agent: * | Disallow: /)</span>
+        <span style="font-size:14px">Verify TripZone vẫn chạy bình thường (không bị ảnh hưởng)</span>
       </label>
     </div>
     <div style="margin-top:16px;padding:16px;background:rgba(34,197,94,0.1);border-radius:8px;text-align:center">
       <div style="font-size:20px;margin-bottom:8px">🎉</div>
-      <div style="font-size:14px;font-weight:600;color:#10b981">Site đã LIVE! Giờ có thể tạo content và chạy affiliate</div>
-      <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Khi muốn cho Google index, sửa robots.txt → Allow: /</div>
+      <div style="font-size:14px;font-weight:600;color:#10b981">Cả 2 site đều LIVE trên cùng 1 server!</div>
+      <div style="font-size:14px;color:var(--text-dim);margin-top:4px">
+        TripZone: tripzone.vn → PHP-FPM&nbsp;&nbsp;|&nbsp;&nbsp;UniLab: unilab.vn → Gunicorn :8000
+      </div>
     </div>
   </div>
 
