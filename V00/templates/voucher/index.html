@@ -17,12 +17,7 @@
       <span class="logo-name">UniVoucher</span>
     </a>
     <nav class="site-nav">
-      <a href="{{ url_for('voucher_index') }}" class="{% if not f_category and not f_platform %}active{% endif %}">Tất cả</a>
-      {% for pname, pcount in platform_stats.items() %}
-      {% if pname != 'Khác' %}
-      <a href="{{ url_for('voucher_index', platform=pname.lower()) }}" class="{% if f_platform == pname.lower() %}active{% endif %}">{{ pname }} <sup>{{ pcount }}</sup></a>
-      {% endif %}
-      {% endfor %}
+      <a href="{{ url_for('voucher_index') }}" class="active">Voucher</a>
       <a href="{{ url_for('voucher_brands') }}">Nhãn hàng</a>
     </nav>
     <div class="header-actions">
