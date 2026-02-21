@@ -141,11 +141,11 @@
   </div>
 </header>
 
-<main class="main-content">
-  <div class="container">
+<main class="site-main">
+
     <div class="brands-hero">
-      <h1>Nhan hang khuyen mai</h1>
-      <p>{{ brands|length }} thuong hieu dang co uu dai tu AccessTrade</p>
+      <h1>Nhãn hàng khuyến mãi</h1>
+      <p>{{ brands|length }} thương hiệu đang có ưu đãi từ AccessTrade</p>
     </div>
 
     {% if brands %}
@@ -173,11 +173,11 @@
     </div>
     {% else %}
     <div class="brands-empty">
-      <h3>Chua co nhan hang nao</h3>
-      <p>He thong se tu dong cap nhat khi co du lieu tu AccessTrade.</p>
+      <h3>Chưa có nhãn hàng nào</h3>
+      <p>Hệ thống sẽ tự động cập nhật khi có dữ liệu từ AccessTrade.</p>
     </div>
     {% endif %}
-  </div>
+
 </main>
 
 <script>
