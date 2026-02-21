@@ -7886,6 +7886,40 @@ def voucher_index():
         f_type=f_type, f_platform=f_platform, f_sort=f_sort,
         now=datetime.utcnow())
 
+@app.route('/voucher/nhan-hang')
+def voucher_brands():
+    """Brands page — show all AT banners, one per brand"""
+    import re as _re
+    now_utc = datetime.utcnow()
+    all_banners = AccessTradeBanner.query.filter(
+        AccessTradeBanner.is_active == True
+    ).order_by(AccessTradeBanner.synced_at.desc()).all()
+
+    # Dedup: each brand (merchant + sub-brand) appears only once
+    seen = set()
+    brands = []
+    for ab in all_banners:
+        if ab.end_date and ab.end_date < now_utc:
+            continue
+        merchant = (ab.merchant or '').strip().lower()
+        offer = ab.offer_name or ''
+        m = _re.search(r'\[([^\]]+)\]', offer)
+        brand_key = f"{merchant}_{m.group(1).strip().lower()}" if m else merchant
+        if brand_key and brand_key not in seen:
+            seen.add(brand_key)
+            brands.append(ab)
+
+    return render_template('voucher/brands.html', brands=brands)
+
+@app.route('/voucher/nhan-hang/click/<int:banner_id>', methods=['POST'])
+def voucher_brand_click(banner_id):
+    """Track brand click"""
+    ab = AccessTradeBanner.query.get(banner_id)
+    if ab:
+        ab.clicks = (ab.clicks or 0) + 1
+        db.session.commit()
+    return '', 204
+
 @app.route('/voucher/<code>')
 def voucher_detail(code):
     """Voucher detail page"""
