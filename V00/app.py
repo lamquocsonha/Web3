@@ -848,7 +848,13 @@ def admin_vouchers_hub():
 
     elif tab == 'banners':
         at_banners = AccessTradeBanner.query.order_by(AccessTradeBanner.created_at.desc()).all()
-        ctx.update(at_banners=at_banners)
+        ctx.update(
+            at_banners=at_banners,
+            banner_auto_sync=SiteSettings.get('banner_auto_sync', 'on') == 'on',
+            banner_sync_time=SiteSettings.get('banner_sync_time', '03:00'),
+            banner_last_auto_sync=SiteSettings.get('banner_last_auto_sync', ''),
+            banner_last_auto_sync_result=SiteSettings.get('banner_last_auto_sync_result', ''),
+        )
 
     return render_template('admin/voucher_hub.html', **ctx)
 
@@ -5777,124 +5783,122 @@ def admin_at_banners():
     now = datetime.utcnow()
     return render_template('admin/at_banners.html', banners=banners, now=now)
 
+def _do_banner_sync():
+    """Core banner sync logic — returns (imported, updated, total, error)"""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return 0, 0, 0, 'Chưa cấu hình AccessTrade API key.'
+
+    offers = api.get_offers(limit=100, status=1)
+    coupons = api.get_coupons_hot(limit=50)
+
+    imported = 0
+    updated = 0
+    all_items = []
+
+    for raw in offers:
+        item = api._parse_offer(raw)
+        item['_source'] = 'offer'
+        all_items.append(item)
+    for raw in coupons:
+        item = api._parse_offer(raw)
+        item['_source'] = 'coupon'
+        all_items.append(item)
+
+    for item in all_items:
+        offer_id = item.get('offer_id', '')
+        if not offer_id:
+            continue
+
+        discount_parts = []
+        if item.get('discount_percentage'):
+            discount_parts.append(str(item['discount_percentage']) + '%')
+        if item.get('discount_value'):
+            val = item['discount_value']
+            if isinstance(val, (int, float)) and val >= 1000:
+                discount_parts.append(str(int(val / 1000)) + 'K')
+            elif val:
+                discount_parts.append(str(val))
+        discount_text = ' | '.join(discount_parts) if discount_parts else ''
+
+        start_dt = None
+        end_dt = None
+        for date_str in [item.get('start_date', '')]:
+            if date_str:
+                try:
+                    start_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
+                except Exception:
+                    pass
+        for date_str in [item.get('end_date', '')]:
+            if date_str:
+                try:
+                    end_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
+                except Exception:
+                    pass
+
+        image_url = ''
+        raw_img = item.get('merchant_logo', '')
+        if raw_img and isinstance(raw_img, str) and raw_img.startswith('http'):
+            image_url = raw_img
+        for raw in offers + coupons:
+            if str(raw.get('id', '')) == offer_id:
+                direct_img = raw.get('image', '') or ''
+                if direct_img and isinstance(direct_img, str) and direct_img.startswith('http'):
+                    image_url = direct_img
+                break
+
+        existing = AccessTradeBanner.query.filter_by(offer_id=offer_id).first()
+        if existing:
+            existing.offer_name = item.get('offer_name', existing.offer_name)
+            existing.description = item.get('description', '')[:500]
+            existing.merchant = item.get('merchant', '')
+            existing.merchant_logo = item.get('merchant_logo', '')
+            existing.category = item.get('category', '')
+            existing.aff_link = item.get('aff_link', '')
+            existing.discount_text = discount_text
+            if image_url:
+                existing.image_url = image_url
+            if start_dt:
+                existing.start_date = start_dt
+            if end_dt:
+                existing.end_date = end_dt
+            existing.synced_at = datetime.utcnow()
+            updated += 1
+        else:
+            banner = AccessTradeBanner(
+                offer_id=offer_id,
+                offer_name=item.get('offer_name', 'Unknown'),
+                description=item.get('description', '')[:500],
+                merchant=item.get('merchant', ''),
+                merchant_logo=item.get('merchant_logo', ''),
+                category=item.get('category', ''),
+                image_url=image_url,
+                aff_link=item.get('aff_link', ''),
+                start_date=start_dt,
+                end_date=end_dt,
+                discount_text=discount_text,
+                placement='both',
+                is_active=True,
+            )
+            db.session.add(banner)
+            imported += 1
+
+    db.session.commit()
+    return imported, updated, len(all_items), None
+
+
 @app.route('/admin/at-banners/sync', methods=['POST'])
 def admin_at_banners_sync():
     """Pull offers/coupons from AccessTrade API and save as banners"""
     try:
-        from accesstrade_integration import get_accesstrade_api
-        api = get_accesstrade_api()
-        if not api:
-            flash('Chua cau hinh AccessTrade API key. Vao Settings de thiet lap.', 'error')
-            return redirect(url_for('admin_at_banners'))
-
-        # Pull offers (active only)
-        offers = api.get_offers(limit=100, status=1)
-        # Also pull hot coupons
-        coupons = api.get_coupons_hot(limit=50)
-
-        imported = 0
-        updated = 0
-        all_items = []
-
-        # Parse offers
-        for raw in offers:
-            item = api._parse_offer(raw)
-            item['_source'] = 'offer'
-            all_items.append(item)
-
-        # Parse coupons
-        for raw in coupons:
-            item = api._parse_offer(raw)
-            item['_source'] = 'coupon'
-            all_items.append(item)
-
-        for item in all_items:
-            offer_id = item.get('offer_id', '')
-            if not offer_id:
-                continue
-
-            # Build discount text
-            discount_parts = []
-            if item.get('discount_percentage'):
-                discount_parts.append(str(item['discount_percentage']) + '%')
-            if item.get('discount_value'):
-                val = item['discount_value']
-                if isinstance(val, (int, float)) and val >= 1000:
-                    discount_parts.append(str(int(val / 1000)) + 'K')
-                elif val:
-                    discount_parts.append(str(val))
-            discount_text = ' | '.join(discount_parts) if discount_parts else ''
-
-            # Parse dates
-            start_dt = None
-            end_dt = None
-            for date_str in [item.get('start_date', '')]:
-                if date_str:
-                    try:
-                        start_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
-                    except Exception:
-                        pass
-            for date_str in [item.get('end_date', '')]:
-                if date_str:
-                    try:
-                        end_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
-                    except Exception:
-                        pass
-
-            # Image: prefer offer image, then merchant logo
-            image_url = ''
-            raw_img = item.get('merchant_logo', '')
-            if raw_img and isinstance(raw_img, str) and raw_img.startswith('http'):
-                image_url = raw_img
-            # Override with direct offer image if available from raw data
-            for raw in offers + coupons:
-                if str(raw.get('id', '')) == offer_id:
-                    direct_img = raw.get('image', '') or ''
-                    if direct_img and isinstance(direct_img, str) and direct_img.startswith('http'):
-                        image_url = direct_img
-                    break
-
-            # Upsert
-            existing = AccessTradeBanner.query.filter_by(offer_id=offer_id).first()
-            if existing:
-                existing.offer_name = item.get('offer_name', existing.offer_name)
-                existing.description = item.get('description', '')[:500]
-                existing.merchant = item.get('merchant', '')
-                existing.merchant_logo = item.get('merchant_logo', '')
-                existing.category = item.get('category', '')
-                existing.aff_link = item.get('aff_link', '')
-                existing.discount_text = discount_text
-                if image_url:
-                    existing.image_url = image_url
-                if start_dt:
-                    existing.start_date = start_dt
-                if end_dt:
-                    existing.end_date = end_dt
-                existing.synced_at = datetime.utcnow()
-                updated += 1
-            else:
-                banner = AccessTradeBanner(
-                    offer_id=offer_id,
-                    offer_name=item.get('offer_name', 'Unknown'),
-                    description=item.get('description', '')[:500],
-                    merchant=item.get('merchant', ''),
-                    merchant_logo=item.get('merchant_logo', ''),
-                    category=item.get('category', ''),
-                    image_url=image_url,
-                    aff_link=item.get('aff_link', ''),
-                    start_date=start_dt,
-                    end_date=end_dt,
-                    discount_text=discount_text,
-                    placement='both',
-                    is_active=True,
-                )
-                db.session.add(banner)
-                imported += 1
-
-        db.session.commit()
-        flash(f'Sync thanh cong: {imported} banner moi, {updated} cap nhat. Tong {len(all_items)} offers/coupons.', 'success')
+        imported, updated, total, err = _do_banner_sync()
+        if err:
+            flash(err, 'error')
+        else:
+            flash(f'Sync thành công: {imported} banner mới, {updated} cập nhật. Tổng {total} offers/coupons.', 'success')
     except Exception as e:
-        flash(f'Loi sync: {str(e)}', 'error')
+        flash(f'Lỗi sync: {str(e)}', 'error')
 
     return redirect(url_for('admin_at_banners'))
 
@@ -5936,6 +5940,29 @@ def admin_at_banners_delete_all():
     db.session.commit()
     flash(f'Da xoa {count} banner', 'success')
     return redirect(url_for('admin_at_banners'))
+
+@app.route('/admin/at-banners/schedule', methods=['POST'])
+def admin_at_banners_schedule():
+    """Save banner auto-sync schedule settings"""
+    data = request.get_json(silent=True) or {}
+    enabled = bool(data.get('enabled', False))
+    sync_time = data.get('sync_time', '03:00')  # HH:MM
+    SiteSettings.set_val('banner_auto_sync', 'on' if enabled else 'off', 'banner')
+    SiteSettings.set_val('banner_sync_time', sync_time, 'banner')
+    db.session.commit()
+    # Restart the scheduler thread with new settings
+    _start_banner_scheduler()
+    return jsonify(status='ok', enabled=enabled, sync_time=sync_time)
+
+@app.route('/admin/at-banners/schedule/status')
+def admin_at_banners_schedule_status():
+    """Get current schedule status and last run info"""
+    return jsonify(
+        enabled=SiteSettings.get('banner_auto_sync', 'on') == 'on',
+        sync_time=SiteSettings.get('banner_sync_time', '03:00'),
+        last_run=SiteSettings.get('banner_last_auto_sync', ''),
+        last_result=SiteSettings.get('banner_last_auto_sync_result', ''),
+    )
 
 @app.route('/admin/at-banners/click/<int:banner_id>')
 def admin_at_banner_click(banner_id):
@@ -8200,6 +8227,73 @@ def _run_schema_migration():
     print(f'[*] Schema check done ({elapsed}ms)')
 
 
+# =============================================
+# BACKGROUND SCHEDULER — Banner Auto Delete + Sync
+# =============================================
+import threading
+
+_banner_stop_flag = threading.Event()
+
+def _banner_scheduler_loop():
+    """Background loop: waits until configured time, then delete-all + sync. Repeats daily."""
+    import time as _time
+    while not _banner_stop_flag.is_set():
+        try:
+            with app.app_context():
+                if SiteSettings.get('banner_auto_sync', 'on') != 'on':
+                    break
+                sync_time = SiteSettings.get('banner_sync_time', '03:00')
+                try:
+                    target_h, target_m = int(sync_time.split(':')[0]), int(sync_time.split(':')[1])
+                except Exception:
+                    target_h, target_m = 3, 0
+
+            now = datetime.now()
+            target = now.replace(hour=target_h, minute=target_m, second=0, microsecond=0)
+            if target <= now:
+                target += timedelta(days=1)
+            wait_secs = (target - now).total_seconds()
+
+            # Sleep in 30s increments to allow stop flag check
+            if _banner_stop_flag.wait(timeout=wait_secs):
+                return  # Stopped
+
+            # Execute: delete all → sync
+            with app.app_context():
+                if SiteSettings.get('banner_auto_sync', 'on') != 'on':
+                    break
+                try:
+                    count = AccessTradeBanner.query.count()
+                    AccessTradeBanner.query.delete()
+                    db.session.commit()
+                    imported, updated, total, err = _do_banner_sync()
+                    if err:
+                        result = f'Xóa {count}, lỗi sync: {err}'
+                    else:
+                        result = f'Xóa {count}, sync {imported} mới, {updated} cập nhật'
+                except Exception as e:
+                    result = f'Lỗi: {str(e)}'
+                SiteSettings.set_val('banner_last_auto_sync', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'banner')
+                SiteSettings.set_val('banner_last_auto_sync_result', result, 'banner')
+                db.session.commit()
+        except Exception:
+            _time.sleep(60)
+
+
+def _start_banner_scheduler():
+    """Start (or restart) the banner auto-sync background thread."""
+    global _banner_stop_flag
+    _banner_stop_flag.set()  # Signal old thread to stop
+    _banner_stop_flag = threading.Event()  # Fresh flag for new thread
+
+    with app.app_context():
+        if SiteSettings.get('banner_auto_sync', 'on') != 'on':
+            return
+
+    t = threading.Thread(target=_banner_scheduler_loop, daemon=True)
+    t.start()
+
+
 if __name__ == '__main__':
     import os, shutil, time, gc
 
@@ -8297,8 +8391,11 @@ if __name__ == '__main__':
         with app.app_context():
             _safe_init_db()
 
+        # Start banner auto-sync scheduler
+        _start_banner_scheduler()
+
         # Auto-open browser after server is ready (only once, not on reload)
-        import threading, webbrowser
+        import webbrowser
         threading.Timer(1.5, webbrowser.open, args=['http://localhost:7000/admin']).start()
 
     app.run(host='0.0.0.0', port=7000, debug=True)

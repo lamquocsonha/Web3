@@ -342,6 +342,42 @@
      ══════════════════════════════════════════════ -->
 {% if active_tab == 'banners' %}
 <div>
+  <!-- ── Schedule Panel ── -->
+  <div style="background:var(--surface2,#f8f9fa);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:22px">&#9200;</span>
+        <div>
+          <div style="font-size:14px;font-weight:700">Tự động xóa &amp; sync mỗi ngày</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-top:2px">Hệ thống sẽ xóa toàn bộ banner cũ rồi sync lại từ AccessTrade</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="bannerAutoSync" {% if banner_auto_sync %}checked{% endif %}
+            style="width:16px;height:16px;accent-color:#2563eb;cursor:pointer">
+          Bật
+        </label>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label style="font-size:13px;color:var(--text-dim)">Giờ chạy:</label>
+          <input type="time" id="bannerSyncTime" value="{{ banner_sync_time or '03:00' }}"
+            style="padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text)">
+        </div>
+        <button onclick="saveBannerSchedule()" class="vh-btn vh-btn-primary" style="padding:6px 14px;font-size:13px">Lưu</button>
+      </div>
+    </div>
+    {% if banner_last_auto_sync %}
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text-dim);display:flex;align-items:center;gap:8px">
+      <span>&#128338;</span>
+      <span>Lần chạy cuối: <strong>{{ banner_last_auto_sync }}</strong></span>
+      {% if banner_last_auto_sync_result %}
+      <span style="margin-left:4px">— {{ banner_last_auto_sync_result }}</span>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div id="bannerScheduleMsg" style="display:none;margin-top:8px;padding:6px 12px;border-radius:6px;font-size:13px"></div>
+  </div>
+
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <h2 style="margin:0;font-size:18px">AccessTrade Banners ({{ at_banners|length }})</h2>
     <div style="display:flex;gap:8px">
@@ -374,6 +410,30 @@
 {% endif %}
 
 <script>
+// ── Banner Schedule JS ──
+function saveBannerSchedule() {
+  const enabled = document.getElementById('bannerAutoSync').checked;
+  const syncTime = document.getElementById('bannerSyncTime').value || '03:00';
+  const msgEl = document.getElementById('bannerScheduleMsg');
+  fetch('{{ url_for("admin_at_banners_schedule") }}', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({enabled: enabled, sync_time: syncTime})
+  }).then(r => r.json()).then(data => {
+    msgEl.style.display = 'block';
+    msgEl.style.background = '#d1fae5';
+    msgEl.style.color = '#065f46';
+    msgEl.textContent = 'Đã lưu! ' + (data.enabled ? 'Tự động xóa & sync lúc ' + data.sync_time + ' mỗi ngày' : 'Đã tắt tự động sync');
+    setTimeout(() => msgEl.style.display = 'none', 4000);
+  }).catch(() => {
+    msgEl.style.display = 'block';
+    msgEl.style.background = '#fee2e2';
+    msgEl.style.color = '#991b1b';
+    msgEl.textContent = 'Lỗi lưu cài đặt';
+    setTimeout(() => msgEl.style.display = 'none', 4000);
+  });
+}
+
 // ── Voucher Sync JS ──
 let fetchedOffers = [];
 let merchantsLoaded = false;
