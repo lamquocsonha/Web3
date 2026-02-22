@@ -126,24 +126,87 @@
 {% if active_tab == 'widgets' %}
 <div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h2 style="margin:0;font-size:18px">Voucher Widgets</h2>
+    <h2 style="margin:0;font-size:18px">Voucher Embed Widgets</h2>
     <a href="{{ url_for('admin_voucher_widget_new') }}" class="vh-btn vh-btn-primary">+ New Widget</a>
   </div>
+  <p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">
+    Quan ly embed codes tu AccessTrade va cac affiliate networks khac. Widgets se hien thi tren trang voucher.
+  </p>
+
   {% if widgets %}
-  <div class="vh-table-wrap"><table><thead><tr><th>Name</th><th>Placement</th><th>Network</th><th>Active</th><th></th></tr></thead><tbody>
-    {% for w in widgets %}<tr>
-      <td><strong>{{ w.name }}</strong></td>
-      <td><span class="vh-badge" style="background:var(--accent-dim,rgba(99,102,241,.1));color:var(--accent)">{{ w.placement or '-' }}</span></td>
-      <td>{{ w.network or '-' }}</td>
-      <td>{% if w.is_active %}<span class="vh-badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="vh-badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
-      <td>
-        <a href="{{ url_for('admin_voucher_widget_edit', wid=w.id) }}" class="vh-btn vh-btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
-        <form method="POST" action="{{ url_for('admin_voucher_widget_toggle', wid=w.id) }}" style="display:inline"><button type="submit" class="vh-btn vh-btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
-      </td>
-    </tr>{% endfor %}
-  </tbody></table></div>
+  <!-- Bulk action bar -->
+  <div id="bulkBarW" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;gap:12px">
+    <input type="checkbox" id="selectAllW" onchange="togAllW(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb">
+    <span id="bulkCountW" style="font-size:14px;font-weight:600"></span>
+    <button type="button" class="vh-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" onclick="bulkDelW()">Xoa da chon</button>
+    <button type="button" class="vh-btn vh-btn-ghost" style="padding:4px 10px;font-size:13px" onclick="clearW()">Bo chon</button>
+    <div style="flex:1"></div>
+    <button type="button" class="vh-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444;opacity:0.8" onclick="bulkDelAllW()">Xoa tat ca ({{ widgets|length }})</button>
+  </div>
+
+  <div style="display:grid;gap:16px">
+    {% for w in widgets %}
+    <div class="widget-card-w" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;{% if not w.is_active %}opacity:0.6{% endif %}" data-id="{{ w.id }}">
+      <div style="display:flex;align-items:start;gap:16px">
+        <!-- Checkbox + Position -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <input type="checkbox" class="wid-check" value="{{ w.id }}" onchange="upBarW()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--text-dim)">
+            {{ w.position }}
+          </div>
+        </div>
+        <!-- Widget Info -->
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+            <h3 style="font-size:16px;margin:0;font-weight:700">{{ w.name }}</h3>
+            {% if w.is_active %}
+            <span class="vh-badge" style="background:#d1fae5;color:#065f46">ACTIVE</span>
+            {% else %}
+            <span class="vh-badge" style="background:var(--surface2);color:var(--text-dim)">HIDDEN</span>
+            {% endif %}
+          </div>
+          {% if w.description %}
+          <div style="font-size:14px;color:var(--text-dim);margin-bottom:12px">{{ w.description }}</div>
+          {% endif %}
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px">
+            <div><div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Network</div><div style="font-size:14px;font-weight:600;text-transform:uppercase">{{ w.network }}</div></div>
+            <div><div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Placement</div><div style="font-size:14px;font-weight:600">{{ w.placement.replace('_', ' ').title() if w.placement else '-' }}</div></div>
+            <div><div style="font-size:14px;color:var(--text-dim);margin-bottom:2px">Created</div><div style="font-size:14px;font-weight:600">{{ w.created_at.strftime('%d/%m/%Y') }}</div></div>
+          </div>
+          <details style="margin-top:16px">
+            <summary style="cursor:pointer;font-size:14px;color:var(--text-dim);user-select:none">Xem embed code</summary>
+            <div style="margin-top:8px;background:var(--surface2);padding:12px;border-radius:6px;max-height:200px;overflow-y:auto">
+              <pre style="margin:0;font-family:'DM Mono',monospace;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-all">{{ w.embed_code }}</pre>
+            </div>
+          </details>
+        </div>
+        <!-- Actions -->
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+          <a href="{{ url_for('admin_voucher_widget_edit', wid=w.id) }}" class="vh-btn vh-btn-primary" style="padding:6px 12px;font-size:13px">Edit</a>
+          <form method="POST" action="{{ url_for('admin_voucher_widget_toggle', wid=w.id) }}" style="margin:0">
+            <button type="submit" class="vh-btn vh-btn-ghost" style="padding:6px 12px;font-size:13px;width:100%">{% if w.is_active %}Hide{% else %}Show{% endif %}</button>
+          </form>
+          <form method="POST" action="{{ url_for('admin_voucher_widget_delete', wid=w.id) }}" onsubmit="return confirm('Xoa widget nay?')" style="margin:0">
+            <button type="submit" class="vh-btn" style="padding:6px 12px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444">Del</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Info Box -->
+  <div style="background:rgba(59,130,246,0.05);border:2px solid rgba(59,130,246,0.2);border-radius:12px;padding:24px;margin-top:24px">
+    <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">Huong dan</h3>
+    <ul style="font-size:14px;color:var(--text-dim);margin:0;padding-left:20px;line-height:1.8">
+      <li><strong>AccessTrade:</strong> Copy embed code tu tool tao widget voucher → Paste vao day</li>
+      <li><strong>Position:</strong> So thu tu hien thi (1 = tren cung, 2 = duoi...)</li>
+      <li><strong>Placement:</strong> Chon noi hien thi widget (voucher_page, sidebar, homepage...)</li>
+      <li><strong>Hide/Show:</strong> Tat/bat hien thi widget ma khong can xoa</li>
+    </ul>
+  </div>
   {% else %}
-  <div style="text-align:center;padding:48px 20px;color:var(--text-dim)"><div style="font-size:42px;margin-bottom:10px">&#128296;</div><h3 style="font-size:17px;margin-bottom:6px">No widgets</h3><p style="font-size:14px">Create a voucher widget to display vouchers on your site.</p></div>
+  <div style="text-align:center;padding:48px 20px;color:var(--text-dim)"><div style="font-size:42px;margin-bottom:10px">&#128296;</div><h3 style="font-size:17px;margin-bottom:6px">Chua co widget nao</h3><p style="font-size:14px">Them embed code tu AccessTrade hoac affiliate networks khac.</p><a href="{{ url_for('admin_voucher_widget_new') }}" class="vh-btn vh-btn-primary" style="margin-top:12px">+ New Widget</a></div>
   {% endif %}
 </div>
 {% endif %}
@@ -302,37 +365,121 @@
      ══════════════════════════════════════════════ -->
 {% if active_tab == 'hotdeals' %}
 <div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h2 style="margin:0;font-size:18px">Hot Deals ({{ deals|length }})</h2>
-    <div style="display:flex;gap:8px">
-      <a href="{{ url_for('admin_hotdeals_upload') }}" class="vh-btn vh-btn-primary">Upload Deals</a>
-      <form method="POST" action="{{ url_for('admin_hotdeals_delete_all') }}" style="display:inline"><button type="submit" class="vh-btn" style="background:rgba(239,68,68,.1);color:#ef4444" onclick="return confirm('Delete ALL deals?')">Delete All</button></form>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+    <h2 style="margin:0;font-size:18px">Hot Deals</h2>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <form method="POST" action="{{ url_for('admin_hotdeals_upload') }}" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center">
+        <input type="file" name="file" accept=".xlsx,.xls" required style="font-size:14px;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--surface)">
+        <button type="submit" class="vh-btn vh-btn-primary">Upload Excel</button>
+      </form>
+      {% if deals %}
+      <form method="POST" action="{{ url_for('admin_hotdeals_delete_all') }}" onsubmit="return confirm('Xoa tat ca deal?')">
+        <button type="submit" class="vh-btn" style="background:rgba(239,68,68,.1);color:#ef4444">Xoa tat ca</button>
+      </form>
+      {% endif %}
     </div>
   </div>
+
+  <!-- Stats -->
+  <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+    {% set active_deals = deals|selectattr('is_active')|list %}
+    {% set valid_deals = [] %}
+    {% for d in active_deals %}
+      {% if d.end_date > now %}
+        {% if valid_deals.append(d) %}{% endif %}
+      {% endif %}
+    {% endfor %}
+    <div class="vh-badge" style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px">Tong: <strong>{{ deals|length }}</strong></div>
+    <div class="vh-badge" style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px;color:#22c55e">Dang hoat dong: <strong>{{ valid_deals|length }}</strong></div>
+    <div class="vh-badge" style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px;color:#ef4444">Het han: <strong>{{ deals|length - valid_deals|length }}</strong></div>
+  </div>
+
+  <p style="color:var(--text-dim);margin-bottom:16px;font-size:14px">
+    Upload file Excel (Hot_deal.xlsx) tu AccessTrade de import deal. Deal het han (End Date &lt; hien tai) se tu dong an khoi trang Shop va Voucher.<br>
+    Format: Name | Campaign | Product Link | Start Date | End Date | Status | Hot Day | Banner (JSON) | Detail
+  </p>
+
   {% if deals %}
-  <div class="vh-table-wrap"><table><thead><tr><th>Deal</th><th>Campaign</th><th>Period</th><th>Status</th><th>Active</th><th></th></tr></thead><tbody>
+  <!-- Bulk action bar -->
+  <div id="bulkBarHD" style="display:none;position:sticky;top:0;z-index:50;background:var(--accent);color:#fff;padding:10px 20px;border-radius:12px;margin-bottom:12px;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+    <span>Da chon <strong id="bulkCountHD">0</strong> deal</span>
+    <button class="vh-btn" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:4px 10px;font-size:13px" onclick="bulkDelHD()">Xoa da chon</button>
+    <button class="vh-btn" style="background:rgba(255,255,255,.1);color:#fff;border:none;padding:4px 10px;font-size:13px;margin-left:auto" onclick="togAllHD(false)">Bo chon</button>
+  </div>
+  <div class="vh-table-wrap"><table><thead><tr>
+    <th style="width:40px"><input type="checkbox" id="checkAllHD" onchange="togAllHD(this.checked)" title="Chon tat ca"></th>
+    <th>Campaign</th>
+    <th>Ten deal</th>
+    <th>Banner</th>
+    <th>Bat dau</th>
+    <th>Ket thuc</th>
+    <th>Trang thai</th>
+    <th style="width:140px">Thao tac</th>
+  </tr></thead><tbody>
     {% for d in deals %}
-    {% set deal_banners = d.get_banner_urls() %}
-    <tr>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        {% if deal_banners %}<img src="{{ deal_banners[0] }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'">{% endif %}
-        <div>
-          <strong>{{ d.name[:50] }}</strong>
-          {% if d.hot_day %}<br><span style="font-size:12px;color:var(--text-dim)">{{ d.hot_day }}</span>{% endif %}
-        </div>
-      </div></td>
-      <td>{{ d.campaign or '-' }}</td>
-      <td style="font-size:13px;white-space:nowrap">{{ d.start_date.strftime('%d/%m/%Y') }} - {{ d.end_date.strftime('%d/%m/%Y') }}</td>
-      <td>{% if d.status %}<span class="vh-badge" style="background:#fef3c7;color:#92400e">{{ d.status }}</span>{% endif %}</td>
-      <td>{% if d.is_active and d.is_valid() %}<span class="vh-badge" style="background:#d1fae5;color:#065f46">Yes</span>{% elif d.is_active and not d.is_valid() %}<span class="vh-badge" style="background:#fef3c7;color:#92400e">Expired</span>{% else %}<span class="vh-badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+    <tr style="{% if d.end_date < now or not d.is_active %}opacity:0.5{% endif %}">
+      <td><input type="checkbox" class="hd-check" value="{{ d.id }}" onchange="upBulkHD()"></td>
       <td>
-        <form method="POST" action="{{ url_for('admin_hotdeal_toggle', deal_id=d.id) }}" style="display:inline"><button type="submit" class="vh-btn vh-btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
-        <form method="POST" action="{{ url_for('admin_hotdeal_delete', deal_id=d.id) }}" style="display:inline"><button type="submit" class="vh-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" onclick="return confirm('Delete?')">Del</button></form>
+        <strong>{{ d.campaign or '—' }}</strong>
+        {% if d.product_link %}
+        <br><a href="{{ d.product_link }}" target="_blank" style="font-size:12px;color:var(--accent)">Link &#8599;</a>
+        {% endif %}
       </td>
-    </tr>{% endfor %}
+      <td style="max-width:300px">
+        <div style="font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
+          {{ d.name }}
+        </div>
+      </td>
+      <td>
+        {% set deal_banners = d.get_banner_urls() %}
+        {% if deal_banners %}
+        <div style="display:flex;gap:4px">
+          {% for url in deal_banners[:2] %}
+          <img src="{{ url }}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--border)" onerror="this.style.display='none'" loading="lazy">
+          {% endfor %}
+          {% if deal_banners|length > 2 %}
+          <span style="font-size:12px;color:var(--text-dim);align-self:center">+{{ deal_banners|length - 2 }}</span>
+          {% endif %}
+        </div>
+        {% else %}
+        <span style="color:var(--text-dim)">—</span>
+        {% endif %}
+      </td>
+      <td style="white-space:nowrap;font-size:13px">{{ d.start_date.strftime('%d/%m/%Y') if d.start_date else '—' }}</td>
+      <td style="white-space:nowrap;font-size:13px">
+        {{ d.end_date.strftime('%d/%m/%Y %H:%M') if d.end_date else '—' }}
+        {% if d.end_date and d.end_date < now %}
+        <br><span style="color:#ef4444;font-size:11px;font-weight:600">HET HAN</span>
+        {% elif d.end_date %}
+        <br><span style="color:#22c55e;font-size:11px;font-weight:600">CON HAN</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if d.is_active and d.end_date > now %}
+        <span class="vh-badge" style="background:rgba(34,197,94,0.1);color:#22c55e">Hien thi</span>
+        {% elif not d.is_active %}
+        <span class="vh-badge" style="background:var(--surface2);color:var(--text-dim)">An</span>
+        {% else %}
+        <span class="vh-badge" style="background:rgba(239,68,68,0.1);color:#ef4444">Het han</span>
+        {% endif %}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <form method="POST" action="{{ url_for('admin_hotdeal_toggle', deal_id=d.id) }}">
+            <button type="submit" class="vh-btn vh-btn-ghost" style="padding:4px 10px;font-size:13px" title="{{ 'Tat' if d.is_active else 'Bat' }}">
+              {% if d.is_active %}&#128065;{% else %}&#128064;{% endif %}
+            </button>
+          </form>
+          <form method="POST" action="{{ url_for('admin_hotdeal_delete', deal_id=d.id) }}" onsubmit="return confirm('Xoa deal nay?')">
+            <button type="submit" class="vh-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" title="Xoa">&#128465;</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
   </tbody></table></div>
   {% else %}
-  <div style="text-align:center;padding:48px 20px;color:var(--text-dim)"><div style="font-size:42px;margin-bottom:10px">&#128293;</div><h3 style="font-size:17px;margin-bottom:6px">No hot deals</h3><p style="font-size:14px">Upload deals to get started.</p></div>
+  <div style="text-align:center;padding:48px 20px;color:var(--text-dim)"><div style="font-size:42px;margin-bottom:10px">&#128293;</div><h3 style="font-size:17px;margin-bottom:6px">Chua co Hot Deal nao</h3><p style="font-size:14px">Upload file Excel (Hot_deal.xlsx) de bat dau import deal.</p></div>
   {% endif %}
 </div>
 {% endif %}
@@ -385,26 +532,136 @@
       <form method="POST" action="{{ url_for('admin_at_banners_delete_all') }}" style="display:inline"><button type="submit" class="vh-btn" style="background:rgba(239,68,68,.1);color:#ef4444" onclick="return confirm('Delete ALL?')">Delete All</button></form>
     </div>
   </div>
+  <!-- Stats -->
+  <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+    {% set active_banners = at_banners|selectattr('is_active')|list %}
+    {% set valid_list = [] %}
+    {% for b in active_banners %}
+      {% if not b.end_date or b.end_date > now %}
+        {% if valid_list.append(b) %}{% endif %}
+      {% endif %}
+    {% endfor %}
+    {% set hotdeal_count = at_banners|selectattr('placement','in',['hotdeal','both'])|list|length %}
+    {% set sidebar_count = at_banners|selectattr('placement','in',['sidebar','both'])|list|length %}
+    {% set total_clicks = at_banners|map(attribute='clicks')|sum %}
+    <div style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px">Tong: <strong>{{ at_banners|length }}</strong></div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px;color:#22c55e">Dang hoat dong: <strong>{{ valid_list|length }}</strong></div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px;color:#3b82f6">HotDeal: <strong>{{ hotdeal_count }}</strong></div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px;color:#f59e0b">Sidebar: <strong>{{ sidebar_count }}</strong></div>
+    <div style="background:var(--surface);border:1px solid var(--border);padding:8px 16px;font-size:14px;border-radius:8px;color:#8b5cf6">Clicks: <strong>{{ total_clicks }}</strong></div>
+  </div>
+
+  <p style="color:var(--text-dim);margin-bottom:16px;font-size:14px">
+    Bam <strong>Sync Banners</strong> de tu dong pull offers/coupons tu API. Banner se hien thi tren trang Shop (HotDeal carousel) va Sidebar.<br>
+    Vi tri: <strong>hotdeal</strong> = carousel, <strong>sidebar</strong> = sidebar widget, <strong>both</strong> = ca hai.
+  </p>
+
   {% if at_banners %}
-  <div class="vh-table-wrap"><table><thead><tr><th>Banner</th><th>Merchant</th><th>Discount</th><th>Placement</th><th>Clicks</th><th>Active</th><th></th></tr></thead><tbody>
-    {% for b in at_banners %}<tr>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        {% if b.image_url %}<img src="{{ b.image_url }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover" onerror="this.style.display='none'">{% endif %}
-        <strong>{{ b.offer_name[:50] }}</strong>
-      </div></td>
-      <td>{{ b.merchant or '-' }}</td>
-      <td>{% if b.discount_text %}<span class="vh-badge" style="background:#fef3c7;color:#92400e">{{ b.discount_text }}</span>{% endif %}</td>
-      <td>{{ b.placement or '-' }}</td>
-      <td>{{ b.clicks or 0 }}</td>
-      <td>{% if b.is_active %}<span class="vh-badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="vh-badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+  <!-- Bulk action bar -->
+  <div id="bulkBarBN" style="display:none;position:sticky;top:0;z-index:50;background:var(--accent);color:#fff;padding:10px 20px;border-radius:12px;margin-bottom:12px;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+    <span>Da chon <strong id="bulkCountBN">0</strong> banner</span>
+    <button class="vh-btn" style="background:rgba(255,255,255,.2);color:#fff;border:none;padding:4px 10px;font-size:13px" onclick="bulkDelBN()">Xoa da chon</button>
+    <button class="vh-btn" style="background:rgba(255,255,255,.1);color:#fff;border:none;padding:4px 10px;font-size:13px;margin-left:auto" onclick="togAllBN(false)">Bo chon</button>
+  </div>
+  <div class="vh-table-wrap" style="max-height:600px;overflow-y:auto"><table><thead style="position:sticky;top:0;z-index:2"><tr>
+    <th style="width:40px"><input type="checkbox" id="checkAllBN" onchange="togAllBN(this.checked)" title="Chon tat ca"></th>
+    <th style="width:70px">Anh</th>
+    <th>Merchant</th>
+    <th>Ten offer</th>
+    <th style="width:80px">Giam gia</th>
+    <th style="width:80px">Vi tri</th>
+    <th style="width:90px">Het han</th>
+    <th style="width:50px">Clicks</th>
+    <th style="width:80px">Trang thai</th>
+    <th style="width:140px">Thao tac</th>
+  </tr></thead><tbody>
+    {% for b in at_banners %}
+    <tr style="{% if (b.end_date and b.end_date < now) or not b.is_active %}opacity:0.5{% endif %}">
+      <td><input type="checkbox" class="bn-check" value="{{ b.id }}" onchange="upBulkBN()"></td>
       <td>
-        <form method="POST" action="{{ url_for('admin_at_banner_toggle', banner_id=b.id) }}" style="display:inline"><button type="submit" class="vh-btn vh-btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
-        <form method="POST" action="{{ url_for('admin_at_banner_delete', banner_id=b.id) }}" style="display:inline"><button type="submit" class="vh-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" onclick="return confirm('Delete?')">Del</button></form>
+        {% if b.image_url %}
+        <img src="{{ b.image_url }}" style="width:60px;height:40px;object-fit:contain;border-radius:4px;border:1px solid var(--border);background:#f9f9f9" onerror="this.style.display='none'" loading="lazy">
+        {% elif b.merchant_logo %}
+        <img src="{{ b.merchant_logo }}" style="width:40px;height:40px;object-fit:contain;border-radius:4px" onerror="this.style.display='none'" loading="lazy">
+        {% else %}
+        <span style="color:var(--text-dim)">—</span>
+        {% endif %}
       </td>
-    </tr>{% endfor %}
+      <td>
+        <strong>{{ b.merchant or '—' }}</strong>
+        {% if b.category %}
+        <br><span style="font-size:11px;color:var(--text-dim)">{{ b.category }}</span>
+        {% endif %}
+      </td>
+      <td style="max-width:250px">
+        <div style="font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
+          {{ b.offer_name }}
+        </div>
+        {% if b.aff_link %}
+        <a href="{{ b.aff_link }}" target="_blank" rel="nofollow noopener" style="font-size:11px;color:var(--accent)">Link &#8599;</a>
+        {% endif %}
+      </td>
+      <td>
+        {% if b.discount_text %}
+        <span class="vh-badge" style="background:rgba(249,115,22,0.1);color:#f97316">{{ b.discount_text }}</span>
+        {% else %}
+        <span style="color:var(--text-dim)">—</span>
+        {% endif %}
+      </td>
+      <td>
+        <form method="POST" action="{{ url_for('admin_at_banner_placement', banner_id=b.id) }}" style="margin:0">
+          <select name="placement" onchange="this.form.submit()" style="font-size:12px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--text)">
+            <option value="hotdeal" {% if b.placement == 'hotdeal' %}selected{% endif %}>HotDeal</option>
+            <option value="sidebar" {% if b.placement == 'sidebar' %}selected{% endif %}>Sidebar</option>
+            <option value="both" {% if b.placement == 'both' %}selected{% endif %}>Both</option>
+          </select>
+        </form>
+      </td>
+      <td style="white-space:nowrap;font-size:12px">
+        {% if b.end_date %}
+          {{ b.end_date.strftime('%d/%m/%Y') }}
+          {% if b.end_date < now %}
+          <br><span style="color:#ef4444;font-size:11px;font-weight:600">HET HAN</span>
+          {% else %}
+          <br><span style="color:#22c55e;font-size:11px;font-weight:600">CON HAN</span>
+          {% endif %}
+        {% else %}
+        <span style="color:var(--text-dim)">—</span>
+        {% endif %}
+      </td>
+      <td style="text-align:center;font-weight:600">{{ b.clicks or 0 }}</td>
+      <td>
+        {% if b.is_active and (not b.end_date or b.end_date > now) %}
+        <span class="vh-badge" style="background:rgba(34,197,94,0.1);color:#22c55e">Hien thi</span>
+        {% elif not b.is_active %}
+        <span class="vh-badge" style="background:var(--surface2);color:var(--text-dim)">An</span>
+        {% else %}
+        <span class="vh-badge" style="background:rgba(239,68,68,0.1);color:#ef4444">Het han</span>
+        {% endif %}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px">
+          <form method="POST" action="{{ url_for('admin_at_banner_toggle', banner_id=b.id) }}">
+            <button type="submit" class="vh-btn vh-btn-ghost" style="padding:4px 10px;font-size:13px" title="{{ 'Tat' if b.is_active else 'Bat' }}">
+              {% if b.is_active %}&#128065;{% else %}&#128064;{% endif %}
+            </button>
+          </form>
+          <form method="POST" action="{{ url_for('admin_at_banner_delete', banner_id=b.id) }}" onsubmit="return confirm('Xoa banner nay?')">
+            <button type="submit" class="vh-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" title="Xoa">&#128465;</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
   </tbody></table></div>
+  <p style="margin-top:8px;color:var(--text-dim);font-size:13px">
+    Hien thi {{ at_banners|length }} banner.
+    {% if at_banners[0].synced_at %}
+    Lan sync cuoi: {{ at_banners[0].synced_at.strftime('%d/%m/%Y %H:%M') }}
+    {% endif %}
+  </p>
   {% else %}
-  <div style="text-align:center;padding:48px 20px;color:var(--text-dim)"><div style="font-size:42px;margin-bottom:10px">&#127912;</div><h3 style="font-size:17px;margin-bottom:6px">No banners</h3><p style="font-size:14px">Sync from AccessTrade to get started.</p></div>
+  <div style="text-align:center;padding:48px 20px;color:var(--text-dim)"><div style="font-size:42px;margin-bottom:10px">&#127912;</div><h3 style="font-size:17px;margin-bottom:6px">Chua co banner nao</h3><p style="font-size:14px">Bam <strong>Sync Banners</strong> de tu dong pull offers va coupons tu API.</p></div>
   {% endif %}
 </div>
 {% endif %}
@@ -661,5 +918,54 @@ async function saveAutoSync() {
 }
 
 if (document.getElementById('merchantFilter')) document.addEventListener('DOMContentLoaded', loadMerchants);
+
+// ── Widgets bulk JS ──
+function gCkW(){return Array.from(document.querySelectorAll('.wid-check:checked'))}
+function togAllW(m){var c=typeof m==='boolean'?m:m.checked;document.querySelectorAll('.wid-check').forEach(function(cb){cb.checked=c;cb.closest('.widget-card-w').style.outline=c?'2px solid #2563eb':'none'});upBarW()}
+function upBarW(){
+  var ck=gCkW(),bar=document.getElementById('bulkBarW'),t=document.querySelectorAll('.wid-check').length,m=document.getElementById('selectAllW');
+  if(!bar)return;bar.style.display=ck.length>0?'flex':'none';
+  var cnt=document.getElementById('bulkCountW');if(cnt)cnt.textContent='Da chon '+ck.length+' / '+t;
+  if(m){m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;}
+  document.querySelectorAll('.wid-check').forEach(function(c){c.closest('.widget-card-w').style.outline=c.checked?'2px solid #2563eb':'none'});
+}
+function clearW(){var m=document.getElementById('selectAllW');if(m)m.checked=false;document.querySelectorAll('.wid-check').forEach(function(c){c.checked=false;c.closest('.widget-card-w').style.outline='none'});upBarW()}
+function bulkDelW(){var ck=gCkW();if(!ck.length)return;if(!confirm('Xoa '+ck.length+' widget da chon?'))return;
+  fetch('{{ url_for("admin_voucher_widgets_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+function bulkDelAllW(){var t=document.querySelectorAll('.wid-check').length;if(!confirm('Xoa TAT CA '+t+' widget?'))return;
+  var ids=Array.from(document.querySelectorAll('.wid-check')).map(function(c){return parseInt(c.value)});
+  fetch('{{ url_for("admin_voucher_widgets_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+
+// ── Hot Deals bulk JS ──
+function togAllHD(checked){document.querySelectorAll('.hd-check').forEach(function(c){c.checked=checked});var m=document.getElementById('checkAllHD');if(m)m.checked=checked;upBulkHD()}
+function upBulkHD(){
+  var checked=document.querySelectorAll('.hd-check:checked'),bar=document.getElementById('bulkBarHD');
+  if(!bar)return;
+  if(checked.length>0){bar.style.display='flex';document.getElementById('bulkCountHD').textContent=checked.length;}else{bar.style.display='none';}
+  var all=document.querySelectorAll('.hd-check'),m=document.getElementById('checkAllHD');
+  if(m)m.checked=all.length>0&&checked.length===all.length;
+}
+function bulkDelHD(){
+  var ids=[].slice.call(document.querySelectorAll('.hd-check:checked')).map(function(c){return c.value});
+  if(!ids.length)return;if(!confirm('Xoa '+ids.length+' deal da chon?'))return;
+  fetch('{{ url_for("admin_hotdeals_bulk_delete_selected") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+
+// ── AT Banners bulk JS ──
+function togAllBN(checked){document.querySelectorAll('.bn-check').forEach(function(c){c.checked=checked});var m=document.getElementById('checkAllBN');if(m)m.checked=checked;upBulkBN()}
+function upBulkBN(){
+  var checked=document.querySelectorAll('.bn-check:checked'),bar=document.getElementById('bulkBarBN');
+  if(!bar)return;
+  if(checked.length>0){bar.style.display='flex';document.getElementById('bulkCountBN').textContent=checked.length;}else{bar.style.display='none';}
+  var all=document.querySelectorAll('.bn-check'),m=document.getElementById('checkAllBN');
+  if(m)m.checked=all.length>0&&checked.length===all.length;
+}
+function bulkDelBN(){
+  var ids=[].slice.call(document.querySelectorAll('.bn-check:checked')).map(function(c){return c.value});
+  if(!ids.length)return;if(!confirm('Xoa '+ids.length+' banner da chon?'))return;
+  fetch('{{ url_for("admin_at_banners_bulk_delete_selected") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
 </script>
 {% endblock %}

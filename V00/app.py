@@ -630,27 +630,36 @@ def admin_products_hub():
     ctx = {'active_tab': tab}
 
     if tab == 'products':
-        f_vertical = request.args.get('vertical', 'all')
-        f_network = request.args.get('network', 'all')
-        f_status = request.args.get('status', 'all')
+        f_vertical = request.args.get('vertical', '')
+        f_network = request.args.get('network', '')
+        f_status = request.args.get('status', '')
         f_search = request.args.get('q', '')
         page = request.args.get('page', 1, type=int)
         per_page = 50
 
-        query = AffiliateLink.query
-        if f_vertical != 'all':
-            query = query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == f_vertical)
-        if f_network != 'all':
-            query = query.filter_by(network=f_network)
-        if f_status == 'active':
-            query = query.filter_by(is_active=True)
-        elif f_status == 'inactive':
-            query = query.filter_by(is_active=False)
-        if f_search:
-            query = query.filter(AffiliateLink.product_name.ilike(f'%{f_search}%'))
+        q = db.session.query(AffiliateLink, Part, Zone, Segment, Vertical).join(
+            Part, AffiliateLink.part_id == Part.id
+        ).join(Zone, Part.zone_id == Zone.id
+        ).join(Segment, Zone.segment_id == Segment.id
+        ).join(Vertical, Segment.vertical_id == Vertical.id)
 
-        total_q = query.count()
-        products = query.order_by(AffiliateLink.id.desc()).offset((page - 1) * per_page).limit(per_page).all()
+        if f_vertical:
+            q = q.filter(Vertical.slug == f_vertical)
+        if f_network:
+            q = q.filter(AffiliateLink.network == f_network)
+        if f_status == 'active':
+            q = q.filter(AffiliateLink.is_active == True)
+        elif f_status == 'inactive':
+            q = q.filter(AffiliateLink.is_active == False)
+        if f_search:
+            q = q.filter(db.or_(
+                AffiliateLink.product_name.ilike(f'%{f_search}%'),
+                Part.name_vi.ilike(f'%{f_search}%'),
+                AffiliateLink.url.ilike(f'%{f_search}%')
+            ))
+
+        pagination = q.order_by(AffiliateLink.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        products = pagination.items
         verticals = Vertical.query.order_by(Vertical.name).all()
         networks = db.session.query(AffiliateLink.network).distinct().all()
 
@@ -662,7 +671,7 @@ def admin_products_hub():
         ctx.update(products=products, verticals=verticals, networks=[n[0] for n in networks],
                    f_vertical=f_vertical, f_network=f_network, f_status=f_status, f_search=f_search,
                    total=total_all, active=active, total_clicks=total_clicks, total_conv=total_conv,
-                   page=page, total_pages=(total_q + per_page - 1) // per_page)
+                   pagination=pagination, page=page)
 
     elif tab == 'affiliate':
         networks = db.session.query(
@@ -686,35 +695,43 @@ def admin_hotels_hub():
     ctx = {'active_tab': tab}
 
     if tab == 'hotels':
-        f_dest = request.args.get('dest', 'all')
-        f_stars = request.args.get('stars', 'all')
-        f_status = request.args.get('status', 'all')
+        f_dest = request.args.get('dest', '')
+        f_stars = request.args.get('stars', '')
+        f_status = request.args.get('status', '')
+        f_image = request.args.get('image', '')
         page = request.args.get('page', 1, type=int)
-        per_page = 50
+        per_page = 30
 
         query = Hotel.query
-        if f_dest != 'all':
-            query = query.filter_by(destination=f_dest)
-        if f_stars != 'all':
-            query = query.filter_by(stars=int(f_stars))
+        if f_dest:
+            query = query.filter(Hotel.destination == f_dest)
+        if f_stars:
+            query = query.filter(Hotel.stars == int(f_stars))
         if f_status == 'active':
-            query = query.filter_by(is_active=True)
+            query = query.filter(Hotel.is_active == True)
         elif f_status == 'inactive':
-            query = query.filter_by(is_active=False)
+            query = query.filter(Hotel.is_active == False)
+        if f_image == 'missing':
+            query = query.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
+        elif f_image == 'has':
+            query = query.filter(Hotel.image_url != '', Hotel.image_url != None)
 
         total_filtered = query.count()
-        hotels = query.order_by(Hotel.id.desc()).offset((page - 1) * per_page).limit(per_page).all()
-        destinations = db.session.query(Hotel.destination).distinct().order_by(Hotel.destination).all()
+        hotels = query.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).offset((page - 1) * per_page).limit(per_page).all()
+        destinations = db.session.query(Hotel.destination, Hotel.destination_name).distinct().all()
 
         total = Hotel.query.count()
         active_h = Hotel.query.filter_by(is_active=True).count()
         no_image = Hotel.query.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
         total_clicks = db.session.query(sqlfunc.sum(Hotel.clicks)).scalar() or 0
+        total_conv = db.session.query(sqlfunc.sum(Hotel.conversions)).scalar() or 0
 
-        ctx.update(hotels=hotels, destinations=[d[0] for d in destinations],
-                   f_dest=f_dest, f_stars=f_stars, f_status=f_status,
-                   total=total, active_h=active_h, no_image=no_image, total_clicks=total_clicks,
-                   page=page, total_pages=(total_filtered + per_page - 1) // per_page)
+        ctx.update(hotels=hotels, destinations=destinations,
+                   f_dest=f_dest, f_stars=f_stars, f_status=f_status, f_image=f_image,
+                   total=total, active_h=active_h, no_image=no_image,
+                   total_clicks=total_clicks, total_conv=total_conv,
+                   page=page, per_page=per_page, total_filtered=total_filtered,
+                   total_pages=(total_filtered + per_page - 1) // per_page)
 
     elif tab == 'sync':
         from agoda_integration import get_agoda_api, VIETNAM_DESTINATIONS

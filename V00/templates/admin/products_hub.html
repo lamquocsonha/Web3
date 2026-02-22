@@ -41,62 +41,161 @@
 <!-- ══ PRODUCTS TAB ══ -->
 <div class="hub-panel {% if active_tab=='products' %}active{% endif %}">
 {% if active_tab == 'products' %}
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <h2 style="margin:0;font-size:18px">Products</h2>
-    <div style="display:flex;gap:8px">
-      <a href="{{ url_for('admin_product_new') }}" class="btn btn-primary">+ New</a>
-      <a href="{{ url_for('admin_products_import_csv') }}" class="btn btn-ghost">Import CSV</a>
-      <a href="{{ url_for('admin_products_datafeeds') }}" class="btn btn-ghost">Datafeeds</a>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <h2 style="margin:0;font-size:18px">Product Management</h2>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      {% if total > 0 %}
+      <div style="position:relative;display:inline-block">
+        <button type="button" class="btn btn-danger" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'" style="font-size:13px;padding:6px 12px">Xoa hang loat</button>
+        <div style="display:none;position:absolute;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;min-width:280px;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,.15)">
+          <p style="font-size:14px;font-weight:700;margin-bottom:10px">Xoa san pham</p>
+          {% if f_vertical or f_network %}
+          <form method="POST" action="{{ url_for('admin_products_bulk_delete') }}" onsubmit="return confirm('Xoa tat ca san pham theo filter?')">
+            <input type="hidden" name="action" value="delete_filtered">
+            <input type="hidden" name="vertical" value="{{ f_vertical }}">
+            <input type="hidden" name="network" value="{{ f_network }}">
+            <button type="submit" class="btn btn-danger" style="width:100%;margin-bottom:8px;font-size:13px">Xoa theo filter {% if f_vertical %}({{ f_vertical }}){% endif %}{% if f_network %}({{ f_network }}){% endif %}</button>
+          </form>
+          {% endif %}
+          <form method="POST" action="{{ url_for('admin_products_bulk_delete') }}" onsubmit="return confirm('XOA TOAN BO {{ total }} SAN PHAM?')">
+            <input type="hidden" name="action" value="delete_all">
+            <button type="submit" class="btn" style="width:100%;font-size:13px;background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b">Reset toan bo ({{ "{:,}".format(total) }})</button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+      <a href="{{ url_for('admin_ai_center') }}" class="btn" style="background:linear-gradient(135deg,#8b5cf6,#3b82f6);color:#fff;font-size:13px;padding:6px 12px">AI Control</a>
+      <a href="{{ url_for('admin_products_import_csv') }}" class="btn btn-ghost" style="font-size:13px;padding:6px 12px">Import CSV</a>
+      <a href="{{ url_for('admin_products_datafeeds') }}" class="btn" style="background:#f59e0b;color:#fff;font-size:13px;padding:6px 12px">Datafeeds</a>
+      <form method="POST" action="{{ url_for('admin_products_reclassify_hub') }}" style="display:inline" onsubmit="return confirm('Re-classify Hub products?')">
+        <button type="submit" class="btn" style="background:#10b981;color:#fff;font-size:13px;padding:6px 12px">Re-classify Hub</button>
+      </form>
+      <a href="{{ url_for('admin_product_new') }}" class="btn btn-primary" style="font-size:13px;padding:6px 12px">+ Add Product</a>
     </div>
   </div>
+
+  <!-- Stats -->
   <div class="stats-row">
     <div class="stat-box"><div class="stat-val">{{ total }}</div><div class="stat-lbl">Total</div></div>
     <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ active }}</div><div class="stat-lbl">Active</div></div>
     <div class="stat-box"><div class="stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="stat-lbl">Clicks</div></div>
     <div class="stat-box"><div class="stat-val" style="color:#f59e0b">{{ "{:,}".format(total_conv) }}</div><div class="stat-lbl">Conversions</div></div>
   </div>
+
+  <!-- Filters -->
   <form class="filter-bar" method="GET">
     <input type="hidden" name="tab" value="products">
-    <select name="vertical" onchange="this.form.submit()">
-      <option value="all">All Verticals</option>
+    <select name="vertical" style="width:140px">
+      <option value="">All Verticals</option>
       {% for v in verticals %}<option value="{{ v.slug }}" {% if f_vertical==v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>{% endfor %}
     </select>
-    <select name="network" onchange="this.form.submit()">
-      <option value="all">All Networks</option>
+    <select name="network" style="width:140px">
+      <option value="">All Networks</option>
       {% for n in networks %}<option value="{{ n }}" {% if f_network==n %}selected{% endif %}>{{ n }}</option>{% endfor %}
     </select>
-    <select name="status" onchange="this.form.submit()">
-      <option value="all">All Status</option>
+    <select name="status" style="width:120px">
+      <option value="">All Status</option>
       <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
       <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
     </select>
-    <input type="text" name="q" value="{{ f_search }}" placeholder="Search..." style="min-width:180px">
-    <button type="submit" class="btn btn-ghost">Filter</button>
+    <input type="text" name="q" value="{{ f_search }}" placeholder="Search name, URL..." style="min-width:200px">
+    <button type="submit" class="btn btn-ghost" style="font-size:13px">Filter</button>
+    {% if f_vertical or f_network or f_status or f_search %}
+    <a href="?tab=products" style="font-size:13px;color:var(--text-dim);text-decoration:none">Clear</a>
+    {% endif %}
   </form>
+
+  <!-- Tracking Link Tool -->
+  <details style="margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <summary style="padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer">Tao Link Affiliate (AccessTrade)</summary>
+    <div style="padding:0 18px 18px;border-top:1px solid var(--border)">
+      <p style="font-size:13px;color:var(--text-dim);margin:10px 0 14px">Dan URL san pham tu Shopee/Lazada/Tiki → affiliate link</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:140px"><label style="font-size:12px;color:var(--text-dim)">Campaign ID</label><input type="text" id="tlCampaignId" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);box-sizing:border-box"></div>
+        <div style="flex:3;min-width:200px"><label style="font-size:12px;color:var(--text-dim)">URLs (moi dong 1 URL)</label><textarea id="tlUrls" rows="2" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);box-sizing:border-box"></textarea></div>
+        <button class="btn btn-primary" onclick="createTrackingLinks()" id="tlBtn" style="font-size:13px">Tao Link</button>
+      </div>
+      <div id="tlResults" style="display:none;margin-top:14px">
+        <table style="width:100%;font-size:13px;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:6px">URL goc</th><th style="text-align:left;padding:6px">Affiliate Link</th><th style="text-align:left;padding:6px">Short Link</th><th></th></tr></thead><tbody id="tlBody"></tbody></table>
+      </div>
+    </div>
+  </details>
+
+  <!-- TikTok Shop Search -->
+  <details style="margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <summary style="padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer">TikTok Shop — Tim san pham</summary>
+    <div style="padding:0 18px 18px;border-top:1px solid var(--border)">
+      <p style="font-size:13px;color:var(--text-dim);margin:10px 0 14px">Tim san pham tren TikTok Shop va tao link affiliate</p>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div style="flex:2;min-width:200px"><label style="font-size:12px;color:var(--text-dim)">Tu khoa</label><input type="text" id="ttKeyword" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);box-sizing:border-box" placeholder="VD: ao thun nam, my pham..."></div>
+        <div style="flex:1;min-width:140px"><label style="font-size:12px;color:var(--text-dim)">Sap xep</label><select id="ttSort" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text)"><option value="RECOMMENDED">De xuat</option><option value="BEST_SELLERS">Ban chay</option><option value="HIGH_COMMISSION_RATE">Hoa hong cao</option><option value="LOW_PRICE">Gia thap</option><option value="HIGH_PRICE">Gia cao</option><option value="NEWLY_RELEASED">Moi nhat</option></select></div>
+        <button class="btn" onclick="tiktokSearch()" id="ttBtn" style="background:#000;color:#fff;font-size:13px">Tim</button>
+      </div>
+      <div id="ttResults" style="display:none;margin-top:14px"><div id="ttGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px"></div></div>
+    </div>
+  </details>
+
   {% if products %}
-  <div class="tbl-wrap"><table><thead><tr><th>Product</th><th>Network</th><th>Price</th><th>Clicks</th><th>Conv</th><th>Status</th><th></th></tr></thead><tbody>
-    {% for p in products %}<tr>
-      <td><div style="display:flex;align-items:center;gap:8px">
-        {% if p.image_url %}<img src="{{ p.image_url }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">{% endif %}
-        <div><strong style="font-size:14px">{{ p.product_name[:50] }}</strong></div>
+  <!-- Bulk action bar -->
+  <div id="bulkBar" style="display:none;position:sticky;top:0;z-index:50;background:var(--accent);color:#fff;padding:10px 20px;border-radius:10px;margin-bottom:12px;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+    <span>Da chon <strong id="bulkCount">0</strong> san pham</span>
+    <button class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:none;font-size:13px;padding:5px 12px" onclick="bulkDeleteSelected()">Xoa da chon</button>
+    <button class="btn" style="background:rgba(255,255,255,.1);color:#fff;border:none;font-size:13px;padding:5px 12px;margin-left:auto" onclick="toggleAll(false)">Bo chon</button>
+  </div>
+  <div class="tbl-wrap"><table><thead><tr>
+    <th style="width:36px"><input type="checkbox" id="checkAll" onchange="toggleAll(this.checked)"></th>
+    <th>Product</th>
+    <th>Vertical</th>
+    <th>Network</th>
+    <th style="text-align:right">Price</th>
+    <th style="text-align:center">Clicks</th>
+    <th>Status</th>
+    <th>Actions</th>
+  </tr></thead><tbody>
+    {% for al, part, zone, seg, vert in products %}<tr>
+      <td><input type="checkbox" class="p-check" value="{{ al.id }}" onchange="updateBulk()"></td>
+      <td style="max-width:280px"><div style="display:flex;gap:8px;align-items:center">
+        {% if al.image_url %}<img src="{{ al.image_url }}" style="width:36px;height:28px;object-fit:cover;border-radius:4px;flex-shrink:0">{% endif %}
+        <div style="min-width:0"><strong style="font-size:13px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ al.product_name or part.name_vi }}</strong>
+        <a href="{{ al.url }}" target="_blank" rel="nofollow" style="font-size:12px;color:var(--text-dim);text-decoration:none;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ al.url[:40] }}{% if al.url|length > 40 %}...{% endif %}</a></div>
       </div></td>
-      <td><span class="badge" style="background:var(--accent-dim);color:var(--accent)">{{ p.network }}</span></td>
-      <td style="font-weight:700">{{ "{:,.0f}".format(p.price or 0) }}</td>
-      <td>{{ p.clicks or 0 }}</td>
-      <td>{{ p.conversions or 0 }}</td>
-      <td>{% if p.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Active</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">Off</span>{% endif %}</td>
-      <td>
-        <a href="{{ url_for('admin_product_edit', pid=p.id) }}" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
-        <form method="POST" action="{{ url_for('admin_product_toggle', pid=p.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
+      <td style="white-space:nowrap;font-size:13px">{{ vert.icon }} {{ vert.name }}</td>
+      <td><span class="badge" style="{% if al.network == 'shopee' %}background:rgba(238,77,45,0.1);color:#ee4d2d{% elif al.network == 'lazada' %}background:rgba(15,0,201,0.08);color:#0f00c9{% elif al.network == 'tiki' %}background:rgba(26,148,217,0.1);color:#1a94d9{% elif al.network == 'accesstrade' %}background:rgba(0,150,136,0.1);color:#009688{% else %}background:var(--surface2);color:var(--text-dim){% endif %}">{{ al.network }}</span></td>
+      <td style="text-align:right;font-family:'DM Mono';font-weight:600;white-space:nowrap">{% if al.price %}{{ "{:,.0f}".format(al.price) }}d{% else %}-{% endif %}</td>
+      <td style="text-align:center;font-family:'DM Mono'">{{ "{:,}".format(al.clicks) }}</td>
+      <td><form method="POST" action="{{ url_for('admin_product_toggle', pid=al.id) }}" style="display:inline"><button type="submit" class="badge" style="cursor:pointer;border:none;font-size:12px;{% if al.is_active %}background:#d1fae5;color:#065f46{% else %}background:var(--surface2);color:var(--text-dim){% endif %}">{{ 'Active' if al.is_active else 'Off' }}</button></form></td>
+      <td style="white-space:nowrap">
+        <a href="{{ url_for('admin_product_edit', pid=al.id) }}" class="btn btn-ghost" style="padding:3px 8px;font-size:12px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_product_delete', pid=al.id) }}" style="display:inline" onsubmit="return confirm('Delete?')"><button class="btn btn-danger" style="padding:3px 8px;font-size:12px">X</button></form>
       </td>
     </tr>{% endfor %}
   </tbody></table></div>
-  {% if total_pages > 1 %}
-  <div class="pag">{% for pg in range(1, total_pages + 1) %}<a href="?tab=products&page={{ pg }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}" {% if pg == page %}class="current"{% endif %}>{{ pg }}</a>{% endfor %}</div>
+
+  <!-- Pagination -->
+  {% if pagination and pagination.pages > 1 %}
+  <nav style="display:flex;justify-content:center;align-items:center;gap:4px;margin:16px 0;flex-wrap:wrap">
+    {% if pagination.has_prev %}<a href="?tab=products&page={{ pagination.prev_num }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}" class="btn btn-ghost" style="font-size:13px;padding:5px 10px">&laquo;</a>{% endif %}
+    {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+      {% if p %}<a href="?tab=products&page={{ p }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}" class="btn {% if p == pagination.page %}btn-primary{% else %}btn-ghost{% endif %}" style="font-size:13px;padding:5px 10px;min-width:34px;text-align:center">{{ p }}</a>
+      {% else %}<span style="color:var(--text-dim);padding:0 4px">...</span>{% endif %}
+    {% endfor %}
+    {% if pagination.has_next %}<a href="?tab=products&page={{ pagination.next_num }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}" class="btn btn-ghost" style="font-size:13px;padding:5px 10px">&raquo;</a>{% endif %}
+    <span style="margin-left:10px;font-size:13px;color:var(--text-dim)">Page {{ pagination.page }}/{{ pagination.pages }} ({{ total }})</span>
+  </nav>
   {% endif %}
+  <div style="font-size:13px;color:var(--text-dim)">Showing {{ products|length }} of {{ total }} products{% if f_vertical or f_network or f_status or f_search %} (filtered){% endif %}</div>
   {% else %}
-  <div class="empty"><h3>No products found</h3></div>
+  <div class="empty"><p>{% if f_vertical or f_network or f_status or f_search %}No products match filters{% else %}No products yet{% endif %}</p><a href="{{ url_for('admin_product_new') }}" class="btn btn-primary" style="margin-top:12px">Add first product</a></div>
   {% endif %}
+
+  <script>
+  function toggleAll(checked){document.querySelectorAll('.p-check').forEach(c=>c.checked=checked);document.getElementById('checkAll').checked=checked;updateBulk()}
+  function updateBulk(){var ck=document.querySelectorAll('.p-check:checked'),bar=document.getElementById('bulkBar');if(ck.length>0){bar.style.display='flex';document.getElementById('bulkCount').textContent=ck.length}else{bar.style.display='none'}var all=document.querySelectorAll('.p-check');document.getElementById('checkAll').checked=all.length>0&&ck.length===all.length}
+  async function bulkDeleteSelected(){var ids=[...document.querySelectorAll('.p-check:checked')].map(c=>c.value);if(!ids.length)return;if(!confirm('Xoa '+ids.length+' san pham da chon?'))return;var r=await fetch('{{ url_for("admin_products_bulk_delete_selected") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})});var d=await r.json();if(d.ok)location.reload();else alert('Loi: '+(d.error||'Unknown'))}
+  async function createTrackingLinks(){var btn=document.getElementById('tlBtn'),cid=document.getElementById('tlCampaignId').value.trim(),raw=document.getElementById('tlUrls').value.trim();if(!cid||!raw)return alert('Nhap Campaign ID va URLs');var urls=raw.split('\n').map(u=>u.trim()).filter(u=>u);btn.disabled=true;btn.textContent='Dang tao...';try{var r=await fetch('/admin/api/create-tracking-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({campaign_id:cid,urls:urls})});var d=await r.json();var tb=document.getElementById('tlBody');tb.innerHTML='';(d.success_link||[]).forEach(function(lk){tb.innerHTML+='<tr><td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:4px 6px">'+lk.url_origin+'</td><td style="padding:4px 6px"><input type="text" value="'+lk.aff_link+'" style="width:100%;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px" readonly onclick="this.select()"></td><td style="padding:4px 6px"><input type="text" value="'+(lk.short_link||'')+'" style="width:120px;font-size:12px;padding:3px;border:1px solid var(--border);border-radius:4px" readonly onclick="this.select()"></td><td style="padding:4px 6px"><button onclick="navigator.clipboard.writeText(\''+lk.aff_link+'\')" style="font-size:11px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:var(--surface)">Copy</button></td></tr>'});(d.error_link||[]).forEach(function(url){tb.innerHTML+='<tr style="color:#ef4444"><td colspan="4" style="padding:4px 6px">Loi: '+url+'</td></tr>'});document.getElementById('tlResults').style.display='block'}catch(e){alert('Loi: '+e.message)}btn.disabled=false;btn.textContent='Tao Link'}
+  async function tiktokSearch(){var btn=document.getElementById('ttBtn'),kw=document.getElementById('ttKeyword').value.trim(),sort=document.getElementById('ttSort').value;if(!kw)return alert('Nhap tu khoa');btn.disabled=true;btn.textContent='Dang tim...';try{var r=await fetch('/admin/api/tiktok-search?q='+encodeURIComponent(kw)+'&sort='+sort+'&limit=20');var d=await r.json();var grid=document.getElementById('ttGrid');grid.innerHTML='';(d.products||[]).forEach(function(p){var price=p.sales_price?p.sales_price.minimum_amount:(p.original_price?p.original_price.minimum_amount:'');var commission=p.commission?(p.commission.rate||0):0;grid.innerHTML+='<div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)"><div style="height:120px;display:flex;align-items:center;justify-content:center;background:var(--code-bg);overflow:hidden">'+(p.main_image_url?'<img src="'+p.main_image_url+'" style="max-width:100%;max-height:100%;object-fit:contain" loading="lazy">':'')+'</div><div style="padding:8px"><div style="font-size:12px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:30px">'+p.title+'</div><div style="margin-top:4px;font-size:13px;font-weight:700;color:#ef4444">'+(price?Number(price).toLocaleString()+'d':'')+'</div><div style="font-size:11px;color:var(--text-dim)">'+commission+'% · '+(p.units_sold||0)+' sold</div><button onclick="tiktokCreateLink(\''+p.detail_link+'\')" style="width:100%;margin-top:6px;font-size:11px;padding:4px;background:#000;color:#fff;border:none;border-radius:4px;cursor:pointer">Tao aff link</button></div></div>'});if(!d.products||d.products.length===0)grid.innerHTML='<p style="color:var(--text-dim);grid-column:1/-1;text-align:center;padding:20px">Khong tim thay</p>';document.getElementById('ttResults').style.display='block'}catch(e){alert('Loi: '+e.message)}btn.disabled=false;btn.textContent='Tim'}
+  async function tiktokCreateLink(url){try{var r=await fetch('/admin/api/tiktok-create-link',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({product_url:url})});var d=await r.json();if(d.status&&d.aff_url)prompt('Affiliate Link:',d.aff_short_url||d.aff_url);else alert('Loi: '+(d.message||'Khong tao duoc'))}catch(e){alert('Loi: '+e.message)}}
+  </script>
 {% endif %}
 </div>
 

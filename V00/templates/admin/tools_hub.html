@@ -153,56 +153,99 @@
 {% if active_tab == 'video' %}
 <div class="th-panel active">
   <!-- Stats -->
-  <div class="th-stat-grid" style="grid-template-columns:repeat(3,1fr)">
+  <div class="th-stat-grid" style="grid-template-columns:repeat(5,1fr)">
     <div class="th-stat">
       <div class="th-stat-val">{{ videos|length }}</div>
-      <div class="th-stat-label">Total Videos</div>
+      <div class="th-stat-label">Videos</div>
     </div>
     <div class="th-stat">
       <div class="th-stat-val" style="color:#22c55e">{{ total_published }}</div>
       <div class="th-stat-label">Published</div>
     </div>
     <div class="th-stat">
-      <div class="th-stat-val" style="color:#3b82f6">{{ "{:,}".format(total_views) }}</div>
+      <div class="th-stat-val" style="color:#8b5cf6">{{ channels|length }}</div>
+      <div class="th-stat-label">Channels</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#f59e0b">{{ "{:,}".format(total_views) }}</div>
       <div class="th-stat-label">Total Views</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="font-size:18px">TikTok YT FB</div>
+      <div class="th-stat-label">Platforms</div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px">
+    <div style="display:flex;gap:8px;font-size:14px;color:var(--text-dim);text-align:center">
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #ff0050"><strong style="color:#ff0050">1. Content</strong><br>Chon bai viet hoac viet script</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #8b5cf6"><strong style="color:#8b5cf6">2. AI Script</strong><br>AI tom tat thanh video script</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #00cec9"><strong style="color:#00cec9">3. Render</strong><br>Hinh + text + voiceover + nhac</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #fdcb6e"><strong style="color:#fdcb6e">4. Review</strong><br>Xem truoc va chinh sua</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #22c55e"><strong style="color:#22c55e">5. Publish</strong><br>Auto upload multi-platform</div>
     </div>
   </div>
 
   <!-- Action buttons -->
   <div style="display:flex;gap:10px;margin-bottom:20px">
-    <a href="{{ url_for('admin_video') }}" class="th-btn th-btn-primary">+ Create Video</a>
-    <a href="{{ url_for('admin_video_channels') }}" class="th-btn th-btn-ghost">Manage Channels</a>
+    <a href="{{ url_for('admin_video_create') }}" class="th-btn th-btn-primary">+ Create Video</a>
+    <a href="{{ url_for('admin_video_channels') }}" class="th-btn th-btn-ghost">Channels</a>
+    <a href="{{ url_for('admin_video_analytics') }}" class="th-btn th-btn-ghost">Analytics</a>
   </div>
 
   <!-- Video list table -->
   {% if videos %}
+  <!-- Bulk action bar -->
+  <div id="bulkBarVid" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;gap:12px">
+    <span id="bulkCountVid" style="font-size:14px;font-weight:600"></span>
+    <button type="button" class="th-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" onclick="bulkDelVid()">Xoa da chon</button>
+    <button type="button" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px" onclick="clearVid()">Bo chon</button>
+    <div style="flex:1"></div>
+    <button type="button" class="th-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444;opacity:0.8" onclick="bulkDelAllVid()">Xoa tat ca ({{ videos|length }})</button>
+  </div>
   <div class="th-table-wrap">
     <table>
       <thead>
         <tr>
+          <th style="width:36px"><input type="checkbox" id="selAllVid" onchange="togVid(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th>
           <th>Title</th>
-          <th>Channel</th>
+          <th>Type</th>
+          <th>Duration</th>
+          <th>Vertical</th>
+          <th>Publishes</th>
           <th>Status</th>
-          <th style="text-align:right">Views</th>
-          <th>Date</th>
+          <th>Created</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for v in videos %}
         <tr>
-          <td><strong>{{ v.title or 'Untitled' }}</strong></td>
+          <td><input type="checkbox" class="vid-check" value="{{ v.id }}" onchange="upBarVid()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
+          <td><a href="{{ url_for('admin_video_detail', vid=v.id) }}" style="color:var(--text);text-decoration:none"><strong>{{ v.title[:45] }}{% if v.title|length > 45 %}...{% endif %}</strong></a></td>
           <td>
-            {% if v.vertical_slug %}
-              <span style="font-size:14px">{{ v.vertical_slug }}</span>
-            {% else %}
-              <span style="color:var(--text-dim)">-</span>
-            {% endif %}
+            {% if v.video_type == 'short' %}<span style="color:#ff0050;font-size:14px;font-family:'DM Mono'">SHORT</span>
+            {% elif v.video_type == 'long' %}<span style="color:#ff0000;font-size:14px;font-family:'DM Mono'">LONG</span>
+            {% else %}<span style="color:#1877f2;font-size:14px;font-family:'DM Mono'">REEL</span>{% endif %}
           </td>
+          <td style="font-family:'DM Mono';font-size:14px">{{ v.duration or '-' }}</td>
+          <td style="font-size:14px">{{ v.vertical_slug or '-' }}</td>
+          <td style="font-size:14px">{{ v.publishes|length if v.publishes else 0 }}</td>
           <td>
             <span class="th-badge" style="{% if v.status == 'published' %}background:#d1fae5;color:#065f46{% elif v.status == 'draft' %}background:#fef3c7;color:#92400e{% elif v.status == 'rendering' %}background:#dbeafe;color:#1e40af{% else %}background:var(--surface2);color:var(--text-dim){% endif %}">{{ v.status or 'draft' }}</span>
           </td>
-          <td style="text-align:right;font-family:'DM Mono'">-</td>
-          <td style="font-size:13px;color:var(--text-dim)">{{ v.created_at.strftime('%d/%m/%Y') if v.created_at else '-' }}</td>
+          <td style="font-size:13px;color:var(--text-dim)">{{ v.created_at.strftime('%m/%d %H:%M') if v.created_at else '-' }}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <a href="{{ url_for('admin_video_detail', vid=v.id) }}" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px">View</a>
+              <form method="POST" action="{{ url_for('admin_video_delete', vid=v.id) }}" style="display:inline" onsubmit="return confirm('Delete?')"><button type="submit" class="th-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444">X</button></form>
+            </div>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
@@ -213,6 +256,7 @@
     <div class="th-empty-icon">&#127909;</div>
     <h3 style="font-size:17px;margin-bottom:6px">No videos yet</h3>
     <p style="font-size:14px">Create your first video project to get started.</p>
+    <a href="{{ url_for('admin_video_create') }}" class="th-btn th-btn-primary" style="margin-top:12px">+ Create Video</a>
   </div>
   {% endif %}
 </div>
@@ -277,6 +321,24 @@
 {% endif %}
 
 <script>
+// ── Video bulk JS ──
+function togVid(m){document.querySelectorAll('.vid-check').forEach(function(c){c.checked=m.checked;c.closest('tr').classList.toggle('row-selected',m.checked)});upBarVid()}
+function upBarVid(){
+  var ck=Array.from(document.querySelectorAll('.vid-check:checked')),bar=document.getElementById('bulkBarVid'),t=document.querySelectorAll('.vid-check').length,m=document.getElementById('selAllVid');
+  if(!bar)return;bar.style.display=ck.length>0?'flex':'none';
+  var cnt=document.getElementById('bulkCountVid');if(cnt)cnt.textContent='Da chon '+ck.length+' / '+t;
+  if(m){m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;}
+  document.querySelectorAll('.vid-check').forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+}
+function clearVid(){var m=document.getElementById('selAllVid');if(m)m.checked=false;document.querySelectorAll('.vid-check').forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});upBarVid()}
+function bulkDelVid(){var ck=Array.from(document.querySelectorAll('.vid-check:checked'));if(!ck.length)return;if(!confirm('Xoa '+ck.length+' video da chon?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_videos_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+function bulkDelAllVid(){var t=document.querySelectorAll('.vid-check').length;if(!confirm('Xoa TAT CA '+t+' video?\n\nKHONG THE hoan tac.'))return;
+  var ids=Array.from(document.querySelectorAll('.vid-check')).map(function(c){return parseInt(c.value)});
+  fetch('{{ url_for("admin_videos_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+
 // Collapsible tree nodes
 document.querySelectorAll('.th-tree-vertical').forEach(node => {
   const header = node.querySelector('.th-tree-header');
@@ -289,4 +351,8 @@ document.querySelectorAll('.th-tree-vertical').forEach(node => {
   }
 });
 </script>
+<style>
+tr.row-selected td { background:rgba(37,99,235,0.06) !important }
+[data-theme="dark"] tr.row-selected td { background:rgba(37,99,235,0.12) !important }
+</style>
 {% endblock %}

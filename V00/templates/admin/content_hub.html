@@ -112,9 +112,22 @@
   <!-- Stats -->
   <div class="ch-stat-grid">
     <div class="ch-stat"><div class="ch-stat-val">{{ stats.total }}</div><div class="ch-stat-label">Total</div></div>
-    <div class="ch-stat"><div class="ch-stat-val" style="color:#3b82f6">{{ stats.nganh }}</div><div class="ch-stat-label">Nganh</div></div>
-    <div class="ch-stat"><div class="ch-stat-val" style="color:#22c55e">{{ stats.chung }}</div><div class="ch-stat-label">Chung</div></div>
-    <div class="ch-stat"><div class="ch-stat-val" style="color:#a855f7">{{ stats.chi_tiet }}</div><div class="ch-stat-label">Chi tiet</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#ef4444">{{ stats.nganh }}</div><div class="ch-stat-label">Nganh (Macro)</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#3b82f6">{{ stats.chung }}</div><div class="ch-stat-label">Chung (System)</div></div>
+    <div class="ch-stat"><div class="ch-stat-val" style="color:#22c55e">{{ stats.chi_tiet }}</div><div class="ch-stat-label">Chi tiet (Part)</div></div>
+  </div>
+
+  <!-- 3-tier explanation -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;display:flex;gap:12px;font-size:14px">
+    <div style="flex:1;padding:10px;background:rgba(239,68,68,0.08);border-radius:8px;border-left:3px solid #ef4444">
+      <strong style="color:#ef4444">T1: Nganh</strong><br>Kien thuc toan nganh: thi truong, xu huong, OEM vs aftermarket
+    </div>
+    <div style="flex:1;padding:10px;background:rgba(59,130,246,0.08);border-radius:8px;border-left:3px solid #3b82f6">
+      <strong style="color:#3b82f6">T2: Chung</strong><br>Kien thuc he thong: he thong treo, phanh, dien, dong co
+    </div>
+    <div style="flex:1;padding:10px;background:rgba(34,197,94,0.08);border-radius:8px;border-left:3px solid #22c55e">
+      <strong style="color:#22c55e">T3: Chi tiet</strong><br>Bai viet sau ve phu tung cu the: cao su phuoc, ma phanh, bugi
+    </div>
   </div>
 
   <!-- Filter Bar -->
@@ -153,6 +166,7 @@
       <thead>
         <tr>
           <th style="width:36px"><input type="checkbox" id="selAllArt" onchange="togArt(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th>
+          <th style="width:50px">Img</th>
           <th>
             <a class="ch-sort {% if current_sort=='title' %}active{% endif %}" href="?tab=articles&vertical={{ current_vertical }}&tier={{ current_tier }}&q={{ current_search }}&sort=title&order={% if current_sort=='title' and current_order=='asc' %}desc{% else %}asc{% endif %}">
               Title {% if current_sort=='title' %}{% if current_order=='asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
@@ -160,6 +174,7 @@
           </th>
           <th>Vertical</th>
           <th>Tier</th>
+          <th>Category</th>
           <th>Status</th>
           <th>
             <a class="ch-sort {% if current_sort=='views' %}active{% endif %}" href="?tab=articles&vertical={{ current_vertical }}&tier={{ current_tier }}&q={{ current_search }}&sort=views&order={% if current_sort=='views' and current_order=='asc' %}desc{% else %}asc{% endif %}">
@@ -178,14 +193,17 @@
         {% for a in articles %}
         <tr>
           <td><input type="checkbox" class="art-check" value="{{ a.id }}" onchange="upBarArt()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
+          <td>{% if a.image_url %}<img src="{{ a.image_url }}" style="width:44px;height:32px;object-fit:cover;border-radius:4px" alt="">{% else %}<span style="display:inline-block;width:44px;height:32px;background:var(--surface2);border-radius:4px;text-align:center;line-height:32px;font-size:14px">&#128196;</span>{% endif %}</td>
           <td style="max-width:320px">
             <strong>{{ a.title[:55] }}{% if a.title|length > 55 %}...{% endif %}</strong>
             {% if a.ai_generated %}<span style="font-size:11px;padding:1px 5px;border-radius:4px;background:rgba(168,85,247,.1);color:#a855f7;margin-left:4px">AI</span>{% endif %}
+            <br><a href="{{ url_for('vertical_article', vertical_slug=a.vertical_slug, slug=a.slug) }}" target="_blank" style="font-size:12px;color:var(--accent);text-decoration:none">{{ a.vertical_slug }}/bai-viet/{{ a.slug[:30] }}</a>
           </td>
           <td style="font-size:13px">{{ a.vertical_slug or '-' }}</td>
           <td>
             <span class="ch-badge ch-badge-{{ a.tier }}">{{ a.tier }}</span>
           </td>
+          <td style="font-size:13px">{{ a.category or '-' }}</td>
           <td>
             <span class="ch-badge ch-badge-{{ a.status }}">{{ a.status }}</span>
           </td>
