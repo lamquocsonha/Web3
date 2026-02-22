@@ -4707,3 +4707,71 @@ def seed_products_garden():
     garden_count = AffiliateLink.query.join(Part).join(Zone).join(Segment).join(Vertical).filter(Vertical.slug == 'garden').count()
     print(f'\u2705 Garden products seeded: {garden_count} affiliate links')
 
+
+# =============================================
+# 30 NEW VERTICALS
+# =============================================
+def seed_new_verticals():
+    """Seed 30 new verticals — skip any that already exist"""
+    from models import db, Vertical
+
+    new_verticals = [
+        # Batch 1 — 20 verticals
+        {'name': 'Fashion',    'slug': 'fashion',    'icon': '👗', 'color': '#fd79a8', 'description': 'Thời trang nam nữ — quần áo, giày dép, phụ kiện',                          'style': 'classic'},
+        {'name': 'Kitchen',    'slug': 'kitchen',    'icon': '🍳', 'color': '#e67e22', 'description': 'Nhà bếp & Gia dụng — nồi, chảo, máy pha cà phê, đồ bếp',                 'style': 'classic'},
+        {'name': 'Baby',       'slug': 'baby',       'icon': '🍼', 'color': '#fab1a0', 'description': 'Mẹ & Bé — đồ sơ sinh, xe đẩy, sữa, đồ chơi trẻ em',                      'style': 'classic'},
+        {'name': 'Home',       'slug': 'home',       'icon': '🏠', 'color': '#636e72', 'description': 'Nội thất & Decor — bàn ghế, đèn, rèm, trang trí nhà',                     'style': 'modern'},
+        {'name': 'Health',     'slug': 'health',     'icon': '💊', 'color': '#00b894', 'description': 'Sức khỏe & Thực phẩm chức năng — vitamin, máy đo, thiết bị y tế',         'style': 'classic'},
+        {'name': 'Gaming',     'slug': 'gaming',     'icon': '🎮', 'color': '#6c5ce7', 'description': 'Gaming — bàn phím cơ, chuột, tai nghe, ghế gaming',                        'style': 'tech'},
+        {'name': 'Photo',      'slug': 'photo',      'icon': '📷', 'color': '#2d3436', 'description': 'Nhiếp ảnh — máy ảnh, lens, tripod, phụ kiện quay phim',                    'style': 'tech'},
+        {'name': 'Music',      'slug': 'music',      'icon': '🎵', 'color': '#a29bfe', 'description': 'Âm nhạc — đàn guitar, piano, loa, thiết bị thu âm',                        'style': 'modern'},
+        {'name': 'Fishing',    'slug': 'fishing',    'icon': '🎣', 'color': '#0984e3', 'description': 'Câu cá & Outdoor — cần câu, mồi, lều, đồ dã ngoại',                       'style': 'classic'},
+        {'name': 'Watch',      'slug': 'watch',      'icon': '⌚', 'color': '#d4a574', 'description': 'Đồng hồ — smartwatch, đồng hồ cơ, phụ kiện',                               'style': 'modern'},
+        {'name': 'Book',       'slug': 'book',       'icon': '📚', 'color': '#b8860b', 'description': 'Sách & Học liệu — sách self-help, kỹ năng, văn học',                       'style': 'classic'},
+        {'name': 'Coffee',     'slug': 'coffee',     'icon': '☕', 'color': '#8d6e63', 'description': 'Cà phê & Trà — hạt cà phê, máy pha, dụng cụ pha chế',                     'style': 'classic'},
+        {'name': 'Camping',    'slug': 'camping',    'icon': '⛺', 'color': '#2d5016', 'description': 'Camping & Phượt — lều, túi ngủ, bếp dã ngoại, đồ sinh tồn',               'style': 'classic'},
+        {'name': 'Office',     'slug': 'office',     'icon': '💼', 'color': '#34495e', 'description': 'Văn phòng — bàn nâng hạ, ghế ergonomic, phụ kiện WFH',                    'style': 'modern'},
+        {'name': 'Yoga',       'slug': 'yoga',       'icon': '🧘', 'color': '#fd79a8', 'description': 'Yoga & Thiền — thảm tập, quần áo yoga, dụng cụ giãn cơ',                  'style': 'beauty'},
+        {'name': 'Audio',      'slug': 'audio',      'icon': '🎧', 'color': '#1abc9c', 'description': 'Âm thanh — tai nghe, loa bluetooth, DAC, amply',                           'style': 'tech'},
+        {'name': 'Clean',      'slug': 'clean',      'icon': '🧹', 'color': '#74b9ff', 'description': 'Vệ sinh & Giặt ủi — robot hút bụi, máy giặt, nước tẩy',                  'style': 'classic'},
+        {'name': 'DIY',        'slug': 'diy',        'icon': '🔧', 'color': '#f39c12', 'description': 'Đồ nghề & DIY — máy khoan, bộ dụng cụ sửa chữa, keo dán',                'style': 'classic'},
+        {'name': 'Shoe',       'slug': 'shoe',       'icon': '👟', 'color': '#e74c3c', 'description': 'Giày & Sneaker — giày chạy, sneaker, boot, dép sandal',                    'style': 'modern'},
+        {'name': 'Smart',      'slug': 'smart',      'icon': '🏡', 'color': '#00cec9', 'description': 'Smarthome — camera, khóa thông minh, đèn, ổ cắm wifi',                    'style': 'tech'},
+        # Batch 2 — 10 verticals
+        {'name': 'Perfume',    'slug': 'perfume',    'icon': '🧴', 'color': '#c39bd3', 'description': 'Nước hoa — nam, nữ, unisex, niche, designer',                              'style': 'beauty'},
+        {'name': 'Stationery', 'slug': 'stationery', 'icon': '✏️', 'color': '#f8c291', 'description': 'Văn phòng phẩm — bút, sổ tay, planner, đồ handmade',                      'style': 'classic'},
+        {'name': 'Aquarium',   'slug': 'aquarium',   'icon': '🐠', 'color': '#00b4d8', 'description': 'Cá cảnh & Thủy sinh — bể cá, lọc nước, cây thủy sinh',                   'style': 'pet'},
+        {'name': 'Wine',       'slug': 'wine',       'icon': '🍷', 'color': '#8e1c3b', 'description': 'Rượu vang & Bia — rượu nhập, bia thủ công, phụ kiện',                     'style': 'classic'},
+        {'name': 'Toy',        'slug': 'toy',        'icon': '🧸', 'color': '#fdcb6e', 'description': 'Đồ chơi — LEGO, mô hình, board game, đồ chơi giáo dục',                  'style': 'classic'},
+        {'name': 'Jewelry',    'slug': 'jewelry',    'icon': '💍', 'color': '#daa520', 'description': 'Trang sức — nhẫn, vòng tay, dây chuyền, phụ kiện',                         'style': 'beauty'},
+        {'name': 'Electric',   'slug': 'electric',   'icon': '⚡', 'color': '#2ecc71', 'description': 'Xe điện — xe máy điện, scooter, xe đạp điện, phụ kiện',                    'style': 'car'},
+        {'name': 'Bag',        'slug': 'bag',        'icon': '🎒', 'color': '#e17055', 'description': 'Túi & Balo — balo laptop, túi du lịch, ví, túi xách',                     'style': 'modern'},
+        {'name': 'Sleep',      'slug': 'sleep',      'icon': '😴', 'color': '#7c8adb', 'description': 'Giấc ngủ — nệm, gối, chăn, máy tiếng ồn trắng',                          'style': 'classic'},
+        {'name': 'Security',   'slug': 'security',   'icon': '🔒', 'color': '#576574', 'description': 'An ninh — camera giám sát, khóa vân tay, két sắt, báo động',              'style': 'tech'},
+    ]
+
+    seeded = 0
+    skipped = 0
+    for vd in new_verticals:
+        if Vertical.query.filter_by(slug=vd['slug']).first():
+            print(f"[SKIP] {vd['name']} vertical already exists")
+            skipped += 1
+            continue
+
+        v = Vertical(
+            name=vd['name'],
+            slug=vd['slug'],
+            icon=vd['icon'],
+            color=vd['color'],
+            description=vd['description'],
+            status='live',
+            style=vd['style'],
+            template='general',
+            default_mode='light'
+        )
+        db.session.add(v)
+        seeded += 1
+
+    db.session.commit()
+    print(f'✅ New verticals seeded: {seeded} added, {skipped} skipped')
+
