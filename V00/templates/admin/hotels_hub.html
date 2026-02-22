@@ -73,8 +73,17 @@
     </select>
   </form>
   {% if hotels %}
-  <div class="tbl-wrap"><table><thead><tr><th>Hotel</th><th>Destination</th><th>Stars</th><th>Price</th><th>Clicks</th><th>Active</th><th></th></tr></thead><tbody>
+  <!-- Bulk action bar -->
+  <div id="bulkBarH" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;gap:12px">
+    <span id="bulkCountH" style="font-size:14px;font-weight:600"></span>
+    <button type="button" class="btn btn-danger" style="padding:5px 12px;font-size:13px" onclick="bulkDelH()">Xoa da chon</button>
+    <button type="button" class="btn btn-ghost" style="padding:5px 12px;font-size:13px" onclick="clearH()">Bo chon</button>
+    <div style="flex:1"></div>
+    <button type="button" class="btn btn-danger" style="padding:5px 12px;font-size:13px;opacity:0.8" onclick="bulkDelAllH()">Xoa tat ca ({{ hotels|length }})</button>
+  </div>
+  <div class="tbl-wrap"><table><thead><tr><th style="width:36px"><input type="checkbox" id="selAllH" onchange="togH(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th><th>Hotel</th><th>Destination</th><th>Stars</th><th>Price</th><th>Clicks</th><th>Active</th><th></th></tr></thead><tbody>
     {% for h in hotels %}<tr>
+      <td><input type="checkbox" class="h-check" value="{{ h.id }}" onchange="upBarH()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
       <td><div style="display:flex;align-items:center;gap:8px">
         {% if h.image_url %}<img src="{{ h.image_url }}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">{% endif %}
         <strong>{{ h.name[:45] }}</strong>
@@ -354,4 +363,27 @@ function importSelected(){
 }
 </script>
 {% endif %}
+
+<script>
+/* Bulk selection for hotels hub table */
+function togH(m){document.querySelectorAll('.h-check').forEach(function(c){c.checked=m.checked;c.closest('tr').classList.toggle('row-selected',m.checked)});upBarH()}
+function upBarH(){
+  var ck=Array.from(document.querySelectorAll('.h-check:checked')),bar=document.getElementById('bulkBarH'),t=document.querySelectorAll('.h-check').length,m=document.getElementById('selAllH');
+  if(!bar) return; bar.style.display=ck.length>0?'flex':'none';document.getElementById('bulkCountH').textContent='Da chon '+ck.length+' / '+t;
+  m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;
+  document.querySelectorAll('.h-check').forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+}
+function clearH(){var m=document.getElementById('selAllH');if(m)m.checked=false;document.querySelectorAll('.h-check').forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});upBarH()}
+function bulkDelH(){var ck=Array.from(document.querySelectorAll('.h-check:checked'));if(!ck.length)return;if(!confirm('Xoa '+ck.length+' khach san da chon?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_hotels_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:ck.map(function(c){return 'hotel_ids='+c.value}).join('&')})
+  .then(function(){location.reload()}).catch(function(){alert('Loi ket noi')})}
+function bulkDelAllH(){var t=document.querySelectorAll('.h-check').length;if(!confirm('Xoa TAT CA '+t+' khach san?\n\nKHONG THE hoan tac.'))return;
+  var ids=Array.from(document.querySelectorAll('.h-check'));
+  fetch('{{ url_for("admin_hotels_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:ids.map(function(c){return 'hotel_ids='+c.value}).join('&')})
+  .then(function(){location.reload()}).catch(function(){alert('Loi ket noi')})}
+</script>
+<style>
+tr.row-selected td { background:rgba(37,99,235,0.06) !important }
+[data-theme="dark"] tr.row-selected td { background:rgba(37,99,235,0.12) !important }
+</style>
 {% endblock %}

@@ -3,7 +3,7 @@
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Video{% endblock %}
 {% block content %}
 <div class="section-header">
-  <h1 class="page-title" style="margin-bottom:0">🎬 Video Production Engine</h1>
+  <h1 class="page-title" style="margin-bottom:0">Video Production Engine</h1>
   <div style="display:flex;gap:8px">
     <a href="{{ url_for('admin_video_create') }}" class="btn btn-primary">+ Create Video</a>
     <a href="{{ url_for('admin_video_channels') }}" class="btn btn-ghost">Channels</a>
@@ -34,14 +34,26 @@
   </div>
 </div>
 
-<!-- Video list -->
 {% if videos %}
+<!-- Bulk action bar -->
+<div id="bulkBar" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);align-items:center;gap:12px">
+  <span id="bulkCount" style="font-size:14px;font-weight:600;color:var(--text)"></span>
+  <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteSelected()">Xoa da chon</button>
+  <button type="button" class="btn btn-ghost btn-sm" onclick="clearSelection()">Bo chon</button>
+  <div style="flex:1"></div>
+  <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteAll()" style="opacity:0.8">Xoa tat ca ({{ videos|length }})</button>
+</div>
+
 <div class="table-wrap">
   <table class="data-table">
-    <thead><tr><th>Title</th><th>Type</th><th>Duration</th><th>Vertical</th><th>Publishes</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+    <thead><tr>
+      <th style="width:36px"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th>
+      <th>Title</th><th>Type</th><th>Duration</th><th>Vertical</th><th>Publishes</th><th>Status</th><th>Created</th><th>Actions</th>
+    </tr></thead>
     <tbody>
       {% for v in videos %}
       <tr>
+        <td><input type="checkbox" class="row-check" value="{{ v.id }}" onchange="updateBulkBar()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
         <td><a href="{{ url_for('admin_video_detail', vid=v.id) }}" style="color:var(--text);text-decoration:none"><strong>{{ v.title[:45] }}{% if v.title|length > 45 %}...{% endif %}</strong></a></td>
         <td>
           {% if v.video_type == 'short' %}<span style="color:#ff0050;font-size:14px;font-family:'DM Mono'">SHORT</span>
@@ -62,6 +74,27 @@
     </tbody>
   </table>
 </div>
+
+<script>
+function getChecked(){return Array.from(document.querySelectorAll('.row-check:checked'))}
+function toggleSelectAll(m){document.querySelectorAll('.row-check').forEach(function(c){c.checked=m.checked;c.closest('tr').classList.toggle('row-selected',m.checked)});updateBulkBar()}
+function updateBulkBar(){
+  var ck=getChecked(),bar=document.getElementById('bulkBar'),t=document.querySelectorAll('.row-check').length,m=document.getElementById('selectAll');
+  bar.style.display=ck.length>0?'flex':'none';document.getElementById('bulkCount').textContent='Da chon '+ck.length+' / '+t;
+  m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;
+  document.querySelectorAll('.row-check').forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+}
+function clearSelection(){document.getElementById('selectAll').checked=false;document.querySelectorAll('.row-check').forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});updateBulkBar()}
+function bulkDeleteSelected(){var ck=getChecked();if(!ck.length)return;if(!confirm('Xoa '+ck.length+' video da chon?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_videos_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+function bulkDeleteAll(){var t=document.querySelectorAll('.row-check').length;if(!confirm('Xoa TAT CA '+t+' video?\n\nKHONG THE hoan tac.'))return;
+  var ids=Array.from(document.querySelectorAll('.row-check')).map(function(c){return parseInt(c.value)});
+  fetch('{{ url_for("admin_videos_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+</script>
+<style>tr.row-selected{background:rgba(37,99,235,0.06)}[data-theme="dark"] tr.row-selected{background:rgba(37,99,235,0.12)}</style>
+
 {% else %}
 <div class="empty-state"><div class="empty-icon">&#127909;</div><p>No videos yet</p><a href="{{ url_for('admin_video_create') }}" class="btn btn-primary" style="margin-top:12px">Create first video</a></div>
 {% endif %}

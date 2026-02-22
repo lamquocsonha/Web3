@@ -2,53 +2,61 @@
 {% block title %}Article Feedbacks{% endblock %}
 {% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Article Feedbacks{% endblock %}
 {% block content %}
-<h1 class="page-title">📝 Article Feedbacks</h1>
-<p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">Quản lý phản hồi từ người đọc về nội dung bài viết</p>
+<h1 class="page-title">Article Feedbacks</h1>
+<p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">Quan ly phan hoi tu nguoi doc ve noi dung bai viet</p>
 
 <!-- Filter tabs -->
 <div class="tabs" style="margin-bottom:24px">
   <a href="{{ url_for('admin_feedbacks', status='all') }}" class="tab {% if status_filter == 'all' %}active{% endif %}">
-    Tất cả ({{ pending_count + reviewed_count + resolved_count + dismissed_count }})
+    Tat ca ({{ pending_count + reviewed_count + resolved_count + dismissed_count }})
   </a>
   <a href="{{ url_for('admin_feedbacks', status='pending') }}" class="tab {% if status_filter == 'pending' %}active{% endif %}">
-    <span style="color:#f59e0b">⏳</span> Chờ xử lý ({{ pending_count }})
+    Cho xu ly ({{ pending_count }})
   </a>
   <a href="{{ url_for('admin_feedbacks', status='reviewed') }}" class="tab {% if status_filter == 'reviewed' %}active{% endif %}">
-    <span style="color:#3b82f6">👁️</span> Đã xem ({{ reviewed_count }})
+    Da xem ({{ reviewed_count }})
   </a>
   <a href="{{ url_for('admin_feedbacks', status='resolved') }}" class="tab {% if status_filter == 'resolved' %}active{% endif %}">
-    <span style="color:#22c55e">✅</span> Đã giải quyết ({{ resolved_count }})
+    Da giai quyet ({{ resolved_count }})
   </a>
   <a href="{{ url_for('admin_feedbacks', status='dismissed') }}" class="tab {% if status_filter == 'dismissed' %}active{% endif %}">
-    <span style="color:#94a3b8">🚫</span> Đã bỏ qua ({{ dismissed_count }})
+    Da bo qua ({{ dismissed_count }})
   </a>
 </div>
 
-<!-- Feedbacks list -->
 {% if feedbacks %}
+<!-- Bulk action bar -->
+<div id="bulkBar" class="bulk-bar">
+  <span id="bulkCount" class="bulk-count"></span>
+  <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteSelected()">Xoa da chon</button>
+  <button type="button" class="btn btn-ghost btn-sm" onclick="clearSelection()">Bo chon</button>
+  <div style="flex:1"></div>
+  <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteAll()" style="opacity:0.8">Xoa tat ca ({{ feedbacks|length }})</button>
+</div>
+
 <div class="table-wrap">
   <table class="data-table">
     <thead>
       <tr>
-        <th>Bài viết</th>
-        <th>Loại phản hồi</th>
-        <th>Mô tả</th>
-        <th>Trạng thái</th>
-        <th>Thời gian</th>
+        <th style="width:36px"><input type="checkbox" id="selectAll" class="bulk-cb" onchange="toggleSelectAll(this)"></th>
+        <th>Bai viet</th>
+        <th>Loai</th>
+        <th>Mo ta</th>
+        <th>Trang thai</th>
+        <th>Thoi gian</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for fb in feedbacks %}
       <tr>
+        <td><input type="checkbox" class="row-check bulk-cb" value="{{ fb.id }}" onchange="updateBulkBar()"></td>
         <td>
           <div style="max-width:300px">
             <a href="{{ url_for('vertical_article', vertical_slug=fb.article.vertical_slug, slug=fb.article.slug) }}" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600;font-size:14px">
               {{ fb.article.title[:50] }}{% if fb.article.title|length > 50 %}...{% endif %}
             </a>
-            <div style="font-size:14px;color:var(--text-dim);margin-top:4px">
-              {{ fb.article.vertical_slug|upper }}
-            </div>
+            <div style="font-size:14px;color:var(--text-dim);margin-top:4px">{{ fb.article.vertical_slug|upper }}</div>
           </div>
         </td>
         <td>
@@ -59,17 +67,17 @@
             {% if fb.feedback_type == 'misleading' %}badge-warning{% endif %}
             {% if fb.feedback_type == 'other' %}badge-secondary{% endif %}
           ">
-            {% if fb.feedback_type == 'inaccurate' %}❌ Không chính xác{% endif %}
-            {% if fb.feedback_type == 'outdated' %}⏰ Lỗi thời{% endif %}
-            {% if fb.feedback_type == 'incomplete' %}📄 Thiếu thông tin{% endif %}
-            {% if fb.feedback_type == 'misleading' %}⚠️ Gây hiểu lầm{% endif %}
-            {% if fb.feedback_type == 'other' %}💬 Khác{% endif %}
+            {% if fb.feedback_type == 'inaccurate' %}Khong chinh xac{% endif %}
+            {% if fb.feedback_type == 'outdated' %}Loi thoi{% endif %}
+            {% if fb.feedback_type == 'incomplete' %}Thieu thong tin{% endif %}
+            {% if fb.feedback_type == 'misleading' %}Gay hieu lam{% endif %}
+            {% if fb.feedback_type == 'other' %}Khac{% endif %}
           </span>
         </td>
         <td>
           <div style="max-width:250px;font-size:14px;color:var(--text-dim)">
-            {{ fb.description[:80] if fb.description else '(Không có mô tả)' }}
-            {% if fb.description|length > 80 %}...{% endif %}
+            {{ fb.description[:80] if fb.description else '(Khong co mo ta)' }}
+            {% if fb.description and fb.description|length > 80 %}...{% endif %}
           </div>
         </td>
         <td>
@@ -78,21 +86,14 @@
             {% if fb.status == 'reviewed' %}badge-info{% endif %}
             {% if fb.status == 'resolved' %}badge-success{% endif %}
             {% if fb.status == 'dismissed' %}badge-secondary{% endif %}
-          ">
-            {% if fb.status == 'pending' %}⏳ Chờ xử lý{% endif %}
-            {% if fb.status == 'reviewed' %}👁️ Đã xem{% endif %}
-            {% if fb.status == 'resolved' %}✅ Đã giải quyết{% endif %}
-            {% if fb.status == 'dismissed' %}🚫 Đã bỏ qua{% endif %}
-          </span>
+          ">{{ fb.status }}</span>
         </td>
-        <td style="font-size:14px;color:var(--text-dim)">
-          {{ fb.created_at.strftime('%d/%m/%Y %H:%M') }}
-        </td>
+        <td style="font-size:14px;color:var(--text-dim)">{{ fb.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
         <td>
           <div style="display:flex;gap:8px">
             <a href="{{ url_for('admin_feedback_detail', fid=fb.id) }}" class="btn-sm btn-primary">Xem</a>
-            <form method="POST" action="{{ url_for('admin_feedback_delete', fid=fb.id) }}" style="display:inline" onsubmit="return confirm('Xóa phản hồi này?')">
-              <button type="submit" class="btn-sm btn-danger">Xóa</button>
+            <form method="POST" action="{{ url_for('admin_feedback_delete', fid=fb.id) }}" style="display:inline" onsubmit="return confirm('Xoa phan hoi nay?')">
+              <button type="submit" class="btn-sm btn-danger">X</button>
             </form>
           </div>
         </td>
@@ -103,94 +104,65 @@
 </div>
 {% else %}
 <div class="empty-state">
-  <div class="empty-icon">📝</div>
-  <h3>Chưa có phản hồi nào</h3>
-  <p>Phản hồi từ người đọc sẽ hiển thị ở đây</p>
+  <div class="empty-icon">&#128221;</div>
+  <h3>Chua co phan hoi nao</h3>
+  <p>Phan hoi tu nguoi doc se hien thi o day</p>
 </div>
 {% endif %}
 
 <style>
-.tabs {
-  display: flex;
-  gap: 8px;
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.tab {
-  padding: 10px 16px;
-  text-decoration: none;
-  color: var(--text-dim);
-  font-size: 14px;
-  font-weight: 600;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s;
-}
-
-.tab:hover {
-  color: var(--text);
-  background: var(--bg-subtle);
-}
-
-.tab.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
-.badge {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.badge-danger {
-  background: rgba(239,68,68,0.1);
-  color: #ef4444;
-}
-
-.badge-warning {
-  background: rgba(245,158,11,0.1);
-  color: #f59e0b;
-}
-
-.badge-info {
-  background: rgba(59,130,246,0.1);
-  color: #3b82f6;
-}
-
-.badge-success {
-  background: rgba(34,197,94,0.1);
-  color: #22c55e;
-}
-
-.badge-secondary {
-  background: var(--bg-subtle);
-  color: var(--text-dim);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-}
-
-.empty-icon {
-  font-size: 64px;
-  margin-bottom: 16px;
-  opacity: 0.3;
-}
-
-.empty-state h3 {
-  font-size: 20px;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-.empty-state p {
-  font-size: 14px;
-  color: var(--text-dim);
-}
+.tabs { display:flex; gap:8px; border-bottom:1px solid var(--border); flex-wrap:wrap }
+.tab { padding:10px 16px; text-decoration:none; color:var(--text-dim); font-size:14px; font-weight:600; border-bottom:2px solid transparent; transition:all 0.2s }
+.tab:hover { color:var(--text); background:var(--bg-subtle) }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent) }
+.badge { padding:4px 10px; border-radius:6px; font-size:14px; font-weight:700; display:inline-block }
+.badge-danger { background:rgba(239,68,68,0.1); color:#ef4444 }
+.badge-warning { background:rgba(245,158,11,0.1); color:#f59e0b }
+.badge-info { background:rgba(59,130,246,0.1); color:#3b82f6 }
+.badge-success { background:rgba(34,197,94,0.1); color:#22c55e }
+.badge-secondary { background:var(--bg-subtle); color:var(--text-dim) }
+.empty-state { text-align:center; padding:80px 20px }
+.empty-icon { font-size:64px; margin-bottom:16px; opacity:0.3 }
+.empty-state h3 { font-size:20px; margin-bottom:8px; color:var(--text) }
+.empty-state p { font-size:14px; color:var(--text-dim) }
+.bulk-bar { display:none; padding:10px 16px; margin-bottom:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); align-items:center; gap:12px }
+.bulk-count { font-size:14px; font-weight:600; color:var(--text) }
+.bulk-cb { width:16px; height:16px; cursor:pointer; accent-color:#2563eb }
+tr.row-selected { background:rgba(37,99,235,0.06) }
+[data-theme="dark"] tr.row-selected { background:rgba(37,99,235,0.12) }
 </style>
+
+<script>
+function getChecked() { return Array.from(document.querySelectorAll('.row-check:checked')); }
+function toggleSelectAll(m) {
+  document.querySelectorAll('.row-check').forEach(function(c){ c.checked=m.checked; c.closest('tr').classList.toggle('row-selected',m.checked); });
+  updateBulkBar();
+}
+function updateBulkBar() {
+  var ck=getChecked(), bar=document.getElementById('bulkBar'), total=document.querySelectorAll('.row-check').length, m=document.getElementById('selectAll');
+  bar.style.display = ck.length>0 ? 'flex' : 'none';
+  document.getElementById('bulkCount').textContent = 'Da chon '+ck.length+' / '+total;
+  m.checked = ck.length===total && total>0;
+  m.indeterminate = ck.length>0 && ck.length<total;
+  document.querySelectorAll('.row-check').forEach(function(c){ c.closest('tr').classList.toggle('row-selected',c.checked); });
+}
+function clearSelection() {
+  document.getElementById('selectAll').checked=false;
+  document.querySelectorAll('.row-check').forEach(function(c){ c.checked=false; c.closest('tr').classList.remove('row-selected'); });
+  updateBulkBar();
+}
+function bulkDeleteSelected() {
+  var ck=getChecked(); if(!ck.length) return;
+  if(!confirm('Xoa '+ck.length+' phan hoi da chon?\n\nKHONG THE hoan tac.')) return;
+  fetch('{{ url_for("admin_feedbacks_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok) location.reload(); else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')});
+}
+function bulkDeleteAll() {
+  var total=document.querySelectorAll('.row-check').length;
+  if(!confirm('Xoa TAT CA '+total+' phan hoi?\n\nKHONG THE hoan tac.')) return;
+  var ids=Array.from(document.querySelectorAll('.row-check')).map(function(c){return parseInt(c.value)});
+  fetch('{{ url_for("admin_feedbacks_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok) location.reload(); else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')});
+}
+</script>
 {% endblock %}

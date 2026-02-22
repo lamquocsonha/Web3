@@ -141,10 +141,18 @@
 
   <!-- Articles Table -->
   {% if articles %}
+  <div id="bulkBarArt" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;gap:12px">
+    <span id="bulkCountArt" style="font-size:14px;font-weight:600"></span>
+    <button type="button" class="ch-btn ch-btn-danger ch-btn-sm" onclick="bulkDelArt()">Xoa da chon</button>
+    <button type="button" class="ch-btn ch-btn-ghost ch-btn-sm" onclick="clearArt()">Bo chon</button>
+    <div style="flex:1"></div>
+    <button type="button" class="ch-btn ch-btn-danger ch-btn-sm" onclick="bulkDelAllArt()" style="opacity:0.8">Xoa tat ca ({{ articles|length }})</button>
+  </div>
   <div class="ch-table-wrap">
     <table>
       <thead>
         <tr>
+          <th style="width:36px"><input type="checkbox" id="selAllArt" onchange="togArt(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th>
           <th>
             <a class="ch-sort {% if current_sort=='title' %}active{% endif %}" href="?tab=articles&vertical={{ current_vertical }}&tier={{ current_tier }}&q={{ current_search }}&sort=title&order={% if current_sort=='title' and current_order=='asc' %}desc{% else %}asc{% endif %}">
               Title {% if current_sort=='title' %}{% if current_order=='asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
@@ -169,6 +177,7 @@
       <tbody>
         {% for a in articles %}
         <tr>
+          <td><input type="checkbox" class="art-check" value="{{ a.id }}" onchange="upBarArt()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
           <td style="max-width:320px">
             <strong>{{ a.title[:55] }}{% if a.title|length > 55 %}...{% endif %}</strong>
             {% if a.ai_generated %}<span style="font-size:11px;padding:1px 5px;border-radius:4px;background:rgba(168,85,247,.1);color:#a855f7;margin-left:4px">AI</span>{% endif %}
@@ -233,10 +242,18 @@
 
   <!-- Feedbacks Table -->
   {% if feedbacks %}
+  <div id="bulkBarFb" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;gap:12px">
+    <span id="bulkCountFb" style="font-size:14px;font-weight:600"></span>
+    <button type="button" class="ch-btn ch-btn-danger ch-btn-sm" onclick="bulkDelFb()">Xoa da chon</button>
+    <button type="button" class="ch-btn ch-btn-ghost ch-btn-sm" onclick="clearFb()">Bo chon</button>
+    <div style="flex:1"></div>
+    <button type="button" class="ch-btn ch-btn-danger ch-btn-sm" onclick="bulkDelAllFb()" style="opacity:0.8">Xoa tat ca ({{ feedbacks|length }})</button>
+  </div>
   <div class="ch-table-wrap">
     <table>
       <thead>
         <tr>
+          <th style="width:36px"><input type="checkbox" id="selAllFb" onchange="togFb(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th>
           <th>Article</th>
           <th>Type</th>
           <th>Description</th>
@@ -248,6 +265,7 @@
       <tbody>
         {% for fb in feedbacks %}
         <tr>
+          <td><input type="checkbox" class="fb-check" value="{{ fb.id }}" onchange="upBarFb()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
           <td style="max-width:250px">
             <strong style="font-size:14px">{{ fb.article.title[:45] }}{% if fb.article.title|length > 45 %}...{% endif %}</strong>
             <div style="font-size:12px;color:var(--text-dim)">{{ fb.article.vertical_slug|upper }}</div>
@@ -303,10 +321,18 @@
 
   <!-- AI Content Table -->
   {% if contents %}
+  <div id="bulkBarAi" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;gap:12px">
+    <span id="bulkCountAi" style="font-size:14px;font-weight:600"></span>
+    <button type="button" class="ch-btn ch-btn-danger ch-btn-sm" onclick="bulkDelAi()">Xoa da chon</button>
+    <button type="button" class="ch-btn ch-btn-ghost ch-btn-sm" onclick="clearAi()">Bo chon</button>
+    <div style="flex:1"></div>
+    <button type="button" class="ch-btn ch-btn-danger ch-btn-sm" onclick="bulkDelAllAi()" style="opacity:0.8">Xoa tat ca ({{ contents|length }})</button>
+  </div>
   <div class="ch-table-wrap">
     <table>
       <thead>
         <tr>
+          <th style="width:36px"><input type="checkbox" id="selAllAi" onchange="togAi(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th>
           <th>Title</th>
           <th>Type</th>
           <th>Provider</th>
@@ -320,6 +346,7 @@
       <tbody>
         {% for c in contents %}
         <tr>
+          <td><input type="checkbox" class="ai-check" value="{{ c.id }}" onchange="upBarAi()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
           <td style="max-width:280px">
             <a href="{{ url_for('admin_content_detail', cid=c.id) }}" style="color:var(--text);text-decoration:none">
               <strong>{{ c.title[:45] }}{% if c.title|length > 45 %}...{% endif %}</strong>
@@ -362,5 +389,57 @@
 function switchMainTab(tab) {
   window.location.href = '?tab=' + tab;
 }
+
+/* === Bulk selection: Articles tab === */
+function togArt(m){document.querySelectorAll('.art-check').forEach(function(c){c.checked=m.checked;c.closest('tr').classList.toggle('row-selected',m.checked)});upBarArt()}
+function upBarArt(){
+  var ck=Array.from(document.querySelectorAll('.art-check:checked')),bar=document.getElementById('bulkBarArt'),t=document.querySelectorAll('.art-check').length,m=document.getElementById('selAllArt');
+  if(!bar)return; bar.style.display=ck.length>0?'flex':'none';document.getElementById('bulkCountArt').textContent='Da chon '+ck.length+' / '+t;
+  m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;
+  document.querySelectorAll('.art-check').forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+}
+function clearArt(){var m=document.getElementById('selAllArt');if(m)m.checked=false;document.querySelectorAll('.art-check').forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});upBarArt()}
+function bulkDelArt(){var ck=Array.from(document.querySelectorAll('.art-check:checked'));if(!ck.length)return;if(!confirm('Xoa '+ck.length+' bai viet?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_articles_bulk_delete_selected") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert(d.error||'Error')}).catch(function(){alert('Loi ket noi')})}
+function bulkDelAllArt(){var ids=Array.from(document.querySelectorAll('.art-check')).map(function(c){return parseInt(c.value)});if(!confirm('Xoa TAT CA '+ids.length+' bai viet?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_articles_bulk_delete_selected") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert(d.error||'Error')}).catch(function(){alert('Loi ket noi')})}
+
+/* === Bulk selection: Feedbacks tab === */
+function togFb(m){document.querySelectorAll('.fb-check').forEach(function(c){c.checked=m.checked;c.closest('tr').classList.toggle('row-selected',m.checked)});upBarFb()}
+function upBarFb(){
+  var ck=Array.from(document.querySelectorAll('.fb-check:checked')),bar=document.getElementById('bulkBarFb'),t=document.querySelectorAll('.fb-check').length,m=document.getElementById('selAllFb');
+  if(!bar)return; bar.style.display=ck.length>0?'flex':'none';document.getElementById('bulkCountFb').textContent='Da chon '+ck.length+' / '+t;
+  m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;
+  document.querySelectorAll('.fb-check').forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+}
+function clearFb(){var m=document.getElementById('selAllFb');if(m)m.checked=false;document.querySelectorAll('.fb-check').forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});upBarFb()}
+function bulkDelFb(){var ck=Array.from(document.querySelectorAll('.fb-check:checked'));if(!ck.length)return;if(!confirm('Xoa '+ck.length+' feedback?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_feedbacks_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert(d.error||'Error')}).catch(function(){alert('Loi ket noi')})}
+function bulkDelAllFb(){var ids=Array.from(document.querySelectorAll('.fb-check')).map(function(c){return parseInt(c.value)});if(!confirm('Xoa TAT CA '+ids.length+' feedback?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_feedbacks_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert(d.error||'Error')}).catch(function(){alert('Loi ket noi')})}
+
+/* === Bulk selection: AI Content tab === */
+function togAi(m){document.querySelectorAll('.ai-check').forEach(function(c){c.checked=m.checked;c.closest('tr').classList.toggle('row-selected',m.checked)});upBarAi()}
+function upBarAi(){
+  var ck=Array.from(document.querySelectorAll('.ai-check:checked')),bar=document.getElementById('bulkBarAi'),t=document.querySelectorAll('.ai-check').length,m=document.getElementById('selAllAi');
+  if(!bar)return; bar.style.display=ck.length>0?'flex':'none';document.getElementById('bulkCountAi').textContent='Da chon '+ck.length+' / '+t;
+  m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;
+  document.querySelectorAll('.ai-check').forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+}
+function clearAi(){var m=document.getElementById('selAllAi');if(m)m.checked=false;document.querySelectorAll('.ai-check').forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});upBarAi()}
+function bulkDelAi(){var ck=Array.from(document.querySelectorAll('.ai-check:checked'));if(!ck.length)return;if(!confirm('Xoa '+ck.length+' AI content?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_contents_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert(d.error||'Error')}).catch(function(){alert('Loi ket noi')})}
+function bulkDelAllAi(){var ids=Array.from(document.querySelectorAll('.ai-check')).map(function(c){return parseInt(c.value)});if(!confirm('Xoa TAT CA '+ids.length+' AI content?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_contents_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert(d.error||'Error')}).catch(function(){alert('Loi ket noi')})}
 </script>
+<style>
+tr.row-selected td { background:rgba(37,99,235,0.06) !important }
+[data-theme="dark"] tr.row-selected td { background:rgba(37,99,235,0.12) !important }
+</style>
 {% endblock %}

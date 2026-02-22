@@ -1105,6 +1105,17 @@ def admin_content_delete(cid):
     flash('Da xoa content', 'success')
     return redirect(url_for('admin_content'))
 
+@app.route('/admin/contents/bulk-delete', methods=['POST'])
+def admin_contents_bulk_delete():
+    """Bulk delete AI contents by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co content nao'), 400
+    deleted = AIContent.query.filter(AIContent.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 # =============================================
 # ADMIN — TOOLS HUB (unified page)
 # =============================================
@@ -2740,6 +2751,17 @@ def admin_feedback_delete(fid):
     db.session.commit()
     flash('Đã xóa phản hồi', 'success')
     return redirect(url_for('admin_feedbacks'))
+
+@app.route('/admin/feedbacks/bulk-delete', methods=['POST'])
+def admin_feedbacks_bulk_delete():
+    """Bulk delete feedbacks by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co feedback nao'), 400
+    deleted = ArticleFeedback.query.filter(ArticleFeedback.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
 
 # =============================================
 # ADMIN — PRODUCTS (Quản lý sản phẩm tập trung)
@@ -4816,6 +4838,17 @@ def admin_video_delete(vid):
     flash('Da xoa video', 'success')
     return redirect(url_for('admin_video'))
 
+@app.route('/admin/videos/bulk-delete', methods=['POST'])
+def admin_videos_bulk_delete():
+    """Bulk delete videos by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co video nao'), 400
+    deleted = VideoProject.query.filter(VideoProject.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 @app.route('/admin/video/<int:vid>/publish', methods=['POST'])
 def admin_video_publish(vid):
     v = VideoProject.query.get_or_404(vid)
@@ -5743,6 +5776,17 @@ def admin_voucher_widget_delete(wid):
     flash(f'Đã xóa widget: {name}', 'success')
     return redirect(url_for('admin_voucher_widgets'))
 
+@app.route('/admin/voucher-widgets/bulk-delete', methods=['POST'])
+def admin_voucher_widgets_bulk_delete():
+    """Bulk delete voucher widgets by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co widget nao'), 400
+    deleted = VoucherWidget.query.filter(VoucherWidget.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 # =============================================
 # ADMIN — HOT DEALS (Upload Excel)
 # =============================================
@@ -6282,6 +6326,17 @@ def admin_wards_delete(ward_id):
     db.session.commit()
     flash(f'Da xoa: {name}', 'success')
     return redirect(url_for('admin_wards'))
+
+@app.route('/admin/wards/bulk-delete', methods=['POST'])
+def admin_wards_bulk_delete():
+    """Bulk delete wards by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co ward nao'), 400
+    deleted = WardCommune.query.filter(WardCommune.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
 
 @app.route('/admin/wards/reset', methods=['POST'])
 def admin_wards_reset():
