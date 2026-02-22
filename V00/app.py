@@ -1236,7 +1236,7 @@ def admin_settings():
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         if tab == 'robots':
-            robots_path = os.path.join(app.root_path, 'static', 'robots.txt')
+            robots_path = os.path.join(app.root_path, 'robots.txt')
             content = request.form.get('robots_content', '')
             with open(robots_path, 'w', encoding='utf-8') as f:
                 f.write(content)
@@ -1260,7 +1260,7 @@ def admin_settings():
     db_info = _get_db_info() if tab == 'database' else None
     robots_content = ''
     if tab == 'robots':
-        robots_path = os.path.join(app.root_path, 'static', 'robots.txt')
+        robots_path = os.path.join(app.root_path, 'robots.txt')
         if os.path.exists(robots_path):
             with open(robots_path, 'r', encoding='utf-8') as f:
                 robots_content = f.read()
@@ -1467,22 +1467,10 @@ def admin_deployment():
     """Deployment guide and workflow documentation"""
     return render_template('admin/deployment.html')
 
-@app.route('/admin/robots', methods=['GET', 'POST'])
+@app.route('/admin/robots')
 def admin_robots():
-    """Edit robots.txt content from admin panel"""
-    robots_path = os.path.join(app.root_path, 'static', 'robots.txt')
-    if request.method == 'POST':
-        content = request.form.get('content', '')
-        with open(robots_path, 'w', encoding='utf-8') as f:
-            f.write(content)
-        flash('robots.txt updated successfully!', 'success')
-        return redirect(url_for('admin_robots'))
-    # GET
-    content = ''
-    if os.path.exists(robots_path):
-        with open(robots_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-    return render_template('admin/robots.html', content=content)
+    """Redirect to Settings > Robots.txt tab"""
+    return redirect(url_for('admin_settings', tab='robots'))
 
 # =============================================
 # ADMIN — SEO BACKLINK ENGINE
@@ -7211,7 +7199,7 @@ def unilab_article(slug):
 def robots_txt():
     """Serve robots.txt to control search engine indexing"""
     from flask import send_from_directory
-    return send_from_directory('static', 'robots.txt', mimetype='text/plain')
+    return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
 
 # =============================================
 # =============================================
