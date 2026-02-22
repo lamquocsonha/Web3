@@ -1232,7 +1232,8 @@ def admin_settings():
                         'shop_display_mode', 'custom_head_code',
                         'hot_products_enabled', 'hot_products_count',
                         'hot_products_show_shop', 'hot_products_show_sidebar',
-                        'hotdeal_enabled', 'hotdeal_show_shop', 'hotdeal_show_voucher'],
+                        'hotdeal_enabled', 'hotdeal_show_shop', 'hotdeal_show_voucher',
+                        'redirect_404_target'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
         if tab == 'robots':
@@ -8310,6 +8311,18 @@ def _start_banner_scheduler():
 
     t = threading.Thread(target=_banner_scheduler_loop, daemon=True)
     t.start()
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    target = SiteSettings.get('redirect_404_target', 'home')
+    target_map = {
+        'home': '/',
+        'shop': '/shop',
+        'voucher': '/voucher',
+    }
+    dest = target_map.get(target, '/')
+    return redirect(dest)
 
 
 if __name__ == '__main__':

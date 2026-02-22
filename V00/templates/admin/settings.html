@@ -234,6 +234,20 @@
     </div>
   </div>
 
+  <div class="scard" style="margin-top:20px">
+    <h3 class="scard-title">404 Redirect</h3>
+    <p class="scard-desc">Khi nguoi dung truy cap link khong ton tai (404), tu dong chuyen huong ve trang da chon. Mac dinh: Trang chu.</p>
+    <div class="form-group">
+      <label class="form-label">Chuyen huong 404 den</label>
+      <select class="form-select" name="redirect_404_target" style="max-width:300px">
+        {% set r404 = settings.get('redirect_404_target', 'home') %}
+        <option value="home" {% if r404 == 'home' %}selected{% endif %}>Trang chu (/)</option>
+        <option value="shop" {% if r404 == 'shop' %}selected{% endif %}>Shop (/shop)</option>
+        <option value="voucher" {% if r404 == 'voucher' %}selected{% endif %}>Voucher (/voucher)</option>
+      </select>
+    </div>
+  </div>
+
   <div class="form-actions"><button type="submit" class="btn btn-primary">Save General</button></div>
 </form>
 </div>
