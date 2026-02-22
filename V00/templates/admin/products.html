@@ -85,7 +85,7 @@
     <input type="text" name="q" value="{{ f_search }}" placeholder="Search name, URL..." class="form-input" style="width:200px;padding:8px 10px;font-size:14px">
     <button class="btn btn-ghost btn-sm" type="submit">Filter</button>
     {% if f_vertical or f_network or f_status or f_search %}
-    <a href="{{ url_for('admin_products') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>
+    <a href="{{ url_for('admin_products_hub') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>
     {% endif %}
   </form>
 </div>

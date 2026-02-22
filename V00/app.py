@@ -2509,66 +2509,8 @@ def admin_content_hub():
 # =============================================
 @app.route('/admin/articles')
 def admin_articles():
-    # Get filter parameters
-    vertical_filter = request.args.get('vertical', '')
-    tier_filter = request.args.get('tier', '')
-    search_query = request.args.get('search', '')
-    sort_by = request.args.get('sort', 'created_at')  # default sort by created_at
-    sort_order = request.args.get('order', 'desc')  # default descending
-
-    # Build query
-    query = Article.query
-
-    # Apply filters
-    if vertical_filter:
-        query = query.filter_by(vertical_slug=vertical_filter)
-    if tier_filter:
-        query = query.filter_by(tier=tier_filter)
-    if search_query:
-        query = query.filter(
-            db.or_(
-                Article.title.ilike(f'%{search_query}%'),
-                Article.category.ilike(f'%{search_query}%'),
-                Article.tags.ilike(f'%{search_query}%')
-            )
-        )
-
-    # Apply sorting
-    if sort_by == 'title':
-        sort_col = Article.title
-    elif sort_by == 'created_at':
-        sort_col = Article.created_at
-    else:
-        sort_col = Article.created_at
-
-    if sort_order == 'asc':
-        query = query.order_by(sort_col.asc())
-    else:
-        query = query.order_by(sort_col.desc())
-
-    articles = query.all()
-
-    # Get all verticals for filter dropdown
-    verticals = Vertical.query.order_by(Vertical.name).all()
-
-    # Calculate stats for all articles (not filtered)
-    all_articles = Article.query.all()
-    stats = {
-        'total': len(all_articles),
-        'nganh': len([a for a in all_articles if a.tier == 'nganh']),
-        'chung': len([a for a in all_articles if a.tier == 'chung']),
-        'chi_tiet': len([a for a in all_articles if a.tier == 'chi-tiet'])
-    }
-
-    return render_template('admin/articles.html',
-                         articles=articles,
-                         verticals=verticals,
-                         stats=stats,
-                         current_vertical=vertical_filter,
-                         current_tier=tier_filter,
-                         current_search=search_query,
-                         current_sort=sort_by,
-                         current_order=sort_order)
+    """Redirect standalone articles page to Content Hub"""
+    return redirect(url_for('admin_content_hub', tab='articles'))
 
 @app.route('/admin/article/new', methods=['GET','POST'])
 def admin_article_new():
@@ -2591,7 +2533,7 @@ def admin_article_new():
         db.session.add(a)
         db.session.commit()
         flash(f'Da tao bai viet: {a.title}', 'success')
-        return redirect(url_for('admin_articles'))
+        return redirect(url_for('admin_content_hub', tab='articles'))
     return render_template('admin/article_form.html', article=None, verticals=verticals)
 
 @app.route('/admin/article/<int:aid>/edit', methods=['GET','POST'])
@@ -2614,7 +2556,7 @@ def admin_article_edit(aid):
         a.status = request.form.get('status','published')
         db.session.commit()
         flash(f'Da cap nhat: {a.title}', 'success')
-        return redirect(url_for('admin_articles'))
+        return redirect(url_for('admin_content_hub', tab='articles'))
     # Related articles for preview in edit form
     related_articles = Article.query.filter(
         Article.id != a.id, Article.status=='published',
@@ -2629,7 +2571,7 @@ def admin_article_delete(aid):
     db.session.delete(a)
     db.session.commit()
     flash('Da xoa bai viet', 'success')
-    return redirect(url_for('admin_articles'))
+    return redirect(url_for('admin_content_hub', tab='articles'))
 
 @app.route('/admin/articles/bulk-delete-selected', methods=['POST'])
 def admin_articles_bulk_delete_selected():
@@ -2700,27 +2642,8 @@ def admin_api_zone_products():
 # =============================================
 @app.route('/admin/feedbacks')
 def admin_feedbacks():
-    """View all article feedbacks"""
-    status_filter = request.args.get('status', 'all')
-
-    if status_filter == 'all':
-        feedbacks = ArticleFeedback.query.order_by(ArticleFeedback.created_at.desc()).all()
-    else:
-        feedbacks = ArticleFeedback.query.filter_by(status=status_filter).order_by(ArticleFeedback.created_at.desc()).all()
-
-    # Count by status
-    pending_count = ArticleFeedback.query.filter_by(status='pending').count()
-    reviewed_count = ArticleFeedback.query.filter_by(status='reviewed').count()
-    resolved_count = ArticleFeedback.query.filter_by(status='resolved').count()
-    dismissed_count = ArticleFeedback.query.filter_by(status='dismissed').count()
-
-    return render_template('admin/feedbacks.html',
-        feedbacks=feedbacks,
-        status_filter=status_filter,
-        pending_count=pending_count,
-        reviewed_count=reviewed_count,
-        resolved_count=resolved_count,
-        dismissed_count=dismissed_count)
+    """Redirect standalone feedbacks page to Content Hub"""
+    return redirect(url_for('admin_content_hub', tab='feedbacks'))
 
 @app.route('/admin/feedback/<int:fid>')
 def admin_feedback_detail(fid):
@@ -2741,7 +2664,7 @@ def admin_feedback_update_status(fid):
 
     db.session.commit()
     flash('Đã cập nhật trạng thái phản hồi', 'success')
-    return redirect(url_for('admin_feedbacks'))
+    return redirect(url_for('admin_content_hub', tab='feedbacks'))
 
 @app.route('/admin/feedback/<int:fid>/delete', methods=['POST'])
 def admin_feedback_delete(fid):
@@ -2750,7 +2673,7 @@ def admin_feedback_delete(fid):
     db.session.delete(feedback)
     db.session.commit()
     flash('Đã xóa phản hồi', 'success')
-    return redirect(url_for('admin_feedbacks'))
+    return redirect(url_for('admin_content_hub', tab='feedbacks'))
 
 @app.route('/admin/feedbacks/bulk-delete', methods=['POST'])
 def admin_feedbacks_bulk_delete():
@@ -2768,54 +2691,8 @@ def admin_feedbacks_bulk_delete():
 # =============================================
 @app.route('/admin/products')
 def admin_products():
-    # Get filter params
-    f_vertical = request.args.get('vertical', '')
-    f_network = request.args.get('network', '')
-    f_status = request.args.get('status', '')
-    f_search = request.args.get('q', '')
-    page = request.args.get('page', 1, type=int)
-    per_page = 50
-
-    # Query with joins to get full path
-    q = db.session.query(AffiliateLink, Part, Zone, Segment, Vertical).join(
-        Part, AffiliateLink.part_id == Part.id
-    ).join(Zone, Part.zone_id == Zone.id
-    ).join(Segment, Zone.segment_id == Segment.id
-    ).join(Vertical, Segment.vertical_id == Vertical.id)
-
-    if f_vertical:
-        q = q.filter(Vertical.slug == f_vertical)
-    if f_network:
-        q = q.filter(AffiliateLink.network == f_network)
-    if f_status == 'active':
-        q = q.filter(AffiliateLink.is_active == True)
-    elif f_status == 'inactive':
-        q = q.filter(AffiliateLink.is_active == False)
-    if f_search:
-        q = q.filter(db.or_(
-            AffiliateLink.product_name.ilike(f'%{f_search}%'),
-            Part.name_vi.ilike(f'%{f_search}%'),
-            AffiliateLink.url.ilike(f'%{f_search}%')
-        ))
-
-    pagination = q.order_by(AffiliateLink.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
-    products = pagination.items
-    verticals = Vertical.query.all()
-    # Get unique networks
-    networks = db.session.query(AffiliateLink.network).distinct().all()
-    networks = [n[0] for n in networks]
-
-    # Stats
-    total = AffiliateLink.query.count()
-    active = AffiliateLink.query.filter_by(is_active=True).count()
-    total_clicks = db.session.query(db.func.sum(AffiliateLink.clicks)).scalar() or 0
-    total_conv = db.session.query(db.func.sum(AffiliateLink.conversions)).scalar() or 0
-
-    return render_template('admin/products.html',
-        products=products, verticals=verticals, networks=networks,
-        f_vertical=f_vertical, f_network=f_network, f_status=f_status, f_search=f_search,
-        total=total, active=active, total_clicks=total_clicks, total_conv=total_conv,
-        pagination=pagination, page=page)
+    """Redirect standalone products page to Products Hub"""
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/product/new', methods=['GET','POST'])
 def admin_product_new():
@@ -2832,7 +2709,7 @@ def admin_product_new():
         db.session.add(al)
         db.session.commit()
         flash(f'Da them san pham: {al.product_name}', 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
     # Get all parts grouped by vertical > segment > zone
     parts_tree = []
     for v in Vertical.query.all():
@@ -2858,7 +2735,7 @@ def admin_product_edit(pid):
         al.is_active = 'is_active' in request.form
         db.session.commit()
         flash(f'Da cap nhat: {al.product_name}', 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
     parts_tree = []
     for v in Vertical.query.all():
         for s in v.segments:
@@ -2876,7 +2753,7 @@ def admin_product_toggle(pid):
     al.is_active = not al.is_active
     db.session.commit()
     flash(f'{"Bat" if al.is_active else "Tat"}: {al.product_name}', 'success')
-    return redirect(url_for('admin_products'))
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/product/<int:pid>/delete', methods=['POST'])
 def admin_product_delete(pid):
@@ -2906,7 +2783,7 @@ def admin_product_delete(pid):
     if warnings:
         msg += ' (Luu y: ' + '; '.join(warnings) + ')'
     flash(msg, 'success' if not warnings else 'warning')
-    return redirect(url_for('admin_products'))
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/products/bulk-delete', methods=['POST'])
 def admin_products_bulk_delete():
@@ -2930,17 +2807,17 @@ def admin_products_bulk_delete():
         label = 'tat ca'
     else:
         flash('Action khong hop le', 'error')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     count = q.count()
     if count == 0:
         flash('Khong co san pham nao de xoa', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     q.delete(synchronize_session=False)
     db.session.commit()
     flash(f'Da xoa {count:,} san pham ({label})', 'success')
-    return redirect(url_for('admin_products'))
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/products/bulk-delete-selected', methods=['POST'])
 def admin_products_bulk_delete_selected():
@@ -4311,7 +4188,7 @@ def admin_products_import_csv():
             detail = ', '.join(f'{name}: {cnt}' for name, cnt in top_vert)
             msg += f' | Vertical match: {detail}'
         flash(msg, 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # GET request - show form
     parts_tree = []
@@ -4336,7 +4213,7 @@ def admin_products_datafeeds():
     api = get_accesstrade_api()
     if not api:
         flash('Chua cau hinh AccessTrade API key. Vao Affiliate Network de thiet lap.', 'error')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # ── POST: Import selected products ──
     if request.method == 'POST':
@@ -4419,7 +4296,7 @@ def admin_products_datafeeds():
         if matched:
             msg += f' + {matched} match vao vertical'
         flash(msg, 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # ── GET: Browse datafeeds ──
     keyword = request.args.get('keyword', '')
@@ -4552,7 +4429,7 @@ def admin_products_reclassify_hub():
     hub = Vertical.query.filter_by(slug='hub').first()
     if not hub:
         flash('Chưa có vertical Hub nào.', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # Get all Hub segment/zone/part IDs
     hub_part_ids = set()
@@ -4563,13 +4440,13 @@ def admin_products_reclassify_hub():
 
     if not hub_part_ids:
         flash('Hub không có sản phẩm nào.', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # Get all products in Hub
     hub_products = AffiliateLink.query.filter(AffiliateLink.part_id.in_(hub_part_ids)).all()
     if not hub_products:
         flash('Hub không có sản phẩm nào cần phân loại.', 'info')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # Build matching index (excluding Hub parts)
     part_index, zone_kw, power_kw, normalize_fn = _build_part_keyword_index()
@@ -4578,7 +4455,7 @@ def admin_products_reclassify_hub():
 
     if not part_index and not zone_kw:
         flash('Chưa có vertical/zone nào để match. Hãy tạo vertical trước.', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     matched = 0
     mapped_zones = {}
@@ -4617,7 +4494,7 @@ def admin_products_reclassify_hub():
         detail = ', '.join(f'{name}: {cnt}' for name, cnt in top)
         msg += f' | {detail}'
     flash(msg, 'success' if matched > 0 else 'info')
-    return redirect(url_for('admin_products'))
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/scheduled-imports')
 def admin_scheduled_imports():
@@ -4753,12 +4630,8 @@ def admin_scheduled_import_delete(job_id):
 # =============================================
 @app.route('/admin/video')
 def admin_video():
-    videos = VideoProject.query.order_by(VideoProject.created_at.desc()).all()
-    channels = SocialChannel.query.all()
-    total_views = db.session.query(db.func.sum(VideoPublish.views)).scalar() or 0
-    total_published = VideoPublish.query.filter_by(status='published').count()
-    return render_template('admin/video.html', videos=videos, channels=channels,
-        total_views=total_views, total_published=total_published)
+    """Redirect standalone video page to Tools Hub"""
+    return redirect(url_for('admin_tools', tab='video'))
 
 @app.route('/admin/video/channels')
 def admin_video_channels():
@@ -4836,7 +4709,7 @@ def admin_video_delete(vid):
     db.session.delete(v)
     db.session.commit()
     flash('Da xoa video', 'success')
-    return redirect(url_for('admin_video'))
+    return redirect(url_for('admin_tools', tab='video'))
 
 @app.route('/admin/videos/bulk-delete', methods=['POST'])
 def admin_videos_bulk_delete():
@@ -4883,38 +4756,8 @@ def admin_video_analytics():
 # =============================================
 @app.route('/admin/hotels')
 def admin_hotels():
-    f_dest = request.args.get('destination', '')
-    f_stars = request.args.get('stars', '')
-    f_status = request.args.get('status', '')
-    f_image = request.args.get('image', '')
-    page = request.args.get('page', 1, type=int)
-    per_page = 30
-    q = Hotel.query
-    if f_dest:
-        q = q.filter(Hotel.destination == f_dest)
-    if f_stars:
-        q = q.filter(Hotel.stars == int(f_stars))
-    if f_status == 'active':
-        q = q.filter(Hotel.is_active == True)
-    elif f_status == 'inactive':
-        q = q.filter(Hotel.is_active == False)
-    if f_image == 'missing':
-        q = q.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
-    elif f_image == 'has':
-        q = q.filter(Hotel.image_url != '', Hotel.image_url != None)
-    total_filtered = q.count()
-    hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).offset((page - 1) * per_page).limit(per_page).all()
-    total_pages = (total_filtered + per_page - 1) // per_page
-    destinations = db.session.query(Hotel.destination, Hotel.destination_name).distinct().all()
-    total = Hotel.query.count()
-    active = Hotel.query.filter_by(is_active=True).count()
-    no_image = Hotel.query.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
-    total_clicks = db.session.query(db.func.sum(Hotel.clicks)).scalar() or 0
-    total_conv = db.session.query(db.func.sum(Hotel.conversions)).scalar() or 0
-    return render_template('admin/hotels.html', hotels=hotels, destinations=destinations,
-        f_dest=f_dest, f_stars=f_stars, f_status=f_status, f_image=f_image,
-        total=total, active=active, no_image=no_image, total_clicks=total_clicks, total_conv=total_conv,
-        page=page, total_pages=total_pages, total_filtered=total_filtered, per_page=per_page)
+    """Redirect standalone hotels page to Hotels Hub"""
+    return redirect(url_for('admin_hotels_hub'))
 
 @app.route('/admin/hotel/new', methods=['GET','POST'])
 def admin_hotel_new():
@@ -4940,7 +4783,7 @@ def admin_hotel_new():
         )
         db.session.add(h); db.session.commit()
         flash(f'Da them: {h.name}', 'success')
-        return redirect(url_for('admin_hotels'))
+        return redirect(url_for('admin_hotels_hub'))
     return render_template('admin/hotel_form.html', hotel=None)
 
 @app.route('/admin/hotel/<int:hid>/edit', methods=['GET','POST'])
@@ -4965,43 +4808,43 @@ def admin_hotel_edit(hid):
         h.is_featured = 'is_featured' in request.form
         db.session.commit()
         flash(f'Da cap nhat: {h.name}', 'success')
-        return redirect(url_for('admin_hotels'))
+        return redirect(url_for('admin_hotels_hub'))
     return render_template('admin/hotel_form.html', hotel=h)
 
 @app.route('/admin/hotel/<int:hid>/toggle', methods=['POST'])
 def admin_hotel_toggle(hid):
     h = Hotel.query.get_or_404(hid)
     h.is_active = not h.is_active; db.session.commit()
-    return redirect(url_for('admin_hotels'))
+    return redirect(url_for('admin_hotels_hub'))
 
 @app.route('/admin/hotel/<int:hid>/delete', methods=['POST'])
 def admin_hotel_delete(hid):
     h = Hotel.query.get_or_404(hid)
     db.session.delete(h); db.session.commit()
     flash('Da xoa khach san', 'success')
-    return redirect(url_for('admin_hotels'))
+    return redirect(url_for('admin_hotels_hub'))
 
 @app.route('/admin/hotels/bulk-delete', methods=['POST'])
 def admin_hotels_bulk_delete():
     ids = request.form.getlist('hotel_ids')
     if not ids:
         flash('Chua chon khach san nao', 'warning')
-        return redirect(url_for('admin_hotels'))
+        return redirect(url_for('admin_hotels_hub'))
     count = Hotel.query.filter(Hotel.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
     db.session.commit()
     flash(f'Da xoa {count} khach san', 'success')
-    return redirect(url_for('admin_hotels'))
+    return redirect(url_for('admin_hotels_hub'))
 
 @app.route('/admin/hotels/delete-all', methods=['POST'])
 def admin_hotels_delete_all():
     count = Hotel.query.count()
     if count == 0:
         flash('Khong co khach san nao de xoa', 'warning')
-        return redirect(url_for('admin_hotels'))
+        return redirect(url_for('admin_hotels_hub'))
     Hotel.query.delete(synchronize_session=False)
     db.session.commit()
     flash(f'Da xoa tat ca {count} khach san', 'success')
-    return redirect(url_for('admin_hotels'))
+    return redirect(url_for('admin_hotels_hub'))
 
 @app.route('/admin/hotels/bulk-toggle', methods=['POST'])
 def admin_hotels_bulk_toggle():
@@ -5009,7 +4852,7 @@ def admin_hotels_bulk_toggle():
     action = request.form.get('action', '')
     if not ids:
         flash('Chua chon khach san nao', 'warning')
-        return redirect(url_for('admin_hotels'))
+        return redirect(url_for('admin_hotels_hub'))
     new_state = action == 'activate'
     hotels = Hotel.query.filter(Hotel.id.in_([int(i) for i in ids])).all()
     for h in hotels:
@@ -5017,7 +4860,7 @@ def admin_hotels_bulk_toggle():
     db.session.commit()
     label = 'bat' if new_state else 'tat'
     flash(f'Da {label} {len(hotels)} khach san', 'success')
-    return redirect(url_for('admin_hotels'))
+    return redirect(url_for('admin_hotels_hub'))
 
 # =============================================
 # ADMIN — HOTEL SYNC (Agoda API)
@@ -5716,9 +5559,8 @@ def admin_vouchers_bulk_delete():
 # =============================================
 @app.route('/admin/voucher-widgets')
 def admin_voucher_widgets():
-    """Manage voucher embed widgets from affiliate networks"""
-    widgets = VoucherWidget.query.order_by(VoucherWidget.position, VoucherWidget.created_at.desc()).all()
-    return render_template('admin/voucher_widgets.html', widgets=widgets)
+    """Redirect standalone voucher widgets page to Vouchers Hub"""
+    return redirect(url_for('admin_vouchers_hub', tab='widgets'))
 
 @app.route('/admin/voucher-widget/new', methods=['GET','POST'])
 def admin_voucher_widget_new():
@@ -5736,7 +5578,7 @@ def admin_voucher_widget_new():
         db.session.add(w)
         db.session.commit()
         flash(f'Đã thêm widget: {w.name}', 'success')
-        return redirect(url_for('admin_voucher_widgets'))
+        return redirect(url_for('admin_vouchers_hub', tab='widgets'))
     return render_template('admin/voucher_widget_form.html', widget=None)
 
 @app.route('/admin/voucher-widget/<int:wid>', methods=['GET','POST'])
@@ -5754,7 +5596,7 @@ def admin_voucher_widget_edit(wid):
         w.updated_at = datetime.utcnow()
         db.session.commit()
         flash(f'Đã cập nhật widget: {w.name}', 'success')
-        return redirect(url_for('admin_voucher_widgets'))
+        return redirect(url_for('admin_vouchers_hub', tab='widgets'))
     return render_template('admin/voucher_widget_form.html', widget=w)
 
 @app.route('/admin/voucher-widget/<int:wid>/toggle', methods=['POST'])
@@ -5764,7 +5606,7 @@ def admin_voucher_widget_toggle(wid):
     w.is_active = not w.is_active
     db.session.commit()
     flash(f'Widget {w.name}: {"Hiển thị" if w.is_active else "Ẩn"}', 'success')
-    return redirect(url_for('admin_voucher_widgets'))
+    return redirect(url_for('admin_vouchers_hub', tab='widgets'))
 
 @app.route('/admin/voucher-widget/<int:wid>/delete', methods=['POST'])
 def admin_voucher_widget_delete(wid):
@@ -5774,7 +5616,7 @@ def admin_voucher_widget_delete(wid):
     db.session.delete(w)
     db.session.commit()
     flash(f'Đã xóa widget: {name}', 'success')
-    return redirect(url_for('admin_voucher_widgets'))
+    return redirect(url_for('admin_vouchers_hub', tab='widgets'))
 
 @app.route('/admin/voucher-widgets/bulk-delete', methods=['POST'])
 def admin_voucher_widgets_bulk_delete():
@@ -5792,26 +5634,24 @@ def admin_voucher_widgets_bulk_delete():
 # =============================================
 @app.route('/admin/hotdeals')
 def admin_hotdeals():
-    """Manage hot deal campaigns uploaded from Excel"""
-    deals = HotDeal.query.order_by(HotDeal.end_date.desc()).all()
-    now = datetime.utcnow()
-    return render_template('admin/hotdeals.html', deals=deals, now=now)
+    """Redirect standalone hotdeals page to Vouchers Hub"""
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
 @app.route('/admin/hotdeals/upload', methods=['GET', 'POST'])
 def admin_hotdeals_upload():
     """Upload Hot_deal.xlsx and import data into HotDeal table"""
     if request.method == 'GET':
-        return redirect(url_for('admin_hotdeals'))
+        return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
     file = request.files.get('file')
     if not file or not file.filename.endswith(('.xlsx', '.xls')):
         flash('Vui long chon file Excel (.xlsx)', 'error')
-        return redirect(url_for('admin_hotdeals'))
+        return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
     try:
         import openpyxl
     except ImportError:
         flash('Thieu thu vien openpyxl. Chay: pip install openpyxl', 'error')
-        return redirect(url_for('admin_hotdeals'))
+        return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
     try:
         from io import BytesIO
@@ -5836,7 +5676,7 @@ def admin_hotdeals_upload():
 
         if 'name' not in col_map:
             flash('Khong tim thay cot "Name" trong file Excel', 'error')
-            return redirect(url_for('admin_hotdeals'))
+            return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
         imported = 0
         skipped = 0
@@ -5908,7 +5748,7 @@ def admin_hotdeals_upload():
     except Exception as e:
         flash(f'Loi import: {str(e)}', 'error')
 
-    return redirect(url_for('admin_hotdeals'))
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
 @app.route('/admin/hotdeals/<int:deal_id>/toggle', methods=['POST'])
 def admin_hotdeal_toggle(deal_id):
@@ -5917,7 +5757,7 @@ def admin_hotdeal_toggle(deal_id):
     deal.is_active = not deal.is_active
     db.session.commit()
     flash(f'{"Bat" if deal.is_active else "Tat"} deal: {deal.campaign}', 'success')
-    return redirect(url_for('admin_hotdeals'))
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
 @app.route('/admin/hotdeals/<int:deal_id>/delete', methods=['POST'])
 def admin_hotdeal_delete(deal_id):
@@ -5927,7 +5767,7 @@ def admin_hotdeal_delete(deal_id):
     db.session.delete(deal)
     db.session.commit()
     flash(f'Da xoa deal: {name}', 'success')
-    return redirect(url_for('admin_hotdeals'))
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
 @app.route('/admin/hotdeals/delete-all', methods=['POST'])
 def admin_hotdeals_delete_all():
@@ -5936,7 +5776,7 @@ def admin_hotdeals_delete_all():
     HotDeal.query.delete()
     db.session.commit()
     flash(f'Da xoa {count} deal', 'success')
-    return redirect(url_for('admin_hotdeals'))
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
 
 @app.route('/admin/hotdeals/bulk-delete-selected', methods=['POST'])
 def admin_hotdeals_bulk_delete_selected():
@@ -5955,10 +5795,8 @@ def admin_hotdeals_bulk_delete_selected():
 
 @app.route('/admin/at-banners')
 def admin_at_banners():
-    """Manage auto-pulled AccessTrade banners"""
-    banners = AccessTradeBanner.query.order_by(AccessTradeBanner.synced_at.desc()).all()
-    now = datetime.utcnow()
-    return render_template('admin/at_banners.html', banners=banners, now=now)
+    """Redirect standalone AT banners page to Vouchers Hub"""
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
 
 def _do_banner_sync():
     """Core banner sync logic — returns (imported, updated, total, error)"""
@@ -6077,7 +5915,7 @@ def admin_at_banners_sync():
     except Exception as e:
         flash(f'Lỗi sync: {str(e)}', 'error')
 
-    return redirect(url_for('admin_at_banners'))
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
 
 @app.route('/admin/at-banners/<int:banner_id>/toggle', methods=['POST'])
 def admin_at_banner_toggle(banner_id):
@@ -6086,7 +5924,7 @@ def admin_at_banner_toggle(banner_id):
     b.is_active = not b.is_active
     db.session.commit()
     flash(f'{"Bat" if b.is_active else "Tat"} banner: {b.merchant}', 'success')
-    return redirect(url_for('admin_at_banners'))
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
 
 @app.route('/admin/at-banners/<int:banner_id>/placement', methods=['POST'])
 def admin_at_banner_placement(banner_id):
@@ -6097,7 +5935,7 @@ def admin_at_banner_placement(banner_id):
         b.placement = new_placement
         db.session.commit()
         flash(f'Da doi vi tri: {b.merchant} → {new_placement}', 'success')
-    return redirect(url_for('admin_at_banners'))
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
 
 @app.route('/admin/at-banners/<int:banner_id>/delete', methods=['POST'])
 def admin_at_banner_delete(banner_id):
@@ -6107,7 +5945,7 @@ def admin_at_banner_delete(banner_id):
     db.session.delete(b)
     db.session.commit()
     flash(f'Da xoa banner: {name}', 'success')
-    return redirect(url_for('admin_at_banners'))
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
 
 @app.route('/admin/at-banners/delete-all', methods=['POST'])
 def admin_at_banners_delete_all():
@@ -6116,7 +5954,7 @@ def admin_at_banners_delete_all():
     AccessTradeBanner.query.delete()
     db.session.commit()
     flash(f'Da xoa {count} banner', 'success')
-    return redirect(url_for('admin_at_banners'))
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
 
 @app.route('/admin/at-banners/bulk-delete-selected', methods=['POST'])
 def admin_at_banners_bulk_delete_selected():

@@ -39,7 +39,7 @@
       <option value="has" {% if f_image=='has' %}selected{% endif %}>✅ Has Image</option>
     </select>
     <button class="btn btn-ghost btn-sm" type="submit">Filter</button>
-    {% if f_dest or f_stars or f_status or f_image %}<a href="{{ url_for('admin_hotels') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>{% endif %}
+    {% if f_dest or f_stars or f_status or f_image %}<a href="{{ url_for('admin_hotels_hub') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>{% endif %}
   </form>
 </div>
 

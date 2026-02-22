@@ -2,7 +2,7 @@
 {% block title %}Import San pham{% endblock %}
 {% block breadcrumb %}
 <a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>
-<a href="{{ url_for('admin_products') }}">Products</a><span class="sep">›</span>
+<a href="{{ url_for('admin_products_hub') }}">Products</a><span class="sep">›</span>
 Import CSV
 {% endblock %}
 {% block content %}
@@ -122,7 +122,7 @@ Import CSV
       <!-- Submit -->
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Import san pham</button>
-        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Huy</a>
+        <a href="{{ url_for('admin_products_hub') }}" class="btn btn-secondary">Huy</a>
       </div>
     </form>
 
@@ -203,7 +203,7 @@ Import CSV
       <!-- Submit -->
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Tao Scheduled Import</button>
-        <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Huy</a>
+        <a href="{{ url_for('admin_products_hub') }}" class="btn btn-secondary">Huy</a>
       </div>
     </form>
   </div>

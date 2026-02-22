@@ -120,7 +120,7 @@
 <div class="mh-toolbar">
   <div style="font-size:14px;color:var(--text-dim)">Showing {{ pagination }} results</div>
   <div style="display:flex;gap:8px">
-    <a href="{{ url_for('admin_products') }}" class="mh-btn mh-btn-primary">+ New Product</a>
+    <a href="{{ url_for('admin_products_hub') }}" class="mh-btn mh-btn-primary">+ New Product</a>
     <a href="{{ url_for('admin_products_import_csv') }}" class="mh-btn mh-btn-ghost">Import CSV</a>
   </div>
 </div>
@@ -208,7 +208,7 @@
 <div class="mh-toolbar">
   <div style="font-size:14px;color:var(--text-dim)">Page {{ page }} of {{ total_pages }}</div>
   <div style="display:flex;gap:8px">
-    <a href="{{ url_for('admin_hotels') }}" class="mh-btn mh-btn-primary">+ New Hotel</a>
+    <a href="{{ url_for('admin_hotels_hub') }}" class="mh-btn mh-btn-primary">+ New Hotel</a>
     <a href="{{ url_for('admin_hotel_sync') }}" class="mh-btn mh-btn-ghost">Hotel Sync</a>
     <a href="{{ url_for('admin_attractions') }}" class="mh-btn mh-btn-ghost">Attractions</a>
   </div>
@@ -355,7 +355,7 @@
 <div class="mh-section">
   <div class="mh-toolbar">
     <div class="mh-section-title">&#128293; Hot Deals ({{ deals|length }})</div>
-    <a href="{{ url_for('admin_hotdeals') }}" class="mh-btn mh-btn-primary">Manage Hot Deals</a>
+    <a href="{{ url_for('admin_vouchers_hub', tab='hotdeals') }}" class="mh-btn mh-btn-primary">Manage Hot Deals</a>
   </div>
 
   {% if deals %}
@@ -393,7 +393,7 @@
 <div class="mh-section">
   <div class="mh-toolbar">
     <div class="mh-section-title">&#127912; AT Banners ({{ banners|length }})</div>
-    <a href="{{ url_for('admin_at_banners') }}" class="mh-btn mh-btn-primary">Manage Banners</a>
+    <a href="{{ url_for('admin_vouchers_hub', tab='banners') }}" class="mh-btn mh-btn-primary">Manage Banners</a>
   </div>
 
   {% if banners %}
