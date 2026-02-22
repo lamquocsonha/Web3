@@ -10,6 +10,7 @@
   <button class="stab-btn {% if active_tab=='api' %}active{% endif %}" data-tab="api">API Keys</button>
   <button class="stab-btn {% if active_tab=='styles' %}active{% endif %}" data-tab="styles">Styles</button>
   <button class="stab-btn {% if active_tab=='database' %}active{% endif %}" data-tab="database">Database</button>
+  <button class="stab-btn {% if active_tab=='robots' %}active{% endif %}" data-tab="robots">Robots.txt</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -573,6 +574,98 @@
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
+<!-- TAB: ROBOTS.TXT                              -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="stab-panel {% if active_tab=='robots' %}active{% endif %}" id="tab-robots">
+<div style="max-width:900px">
+
+  <!-- Current status -->
+  <div class="scard">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="font-size:20px">📍</div>
+      <div>
+        <div style="font-size:14px;font-weight:600">File location</div>
+        <div style="font-size:13px;color:var(--text-dim);font-family:'DM Mono',monospace">/static/robots.txt → {{ request.host }}/robots.txt</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preset buttons -->
+  <div class="scard">
+    <h3 class="scard-title">Preset nhanh</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" onclick="setRobotsPreset('block')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.05);color:#ef4444;cursor:pointer;font-size:13px;font-weight:600">
+        Block tat ca (dang dev)
+      </button>
+      <button type="button" onclick="setRobotsPreset('allow')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);color:#22c55e;cursor:pointer;font-size:13px;font-weight:600">
+        Cho phep tat ca (production)
+      </button>
+      <button type="button" onclick="setRobotsPreset('partial')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.05);color:#3b82f6;cursor:pointer;font-size:13px;font-weight:600">
+        Chan admin, cho phep public
+      </button>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <form method="POST">
+    <input type="hidden" name="_tab" value="robots">
+    <div class="scard">
+      <h3 class="scard-title">Noi dung robots.txt</h3>
+      <textarea name="robots_content" id="robotsContent"
+        style="width:100%;min-height:260px;padding:16px;font-family:'DM Mono',monospace;font-size:14px;line-height:1.8;background:var(--code-bg, var(--surface2));color:var(--text);border:1px solid var(--border);border-radius:8px;resize:vertical"
+      >{{ robots_content }}</textarea>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+        <button type="submit" class="btn btn-primary">Save Robots.txt</button>
+        <a href="/robots.txt" target="_blank" style="font-size:13px;color:var(--accent)">Xem file hien tai ↗</a>
+      </div>
+    </div>
+  </form>
+
+  <!-- Guide -->
+  <div class="scard">
+    <h3 class="scard-title">Huong dan cu phap</h3>
+    <div class="table-wrap">
+      <table class="data-table" style="font-size:14px">
+        <thead><tr><th>Directive</th><th>Y nghia</th><th>Vi du</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>User-agent</code></td>
+            <td>Chi dinh bot nao bi anh huong</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">User-agent: *</td>
+          </tr>
+          <tr>
+            <td><code>Disallow</code></td>
+            <td>Chan crawl duong dan</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">Disallow: /admin</td>
+          </tr>
+          <tr>
+            <td><code>Allow</code></td>
+            <td>Cho phep crawl (override Disallow)</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">Allow: /</td>
+          </tr>
+          <tr>
+            <td><code>Sitemap</code></td>
+            <td>Chi duong dan sitemap.xml</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">Sitemap: https://example.com/sitemap.xml</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:16px;padding:14px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
+      <strong style="font-size:13px;color:#f59e0b">Luu y:</strong>
+      <ul style="font-size:13px;color:var(--text-dim);margin:6px 0 0;padding-left:18px;line-height:1.8">
+        <li><code>Disallow: /</code> = chan toan bo site (dung khi dang dev)</li>
+        <li>Khi production san sang, doi sang <code>Allow: /</code> + them Sitemap</li>
+        <li>Google co the mat vai ngay de nhan thay doi robots.txt</li>
+        <li>robots.txt chi la "goi y" — bot xau co the bo qua</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
 <!-- STYLE EDITOR MODAL                          -->
 <!-- ═══════════════════════════════════════════ -->
 <div class="modal-overlay" id="styleModal" style="display:none">
@@ -842,5 +935,16 @@ document.getElementById('styleModal')?.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeStyleEditor();
 });
+
+/* ═══ ROBOTS PRESETS ═══ */
+function setRobotsPreset(type) {
+  const ta = document.getElementById('robotsContent');
+  const presets = {
+    block: `# robots.txt - Block all search engines from indexing\n\nUser-agent: *\nDisallow: /\n\n# Block all crawlers from accessing the entire site\n# Remove or modify this file when ready for production`,
+    allow: `# robots.txt - Allow all search engines\n\nUser-agent: *\nAllow: /\n\n# Sitemap\n# Sitemap: https://example.com/sitemap.xml`,
+    partial: `# robots.txt - Allow public pages, block admin\n\nUser-agent: *\nDisallow: /admin\nDisallow: /api/\nAllow: /\n\n# Sitemap\n# Sitemap: https://example.com/sitemap.xml`
+  };
+  if (presets[type]) ta.value = presets[type];
+}
 </script>
 {% endblock %}

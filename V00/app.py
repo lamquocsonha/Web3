@@ -1235,6 +1235,13 @@ def admin_settings():
                         'hotdeal_enabled', 'hotdeal_show_shop', 'hotdeal_show_voucher'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
+        if tab == 'robots':
+            robots_path = os.path.join(app.root_path, 'static', 'robots.txt')
+            content = request.form.get('robots_content', '')
+            with open(robots_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            flash('robots.txt updated!', 'success')
+            return redirect(url_for('admin_settings', tab='robots'))
         keys_to_save = tab_keys.get(tab, [])
         for key in keys_to_save:
             val = request.form.get(key, '')
@@ -1251,11 +1258,17 @@ def admin_settings():
     except:
         custom_names = set()
     db_info = _get_db_info() if tab == 'database' else None
+    robots_content = ''
+    if tab == 'robots':
+        robots_path = os.path.join(app.root_path, 'static', 'robots.txt')
+        if os.path.exists(robots_path):
+            with open(robots_path, 'r', encoding='utf-8') as f:
+                robots_content = f.read()
     return render_template('admin/settings.html', settings=settings, styles=styles,
                            active_tab=tab, custom_names=custom_names,
                            default_names=set(THEME_STYLES.keys()),
                            available_fonts=AVAILABLE_FONTS,
-                           db_info=db_info)
+                           db_info=db_info, robots_content=robots_content)
 
 @app.route('/admin/settings/styles', methods=['POST'])
 def admin_settings_styles():
