@@ -2620,6 +2620,38 @@ def admin_article_delete(aid):
     flash('Da xoa bai viet', 'success')
     return redirect(url_for('admin_articles'))
 
+@app.route('/admin/articles/bulk-delete-selected', methods=['POST'])
+def admin_articles_bulk_delete_selected():
+    """Delete selected articles by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co bai viet nao duoc chon'), 400
+    deleted = Article.query.filter(Article.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
+@app.route('/admin/articles/bulk-delete-all', methods=['POST'])
+def admin_articles_bulk_delete_all():
+    """Delete all articles matching current filters"""
+    data = request.get_json(silent=True) or {}
+    vertical = data.get('vertical', '')
+    tier = data.get('tier', '')
+    search = data.get('search', '')
+    q = Article.query
+    if vertical:
+        q = q.filter_by(vertical_slug=vertical)
+    if tier:
+        q = q.filter_by(tier=tier)
+    if search:
+        q = q.filter(db.or_(Article.title.ilike(f'%{search}%'), Article.category.ilike(f'%{search}%'), Article.tags.ilike(f'%{search}%')))
+    count = q.count()
+    if count == 0:
+        return jsonify(ok=False, error='Khong co bai viet nao de xoa'), 400
+    q.delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=count)
+
 @app.route('/admin/api/zone-products')
 def admin_api_zone_products():
     """API: return products from a zone by slug for article product attachment UI"""
