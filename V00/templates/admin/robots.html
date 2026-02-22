@@ -1,0 +1,106 @@
+{% extends "admin/base.html" %}
+{% block title %}Robots.txt{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Robots.txt{% endblock %}
+{% block content %}
+<h1 class="page-title">🤖 Quản lý Robots.txt</h1>
+<p style="font-size:14px;color:var(--text-dim);margin:-12px 0 24px">Kiểm soát search engine crawl / index trang web</p>
+
+<div style="max-width:900px">
+
+  <!-- Current status -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="font-size:20px">📍</div>
+      <div>
+        <div style="font-size:14px;font-weight:600">File location</div>
+        <div style="font-size:13px;color:var(--text-dim);font-family:'DM Mono',monospace">/static/robots.txt → {{ request.host }}/robots.txt</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preset buttons -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+    <h3 style="font-size:14px;margin-bottom:12px">⚡ Preset nhanh</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button type="button" onclick="setPreset('block')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.05);color:#ef4444;cursor:pointer;font-size:13px;font-weight:600">
+        🚫 Block tất cả (đang dev)
+      </button>
+      <button type="button" onclick="setPreset('allow')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.05);color:#22c55e;cursor:pointer;font-size:13px;font-weight:600">
+        ✅ Cho phép tất cả (production)
+      </button>
+      <button type="button" onclick="setPreset('partial')" style="padding:8px 16px;border-radius:8px;border:1px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.05);color:#3b82f6;cursor:pointer;font-size:13px;font-weight:600">
+        🔒 Chặn admin, cho phép public
+      </button>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <form method="post" action="{{ url_for('admin_robots') }}">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+      <h3 style="font-size:14px;margin-bottom:12px">📝 Nội dung robots.txt</h3>
+      <textarea name="content" id="robotsContent"
+        style="width:100%;min-height:260px;padding:16px;font-family:'DM Mono',monospace;font-size:14px;line-height:1.8;background:var(--code-bg);color:var(--text);border:1px solid var(--border);border-radius:8px;resize:vertical"
+      >{{ content }}</textarea>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+        <button type="submit" class="btn btn-primary" style="padding:10px 24px;font-size:14px">💾 Lưu robots.txt</button>
+        <a href="/robots.txt" target="_blank" style="font-size:13px;color:var(--primary)">Xem file hiện tại ↗</a>
+      </div>
+    </div>
+  </form>
+
+  <!-- Guide -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+    <h3 style="font-size:14px;margin-bottom:12px">📖 Hướng dẫn cú pháp</h3>
+    <div class="table-wrap">
+      <table class="data-table" style="font-size:14px">
+        <thead><tr><th>Directive</th><th>Ý nghĩa</th><th>Ví dụ</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>User-agent</code></td>
+            <td>Chỉ định bot nào bị ảnh hưởng</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">User-agent: *</td>
+          </tr>
+          <tr>
+            <td><code>Disallow</code></td>
+            <td>Chặn crawl đường dẫn</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">Disallow: /admin</td>
+          </tr>
+          <tr>
+            <td><code>Allow</code></td>
+            <td>Cho phép crawl (override Disallow)</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">Allow: /</td>
+          </tr>
+          <tr>
+            <td><code>Sitemap</code></td>
+            <td>Chỉ đường dẫn sitemap.xml</td>
+            <td style="font-family:'DM Mono',monospace;font-size:13px">Sitemap: https://unilab.vn/sitemap.xml</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:16px;padding:14px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:8px">
+      <strong style="font-size:13px;color:#f59e0b">⚠️ Lưu ý:</strong>
+      <ul style="font-size:13px;color:var(--text-dim);margin:6px 0 0;padding-left:18px;line-height:1.8">
+        <li><code>Disallow: /</code> = chặn toàn bộ site (dùng khi đang dev, chưa muốn Google index)</li>
+        <li>Khi production sẵn sàng, đổi sang <code>Allow: /</code> + thêm Sitemap</li>
+        <li>Google có thể mất vài ngày để nhận thay đổi robots.txt</li>
+        <li>robots.txt chỉ là "gợi ý" — bot xấu có thể bỏ qua</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function setPreset(type) {
+  const ta = document.getElementById('robotsContent');
+  const presets = {
+    block: `# robots.txt - Block all search engines from indexing\n\nUser-agent: *\nDisallow: /\n\n# Block all crawlers from accessing the entire site\n# Remove or modify this file when ready for production`,
+    allow: `# robots.txt - Allow all search engines\n\nUser-agent: *\nAllow: /\n\n# Sitemap\n# Sitemap: https://unilab.vn/sitemap.xml`,
+    partial: `# robots.txt - Allow public pages, block admin\n\nUser-agent: *\nDisallow: /admin\nDisallow: /api/\nAllow: /\n\n# Sitemap\n# Sitemap: https://unilab.vn/sitemap.xml`
+  };
+  if (presets[type]) ta.value = presets[type];
+}
+</script>
+{% endblock %}

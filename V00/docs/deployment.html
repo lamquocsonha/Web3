@@ -105,6 +105,22 @@ body::before {
   color: var(--orange); font-weight: 600;
 }
 
+/* Table */
+.doc-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 14px; margin-bottom: 16px;
+}
+.doc-table th, .doc-table td {
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.doc-table th {
+  font-weight: 600; font-size: 13px;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.doc-table tr:last-child td { border-bottom: none; }
+
 /* Compare table */
 .compare-grid {
   display: grid;
@@ -146,6 +162,25 @@ body::before {
 .compare-card .row .val {
   font-family: 'JetBrains Mono', monospace;
   font-size: 12px;
+}
+
+/* Info card */
+.info-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px;
+  margin-bottom: 20px;
+}
+
+.info-card h3 {
+  font-size: 15px; font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.tip-box {
+  padding: 16px; border-radius: 8px;
+  margin-bottom: 16px; font-size: 14px;
+  line-height: 1.7; border-left: 3px solid;
 }
 
 /* Steps */
@@ -258,9 +293,9 @@ body::before {
 }
 
 .warn-box h4 { font-size: 14px; color: var(--red); margin-bottom: 8px; }
-.warn-box p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
 .warn-box ul { padding-left: 20px; margin-top: 8px; }
 .warn-box li { font-size: 13px; color: var(--text-dim); line-height: 1.8; }
+.warn-box li strong { color: var(--text); }
 
 /* FAQ section */
 .faq { margin-bottom: 48px; }
@@ -283,11 +318,70 @@ body::before {
 
 .faq-item .a strong { color: var(--text); font-weight: 600; }
 
+/* Troubleshoot */
+.trouble-item { margin-bottom: 16px; }
+
+.trouble-header {
+  padding: 12px 16px; border-radius: 10px 10px 0 0;
+  font-size: 14px; font-weight: 600;
+}
+
+.trouble-body {
+  background: var(--surface);
+  border: 1px solid var(--border); border-top: 0;
+  border-radius: 0 0 10px 10px;
+  padding: 14px 16px; font-size: 14px;
+}
+
+.trouble-body .hint {
+  color: var(--text-dim); margin-bottom: 8px; font-size: 13px;
+}
+
+/* Checklist */
+.checklist {
+  background: linear-gradient(135deg, rgba(0,206,201,0.05), rgba(108,92,231,0.05));
+  border: 2px solid rgba(0,206,201,0.25);
+  border-radius: 14px; padding: 28px;
+  margin-bottom: 48px;
+}
+
+.checklist h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--green); }
+
+.checklist label {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--surface);
+  border-radius: 8px; cursor: pointer;
+  margin-bottom: 8px; font-size: 14px;
+}
+
+.checklist input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green); }
+
+/* Grid helpers */
+.grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; margin-bottom: 16px;
+}
+
+.grid-3 {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-bottom: 16px;
+}
+
+.mini-card {
+  padding: 16px; border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.mini-card .icon { font-size: 22px; margin-bottom: 8px; }
+.mini-card .title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.mini-card .desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
 /* Responsive */
 @media (max-width: 768px) {
   .header { padding: 24px; }
   .container { padding: 24px; }
-  .compare-grid { grid-template-columns: 1fr; }
+  .compare-grid, .grid-2 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
   .flow-row { flex-direction: column; gap: 8px; }
   .flow-arrow { transform: rotate(90deg); }
 }
@@ -383,6 +477,61 @@ body::before {
     </div>
   </div>
 
+  <!-- ═══ 2 apps on 1 server ═══ -->
+  <div class="section-title">2 App trên 1 Server</div>
+
+  <div class="info-card">
+    <h3 style="color:var(--green)">TripZone + UniLab chạy song song</h3>
+    <div style="overflow-x:auto">
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>Thành phần</th>
+            <th style="color:var(--orange)">TripZone (đã chạy)</th>
+            <th style="color:var(--blue)">UniLab (sắp deploy)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Loại app</strong></td><td>WordPress / PHP</td><td>Python Flask</td></tr>
+          <tr><td><strong>Web server</strong></td><td>Nginx (port 80/443)</td><td>Nginx reverse proxy → Gunicorn</td></tr>
+          <tr><td><strong>Backend</strong></td><td>PHP-FPM</td><td>Gunicorn (127.0.0.1:8000)</td></tr>
+          <tr><td><strong>Database</strong></td><td>MySQL</td><td>SQLite (file, không cần setup)</td></tr>
+          <tr><td><strong>Thư mục</strong></td><td>/var/www/tripzone</td><td>/var/www/unilab</td></tr>
+          <tr><td><strong>Domain</strong></td><td>tripzone.vn (giữ nguyên)</td><td>unilab.vn (domain mới)</td></tr>
+          <tr><td><strong>Nginx config</strong></td><td>/etc/nginx/conf.d/tripzone.conf</td><td>/etc/nginx/conf.d/unilab.conf</td></tr>
+          <tr>
+            <td><strong>Ảnh hưởng lẫn nhau?</strong></td>
+            <td colspan="2" style="color:var(--green);text-align:center"><strong>KHÔNG — mỗi app chạy độc lập, Nginx phân biệt bằng domain</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:14px;color:var(--text-dim);margin-top:12px;line-height:1.6">
+      Nginx nhận tất cả request trên port 80/443.
+      Dựa vào domain, Nginx chuyển request đến đúng backend: TripZone → PHP-FPM, UniLab → Gunicorn port 8000.
+      Hai app hoàn toàn tách biệt, không ảnh hưởng nhau.
+    </p>
+  </div>
+
+  <!-- ═══ Server info ═══ -->
+  <div class="grid-3">
+    <div class="mini-card" style="background:rgba(108,92,231,0.05);">
+      <div class="icon">&#128421;&#65039;</div>
+      <div class="title">Vultr VPS</div>
+      <div class="desc">CentOS 7, 4 vCPU, 8GB RAM<br>TripZone đã chạy ổn định</div>
+    </div>
+    <div class="mini-card" style="background:rgba(0,206,201,0.05);">
+      <div class="icon">&#127760;</div>
+      <div class="title">Domain UniLab</div>
+      <div class="desc">Cần 1 domain mới (VD: unilab.vn)<br>Trỏ DNS A record về IP server</div>
+    </div>
+    <div class="mini-card" style="background:rgba(253,203,110,0.05);">
+      <div class="icon">&#128187;</div>
+      <div class="title">SSH Access</div>
+      <div class="desc">Đã có sẵn từ TripZone<br>ssh root@IP_SERVER</div>
+    </div>
+  </div>
+
   <!-- ═══ Deploy steps ═══ -->
   <div class="section-title">Các bước deploy lên server</div>
 
@@ -390,21 +539,51 @@ body::before {
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <h4>Upload source code lên server</h4>
-        <p>Dùng SCP hoặc rsync để copy toàn bộ thư mục V00 lên VPS.</p>
-        <div class="code-block">
-          <span class="comment"># Copy từ máy local lên server</span><br>
-          <span class="cmd">scp</span> <span class="flag">-r</span> V00/* root@&lt;server-ip&gt;:/var/www/unilab/
+        <h4>Trỏ Domain UniLab về Server</h4>
+        <p>Vào quản lý DNS của domain UniLab, thêm A records. Dùng cùng IP server với TripZone.</p>
+        <div style="overflow-x:auto;margin-bottom:10px">
+          <table class="doc-table" style="background:var(--surface);border-radius:8px">
+            <thead><tr><th>Type</th><th>Name</th><th>Value</th><th>TTL</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--blue)">A</td><td><strong>@</strong></td><td style="color:var(--green)">IP_SERVER_VULTR</td><td>3600</td></tr>
+              <tr><td style="color:var(--blue)">A</td><td><strong>www</strong></td><td style="color:var(--green)">IP_SERVER_VULTR</td><td>3600</td></tr>
+            </tbody>
+          </table>
         </div>
+        <div class="code-block">
+          <span class="comment"># Kiểm tra DNS đã trỏ đúng:</span><br>
+          <span class="cmd">ping</span> unilab.vn<br>
+          <span class="comment"># Phải thấy IP trùng với server Vultr</span>
+        </div>
+        <p style="color:var(--orange);font-size:13px">DNS thường mất 5-30 phút để có hiệu lực. Có thể deploy song song trong khi chờ.</p>
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
+        <h4>Upload source code lên server</h4>
+        <p>Dùng SCP hoặc Git để copy toàn bộ thư mục V00 lên VPS.</p>
+        <div class="code-block">
+          <span class="comment"># Option 1: SCP (nhanh nhất)</span><br>
+          <span class="cmd">ssh</span> root@IP_SERVER "mkdir -p /var/www/unilab"<br>
+          <span class="cmd">scp</span> <span class="flag">-r</span> V00/* root@IP_SERVER:/var/www/unilab/<br><br>
+          <span class="comment"># Option 2: Git</span><br>
+          <span class="cmd">ssh</span> root@IP_SERVER<br>
+          <span class="cmd">git</span> clone https://github.com/username/Web3.git /tmp/web3<br>
+          <span class="cmd">cp</span> <span class="flag">-r</span> /tmp/web3/V00/* /var/www/unilab/
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
         <h4>Chạy script deploy tự động</h4>
         <p>Script <code>deploy.sh</code> sẽ tự làm mọi thứ: cài Python, tạo venv, cài dependencies, tạo systemd service, cấu hình Nginx.</p>
         <div class="code-block">
+          <span class="cmd">cd</span> /var/www/unilab<br>
+          <span class="cmd">chmod</span> +x deploy.sh<br>
           <span class="cmd">sudo</span> bash deploy.sh
         </div>
         <p>Script sẽ hỏi domain (VD: <code>unilab.vn</code>) và có muốn cài SSL không.</p>
@@ -412,16 +591,29 @@ body::before {
     </div>
 
     <div class="step">
-      <div class="step-num">3</div>
+      <div class="step-num">4</div>
       <div class="step-body">
-        <h4>Xong! App chạy tự động</h4>
-        <p>Sau khi deploy xong, systemd sẽ quản lý app. Không cần mở terminal, không cần chạy bất kỳ file .bat nào.</p>
+        <h4>Kiểm tra cả 2 site hoạt động</h4>
+        <p>Mở browser kiểm tra TripZone vẫn chạy và UniLab hoạt động.</p>
+        <div class="grid-2" style="margin-bottom:10px">
+          <div class="mini-card" style="background:rgba(253,203,110,0.05);">
+            <div class="desc"><strong style="color:var(--orange)">TripZone (cũ)</strong><br>https://tripzone.vn — phải vẫn OK</div>
+          </div>
+          <div class="mini-card" style="background:rgba(116,185,255,0.05);">
+            <div class="desc"><strong style="color:var(--blue)">UniLab (mới)</strong><br>https://unilab.vn — trang homepage</div>
+          </div>
+          <div class="mini-card" style="background:rgba(108,92,231,0.05);">
+            <div class="desc"><strong style="color:var(--accent)">UniLab Admin</strong><br>https://unilab.vn/admin</div>
+          </div>
+          <div class="mini-card" style="background:rgba(253,121,168,0.05);">
+            <div class="desc"><strong style="color:var(--pink)">Robots.txt</strong><br>https://unilab.vn/robots.txt</div>
+          </div>
+        </div>
         <div class="code-block">
-          <span class="comment"># Kiểm tra app đang chạy</span><br>
-          <span class="cmd">systemctl</span> status unilab<br><br>
-          <span class="comment"># Kết quả mong đợi:</span><br>
-          <span style="color:var(--green)">● unilab.service - UniLab Flask App (Gunicorn)</span><br>
-          <span style="color:var(--text-dim)">   Active: <span style="color:var(--green)">active (running)</span></span>
+          <span class="comment"># Kiểm tra services trên server:</span><br>
+          <span class="cmd">systemctl</span> status unilab<br>
+          <span class="cmd">systemctl</span> status nginx<br>
+          <span class="cmd">nginx</span> <span class="flag">-t</span>
         </div>
       </div>
     </div>
@@ -475,7 +667,7 @@ body::before {
   </div>
 
   <!-- ═══ What deploy.sh does ═══ -->
-  <div class="section-title">deploy.sh làm gì (chi tiết)</div>
+  <div class="section-title">deploy.sh làm gì (chi tiết 7 bước)</div>
 
   <div class="steps">
     <div class="step">
@@ -488,8 +680,8 @@ body::before {
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <h4>Tạo thư mục /var/www/unilab</h4>
-        <p>Kiểm tra source code đã được copy lên chưa. Nếu chưa thì dừng lại để anh copy.</p>
+        <h4>Chuẩn bị thư mục /var/www/unilab</h4>
+        <p>Kiểm tra source code đã được copy lên chưa. Nếu chưa thì dừng lại để copy.</p>
       </div>
     </div>
     <div class="step">
@@ -534,13 +726,57 @@ body::before {
     <div class="step">
       <div class="step-num">7</div>
       <div class="step-body">
-        <h4>Khởi động app</h4>
-        <p>Bật service và kiểm tra trạng thái. App chạy ngay lập tức.</p>
+        <h4>Khởi động app + SSL (tuỳ chọn)</h4>
+        <p>Bật service, reload Nginx, và tuỳ chọn cài SSL Let's Encrypt miễn phí.</p>
         <div class="code-block">
           <span class="cmd">systemctl</span> restart unilab<br>
           <span class="cmd">systemctl</span> status unilab
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══ Nginx routing ═══ -->
+  <div class="section-title">Nginx phân luồng traffic thế nào?</div>
+
+  <div class="info-card" style="margin-bottom:48px">
+    <p style="font-size:14px;color:var(--text-dim);margin-bottom:16px;line-height:1.6">
+      Cả 2 site dùng chung 1 Nginx. Nginx dựa vào <strong style="color:var(--text)">domain name</strong> trong request để chuyển đến đúng backend.
+    </p>
+    <div class="grid-2">
+      <div>
+        <div style="padding:8px 14px;background:rgba(253,203,110,0.1);border-radius:8px 8px 0 0;font-weight:600;color:var(--orange);font-size:13px">
+          /etc/nginx/conf.d/tripzone.conf
+        </div>
+        <div class="code-block" style="border-radius:0 0 8px 8px;margin-bottom:0">
+          server {<br>
+          &nbsp;&nbsp;listen 80;<br>
+          &nbsp;&nbsp;server_name <span style="color:var(--orange)">tripzone.vn</span>;<br>
+          &nbsp;&nbsp;...<br>
+          &nbsp;&nbsp;<span class="comment"># → PHP-FPM backend</span><br>
+          }
+        </div>
+      </div>
+      <div>
+        <div style="padding:8px 14px;background:rgba(116,185,255,0.1);border-radius:8px 8px 0 0;font-weight:600;color:var(--blue);font-size:13px">
+          /etc/nginx/conf.d/unilab.conf
+        </div>
+        <div class="code-block" style="border-radius:0 0 8px 8px;margin-bottom:0">
+          server {<br>
+          &nbsp;&nbsp;listen 80;<br>
+          &nbsp;&nbsp;server_name <span style="color:var(--blue)">unilab.vn</span>;<br>
+          &nbsp;&nbsp;...<br>
+          &nbsp;&nbsp;location / {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;proxy_pass <span style="color:var(--green)">http://127.0.0.1:8000</span>;<br>
+          &nbsp;&nbsp;}<br>
+          }
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding:12px 16px;background:rgba(0,206,201,0.05);border:1px solid rgba(0,206,201,0.15);border-radius:8px;font-size:14px;color:var(--text-dim)">
+      <strong style="color:var(--green)">Request flow:</strong><br>
+      User → <strong>tripzone.vn</strong> → Nginx → PHP-FPM → TripZone response<br>
+      User → <strong>unilab.vn</strong> → Nginx → Gunicorn :8000 → UniLab response
     </div>
   </div>
 
@@ -551,7 +787,8 @@ body::before {
     <div class="manage-card">
       <h4>Xem trạng thái</h4>
       <div class="code-block">
-        <span class="cmd">systemctl</span> status unilab
+        <span class="cmd">systemctl</span> status unilab<br>
+        <span class="cmd">systemctl</span> status nginx
       </div>
       <div class="note">Xem app đang chạy hay dừng, PID, memory usage.</div>
     </div>
@@ -561,7 +798,7 @@ body::before {
       <div class="code-block">
         <span class="cmd">systemctl</span> restart unilab
       </div>
-      <div class="note">Sau khi update code hoặc sửa config, restart để áp dụng.</div>
+      <div class="note">Sau khi update code hoặc sửa config, restart để áp dụng. TripZone không bị ảnh hưởng.</div>
     </div>
 
     <div class="manage-card">
@@ -592,11 +829,87 @@ body::before {
     </div>
 
     <div class="manage-card">
-      <h4>Xem log cũ (100 dòng cuối)</h4>
+      <h4>Xem log Nginx</h4>
       <div class="code-block">
-        <span class="cmd">journalctl</span> <span class="flag">-u</span> unilab <span class="flag">-n 100</span>
+        <span class="cmd">tail</span> <span class="flag">-f</span> /var/log/nginx/error.log<br>
+        <span class="cmd">tail</span> <span class="flag">-f</span> /var/log/nginx/access.log
       </div>
-      <div class="note">Debug lỗi bằng cách xem log gần nhất.</div>
+      <div class="note">Debug lỗi Nginx hoặc xem access pattern.</div>
+    </div>
+
+    <div class="manage-card">
+      <h4>Sửa Nginx config</h4>
+      <div class="code-block">
+        <span class="cmd">nano</span> /etc/nginx/conf.d/unilab.conf<br>
+        <span class="cmd">nginx</span> <span class="flag">-t</span> && <span class="cmd">systemctl</span> reload nginx
+      </div>
+      <div class="note">Luôn test trước khi reload Nginx.</div>
+    </div>
+
+    <div class="manage-card">
+      <h4>Backup database</h4>
+      <div class="code-block">
+        <span class="cmd">cp</span> /var/www/unilab/instance/unilab.db<br>
+        &nbsp;&nbsp;&nbsp;/var/www/unilab/instance/unilab.db.bak
+      </div>
+      <div class="note">SQLite là 1 file, backup đơn giản bằng copy.</div>
+    </div>
+  </div>
+
+  <!-- ═══ Troubleshooting ═══ -->
+  <div class="section-title">Xử lý lỗi thường gặp</div>
+
+  <div style="margin-bottom:48px">
+    <div class="trouble-item">
+      <div class="trouble-header" style="background:rgba(255,118,117,0.08);border:1px solid rgba(255,118,117,0.2);color:var(--red)">UniLab 502 Bad Gateway</div>
+      <div class="trouble-body">
+        <div class="hint">Gunicorn chưa chạy hoặc bị crash</div>
+        <div class="code-block">
+          <span class="cmd">systemctl</span> status unilab<br>
+          <span class="comment"># Nếu inactive/failed:</span><br>
+          <span class="cmd">systemctl</span> restart unilab<br>
+          <span class="cmd">journalctl</span> <span class="flag">-u</span> unilab <span class="flag">-n 50</span> <span class="comment"># Xem lỗi</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-header" style="background:rgba(253,203,110,0.08);border:1px solid rgba(253,203,110,0.2);color:var(--orange)">TripZone bị ảnh hưởng sau deploy</div>
+      <div class="trouble-body">
+        <div class="hint">Rất hiếm — thường do Nginx config bị syntax error</div>
+        <div class="code-block">
+          <span class="cmd">nginx</span> <span class="flag">-t</span><br>
+          <span class="comment"># Tạm tắt UniLab config nếu cần khôi phục TripZone:</span><br>
+          <span class="cmd">mv</span> /etc/nginx/conf.d/unilab.conf /etc/nginx/conf.d/unilab.conf.bak<br>
+          <span class="cmd">systemctl</span> reload nginx
+        </div>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-header" style="background:rgba(253,203,110,0.08);border:1px solid rgba(253,203,110,0.2);color:var(--orange)">SSL certificate lỗi</div>
+      <div class="trouble-body">
+        <div class="hint">DNS chưa trỏ đúng hoặc port 80 bị block</div>
+        <div class="code-block">
+          <span class="cmd">ping</span> unilab.vn<br>
+          <span class="cmd">firewall-cmd</span> <span class="flag">--permanent --add-service=http</span><br>
+          <span class="cmd">firewall-cmd</span> <span class="flag">--permanent --add-service=https</span><br>
+          <span class="cmd">firewall-cmd</span> <span class="flag">--reload</span><br>
+          <span class="cmd">certbot</span> <span class="flag">--nginx</span> -d unilab.vn -d www.unilab.vn
+        </div>
+      </div>
+    </div>
+
+    <div class="trouble-item">
+      <div class="trouble-header" style="background:rgba(108,92,231,0.08);border:1px solid rgba(108,92,231,0.2);color:var(--accent)">Code update nhưng site không thay đổi</div>
+      <div class="trouble-body">
+        <div class="hint">Gunicorn cache code cũ, cần restart</div>
+        <div class="code-block">
+          <span class="comment"># Upload code mới rồi:</span><br>
+          <span class="cmd">systemctl</span> restart unilab<br>
+          <span class="comment"># Clear browser cache: Ctrl + F5</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -604,7 +917,7 @@ body::before {
   <div class="warn-box">
     <h4>Lưu ý quan trọng</h4>
     <ul>
-      <li><strong>Không bật debug=True trên production</strong> — Gunicorn tự tắt debug, nhưng nếu anh sửa app.py, đừng hardcode <code>debug=True</code> ở ngoài block <code>if __name__</code>.</li>
+      <li><strong>Không bật debug=True trên production</strong> — Gunicorn tự tắt debug, nhưng nếu sửa app.py, đừng hardcode <code>debug=True</code> ở ngoài block <code>if __name__</code>.</li>
       <li><strong>Backup database thường xuyên</strong> — SQLite là 1 file duy nhất (<code>instance/unilab.db</code>), dễ mất nếu server hỏng.</li>
       <li><strong>SSL/HTTPS</strong> — Nên cài Let's Encrypt (miễn phí) để bảo mật. Script deploy.sh có hỗ trợ sẵn.</li>
       <li><strong>Khi thay đổi requirements.txt</strong> — Cần SSH vào server, activate venv, chạy <code>pip install -r requirements.txt</code> rồi restart.</li>
@@ -614,15 +927,33 @@ body::before {
   <!-- ═══ Summary ═══ -->
   <div class="section-title">Tóm tắt</div>
 
-  <div class="faq">
+  <div class="faq" style="margin-bottom:32px">
     <div class="faq-item">
       <div class="a" style="font-size:15px; line-height:1.8;">
-        <strong style="color:var(--green);font-size:17px;">Local (Windows):</strong><br>
+        <strong style="color:var(--orange);font-size:17px;">Local (Windows):</strong><br>
         Chạy <code>install.bat</code> (1 lần) &rarr; Chạy <code>run.bat</code> (mỗi lần muốn dev) &rarr;
         Flask dev server trên port 7000 &rarr; Tắt terminal = app tắt.<br><br>
         <strong style="color:var(--green);font-size:17px;">Production (Server):</strong><br>
         Upload code &rarr; Chạy <code>deploy.sh</code> (1 lần) &rarr; Gunicorn + Nginx chạy 24/7 &rarr;
         systemd tự quản lý &rarr; <strong>Không cần run.bat, không cần mở terminal</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Checklist ═══ -->
+  <div class="checklist">
+    <h3>Checklist Deploy UniLab chung TripZone</h3>
+    <label><input type="checkbox"><span>Trỏ DNS domain UniLab về IP server (cùng IP với TripZone)</span></label>
+    <label><input type="checkbox"><span>SSH vào server thành công</span></label>
+    <label><input type="checkbox"><span>Upload source code vào /var/www/unilab</span></label>
+    <label><input type="checkbox"><span>Chạy deploy.sh — nhập domain khi hỏi</span></label>
+    <label><input type="checkbox"><span>Setup SSL với Let's Encrypt (sau khi DNS đã OK)</span></label>
+    <label><input type="checkbox"><span>Test UniLab: homepage + admin + robots.txt</span></label>
+    <label><input type="checkbox"><span>Verify TripZone vẫn chạy bình thường (không bị ảnh hưởng)</span></label>
+    <div style="margin-top:16px;padding:14px;background:rgba(0,206,201,0.08);border-radius:8px;text-align:center">
+      <div style="font-size:15px;font-weight:600;color:var(--green)">Cả 2 site đều LIVE trên cùng 1 server!</div>
+      <div style="font-size:13px;color:var(--text-dim);margin-top:4px">
+        TripZone: tripzone.vn → PHP-FPM &nbsp;|&nbsp; UniLab: unilab.vn → Gunicorn :8000
       </div>
     </div>
   </div>

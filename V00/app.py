@@ -1454,6 +1454,23 @@ def admin_deployment():
     """Deployment guide and workflow documentation"""
     return render_template('admin/deployment.html')
 
+@app.route('/admin/robots', methods=['GET', 'POST'])
+def admin_robots():
+    """Edit robots.txt content from admin panel"""
+    robots_path = os.path.join(app.root_path, 'static', 'robots.txt')
+    if request.method == 'POST':
+        content = request.form.get('content', '')
+        with open(robots_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+        flash('robots.txt updated successfully!', 'success')
+        return redirect(url_for('admin_robots'))
+    # GET
+    content = ''
+    if os.path.exists(robots_path):
+        with open(robots_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    return render_template('admin/robots.html', content=content)
+
 # =============================================
 # ADMIN — SEO BACKLINK ENGINE
 # =============================================

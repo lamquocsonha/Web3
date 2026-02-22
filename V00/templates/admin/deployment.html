@@ -7,6 +7,108 @@
 
 <div style="max-width:1100px">
 
+  <!-- ═══ run.bat answer ═══ -->
+  <div style="background:linear-gradient(135deg,rgba(59,130,246,0.06),rgba(139,92,246,0.08));border:2px solid rgba(59,130,246,0.3);border-radius:var(--radius);padding:24px;margin-bottom:24px">
+    <h3 style="font-size:15px;margin-bottom:12px;color:#3b82f6">💡 Khi deploy rồi, có cần chạy run.bat không?</h3>
+    <p style="font-size:14px;line-height:1.8;color:var(--text)">
+      <strong style="color:#f59e0b;font-size:16px">Không.</strong>
+      Khi deploy lên server (VPS/Vultr), <strong>run.bat hoàn toàn không cần dùng</strong>.
+      Trên production, ứng dụng được chạy bởi <strong>Gunicorn</strong> (WSGI server chuyên dụng)
+      thông qua <strong>systemd service</strong> — hệ thống tự động khởi động app khi server bật,
+      tự restart khi app crash, và chạy nền 24/7 mà không cần mở terminal.
+    </p>
+    <p style="font-size:14px;color:var(--text-dim);margin-top:8px">
+      <code style="color:#f59e0b;font-size:14px">run.bat</code> chỉ dành cho môi trường <strong>phát triển trên Windows</strong> (localhost).
+    </p>
+  </div>
+
+  <!-- ═══ Local vs Production ═══ -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px">
+    <h3 style="font-size:15px;margin-bottom:16px">⚡ So sánh: Local vs Production</h3>
+    <div class="table-wrap">
+      <table class="data-table" style="font-size:14px">
+        <thead><tr><th>Tiêu chí</th><th style="color:#f59e0b">Local (Phát triển)</th><th style="color:#3b82f6">Production (Deploy)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Hệ điều hành</strong></td><td>Windows</td><td>CentOS 7 (Linux)</td></tr>
+          <tr><td><strong>Khởi động bằng</strong></td><td>run.bat → python app.py</td><td>systemctl start unilab</td></tr>
+          <tr><td><strong>Server</strong></td><td>Flask built-in (Werkzeug)</td><td>Gunicorn (WSGI)</td></tr>
+          <tr><td><strong>Port</strong></td><td>7000</td><td>8000 (internal) → Nginx 80/443</td></tr>
+          <tr><td><strong>Debug mode</strong></td><td style="color:#f59e0b">ON (auto-reload)</td><td style="color:#22c55e">OFF (an toàn)</td></tr>
+          <tr><td><strong>Xử lý đồng thời</strong></td><td>1 thread duy nhất</td><td>2 workers x 2 threads</td></tr>
+          <tr><td><strong>Tắt terminal</strong></td><td style="color:#ef4444">App tắt theo</td><td style="color:#22c55e">App vẫn chạy</td></tr>
+          <tr><td><strong>Auto-restart khi crash</strong></td><td style="color:#ef4444">Không</td><td style="color:#22c55e">Có (systemd, sau 5s)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ Why no run.bat ═══ -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px">
+    <h3 style="font-size:15px;margin-bottom:16px">🔍 Tại sao không dùng run.bat trên server?</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="padding:14px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:#ef4444">1. File .bat là của Windows</div>
+        <div style="font-size:14px;color:var(--text-dim);line-height:1.6">
+          File <code>.bat</code> là định dạng script Windows, không chạy được trên Linux. Server dùng bash script (<code>.sh</code>).
+        </div>
+      </div>
+      <div style="padding:14px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:#f59e0b">2. Flask dev server không an toàn</div>
+        <div style="font-size:14px;color:var(--text-dim);line-height:1.6">
+          <code>run.bat</code> chạy <code>python app.py</code> với debug=True — lộ thông tin nhạy cảm, chỉ 1 thread, không ổn định.
+        </div>
+      </div>
+      <div style="padding:14px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:#3b82f6">3. systemd thay thế "bấm run"</div>
+        <div style="font-size:14px;color:var(--text-dim);line-height:1.6">
+          Server bật → app tự chạy. App crash → tự restart. Tắt SSH → app vẫn chạy 24/7 không cần ai giám sát.
+        </div>
+      </div>
+      <div style="padding:14px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:8px">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px;color:#8b5cf6">4. Gunicorn bỏ qua if __name__</div>
+        <div style="font-size:14px;color:var(--text-dim);line-height:1.6">
+          <code>gunicorn app:app</code> import trực tiếp app object — không chạy block <code>if __name__ == '__main__'</code>, không auto-open browser.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Production Architecture Flow ═══ -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px">
+    <h3 style="font-size:15px;margin-bottom:16px">🔗 Kiến trúc Production</h3>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;padding:16px 0">
+      <div style="padding:14px 18px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:10px;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">🌐</div>
+        <div style="font-size:14px;font-weight:600">Browser</div>
+        <div style="font-size:11px;color:var(--text-dim)">User truy cập</div>
+      </div>
+      <div style="font-size:18px;color:#8b5cf6;padding:0 10px">▸</div>
+      <div style="padding:14px 18px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:10px;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">⚙️</div>
+        <div style="font-size:14px;font-weight:600">Nginx</div>
+        <div style="font-size:11px;color:var(--text-dim)">Port 80 / 443</div>
+      </div>
+      <div style="font-size:18px;color:#8b5cf6;padding:0 10px">▸</div>
+      <div style="padding:14px 18px;background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.2);border-radius:10px;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">🚀</div>
+        <div style="font-size:14px;font-weight:600">Gunicorn</div>
+        <div style="font-size:11px;color:var(--text-dim)">Port 8000</div>
+      </div>
+      <div style="font-size:18px;color:#8b5cf6;padding:0 10px">▸</div>
+      <div style="padding:14px 18px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:10px;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">🐍</div>
+        <div style="font-size:14px;font-weight:600">Flask app</div>
+        <div style="font-size:11px;color:var(--text-dim)">app:app</div>
+      </div>
+      <div style="font-size:18px;color:#8b5cf6;padding:0 10px">▸</div>
+      <div style="padding:14px 18px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:10px;text-align:center">
+        <div style="font-size:22px;margin-bottom:4px">🗄️</div>
+        <div style="font-size:14px;font-weight:600">SQLite</div>
+        <div style="font-size:11px;color:var(--text-dim)">unilab.db</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Architecture Overview -->
   <div style="background:linear-gradient(135deg,rgba(52,211,153,0.05),rgba(16,185,129,0.1));border:2px solid rgba(16,185,129,0.3);border-radius:var(--radius);padding:24px;margin-bottom:24px">
     <h3 style="font-size:15px;margin-bottom:12px;color:#10b981">🏗️ Kiến trúc: 2 app trên 1 server</h3>
@@ -535,6 +637,30 @@
           &nbsp;&nbsp;/var/www/unilab/instance/unilab.db.bak
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Lưu ý quan trọng -->
+  <div style="background:rgba(239,68,68,0.04);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+    <h3 style="font-size:15px;margin-bottom:12px;color:#ef4444">⚠️ Lưu ý quan trọng</h3>
+    <ul style="font-size:14px;color:var(--text-dim);line-height:2;padding-left:20px">
+      <li><strong style="color:var(--text)">Không bật debug=True trên production</strong> — Gunicorn tự tắt debug, nhưng nếu sửa app.py, đừng hardcode <code>debug=True</code> ở ngoài block <code>if __name__</code>.</li>
+      <li><strong style="color:var(--text)">Backup database thường xuyên</strong> — SQLite là 1 file duy nhất (<code>instance/unilab.db</code>), dễ mất nếu server hỏng.</li>
+      <li><strong style="color:var(--text)">SSL/HTTPS</strong> — Nên cài Let's Encrypt (miễn phí) để bảo mật. Script deploy.sh có hỗ trợ sẵn.</li>
+      <li><strong style="color:var(--text)">Khi thay đổi requirements.txt</strong> — Cần SSH vào server, activate venv, chạy <code>pip install -r requirements.txt</code> rồi restart.</li>
+    </ul>
+  </div>
+
+  <!-- Tóm tắt -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+    <h3 style="font-size:15px;margin-bottom:12px">📋 Tóm tắt</h3>
+    <div style="font-size:14px;line-height:1.9;color:var(--text)">
+      <strong style="color:#f59e0b">Local (Windows):</strong><br>
+      Chạy <code>install.bat</code> (1 lần) → Chạy <code>run.bat</code> (mỗi lần muốn dev) →
+      Flask dev server trên port 7000 → Tắt terminal = app tắt.<br><br>
+      <strong style="color:#3b82f6">Production (Server):</strong><br>
+      Upload code → Chạy <code>deploy.sh</code> (1 lần) → Gunicorn + Nginx chạy 24/7 →
+      systemd tự quản lý → <strong style="color:#22c55e">Không cần run.bat, không cần mở terminal</strong>.
     </div>
   </div>
 
