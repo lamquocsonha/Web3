@@ -91,7 +91,7 @@
             {% endfor %}
           </div>
           {% endif %}
-          {% if article.embed_code %}<div class="embed-zone">{{ article.embed_code|safe }}</div>{% endif %}
+          {% if article.embed_code and not article.embed_code.startswith('product_ids:') %}<div class="embed-zone">{{ article.embed_code|safe }}</div>{% endif %}
         </div>
         {% endif %}
 

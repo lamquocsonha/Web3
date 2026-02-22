@@ -2604,7 +2604,13 @@ def admin_article_edit(aid):
         db.session.commit()
         flash(f'Da cap nhat: {a.title}', 'success')
         return redirect(url_for('admin_articles'))
-    return render_template('admin/article_form.html', article=a, verticals=verticals)
+    # Related articles for preview in edit form
+    related_articles = Article.query.filter(
+        Article.id != a.id, Article.status=='published',
+        db.or_(Article.vertical_slug==a.vertical_slug),
+        db.or_(Article.category==a.category, Article.tier==a.tier)
+    ).order_by(Article.views.desc()).limit(6).all()
+    return render_template('admin/article_form.html', article=a, verticals=verticals, related_articles=related_articles)
 
 @app.route('/admin/article/<int:aid>/delete', methods=['POST'])
 def admin_article_delete(aid):
@@ -2613,6 +2619,38 @@ def admin_article_delete(aid):
     db.session.commit()
     flash('Da xoa bai viet', 'success')
     return redirect(url_for('admin_articles'))
+
+@app.route('/admin/api/zone-products')
+def admin_api_zone_products():
+    """API: return products from a zone by slug for article product attachment UI"""
+    slug = request.args.get('slug', '').strip()
+    selected_ids_str = request.args.get('selected', '')
+    selected_ids = set()
+    if selected_ids_str:
+        try:
+            selected_ids = {int(x) for x in selected_ids_str.split(',') if x.strip()}
+        except (ValueError, TypeError):
+            pass
+    if not slug:
+        return jsonify(products=[])
+    z = Zone.query.filter_by(slug=slug).first()
+    if not z:
+        return jsonify(products=[])
+    parts = Part.query.filter_by(zone_id=z.id, status='published').all()
+    products = []
+    for p in parts:
+        for al in p.affiliate_links:
+            if al.is_active:
+                products.append({
+                    'id': al.id,
+                    'network': al.network,
+                    'product_name': al.product_name,
+                    'part_name': p.name_vi,
+                    'price': al.price,
+                    'image_url': al.image_url,
+                    'selected': al.id in selected_ids
+                })
+    return jsonify(products=products)
 
 # =============================================
 # ADMIN — ARTICLE FEEDBACKS
@@ -2789,9 +2827,31 @@ def admin_product_toggle(pid):
 @app.route('/admin/product/<int:pid>/delete', methods=['POST'])
 def admin_product_delete(pid):
     al = AffiliateLink.query.get_or_404(pid)
+    # Check if product is attached to articles (via zone or embed_code product_ids)
+    part = Part.query.get(al.part_id)
+    warnings = []
+    if part:
+        zone = Zone.query.get(part.zone_id)
+        if zone:
+            linked_articles = Article.query.filter(Article.related_zone_slug==zone.slug, Article.status=='published').all()
+            if linked_articles:
+                titles = ', '.join([a.title[:40] for a in linked_articles[:3]])
+                warnings.append(f'San pham nay thuoc zone "{zone.slug}" dang gan voi {len(linked_articles)} bai viet: {titles}')
+    # Check embed_code product_ids references
+    embed_articles = Article.query.filter(Article.embed_code.contains(f'product_ids:'), Article.embed_code.contains(str(al.id))).all()
+    for ea in embed_articles:
+        # Verify the ID is actually in the list
+        ec = ea.embed_code or ''
+        if ec.startswith('product_ids:'):
+            ids = ec.replace('product_ids:', '').split(',')
+            if str(al.id) in ids:
+                warnings.append(f'San pham dang duoc gan truc tiep trong bai viet: {ea.title[:40]}')
     db.session.delete(al)
     db.session.commit()
-    flash('Da xoa san pham', 'success')
+    msg = 'Da xoa san pham'
+    if warnings:
+        msg += ' (Luu y: ' + '; '.join(warnings) + ')'
+    flash(msg, 'success' if not warnings else 'warning')
     return redirect(url_for('admin_products'))
 
 @app.route('/admin/products/bulk-delete', methods=['POST'])
@@ -7591,7 +7651,16 @@ def vertical_article(vertical_slug, slug):
 
     # Related parts for product carousel — flatten to individual affiliate cards
     carousel_items = []
-    if a.related_zone_slug:
+    # Check if embed_code uses product_ids format (selected products from admin UI)
+    embed_code_val = (a.embed_code or '').strip()
+    if embed_code_val.startswith('product_ids:'):
+        try:
+            pids = [int(x) for x in embed_code_val.replace('product_ids:', '').split(',') if x.strip()]
+            if pids:
+                carousel_items = AffiliateLink.query.filter(AffiliateLink.id.in_(pids), AffiliateLink.is_active==True).all()
+        except (ValueError, TypeError):
+            pass
+    elif a.related_zone_slug:
         z = Zone.query.filter_by(slug=a.related_zone_slug).first()
         if z:
             carousel_limit = int(SiteSettings.get('carousel_product_limit', '3'))
