@@ -73,7 +73,12 @@
 <div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <h2 style="margin:0;font-size:18px">Vouchers</h2>
-    <a href="{{ url_for('admin_voucher_new') }}" class="vh-btn vh-btn-primary">+ New Voucher</a>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_voucher_new') }}" class="vh-btn vh-btn-primary">+ New Voucher</a>
+      {% if items %}
+      <button type="button" class="vh-btn" style="background:rgba(239,68,68,.1);color:#ef4444" onclick="if(confirm('Xoa TAT CA {{ items|length }} voucher?\n\nKHONG THE hoan tac.'))bulkDelAllV()">Xoa tat ca</button>
+      {% endif %}
+    </div>
   </div>
   <div class="vh-stat-grid" style="grid-template-columns:repeat(3,1fr)">
     <div class="vh-stat"><div class="vh-stat-val">{{ v_total }}</div><div class="vh-stat-label">Total</div></div>
@@ -138,7 +143,12 @@
 <div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
     <h2 style="margin:0;font-size:18px">Voucher Embed Widgets</h2>
-    <a href="{{ url_for('admin_voucher_widget_new') }}" class="vh-btn vh-btn-primary">+ New Widget</a>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_voucher_widget_new') }}" class="vh-btn vh-btn-primary">+ New Widget</a>
+      {% if widgets %}
+      <button type="button" class="vh-btn" style="background:rgba(239,68,68,.1);color:#ef4444" onclick="if(confirm('Xoa TAT CA {{ widgets|length }} widget?\n\nKHONG THE hoan tac.'))bulkDelAllW()">Xoa tat ca</button>
+      {% endif %}
+    </div>
   </div>
   <p style="font-size:14px;color:var(--text-dim);margin:-8px 0 24px">
     Quan ly embed codes tu AccessTrade va cac affiliate networks khac. Widgets se hien thi tren trang voucher.
