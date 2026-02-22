@@ -54,6 +54,9 @@
       <a href="{{ url_for('admin_settings') }}" class="sb-link {% if 'settings' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#9881;</span> Settings
       </a>
+      <a href="{{ url_for('admin_robots') }}" class="sb-link {% if 'robots' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#129302;</span> Robots.txt
+      </a>
     </nav>
     <!-- No dropdowns — all pages are tab-based now -->
   </aside>
