@@ -208,38 +208,44 @@ if (saved) {
 }
 /* Neutralize AccessTrade Smart Tag overlay — it creates a full-screen
    fixed div that intercepts all clicks. CSS pointer-events alone is
-   insufficient because the script applies inline styles. */
+   insufficient because the AT script applies inline !important styles
+   that override stylesheet rules. */
 (function() {
+  var AT_SEL = '[id*="at-smart"], [class*="atsmarttag"], [id*="atsmart"]';
   function killATOverlay() {
-    document.querySelectorAll('[id*="at-smart"], [class*="atsmarttag"], [id*="atsmart"]').forEach(function(el) {
-      var s = window.getComputedStyle(el);
-      if (s.position === 'fixed' && (parseInt(s.width) > window.innerWidth * 0.8 || parseInt(s.height) > window.innerHeight * 0.8)) {
-        el.style.setProperty('pointer-events', 'none', 'important');
-        el.style.setProperty('z-index', '-1', 'important');
-      }
+    /* 1) Kill any AT-branded element unconditionally */
+    document.querySelectorAll(AT_SEL).forEach(function(el) {
+      el.style.setProperty('pointer-events', 'none', 'important');
+      el.style.setProperty('z-index', '-1', 'important');
+      el.style.setProperty('width', '0', 'important');
+      el.style.setProperty('height', '0', 'important');
+      el.style.setProperty('overflow', 'hidden', 'important');
+      el.style.setProperty('opacity', '0', 'important');
     });
-    /* Catch any full-screen fixed div injected by third-party scripts */
+    /* 2) Catch any full-screen fixed div injected by third-party scripts */
     document.querySelectorAll('body > div').forEach(function(el) {
       if (el.classList.contains('site-header') || el.classList.contains('site-main') || el.classList.contains('site-footer')) return;
       var s = window.getComputedStyle(el);
       if (s.position === 'fixed' && s.top === '0px' && s.left === '0px' &&
-          (s.width === '100%' || s.width === '100vw' || parseInt(s.width) >= window.innerWidth) &&
-          s.opacity < 0.05 && el.children.length === 0) {
-        el.style.setProperty('pointer-events', 'none', 'important');
-        el.style.setProperty('display', 'none', 'important');
+          (s.width === '100%' || s.width === '100vw' || parseInt(s.width) >= window.innerWidth * 0.5)) {
+        var z = parseInt(s.zIndex) || 0;
+        if (z > 9000 || s.opacity < 0.1) {
+          el.style.setProperty('pointer-events', 'none', 'important');
+          el.style.setProperty('display', 'none', 'important');
+        }
       }
     });
   }
-  /* Run after AT script loads (async) */
-  setTimeout(killATOverlay, 2000);
+  /* Run after AT script loads (async) — multiple passes */
+  setTimeout(killATOverlay, 1000);
+  setTimeout(killATOverlay, 2500);
   setTimeout(killATOverlay, 5000);
-  /* Also watch for dynamically inserted overlays */
+  setTimeout(killATOverlay, 10000);
+  /* Watch for dynamically inserted AND modified overlays
+     (AT script re-applies inline styles, so watch attributes too) */
   if (window.MutationObserver) {
-    new MutationObserver(function(mutations) {
-      for (var i = 0; i < mutations.length; i++) {
-        if (mutations[i].addedNodes.length) { killATOverlay(); return; }
-      }
-    }).observe(document.body, { childList: true });
+    new MutationObserver(function() { killATOverlay(); })
+      .observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style','class'] });
   }
 })();
 </script>

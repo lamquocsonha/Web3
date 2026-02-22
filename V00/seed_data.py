@@ -4764,7 +4764,7 @@ def seed_new_verticals():
             icon=vd['icon'],
             color=vd['color'],
             description=vd['description'],
-            status='live',
+            status='published',
             style=vd['style'],
             template='general',
             default_mode='light'

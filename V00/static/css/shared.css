@@ -25,18 +25,26 @@ body {
 }
 
 /* Force AccessTrade Smart Tag overlay below header/footer
-   and prevent it from blocking clicks on page content */
-#at-smart-tag-container,
-[id^="at-smart"],
-.at-smart-tag,
-div[class*="atsmarttag"] { z-index: 9999 !important; pointer-events: none !important; }
-/* Re-enable clicks on actual AT smart tag links/buttons inside */
+   and prevent it from blocking clicks on page content.
+   AT script uses inline !important so we need max specificity. */
+body #at-smart-tag-container,
+body [id^="at-smart"],
+body .at-smart-tag,
+body div[class*="atsmarttag"],
+body div[id*="atsmart"] {
+  z-index: -1 !important;
+  pointer-events: none !important;
+  position: fixed !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+}
+/* Re-enable clicks on actual AT smart tag banner links/buttons */
 #at-smart-tag-container a,
 #at-smart-tag-container button,
 [id^="at-smart"] a,
-[id^="at-smart"] button,
-.at-smart-tag a,
-.at-smart-tag button { pointer-events: auto !important; }
+[id^="at-smart"] button { pointer-events: auto !important; }
 
 .header-inner {
   max-width: 1100px;
