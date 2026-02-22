@@ -446,6 +446,7 @@ function addMarkersToMap(markers) {
     var shortName = rawName.length > 18 ? rawName.substring(0, 18) + '…' : rawName;
     var labelHtml = '<div class="map-price-marker">'
       + (priceShort ? '<span class="mpm-price">' + priceShort + '</span>' : '<span class="mpm-price">🏨</span>')
+      + (shortName && priceShort ? '<span class="mpm-sep" style="color:#999;font-size:11px;margin:0 2px">|</span>' : '')
       + (shortName ? '<span class="mpm-name">' + shortName + '</span>' : '')
       + '</div>';
     var markerWidth = Math.max(80, Math.min(200, (shortName.length + (priceShort ? priceShort.length : 2)) * 7 + 24));
