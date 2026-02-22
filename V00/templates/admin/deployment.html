@@ -196,6 +196,159 @@
     </div>
   </div>
 
+  <!-- ═══ SSH Chi tiết ═══ -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+    <h3 style="font-size:15px;margin-bottom:16px;color:#8b5cf6">🔐 SSH — Hướng dẫn chi tiết thao tác</h3>
+
+    <div style="font-size:14px;line-height:1.8;color:var(--text)">
+
+      <!-- SSH là gì -->
+      <div style="background:rgba(139,92,246,0.05);padding:16px;border-radius:8px;margin-bottom:16px;border-left:3px solid #8b5cf6">
+        <strong style="color:#8b5cf6">💡 SSH là gì?</strong><br>
+        <span style="color:var(--text-dim)">
+          SSH (Secure Shell) cho phép anh điều khiển server từ xa qua terminal — giống mở Command Prompt trên máy Windows nhưng chạy lệnh trên server Linux.
+          Mọi thao tác deploy, quản lý app, xem log đều thông qua SSH.
+        </span>
+      </div>
+
+      <!-- Bước 1: Mở terminal -->
+      <strong>Bước 1: Mở terminal trên máy Windows</strong>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0">
+        <div style="padding:12px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:8px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Option 1: Windows Terminal / PowerShell</div>
+          <div style="font-size:13px;color:var(--text-dim)">Bấm <code>Win + X</code> → chọn <strong>Windows Terminal</strong> hoặc <strong>PowerShell</strong></div>
+        </div>
+        <div style="padding:12px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:8px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">Option 2: Command Prompt (CMD)</div>
+          <div style="font-size:13px;color:var(--text-dim)">Bấm <code>Win + R</code> → gõ <code>cmd</code> → Enter</div>
+        </div>
+      </div>
+
+      <!-- Bước 2: Kết nối SSH -->
+      <strong style="display:block;margin-top:20px">Bước 2: Kết nối SSH vào server</strong>
+      <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
+        <span style="color:#6b7280"># Cú pháp cơ bản:</span><br>
+        ssh <span style="color:#22c55e">root</span>@<span style="color:#f59e0b">IP_SERVER</span><br><br>
+        <span style="color:#6b7280"># Ví dụ thực tế (thay IP thật của Vultr vào):</span><br>
+        ssh root@149.28.xxx.xxx<br><br>
+        <span style="color:#6b7280"># Nếu dùng port khác (mặc định 22):</span><br>
+        ssh -p 2222 root@149.28.xxx.xxx<br><br>
+        <span style="color:#6b7280"># Nếu dùng SSH key thay vì password:</span><br>
+        ssh -i <span style="color:#8b5cf6">C:\Users\anh\.ssh\id_rsa</span> root@149.28.xxx.xxx
+      </div>
+
+      <div style="background:rgba(245,158,11,0.05);padding:12px;border-radius:8px;margin:12px 0;border:1px solid rgba(245,158,11,0.2)">
+        <strong style="font-size:13px;color:#f59e0b">📌 Lần đầu kết nối:</strong>
+        <span style="font-size:13px;color:var(--text-dim)">
+          Sẽ hỏi <code>Are you sure you want to continue connecting?</code> → gõ <strong>yes</strong> → Enter.
+          Sau đó nhập <strong>password</strong> (Vultr gửi qua email khi tạo VPS). Lưu ý: khi gõ password sẽ không thấy ký tự hiện ra — bình thường, cứ gõ xong nhấn Enter.
+        </span>
+      </div>
+
+      <!-- Bước 3: Sau khi vào server -->
+      <strong style="display:block;margin-top:20px">Bước 3: Đã vào server — các lệnh cơ bản</strong>
+      <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
+        <span style="color:#22c55e">[root@vultr ~]#</span> <span style="color:#6b7280">← Khi thấy dấu # là đã vào server thành công</span><br><br>
+
+        <span style="color:#6b7280"># ── Di chuyển thư mục ──</span><br>
+        cd /var/www/unilab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Vào thư mục UniLab</span><br>
+        cd /var/www/tripzone&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Vào thư mục TripZone</span><br>
+        cd ~&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Về thư mục home (/root)</span><br>
+        pwd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xem đang ở thư mục nào</span><br><br>
+
+        <span style="color:#6b7280"># ── Xem file / thư mục ──</span><br>
+        ls&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Liệt kê file trong thư mục hiện tại</span><br>
+        ls -la&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Liệt kê chi tiết (kích thước, quyền, ngày)</span><br>
+        cat app.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xem nội dung file</span><br>
+        head -20 app.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xem 20 dòng đầu</span><br>
+        tail -50 app.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xem 50 dòng cuối</span><br><br>
+
+        <span style="color:#6b7280"># ── Sửa file ──</span><br>
+        nano robots.txt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Mở editor nano (dễ dùng nhất)</span><br>
+        <span style="color:#6b7280">&nbsp;&nbsp;# Sửa xong: Ctrl+O → Enter (lưu) → Ctrl+X (thoát)</span><br>
+        vi app.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Mở editor vi (dành cho pro)</span><br><br>
+
+        <span style="color:#6b7280"># ── Copy / Di chuyển / Xóa file ──</span><br>
+        cp file.txt file.bak&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Copy file</span><br>
+        cp -r templates/ templates_bak/&nbsp;<span style="color:#6b7280"># Copy thư mục</span><br>
+        mv old.txt new.txt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Đổi tên / di chuyển</span><br>
+        rm file.txt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xóa file (cẩn thận!)</span><br>
+        rm -rf folder/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xóa thư mục (NGUY HIỂM — chắc chắn mới dùng)</span><br><br>
+
+        <span style="color:#6b7280"># ── Xem dung lượng ──</span><br>
+        df -h&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xem dung lượng ổ cứng</span><br>
+        du -sh /var/www/unilab&nbsp;<span style="color:#6b7280"># Xem dung lượng thư mục UniLab</span><br>
+        free -h&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Xem RAM đang dùng</span><br><br>
+
+        <span style="color:#6b7280"># ── Thoát SSH ──</span><br>
+        exit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#6b7280"># Thoát khỏi server, về lại máy local</span>
+      </div>
+
+      <!-- Upload file từ local lên server -->
+      <strong style="display:block;margin-top:20px">Upload / Download file (chạy trên máy local, KHÔNG phải trong SSH)</strong>
+      <div style="background:var(--code-bg);padding:12px;border-radius:8px;margin:8px 0;font-family:'DM Mono';font-size:14px;border:1px solid var(--border)">
+        <span style="color:#6b7280"># ── Upload file từ local → server ──</span><br><br>
+
+        <span style="color:#6b7280"># Upload 1 file:</span><br>
+        scp <span style="color:#8b5cf6">C:\Users\anh\Web3\V00\app.py</span> root@IP_SERVER:<span style="color:#22c55e">/var/www/unilab/app.py</span><br><br>
+
+        <span style="color:#6b7280"># Upload cả thư mục V00:</span><br>
+        scp -r <span style="color:#8b5cf6">C:\Users\anh\Web3\V00\*</span> root@IP_SERVER:<span style="color:#22c55e">/var/www/unilab/</span><br><br>
+
+        <span style="color:#6b7280"># Upload chỉ templates:</span><br>
+        scp -r <span style="color:#8b5cf6">C:\Users\anh\Web3\V00\templates</span> root@IP_SERVER:<span style="color:#22c55e">/var/www/unilab/</span><br><br>
+
+        <span style="color:#6b7280"># ── Download file từ server → local ──</span><br><br>
+
+        <span style="color:#6b7280"># Download database về local (backup):</span><br>
+        scp root@IP_SERVER:<span style="color:#22c55e">/var/www/unilab/instance/unilab.db</span> <span style="color:#8b5cf6">C:\Users\anh\Desktop\unilab.db</span>
+      </div>
+
+      <!-- Quy trình update code -->
+      <strong style="display:block;margin-top:20px">Quy trình update code (làm hàng ngày)</strong>
+      <div style="background:rgba(34,197,94,0.05);padding:16px;border-radius:8px;margin:8px 0;border:1px solid rgba(34,197,94,0.2)">
+        <div style="font-size:14px;color:var(--text-dim);line-height:2">
+          <strong style="color:#22c55e">Bước 1:</strong> Sửa code trên máy local (Windows) — test xong trên localhost:7000<br>
+          <strong style="color:#22c55e">Bước 2:</strong> Mở CMD/PowerShell trên máy local, chạy SCP upload:<br>
+          <div style="font-family:'DM Mono';font-size:13px;background:var(--code-bg);padding:8px 12px;border-radius:6px;margin:4px 0 8px;border:1px solid var(--border)">
+            scp -r V00/* root@IP_SERVER:/var/www/unilab/
+          </div>
+          <strong style="color:#22c55e">Bước 3:</strong> SSH vào server, restart app:<br>
+          <div style="font-family:'DM Mono';font-size:13px;background:var(--code-bg);padding:8px 12px;border-radius:6px;margin:4px 0 8px;border:1px solid var(--border)">
+            ssh root@IP_SERVER<br>
+            systemctl restart unilab
+          </div>
+          <strong style="color:#22c55e">Bước 4:</strong> Mở browser → Ctrl+F5 (hard refresh) → kiểm tra thay đổi<br>
+        </div>
+      </div>
+
+      <!-- SSH Tips -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+        <div style="padding:12px;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.15);border-radius:8px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;color:#3b82f6">⌨️ Phím tắt trong SSH</div>
+          <div style="font-size:13px;color:var(--text-dim);line-height:1.8;font-family:'DM Mono'">
+            Tab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family:inherit;color:var(--text-dim)">Auto-complete tên file/lệnh</span><br>
+            ↑ ↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family:inherit;color:var(--text-dim)">Xem lại lệnh đã gõ trước đó</span><br>
+            Ctrl+C&nbsp;&nbsp;&nbsp;<span style="font-family:inherit;color:var(--text-dim)">Dừng lệnh đang chạy</span><br>
+            Ctrl+L&nbsp;&nbsp;&nbsp;<span style="font-family:inherit;color:var(--text-dim)">Xóa màn hình (clear)</span><br>
+            Ctrl+D&nbsp;&nbsp;&nbsp;<span style="font-family:inherit;color:var(--text-dim)">Thoát SSH (giống exit)</span>
+          </div>
+        </div>
+        <div style="padding:12px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:8px">
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px;color:#f59e0b">⚠️ Lưu ý an toàn</div>
+          <div style="font-size:13px;color:var(--text-dim);line-height:1.8">
+            • Đang SSH = đang điều khiển server thật<br>
+            • <code>rm -rf /</code> sẽ xóa TOÀN BỘ server<br>
+            • Luôn backup trước khi sửa file quan trọng<br>
+            • Gõ <code>exit</code> khi xong để đóng kết nối<br>
+            • Không chia sẻ password SSH cho ai
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Step 1: DNS for new domain -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:20px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">

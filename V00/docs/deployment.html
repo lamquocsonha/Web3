@@ -532,6 +532,134 @@ body::before {
     </div>
   </div>
 
+  <!-- ═══ SSH Chi tiết ═══ -->
+  <div class="section-title">SSH — Hướng dẫn chi tiết thao tác</div>
+
+  <div class="info-card" style="margin-bottom:48px">
+    <div style="padding:16px;background:rgba(108,92,231,0.06);border:1px solid rgba(108,92,231,0.15);border-radius:8px;margin-bottom:20px;border-left:3px solid var(--accent)">
+      <strong style="color:var(--accent)">SSH là gì?</strong><br>
+      <span style="font-size:14px;color:var(--text-dim)">
+        SSH (Secure Shell) cho phép điều khiển server từ xa qua terminal — giống mở Command Prompt trên Windows nhưng chạy lệnh trên server Linux.
+        Mọi thao tác deploy, quản lý app, xem log đều thông qua SSH.
+      </span>
+    </div>
+
+    <h4 style="font-size:14px;margin-bottom:10px">Bước 1: Mở terminal trên máy Windows</h4>
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="mini-card" style="background:rgba(116,185,255,0.05);">
+        <div class="title">Windows Terminal / PowerShell</div>
+        <div class="desc">Bấm <code>Win + X</code> → chọn <strong>Windows Terminal</strong> hoặc <strong>PowerShell</strong></div>
+      </div>
+      <div class="mini-card" style="background:rgba(116,185,255,0.05);">
+        <div class="title">Command Prompt (CMD)</div>
+        <div class="desc">Bấm <code>Win + R</code> → gõ <code>cmd</code> → Enter</div>
+      </div>
+    </div>
+
+    <h4 style="font-size:14px;margin-bottom:10px">Bước 2: Kết nối SSH vào server</h4>
+    <div class="code-block" style="margin-bottom:10px">
+      <span class="comment"># Cú pháp cơ bản:</span><br>
+      <span class="cmd">ssh</span> <span style="color:var(--green)">root</span>@<span class="flag">IP_SERVER</span><br><br>
+      <span class="comment"># Ví dụ thực tế (thay IP thật của Vultr vào):</span><br>
+      <span class="cmd">ssh</span> root@149.28.xxx.xxx<br><br>
+      <span class="comment"># Nếu dùng port khác (mặc định 22):</span><br>
+      <span class="cmd">ssh</span> <span class="flag">-p 2222</span> root@149.28.xxx.xxx<br><br>
+      <span class="comment"># Nếu dùng SSH key thay vì password:</span><br>
+      <span class="cmd">ssh</span> <span class="flag">-i</span> <span style="color:var(--accent)">C:\Users\anh\.ssh\id_rsa</span> root@149.28.xxx.xxx
+    </div>
+    <div style="padding:12px;background:rgba(253,203,110,0.06);border:1px solid rgba(253,203,110,0.15);border-radius:8px;margin-bottom:20px;font-size:13px;color:var(--text-dim)">
+      <strong style="color:var(--orange)">Lần đầu kết nối:</strong>
+      Sẽ hỏi <code>Are you sure you want to continue connecting?</code> → gõ <strong>yes</strong> → Enter.
+      Sau đó nhập password (Vultr gửi qua email). Khi gõ password sẽ không thấy ký tự hiện ra — bình thường, cứ gõ xong nhấn Enter.
+    </div>
+
+    <h4 style="font-size:14px;margin-bottom:10px">Bước 3: Đã vào server — các lệnh cơ bản</h4>
+    <div class="code-block" style="margin-bottom:16px">
+      <span style="color:var(--green)">[root@vultr ~]#</span> <span class="comment">← Khi thấy dấu # là đã vào server</span><br><br>
+
+      <span class="comment"># ── Di chuyển thư mục ──</span><br>
+      <span class="cmd">cd</span> /var/www/unilab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Vào thư mục UniLab</span><br>
+      <span class="cmd">cd</span> ~&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Về thư mục home (/root)</span><br>
+      <span class="cmd">pwd</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Xem đang ở thư mục nào</span><br><br>
+
+      <span class="comment"># ── Xem file / thư mục ──</span><br>
+      <span class="cmd">ls</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Liệt kê file</span><br>
+      <span class="cmd">ls</span> <span class="flag">-la</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Liệt kê chi tiết (kích thước, quyền, ngày)</span><br>
+      <span class="cmd">cat</span> app.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Xem nội dung file</span><br>
+      <span class="cmd">head</span> <span class="flag">-20</span> app.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Xem 20 dòng đầu</span><br>
+      <span class="cmd">tail</span> <span class="flag">-50</span> app.py&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Xem 50 dòng cuối</span><br><br>
+
+      <span class="comment"># ── Sửa file ──</span><br>
+      <span class="cmd">nano</span> robots.txt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Mở editor nano (dễ dùng nhất)</span><br>
+      <span class="comment">&nbsp;&nbsp;# Sửa xong: Ctrl+O → Enter (lưu) → Ctrl+X (thoát)</span><br><br>
+
+      <span class="comment"># ── Copy / Di chuyển / Xóa file ──</span><br>
+      <span class="cmd">cp</span> file.txt file.bak&nbsp;&nbsp;&nbsp;<span class="comment"># Copy file</span><br>
+      <span class="cmd">cp</span> <span class="flag">-r</span> templates/ templates_bak/&nbsp;<span class="comment"># Copy thư mục</span><br>
+      <span class="cmd">mv</span> old.txt new.txt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Đổi tên / di chuyển</span><br>
+      <span class="cmd">rm</span> file.txt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Xóa file (cẩn thận!)</span><br><br>
+
+      <span class="comment"># ── Xem dung lượng ──</span><br>
+      <span class="cmd">df</span> <span class="flag">-h</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Xem dung lượng ổ cứng</span><br>
+      <span class="cmd">du</span> <span class="flag">-sh</span> /var/www/unilab&nbsp;<span class="comment"># Dung lượng thư mục UniLab</span><br>
+      <span class="cmd">free</span> <span class="flag">-h</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Xem RAM đang dùng</span><br><br>
+
+      <span class="comment"># ── Thoát SSH ──</span><br>
+      <span class="cmd">exit</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Thoát, về lại máy local</span>
+    </div>
+
+    <h4 style="font-size:14px;margin-bottom:10px">Upload / Download file (chạy trên máy local, KHÔNG trong SSH)</h4>
+    <div class="code-block" style="margin-bottom:16px">
+      <span class="comment"># ── Upload file từ local → server ──</span><br><br>
+      <span class="comment"># Upload 1 file:</span><br>
+      <span class="cmd">scp</span> <span style="color:var(--accent)">C:\Users\anh\Web3\V00\app.py</span> root@IP_SERVER:<span style="color:var(--green)">/var/www/unilab/app.py</span><br><br>
+      <span class="comment"># Upload cả thư mục V00:</span><br>
+      <span class="cmd">scp</span> <span class="flag">-r</span> <span style="color:var(--accent)">C:\Users\anh\Web3\V00\*</span> root@IP_SERVER:<span style="color:var(--green)">/var/www/unilab/</span><br><br>
+      <span class="comment"># Upload chỉ templates:</span><br>
+      <span class="cmd">scp</span> <span class="flag">-r</span> <span style="color:var(--accent)">C:\Users\anh\Web3\V00\templates</span> root@IP_SERVER:<span style="color:var(--green)">/var/www/unilab/</span><br><br>
+      <span class="comment"># ── Download file từ server → local (backup) ──</span><br><br>
+      <span class="cmd">scp</span> root@IP_SERVER:<span style="color:var(--green)">/var/www/unilab/instance/unilab.db</span> <span style="color:var(--accent)">C:\Users\anh\Desktop\unilab.db</span>
+    </div>
+
+    <h4 style="font-size:14px;margin-bottom:10px">Quy trình update code (làm hàng ngày)</h4>
+    <div style="padding:16px;background:rgba(0,206,201,0.05);border:1px solid rgba(0,206,201,0.15);border-radius:8px;margin-bottom:16px;font-size:14px;color:var(--text-dim);line-height:2">
+      <strong style="color:var(--green)">Bước 1:</strong> Sửa code trên máy local (Windows) — test xong trên localhost:7000<br>
+      <strong style="color:var(--green)">Bước 2:</strong> Mở CMD/PowerShell, chạy SCP upload:<br>
+      <div class="code-block" style="margin:4px 0 8px;font-size:12px">
+        <span class="cmd">scp</span> <span class="flag">-r</span> V00/* root@IP_SERVER:/var/www/unilab/
+      </div>
+      <strong style="color:var(--green)">Bước 3:</strong> SSH vào server, restart app:<br>
+      <div class="code-block" style="margin:4px 0 8px;font-size:12px">
+        <span class="cmd">ssh</span> root@IP_SERVER<br>
+        <span class="cmd">systemctl</span> restart unilab
+      </div>
+      <strong style="color:var(--green)">Bước 4:</strong> Mở browser → Ctrl+F5 (hard refresh) → kiểm tra thay đổi
+    </div>
+
+    <div class="grid-2">
+      <div class="mini-card" style="background:rgba(116,185,255,0.05);">
+        <div class="title" style="color:var(--blue)">Phím tắt trong SSH</div>
+        <div class="desc" style="font-family:'JetBrains Mono',monospace;line-height:1.9">
+          Tab&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family:'Outfit',sans-serif">Auto-complete tên file/lệnh</span><br>
+          ↑ ↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-family:'Outfit',sans-serif">Xem lại lệnh đã gõ trước</span><br>
+          Ctrl+C&nbsp;&nbsp;&nbsp;<span style="font-family:'Outfit',sans-serif">Dừng lệnh đang chạy</span><br>
+          Ctrl+L&nbsp;&nbsp;&nbsp;<span style="font-family:'Outfit',sans-serif">Xóa màn hình (clear)</span><br>
+          Ctrl+D&nbsp;&nbsp;&nbsp;<span style="font-family:'Outfit',sans-serif">Thoát SSH</span>
+        </div>
+      </div>
+      <div class="mini-card" style="background:rgba(255,118,117,0.05);">
+        <div class="title" style="color:var(--red)">Lưu ý an toàn</div>
+        <div class="desc">
+          Đang SSH = đang điều khiển server thật<br>
+          <code>rm -rf /</code> sẽ xóa TOÀN BỘ server<br>
+          Luôn backup trước khi sửa file quan trọng<br>
+          Gõ <code>exit</code> khi xong để đóng kết nối<br>
+          Không chia sẻ password SSH cho ai
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ Deploy steps ═══ -->
   <div class="section-title">Các bước deploy lên server</div>
 
