@@ -40,10 +40,17 @@
 
   <div class="form-group"><label class="form-label">Excerpt</label><textarea class="form-textarea" name="excerpt" style="min-height:80px" placeholder="Mo ta ngan cho listing...">{{ article.excerpt if article else '' }}</textarea></div>
 
-  <!-- Rich Text Editor for Content -->
+  <!-- Rich Text Editor for Content (Quill - free, MIT license) -->
   <div class="form-group">
     <label class="form-label">Content</label>
-    <textarea name="content" id="contentEditor">{{ article.content if article else '' }}</textarea>
+    <div id="editorWrap">
+      <div id="quillEditor"></div>
+    </div>
+    <textarea name="content" id="contentHidden" style="display:none">{{ article.content if article else '' }}</textarea>
+    <div style="margin-top:6px;text-align:right">
+      <button type="button" class="btn btn-ghost" id="toggleHtmlBtn" style="font-size:12px;padding:4px 10px">HTML</button>
+    </div>
+    <textarea id="htmlSourceEditor" class="form-textarea" style="display:none;min-height:300px;font-family:'DM Mono',monospace;font-size:13px"></textarea>
   </div>
 
   <!-- Product Attachment Section -->
@@ -97,29 +104,118 @@
   </div>
 </form>
 
-<!-- TinyMCE CDN -->
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<!-- Quill.js CDN (free, MIT license) -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script>
-tinymce.init({
-  selector: '#contentEditor',
-  height: 500,
-  menubar: 'file edit view insert format table',
-  plugins: 'lists link image table code fullscreen preview searchreplace autolink',
-  toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image table | code fullscreen',
-  block_formats: 'Paragraph=p; Heading 2=h2; Heading 3=h3; Heading 4=h4; Blockquote=blockquote; Pre=pre',
-  content_style: "body { font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.7; padding: 12px; }",
-  branding: false,
-  promotion: false,
-  license_key: 'gpl',
-  skin: (document.documentElement.getAttribute('data-theme') === 'dark') ? 'oxide-dark' : 'oxide',
-  content_css: (document.documentElement.getAttribute('data-theme') === 'dark') ? 'dark' : 'default',
-  setup: function(editor) {
-    editor.on('change', function() { editor.save(); });
+(function() {
+  // Size whitelist
+  var Size = Quill.import('attributors/style/size');
+  Size.whitelist = ['12px','14px','16px','18px','20px','24px','28px','32px'];
+  Quill.register(Size, true);
+
+  // Font whitelist
+  var Font = Quill.import('attributors/style/font');
+  Font.whitelist = ['DM Sans','Arial','Georgia','Times New Roman','Courier New','Verdana'];
+  Quill.register(Font, true);
+
+  var quill = new Quill('#quillEditor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ 'header': [2, 3, 4, false] }],
+        [{ 'font': Font.whitelist }],
+        [{ 'size': Size.whitelist }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        [{ 'indent': '-1' }, { 'indent': '+1' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image'],
+        ['clean']
+      ]
+    },
+    placeholder: 'Noi dung bai viet...'
+  });
+
+  // Load existing content
+  var existing = document.getElementById('contentHidden').value;
+  if (existing) {
+    quill.root.innerHTML = existing;
   }
-});
+
+  // Sync to hidden textarea on text change
+  quill.on('text-change', function() {
+    document.getElementById('contentHidden').value = quill.root.innerHTML;
+  });
+
+  // Sync before form submit
+  document.getElementById('articleForm').addEventListener('submit', function() {
+    if (document.getElementById('htmlSourceEditor').style.display !== 'none') {
+      // If HTML source is visible, sync it back
+      quill.root.innerHTML = document.getElementById('htmlSourceEditor').value;
+    }
+    document.getElementById('contentHidden').value = quill.root.innerHTML;
+  });
+
+  // Toggle HTML source view
+  var htmlMode = false;
+  document.getElementById('toggleHtmlBtn').addEventListener('click', function() {
+    htmlMode = !htmlMode;
+    var srcEditor = document.getElementById('htmlSourceEditor');
+    var editorWrap = document.getElementById('editorWrap');
+    if (htmlMode) {
+      srcEditor.value = quill.root.innerHTML;
+      srcEditor.style.display = 'block';
+      editorWrap.style.display = 'none';
+      this.textContent = 'Visual';
+    } else {
+      quill.root.innerHTML = srcEditor.value;
+      document.getElementById('contentHidden').value = srcEditor.value;
+      srcEditor.style.display = 'none';
+      editorWrap.style.display = 'block';
+      this.textContent = 'HTML';
+    }
+  });
+
+  window._quill = quill;
+})();
 </script>
 
 <style>
+/* Quill Editor */
+#editorWrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+#editorWrap .ql-toolbar {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+}
+#editorWrap .ql-container {
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+}
+#editorWrap .ql-editor {
+  min-height: 400px;
+  line-height: 1.7;
+  padding: 16px;
+}
+#editorWrap .ql-editor h2 { font-size: 22px; font-weight: 700; margin: 20px 0 10px; }
+#editorWrap .ql-editor h3 { font-size: 18px; font-weight: 700; margin: 16px 0 8px; }
+#editorWrap .ql-editor h4 { font-size: 16px; font-weight: 700; margin: 12px 0 6px; }
+/* Dark mode support */
+[data-theme="dark"] #editorWrap .ql-toolbar { background: var(--bg-card); }
+[data-theme="dark"] #editorWrap .ql-editor { color: var(--text); background: var(--bg); }
+[data-theme="dark"] .ql-toolbar .ql-stroke { stroke: var(--text-muted); }
+[data-theme="dark"] .ql-toolbar .ql-fill { fill: var(--text-muted); }
+[data-theme="dark"] .ql-toolbar .ql-picker-label { color: var(--text-muted); }
+[data-theme="dark"] .ql-toolbar button:hover .ql-stroke,
+[data-theme="dark"] .ql-toolbar .ql-picker-label:hover { stroke: var(--text); color: var(--text); }
 /* Product Attachment Section */
 .product-attach-section {
   border: 1px solid var(--border);
