@@ -224,11 +224,17 @@ async function tiktokCreateLink(url) {
 </script>
 
 {% if products %}
+<!-- Bulk action bar -->
+<div id="bulkBar" style="display:none;position:sticky;top:0;z-index:50;background:var(--accent);color:#fff;padding:10px 20px;border-radius:var(--radius);margin-bottom:12px;display:none;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+  <span>Da chon <strong id="bulkCount">0</strong> san pham</span>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:none" onclick="bulkDeleteSelected()">Xoa da chon</button>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border:none;margin-left:auto" onclick="toggleAll(false)">Bo chon</button>
+</div>
 <div class="table-wrap">
   <table class="data-table">
     <thead>
       <tr>
-        <th style="width:36px">#</th>
+        <th style="width:36px"><input type="checkbox" id="checkAll" onchange="toggleAll(this.checked)" title="Chon tat ca"></th>
         <th>Product</th>
         <th>Vertical</th>
         <th>Network</th>
@@ -241,7 +247,7 @@ async function tiktokCreateLink(url) {
     <tbody>
       {% for al, part, zone, seg, vert in products %}
       <tr>
-        <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ al.id }}</td>
+        <td><input type="checkbox" class="p-check" value="{{ al.id }}" onchange="updateBulk()"></td>
         <td style="max-width:280px">
           <div style="display:flex;gap:8px;align-items:center">
             {% if al.image_url %}<img src="{{ al.image_url }}" style="width:36px;height:28px;object-fit:cover;border-radius:4px;flex-shrink:0" alt="">{% endif %}
@@ -317,4 +323,36 @@ async function tiktokCreateLink(url) {
   <a href="{{ url_for('admin_product_new') }}" class="btn btn-primary" style="margin-top:12px">Add first product</a>
 </div>
 {% endif %}
+
+<script>
+function toggleAll(checked) {
+  document.querySelectorAll('.p-check').forEach(c => c.checked = checked);
+  document.getElementById('checkAll').checked = checked;
+  updateBulk();
+}
+function updateBulk() {
+  const checked = document.querySelectorAll('.p-check:checked');
+  const bar = document.getElementById('bulkBar');
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulkCount').textContent = checked.length;
+  } else {
+    bar.style.display = 'none';
+  }
+  const all = document.querySelectorAll('.p-check');
+  document.getElementById('checkAll').checked = all.length > 0 && checked.length === all.length;
+}
+async function bulkDeleteSelected() {
+  const ids = [...document.querySelectorAll('.p-check:checked')].map(c => c.value);
+  if (!ids.length) return;
+  if (!confirm('Xoa ' + ids.length + ' san pham da chon?')) return;
+  const resp = await fetch('{{ url_for("admin_products_bulk_delete_selected") }}', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ids: ids})
+  });
+  const data = await resp.json();
+  if (data.ok) location.reload();
+  else alert('Loi: ' + (data.error || 'Unknown'));
+}
+</script>
 {% endblock %}

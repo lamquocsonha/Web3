@@ -2828,6 +2828,17 @@ def admin_products_bulk_delete():
     flash(f'Da xoa {count:,} san pham ({label})', 'success')
     return redirect(url_for('admin_products'))
 
+@app.route('/admin/products/bulk-delete-selected', methods=['POST'])
+def admin_products_bulk_delete_selected():
+    """Delete selected products by IDs"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = AffiliateLink.query.filter(AffiliateLink.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 # =============================================
 # AI CONTROL CENTER - Unified AI Operations Hub
 # =============================================
@@ -5791,6 +5802,17 @@ def admin_hotdeals_delete_all():
     flash(f'Da xoa {count} deal', 'success')
     return redirect(url_for('admin_hotdeals'))
 
+@app.route('/admin/hotdeals/bulk-delete-selected', methods=['POST'])
+def admin_hotdeals_bulk_delete_selected():
+    """Delete selected hotdeals by IDs"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = HotDeal.query.filter(HotDeal.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 # =============================================
 # ADMIN — ACCESSTRADE BANNERS (Auto-pull)
 # =============================================
@@ -5959,6 +5981,17 @@ def admin_at_banners_delete_all():
     db.session.commit()
     flash(f'Da xoa {count} banner', 'success')
     return redirect(url_for('admin_at_banners'))
+
+@app.route('/admin/at-banners/bulk-delete-selected', methods=['POST'])
+def admin_at_banners_bulk_delete_selected():
+    """Delete selected banners by IDs"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = AccessTradeBanner.query.filter(AccessTradeBanner.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
 
 @app.route('/admin/at-banners/schedule', methods=['POST'])
 def admin_at_banners_schedule():
