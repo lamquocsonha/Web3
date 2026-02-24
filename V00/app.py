@@ -2325,6 +2325,15 @@ def admin_seed_data():
             except Exception as e:
                 flash(f'❌ Error seeding new verticals: {str(e)}', 'error')
 
+        elif action.startswith('seed_') and action != 'seed_all' and action != 'seed_new_verticals':
+            slug = action.replace('seed_', '', 1)
+            from seed_data import seed_vertical_content
+            try:
+                seed_vertical_content(slug)
+                flash(f'✅ {slug.title()} vertical content seeded!', 'success')
+            except Exception as e:
+                flash(f'❌ Error seeding {slug}: {str(e)}', 'error')
+
         elif action == 'seed_all':
             from seed_data import (seed, seed_articles, seed_networks, seed_video,
                 seed_pet, seed_pet_articles, seed_pet_v2, seed_travel, seed_travel_articles,
@@ -2333,7 +2342,7 @@ def admin_seed_data():
                 seed_tech, seed_tech_articles, seed_products_beauty_tech,
                 seed_sport, seed_sport_articles, seed_products_sport,
                 seed_garden, seed_garden_articles, seed_products_garden,
-                seed_new_verticals)
+                seed_new_verticals, seed_all_new_verticals_content)
             try:
                 seed()
                 seed_articles()
@@ -2360,6 +2369,7 @@ def admin_seed_data():
                 seed_garden_articles()
                 seed_products_garden()
                 seed_new_verticals()
+                seed_all_new_verticals_content()
                 flash('✅ All verticals seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding all: {str(e)}', 'error')
