@@ -21,10 +21,22 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM --- Detect Python command ---
+set PYTHON_CMD=
+where python >nul 2>&1 && set PYTHON_CMD=python && goto :run_server
+where python3 >nul 2>&1 && set PYTHON_CMD=python3 && goto :run_server
+where py >nul 2>&1 && set PYTHON_CMD=py && goto :run_server
+
+echo [ERROR] Python not found! Run install.bat first.
+pause
+exit /b 1
+
+:run_server
 echo ==========================================
 echo   UNILAB - Server running
 echo.
 echo   Admin:   http://localhost:7000/admin
+echo   Shop:    http://localhost:7000/shop
 echo   Car:     http://localhost:7000/car
 echo   Travel:  http://localhost:7000/travel
 echo.
@@ -32,7 +44,7 @@ echo   Press Ctrl+C to stop
 echo ==========================================
 echo.
 
-python app.py
+%PYTHON_CMD% app.py
 
 REM Pause if app exits with error
 if errorlevel 1 (
