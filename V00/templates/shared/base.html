@@ -121,7 +121,6 @@ a.seo-backlink:hover {
 }
 </style>
 {% endautoescape %}
-{% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}
 </head>
 <body data-mode="{{ vertical.default_mode or 'light' }}">
 
@@ -206,47 +205,99 @@ if (saved) {
   document.querySelector('.mode-icon').textContent = icon;
   document.querySelector('.mode-label').textContent = label;
 }
-/* Neutralize AccessTrade Smart Tag overlay — it creates a full-screen
-   fixed div that intercepts all clicks. CSS pointer-events alone is
-   insufficient because the AT script applies inline !important styles
-   that override stylesheet rules. */
+/* ══ AccessTrade Smart Tag Neutralizer ══
+   AT script: 1) creates overlay div intercepting all clicks
+              2) hijacks <a> href to redirect through AT tracking
+              3) adds onmousedown handlers on links
+   Fix: backup internal links, kill overlays, restore hijacked hrefs */
 (function() {
-  var AT_SEL = '[id*="at-smart"], [class*="atsmarttag"], [id*="atsmart"]';
-  function killATOverlay() {
-    /* 1) Kill any AT-branded element unconditionally */
-    document.querySelectorAll(AT_SEL).forEach(function(el) {
-      el.style.setProperty('pointer-events', 'none', 'important');
-      el.style.setProperty('z-index', '-1', 'important');
-      el.style.setProperty('width', '0', 'important');
-      el.style.setProperty('height', '0', 'important');
-      el.style.setProperty('overflow', 'hidden', 'important');
-      el.style.setProperty('opacity', '0', 'important');
+  /* ─── 1. Backup all internal links BEFORE AT loads ─── */
+  var INTERNAL = {};
+  document.querySelectorAll('a[href]').forEach(function(a){
+    var h = a.getAttribute('href');
+    if (!h) return;
+    if (h.charAt(0)==='/' || h.charAt(0)==='#' || h.indexOf(location.origin)===0) {
+      var key = 'at_b_' + Math.random().toString(36).substr(2,9);
+      a.dataset.atBackup = key;
+      INTERNAL[key] = h;
+    }
+    if (a.closest('header, footer, nav, .site-header, .site-nav, .header-actions, .mode-toggle')) {
+      a.dataset.atProtect = '1';
+    }
+  });
+  document.querySelectorAll('button, .mode-toggle, select').forEach(function(el){
+    el.dataset.atProtect = '1';
+  });
+
+  /* ─── 2. Neutralizer function ─── */
+  var AT_SEL = '[id*="at-smart"], [class*="atsmarttag"], [id*="atsmart"], [id*="at_smart"]';
+  function neutralizeAT() {
+    /* Kill AT-branded elements */
+    document.querySelectorAll(AT_SEL).forEach(function(el){
+      el.style.setProperty('pointer-events','none','important');
+      el.style.setProperty('z-index','-1','important');
+      el.style.setProperty('width','0','important');
+      el.style.setProperty('height','0','important');
+      el.style.setProperty('overflow','hidden','important');
+      el.style.setProperty('opacity','0','important');
+      el.style.setProperty('display','none','important');
     });
-    /* 2) Catch any full-screen fixed div injected by third-party scripts */
-    document.querySelectorAll('body > div').forEach(function(el) {
-      if (el.classList.contains('site-header') || el.classList.contains('site-main') || el.classList.contains('site-footer')) return;
+    /* Kill full-screen fixed divs */
+    document.querySelectorAll('body > div').forEach(function(el){
+      if (el.classList.contains('site-header') || el.classList.contains('site-main') ||
+          el.classList.contains('site-footer')) return;
       var s = window.getComputedStyle(el);
-      if (s.position === 'fixed' && s.top === '0px' && s.left === '0px' &&
-          (s.width === '100%' || s.width === '100vw' || parseInt(s.width) >= window.innerWidth * 0.5)) {
-        var z = parseInt(s.zIndex) || 0;
-        if (z > 9000 || s.opacity < 0.1) {
-          el.style.setProperty('pointer-events', 'none', 'important');
-          el.style.setProperty('display', 'none', 'important');
-        }
+      if (s.position==='fixed' && s.top==='0px' && s.left==='0px' &&
+          (parseInt(s.width) >= window.innerWidth * 0.9 || s.width==='100%' || s.width==='100vw')) {
+        el.style.setProperty('pointer-events','none','important');
+        el.style.setProperty('display','none','important');
+      }
+    });
+    /* Restore hijacked internal links */
+    document.querySelectorAll('a[data-at-backup]').forEach(function(a){
+      var orig = INTERNAL[a.dataset.atBackup];
+      if (orig && a.getAttribute('href') !== orig) {
+        a.setAttribute('href', orig);
+      }
+    });
+    /* Remove AT-injected handlers on protected elements */
+    document.querySelectorAll('a[data-at-protect]').forEach(function(a){
+      if (a.getAttribute('onmousedown') && a.getAttribute('onmousedown').indexOf('accesstrade') !== -1) {
+        a.removeAttribute('onmousedown');
       }
     });
   }
-  /* Run after AT script loads (async) — multiple passes */
-  setTimeout(killATOverlay, 1000);
-  setTimeout(killATOverlay, 2500);
-  setTimeout(killATOverlay, 5000);
-  setTimeout(killATOverlay, 10000);
-  /* Watch for dynamically inserted AND modified overlays
-     (AT script re-applies inline styles, so watch attributes too) */
+
+  /* ─── 3. Run on timers ─── */
+  [500, 1000, 2000, 3500, 5000, 8000].forEach(function(ms){
+    setTimeout(neutralizeAT, ms);
+  });
+
+  /* ─── 4. MutationObserver ─── */
   if (window.MutationObserver) {
-    new MutationObserver(function() { killATOverlay(); })
-      .observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style','class'] });
+    var debounce = null;
+    new MutationObserver(function(){
+      clearTimeout(debounce);
+      debounce = setTimeout(neutralizeAT, 100);
+    }).observe(document.body, {
+      childList: true, subtree: true,
+      attributes: true, attributeFilter: ['style','class','href','onmousedown','onclick']
+    });
   }
+
+  /* ─── 5. Inject smart tag AFTER protection is set up ─── */
+  {% if custom_head_code %}
+  var container = document.createElement('div');
+  container.style.display = 'none';
+  container.innerHTML = {{ custom_head_code|tojson }};
+  var scripts = container.querySelectorAll('script');
+  scripts.forEach(function(oldScript){
+    var s = document.createElement('script');
+    if (oldScript.src) { s.src = oldScript.src; s.async = true; }
+    else { s.textContent = oldScript.textContent; }
+    document.body.appendChild(s);
+  });
+  {% endif %}
 })();
 </script>
 
