@@ -1,22 +1,23 @@
 from models import db, Vertical, Segment, Zone, Part, AffiliateLink, Voucher
 
 def seed():
-    """Seed Car vertical data - skip if already exists"""
+    """Seed Car vertical data"""
     # Check if Car already exists
-    car_vertical = Vertical.query.filter_by(slug='car').first()
-    if car_vertical:
-        print('[SKIP] Car vertical already exists')
-        return
-
-    print('[+] Seeding Car vertical...')
-    # Vertical: Car
-    car = Vertical(
-        name='Car', slug='car', icon='🚗', color='#f39c12',
-        description='Kiến thức chi tiết về ô tô — từ tổng thể đến từng bu-lông. Tìm hiểu, sửa chữa, nâng cấp.',
-        status='live', style='car', template='general', default_mode='light'
-    )
-    db.session.add(car)
-    db.session.flush()
+    car = Vertical.query.filter_by(slug='car').first()
+    if car:
+        if Segment.query.filter_by(vertical_id=car.id).count() > 0:
+            print('[SKIP] Car already has content')
+            return
+        print('[+] Car exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Car vertical...')
+        car = Vertical(
+            name='Car', slug='car', icon='🚗', color='#f39c12',
+            description='Kiến thức chi tiết về ô tô — từ tổng thể đến từng bu-lông. Tìm hiểu, sửa chữa, nâng cấp.',
+            status='live', style='car', template='general', default_mode='light'
+        )
+        db.session.add(car)
+        db.session.flush()
 
     # Segments
     segments_data = [
@@ -380,14 +381,17 @@ def seed_pet():
     import random
 
     # Check if Pet vertical already exists
-    if Vertical.query.filter_by(slug='pet').first():
-        print('[SKIP] Pet vertical already exists')
-        return
-
-    print('[+] Seeding Pet vertical...')
-    v = Vertical(name='Pet', slug='pet', description='Kiến thức chăm sóc thú cưng — chó, mèo, và thú nhỏ', icon='🐾', color='#e17055', status='active', style='pet', template='general', default_mode='light')
-    db.session.add(v)
-    db.session.flush()
+    v = Vertical.query.filter_by(slug='pet').first()
+    if v:
+        if Segment.query.filter_by(vertical_id=v.id).count() > 0:
+            print('[SKIP] Pet already has content')
+            return
+        print('[+] Pet exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Pet vertical...')
+        v = Vertical(name='Pet', slug='pet', description='Kiến thức chăm sóc thú cưng — chó, mèo, và thú nhỏ', icon='🐾', color='#e17055', status='active', style='pet', template='general', default_mode='light')
+        db.session.add(v)
+        db.session.flush()
 
     segments_data = [
         {'name':'Chó','slug':'cho','icon':'🐕','desc':'Tất cả về chó: giống, chăm sóc, dinh dưỡng, bệnh lý, huấn luyện'},
@@ -1131,14 +1135,17 @@ def seed_travel():
     import random
 
     # Check if Travel vertical already exists
-    if Vertical.query.filter_by(slug='travel').first():
-        print('[SKIP] Travel vertical already exists')
-        return
-
-    print('[+] Seeding Travel vertical...')
-    v = Vertical(name='Travel', slug='travel', description='Du lịch & Khách sạn — Khám phá, đặt phòng, trải nghiệm', icon='✈️', color='#0984e3', status='active', style='travel', template='general', default_mode='light')
-    db.session.add(v)
-    db.session.flush()
+    v = Vertical.query.filter_by(slug='travel').first()
+    if v:
+        if Segment.query.filter_by(vertical_id=v.id).count() > 0:
+            print('[SKIP] Travel already has content')
+            return
+        print('[+] Travel exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Travel vertical...')
+        v = Vertical(name='Travel', slug='travel', description='Du lịch & Khách sạn — Khám phá, đặt phòng, trải nghiệm', icon='✈️', color='#0984e3', status='active', style='travel', template='general', default_mode='light')
+        db.session.add(v)
+        db.session.flush()
 
     segments_data = [
         {'name':'Trong nước','slug':'trong-nuoc','icon':'🇻🇳','desc':'Du lịch nội địa Việt Nam: biển, núi, phố cổ, miệt vườn'},
@@ -1568,23 +1575,24 @@ def seed_bike():
     from models import db, Vertical, Segment, Zone, Part, AffiliateLink, Voucher, Article
 
     # Check if Bike vertical already exists
-    if Vertical.query.filter_by(slug='bike').first():
-        print('[SKIP] Bike vertical already exists')
-        return
-
-    print('[+] Seeding Bike vertical...')
-
-    # Create Bike Vertical
-    bike = Vertical(
-        name='Bike',
-        slug='bike',
-        icon='🚴',
-        color='#00cec9',
-        description='Kiến thức về xe đạp và phụ kiện đạp xe — từ chọn xe phù hợp đến nâng cấp chi tiết.',
-        status='live', style='bike', template='general', default_mode='light'
-    )
-    db.session.add(bike)
-    db.session.flush()
+    bike = Vertical.query.filter_by(slug='bike').first()
+    if bike:
+        if Segment.query.filter_by(vertical_id=bike.id).count() > 0:
+            print('[SKIP] Bike already has content')
+            return
+        print('[+] Bike exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Bike vertical...')
+        bike = Vertical(
+            name='Bike',
+            slug='bike',
+            icon='🚴',
+            color='#00cec9',
+            description='Kiến thức về xe đạp và phụ kiện đạp xe — từ chọn xe phù hợp đến nâng cấp chi tiết.',
+            status='live', style='bike', template='general', default_mode='light'
+        )
+        db.session.add(bike)
+        db.session.flush()
 
     # Segments (Loại xe đạp)
     segments_data = [
@@ -2015,23 +2023,24 @@ def seed_beauty():
     """Seed Beauty vertical data for cosmetics, skincare, beauty"""
 
     # Check if Beauty already exists
-    beauty_vertical = Vertical.query.filter_by(slug='beauty').first()
-    if beauty_vertical:
-        print('[SKIP] Beauty vertical already exists')
-        return
-
-    print('[+] Seeding Beauty vertical...')
-    # Vertical: Beauty
-    beauty = Vertical(
-        name='Beauty',
-        slug='beauty',
-        icon='💄',
-        color='#e84393',
-        description='Làm đẹp & Chăm sóc — Mỹ phẩm, skincare, makeup từ cơ bản đến nâng cao',
-        status='live', style='beauty', template='general', default_mode='light'
-    )
-    db.session.add(beauty)
-    db.session.flush()
+    beauty = Vertical.query.filter_by(slug='beauty').first()
+    if beauty:
+        if Segment.query.filter_by(vertical_id=beauty.id).count() > 0:
+            print('[SKIP] Beauty already has content')
+            return
+        print('[+] Beauty exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Beauty vertical...')
+        beauty = Vertical(
+            name='Beauty',
+            slug='beauty',
+            icon='💄',
+            color='#e84393',
+            description='Làm đẹp & Chăm sóc — Mỹ phẩm, skincare, makeup từ cơ bản đến nâng cao',
+            status='live', style='beauty', template='general', default_mode='light'
+        )
+        db.session.add(beauty)
+        db.session.flush()
 
     # Segments
     segments_data = [
@@ -2312,23 +2321,24 @@ def seed_beauty():
 def seed_tech():
     """Seed Tech vertical data for phones, headphones, audio, gadgets"""
     # Check if Tech already exists
-    tech_vertical = Vertical.query.filter_by(slug='tech').first()
-    if tech_vertical:
-        print('[SKIP] Tech vertical already exists')
-        return
-
-    print('[+] Seeding Tech vertical...')
-    # Vertical: Tech
-    tech = Vertical(
-        name='Tech',
-        slug='tech',
-        icon='📱',
-        color='#6c5ce7',
-        description='Công nghệ & Thiết bị — Điện thoại, tai nghe, âm thanh, gadgets từ cơ bản đến cao cấp',
-        status='live', style='tech', template='general', default_mode='light'
-    )
-    db.session.add(tech)
-    db.session.flush()
+    tech = Vertical.query.filter_by(slug='tech').first()
+    if tech:
+        if Segment.query.filter_by(vertical_id=tech.id).count() > 0:
+            print('[SKIP] Tech already has content')
+            return
+        print('[+] Tech exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Tech vertical...')
+        tech = Vertical(
+            name='Tech',
+            slug='tech',
+            icon='📱',
+            color='#6c5ce7',
+            description='Công nghệ & Thiết bị — Điện thoại, tai nghe, âm thanh, gadgets từ cơ bản đến cao cấp',
+            status='live', style='tech', template='general', default_mode='light'
+        )
+        db.session.add(tech)
+        db.session.flush()
 
     # Segments
     segments_data = [
@@ -2979,25 +2989,27 @@ def seed_sport():
     """Seed Sport vertical data for running, gym, football, cycling, swimming, nutrition"""
 
     # Check if Sport already exists
-    sport_vertical = Vertical.query.filter_by(slug='sport').first()
-    if sport_vertical:
-        print('[SKIP] Sport vertical already exists')
-        return
-
-    print('[+] Seeding Sport vertical...')
-    sport = Vertical(
-        name='Sport',
-        slug='sport',
-        icon='⚽',
-        color='#00b894',
-        description='Thể thao & Fitness — Giày chạy, đồ gym, dinh dưỡng thể thao, thiết bị tập luyện',
-        status='live',
-        style='sport',
-        template='general',
-        default_mode='light'
-    )
-    db.session.add(sport)
-    db.session.flush()
+    sport = Vertical.query.filter_by(slug='sport').first()
+    if sport:
+        if Segment.query.filter_by(vertical_id=sport.id).count() > 0:
+            print('[SKIP] Sport already has content')
+            return
+        print('[+] Sport exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Sport vertical...')
+        sport = Vertical(
+            name='Sport',
+            slug='sport',
+            icon='⚽',
+            color='#00b894',
+            description='Thể thao & Fitness — Giày chạy, đồ gym, dinh dưỡng thể thao, thiết bị tập luyện',
+            status='live',
+            style='sport',
+            template='general',
+            default_mode='light'
+        )
+        db.session.add(sport)
+        db.session.flush()
 
     # Segments (6 bộ môn)
     segments_data = [
@@ -3646,25 +3658,27 @@ def seed_garden():
     """Seed Garden vertical data for vegetables, flowers, fruit trees, ornamental plants, tools"""
 
     # Check if Garden already exists
-    garden_vertical = Vertical.query.filter_by(slug='garden').first()
-    if garden_vertical:
-        print('[SKIP] Garden vertical already exists')
-        return
-
-    print('[+] Seeding Garden vertical...')
-    garden = Vertical(
-        name='Garden',
-        slug='garden',
-        icon='🌿',
-        color='#27ae60',
-        description='Kiến thức làm vườn — chăm sóc cây trồng, rau sạch, hoa, cây cảnh',
-        status='live',
-        style='classic',
-        template='general',
-        default_mode='light'
-    )
-    db.session.add(garden)
-    db.session.flush()
+    garden = Vertical.query.filter_by(slug='garden').first()
+    if garden:
+        if Segment.query.filter_by(vertical_id=garden.id).count() > 0:
+            print('[SKIP] Garden already has content')
+            return
+        print('[+] Garden exists but empty — seeding content...')
+    else:
+        print('[+] Seeding Garden vertical...')
+        garden = Vertical(
+            name='Garden',
+            slug='garden',
+            icon='🌿',
+            color='#27ae60',
+            description='Kiến thức làm vườn — chăm sóc cây trồng, rau sạch, hoa, cây cảnh',
+            status='live',
+            style='classic',
+            template='general',
+            default_mode='light'
+        )
+        db.session.add(garden)
+        db.session.flush()
 
     # Segments (5 chuyên mục)
     segments_data = [
