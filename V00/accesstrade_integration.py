@@ -985,7 +985,7 @@ def get_accesstrade_api(api_key=None):
         # Try to get from database
         from app import app, SiteSettings, AffiliateNetwork
         with app.app_context():
-            api_key = SiteSettings.get('accesstrade_api_key', '')
+            api_key = SiteSettings.get('accesstrade_api_key', 'byMkvHrygyW5bZCaP3O2AZDv4P4DY34F')
             # Fallback: check AffiliateNetwork table
             if not api_key:
                 at = AffiliateNetwork.query.filter_by(slug='accesstrade').first()

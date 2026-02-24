@@ -1,14 +1,145 @@
-{# Travel Zone Diagram - Interactive SVG Vietnam Map #}
-{# For segment "Trong nước" - 3 regions highlighted #}
+{# Travel Zone Diagram - Interactive SVG Map #}
+{# "Trong nước" → Vietnam map, "Quốc tế" → Asia/World map #}
 
 <div class="travel-diagram-wrap">
   <div class="cd-title">🗺️ Bản đồ du lịch — <strong>{{ segment.name }}</strong></div>
   <div class="cd-subtitle">Di chuột hoặc chạm vào vùng trên bản đồ để khám phá</div>
 
-  <svg class="travel-diagram-svg" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg">
+{% if segment.slug == 'quoc-te' %}
+  {# ═══ INTERNATIONAL / ASIA MAP ═══ #}
+  <svg class="travel-diagram-svg" viewBox="0 0 600 500" xmlns="http://www.w3.org/2000/svg">
 
-    <!-- ═══ VIETNAM MAP OUTLINE ═══ -->
-    <!-- Simplified S-shape Vietnam map -->
+    <!-- Background ocean -->
+    <rect class="travel-sea" x="0" y="0" width="600" height="500" rx="16"/>
+
+    <!-- Simplified continent outlines (light, decorative) -->
+    <!-- Asia mainland outline -->
+    <path class="travel-outline" style="opacity:0.15" d="
+      M 50,30 L 180,20 L 300,25 L 400,40 L 480,80
+      L 520,130 L 530,200 L 510,260 L 480,300
+      L 440,340 L 400,360 L 350,380 L 300,390
+      L 250,400 L 200,390 L 150,360 L 120,320
+      L 100,270 L 80,220 L 60,160 L 50,100 Z
+    "/>
+
+    {% for z in segment.zones %}
+    <a href="{{ url_for('vertical_zone', vertical_slug='travel', segment_slug=segment.slug, zone_slug=z.slug) }}" class="travel-zone-link">
+      <g class="travel-zone-group {% if active_zone_slug is defined and active_zone_slug == z.slug %}active{% endif %}"
+         data-zone="{{ z.slug }}" data-name="{{ z.name }}" data-color="{{ z.color }}">
+
+        {% if z.slug == 'dong-nam-a' %}
+        <!-- Đông Nam Á: Southeast Asia region -->
+        <path class="zone-fill" d="
+          M 250,250 L 290,235 L 340,230 L 380,240
+          L 410,260 L 430,290 L 440,330 L 430,360
+          L 400,385 L 360,400 L 310,410 L 270,400
+          L 240,380 L 220,350 L 215,320 L 220,290
+          L 230,270 Z
+        "/>
+        <circle class="zone-dot" cx="330" cy="310" r="8"/>
+        <text class="zone-label" x="330" y="295" style="font-size:13px">{{ z.icon }} Đông Nam Á</text>
+        <!-- Bangkok -->
+        <circle cx="290" cy="280" r="4" fill="#f39c12" opacity="0.8"/>
+        <text class="zone-city" x="255" y="275">Bangkok</text>
+        <!-- Singapore -->
+        <circle cx="330" cy="370" r="3" fill="#f39c12" opacity="0.7"/>
+        <text class="zone-city" x="340" y="375">Singapore</text>
+        <!-- Bali -->
+        <circle cx="400" cy="380" r="3" fill="#f39c12" opacity="0.7"/>
+        <text class="zone-city" x="410" y="385">Bali</text>
+        <!-- KL -->
+        <circle cx="310" cy="345" r="3" fill="#f39c12" opacity="0.7"/>
+        <text class="zone-city" x="275" y="350">KL</text>
+
+        {% elif z.slug == 'dong-a' %}
+        <!-- Đông Á: East Asia region -->
+        <path class="zone-fill" d="
+          M 280,50 L 340,40 L 400,45 L 450,60
+          L 490,85 L 510,120 L 515,160 L 500,195
+          L 470,220 L 430,235 L 390,240 L 340,235
+          L 300,225 L 270,205 L 255,175 L 250,140
+          L 255,105 L 265,75 Z
+        "/>
+        <circle class="zone-dot" cx="400" cy="145" r="8"/>
+        <text class="zone-label" x="400" y="130" style="font-size:13px">{{ z.icon }} Đông Á</text>
+        <!-- Tokyo -->
+        <circle cx="490" cy="130" r="4" fill="#e74c3c" opacity="0.8"/>
+        <text class="zone-city" x="460" y="118">Tokyo</text>
+        <!-- Seoul -->
+        <circle cx="440" cy="105" r="3" fill="#e74c3c" opacity="0.7"/>
+        <text class="zone-city" x="448" y="100">Seoul</text>
+        <!-- Taipei -->
+        <circle cx="430" cy="185" r="3" fill="#e74c3c" opacity="0.7"/>
+        <text class="zone-city" x="438" y="195">Đài Bắc</text>
+        <!-- Beijing -->
+        <circle cx="370" cy="90" r="3" fill="#e74c3c" opacity="0.7"/>
+        <text class="zone-city" x="340" y="85">Bắc Kinh</text>
+
+        {% elif z.slug == 'chau-au' %}
+        <!-- Châu Âu: Europe region -->
+        <path class="zone-fill" d="
+          M 30,60 L 80,45 L 140,40 L 190,50
+          L 230,70 L 250,100 L 255,140 L 240,175
+          L 210,200 L 170,215 L 120,220 L 75,210
+          L 45,185 L 30,155 L 25,120 L 25,90 Z
+        "/>
+        <circle class="zone-dot" cx="140" cy="130" r="8"/>
+        <text class="zone-label" x="140" y="115" style="font-size:13px">{{ z.icon }} Châu Âu</text>
+        <!-- Paris -->
+        <circle cx="100" cy="105" r="3" fill="#9b59b6" opacity="0.8"/>
+        <text class="zone-city" x="70" y="100">Paris</text>
+        <!-- London -->
+        <circle cx="85" cy="80" r="3" fill="#9b59b6" opacity="0.7"/>
+        <text class="zone-city" x="55" y="74">London</text>
+        <!-- Rome -->
+        <circle cx="140" cy="165" r="3" fill="#9b59b6" opacity="0.7"/>
+        <text class="zone-city" x="148" y="170">Roma</text>
+
+        {% elif z.slug == 'chau-my' or z.slug == 'my' %}
+        <!-- Châu Mỹ / Mỹ -->
+        <path class="zone-fill" d="
+          M 30,260 L 80,250 L 140,255 L 190,270
+          L 220,295 L 230,330 L 220,365 L 195,390
+          L 155,405 L 110,410 L 65,395 L 40,370
+          L 25,335 L 22,300 Z
+        "/>
+        <circle class="zone-dot" cx="130" cy="330" r="8"/>
+        <text class="zone-label" x="130" y="315" style="font-size:13px">{{ z.icon }} {{ z.name[:10] }}</text>
+
+        {% else %}
+        <!-- Generic zone fallback -->
+        <ellipse class="zone-fill" cx="300" cy="440" rx="70" ry="35"/>
+        <circle class="zone-dot" cx="300" cy="440" r="6"/>
+        <text class="zone-label" x="300" y="428" style="font-size:13px">{{ z.icon }} {{ z.name[:12] }}</text>
+        {% endif %}
+      </g>
+    </a>
+    {% endfor %}
+
+    <!-- Vietnam marker (home) -->
+    <g transform="translate(315,285)">
+      <circle r="5" fill="#e74c3c" opacity="0.9"/>
+      <circle r="9" fill="none" stroke="#e74c3c" stroke-width="1.5" opacity="0.5"/>
+      <text x="10" y="4" style="font-size:10px;fill:var(--text-dim);font-weight:600">VN</text>
+    </g>
+
+    <!-- Compass -->
+    <g transform="translate(555,45)">
+      <circle cx="0" cy="0" r="20" class="compass-bg"/>
+      <text x="0" y="-6" class="compass-text" text-anchor="middle">N</text>
+      <line x1="0" y1="-2" x2="0" y2="8" class="compass-line"/>
+      <polygon points="0,-16 -3,-9 3,-9" class="compass-arrow"/>
+    </g>
+
+    <!-- Ocean labels -->
+    <text x="500" y="440" class="sea-label" style="font-size:11px" transform="rotate(-10,500,440)">Thái Bình Dương</text>
+    <text x="60" y="460" class="sea-label" style="font-size:11px">Ấn Độ Dương</text>
+
+  </svg>
+
+{% else %}
+  {# ═══ DOMESTIC VIETNAM MAP ═══ #}
+  <svg class="travel-diagram-svg" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg">
 
     <!-- Background sea -->
     <rect class="travel-sea" x="0" y="0" width="500" height="700" rx="16"/>
@@ -145,6 +276,7 @@
     <text x="420" y="350" class="sea-label" transform="rotate(15,420,350)">Biển Đông</text>
 
   </svg>
+{% endif %}
 
   <!-- Legend -->
   <div class="cd-legend">

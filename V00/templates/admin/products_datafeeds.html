@@ -1,8 +1,8 @@
 {% extends "admin/base.html" %}
 {% block title %}Import tu Datafeeds{% endblock %}
 {% block breadcrumb %}
-<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>
-<a href="{{ url_for('admin_products') }}">Products</a><span class="sep">></span>
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>
+<a href="{{ url_for('admin_products_hub') }}">Products</a><span class="sep">›</span>
 Datafeeds
 {% endblock %}
 {% block content %}
@@ -41,7 +41,7 @@ Datafeeds
           <button type="submit" class="btn btn-primary">Tim kiem</button>
         </div>
         <div>
-          <a href="{{ url_for('admin_products') }}" class="btn btn-secondary">Quay lai</a>
+          <a href="{{ url_for('admin_products_hub') }}" class="btn btn-secondary">Quay lai</a>
         </div>
       </div>
     </form>

@@ -1,9 +1,9 @@
 {% extends "admin/base.html" %}
 {% block title %}Articles{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Articles{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Articles{% endblock %}
 {% block content %}
 <div class="section-header">
-  <h1 class="page-title" style="margin-bottom:0">📚 Knowledge Articles</h1>
+  <h1 class="page-title" style="margin-bottom:0">Knowledge Articles</h1>
   <a href="{{ url_for('admin_article_new') }}" class="btn btn-primary">+ New Article</a>
 </div>
 
@@ -54,9 +54,19 @@
 </div>
 
 {% if articles %}
+<!-- Bulk action bar (hidden until selection) -->
+<div id="bulkBar" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);align-items:center;gap:12px">
+  <span id="bulkCount" style="font-size:14px;font-weight:600;color:var(--text)"></span>
+  <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteSelected()">Xoa da chon</button>
+  <button type="button" class="btn btn-ghost btn-sm" onclick="clearSelection()">Bo chon</button>
+  <div style="flex:1"></div>
+  <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteAll()" style="opacity:0.8">Xoa tat ca ({{ articles|length }})</button>
+</div>
+
 <div class="table-wrap">
   <table class="data-table">
     <thead><tr>
+      <th style="width:36px"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="Chon tat ca"></th>
       <th style="width:50px">Img</th>
       <th style="cursor:pointer;user-select:none" onclick="sortBy('title')">
         Title {% if current_sort == 'title' %}{{ '↑' if current_order == 'asc' else '↓' }}{% endif %}
@@ -73,8 +83,9 @@
     </tr></thead>
     <tbody>
       {% for a in articles %}
-      <tr>
-        <td>{% if a.image_url %}<img src="{{ a.image_url }}" style="width:44px;height:32px;object-fit:cover;border-radius:4px" alt="">{% else %}<span style="display:inline-block;width:44px;height:32px;background:var(--surface);border-radius:4px;text-align:center;line-height:32px;font-size:14px">📄</span>{% endif %}</td>
+      <tr data-id="{{ a.id }}">
+        <td><input type="checkbox" class="row-check" value="{{ a.id }}" onchange="updateBulkBar()"></td>
+        <td>{% if a.image_url %}<img src="{{ a.image_url }}" style="width:44px;height:32px;object-fit:cover;border-radius:4px" alt="">{% else %}<span style="display:inline-block;width:44px;height:32px;background:var(--surface);border-radius:4px;text-align:center;line-height:32px;font-size:14px">&#128196;</span>{% endif %}</td>
         <td><strong>{{ a.title[:50] }}{% if a.title|length > 50 %}...{% endif %}</strong><br><a href="{{ url_for('vertical_article', vertical_slug=a.vertical_slug, slug=a.slug) }}" target="_blank" style="font-size:14px;color:var(--accent);text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">{{ a.vertical_slug }}/bai-viet/{{ a.slug[:30] }}</a></td>
         <td>
           {% if a.tier == 'nganh' %}<span style="color:#e74c3c;font-family:'DM Mono';font-size:14px">NGANH</span>
@@ -111,11 +122,6 @@ function applyFilters() {
   if (search) params.set('search', search);
   else params.delete('search');
 
-  // Keep tier and sort params if they exist
-  const tier = params.get('tier');
-  const sort = params.get('sort');
-  const order = params.get('order');
-
   window.location.href = '{{ url_for("admin_articles") }}?' + params.toString();
 }
 
@@ -130,7 +136,6 @@ function sortBy(column) {
   const currentSort = params.get('sort');
   const currentOrder = params.get('order') || 'desc';
 
-  // Toggle order if clicking same column
   if (currentSort === column) {
     params.set('order', currentOrder === 'asc' ? 'desc' : 'asc');
   } else {
@@ -140,5 +145,99 @@ function sortBy(column) {
 
   window.location.href = '{{ url_for("admin_articles") }}?' + params.toString();
 }
+
+/* === Bulk selection === */
+function getChecked() {
+  return Array.from(document.querySelectorAll('.row-check:checked'));
+}
+
+function toggleSelectAll(master) {
+  document.querySelectorAll('.row-check').forEach(function(cb) {
+    cb.checked = master.checked;
+    cb.closest('tr').classList.toggle('row-selected', master.checked);
+  });
+  updateBulkBar();
+}
+
+function updateBulkBar() {
+  var checked = getChecked();
+  var bar = document.getElementById('bulkBar');
+  var total = document.querySelectorAll('.row-check').length;
+  var master = document.getElementById('selectAll');
+
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulkCount').textContent = 'Da chon ' + checked.length + ' / ' + total + ' bai viet';
+  } else {
+    bar.style.display = 'none';
+  }
+
+  // Sync select-all checkbox state
+  master.checked = checked.length === total && total > 0;
+  master.indeterminate = checked.length > 0 && checked.length < total;
+
+  // Highlight selected rows
+  document.querySelectorAll('.row-check').forEach(function(cb) {
+    cb.closest('tr').classList.toggle('row-selected', cb.checked);
+  });
+}
+
+function clearSelection() {
+  document.getElementById('selectAll').checked = false;
+  document.querySelectorAll('.row-check').forEach(function(cb) {
+    cb.checked = false;
+    cb.closest('tr').classList.remove('row-selected');
+  });
+  updateBulkBar();
+}
+
+function bulkDeleteSelected() {
+  var checked = getChecked();
+  if (checked.length === 0) return;
+  if (!confirm('Xoa ' + checked.length + ' bai viet da chon?\n\nHanh dong nay KHONG THE hoan tac.')) return;
+  var ids = checked.map(function(cb) { return parseInt(cb.value); });
+  fetch('{{ url_for("admin_articles_bulk_delete_selected") }}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids: ids })
+  }).then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        location.reload();
+      } else {
+        alert('Loi: ' + (data.error || 'Unknown'));
+      }
+    }).catch(function() { alert('Loi ket noi server'); });
+}
+
+function bulkDeleteAll() {
+  var total = document.querySelectorAll('.row-check').length;
+  if (!confirm('Xoa TAT CA ' + total + ' bai viet dang hien thi?\n\nHanh dong nay KHONG THE hoan tac.')) return;
+  // Collect current filters
+  var params = new URLSearchParams(window.location.search);
+  fetch('{{ url_for("admin_articles_bulk_delete_all") }}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      vertical: params.get('vertical') || '',
+      tier: params.get('tier') || '',
+      search: params.get('search') || ''
+    })
+  }).then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        location.reload();
+      } else {
+        alert('Loi: ' + (data.error || 'Unknown'));
+      }
+    }).catch(function() { alert('Loi ket noi server'); });
+}
 </script>
+
+<style>
+tr.row-selected { background: rgba(37,99,235,0.06); }
+[data-theme="dark"] tr.row-selected { background: rgba(37,99,235,0.12); }
+.row-check { width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb; }
+#selectAll { width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb; }
+</style>
 {% endblock %}

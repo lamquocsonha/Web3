@@ -1,0 +1,501 @@
+{% extends "admin/base.html" %}
+{% block title %}Monetization{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> Monetization{% endblock %}
+{% block content %}
+<style>
+/* ── Top Tabs ── */
+.mh-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:28px; overflow-x:auto }
+.mh-tab { flex:1; padding:12px 20px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; color:var(--text-dim); text-decoration:none; display:block; font-family:inherit }
+.mh-tab:hover { background:var(--surface2); color:var(--text) }
+.mh-tab.active { background:var(--accent); color:#fff }
+
+/* ── Stats ── */
+.mh-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:24px }
+.mh-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.mh-stat-val { font-size:26px; font-weight:800 }
+.mh-stat-label { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+
+/* ── Filter Bar ── */
+.mh-filters { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:20px; padding:14px 18px; background:var(--surface); border:1px solid var(--border); border-radius:12px }
+.mh-filters select, .mh-filters input[type=text] { padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface2); color:var(--text); font-family:inherit }
+.mh-filters select { min-width:140px }
+.mh-filters input[type=text] { min-width:200px }
+
+/* ── Table ── */
+.mh-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.mh-table-wrap table { width:100%; border-collapse:collapse }
+.mh-table-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.mh-table-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.mh-table-wrap tr:last-child td { border:none }
+.mh-table-wrap tr:hover td { background:var(--surface2) }
+
+/* ── Buttons ── */
+.mh-btn { padding:8px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.mh-btn-primary { background:var(--accent); color:#fff }
+.mh-btn-primary:hover { opacity:.9 }
+.mh-btn-ghost { background:var(--surface2); color:var(--text) }
+.mh-btn-ghost:hover { background:var(--border) }
+.mh-btn-danger { background:rgba(239,68,68,.1); color:#ef4444 }
+.mh-btn-success { background:#d1fae5; color:#065f46 }
+
+/* ── Badge ── */
+.mh-badge { display:inline-block; font-size:12px; padding:3px 10px; border-radius:6px; font-weight:700 }
+.mh-badge-active { background:#d1fae5; color:#065f46 }
+.mh-badge-inactive { background:var(--surface2); color:var(--text-dim) }
+.mh-badge-valid { background:#d1fae5; color:#065f46 }
+.mh-badge-expired { background:rgba(239,68,68,.1); color:#ef4444 }
+
+/* ── Toolbar ── */
+.mh-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px }
+
+/* ── Pagination ── */
+.mh-pagination { display:flex; gap:4px; align-items:center; justify-content:center; margin-top:20px }
+.mh-pagination a, .mh-pagination span { padding:8px 14px; border-radius:8px; font-size:14px; font-weight:600; text-decoration:none; border:1px solid var(--border); color:var(--text); background:var(--surface) }
+.mh-pagination a:hover { background:var(--surface2) }
+.mh-pagination .current { background:var(--accent); color:#fff; border-color:var(--accent) }
+
+/* ── Section Header ── */
+.mh-section { margin-bottom:32px }
+.mh-section-title { font-size:18px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px }
+
+/* ── Empty State ── */
+.mh-empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.mh-empty-icon { font-size:42px; margin-bottom:10px }
+
+/* ── Image thumbnail ── */
+.mh-thumb { width:48px; height:48px; border-radius:8px; object-fit:cover; background:var(--surface2) }
+
+@media(max-width:768px) {
+  .mh-stats { grid-template-columns:repeat(2,1fr) }
+  .mh-filters { flex-direction:column }
+}
+</style>
+
+<!-- ============================================================
+     TAB NAVIGATION
+     ============================================================ -->
+<div class="mh-tabs">
+  <a class="mh-tab {% if active_tab=='products' %}active{% endif %}" href="?tab=products">Products</a>
+  <a class="mh-tab {% if active_tab=='hotels' %}active{% endif %}" href="?tab=hotels">Hotels</a>
+  <a class="mh-tab {% if active_tab=='vouchers' %}active{% endif %}" href="?tab=vouchers">Vouchers</a>
+  <a class="mh-tab {% if active_tab=='hotdeals' %}active{% endif %}" href="?tab=hotdeals">Hot Deals</a>
+  <a class="mh-tab {% if active_tab=='locations' %}active{% endif %}" href="?tab=locations">Locations</a>
+</div>
+
+<!-- ============================================================
+     TAB: PRODUCTS
+     ============================================================ -->
+{% if active_tab == 'products' %}
+<div class="mh-stats">
+  <div class="mh-stat"><div class="mh-stat-val">{{ "{:,}".format(total) }}</div><div class="mh-stat-label">Total Products</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#22c55e">{{ "{:,}".format(active) }}</div><div class="mh-stat-label">Active</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="mh-stat-label">Total Clicks</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#f59e0b">{{ "{:,}".format(total_conv) }}</div><div class="mh-stat-label">Conversions</div></div>
+</div>
+
+<form method="GET" action="">
+  <input type="hidden" name="tab" value="products">
+  <div class="mh-filters">
+    <select name="vertical">
+      <option value="all">All Verticals</option>
+      {% for v in verticals %}<option value="{{ v.slug }}" {% if f_vertical == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>{% endfor %}
+    </select>
+    <select name="network">
+      <option value="all">All Networks</option>
+      {% for n in networks %}<option value="{{ n }}" {% if f_network == n %}selected{% endif %}>{{ n }}</option>{% endfor %}
+    </select>
+    <select name="status">
+      <option value="all">All Status</option>
+      <option value="active" {% if f_status == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if f_status == 'inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+    <input type="text" name="q" value="{{ f_search }}" placeholder="Search product name...">
+    <button type="submit" class="mh-btn mh-btn-primary">Filter</button>
+    {% if f_vertical != 'all' or f_network != 'all' or f_status != 'all' or f_search %}
+    <a href="?tab=products" class="mh-btn mh-btn-ghost">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<div class="mh-toolbar">
+  <div style="font-size:14px;color:var(--text-dim)">Showing {{ pagination }} results</div>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('admin_products_hub') }}" class="mh-btn mh-btn-primary">+ New Product</a>
+    <a href="{{ url_for('admin_products_import_csv') }}" class="mh-btn mh-btn-ghost">Import CSV</a>
+  </div>
+</div>
+
+{% if products %}
+<div class="mh-table-wrap">
+  <table>
+    <thead><tr>
+      <th>Name</th>
+      <th>Network</th>
+      <th>Price</th>
+      <th>Clicks</th>
+      <th>Conv.</th>
+      <th>Active</th>
+    </tr></thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td><strong>{{ p.product_name or p.url[:40] }}</strong></td>
+        <td>{{ p.network or '-' }}</td>
+        <td>{{ "{:,.0f}".format(p.price) if p.price else '-' }}</td>
+        <td>{{ "{:,}".format(p.clicks) }}</td>
+        <td>{{ "{:,}".format(p.conversions) }}</td>
+        <td>
+          {% if p.is_active %}<span class="mh-badge mh-badge-active">Active</span>
+          {% else %}<span class="mh-badge mh-badge-inactive">Off</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if total_pages > 1 %}
+<div class="mh-pagination">
+  {% if page > 1 %}<a href="?tab=products&page={{ page-1 }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}">&laquo; Prev</a>{% endif %}
+  {% for pg in range(1, total_pages + 1) %}
+    {% if pg == page %}<span class="current">{{ pg }}</span>
+    {% elif pg <= 3 or pg > total_pages - 3 or (pg >= page - 2 and pg <= page + 2) %}<a href="?tab=products&page={{ pg }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}">{{ pg }}</a>
+    {% elif pg == 4 or pg == total_pages - 3 %}<span style="border:none;padding:8px 4px">...</span>{% endif %}
+  {% endfor %}
+  {% if page < total_pages %}<a href="?tab=products&page={{ page+1 }}&vertical={{ f_vertical }}&network={{ f_network }}&status={{ f_status }}&q={{ f_search }}">Next &raquo;</a>{% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="mh-empty"><div class="mh-empty-icon">&#128230;</div><h3 style="font-size:17px;margin-bottom:6px">No products found</h3><p style="font-size:14px">Try adjusting your filters or add new products.</p></div>
+{% endif %}
+{% endif %}
+
+<!-- ============================================================
+     TAB: HOTELS
+     ============================================================ -->
+{% if active_tab == 'hotels' %}
+<div class="mh-stats">
+  <div class="mh-stat"><div class="mh-stat-val">{{ "{:,}".format(total) }}</div><div class="mh-stat-label">Total Hotels</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#22c55e">{{ "{:,}".format(active_h) }}</div><div class="mh-stat-label">Active</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#f59e0b">{{ "{:,}".format(no_image) }}</div><div class="mh-stat-label">No Image</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="mh-stat-label">Total Clicks</div></div>
+</div>
+
+<form method="GET" action="">
+  <input type="hidden" name="tab" value="hotels">
+  <div class="mh-filters">
+    <select name="dest">
+      <option value="all">All Destinations</option>
+      {% for d in destinations %}<option value="{{ d }}" {% if f_dest == d %}selected{% endif %}>{{ d }}</option>{% endfor %}
+    </select>
+    <select name="stars">
+      <option value="all">All Stars</option>
+      {% for s in [5,4,3,2,1] %}<option value="{{ s }}" {% if f_stars == s|string %}selected{% endif %}>{{ s }} Stars</option>{% endfor %}
+    </select>
+    <select name="status">
+      <option value="all">All Status</option>
+      <option value="active" {% if f_status == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if f_status == 'inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+    <button type="submit" class="mh-btn mh-btn-primary">Filter</button>
+    {% if f_dest != 'all' or f_stars != 'all' or f_status != 'all' %}
+    <a href="?tab=hotels" class="mh-btn mh-btn-ghost">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<div class="mh-toolbar">
+  <div style="font-size:14px;color:var(--text-dim)">Page {{ page }} of {{ total_pages }}</div>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('admin_hotels_hub') }}" class="mh-btn mh-btn-primary">+ New Hotel</a>
+    <a href="{{ url_for('admin_hotel_sync') }}" class="mh-btn mh-btn-ghost">Hotel Sync</a>
+    <a href="{{ url_for('admin_attractions') }}" class="mh-btn mh-btn-ghost">Attractions</a>
+  </div>
+</div>
+
+{% if hotels %}
+<div class="mh-table-wrap">
+  <table>
+    <thead><tr>
+      <th>Image</th>
+      <th>Name</th>
+      <th>Destination</th>
+      <th>Stars</th>
+      <th>Price</th>
+      <th>Clicks</th>
+      <th>Active</th>
+    </tr></thead>
+    <tbody>
+      {% for h in hotels %}
+      <tr>
+        <td>
+          {% if h.image_url %}<img src="{{ h.image_url }}" alt="" class="mh-thumb">
+          {% else %}<div class="mh-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-dim)">&#127976;</div>{% endif %}
+        </td>
+        <td><strong>{{ h.name }}</strong>{% if h.district %}<div style="font-size:12px;color:var(--text-dim)">{{ h.district }}</div>{% endif %}</td>
+        <td>{{ h.destination_name or h.destination }}</td>
+        <td>{% for _ in range(h.stars) %}&#11088;{% endfor %}</td>
+        <td>{{ "{:,.0f}".format(h.price_from) if h.price_from else '-' }}</td>
+        <td>{{ "{:,}".format(h.clicks) }}</td>
+        <td>
+          {% if h.is_active %}<span class="mh-badge mh-badge-active">Active</span>
+          {% else %}<span class="mh-badge mh-badge-inactive">Off</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if total_pages > 1 %}
+<div class="mh-pagination">
+  {% if page > 1 %}<a href="?tab=hotels&page={{ page-1 }}&dest={{ f_dest }}&stars={{ f_stars }}&status={{ f_status }}">&laquo; Prev</a>{% endif %}
+  {% for pg in range(1, total_pages + 1) %}
+    {% if pg == page %}<span class="current">{{ pg }}</span>
+    {% elif pg <= 3 or pg > total_pages - 3 or (pg >= page - 2 and pg <= page + 2) %}<a href="?tab=hotels&page={{ pg }}&dest={{ f_dest }}&stars={{ f_stars }}&status={{ f_status }}">{{ pg }}</a>
+    {% elif pg == 4 or pg == total_pages - 3 %}<span style="border:none;padding:8px 4px">...</span>{% endif %}
+  {% endfor %}
+  {% if page < total_pages %}<a href="?tab=hotels&page={{ page+1 }}&dest={{ f_dest }}&stars={{ f_stars }}&status={{ f_status }}">Next &raquo;</a>{% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="mh-empty"><div class="mh-empty-icon">&#127976;</div><h3 style="font-size:17px;margin-bottom:6px">No hotels found</h3><p style="font-size:14px">Try adjusting your filters or use Hotel Sync to import.</p></div>
+{% endif %}
+{% endif %}
+
+<!-- ============================================================
+     TAB: VOUCHERS
+     ============================================================ -->
+{% if active_tab == 'vouchers' %}
+<div class="mh-stats">
+  <div class="mh-stat"><div class="mh-stat-val">{{ "{:,}".format(total) }}</div><div class="mh-stat-label">Total Vouchers</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#22c55e">{{ "{:,}".format(active_v) }}</div><div class="mh-stat-label">Active</div></div>
+  <div class="mh-stat"><div class="mh-stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="mh-stat-label">Total Clicks</div></div>
+</div>
+
+<form method="GET" action="">
+  <input type="hidden" name="tab" value="vouchers">
+  <div class="mh-filters">
+    <select name="cat">
+      <option value="all">All Categories</option>
+      {% for c in cats %}<option value="{{ c }}" {% if f_cat == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+    <select name="merchant">
+      <option value="all">All Merchants</option>
+      {% for m in merchants %}<option value="{{ m }}" {% if f_merchant == m %}selected{% endif %}>{{ m }}</option>{% endfor %}
+    </select>
+    <select name="status">
+      <option value="all">All Status</option>
+      <option value="active" {% if f_status == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if f_status == 'inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+    <button type="submit" class="mh-btn mh-btn-primary">Filter</button>
+    {% if f_cat != 'all' or f_merchant != 'all' or f_status != 'all' %}
+    <a href="?tab=vouchers" class="mh-btn mh-btn-ghost">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<div class="mh-toolbar">
+  <div style="font-size:14px;color:var(--text-dim)">{{ items|length }} vouchers</div>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('admin_vouchers') }}" class="mh-btn mh-btn-primary">+ New Voucher</a>
+    <a href="{{ url_for('admin_voucher_widgets') }}" class="mh-btn mh-btn-ghost">Voucher Widgets</a>
+    <a href="{{ url_for('admin_voucher_sync') }}" class="mh-btn mh-btn-ghost">Voucher Sync</a>
+  </div>
+</div>
+
+{% if items %}
+<div class="mh-table-wrap">
+  <table>
+    <thead><tr>
+      <th>Title</th>
+      <th>Code</th>
+      <th>Merchant</th>
+      <th>Category</th>
+      <th>Discount</th>
+      <th>Valid To</th>
+      <th>Active</th>
+    </tr></thead>
+    <tbody>
+      {% for v in items %}
+      <tr>
+        <td><strong>{{ v.title }}</strong></td>
+        <td><code style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:13px">{{ v.code }}</code></td>
+        <td>{{ v.merchant }}</td>
+        <td><span class="mh-badge" style="background:var(--accent-dim);color:var(--accent)">{{ v.category }}</span></td>
+        <td style="font-weight:700">
+          {% if v.discount_type == 'percentage' %}{{ v.discount_value|int }}%
+          {% elif v.discount_type == 'fixed_amount' %}{{ "{:,.0f}".format(v.discount_value) }}d
+          {% else %}Free Ship{% endif %}
+        </td>
+        <td style="font-size:13px">{{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '-' }}</td>
+        <td>
+          {% if v.is_active %}<span class="mh-badge mh-badge-active">Active</span>
+          {% else %}<span class="mh-badge mh-badge-inactive">Off</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="mh-empty"><div class="mh-empty-icon">&#127915;</div><h3 style="font-size:17px;margin-bottom:6px">No vouchers found</h3><p style="font-size:14px">Try adjusting your filters or use Voucher Sync to import.</p></div>
+{% endif %}
+{% endif %}
+
+<!-- ============================================================
+     TAB: HOT DEALS
+     ============================================================ -->
+{% if active_tab == 'hotdeals' %}
+
+<!-- Hot Deals Section -->
+<div class="mh-section">
+  <div class="mh-toolbar">
+    <div class="mh-section-title">&#128293; Hot Deals ({{ deals|length }})</div>
+    <a href="{{ url_for('admin_vouchers_hub', tab='hotdeals') }}" class="mh-btn mh-btn-primary">Manage Hot Deals</a>
+  </div>
+
+  {% if deals %}
+  <div class="mh-table-wrap">
+    <table>
+      <thead><tr>
+        <th>Name</th>
+        <th>Campaign</th>
+        <th>Period</th>
+        <th>Hot Day</th>
+        <th>Status</th>
+      </tr></thead>
+      <tbody>
+        {% for d in deals %}
+        <tr>
+          <td><strong>{{ d.name }}</strong></td>
+          <td>{{ d.campaign or '-' }}</td>
+          <td style="font-size:13px">{{ d.start_date.strftime('%d/%m/%Y') }} - {{ d.end_date.strftime('%d/%m/%Y') }}</td>
+          <td>{{ d.hot_day or '-' }}</td>
+          <td>
+            {% if d.is_valid() %}<span class="mh-badge mh-badge-valid">Valid</span>
+            {% else %}<span class="mh-badge mh-badge-expired">Expired</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mh-empty" style="padding:30px"><div class="mh-empty-icon">&#128293;</div><p style="font-size:14px">No hot deals yet.</p></div>
+  {% endif %}
+</div>
+
+<!-- AT Banners Section -->
+<div class="mh-section">
+  <div class="mh-toolbar">
+    <div class="mh-section-title">&#127912; AT Banners ({{ banners|length }})</div>
+    <a href="{{ url_for('admin_vouchers_hub', tab='banners') }}" class="mh-btn mh-btn-primary">Manage Banners</a>
+  </div>
+
+  {% if banners %}
+  <div class="mh-table-wrap">
+    <table>
+      <thead><tr>
+        <th>Image</th>
+        <th>Offer</th>
+        <th>Merchant</th>
+        <th>Category</th>
+        <th>Discount</th>
+        <th>Placement</th>
+        <th>Clicks</th>
+        <th>Active</th>
+      </tr></thead>
+      <tbody>
+        {% for b in banners %}
+        <tr>
+          <td>
+            {% if b.image_url %}<img src="{{ b.image_url }}" alt="" class="mh-thumb">
+            {% else %}<div class="mh-thumb" style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text-dim)">&#127912;</div>{% endif %}
+          </td>
+          <td><strong>{{ b.offer_name[:50] }}</strong>{% if b.description %}<div style="font-size:12px;color:var(--text-dim)">{{ b.description[:60] }}</div>{% endif %}</td>
+          <td>{{ b.merchant or '-' }}</td>
+          <td>{{ b.category or '-' }}</td>
+          <td style="font-weight:700;color:#ef4444">{{ b.discount_text or '-' }}</td>
+          <td><span class="mh-badge" style="background:var(--surface2);color:var(--text-dim)">{{ b.placement }}</span></td>
+          <td>{{ "{:,}".format(b.clicks) }}</td>
+          <td>
+            {% if b.is_active %}<span class="mh-badge mh-badge-active">Active</span>
+            {% else %}<span class="mh-badge mh-badge-inactive">Off</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="mh-empty" style="padding:30px"><div class="mh-empty-icon">&#127912;</div><p style="font-size:14px">No AT banners yet. Use Manage Banners to sync from AccessTrade.</p></div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ============================================================
+     TAB: LOCATIONS
+     ============================================================ -->
+{% if active_tab == 'locations' %}
+<div class="mh-stats" style="grid-template-columns:repeat(2,1fr);max-width:400px">
+  <div class="mh-stat"><div class="mh-stat-val">{{ "{:,}".format(total) }}</div><div class="mh-stat-label">Total Wards</div></div>
+  <div class="mh-stat"><div class="mh-stat-val">{{ provinces|length }}</div><div class="mh-stat-label">Provinces</div></div>
+</div>
+
+<form method="GET" action="">
+  <input type="hidden" name="tab" value="locations">
+  <div class="mh-filters">
+    <select name="province">
+      <option value="all">All Provinces</option>
+      {% for p in provinces %}<option value="{{ p }}" {% if f_province == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
+    </select>
+    <select name="level">
+      <option value="all">All Levels</option>
+      <option value="Phường" {% if f_level == 'Phường' %}selected{% endif %}>Phường</option>
+      <option value="Xã" {% if f_level == 'Xã' %}selected{% endif %}>Xã</option>
+      <option value="Thị trấn" {% if f_level == 'Thị trấn' %}selected{% endif %}>Thị trấn</option>
+    </select>
+    <input type="text" name="q" value="{{ f_search }}" placeholder="Search ward name...">
+    <button type="submit" class="mh-btn mh-btn-primary">Filter</button>
+    {% if f_province != 'all' or f_level != 'all' or f_search %}
+    <a href="?tab=locations" class="mh-btn mh-btn-ghost">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<div class="mh-toolbar">
+  <div style="font-size:14px;color:var(--text-dim)">{{ wards|length }} results</div>
+  <a href="{{ url_for('admin_wards') }}" class="mh-btn mh-btn-primary">+ Add Ward</a>
+</div>
+
+{% if wards %}
+<div class="mh-table-wrap">
+  <table>
+    <thead><tr>
+      <th>Code</th>
+      <th>Name</th>
+      <th>Level</th>
+      <th>Province</th>
+    </tr></thead>
+    <tbody>
+      {% for w in wards %}
+      <tr>
+        <td><code style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:13px">{{ w.code }}</code></td>
+        <td><strong>{{ w.name }}</strong></td>
+        <td><span class="mh-badge" style="background:var(--accent-dim);color:var(--accent)">{{ w.level }}</span></td>
+        <td>{{ w.province_name }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="mh-empty"><div class="mh-empty-icon">&#128506;</div><h3 style="font-size:17px;margin-bottom:6px">No wards found</h3><p style="font-size:14px">Try adjusting your filters or import ward data.</p></div>
+{% endif %}
+{% endif %}
+
+{% endblock %}

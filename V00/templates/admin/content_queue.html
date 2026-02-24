@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}Content Queue{% endblock %}
-{% block breadcrumb %}AI Engine &rsaquo; Content Queue{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> <a href="{{ url_for('admin_ai_engine') }}">AI Engine</a><span class="sep">›</span> Content Queue{% endblock %}
 {% block content %}
 <style>
 .queue-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:16px }
@@ -59,8 +59,14 @@
 </style>
 
 <div class="queue-header">
-  <h1 class="page-title" style="margin:0">📋 Content Queue</h1>
-  <button class="btn-primary" onclick="openAddModal()">+ Add Topic</button>
+  <h1 class="page-title" style="margin:0">Content Queue</h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <a href="{{ url_for('admin_ai_scan_gaps') }}" class="btn-secondary" style="text-decoration:none;display:inline-block">Gap Scanner</a>
+    <form method="POST" action="{{ url_for('admin_ai_batch_generate') }}" style="display:inline">
+      <button type="submit" class="btn-secondary" onclick="return confirm('Generate AI content for pending items?')">Batch Generate</button>
+    </form>
+    <button class="btn-primary" onclick="openAddModal()">+ Add Topic</button>
+  </div>
 </div>
 
 <!-- Stats -->
@@ -114,7 +120,7 @@
         <th>Layer</th>
         <th>Source</th>
         <th>Status</th>
-        <th>Scheduled</th>
+        <th>Words</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -133,22 +139,28 @@
         <td><span class="q-layer">{{ q.knowledge_layer }}</span></td>
         <td style="font-size:14px;color:var(--text-dim)">{{ q.source_type }}</td>
         <td><span class="q-badge {{ q.status }}">{{ q.status }}</span></td>
-        <td style="font-size:14px">{{ q.scheduled_at.strftime('%d/%m %H:%M') if q.scheduled_at else '-' }}</td>
+        <td style="font-size:14px;font-weight:600">{{ q.word_count if q.word_count else '-' }}</td>
         <td>
           <div class="q-actions">
             {% if q.status == 'pending' %}
             <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline">
-              <input type="hidden" name="action" value="approve">
-              <button type="submit" class="q-btn approve">Approve</button>
+              <input type="hidden" name="action" value="generate">
+              <button type="submit" class="q-btn approve" title="Generate AI content">Generate</button>
             </form>
             <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline">
               <input type="hidden" name="action" value="skip">
               <button type="submit" class="q-btn skip">Skip</button>
             </form>
+            {% elif q.status == 'generating' %}
+            <span style="font-size:14px;color:#9d174d;font-weight:600">Generating...</span>
             {% elif q.status == 'review' %}
             <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline">
               <input type="hidden" name="action" value="publish">
               <button type="submit" class="q-btn approve">Publish</button>
+            </form>
+            <form method="POST" action="{{ url_for('admin_content_queue_action', qid=q.id) }}" style="display:inline">
+              <input type="hidden" name="action" value="skip">
+              <button type="submit" class="q-btn skip">Skip</button>
             </form>
             {% endif %}
             <form method="POST" action="{{ url_for('admin_content_queue_delete', qid=q.id) }}" style="display:inline">

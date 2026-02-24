@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}Hotels{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Hotels{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Hotels{% endblock %}
 {% block content %}
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0">🏨 Hotel Management</h1>
@@ -10,14 +10,15 @@
   </div>
 </div>
 
-<div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin:20px 0">
+<div class="stats-grid" style="grid-template-columns:repeat(5,1fr);margin:20px 0">
   <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value">{{ total }}</div></div>
   <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value" style="color:#2ecc71">{{ active }}</div></div>
+  <div class="stat-card"><div class="stat-label">No Image</div><div class="stat-value" style="color:#e74c3c">{{ no_image }}</div></div>
   <div class="stat-card"><div class="stat-label">Clicks</div><div class="stat-value" style="color:#3498db">{{ "{:,}".format(total_clicks) }}</div></div>
   <div class="stat-card"><div class="stat-label">Bookings</div><div class="stat-value" style="color:#8b5cf6">{{ "{:,}".format(total_conv) }}</div></div>
 </div>
 
-<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+<div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;justify-content:space-between">
   <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap">
     <select name="destination" class="form-select" style="width:150px;padding:8px;font-size:14px">
       <option value="">All Destinations</option>
@@ -32,26 +33,54 @@
       <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
       <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
     </select>
+    <select name="image" class="form-select" style="width:140px;padding:8px;font-size:14px">
+      <option value="">All Images</option>
+      <option value="missing" {% if f_image=='missing' %}selected{% endif %}>🚫 No Image</option>
+      <option value="has" {% if f_image=='has' %}selected{% endif %}>✅ Has Image</option>
+    </select>
     <button class="btn btn-ghost btn-sm" type="submit">Filter</button>
-    {% if f_dest or f_stars or f_status %}<a href="{{ url_for('admin_hotels') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>{% endif %}
+    {% if f_dest or f_stars or f_status or f_image %}<a href="{{ url_for('admin_hotels') }}" class="btn btn-ghost btn-sm" style="color:var(--text-dim)">Clear</a>{% endif %}
   </form>
 </div>
 
 {% if hotels %}
+<!-- Bulk action bar -->
+<div id="bulkBar" style="display:none;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #e74c3c44;border-radius:10px;padding:12px 20px;margin-bottom:14px;align-items:center;gap:14px;position:sticky;top:60px;z-index:10;box-shadow:0 4px 15px rgba(231,76,60,.15)">
+  <span id="bulkCount" style="font-size:14px;font-weight:700;color:#e74c3c">0 selected</span>
+  <form method="POST" action="{{ url_for('admin_hotels_bulk_delete') }}" id="bulkForm" style="display:inline">
+    <div id="bulkInputs"></div>
+    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xoa ' + document.querySelectorAll('.hotel-cb:checked').length + ' khach san?')">🗑 Xoa da chon</button>
+  </form>
+  <form method="POST" action="{{ url_for('admin_hotels_bulk_toggle') }}" id="bulkToggleForm" style="display:inline">
+    <div id="bulkToggleInputs"></div>
+    <button type="submit" name="action" value="deactivate" class="btn btn-ghost btn-sm" style="font-size:13px;color:#f39c12">Tat da chon</button>
+    <button type="submit" name="action" value="activate" class="btn btn-ghost btn-sm" style="font-size:13px;color:#2ecc71">Bat da chon</button>
+  </form>
+  <button type="button" class="btn btn-ghost btn-sm" onclick="toggleAll(false)" style="font-size:13px;margin-left:auto">Bo chon</button>
+</div>
+<!-- Delete ALL banner — shows when select-all checkbox is checked -->
+<div id="deleteAllBanner" style="display:none;background:linear-gradient(135deg,#2d1b1b,#1a1a2e);border:2px solid #e74c3c;border-radius:10px;padding:14px 20px;margin-bottom:14px;align-items:center;gap:14px;text-align:center">
+  <span style="font-size:14px;color:#fca5a5">Bạn đã chọn {{ hotels|length }} khách sạn trên trang này.</span>
+  <form method="POST" action="{{ url_for('admin_hotels_delete_all') }}" id="deleteAllForm" style="display:inline;margin-left:12px">
+    <button type="submit" class="btn btn-danger btn-sm" style="font-weight:700;font-size:14px" id="deleteAllBtn">🗑 Xóa tất cả {{ total_filtered }} khách sạn</button>
+  </form>
+</div>
+
 <div class="table-wrap">
   <table class="data-table">
     <thead><tr>
-      <th style="width:35px">#</th><th style="width:60px">Image</th><th>Hotel</th><th>Destination</th><th>Stars</th>
+      <th style="width:32px"><input type="checkbox" id="selectAll" title="Chon tat ca" style="width:16px;height:16px;cursor:pointer"></th>
+      <th style="width:60px">Image</th><th>Hotel</th><th>Destination</th><th>Stars</th>
       <th style="text-align:center">Rating</th><th style="text-align:right">Price/đêm</th>
       <th style="text-align:center">Clicks</th><th>Status</th><th>Actions</th>
     </tr></thead>
     <tbody>
       {% for h in hotels %}
       <tr>
-        <td style="font-family:'DM Mono';font-size:14px;color:var(--text-dim)">{{ h.id }}</td>
+        <td><input type="checkbox" class="hotel-cb" value="{{ h.id }}" style="width:16px;height:16px;cursor:pointer"></td>
         <td>
           {% if h.image_url %}
-          <img src="{{ h.image_url }}" alt="{{ h.name }}" style="width:56px;height:40px;object-fit:cover;border-radius:4px;display:block">
+          <img src="{{ h.image_url }}" alt="{{ h.name }}" style="width:56px;height:40px;object-fit:cover;border-radius:4px;display:block" onerror="this.outerHTML='<div style=\'width:56px;height:40px;background:var(--bg-hover);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px\'>🏨</div>'" loading="lazy">
           {% else %}
           <div style="width:56px;height:40px;background:var(--bg-hover);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px">🏨</div>
           {% endif %}
@@ -86,7 +115,105 @@
     </tbody>
   </table>
 </div>
-<div style="margin-top:12px;font-size:14px;color:var(--text-dim)">{{ hotels|length }} hotels</div>
+<!-- Pagination -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;font-size:14px;color:var(--text-dim)">
+  <span>{{ (page - 1) * per_page + 1 }}–{{ [(page - 1) * per_page + hotels|length, total_filtered]|min }} / {{ total_filtered }} hotels</span>
+  {% if total_pages > 1 %}
+  <div style="display:flex;gap:4px;align-items:center">
+    {% if page > 1 %}
+    <a href="{{ url_for('admin_hotels', destination=f_dest, stars=f_stars, status=f_status, image=f_image, page=page-1) }}" class="btn btn-ghost btn-sm">&laquo; Prev</a>
+    {% endif %}
+    {% for p in range(1, total_pages + 1) %}
+      {% if p == page %}
+        <span style="display:inline-block;min-width:32px;text-align:center;padding:4px 8px;background:var(--accent);color:#fff;border-radius:6px;font-weight:700;font-size:13px">{{ p }}</span>
+      {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+        <a href="{{ url_for('admin_hotels', destination=f_dest, stars=f_stars, status=f_status, image=f_image, page=p) }}" class="btn btn-ghost btn-sm" style="min-width:32px;text-align:center;font-size:13px">{{ p }}</a>
+      {% elif p == page - 3 or p == page + 3 %}
+        <span style="padding:0 4px;color:var(--text-dim)">…</span>
+      {% endif %}
+    {% endfor %}
+    {% if page < total_pages %}
+    <a href="{{ url_for('admin_hotels', destination=f_dest, stars=f_stars, status=f_status, image=f_image, page=page+1) }}" class="btn btn-ghost btn-sm">Next &raquo;</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function() {
+  var selectAll = document.getElementById('selectAll');
+  var bulkBar = document.getElementById('bulkBar');
+  var bulkCount = document.getElementById('bulkCount');
+  var bulkInputs = document.getElementById('bulkInputs');
+  var bulkToggleInputs = document.getElementById('bulkToggleInputs');
+  var deleteAllBanner = document.getElementById('deleteAllBanner');
+  var deleteAllForm = document.getElementById('deleteAllForm');
+  var checkboxes = Array.prototype.slice.call(document.querySelectorAll('.hotel-cb'));
+  var total = checkboxes.length;
+  var totalAll = {{ total_filtered }};
+
+  function getChecked() {
+    return checkboxes.filter(function(cb) { return cb.checked; });
+  }
+
+  function updateBulkBar() {
+    var checked = getChecked();
+    var n = checked.length;
+    if (n > 0) {
+      bulkBar.style.display = 'flex';
+      bulkCount.textContent = n + ' / ' + total + ' da chon';
+      bulkInputs.innerHTML = '';
+      bulkToggleInputs.innerHTML = '';
+      checked.forEach(function(cb) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'hotel_ids'; inp.value = cb.value;
+        bulkInputs.appendChild(inp);
+        var inp2 = inp.cloneNode(true);
+        bulkToggleInputs.appendChild(inp2);
+      });
+    } else {
+      bulkBar.style.display = 'none';
+    }
+    // Show "Delete All" banner when all on page are selected and there are more pages
+    if (n === total && totalAll > total) {
+      deleteAllBanner.style.display = 'flex';
+    } else {
+      deleteAllBanner.style.display = 'none';
+    }
+    selectAll.checked = n === total && n > 0;
+    selectAll.indeterminate = n > 0 && n < total;
+  }
+
+  // Confirmation for Delete All
+  if (deleteAllForm) {
+    deleteAllForm.addEventListener('submit', function(e) {
+      var msg = 'BẠN CÓ CHẮC CHẮN muốn xóa TẤT CẢ ' + totalAll + ' khách sạn?\n\nHành động này KHÔNG THỂ hoàn tác!';
+      if (!confirm(msg)) {
+        e.preventDefault();
+      }
+    });
+  }
+
+  window.toggleAll = function(state) {
+    checkboxes.forEach(function(cb) { cb.checked = state; });
+    updateBulkBar();
+  };
+
+  selectAll.addEventListener('change', function() { window.toggleAll(this.checked); });
+
+  // Use event delegation on tbody for checkbox changes
+  var tbody = document.querySelector('.data-table tbody');
+  if (tbody) {
+    tbody.addEventListener('change', function(e) {
+      if (e.target && e.target.classList.contains('hotel-cb')) {
+        updateBulkBar();
+      }
+    });
+  }
+  checkboxes.forEach(function(cb) { cb.addEventListener('change', updateBulkBar); });
+})();
+</script>
+
 {% else %}
 <div class="empty-state"><div class="empty-icon">🏨</div><p>No hotels yet</p><a href="{{ url_for('admin_hotel_new') }}" class="btn btn-primary" style="margin-top:12px">Add first hotel</a></div>
 {% endif %}

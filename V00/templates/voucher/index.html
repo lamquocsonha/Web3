@@ -17,12 +17,8 @@
       <span class="logo-name">UniVoucher</span>
     </a>
     <nav class="site-nav">
-      <a href="{{ url_for('voucher_index') }}" class="{% if not f_category and not f_platform %}active{% endif %}">Tất cả</a>
-      {% for pname, pcount in platform_stats.items() %}
-      {% if pname != 'Khác' %}
-      <a href="{{ url_for('voucher_index', platform=pname.lower()) }}" class="{% if f_platform == pname.lower() %}active{% endif %}">{{ pname }} <sup>{{ pcount }}</sup></a>
-      {% endif %}
-      {% endfor %}
+      <a href="{{ url_for('voucher_index') }}" class="active">Voucher</a>
+      <a href="{{ url_for('voucher_brands') }}">Nhãn hàng</a>
     </nav>
     <div class="header-actions">
       <button class="mode-toggle" onclick="toggleMode()" title="Sáng/Tối">
@@ -35,11 +31,16 @@
 
 <main class="site-main">
 
+  <!-- HOT DEALS BANNER -->
+  {% if hotdeal_show_voucher == '1' %}
+  {% include 'shared/_hotdeal_banner.html' %}
+  {% endif %}
+
   <!-- HERO -->
   <section class="v-hero">
     <div class="v-hero-inner">
       <h1>Mã giảm giá & Voucher</h1>
-      <p class="v-hero-sub">{{ vouchers|length }} voucher đang hoạt động — Cập nhật tự động từ AccessTrade</p>
+      <p class="v-hero-sub">{{ total_vouchers }} voucher đang hoạt động — Cập nhật tự động từ AccessTrade</p>
       <div class="v-hero-platforms">
         {% for pname, pcount in platform_stats.items() %}
         <a href="{{ url_for('voucher_index', platform=pname.lower()) }}" class="v-platform-chip {% if f_platform == pname.lower() %}active{% endif %}">
@@ -63,7 +64,7 @@
       <button class="v-feat-arrow v-feat-arrow-left" id="featPrev" aria-label="Trước">&#8249;</button>
       <div class="v-featured-grid" id="featuredGrid">
         {% for v in featured[:6] %}
-        <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color }}">
+        <div class="v-feat-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)" style="--card-color: {{ v.color or '#e74c3c' }}">
           <div class="v-feat-top">
             <span class="v-feat-discount">{{ v.get_discount_text() }}</span>
             <span class="v-feat-exp">HSD {{ v.valid_to.strftime('%d/%m') if v.valid_to else '—' }}</span>
@@ -199,32 +200,69 @@
     <!-- GRID -->
     <div class="voucher-main">
       {% if vouchers %}
+      <!-- Info bar -->
+      <div class="v-info-bar">
+        <span>{{ total_vouchers }} voucher{% if f_category or f_merchant or f_type or f_platform %} (đã lọc){% endif %}</span>
+        <span>Trang {{ page }}/{{ total_pages }}</span>
+      </div>
+
       <div class="voucher-grid">
         {% for v in vouchers %}
         <div class="voucher-card" data-code="{{ v.code }}" data-url="{{ v.affiliate_url or '' }}" onclick="revealCode(this)">
           <div class="vc-header" style="background:linear-gradient(135deg, {{ v.color }} 0%, {{ v.color }}cc 100%)">
-            <div class="vc-discount">{{ v.get_discount_text() }}</div>
-            <div class="vc-merchant">{{ v.icon }} {{ v.merchant }}</div>
+            <div class="vc-row-top">
+              <div class="vc-discount">{{ v.get_discount_text() }}</div>
+              <div class="vc-code-wrap">
+                <span class="vc-sticker">👍 COPY MÃ</span>
+                <code class="vc-code vc-code-hidden">{{ v.code[-2:] }}</code>
+              </div>
+            </div>
+            <div class="vc-row-bot">
+              <span class="vc-merchant">{{ v.icon }} {{ v.merchant }}</span>
+              <span class="vc-date">📅 {{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</span>
+            </div>
           </div>
           <div class="vc-body">
             <h4>{{ v.title[:55] }}{% if v.title|length > 55 %}...{% endif %}</h4>
             {% if v.description and v.description != v.title %}
             <p>{{ v.description[:80] }}{% if v.description|length > 80 %}...{% endif %}</p>
             {% endif %}
-            <div class="vc-meta">
-              <span>📅 {{ v.valid_to.strftime('%d/%m/%Y') if v.valid_to else '—' }}</span>
-              {% if (v.min_order or 0) > 0 %}<span>💵 Từ {{ '{:,.0f}'.format(v.min_order) }}đ</span>{% endif %}
-            </div>
-          </div>
-          <div class="vc-footer">
-            <div class="vc-code-wrap">
-              <span class="vc-sticker">👍 COPY MÃ</span>
-              <code class="vc-code vc-code-hidden">{{ v.code[-2:] }}</code>
-            </div>
+            {% if (v.min_order or 0) > 0 %}<div class="vc-meta"><span>💵 Từ {{ '{:,.0f}'.format(v.min_order) }}đ</span></div>{% endif %}
           </div>
         </div>
         {% endfor %}
       </div>
+
+      <!-- PAGINATION -->
+      {% if total_pages > 1 %}
+      <nav class="v-pagination">
+        {% if page > 1 %}
+        <a href="{{ url_for('voucher_index', page=page-1, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-btn">&laquo; Trước</a>
+        {% endif %}
+
+        {% set start_page = [1, page - 2]|max %}
+        {% set end_page = [total_pages, page + 2]|min %}
+
+        {% if start_page > 1 %}
+        <a href="{{ url_for('voucher_index', page=1, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-num">1</a>
+        {% if start_page > 2 %}<span class="v-pg-dots">...</span>{% endif %}
+        {% endif %}
+
+        {% for p in range(start_page, end_page + 1) %}
+        <a href="{{ url_for('voucher_index', page=p, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-num {% if p == page %}active{% endif %}">{{ p }}</a>
+        {% endfor %}
+
+        {% if end_page < total_pages %}
+        {% if end_page < total_pages - 1 %}<span class="v-pg-dots">...</span>{% endif %}
+        <a href="{{ url_for('voucher_index', page=total_pages, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-num">{{ total_pages }}</a>
+        {% endif %}
+
+        {% if page < total_pages %}
+        <a href="{{ url_for('voucher_index', page=page+1, platform=f_platform, category=f_category, merchant=f_merchant, type=f_type, sort=f_sort) }}" class="v-pg-btn">Sau &raquo;</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+
       {% else %}
       <div class="empty-state">
         <span style="font-size:64px">🔍</span>
@@ -235,6 +273,26 @@
     </div>
   </div>
 </main>
+
+<!-- SEO Content Section -->
+<section class="seo-section">
+  <div class="seo-inner">
+    <h2 class="seo-title">Mã giảm giá & Voucher khuyến mãi mới nhất Tháng {{ current_month }}/{{ current_year }}</h2>
+    <div class="seo-content collapsed" id="seoContent">
+      <p><strong>UniVoucher</strong> là nền tảng tổng hợp <strong>mã giảm giá</strong>, voucher khuyến mãi từ các sàn thương mại điện tử hàng đầu Việt Nam như <a href="{{ url_for('voucher_index', platform='shopee') }}">Shopee</a>, <a href="{{ url_for('voucher_index', platform='lazada') }}">Lazada</a>, <a href="{{ url_for('voucher_index', platform='tiki') }}">Tiki</a>, <a href="{{ url_for('voucher_index', platform='grab') }}">Grab</a> và nhiều thương hiệu uy tín khác. Hệ thống cập nhật tự động theo thời gian thực thông qua AccessTrade API, đảm bảo bạn luôn nhận được mã còn hiệu lực và tỷ lệ giảm giá tốt nhất.</p>
+
+      <h3>Cách sử dụng mã giảm giá trên UniVoucher</h3>
+      <p>Việc sử dụng voucher rất đơn giản chỉ với 3 bước. <strong>Bước 1:</strong> Tìm mã giảm giá phù hợp — bạn có thể lọc theo sàn (<a href="{{ url_for('voucher_index', platform='shopee') }}">Shopee</a>, <a href="{{ url_for('voucher_index', platform='lazada') }}">Lazada</a>...), theo danh mục sản phẩm hoặc theo mức giảm mong muốn. <strong>Bước 2:</strong> Nhấn vào nút <em>"COPY MÃ"</em> trên voucher, mã sẽ được sao chép tự động vào clipboard và trang mua sắm sẽ mở trong tab mới. <strong>Bước 3:</strong> Dán mã vào ô "Mã giảm giá" khi thanh toán trên sàn TMĐT để được áp dụng ưu đãi ngay lập tức.</p>
+
+      <h3>Các loại voucher phổ biến</h3>
+      <p>Trên UniVoucher, bạn sẽ tìm thấy đa dạng loại mã giảm giá: <strong>Voucher freeship</strong> miễn phí vận chuyển toàn quốc, <strong>mã giảm theo phần trăm</strong> từ 5% đến 50% cho đơn hàng, <strong>voucher giảm trực tiếp</strong> từ 10K đến 500K trên tổng giá trị đơn, và <strong>mã ưu đãi độc quyền</strong> dành riêng cho khách hàng mới hoặc các dịp đặc biệt như Flash Sale, ngày đôi (6.6, 7.7, 11.11, 12.12), Tết, Black Friday. Ngoài ra còn có voucher <a href="{{ url_for('voucher_index', platform='grab') }}">Grab</a> giảm giá đồ ăn, di chuyển và các dịch vụ tiện ích hàng ngày.</p>
+
+      <h3>Tại sao nên dùng UniVoucher?</h3>
+      <p>UniVoucher giúp bạn tiết kiệm thời gian tìm kiếm mã giảm giá bằng cách tập trung tất cả voucher từ nhiều sàn TMĐT vào một nơi duy nhất. Tất cả mã được xác minh tự động, loại bỏ voucher hết hạn, đảm bảo tỷ lệ áp dụng thành công cao nhất. Hệ thống cập nhật liên tục 24/7, bạn không cần phải kiểm tra từng sàn — chỉ cần truy cập UniVoucher là đã có đầy đủ ưu đãi mới nhất từ <a href="{{ url_for('voucher_index', platform='shopee') }}">Shopee</a>, <a href="{{ url_for('voucher_index', platform='lazada') }}">Lazada</a>, <a href="{{ url_for('voucher_index', platform='tiki') }}">Tiki</a> và hơn thế nữa.</p>
+    </div>
+    <button class="seo-toggle" onclick="toggleSeoContent()" id="seoToggle">Xem thêm ▾</button>
+  </div>
+</section>
 
 <footer class="site-footer">
   <div class="footer-inner">
@@ -381,6 +439,18 @@ function revealCode(el) {
 
   raf = requestAnimationFrame(slide);
 })();
+
+function toggleSeoContent() {
+  var el = document.getElementById('seoContent');
+  var btn = document.getElementById('seoToggle');
+  if (el.classList.contains('collapsed')) {
+    el.classList.remove('collapsed');
+    btn.textContent = 'Thu gọn ▴';
+  } else {
+    el.classList.add('collapsed');
+    btn.textContent = 'Xem thêm ▾';
+  }
+}
 </script>
 </body>
 </html>

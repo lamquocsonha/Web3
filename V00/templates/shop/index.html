@@ -34,6 +34,11 @@
 
 <main class="site-main">
 
+  <!-- HOT DEALS BANNER -->
+  {% if hotdeal_show_shop == '1' %}
+  {% include 'shared/_hotdeal_banner.html' %}
+  {% endif %}
+
   <!-- HERO + SEARCH -->
   <section class="shop-hero">
     <div class="shop-hero-inner">
@@ -134,6 +139,9 @@
 
       <!-- Hot Products Sidebar Widget -->
       {% include 'shared/_hot_products_sidebar.html' %}
+
+      <!-- AccessTrade Banners Sidebar Widget -->
+      {% include 'shared/_at_banners_sidebar.html' %}
     </aside>
 
     <!-- MAIN CONTENT -->
@@ -284,5 +292,6 @@ function closeSidebar() {
   document.body.style.overflow = '';
 }
 </script>
+
 </body>
 </html>

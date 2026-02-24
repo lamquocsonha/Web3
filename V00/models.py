@@ -297,6 +297,9 @@ class Hotel(db.Model):
     agoda_url = db.Column(db.String(1000), default='')
     booking_url = db.Column(db.String(1000), default='')
     traveloka_url = db.Column(db.String(1000), default='')
+    latitude = db.Column(db.Float, default=0)
+    longitude = db.Column(db.Float, default=0)
+    address = db.Column(db.String(500), default='')
     source = db.Column(db.String(50), default='manual')  # manual, agoda_api, import
     is_active = db.Column(db.Boolean, default=True)
     is_featured = db.Column(db.Boolean, default=False)
@@ -382,6 +385,38 @@ class Voucher(db.Model):
         elif self.discount_type == 'free_shipping':
             return 'Freeship'
         return f'Giảm {int(val)}%'
+# === SEO BACKLINK ENGINE ===
+class BacklinkKeyword(db.Model):
+    """Defines a keyword/phrase that should be auto-linked to a target page"""
+    id = db.Column(db.Integer, primary_key=True)
+    vertical_slug = db.Column(db.String(50), default='', index=True)  # scope to vertical, '' = global
+    keyword = db.Column(db.String(200), nullable=False)  # keyword/phrase to match in content
+    target_type = db.Column(db.String(20), nullable=False)  # article / zone / part
+    target_slug = db.Column(db.String(200), nullable=False)  # slug of target page
+    target_title = db.Column(db.String(300), default='')  # display title for reference
+    anchor_text = db.Column(db.String(200), default='')  # custom anchor text, if empty uses keyword
+    priority = db.Column(db.Integer, default=5)  # 1-10, higher = linked first
+    max_per_page = db.Column(db.Integer, default=1)  # max times this keyword is linked per source page
+    is_active = db.Column(db.Boolean, default=True, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    instances = db.relationship('BacklinkInstance', backref='keyword', cascade='all,delete-orphan', lazy=True)
+
+class BacklinkInstance(db.Model):
+    """Tracks each actual backlink placement: source → target"""
+    id = db.Column(db.Integer, primary_key=True)
+    keyword_id = db.Column(db.Integer, db.ForeignKey('backlink_keyword.id'), nullable=False, index=True)
+    source_type = db.Column(db.String(20), nullable=False)  # article / part / zone
+    source_id = db.Column(db.Integer, nullable=False, index=True)
+    source_slug = db.Column(db.String(200), default='')
+    source_title = db.Column(db.String(300), default='')
+    target_type = db.Column(db.String(20), nullable=False)  # article / zone / part
+    target_slug = db.Column(db.String(200), nullable=False)
+    link_type = db.Column(db.String(10), default='intext')  # intext / outtext
+    anchor_text = db.Column(db.String(200), default='')
+    status = db.Column(db.String(15), default='active')  # active / pending / removed
+    clicks = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 class ArticleFeedback(db.Model):
     """User feedback on article accuracy"""
     id = db.Column(db.Integer, primary_key=True)
@@ -416,6 +451,84 @@ class ScheduledCSVImport(db.Model):
 
     # Relationship
     part = db.relationship('Part', backref=db.backref('scheduled_imports', lazy=True))
+
+class HotDeal(db.Model):
+    """Hot deal campaigns uploaded from Excel (Hot_deal.xlsx)"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(500), nullable=False)
+    campaign = db.Column(db.String(200), default='')
+    product_link = db.Column(db.String(1000), default='')
+    start_date = db.Column(db.DateTime, nullable=False)
+    end_date = db.Column(db.DateTime, nullable=False)
+    status = db.Column(db.String(50), default='')
+    hot_day = db.Column(db.String(100), default='')
+    banner = db.Column(db.Text, default='')  # JSON array of banner image URLs
+    detail = db.Column(db.Text, default='')
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def is_valid(self):
+        """Check if deal is currently active and not expired"""
+        now = datetime.utcnow()
+        if not self.is_active:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
+
+    def get_banner_urls(self):
+        """Parse banner JSON to get list of image URLs"""
+        if not self.banner:
+            return []
+        try:
+            import json
+            data = json.loads(self.banner)
+            if isinstance(data, list):
+                return [item.get('link', '') for item in data if item.get('link')]
+            return []
+        except:
+            return []
+
+class WardCommune(db.Model):
+    """Phường/Xã data imported from Excel"""
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(10), nullable=False, unique=True, index=True)  # Mã phường xã
+    name = db.Column(db.String(200), nullable=False)  # Tên phường xã
+    level = db.Column(db.String(20), default='')  # Cấp: Phường, Xã, Đặc khu
+    resolution = db.Column(db.String(200), default='')  # Nghị quyết
+    province_code = db.Column(db.String(10), nullable=False, index=True)  # Mã tỉnh/TP
+    province_name = db.Column(db.String(200), nullable=False)  # Tên tỉnh/TP
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class AccessTradeBanner(db.Model):
+    """Auto-pulled banners/offers from AccessTrade API"""
+    id = db.Column(db.Integer, primary_key=True)
+    offer_id = db.Column(db.String(50), nullable=False, index=True)
+    offer_name = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.Text, default='')
+    merchant = db.Column(db.String(200), default='')
+    merchant_logo = db.Column(db.String(500), default='')
+    category = db.Column(db.String(200), default='')
+    image_url = db.Column(db.String(1000), default='')
+    aff_link = db.Column(db.String(1000), default='')
+    start_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
+    discount_text = db.Column(db.String(200), default='')  # e.g. "50%" or "100K"
+    placement = db.Column(db.String(50), default='hotdeal')  # hotdeal / sidebar / both
+    is_active = db.Column(db.Boolean, default=True)
+    clicks = db.Column(db.Integer, default=0)
+    synced_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def is_valid(self):
+        now = datetime.utcnow()
+        if not self.is_active:
+            return False
+        if self.end_date and now > self.end_date:
+            return False
+        return True
 
 class VoucherWidget(db.Model):
     """Voucher embed widgets from affiliate networks (AccessTrade, etc.)"""

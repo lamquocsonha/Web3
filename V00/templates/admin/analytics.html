@@ -1,86 +1,415 @@
 {% extends "admin/base.html" %}
 {% block title %}Analytics{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>Analytics{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Analytics{% endblock %}
 {% block content %}
 <h1 class="page-title">📊 Analytics</h1>
 
-<!-- 4 Levels -->
-<div class="items-grid" style="grid-template-columns:1fr 1fr">
-  <div class="item-card" style="border-left:4px solid #00cec9">
-    <div style="font-family:'DM Mono';font-size:14px;color:#00cec9;margin-bottom:8px">LEVEL 1 - CROSS-VERTICAL</div>
-    <h3>System Overview</h3>
-    <div class="item-desc" style="margin-top:8px;line-height:1.6">
-      Compare performance across verticals: car vs pet vs finance.<br>
-      Which vertical is growing, which needs more investment.<br>
-      Total revenue, traffic, top pages across all subdomains.<br>
-      Marketing budget allocation by ROI per vertical.
-    </div>
-    <div class="item-meta" style="margin-top:12px">{{ verticals|length }} verticals active</div>
-  </div>
-
-  <div class="item-card" style="border-left:4px solid #8b5cf6">
-    <div style="font-family:'DM Mono';font-size:14px;color:#8b5cf6;margin-bottom:8px">LEVEL 2 - PER VERTICAL</div>
-    <h3>Vertical Deep Dive</h3>
-    <div class="item-desc" style="margin-top:8px;line-height:1.6">
-      car.unilab.vn: traffic by segment (CUV vs Sedan vs SUV).<br>
-      Top searched parts, hottest zones.<br>
-      Revenue by product category, by affiliate network.<br>
-      SEO: keyword rankings, organic traffic trend.
-    </div>
-    <div class="item-meta" style="margin-top:12px">
-      {% for v in verticals %}<span style="margin-right:12px">{{ v.icon }} {{ v.slug }}</span>{% endfor %}
-    </div>
-  </div>
-
-  <div class="item-card" style="border-left:4px solid #fdcb6e">
-    <div style="font-family:'DM Mono';font-size:14px;color:#fdcb6e;margin-bottom:8px">LEVEL 3 - PER PAGE</div>
-    <h3>Page & Product Analytics</h3>
-    <div class="item-desc" style="margin-top:8px;line-height:1.6">
-      Heatmap: where users click on 3D model.<br>
-      Funnel: view article > click product > click affiliate > purchase.<br>
-      Products with high CTR but low conversion > optimize.<br>
-      A/B test results: which layout converts better.
-    </div>
-    <div class="item-meta" style="margin-top:12px">Requires Google Analytics integration</div>
-  </div>
-
-  <div class="item-card" style="border-left:4px solid #fd79a8">
-    <div style="font-family:'DM Mono';font-size:14px;color:#fd79a8;margin-bottom:8px">LEVEL 4 - USER BEHAVIOR</div>
-    <h3>User Intelligence</h3>
-    <div class="item-desc" style="margin-top:8px;line-height:1.6">
-      User journey: from Google search > which page > what click > what buy.<br>
-      Cohort: return rate, cross-vertical (viewed car then home).<br>
-      Intent detection: browsing vs ready to buy.<br>
-      Device & geo: mobile vs desktop, HCM vs HN.
-    </div>
-    <div class="item-meta" style="margin-top:12px">Advanced tracking required</div>
-  </div>
+<!-- Total Stats -->
+<div class="stats-grid" style="grid-template-columns:repeat(6,1fr)">
+  <div class="stat-card"><div class="stat-label">Verticals</div><div class="stat-value">{{ verticals|length }}</div></div>
+  <div class="stat-card"><div class="stat-label">Articles</div><div class="stat-value">{{ totals.articles }}</div></div>
+  <div class="stat-card"><div class="stat-label">Parts</div><div class="stat-value">{{ totals.parts }}</div></div>
+  <div class="stat-card"><div class="stat-label">Affiliate Links</div><div class="stat-value">{{ totals.links }}</div></div>
+  <div class="stat-card"><div class="stat-label">Total Views</div><div class="stat-value" style="color:#22c55e">{{ "{:,}".format(totals.views) }}</div></div>
+  <div class="stat-card"><div class="stat-label">Total Clicks</div><div class="stat-value" style="color:#8b5cf6">{{ "{:,}".format(totals.clicks) }}</div></div>
 </div>
 
-<!-- Subdomain Management -->
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-top:24px">
-  <h3 style="font-size:16px;margin-bottom:16px">Subdomain Status</h3>
+<!-- Tabs -->
+<div class="analytics-tabs" style="display:flex;gap:0;border-bottom:2px solid var(--border);margin:28px 0 24px">
+  <button class="atab active" data-tab="overview" onclick="switchTab('overview')">📋 Overview</button>
+  <button class="atab" data-tab="charts" onclick="switchTab('charts')">📊 Charts</button>
+  <button class="atab" data-tab="details" onclick="switchTab('details')">📑 Chi tiết</button>
+</div>
+
+<!-- ==================== TAB 1: OVERVIEW ==================== -->
+<div class="tab-panel active" id="tab-overview">
   <div class="table-wrap">
     <table class="data-table">
-      <thead><tr><th>Subdomain</th><th>Status</th><th>Segments</th><th>Parts</th><th>Mode</th><th>Actions</th></tr></thead>
-      <tbody>
-        {% for v in verticals %}
+      <thead>
         <tr>
-          <td style="font-family:'DM Mono';font-size:14px"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{{ v.color }};margin-right:6px"></span>{{ v.slug }}.unilab.vn</td>
-          <td><span class="status-badge {{ v.status }}">{{ v.status }}</span></td>
-          <td>{{ v.segments|length }}</td>
-          <td>-</td>
-          <td style="font-size:14px">{{ v.default_mode }}</td>
-          <td><a href="{{ url_for('admin_vertical_detail', vid=v.id) }}" class="btn btn-ghost btn-sm">Manage</a></td>
+          <th>Vertical</th>
+          <th style="text-align:right">Articles</th>
+          <th style="text-align:right">Views</th>
+          <th style="text-align:right">Parts</th>
+          <th style="text-align:right">Aff Links</th>
+          <th style="text-align:right">Clicks</th>
+          <th style="text-align:right">Conversions</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for vs in vertical_stats %}
+        <tr>
+          <td>
+            <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:{{ vs.color }};margin-right:8px"></span>
+            {{ vs.icon }} <strong>{{ vs.name }}</strong>
+            <span style="font-size:12px;color:var(--text-dim);margin-left:4px">{{ vs.slug }}</span>
+          </td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ vs.articles }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(vs.views) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ vs.parts }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ vs.links }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#22c55e">{{ "{:,}".format(vs.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#8b5cf6">{{ vs.conversions }}</td>
+          <td><a href="{{ url_for('admin_verticals') }}" class="btn btn-ghost btn-sm">Manage</a></td>
         </tr>
         {% endfor %}
       </tbody>
+      <tfoot>
+        <tr style="font-weight:700;border-top:2px solid var(--border)">
+          <td>Total</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ totals.articles }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(totals.views) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ totals.parts }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ totals.links }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#22c55e">{{ "{:,}".format(totals.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#8b5cf6">{{ totals.conversions }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
     </table>
   </div>
 </div>
 
-<div style="background:rgba(139,92,246,0.05);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius);padding:20px;margin-top:16px;font-size:14px;color:var(--text-dim)">
-  <strong style="color:var(--accent)">Note:</strong> Full analytics requires Google Analytics 4 or Plausible integration.
-  Demo data is shown above. Connect your analytics provider in <a href="{{ url_for('admin_settings') }}" style="color:var(--accent)">Settings</a>.
+<!-- ==================== TAB 2: CHARTS ==================== -->
+<div class="tab-panel" id="tab-charts">
+  <!-- Row 1: Articles + Views -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <h3 style="font-size:15px;margin-bottom:16px">Bài viết theo vertical</h3>
+      <canvas id="chartArticles" height="260"></canvas>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <h3 style="font-size:15px;margin-bottom:16px">Lượt xem theo vertical</h3>
+      <canvas id="chartViews" height="260"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 2: Parts + Affiliate -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <h3 style="font-size:15px;margin-bottom:16px">Sản phẩm (Parts) theo vertical</h3>
+      <canvas id="chartParts" height="260"></canvas>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <h3 style="font-size:15px;margin-bottom:16px">Clicks & Conversions</h3>
+      <canvas id="chartClicks" height="260"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 3: Tier breakdown (doughnut) + Links per vertical -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <h3 style="font-size:15px;margin-bottom:16px">Phân bổ Tier bài viết</h3>
+      <div style="max-width:320px;margin:0 auto">
+        <canvas id="chartTiers" height="280"></canvas>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
+      <h3 style="font-size:15px;margin-bottom:16px">Affiliate Links theo vertical</h3>
+      <canvas id="chartLinks" height="280"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 4: Stacked bar — Tier per vertical -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+    <h3 style="font-size:15px;margin-bottom:16px">Phân bổ Tier theo từng vertical</h3>
+    <canvas id="chartTierPerVertical" height="200"></canvas>
+  </div>
 </div>
+
+<!-- ==================== TAB 3: DETAILS ==================== -->
+<div class="tab-panel" id="tab-details">
+  {% for vs in vertical_stats %}
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <span style="font-size:28px">{{ vs.icon }}</span>
+      <div>
+        <h3 style="font-size:16px;margin:0">{{ vs.name }}</h3>
+        <span style="font-size:13px;color:var(--text-dim);font-family:'DM Mono'">{{ vs.slug }}.unilab.vn</span>
+      </div>
+      <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:{{ vs.color }};margin-left:auto"></span>
+    </div>
+    <div class="stats-grid" style="grid-template-columns:repeat(6,1fr)">
+      <div class="stat-card" style="border-left:3px solid {{ vs.color }}">
+        <div class="stat-label">Articles</div>
+        <div class="stat-value" style="font-size:20px">{{ vs.articles }}</div>
+      </div>
+      <div class="stat-card" style="border-left:3px solid #22c55e">
+        <div class="stat-label">Views</div>
+        <div class="stat-value" style="font-size:20px">{{ "{:,}".format(vs.views) }}</div>
+      </div>
+      <div class="stat-card" style="border-left:3px solid #3b82f6">
+        <div class="stat-label">Parts</div>
+        <div class="stat-value" style="font-size:20px">{{ vs.parts }}</div>
+      </div>
+      <div class="stat-card" style="border-left:3px solid #f59e0b">
+        <div class="stat-label">Aff Links</div>
+        <div class="stat-value" style="font-size:20px">{{ vs.links }}</div>
+      </div>
+      <div class="stat-card" style="border-left:3px solid #8b5cf6">
+        <div class="stat-label">Clicks</div>
+        <div class="stat-value" style="font-size:20px">{{ "{:,}".format(vs.clicks) }}</div>
+      </div>
+      <div class="stat-card" style="border-left:3px solid #ef4444">
+        <div class="stat-label">Conversions</div>
+        <div class="stat-value" style="font-size:20px">{{ vs.conversions }}</div>
+      </div>
+    </div>
+    <!-- Tier breakdown bar -->
+    <div style="margin-top:12px;display:flex;align-items:center;gap:8px;font-size:13px">
+      <span style="color:var(--text-dim)">Tier:</span>
+      {% set total_tier = vs.tier_nganh + vs.tier_chung + vs.tier_chitiet %}
+      {% if total_tier > 0 %}
+      <div style="flex:1;display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--bg)">
+        {% if vs.tier_nganh > 0 %}<div style="width:{{ (vs.tier_nganh / total_tier * 100)|round }}%;background:#f59e0b" title="Ngành: {{ vs.tier_nganh }}"></div>{% endif %}
+        {% if vs.tier_chung > 0 %}<div style="width:{{ (vs.tier_chung / total_tier * 100)|round }}%;background:#3b82f6" title="Chung: {{ vs.tier_chung }}"></div>{% endif %}
+        {% if vs.tier_chitiet > 0 %}<div style="width:{{ (vs.tier_chitiet / total_tier * 100)|round }}%;background:#8b5cf6" title="Chi tiết: {{ vs.tier_chitiet }}"></div>{% endif %}
+      </div>
+      <span style="color:#f59e0b">Ngành {{ vs.tier_nganh }}</span>
+      <span style="color:#3b82f6">Chung {{ vs.tier_chung }}</span>
+      <span style="color:#8b5cf6">Chi tiết {{ vs.tier_chitiet }}</span>
+      {% else %}
+      <span style="color:var(--text-dim)">No articles</span>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+// Data from backend
+const vLabels = [{% for vs in vertical_stats %}'{{ vs.icon }} {{ vs.name }}'{% if not loop.last %},{% endif %}{% endfor %}];
+const vColors = [{% for vs in vertical_stats %}'{{ vs.color }}'{% if not loop.last %},{% endif %}{% endfor %}];
+const vArticles = [{% for vs in vertical_stats %}{{ vs.articles }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vViews = [{% for vs in vertical_stats %}{{ vs.views }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vParts = [{% for vs in vertical_stats %}{{ vs.parts }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vLinks = [{% for vs in vertical_stats %}{{ vs.links }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vClicks = [{% for vs in vertical_stats %}{{ vs.clicks }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vConversions = [{% for vs in vertical_stats %}{{ vs.conversions }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vTierNganh = [{% for vs in vertical_stats %}{{ vs.tier_nganh }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vTierChung = [{% for vs in vertical_stats %}{{ vs.tier_chung }}{% if not loop.last %},{% endif %}{% endfor %}];
+const vTierChitiet = [{% for vs in vertical_stats %}{{ vs.tier_chitiet }}{% if not loop.last %},{% endif %}{% endfor %}];
+
+// Theme-aware defaults
+const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+const textColor = isDark ? '#a0a0a0' : '#666';
+
+Chart.defaults.color = textColor;
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 13;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = 'rectRounded';
+
+const commonScales = {
+  x: { grid: { display: false } },
+  y: { grid: { color: gridColor }, beginAtZero: true,
+    ticks: { callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v }
+  }
+};
+
+// 1. Articles bar
+new Chart(document.getElementById('chartArticles'), {
+  type: 'bar',
+  data: {
+    labels: vLabels,
+    datasets: [{
+      label: 'Bài viết',
+      data: vArticles,
+      backgroundColor: vColors.map(c => c + '99'),
+      borderColor: vColors,
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: commonScales
+  }
+});
+
+// 2. Views bar
+new Chart(document.getElementById('chartViews'), {
+  type: 'bar',
+  data: {
+    labels: vLabels,
+    datasets: [{
+      label: 'Lượt xem',
+      data: vViews,
+      backgroundColor: '#22c55e55',
+      borderColor: '#22c55e',
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: commonScales
+  }
+});
+
+// 3. Parts bar
+new Chart(document.getElementById('chartParts'), {
+  type: 'bar',
+  data: {
+    labels: vLabels,
+    datasets: [{
+      label: 'Sản phẩm',
+      data: vParts,
+      backgroundColor: '#3b82f655',
+      borderColor: '#3b82f6',
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: commonScales
+  }
+});
+
+// 4. Clicks & Conversions grouped bar
+new Chart(document.getElementById('chartClicks'), {
+  type: 'bar',
+  data: {
+    labels: vLabels,
+    datasets: [
+      {
+        label: 'Clicks',
+        data: vClicks,
+        backgroundColor: '#22c55e55',
+        borderColor: '#22c55e',
+        borderWidth: 2,
+        borderRadius: 6,
+      },
+      {
+        label: 'Conversions',
+        data: vConversions,
+        backgroundColor: '#8b5cf655',
+        borderColor: '#8b5cf6',
+        borderWidth: 2,
+        borderRadius: 6,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'top' } },
+    scales: commonScales
+  }
+});
+
+// 5. Tier doughnut (total across all verticals)
+const totalNganh = vTierNganh.reduce((a,b)=>a+b,0);
+const totalChung = vTierChung.reduce((a,b)=>a+b,0);
+const totalChitiet = vTierChitiet.reduce((a,b)=>a+b,0);
+new Chart(document.getElementById('chartTiers'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Ngành (macro)', 'Chung (system)', 'Chi tiết (detail)'],
+    datasets: [{
+      data: [totalNganh, totalChung, totalChitiet],
+      backgroundColor: ['#f59e0b', '#3b82f6', '#8b5cf6'],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '55%',
+    plugins: {
+      legend: { position: 'bottom' },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.label + ': ' + ctx.parsed + ' bài (' + Math.round(ctx.parsed/(totalNganh+totalChung+totalChitiet)*100) + '%)'
+        }
+      }
+    }
+  }
+});
+
+// 6. Links horizontal bar
+new Chart(document.getElementById('chartLinks'), {
+  type: 'bar',
+  data: {
+    labels: vLabels,
+    datasets: [{
+      label: 'Affiliate Links',
+      data: vLinks,
+      backgroundColor: vColors.map(c => c + '88'),
+      borderColor: vColors,
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, beginAtZero: true },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// 7. Stacked bar — tier per vertical
+new Chart(document.getElementById('chartTierPerVertical'), {
+  type: 'bar',
+  data: {
+    labels: vLabels,
+    datasets: [
+      { label: 'Ngành', data: vTierNganh, backgroundColor: '#f59e0b', borderRadius: 4, },
+      { label: 'Chung', data: vTierChung, backgroundColor: '#3b82f6', borderRadius: 4, },
+      { label: 'Chi tiết', data: vTierChitiet, backgroundColor: '#8b5cf6', borderRadius: 4, },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: { stacked: true, grid: { color: gridColor }, beginAtZero: true }
+    }
+  }
+});
+
+// Tab switching
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.atab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.querySelector('.atab[data-tab="' + tab + '"]').classList.add('active');
+}
+</script>
+
+<style>
+.atab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all .15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.atab:hover { color: var(--text); }
+.atab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+</style>
 {% endblock %}

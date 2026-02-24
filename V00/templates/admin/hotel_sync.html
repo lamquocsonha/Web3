@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 {% block title %}Hotel Sync — Agoda{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_hotels') }}">Hotels</a><span class="sep">></span>Agoda Sync{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span><a href="{{ url_for('admin_hotels_hub') }}">Hotels</a><span class="sep">›</span>Agoda Sync{% endblock %}
 {% block content %}
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0">🏨 Agoda Hotel Sync</h1>
-  <a href="{{ url_for('admin_hotels') }}" class="btn btn-ghost btn-sm">← Hotels</a>
+  <a href="{{ url_for('admin_hotels_hub') }}" class="btn btn-ghost btn-sm">← Hotels</a>
 </div>
 
 <!-- Stats -->
@@ -58,8 +58,9 @@
       <div class="form-group" style="margin-bottom:0">
         <select id="fsMaxPerCity" class="form-select" style="width:auto;padding:6px 10px;font-size:13px">
           <option value="5">5 hotels/tinh</option>
-          <option value="10" selected>10 hotels/tinh</option>
+          <option value="10">10 hotels/tinh</option>
           <option value="20">20 hotels/tinh</option>
+          <option value="30" selected>30 hotels/tinh</option>
           <option value="50">50 hotels/tinh</option>
         </select>
       </div>
@@ -89,12 +90,18 @@
   {% if not api_connected %}<p style="margin:-8px 0 12px;font-size:13px;color:#e74c3c;font-weight:600">⚠ Luu credentials truoc khi search</p>{% endif %}
   <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
     <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">Destination</label>
-      <select id="syncDest" class="form-select" style="width:180px;padding:8px;font-size:13px">
+      <label class="form-label">Tinh thanh</label>
+      <select id="syncDest" class="form-select" style="width:200px;padding:8px;font-size:13px">
         <option value="">Chon tinh thanh...</option>
         {% for d in destinations %}
-        <option value="{{ d.slug }}">{{ d.name }} ({{ d.city_id }})</option>
+        <option value="{{ d.slug }}"{% if not d.city_id %} data-no-agoda="1"{% endif %}>{{ d.name }}{% if d.city_id %} ({{ d.city_id }}){% endif %}</option>
         {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0;display:none" id="wardGroup">
+      <label class="form-label">Phuong xa</label>
+      <select id="syncWard" class="form-select" style="width:200px;padding:8px;font-size:13px">
+        <option value="">Tat ca phuong xa</option>
       </select>
     </div>
     <div class="form-group" style="margin-bottom:0">
@@ -117,17 +124,36 @@
   <div id="searchCount" style="margin-top:8px;font-size:13px;color:var(--text-dim);display:none"></div>
 </div>
 
-<!-- Recent Agoda Imports -->
-{% if recent %}
+<!-- Agoda Imports -->
 <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px">
-  <h3 style="margin:0 0 16px;font-size:15px">📋 Hotels da import tu Agoda</h3>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+    <h3 style="margin:0;font-size:15px">📋 Hotels da import tu Agoda <span style="font-weight:400;color:var(--text-dim)">({{ total_agoda }})</span></h3>
+    {% if agoda_no_image %}<span style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">{{ agoda_no_image }} thieu anh</span>{% endif %}
+    <button onclick="fixImages()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">🖼 Fix missing images</button>
+    <button onclick="fixAddresses()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">📍 Fix addresses</button>
+    <span id="fixImgResult" style="font-size:12px;color:var(--text-dim)"></span>
+    <div style="margin-left:auto;display:flex;gap:6px">
+      <a href="{{ url_for('admin_hotel_sync') }}" class="btn btn-ghost btn-sm" style="font-size:12px{% if not f_image %};font-weight:700{% endif %}">All</a>
+      <a href="{{ url_for('admin_hotel_sync', image='missing') }}" class="btn btn-ghost btn-sm" style="font-size:12px{% if f_image=='missing' %};font-weight:700;color:#e74c3c{% endif %}">🚫 No Image</a>
+      <a href="{{ url_for('admin_hotel_sync', image='has') }}" class="btn btn-ghost btn-sm" style="font-size:12px{% if f_image=='has' %};font-weight:700;color:#2ecc71{% endif %}">✅ Has Image</a>
+    </div>
+  </div>
+  {% if recent %}
   <div class="table-wrap">
     <table class="data-table" style="font-size:13px">
-      <thead><tr><th>#</th><th>Hotel</th><th>Destination</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead>
+      <thead><tr><th>#</th><th style="width:56px">Anh</th><th>Hotel</th><th>Destination</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead>
       <tbody>
         {% for h in recent %}
         <tr>
           <td style="font-family:'DM Mono';color:var(--text-dim)">{{ h.id }}</td>
+          <td>
+            {% if h.image_url %}
+            <img src="{{ h.image_url }}" alt="" style="width:48px;height:36px;object-fit:cover;border-radius:4px;display:block" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display=''">
+            <span style="display:none;width:48px;height:36px;background:var(--border);border-radius:4px;text-align:center;line-height:36px;font-size:16px">🏨</span>
+            {% else %}
+            <span style="display:inline-block;width:48px;height:36px;background:rgba(231,76,60,0.1);border-radius:4px;text-align:center;line-height:36px;font-size:14px">🚫</span>
+            {% endif %}
+          </td>
           <td>
             <strong>{{ h.name[:50] }}{% if h.name|length > 50 %}...{% endif %}</strong>
             <div style="font-size:12px;color:var(--text-dim)">{{ h.district }}</div>
@@ -142,15 +168,110 @@
       </tbody>
     </table>
   </div>
+  <!-- Pagination -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:13px;color:var(--text-dim)">
+    <span>{{ (page - 1) * per_page + 1 }}–{{ [(page - 1) * per_page + recent|length, recent_total]|min }} / {{ recent_total }} hotels</span>
+    {% if recent_pages > 1 %}
+    <div style="display:flex;gap:4px;align-items:center">
+      {% if page > 1 %}
+      <a href="{{ url_for('admin_hotel_sync', image=f_image, page=page-1) }}" class="btn btn-ghost btn-sm" style="font-size:12px">&laquo; Prev</a>
+      {% endif %}
+      {% for p in range(1, recent_pages + 1) %}
+        {% if p == page %}
+          <span style="display:inline-block;min-width:28px;text-align:center;padding:3px 6px;background:var(--accent);color:#fff;border-radius:5px;font-weight:700;font-size:12px">{{ p }}</span>
+        {% elif p == 1 or p == recent_pages or (p >= page - 2 and p <= page + 2) %}
+          <a href="{{ url_for('admin_hotel_sync', image=f_image, page=p) }}" class="btn btn-ghost btn-sm" style="min-width:28px;text-align:center;font-size:12px">{{ p }}</a>
+        {% elif p == page - 3 or p == page + 3 %}
+          <span style="padding:0 3px;color:var(--text-dim)">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if page < recent_pages %}
+      <a href="{{ url_for('admin_hotel_sync', image=f_image, page=page+1) }}" class="btn btn-ghost btn-sm" style="font-size:12px">Next &raquo;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div style="padding:24px;text-align:center;color:var(--text-dim);font-size:14px">
+    {% if f_image == 'missing' %}Khong co hotel nao thieu anh{% elif f_image == 'has' %}Khong co hotel nao co anh{% else %}Chua import hotel nao tu Agoda{% endif %}
+  </div>
+  {% endif %}
 </div>
-{% endif %}
 
 <script>
+function fixImages(){
+  var el=document.getElementById('fixImgResult');
+  el.textContent='Dang fix... (co the mat 30-60s)';
+  el.style.color='var(--text-dim)';
+  fetch('/admin/hotel-sync/fix-images',{method:'POST'})
+    .then(r=>r.json())
+    .then(d=>{
+      var parts=[];
+      if(d.fixed_api) parts.push(d.fixed_api+' tu API');
+      if(d.fixed_placeholder) parts.push(d.fixed_placeholder+' placeholder');
+      if(d.cleared) parts.push(d.cleared+' broken URL cleared');
+      el.textContent='Done! '+d.fixed+' fixed'+(parts.length?' ('+parts.join(', ')+')':'')+'. Reload de xem.';
+      el.style.color='#2ecc71';
+    })
+    .catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
+}
+function fixAddresses(){
+  var el=document.getElementById('fixImgResult');
+  el.textContent='Dang geocode dia chi... (~3-4 phut, 1 req/s Nominatim)';
+  el.style.color='var(--text-dim)';
+  fetch('/admin/hotel-sync/fix-addresses',{method:'POST'})
+    .then(r=>r.json())
+    .then(d=>{
+      el.textContent='Done! '+d.updated+'/'+d.total+' hotels da cap nhat dia chi. Reload de xem.';
+      el.style.color='#2ecc71';
+    })
+    .catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
+}
+
+// ─── Cascading: Tinh thanh → Phuong xa ───
+(function(){
+  var destSel = document.getElementById('syncDest');
+  var wardGrp = document.getElementById('wardGroup');
+  var wardSel = document.getElementById('syncWard');
+  if (!destSel || !wardGrp || !wardSel) return;
+
+  destSel.addEventListener('change', function(){
+    var slug = this.value;
+    wardSel.innerHTML = '<option value="">Tat ca phuong xa</option>';
+    if (!slug) { wardGrp.style.display = 'none'; return; }
+
+    wardGrp.style.display = '';
+    wardSel.innerHTML = '<option value="">Dang tai...</option>';
+    wardSel.disabled = true;
+
+    fetch('/api/wards/by-destination?slug=' + encodeURIComponent(slug))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        wardSel.disabled = false;
+        wardSel.innerHTML = '<option value="">Tat ca phuong xa (' + (data.total||0) + ')</option>';
+        if (data.wards && data.wards.length > 0) {
+          data.wards.forEach(function(w){
+            var opt = document.createElement('option');
+            opt.value = w.name;
+            opt.textContent = w.name;
+            wardSel.appendChild(opt);
+          });
+        } else {
+          wardSel.innerHTML = '<option value="">Chua co du lieu phuong xa</option>';
+        }
+      })
+      .catch(function(){
+        wardSel.disabled = false;
+        wardSel.innerHTML = '<option value="">Khong tai duoc</option>';
+      });
+  });
+})();
+
 // ─── Fast Sync ───
 var fsStopped = false;
 var fsRunning = false;
 var DESTINATIONS = [
-  {% for d in destinations %}
+  {% for d in agoda_destinations %}
   {slug:'{{ d.slug }}', name:'{{ d.name }}'},
   {% endfor %}
 ];
@@ -319,7 +440,7 @@ function searchAgoda() {
       html += '<tr style="' + (imported ? 'opacity:0.5' : '') + '">'
         + '<td><input type="checkbox" class="hCheck" data-idx="' + i + '" ' + (imported ? 'disabled' : 'checked') + '></td>'
         + '<td><div style="display:flex;gap:10px;align-items:center">'
-        + (h.image_url ? '<img src="'+h.image_url+'" style="width:60px;height:40px;border-radius:4px;object-fit:cover" onerror="this.style.display=\'none\'">' : '')
+        + (h.image_url ? '<img src="'+h.image_url+'" style="width:60px;height:40px;border-radius:4px;object-fit:cover" onerror="this.onerror=null;this.outerHTML=\'<span style=\\\'display:inline-block;width:60px;height:40px;background:var(--border);border-radius:4px;text-align:center;line-height:40px;font-size:18px\\\'>🏨</span>\'">' : '<span style="display:inline-block;width:60px;height:40px;background:var(--border);border-radius:4px;text-align:center;line-height:40px;font-size:18px">🏨</span>')
         + '<div><strong>' + (h.name||'').substring(0,50) + '</strong>'
         + '<div style="font-size:12px;color:var(--text-dim)">' + (h.district||h.address||'') + '</div></div></div></td>'
         + '<td>' + '⭐'.repeat(h.stars||0) + '</td>'

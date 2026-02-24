@@ -1,0 +1,503 @@
+{% extends "admin/base.html" %}
+{% block title %}SEO Hub{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> SEO
+{% endblock %}
+{% block content %}
+<style>
+/* ── Top Tabs ── */
+.seo-top-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:28px; overflow-x:auto }
+.seo-top-tab { flex:1; padding:12px 20px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; color:var(--text-dim); border:none; background:transparent; font-family:inherit; text-decoration:none }
+.seo-top-tab:hover { background:var(--surface2); color:var(--text) }
+.seo-top-tab.active { background:var(--accent); color:#fff }
+.seo-top-tab .tab-badge { display:inline-block; font-size:12px; padding:1px 7px; border-radius:99px; font-weight:800; margin-left:6px; vertical-align:middle }
+.seo-top-tab.active .tab-badge { background:rgba(255,255,255,.25); color:#fff }
+
+.seo-tab-panel { display:none }
+.seo-tab-panel.active { display:block }
+
+/* ── Common ── */
+.btn { padding:8px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.btn-primary { background:var(--accent); color:#fff }
+.btn-primary:hover { opacity:.9 }
+.btn-ghost { background:var(--surface2); color:var(--text) }
+.btn-ghost:hover { background:var(--border) }
+
+.p-stat-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px }
+.p-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.p-stat-val { font-size:26px; font-weight:800 }
+.p-stat-label { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+
+.q-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.q-table-wrap table { width:100%; border-collapse:collapse }
+.q-table-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.q-table-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.q-table-wrap tr:last-child td { border:none }
+.q-table-wrap tr:hover td { background:var(--surface2) }
+
+.q-badge { display:inline-block; font-size:13px; padding:3px 10px; border-radius:6px; font-weight:700 }
+.q-actions { display:flex; gap:6px }
+.q-btn { padding:5px 12px; border:none; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; font-family:inherit }
+.q-btn.del { background:rgba(239,68,68,.1); color:#ef4444 }
+
+.empty-state { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.empty-state-icon { font-size:42px; margin-bottom:10px }
+
+/* ── Filter bar ── */
+.filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center }
+.filter-bar select, .filter-bar input[type=text] { padding:8px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface); color:var(--text); font-family:inherit }
+.filter-bar input[type=text] { width:200px }
+.filter-btn { padding:8px 16px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit }
+.filter-clear { font-size:13px; color:var(--text-dim); text-decoration:none; margin-left:4px }
+.filter-clear:hover { color:var(--text) }
+
+/* ── Suggestion group ── */
+.sug-group { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px 20px; margin-bottom:14px }
+.sug-quote { border-left:4px solid var(--accent); background:rgba(108,92,231,0.06); border-radius:0 8px 8px 0; padding:14px 16px; margin-bottom:10px }
+.sug-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 12px; margin-bottom:4px; border-radius:6px; background:rgba(255,255,255,0.7) }
+
+@media(max-width:768px) {
+  .p-stat-grid { grid-template-columns:repeat(2,1fr) }
+  .filter-bar { flex-direction:column; align-items:stretch }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════════════
+     TOP-LEVEL TABS
+     ══════════════════════════════════════════════════════ -->
+<div class="seo-top-tabs">
+  <a class="seo-top-tab {% if active_tab=='dashboard' %}active{% endif %}" href="{{ url_for('admin_seo_hub', tab='dashboard') }}">Dashboard</a>
+  <a class="seo-top-tab {% if active_tab=='keywords' %}active{% endif %}" href="{{ url_for('admin_seo_hub', tab='keywords') }}">Keywords</a>
+  <a class="seo-top-tab {% if active_tab=='instances' %}active{% endif %}" href="{{ url_for('admin_seo_hub', tab='instances') }}">Instances</a>
+  <a class="seo-top-tab {% if active_tab=='suggestions' %}active{% endif %}" href="{{ url_for('admin_seo_hub', tab='suggestions') }}">Suggestions</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: DASHBOARD
+     ══════════════════════════════════════════════════════ -->
+{% if active_tab == 'dashboard' %}
+<div class="seo-tab-panel active" id="seoTab-dashboard">
+  <!-- Stats Grid -->
+  <div class="p-stat-grid">
+    <div class="p-stat"><div class="p-stat-val" style="color:var(--accent)">{{ total_keywords }}</div><div class="p-stat-label">Total Keywords</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:#22c55e">{{ active_keywords }}</div><div class="p-stat-label">Active Keywords</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:#3b82f6">{{ total_instances }}</div><div class="p-stat-label">Total Instances</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:#f59e0b">{{ active_instances }}</div><div class="p-stat-label">Active Instances</div></div>
+    <div class="p-stat"><div class="p-stat-val" style="color:#ef4444">{{ total_clicks }}</div><div class="p-stat-label">Total Clicks</div></div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div style="display:flex;gap:10px;margin-bottom:24px">
+    <a href="{{ url_for('admin_seo_auto_generate') }}" class="btn btn-ghost">Auto Generate Keywords</a>
+    <a href="{{ url_for('admin_seo_scan') }}" class="btn btn-primary">Scan & Build Links</a>
+  </div>
+
+  <!-- Per-Vertical Stats -->
+  {% if v_stats %}
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Per-Vertical Overview</h3>
+  <div class="q-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th style="text-align:center">Keywords</th>
+          <th style="text-align:center">Instances</th>
+          <th style="text-align:center">Clicks</th>
+          <th style="text-align:center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for vs in v_stats %}
+        <tr>
+          <td><span style="font-size:18px">{{ vs.vertical.icon }}</span> <strong>{{ vs.vertical.name }}</strong> <span style="font-size:12px;color:var(--text-dim)">({{ vs.vertical.slug }})</span></td>
+          <td style="text-align:center"><span class="q-badge" style="background:var(--accent);color:#fff">{{ vs.keywords }}</span></td>
+          <td style="text-align:center"><span class="q-badge" style="background:#22c55e;color:#fff">{{ vs.instances }}</span></td>
+          <td style="text-align:center;font-weight:700">{{ vs.clicks }}</td>
+          <td style="text-align:center">
+            <a href="{{ url_for('admin_seo_hub', tab='keywords', vertical=vs.vertical.slug) }}" style="color:var(--accent);text-decoration:none;font-size:13px">Keywords</a>
+            <span style="color:var(--text-dim);margin:0 4px">|</span>
+            <a href="{{ url_for('admin_seo_hub', tab='instances', vertical=vs.vertical.slug) }}" style="color:var(--accent);text-decoration:none;font-size:13px">Links</a>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not v_stats %}
+        <tr><td colspan="5" class="empty-state">No verticals found.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <!-- Recent Instances -->
+  <h3 style="font-size:16px;font-weight:700;margin-bottom:12px">Recent Instances</h3>
+  <div class="q-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Anchor</th>
+          <th>Target</th>
+          <th style="text-align:center">Type</th>
+          <th style="text-align:center">Status</th>
+          <th style="text-align:center">Clicks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inst in recent %}
+        <tr>
+          <td>
+            <span style="background:var(--surface2);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--text-dim)">{{ inst.source_type }}</span>
+            {{ inst.source_title[:40] }}{% if inst.source_title|length > 40 %}...{% endif %}
+          </td>
+          <td style="color:var(--accent);font-weight:600">{{ inst.anchor_text[:30] }}{% if inst.anchor_text|length > 30 %}...{% endif %}</td>
+          <td>
+            <span style="background:{% if inst.target_type == 'article' %}#dbeafe;color:#1e40af{% elif inst.target_type == 'zone' %}#fef3c7;color:#92400e{% else %}#d1fae5;color:#065f46{% endif %};padding:1px 6px;border-radius:4px;font-size:12px">{{ inst.target_type }}</span>
+            {{ inst.target_slug[:25] }}
+          </td>
+          <td style="text-align:center">
+            {% if inst.link_type == 'intext' %}
+            <span class="q-badge" style="background:#d1fae5;color:#065f46;font-size:12px">intext</span>
+            {% elif inst.link_type == 'suggest' %}
+            <span class="q-badge" style="background:#dbeafe;color:#1e40af;font-size:12px">suggest</span>
+            {% else %}
+            <span class="q-badge" style="background:#fef3c7;color:#92400e;font-size:12px">{{ inst.link_type }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center">
+            {% if inst.status == 'active' %}<span style="color:#22c55e;font-weight:600;font-size:13px">Active</span>
+            {% elif inst.status == 'removed' %}<span style="color:#ef4444;font-size:13px">Removed</span>
+            {% else %}<span style="color:#f59e0b;font-size:13px">{{ inst.status }}</span>{% endif %}
+          </td>
+          <td style="text-align:center;font-weight:700">{{ inst.clicks }}</td>
+        </tr>
+        {% endfor %}
+        {% if not recent %}
+        <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-dim)">No backlink instances yet. Use Scan & Build to create them.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: KEYWORDS
+     ══════════════════════════════════════════════════════ -->
+{% if active_tab == 'keywords' %}
+<div class="seo-tab-panel active" id="seoTab-keywords">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div>
+      <h2 style="margin:0;font-size:18px;font-weight:700">Backlink Keywords</h2>
+      <p style="margin:4px 0 0;font-size:13px;color:var(--text-dim)">{{ keywords|length }} keywords found</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_seo_auto_generate') }}" class="btn btn-ghost" style="font-size:13px;padding:7px 14px">Auto Generate</a>
+      <a href="{{ url_for('admin_seo_keyword_new') }}" class="btn btn-primary" style="font-size:13px;padding:7px 14px">+ New Keyword</a>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <form method="GET" class="filter-bar">
+    <input type="hidden" name="tab" value="keywords">
+    <select name="vertical">
+      <option value="all">All Verticals</option>
+      {% for v in verticals %}
+      <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="type">
+      <option value="all">All Types</option>
+      <option value="article" {% if filter_type == 'article' %}selected{% endif %}>Article</option>
+      <option value="zone" {% if filter_type == 'zone' %}selected{% endif %}>Zone</option>
+      <option value="part" {% if filter_type == 'part' %}selected{% endif %}>Part</option>
+    </select>
+    <input type="text" name="q" value="{{ q }}" placeholder="Search keyword...">
+    <button type="submit" class="filter-btn">Filter</button>
+    {% if filter_v != 'all' or filter_type != 'all' or q %}
+    <a href="{{ url_for('admin_seo_hub', tab='keywords') }}" class="filter-clear">Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- Keywords Table -->
+  <div class="q-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Keyword</th>
+          <th>Vertical</th>
+          <th>Target</th>
+          <th style="text-align:center">Priority</th>
+          <th style="text-align:center">Max/Page</th>
+          <th style="text-align:center">Instances</th>
+          <th style="text-align:center">Active</th>
+          <th style="text-align:center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for kw in keywords %}
+        <tr {% if not kw.is_active %}style="opacity:0.5"{% endif %}>
+          <td>
+            <div style="font-weight:600">{{ kw.keyword[:50] }}{% if kw.keyword|length > 50 %}...{% endif %}</div>
+            {% if kw.anchor_text and kw.anchor_text != kw.keyword %}
+            <div style="font-size:12px;color:var(--text-dim)">Anchor: {{ kw.anchor_text }}</div>
+            {% endif %}
+          </td>
+          <td><span style="font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:4px">{{ kw.vertical_slug or 'global' }}</span></td>
+          <td>
+            <span style="background:{% if kw.target_type == 'article' %}#dbeafe;color:#1e40af{% elif kw.target_type == 'zone' %}#fef3c7;color:#92400e{% else %}#d1fae5;color:#065f46{% endif %};padding:2px 8px;border-radius:4px;font-size:12px">{{ kw.target_type }}</span>
+            <span style="font-size:13px;margin-left:4px">{{ kw.target_slug[:25] }}</span>
+            {% if kw.target_title %}
+            <div style="font-size:12px;color:var(--text-dim)">{{ kw.target_title[:40] }}</div>
+            {% endif %}
+          </td>
+          <td style="text-align:center">
+            <span style="background:{% if kw.priority >= 8 %}#ef4444{% elif kw.priority >= 5 %}#f59e0b{% else %}#6b7280{% endif %};color:#fff;padding:2px 8px;border-radius:8px;font-size:12px;font-weight:700">{{ kw.priority }}</span>
+          </td>
+          <td style="text-align:center;font-size:13px">{{ kw.max_per_page }}</td>
+          <td style="text-align:center;font-weight:700">{{ kw.instances|length }}</td>
+          <td style="text-align:center">
+            <form method="POST" action="{{ url_for('admin_seo_keyword_toggle', kid=kw.id) }}" style="display:inline">
+              {% if kw.is_active %}
+              <button type="submit" style="background:#22c55e;color:#fff;border:none;padding:3px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700">ON</button>
+              {% else %}
+              <button type="submit" style="background:#ef4444;color:#fff;border:none;padding:3px 10px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:700">OFF</button>
+              {% endif %}
+            </form>
+          </td>
+          <td style="text-align:center;white-space:nowrap">
+            <a href="{{ url_for('admin_seo_keyword_edit', kid=kw.id) }}" style="color:var(--accent);text-decoration:none;font-size:13px">Edit</a>
+            <form method="POST" action="{{ url_for('admin_seo_keyword_delete', kid=kw.id) }}" style="display:inline" onsubmit="return confirm('Delete keyword and all instances?')">
+              <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;padding:0;margin-left:6px">Del</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not keywords %}
+        <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-dim)">
+          No keywords found. <a href="{{ url_for('admin_seo_auto_generate') }}" style="color:var(--accent)">Auto-generate keywords</a> or <a href="{{ url_for('admin_seo_keyword_new') }}" style="color:var(--accent)">add manually</a>.
+        </td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: INSTANCES
+     ══════════════════════════════════════════════════════ -->
+{% if active_tab == 'instances' %}
+<div class="seo-tab-panel active" id="seoTab-instances">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div>
+      <h2 style="margin:0;font-size:18px;font-weight:700">Backlink Instances</h2>
+      <p style="margin:4px 0 0;font-size:13px;color:var(--text-dim)">{{ instances|length }} link placements found</p>
+    </div>
+    <a href="{{ url_for('admin_seo_scan') }}" class="btn btn-primary" style="font-size:13px;padding:7px 14px">Re-scan Content</a>
+  </div>
+
+  <!-- Filter Bar -->
+  <form method="GET" class="filter-bar">
+    <input type="hidden" name="tab" value="instances">
+    <select name="vertical">
+      <option value="all">All Verticals</option>
+      {% for v in verticals %}
+      <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="type">
+      <option value="all">All Types</option>
+      <option value="intext" {% if filter_type == 'intext' %}selected{% endif %}>Intext</option>
+      <option value="outtext" {% if filter_type == 'outtext' %}selected{% endif %}>Outtext</option>
+      <option value="suggest" {% if filter_type == 'suggest' %}selected{% endif %}>Suggest</option>
+    </select>
+    <select name="status">
+      <option value="all">All Status</option>
+      <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Active</option>
+      <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="removed" {% if filter_status == 'removed' %}selected{% endif %}>Removed</option>
+    </select>
+    <button type="submit" class="filter-btn">Filter</button>
+    {% if filter_v != 'all' or filter_type != 'all' or filter_status != 'all' %}
+    <a href="{{ url_for('admin_seo_hub', tab='instances') }}" class="filter-clear">Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- Instances Table -->
+  <div class="q-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Anchor Text</th>
+          <th>Target</th>
+          <th style="text-align:center">Type</th>
+          <th style="text-align:center">Status</th>
+          <th style="text-align:center">Clicks</th>
+          <th style="text-align:center">Created</th>
+          <th style="text-align:center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inst in instances %}
+        <tr {% if inst.status == 'removed' %}style="opacity:0.5"{% endif %}>
+          <td>
+            <span style="background:var(--surface2);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--text-dim)">{{ inst.source_type }}</span>
+            <div style="font-weight:500;margin-top:2px;font-size:13px">{{ inst.source_title[:35] }}{% if inst.source_title|length > 35 %}...{% endif %}</div>
+            <div style="font-size:12px;color:var(--text-dim)">{{ inst.source_slug }}</div>
+          </td>
+          <td style="color:var(--accent);font-weight:600;font-size:13px">{{ inst.anchor_text[:25] }}{% if inst.anchor_text|length > 25 %}...{% endif %}</td>
+          <td>
+            <span style="background:{% if inst.target_type == 'article' %}#dbeafe;color:#1e40af{% elif inst.target_type == 'zone' %}#fef3c7;color:#92400e{% else %}#d1fae5;color:#065f46{% endif %};padding:1px 6px;border-radius:4px;font-size:11px">{{ inst.target_type }}</span>
+            <div style="font-size:13px;margin-top:2px">{{ inst.target_slug[:25] }}</div>
+          </td>
+          <td style="text-align:center">
+            {% if inst.link_type == 'intext' %}
+            <span class="q-badge" style="background:#d1fae5;color:#065f46;font-size:12px">intext</span>
+            {% elif inst.link_type == 'suggest' %}
+            <span class="q-badge" style="background:#dbeafe;color:#1e40af;font-size:12px">suggest</span>
+            {% else %}
+            <span class="q-badge" style="background:#fef3c7;color:#92400e;font-size:12px">{{ inst.link_type }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center">
+            {% if inst.status == 'active' %}<span style="color:#22c55e;font-weight:600;font-size:13px">Active</span>
+            {% elif inst.status == 'removed' %}<span style="color:#ef4444;font-size:13px">Removed</span>
+            {% else %}<span style="color:#f59e0b;font-size:13px">{{ inst.status }}</span>{% endif %}
+          </td>
+          <td style="text-align:center;font-weight:700">{{ inst.clicks }}</td>
+          <td style="text-align:center;font-size:12px;color:var(--text-dim)">{{ inst.created_at.strftime('%d/%m/%y') if inst.created_at else '-' }}</td>
+          <td style="text-align:center;white-space:nowrap">
+            {% if inst.status == 'active' %}
+            <form method="POST" action="{{ url_for('admin_seo_instance_remove', iid=inst.id) }}" style="display:inline">
+              <button type="submit" style="background:none;border:none;color:#f59e0b;cursor:pointer;font-size:12px;padding:0">Remove</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin_seo_instance_delete', iid=inst.id) }}" style="display:inline" onsubmit="return confirm('Delete this instance?')">
+              <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;padding:0;margin-left:6px">Del</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not instances %}
+        <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text-dim)">
+          No backlink instances found. <a href="{{ url_for('admin_seo_scan') }}" style="color:var(--accent)">Run a scan</a> to detect and create links.
+        </td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════════════
+     TAB: SUGGESTIONS
+     ══════════════════════════════════════════════════════ -->
+{% if active_tab == 'suggestions' %}
+<div class="seo-tab-panel active" id="seoTab-suggestions">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+    <div>
+      <h2 style="margin:0;font-size:18px;font-weight:700">Inline Suggestions</h2>
+      <p style="margin:4px 0 0;font-size:13px;color:var(--text-dim)">Quote-style article suggestions -- {{ suggestions|length }} total</p>
+    </div>
+    <a href="{{ url_for('admin_seo_scan') }}" class="btn btn-ghost" style="font-size:13px;padding:7px 14px">Re-scan to Generate</a>
+  </div>
+
+  <!-- Filter Bar -->
+  <form method="GET" class="filter-bar">
+    <input type="hidden" name="tab" value="suggestions">
+    <select name="vertical">
+      <option value="all">All Verticals</option>
+      {% for v in verticals %}
+      <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="filter-btn">Filter</button>
+    {% if filter_v != 'all' %}
+    <a href="{{ url_for('admin_seo_hub', tab='suggestions') }}" class="filter-clear">Clear</a>
+    {% endif %}
+  </form>
+
+  <!-- Manual Add Suggestion -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:20px">
+    <h3 style="margin:0 0 12px;font-size:14px;font-weight:700">Add Manual Suggestion</h3>
+    <form method="POST" action="{{ url_for('admin_seo_suggestion_add') }}" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+      <div style="flex:1;min-width:140px">
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px">Vertical *</label>
+        <select name="vertical_slug" required style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px">
+          <option value="">Select</option>
+          {% for v in verticals %}
+          <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="flex:2;min-width:160px">
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px">Source Article Slug *</label>
+        <input type="text" name="source_slug" required placeholder="source-article-slug" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+      </div>
+      <div style="flex:2;min-width:160px">
+        <label style="font-size:12px;color:var(--text-dim);display:block;margin-bottom:4px">Target Article Slug *</label>
+        <input type="text" name="target_slug" required placeholder="target-article-slug" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:13px;box-sizing:border-box">
+      </div>
+      <button type="submit" class="btn btn-primary" style="font-size:13px;padding:8px 16px">+ Add</button>
+    </form>
+  </div>
+
+  <!-- Grouped Suggestions -->
+  {% for key, group in grouped.items() %}
+  <div class="sug-group">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div>
+        <span style="background:var(--surface2);padding:2px 8px;border-radius:4px;font-size:11px;color:var(--text-dim)">{{ group.source_type }}</span>
+        <strong style="margin-left:6px;font-size:14px">{{ group.source_title }}</strong>
+        <span style="color:var(--text-dim);font-size:12px;margin-left:6px">({{ group.source_slug }})</span>
+      </div>
+      <span style="font-size:12px;color:var(--text-dim)">{{ group.items|length }} suggestion{{ 's' if group.items|length > 1 else '' }}</span>
+    </div>
+
+    <div class="sug-quote">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);margin-bottom:8px">Related Articles</div>
+      {% for item in group.items %}
+      <div class="sug-item" {% if item.status == 'removed' %}style="opacity:0.4"{% endif %}>
+        <div style="flex:1;display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;color:var(--text-dim)">&rarr;</span>
+          <span style="font-size:13px;font-weight:500">{{ item.anchor_text[:50] }}{% if item.anchor_text|length > 50 %}...{% endif %}</span>
+          <span style="font-size:11px;color:var(--text-dim)">({{ item.target_slug }})</span>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+          {% if item.status == 'active' %}
+          <span style="color:#22c55e;font-size:12px;font-weight:600">Active</span>
+          {% else %}
+          <span style="color:#ef4444;font-size:12px">Removed</span>
+          {% endif %}
+          <form method="POST" action="{{ url_for('admin_seo_suggestion_toggle', sid=item.id) }}" style="display:inline">
+            <button type="submit" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px;color:var(--text);font-family:inherit">
+              {% if item.status == 'active' %}Disable{% else %}Enable{% endif %}
+            </button>
+          </form>
+          <form method="POST" action="{{ url_for('admin_seo_suggestion_delete', sid=item.id) }}" style="display:inline" onsubmit="return confirm('Delete this suggestion?')">
+            <button type="submit" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;padding:0">Del</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  {% if not grouped %}
+  <div class="empty-state">
+    <div class="empty-state-icon">&#128172;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No inline suggestions yet</h3>
+    <p style="font-size:14px">Use <a href="{{ url_for('admin_seo_scan') }}" style="color:var(--accent)">Scan & Build</a> to auto-generate, or add manually above.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<script>
+function switchMainTab(tab) {
+  window.location.href = '{{ url_for("admin_seo_hub") }}?tab=' + tab;
+}
+</script>
+{% endblock %}

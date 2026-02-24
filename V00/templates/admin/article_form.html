@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 {% block title %}{% if article %}Edit Article{% else %}New Article{% endif %}{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_articles') }}">Articles</a><span class="sep">></span>{% if article %}Edit{% else %}New{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span><a href="{{ url_for('admin_content_hub', tab='articles') }}">Articles</a><span class="sep">›</span>{% if article %}Edit{% else %}New{% endif %}{% endblock %}
 {% block content %}
-<h1 class="page-title">📝 {% if article %}Edit: {{ article.title[:50] }}{% else %}New Article{% endif %}</h1>
+<h1 class="page-title">{% if article %}Edit: {{ article.title[:50] }}{% else %}New Article{% endif %}</h1>
 
-<form method="POST" style="max-width:900px">
+<form method="POST" style="max-width:960px" id="articleForm">
   <div class="form-group"><label class="form-label">Title *</label><input class="form-input" name="title" value="{{ article.title if article else '' }}" required placeholder="Cao su chan phuoc — Tat ca kien thuc ban can biet"></div>
 
   <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr">
@@ -27,7 +27,7 @@
 
   <div class="form-row">
     <div class="form-group"><label class="form-label">Related Segment slug</label><input class="form-input" name="related_segment_slug" value="{{ article.related_segment_slug if article else '' }}" placeholder="cuv"></div>
-    <div class="form-group"><label class="form-label">Related Zone slug</label><input class="form-input" name="related_zone_slug" value="{{ article.related_zone_slug if article else '' }}" placeholder="he-thong-treo"></div>
+    <div class="form-group"><label class="form-label">Related Zone slug</label><input class="form-input" name="related_zone_slug" id="relatedZoneSlug" value="{{ article.related_zone_slug if article else '' }}" placeholder="he-thong-treo"></div>
   </div>
 
   <div class="form-group"><label class="form-label">Tags (comma separated)</label><input class="form-input" name="tags" value="{{ article.tags if article else '' }}" placeholder="cao su phuoc, he thong treo, bao duong"></div>
@@ -40,15 +40,411 @@
 
   <div class="form-group"><label class="form-label">Excerpt</label><textarea class="form-textarea" name="excerpt" style="min-height:80px" placeholder="Mo ta ngan cho listing...">{{ article.excerpt if article else '' }}</textarea></div>
 
-  <div class="form-group"><label class="form-label">Content (HTML)</label><textarea class="form-textarea" name="content" style="min-height:400px" placeholder="<h2>Title</h2><p>Content...</p>">{{ article.content if article else '' }}</textarea></div>
+  <!-- Rich Text Editor for Content (Quill - free, MIT license) -->
+  <div class="form-group">
+    <label class="form-label">Content</label>
+    <div id="editorWrap">
+      <div id="quillEditor"></div>
+    </div>
+    <textarea name="content" id="contentHidden" style="display:none">{{ article.content if article else '' }}</textarea>
+    <div style="margin-top:6px;text-align:right">
+      <button type="button" class="btn btn-ghost" id="toggleHtmlBtn" style="font-size:12px;padding:4px 10px">HTML</button>
+    </div>
+    <textarea id="htmlSourceEditor" class="form-textarea" style="display:none;min-height:300px;font-family:'DM Mono',monospace;font-size:13px"></textarea>
+  </div>
 
-  <div class="form-group"><label class="form-label">Product Embed Code</label><textarea class="form-textarea" name="embed_code" style="min-height:80px;font-family:'DM Mono';font-size:14px" placeholder='<div class="at-carousel" data-keyword="..." data-limit="6"></div>'>{{ article.embed_code if article else '' }}</textarea></div>
+  <!-- Product Attachment Section -->
+  <div class="form-group">
+    <label class="form-label">San pham gan vao bai viet</label>
+    <div class="product-attach-section">
+      <div class="product-attach-zone-bar">
+        <button type="button" class="btn btn-ghost" id="loadZoneProducts" style="font-size:13px">
+          Tai san pham tu Zone
+        </button>
+        <span class="product-attach-hint" id="zoneHint"></span>
+      </div>
+      <div class="product-attach-grid" id="productGrid">
+        <!-- Products loaded dynamically -->
+      </div>
+      <div class="product-attach-empty" id="productEmpty">
+        Nhap Related Zone slug phia tren va nhan "Tai san pham tu Zone" de xem san pham lien quan.
+      </div>
+    </div>
+    <input type="hidden" name="embed_code" id="embedCodeHidden" value="{{ article.embed_code if article else '' }}">
+  </div>
+
+  <!-- Related Articles Preview -->
+  {% if article %}
+  <div class="form-group">
+    <label class="form-label">Bai viet lien quan (tu dong)</label>
+    <div class="related-articles-preview">
+      {% if related_articles %}
+        {% for r in related_articles %}
+        <a href="{{ url_for('admin_article_edit', aid=r.id) }}" class="related-article-card" target="_blank">
+          {% if r.image_url %}<img src="{{ r.image_url }}" class="rac-img" alt="">{% endif %}
+          <div class="rac-body">
+            <div class="rac-tier {{ r.tier }}">{{ r.tier|replace('-',' ')|upper }}</div>
+            <div class="rac-title">{{ r.title }}</div>
+            <div class="rac-meta">{{ "{:,}".format(r.views) }} views · {{ r.reading_time }} min</div>
+          </div>
+        </a>
+        {% endfor %}
+      {% else %}
+        <div class="related-articles-empty">Khong co bai viet lien quan (cung category hoac tier).</div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
 
   <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="ai_generated" {% if article and article.ai_generated %}checked{% endif %}> AI Generated</label></div>
 
   <div class="form-actions">
     <button type="submit" class="btn btn-primary">{% if article %}Save{% else %}Create{% endif %}</button>
-    <a href="{{ url_for('admin_articles') }}" class="btn btn-ghost">Cancel</a>
+    <a href="{{ url_for('admin_content_hub', tab='articles') }}" class="btn btn-ghost">Cancel</a>
   </div>
 </form>
+
+<!-- Quill.js CDN (free, MIT license) -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+(function() {
+  // Size whitelist
+  var Size = Quill.import('attributors/style/size');
+  Size.whitelist = ['12px','14px','16px','18px','20px','24px','28px','32px'];
+  Quill.register(Size, true);
+
+  // Font whitelist
+  var Font = Quill.import('attributors/style/font');
+  Font.whitelist = ['DM Sans','Arial','Georgia','Times New Roman','Courier New','Verdana'];
+  Quill.register(Font, true);
+
+  var quill = new Quill('#quillEditor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ 'header': [2, 3, 4, false] }],
+        [{ 'font': Font.whitelist }],
+        [{ 'size': Size.whitelist }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+        [{ 'indent': '-1' }, { 'indent': '+1' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image'],
+        ['clean']
+      ]
+    },
+    placeholder: 'Noi dung bai viet...'
+  });
+
+  // Load existing content
+  var existing = document.getElementById('contentHidden').value;
+  if (existing) {
+    quill.root.innerHTML = existing;
+  }
+
+  // Sync to hidden textarea on text change
+  quill.on('text-change', function() {
+    document.getElementById('contentHidden').value = quill.root.innerHTML;
+  });
+
+  // Sync before form submit
+  document.getElementById('articleForm').addEventListener('submit', function() {
+    if (document.getElementById('htmlSourceEditor').style.display !== 'none') {
+      // If HTML source is visible, sync it back
+      quill.root.innerHTML = document.getElementById('htmlSourceEditor').value;
+    }
+    document.getElementById('contentHidden').value = quill.root.innerHTML;
+  });
+
+  // Toggle HTML source view
+  var htmlMode = false;
+  document.getElementById('toggleHtmlBtn').addEventListener('click', function() {
+    htmlMode = !htmlMode;
+    var srcEditor = document.getElementById('htmlSourceEditor');
+    var editorWrap = document.getElementById('editorWrap');
+    if (htmlMode) {
+      srcEditor.value = quill.root.innerHTML;
+      srcEditor.style.display = 'block';
+      editorWrap.style.display = 'none';
+      this.textContent = 'Visual';
+    } else {
+      quill.root.innerHTML = srcEditor.value;
+      document.getElementById('contentHidden').value = srcEditor.value;
+      srcEditor.style.display = 'none';
+      editorWrap.style.display = 'block';
+      this.textContent = 'HTML';
+    }
+  });
+
+  window._quill = quill;
+})();
+</script>
+
+<style>
+/* Quill Editor */
+#editorWrap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+#editorWrap .ql-toolbar {
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+}
+#editorWrap .ql-container {
+  border: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+}
+#editorWrap .ql-editor {
+  min-height: 400px;
+  line-height: 1.7;
+  padding: 16px;
+}
+#editorWrap .ql-editor h2 { font-size: 22px; font-weight: 700; margin: 20px 0 10px; }
+#editorWrap .ql-editor h3 { font-size: 18px; font-weight: 700; margin: 16px 0 8px; }
+#editorWrap .ql-editor h4 { font-size: 16px; font-weight: 700; margin: 12px 0 6px; }
+/* Dark mode support */
+[data-theme="dark"] #editorWrap .ql-toolbar { background: var(--bg-card); }
+[data-theme="dark"] #editorWrap .ql-editor { color: var(--text); background: var(--bg); }
+[data-theme="dark"] .ql-toolbar .ql-stroke { stroke: var(--text-muted); }
+[data-theme="dark"] .ql-toolbar .ql-fill { fill: var(--text-muted); }
+[data-theme="dark"] .ql-toolbar .ql-picker-label { color: var(--text-muted); }
+[data-theme="dark"] .ql-toolbar button:hover .ql-stroke,
+[data-theme="dark"] .ql-toolbar .ql-picker-label:hover { stroke: var(--text); color: var(--text); }
+/* Product Attachment Section */
+.product-attach-section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--bg-card);
+}
+.product-attach-zone-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.product-attach-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.product-attach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.product-attach-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 24px;
+  font-size: 13px;
+}
+/* Product Card */
+.pa-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg);
+  transition: all .15s;
+  position: relative;
+}
+.pa-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.pa-card.selected { border-color: #2563eb; box-shadow: 0 0 0 2px rgba(37,99,235,0.2); }
+.pa-card-img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+  background: var(--bg-hover);
+}
+.pa-card-img-empty {
+  width: 100%;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-hover);
+  font-size: 28px;
+}
+.pa-card-body { padding: 10px; }
+.pa-card-network {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #2563eb;
+  margin-bottom: 4px;
+}
+.pa-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  max-height: 32px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.pa-card-price {
+  font-size: 13px;
+  font-weight: 800;
+  color: #c45d3e;
+  margin-top: 4px;
+}
+.pa-card-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all .15s;
+}
+.pa-card.selected .pa-card-check {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+/* Related Articles Preview */
+.related-articles-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.related-article-card {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  text-decoration: none;
+  color: var(--text);
+  transition: all .15s;
+}
+.related-article-card:hover { border-color: #2563eb; background: var(--bg-hover); }
+.rac-img {
+  width: 70px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.rac-body { flex: 1; min-width: 0; }
+.rac-tier {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 5px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+.rac-tier.nganh { background: #fef3c7; color: #92400e; }
+.rac-tier.chung { background: #dbeafe; color: #1e40af; }
+.rac-tier.chi-tiet { background: #d1fae5; color: #065f46; }
+.rac-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.rac-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.related-articles-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--text-muted);
+  padding: 16px;
+  font-size: 13px;
+}
+</style>
+
+<script>
+// Load products from zone
+document.getElementById('loadZoneProducts').addEventListener('click', function() {
+  var slug = document.getElementById('relatedZoneSlug').value.trim();
+  if (!slug) {
+    document.getElementById('zoneHint').textContent = 'Vui long nhap Related Zone slug truoc.';
+    return;
+  }
+  document.getElementById('zoneHint').textContent = 'Dang tai...';
+  var embedVal = document.getElementById('embedCodeHidden').value || '';
+  var selectedParam = '';
+  if (embedVal.startsWith('product_ids:')) {
+    selectedParam = '&selected=' + encodeURIComponent(embedVal.replace('product_ids:', ''));
+  }
+  fetch('/admin/api/zone-products?slug=' + encodeURIComponent(slug) + selectedParam)
+    .then(r => r.json())
+    .then(data => {
+      var grid = document.getElementById('productGrid');
+      var empty = document.getElementById('productEmpty');
+      if (!data.products || data.products.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        empty.textContent = 'Khong tim thay san pham nao trong zone "' + slug + '".';
+        document.getElementById('zoneHint').textContent = '0 san pham';
+        return;
+      }
+      empty.style.display = 'none';
+      document.getElementById('zoneHint').textContent = data.products.length + ' san pham';
+      grid.innerHTML = data.products.map(function(p) {
+        return '<div class="pa-card' + (p.selected ? ' selected' : '') + '" data-id="' + p.id + '" onclick="toggleProduct(this)">'
+          + (p.image_url ? '<img class="pa-card-img" src="' + p.image_url + '" alt="" onerror="this.outerHTML=\'<div class=pa-card-img-empty>&#128230;</div>\'">' : '<div class="pa-card-img-empty">&#128230;</div>')
+          + '<div class="pa-card-body">'
+          + '<div class="pa-card-network">' + p.network + '</div>'
+          + '<div class="pa-card-name">' + (p.product_name || p.part_name || '') + '</div>'
+          + (p.price ? '<div class="pa-card-price">' + Number(p.price).toLocaleString() + 'd</div>' : '')
+          + '</div>'
+          + '<div class="pa-card-check">' + (p.selected ? '&#10003;' : '') + '</div>'
+          + '</div>';
+      }).join('');
+    })
+    .catch(function() {
+      document.getElementById('zoneHint').textContent = 'Loi khi tai san pham.';
+    });
+});
+
+function toggleProduct(card) {
+  card.classList.toggle('selected');
+  var check = card.querySelector('.pa-card-check');
+  check.innerHTML = card.classList.contains('selected') ? '&#10003;' : '';
+  updateEmbedCode();
+}
+
+function updateEmbedCode() {
+  var ids = [];
+  document.querySelectorAll('.pa-card.selected').forEach(function(c) {
+    ids.push(c.getAttribute('data-id'));
+  });
+  document.getElementById('embedCodeHidden').value = ids.length ? 'product_ids:' + ids.join(',') : '';
+}
+
+// Auto-load products on page load if zone slug exists
+(function() {
+  var slug = document.getElementById('relatedZoneSlug').value.trim();
+  if (slug) {
+    setTimeout(function() {
+      document.getElementById('loadZoneProducts').click();
+    }, 500);
+  }
+})();
+</script>
 {% endblock %}

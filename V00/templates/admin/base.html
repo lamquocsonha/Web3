@@ -30,120 +30,32 @@
       <a href="{{ url_for('admin_verticals') }}" class="sb-link {% if 'vertical' in (request.endpoint or '') or 'segment' in (request.endpoint or '') or 'zone' in (request.endpoint or '') or 'part' in (request.endpoint or '') %}active{% endif %}">
         <span class="sb-icon">&#127760;</span> Verticals
       </a>
-
-      <!-- Content Dropdown -->
-      <div class="sb-dropdown">
-        <div class="sb-dropdown-header">
-          <span class="sb-icon">&#128218;</span> Content
-          <span class="sb-arrow">›</span>
-        </div>
-        <div class="sb-dropdown-content">
-          <a href="{{ url_for('admin_articles') }}" class="sb-link sb-sub {% if 'article' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128218;</span> Articles
-          </a>
-          <a href="{{ url_for('admin_feedbacks') }}" class="sb-link sb-sub {% if 'feedback' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">📝</span> Feedbacks
-          </a>
-          <a href="{{ url_for('admin_content') }}" class="sb-link sb-sub {% if 'content' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#129302;</span> AI Content
-          </a>
-        </div>
-      </div>
-
-      <!-- Monetization Dropdown -->
-      <div class="sb-dropdown">
-        <div class="sb-dropdown-header">
-          <span class="sb-icon">&#128176;</span> Monetization
-          <span class="sb-arrow">›</span>
-        </div>
-        <div class="sb-dropdown-content">
-          <a href="{{ url_for('admin_affiliate') }}" class="sb-link sb-sub {% if 'affiliate' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128279;</span> Affiliate Hub
-          </a>
-          <a href="{{ url_for('admin_products') }}" class="sb-link sb-sub {% if 'product' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128230;</span> Products
-          </a>
-          <a href="{{ url_for('admin_hotels') }}" class="sb-link sb-sub {% if request.endpoint == 'admin_hotels' or request.endpoint == 'admin_hotel_new' or request.endpoint == 'admin_hotel_edit' %}active{% endif %}">
-            <span class="sb-icon">&#127976;</span> Hotels
-          </a>
-          <a href="{{ url_for('admin_hotel_sync') }}" class="sb-link sb-sub {% if 'hotel_sync' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
-            <span class="sb-icon">&#128260;</span> Hotel Sync
-          </a>
-          <a href="{{ url_for('admin_attractions') }}" class="sb-link sb-sub {% if 'attraction' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#127903;</span> Attractions
-          </a>
-          <a href="{{ url_for('admin_vouchers') }}" class="sb-link sb-sub {% if request.endpoint == 'admin_vouchers' or request.endpoint == 'admin_voucher_new' or request.endpoint == 'admin_voucher_edit' %}active{% endif %}">
-            <span class="sb-icon">&#127915;</span> Vouchers
-          </a>
-          <a href="{{ url_for('admin_voucher_widgets') }}" class="sb-link sb-sub {% if 'voucher_widget' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#127873;</span> Voucher Widgets
-          </a>
-          <a href="{{ url_for('admin_voucher_sync') }}" class="sb-link sb-sub {% if 'voucher_sync' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
-            <span class="sb-icon">&#128260;</span> Voucher Sync
-          </a>
-        </div>
-      </div>
-
-      <!-- AI Engine Dropdown -->
-      <div class="sb-dropdown">
-        <div class="sb-dropdown-header">
-          <span class="sb-icon">&#9889;</span> AI Engine
-          <span class="sb-arrow">›</span>
-        </div>
-        <div class="sb-dropdown-content">
-          <a href="{{ url_for('admin_ai_center') }}" class="sb-link sb-sub {% if 'ai_center' in (request.endpoint or '') %}active{% endif %}" style="font-weight:600">
-            <span class="sb-icon">&#129302;</span> AI Control Center
-          </a>
-          <a href="{{ url_for('admin_content_calendar') }}" class="sb-link sb-sub {% if 'content_calendar' in (request.endpoint or '') or 'content_event' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128197;</span> Calendar
-          </a>
-          <a href="{{ url_for('admin_auto_rules') }}" class="sb-link sb-sub {% if 'auto_rules' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#9881;</span> Auto Rules
-          </a>
-          <a href="{{ url_for('admin_content_queue') }}" class="sb-link sb-sub {% if 'content_queue' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128203;</span> Queue
-          </a>
-          <a href="{{ url_for('admin_gap_analysis') }}" class="sb-link sb-sub {% if 'gap_analysis' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128200;</span> Gap Analysis
-          </a>
-        </div>
-      </div>
-
-      <!-- Tools Dropdown -->
-      <div class="sb-dropdown">
-        <div class="sb-dropdown-header">
-          <span class="sb-icon">&#128295;</span> Tools
-          <span class="sb-arrow">›</span>
-        </div>
-        <div class="sb-dropdown-content">
-          <a href="{{ url_for('admin_video') }}" class="sb-link sb-sub {% if 'video' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#127909;</span> Video
-          </a>
-          <a href="{{ url_for('admin_analytics') }}" class="sb-link sb-sub {% if 'analytics' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#128200;</span> Analytics
-          </a>
-          <a href="{{ url_for('admin_settings') }}" class="sb-link sb-sub {% if 'settings' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#9881;</span> Settings
-          </a>
-          <a href="{{ url_for('admin_seed_data') }}" class="sb-link sb-sub {% if 'seed_data' in (request.endpoint or '') %}active{% endif %}">
-            <span class="sb-icon">&#127793;</span> Seed Data
-          </a>
-        </div>
-      </div>
+      <a href="{{ url_for('admin_content_hub') }}" class="sb-link {% if 'content_hub' in (request.endpoint or '') or 'article' in (request.endpoint or '') or 'feedback' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#128218;</span> Content
+      </a>
+      <a href="{{ url_for('admin_products_hub') }}" class="sb-link {% if 'products_hub' in (request.endpoint or '') or 'product' in (request.endpoint or '') or 'affiliate' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#128230;</span> Products
+      </a>
+      <a href="{{ url_for('admin_hotels_hub') }}" class="sb-link {% if 'hotels_hub' in (request.endpoint or '') or 'hotel' in (request.endpoint or '') or 'attraction' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#127976;</span> Hotels
+      </a>
+      <a href="{{ url_for('admin_seo_hub') }}" class="sb-link {% if 'seo' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#128269;</span> SEO
+      </a>
+      <a href="{{ url_for('admin_ai_engine') }}" class="sb-link {% if 'ai_engine' in (request.endpoint or '') or 'ai_center' in (request.endpoint or '') or 'gap_analysis' in (request.endpoint or '') or 'content_queue' in (request.endpoint or '') or 'content_calendar' in (request.endpoint or '') or 'auto_rules' in (request.endpoint or '') or 'ai_scan_gaps' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#9889;</span> AI Engine
+      </a>
+      <a href="{{ url_for('admin_vouchers_hub') }}" class="sb-link {% if 'voucher' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#127915;</span> Vouchers
+      </a>
+      <a href="{{ url_for('admin_tools') }}" class="sb-link {% if 'tools' in (request.endpoint or '') or 'video' in (request.endpoint or '') or 'analytics' in (request.endpoint or '') or 'seed_data' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#128295;</span> Tools
+      </a>
+      <a href="{{ url_for('admin_settings') }}" class="sb-link {% if 'settings' in (request.endpoint or '') %}active{% endif %}">
+        <span class="sb-icon">&#9881;</span> Settings
+      </a>
     </nav>
-    <script>
-    // Dropdown toggle
-    document.querySelectorAll('.sb-dropdown-header').forEach(header => {
-      header.addEventListener('click', function() {
-        const dropdown = this.parentElement;
-        dropdown.classList.toggle('open');
-      });
-    });
-    // Open all dropdowns by default
-    document.querySelectorAll('.sb-dropdown').forEach(dropdown => {
-      dropdown.classList.add('open');
-    });
-    </script>
+    <!-- No dropdowns — all pages are tab-based now -->
   </aside>
   <main class="main">
     <header class="topbar">

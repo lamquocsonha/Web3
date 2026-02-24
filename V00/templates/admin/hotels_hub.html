@@ -1,0 +1,436 @@
+{% extends "admin/base.html" %}
+{% block title %}Hotels{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> Hotels{% endblock %}
+{% block content %}
+<style>
+.hub-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:24px }
+.hub-tab { flex:1; padding:11px 18px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; color:var(--text-dim); border:none; background:transparent; font-family:inherit; transition:all .2s }
+.hub-tab:hover { background:var(--surface2); color:var(--text) }
+.hub-tab.active { background:var(--accent); color:#fff }
+.hub-panel { display:none }
+.hub-panel.active { display:block }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px }
+.stat-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.stat-val { font-size:26px; font-weight:800 }
+.stat-lbl { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+.filter-bar { display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; align-items:center }
+.filter-bar select { padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:14px; background:var(--surface); color:var(--text); font-family:inherit }
+.tbl-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.tbl-wrap table { width:100%; border-collapse:collapse }
+.tbl-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.tbl-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.tbl-wrap tr:last-child td { border:none }
+.tbl-wrap tr:hover td { background:var(--surface2) }
+.btn { padding:8px 18px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.btn-primary { background:var(--accent); color:#fff }
+.btn-ghost { background:var(--surface2); color:var(--text) }
+.btn-danger { background:rgba(239,68,68,.1); color:#ef4444 }
+.btn-success { background:#d1fae5; color:#065f46 }
+.btn-warning { background:#fef3c7; color:#92400e }
+.empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:5px; font-weight:700 }
+.pag { display:flex; gap:4px; margin-top:16px }
+.pag a { padding:6px 12px; border:1px solid var(--border); border-radius:6px; text-decoration:none; font-size:14px; color:var(--text) }
+.pag a.current { background:var(--accent); color:#fff; border-color:var(--accent) }
+</style>
+
+<div class="hub-tabs">
+  <button class="hub-tab {% if active_tab=='hotels' %}active{% endif %}" onclick="location.href='?tab=hotels'">Hotels</button>
+  <button class="hub-tab {% if active_tab=='sync' %}active{% endif %}" onclick="location.href='?tab=sync'">Hotel Sync</button>
+  <button class="hub-tab {% if active_tab=='attractions' %}active{% endif %}" onclick="location.href='?tab=attractions'">Attractions</button>
+</div>
+
+<!-- ══ HOTELS TAB ══ -->
+<div class="hub-panel {% if active_tab=='hotels' %}active{% endif %}">
+{% if active_tab == 'hotels' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <h2 style="margin:0;font-size:18px">Hotel Management</h2>
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('admin_hotel_sync') }}" class="btn btn-ghost" style="font-size:13px;padding:6px 12px;color:#e74c3c">Agoda Sync</a>
+      <a href="{{ url_for('admin_hotel_new') }}" class="btn btn-primary" style="font-size:13px;padding:6px 12px">+ Add Hotel</a>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="stat-box"><div class="stat-val">{{ total }}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ active_h }}</div><div class="stat-lbl">Active</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#ef4444">{{ no_image }}</div><div class="stat-lbl">No Image</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#3b82f6">{{ "{:,}".format(total_clicks) }}</div><div class="stat-lbl">Clicks</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#8b5cf6">{{ "{:,}".format(total_conv) }}</div><div class="stat-lbl">Bookings</div></div>
+  </div>
+
+  <!-- Filters -->
+  <form class="filter-bar" method="GET">
+    <input type="hidden" name="tab" value="hotels">
+    <select name="dest" style="width:150px">
+      <option value="">All Destinations</option>
+      {% for d in destinations %}<option value="{{ d[0] }}" {% if f_dest == d[0] %}selected{% endif %}>{{ d[1] }}</option>{% endfor %}
+    </select>
+    <select name="stars" style="width:120px">
+      <option value="">All Stars</option>
+      {% for s in [5,4,3] %}<option value="{{ s }}" {% if f_stars == s|string %}selected{% endif %}>{{ s }}&#11088;</option>{% endfor %}
+    </select>
+    <select name="status" style="width:120px">
+      <option value="">All Status</option>
+      <option value="active" {% if f_status=='active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if f_status=='inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+    <select name="image" style="width:140px">
+      <option value="">All Images</option>
+      <option value="missing" {% if f_image=='missing' %}selected{% endif %}>No Image</option>
+      <option value="has" {% if f_image=='has' %}selected{% endif %}>Has Image</option>
+    </select>
+    <button type="submit" class="btn btn-ghost" style="font-size:13px">Filter</button>
+    {% if f_dest or f_stars or f_status or f_image %}<a href="?tab=hotels" style="font-size:13px;color:var(--text-dim);text-decoration:none">Clear</a>{% endif %}
+  </form>
+
+  {% if hotels %}
+  <!-- Bulk action bar -->
+  <div id="bulkBarH" style="display:none;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #e74c3c44;border-radius:10px;padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px;position:sticky;top:60px;z-index:10;box-shadow:0 4px 15px rgba(231,76,60,.15)">
+    <span id="bulkCountH" style="font-size:13px;font-weight:700;color:#e74c3c">0 selected</span>
+    <form method="POST" action="{{ url_for('admin_hotels_bulk_delete') }}" id="bulkFormH" style="display:inline"><div id="bulkInputsH"></div>
+      <button type="submit" class="btn btn-danger" style="padding:5px 12px;font-size:13px" onclick="return confirm('Xoa ' + document.querySelectorAll('.h-check:checked').length + ' khach san?')">Xoa da chon</button>
+    </form>
+    <form method="POST" action="{{ url_for('admin_hotels_bulk_toggle') }}" id="bulkToggleFormH" style="display:inline"><div id="bulkToggleInputsH"></div>
+      <button type="submit" name="action" value="deactivate" class="btn btn-ghost" style="font-size:12px;padding:4px 10px;color:#f39c12">Tat</button>
+      <button type="submit" name="action" value="activate" class="btn btn-ghost" style="font-size:12px;padding:4px 10px;color:#2ecc71">Bat</button>
+    </form>
+    <button type="button" class="btn btn-ghost" onclick="clearH()" style="font-size:12px;padding:4px 10px;margin-left:auto">Bo chon</button>
+  </div>
+  <div id="deleteAllBanner" style="display:none;background:linear-gradient(135deg,#2d1b1b,#1a1a2e);border:2px solid #e74c3c;border-radius:10px;padding:12px 20px;margin-bottom:12px;align-items:center;gap:14px;text-align:center">
+    <span style="font-size:13px;color:#fca5a5">Da chon tat ca {{ hotels|length }} khach san trang nay.</span>
+    <form method="POST" action="{{ url_for('admin_hotels_delete_all') }}" style="display:inline;margin-left:12px" onsubmit="return confirm('XOA TAT CA {{ total_filtered }} khach san?')">
+      <button type="submit" class="btn btn-danger" style="font-size:13px;padding:5px 12px">Xoa tat ca {{ total_filtered }}</button>
+    </form>
+  </div>
+
+  <div class="tbl-wrap"><table><thead><tr>
+    <th style="width:32px"><input type="checkbox" id="selAllH" style="width:16px;height:16px;cursor:pointer"></th>
+    <th style="width:56px">Image</th><th>Hotel</th><th>Destination</th><th>Stars</th>
+    <th style="text-align:center">Rating</th><th style="text-align:right">Price</th>
+    <th style="text-align:center">Clicks</th><th>Status</th><th>Actions</th>
+  </tr></thead><tbody>
+    {% for h in hotels %}<tr>
+      <td><input type="checkbox" class="h-check" value="{{ h.id }}" style="width:16px;height:16px;cursor:pointer"></td>
+      <td>{% if h.image_url %}<img src="{{ h.image_url }}" style="width:56px;height:40px;object-fit:cover;border-radius:4px" loading="lazy" onerror="this.outerHTML='<div style=\'width:56px;height:40px;background:var(--surface2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px\'>&#127976;</div>'">{% else %}<div style="width:56px;height:40px;background:var(--surface2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px">&#127976;</div>{% endif %}</td>
+      <td><strong style="font-size:13px">{{ h.name }}</strong>{% if h.is_featured %}<span style="font-size:11px;background:#ff6b35;color:#fff;padding:1px 4px;border-radius:3px;margin-left:4px">HOT</span>{% endif %}
+        <div style="font-size:12px;color:var(--text-dim);margin-top:2px">{{ h.district }}{% if h.amenities %} · {{ h.amenities[:40] }}{% if h.amenities|length > 40 %}...{% endif %}{% endif %}</div></td>
+      <td style="font-size:13px">{{ h.destination_name }}</td>
+      <td>{% for i in range(h.stars) %}&#11088;{% endfor %}</td>
+      <td style="text-align:center"><span style="background:#004fac;color:#fff;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:700">{{ h.rating }}</span></td>
+      <td style="text-align:right;font-family:'DM Mono';font-weight:600;font-size:13px">{{ "{:,.0f}".format(h.price_from) }}d</td>
+      <td style="text-align:center;font-family:'DM Mono';font-size:13px">{{ "{:,}".format(h.clicks) }}</td>
+      <td><form method="POST" action="{{ url_for('admin_hotel_toggle', hid=h.id) }}" style="display:inline"><button type="submit" class="badge" style="cursor:pointer;border:none;font-size:12px;{% if h.is_active %}background:#d1fae5;color:#065f46{% else %}background:var(--surface2);color:var(--text-dim){% endif %}">{{ 'Active' if h.is_active else 'Off' }}</button></form></td>
+      <td style="white-space:nowrap">
+        <a href="{{ url_for('admin_hotel_edit', hid=h.id) }}" class="btn btn-ghost" style="padding:3px 8px;font-size:12px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_hotel_delete', hid=h.id) }}" style="display:inline" onsubmit="return confirm('Delete?')"><button class="btn btn-danger" style="padding:3px 8px;font-size:12px">X</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+
+  <!-- Pagination -->
+  <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text-dim)">
+    <span>{{ (page - 1) * per_page + 1 }}–{{ [(page - 1) * per_page + hotels|length, total_filtered]|min }} / {{ total_filtered }} hotels</span>
+    {% if total_pages > 1 %}
+    <div style="display:flex;gap:4px;align-items:center">
+      {% if page > 1 %}<a href="?tab=hotels&dest={{ f_dest }}&stars={{ f_stars }}&status={{ f_status }}&image={{ f_image }}&page={{ page-1 }}" class="btn btn-ghost" style="font-size:12px;padding:4px 8px">&laquo;</a>{% endif %}
+      {% for p in range(1, total_pages + 1) %}
+        {% if p == page %}<span style="display:inline-block;min-width:30px;text-align:center;padding:4px 6px;background:var(--accent);color:#fff;border-radius:6px;font-weight:700;font-size:12px">{{ p }}</span>
+        {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}<a href="?tab=hotels&dest={{ f_dest }}&stars={{ f_stars }}&status={{ f_status }}&image={{ f_image }}&page={{ p }}" class="btn btn-ghost" style="min-width:30px;text-align:center;font-size:12px;padding:4px 6px">{{ p }}</a>
+        {% elif p == page - 3 or p == page + 3 %}<span style="padding:0 3px;color:var(--text-dim)">...</span>{% endif %}
+      {% endfor %}
+      {% if page < total_pages %}<a href="?tab=hotels&dest={{ f_dest }}&stars={{ f_stars }}&status={{ f_status }}&image={{ f_image }}&page={{ page+1 }}" class="btn btn-ghost" style="font-size:12px;padding:4px 8px">&raquo;</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="empty"><p>{% if f_dest or f_stars or f_status or f_image %}No hotels match filters{% else %}No hotels yet{% endif %}</p><a href="{{ url_for('admin_hotel_new') }}" class="btn btn-primary" style="margin-top:12px">Add first hotel</a></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══ HOTEL SYNC TAB ══ -->
+<div class="hub-panel {% if active_tab=='sync' %}active{% endif %}">
+{% if active_tab == 'sync' %}
+  <!-- Stats -->
+  <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+    <div class="stat-box"><div class="stat-val">{{ total_hotels }}</div><div class="stat-lbl">Total Hotels</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#e74c3c">{{ total_agoda }}</div><div class="stat-lbl">From Agoda</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#3498db">{{ total_manual }}</div><div class="stat-lbl">Manual</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ total_active }}</div><div class="stat-lbl">Active</div></div>
+  </div>
+
+  <!-- API Credentials -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0;font-size:15px">API Credentials</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        {% if api_connected %}
+        <span style="font-size:13px;padding:4px 10px;background:rgba(46,204,113,0.1);color:#2ecc71;border-radius:4px;font-weight:600">Connected</span>
+        {% else %}
+        <span style="font-size:13px;padding:4px 10px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">Not configured</span>
+        {% endif %}
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:13px" onclick="testConnection()" id="testBtn">Test</button>
+      </div>
+    </div>
+    <form method="POST" action="{{ url_for('admin_hotel_sync_save_credentials') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+      <div style="flex:1;min-width:120px"><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">CID</label><input style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2);color:var(--text);font-family:'DM Mono';box-sizing:border-box" name="cid" value="{{ cid }}" placeholder="1959245"></div>
+      <div style="flex:3;min-width:200px"><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">API Key</label><input style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--surface2);color:var(--text);font-family:'DM Mono';box-sizing:border-box" name="api_key" value="{{ 'configured' if has_key else '' }}" placeholder="1959245:5669c3b3-..." {% if has_key %}onfocus="if(this.value==='configured')this.value=''"{% endif %}></div>
+      <button class="btn btn-primary" type="submit">Save</button>
+    </form>
+    <div id="testResult" style="margin-top:8px;font-size:13px;display:none"></div>
+  </div>
+
+  <!-- Fast Sync -->
+  <div style="background:linear-gradient(135deg,rgba(231,76,60,0.04),rgba(231,76,60,0.08));border:2px solid rgba(231,76,60,0.2);border-radius:12px;padding:20px;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <h3 style="margin:0;font-size:15px">Fast Sync — Tu dong phan bo tat ca tinh thanh</h3>
+        <p style="margin:4px 0 0;font-size:13px;color:var(--text-dim)">Tim & import khach san tu Agoda cho {{ agoda_destinations|length }} tinh thanh.</p>
+        {% if not api_connected %}<p style="margin:6px 0 0;font-size:13px;color:#e74c3c;font-weight:600">Luu credentials truoc khi sync</p>{% endif %}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="fsMaxPerCity" style="padding:6px 10px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text)">
+          <option value="5">5/tinh</option><option value="10">10/tinh</option><option value="20">20/tinh</option><option value="30" selected>30/tinh</option><option value="50">50/tinh</option>
+        </select>
+        <button class="btn btn-primary" onclick="startFastSync()" id="fsSyncBtn" {% if not api_connected %}disabled{% endif %}>Fast Sync</button>
+        <button class="btn btn-ghost" onclick="stopFastSync()" id="fsStopBtn" style="display:none;color:#e74c3c;padding:6px 12px;font-size:13px">Stop</button>
+      </div>
+    </div>
+    <div id="fsProgress" style="display:none">
+      <div style="background:var(--border);border-radius:6px;height:8px;margin-bottom:10px;overflow:hidden"><div id="fsBar" style="height:100%;background:linear-gradient(90deg,#e74c3c,#ff6b6b);border-radius:6px;width:0%;transition:width 0.4s"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px"><span id="fsStatus" style="color:var(--text-dim)">Dang chuan bi...</span><span id="fsSummary" style="font-family:'DM Mono';font-weight:600"></span></div>
+    </div>
+    <div id="fsLog" style="display:none;margin-top:12px;max-height:300px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'DM Mono';font-size:12px;line-height:1.8"></div>
+  </div>
+
+  <!-- Search Hotels -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+    <h3 style="margin:0 0 16px;font-size:15px">Tim thu cong theo tinh thanh</h3>
+    {% if not api_connected %}<p style="margin:-8px 0 12px;font-size:13px;color:#e74c3c;font-weight:600">Luu credentials truoc khi search</p>{% endif %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Tinh thanh</label>
+        <select id="syncDest" style="width:200px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)">
+          <option value="">Chon tinh thanh...</option>
+          {% for d in destinations %}<option value="{{ d.slug }}"{% if not d.city_id %} data-no-agoda="1"{% endif %}>{{ d.name }}{% if d.city_id %} ({{ d.city_id }}){% endif %}</option>{% endfor %}
+        </select>
+      </div>
+      <div style="display:none" id="wardGroup"><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Phuong xa</label>
+        <select id="syncWard" style="width:200px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)"><option value="">Tat ca phuong xa</option></select>
+      </div>
+      <div><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Check-in</label><input type="date" id="syncCheckin" style="width:150px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)"></div>
+      <div><label style="display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:4px">Check-out</label><input type="date" id="syncCheckout" style="width:150px;padding:8px;font-size:13px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text)"></div>
+      <button class="btn btn-primary" onclick="searchAgoda()" id="searchBtn" {% if not api_connected %}disabled{% endif %}>Search</button>
+      <button class="btn btn-ghost" onclick="importSelected()" id="importBtn" style="display:none;font-size:13px;padding:6px 14px">Import selected</button>
+    </div>
+    <div id="searchLoading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);font-size:14px">Dang tai du lieu tu Agoda API...</div>
+    <div id="searchResults" style="margin-top:16px"></div>
+    <div id="searchCount" style="margin-top:8px;font-size:13px;color:var(--text-dim);display:none"></div>
+  </div>
+
+  <!-- Imported Hotels List -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <h3 style="margin:0;font-size:15px">Hotels da import tu Agoda <span style="font-weight:400;color:var(--text-dim)">({{ total_agoda }})</span></h3>
+      {% if agoda_no_image %}<span style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">{{ agoda_no_image }} thieu anh</span>{% endif %}
+      <button onclick="fixImages()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">Fix images</button>
+      <button onclick="fixAddresses()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--text)">Fix addresses</button>
+      <span id="fixImgResult" style="font-size:12px;color:var(--text-dim)"></span>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <a href="?tab=sync" class="btn btn-ghost" style="padding:4px 10px;font-size:12px{% if not f_image %};font-weight:700{% endif %}">All</a>
+        <a href="?tab=sync&image=missing" class="btn btn-ghost" style="padding:4px 10px;font-size:12px{% if f_image=='missing' %};font-weight:700;color:#e74c3c{% endif %}">No Image</a>
+        <a href="?tab=sync&image=has" class="btn btn-ghost" style="padding:4px 10px;font-size:12px{% if f_image=='has' %};font-weight:700;color:#2ecc71{% endif %}">Has Image</a>
+      </div>
+    </div>
+    {% if recent %}
+    <div class="tbl-wrap"><table><thead><tr><th>#</th><th style="width:56px">Anh</th><th>Hotel</th><th>Destination</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead><tbody>
+      {% for h in recent %}<tr>
+        <td style="font-family:'DM Mono';color:var(--text-dim)">{{ h.id }}</td>
+        <td>{% if h.image_url %}<img src="{{ h.image_url }}" style="width:48px;height:36px;object-fit:cover;border-radius:4px" loading="lazy" onerror="this.style.display='none'">{% else %}<span style="display:inline-block;width:48px;height:36px;background:rgba(231,76,60,0.1);border-radius:4px;text-align:center;line-height:36px;font-size:14px">-</span>{% endif %}</td>
+        <td><strong>{{ h.name[:50] }}</strong><div style="font-size:12px;color:var(--text-dim)">{{ h.district }}</div></td>
+        <td>{{ h.destination_name }}</td>
+        <td>{% for i in range(h.stars) %}&#11088;{% endfor %}</td>
+        <td><span style="background:#004fac;color:#fff;padding:1px 5px;border-radius:3px;font-size:12px;font-weight:700">{{ h.rating }}</span></td>
+        <td style="font-family:'DM Mono'">{{ "{:,.0f}".format(h.price_from) }}d</td>
+        <td>{% if h.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Active</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">Off</span>{% endif %}</td>
+      </tr>{% endfor %}
+    </tbody></table></div>
+    {% if recent_pages > 1 %}
+    <div class="pag">
+      {% if page > 1 %}<a href="?tab=sync&image={{ f_image }}&page={{ page-1 }}">Prev</a>{% endif %}
+      {% for p in range(1, recent_pages + 1) %}
+        {% if p == page %}<a class="current">{{ p }}</a>
+        {% elif p == 1 or p == recent_pages or (p >= page - 2 and p <= page + 2) %}<a href="?tab=sync&image={{ f_image }}&page={{ p }}">{{ p }}</a>
+        {% elif p == page - 3 or p == page + 3 %}<span style="padding:0 3px;color:var(--text-dim)">...</span>{% endif %}
+      {% endfor %}
+      {% if page < recent_pages %}<a href="?tab=sync&image={{ f_image }}&page={{ page+1 }}">Next</a>{% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div style="padding:24px;text-align:center;color:var(--text-dim);font-size:14px">
+      {% if f_image == 'missing' %}Khong co hotel nao thieu anh{% elif f_image == 'has' %}Khong co hotel nao co anh{% else %}Chua import hotel nao tu Agoda{% endif %}
+    </div>
+    {% endif %}
+  </div>
+{% endif %}
+</div>
+
+<!-- ══ ATTRACTIONS TAB ══ -->
+<div class="hub-panel {% if active_tab=='attractions' %}active{% endif %}">
+{% if active_tab == 'attractions' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <h2 style="margin:0;font-size:18px">Attractions</h2>
+    <a href="{{ url_for('admin_attraction_new') }}" class="btn btn-primary">+ New Attraction</a>
+  </div>
+  <div class="stats-row" style="grid-template-columns:repeat(2,1fr)">
+    <div class="stat-box"><div class="stat-val">{{ total }}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#22c55e">{{ active_a }}</div><div class="stat-lbl">Active</div></div>
+  </div>
+  <form class="filter-bar" method="GET">
+    <input type="hidden" name="tab" value="attractions">
+    <select name="dest" onchange="this.form.submit()">
+      <option value="all">All Destinations</option>
+      {% for d in destinations %}<option value="{{ d }}" {% if f_dest==d %}selected{% endif %}>{{ d }}</option>{% endfor %}
+    </select>
+    <select name="cat" onchange="this.form.submit()">
+      <option value="all">All Categories</option>
+      {% for c in cats %}<option value="{{ c }}" {% if f_cat==c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select>
+  </form>
+  {% if items %}
+  <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Destination</th><th>Category</th><th>Active</th><th></th></tr></thead><tbody>
+    {% for a in items %}<tr>
+      <td><strong>{{ a.name[:50] }}</strong></td>
+      <td>{{ a.destination }}</td>
+      <td><span class="badge" style="background:var(--accent-dim);color:var(--accent)">{{ a.category }}</span></td>
+      <td>{% if a.is_active %}<span class="badge" style="background:#d1fae5;color:#065f46">Yes</span>{% else %}<span class="badge" style="background:var(--surface2);color:var(--text-dim)">No</span>{% endif %}</td>
+      <td>
+        <a href="{{ url_for('admin_attraction_edit', aid=a.id) }}" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Edit</a>
+        <form method="POST" action="{{ url_for('admin_attraction_toggle', aid=a.id) }}" style="display:inline"><button type="submit" class="btn btn-ghost" style="padding:4px 10px;font-size:13px">Toggle</button></form>
+      </td>
+    </tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}
+  <div class="empty"><h3>No attractions found</h3></div>
+  {% endif %}
+{% endif %}
+</div>
+
+{% if active_tab == 'sync' %}
+<script>
+function fixImages(){
+  var el=document.getElementById('fixImgResult');el.textContent='Dang fix...';el.style.color='var(--text-dim)';
+  fetch('/admin/hotel-sync/fix-images',{method:'POST'}).then(r=>r.json()).then(d=>{el.textContent='Done! '+d.fixed+' fixed. Reload de xem.';el.style.color='#2ecc71';}).catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
+}
+function fixAddresses(){
+  var el=document.getElementById('fixImgResult');el.textContent='Dang geocode...';el.style.color='var(--text-dim)';
+  fetch('/admin/hotel-sync/fix-addresses',{method:'POST'}).then(r=>r.json()).then(d=>{el.textContent='Done! '+d.updated+'/'+d.total+' updated. Reload de xem.';el.style.color='#2ecc71';}).catch(e=>{el.textContent='Loi: '+e;el.style.color='#e74c3c';});
+}
+(function(){
+  var destSel=document.getElementById('syncDest'),wardGrp=document.getElementById('wardGroup'),wardSel=document.getElementById('syncWard');
+  if(!destSel||!wardGrp||!wardSel)return;
+  destSel.addEventListener('change',function(){
+    var slug=this.value;wardSel.innerHTML='<option value="">Tat ca phuong xa</option>';
+    if(!slug){wardGrp.style.display='none';return;}
+    wardGrp.style.display='';wardSel.innerHTML='<option value="">Dang tai...</option>';wardSel.disabled=true;
+    fetch('/api/wards/by-destination?slug='+encodeURIComponent(slug)).then(r=>r.json()).then(data=>{
+      wardSel.disabled=false;wardSel.innerHTML='<option value="">Tat ca phuong xa ('+( data.total||0)+')</option>';
+      if(data.wards&&data.wards.length>0)data.wards.forEach(w=>{var o=document.createElement('option');o.value=w.name;o.textContent=w.name;wardSel.appendChild(o);});
+      else wardSel.innerHTML='<option value="">Chua co du lieu phuong xa</option>';
+    }).catch(()=>{wardSel.disabled=false;wardSel.innerHTML='<option value="">Khong tai duoc</option>';});
+  });
+})();
+var fsStopped=false,fsRunning=false;
+var DESTINATIONS=[{% for d in agoda_destinations %}{slug:'{{ d.slug }}',name:'{{ d.name }}'},{% endfor %}];
+function startFastSync(){
+  if(fsRunning)return;fsRunning=true;fsStopped=false;
+  var btn=document.getElementById('fsSyncBtn');btn.disabled=true;btn.textContent='Dang sync...';
+  document.getElementById('fsStopBtn').style.display='inline-flex';
+  document.getElementById('fsProgress').style.display='block';
+  document.getElementById('fsLog').style.display='block';document.getElementById('fsLog').innerHTML='';
+  var maxPerCity=parseInt(document.getElementById('fsMaxPerCity').value)||10,total=DESTINATIONS.length,totalImported=0,totalFound=0;
+  function syncNext(idx){
+    if(fsStopped||idx>=total){document.getElementById('fsBar').style.width='100%';fsRunning=false;btn.disabled=false;btn.textContent='Fast Sync';document.getElementById('fsStopBtn').style.display='none';
+      document.getElementById('fsStatus').innerHTML=fsStopped?'<span style="color:#f59e0b;font-weight:600">Da dung lai</span>':'<span style="color:#2ecc71;font-weight:600">Hoan tat!</span>';
+      document.getElementById('fsSummary').textContent=totalImported+' imported / '+totalFound+' found';appendLog(fsStopped?'Dung tai':'Hoan tat! '+totalImported+' hotel imported');return;}
+    var dest=DESTINATIONS[idx],pct=Math.round(idx/total*100);
+    document.getElementById('fsBar').style.width=pct+'%';document.getElementById('fsStatus').textContent='('+(idx+1)+'/'+total+') '+dest.name+'...';
+    document.getElementById('fsSummary').textContent=totalImported+' imported';appendLog(dest.name+' ...');
+    fetch('/admin/hotel-sync/fast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({destination:dest.slug,max_per_city:maxPerCity})})
+    .then(r=>r.json()).then(data=>{totalFound+=(data.found||0);totalImported+=(data.imported||0);appendLog('  '+dest.name+': '+(data.found||0)+' found, '+(data.imported||0)+' imported');setTimeout(()=>syncNext(idx+1),500);})
+    .catch(()=>{appendLog('  Loi: '+dest.name);setTimeout(()=>syncNext(idx+1),1000);});
+  }
+  appendLog('Bat dau Fast Sync — '+total+' tinh thanh, max '+maxPerCity+' hotels/tinh');syncNext(0);
+}
+function stopFastSync(){fsStopped=true;document.getElementById('fsStopBtn').style.display='none';}
+function appendLog(msg){var log=document.getElementById('fsLog');log.innerHTML+=msg+'<br>';log.scrollTop=log.scrollHeight;}
+function testConnection(){
+  var btn=document.getElementById('testBtn'),result=document.getElementById('testResult');btn.textContent='...';btn.disabled=true;result.style.display='none';
+  fetch('/admin/hotel-sync/test',{method:'POST'}).then(r=>r.json()).then(data=>{
+    result.style.display='block';
+    result.innerHTML=data.connected?'<span style="color:#2ecc71;font-weight:600">Ket noi thanh cong</span>':'<span style="color:#e74c3c;font-weight:600">Ket noi that bai</span> '+(data.error||'');
+    btn.textContent='Test';btn.disabled=false;
+  }).catch(()=>{result.style.display='block';result.innerHTML='<span style="color:#e74c3c">Loi network</span>';btn.textContent='Test';btn.disabled=false;});
+}
+var searchResultsData=[];
+function searchAgoda(){
+  var dest=document.getElementById('syncDest').value;if(!dest){alert('Chon destination truoc');return;}
+  var btn=document.getElementById('searchBtn');btn.textContent='...';btn.disabled=true;
+  document.getElementById('searchLoading').style.display='block';document.getElementById('searchResults').innerHTML='';document.getElementById('searchCount').style.display='none';document.getElementById('importBtn').style.display='none';
+  fetch('/admin/hotel-sync/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({destination:dest,checkin:document.getElementById('syncCheckin').value,checkout:document.getElementById('syncCheckout').value})})
+  .then(r=>r.json()).then(data=>{
+    document.getElementById('searchLoading').style.display='none';btn.textContent='Search';btn.disabled=false;searchResultsData=data.hotels||[];
+    if(data.error){document.getElementById('searchResults').innerHTML='<div style="padding:16px;color:#e74c3c">'+data.error+'</div>';return;}
+    if(searchResultsData.length===0){document.getElementById('searchResults').innerHTML='<div style="padding:16px;color:var(--text-dim)">Khong tim thay hotel nao</div>';return;}
+    document.getElementById('importBtn').style.display='inline-flex';document.getElementById('searchCount').style.display='block';document.getElementById('searchCount').textContent=data.total+' hotels found';
+    var html='<div class="tbl-wrap"><table><thead><tr><th style="width:30px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th><th>Hotel</th><th>Stars</th><th>Rating</th><th>Price</th><th>Status</th></tr></thead><tbody>';
+    searchResultsData.forEach(function(h,i){var imp=h.already_imported;
+      html+='<tr style="'+(imp?'opacity:0.5':'')+'">'+'<td><input type="checkbox" class="hCheck" data-idx="'+i+'" '+(imp?'disabled':'checked')+'></td>'
+      +'<td><strong>'+(h.name||'').substring(0,50)+'</strong><div style="font-size:12px;color:var(--text-dim)">'+(h.district||h.address||'')+'</div></td>'
+      +'<td>'+'&#11088;'.repeat(h.stars||0)+'</td><td>'+(h.rating||0)+'</td>'
+      +'<td style="font-family:DM Mono">'+Number(h.price_from||0).toLocaleString()+'d</td>'
+      +'<td>'+(imp?'<span style="color:var(--text-dim)">Da import</span>':'<span style="color:#2ecc71">Moi</span>')+'</td></tr>';
+    });html+='</tbody></table></div>';document.getElementById('searchResults').innerHTML=html;
+  }).catch(()=>{document.getElementById('searchLoading').style.display='none';document.getElementById('searchResults').innerHTML='<div style="padding:16px;color:#e74c3c">Loi ket noi API</div>';btn.textContent='Search';btn.disabled=false;});
+}
+function toggleAll(el){document.querySelectorAll('.hCheck:not(:disabled)').forEach(cb=>{cb.checked=el.checked;});}
+function importSelected(){
+  var selected=[];document.querySelectorAll('.hCheck:checked').forEach(cb=>{var idx=parseInt(cb.dataset.idx);if(searchResultsData[idx])selected.push(searchResultsData[idx]);});
+  if(selected.length===0){alert('Chon it nhat 1 hotel');return;}
+  var btn=document.getElementById('importBtn');btn.textContent='Importing...';btn.disabled=true;
+  fetch('/admin/hotel-sync/import',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hotels:selected})})
+  .then(r=>r.json()).then(data=>{btn.textContent='Import selected';btn.disabled=false;if(data.error)alert(data.error);else{alert('Da import '+data.imported+' khach san!');location.reload();}})
+  .catch(()=>{btn.textContent='Import selected';btn.disabled=false;alert('Loi import');});
+}
+</script>
+{% endif %}
+
+<script>
+/* Bulk selection for hotels hub table */
+(function(){
+  var selAll=document.getElementById('selAllH'),bar=document.getElementById('bulkBarH'),delBanner=document.getElementById('deleteAllBanner');
+  if(!selAll||!bar)return;
+  var cbs=Array.from(document.querySelectorAll('.h-check')),total=cbs.length,totalAll={{ total_filtered|default(0) }};
+  function getChecked(){return cbs.filter(function(c){return c.checked})}
+  function update(){
+    var ck=getChecked(),n=ck.length;
+    bar.style.display=n>0?'flex':'none';
+    document.getElementById('bulkCountH').textContent=n+' / '+total+' da chon';
+    var bi=document.getElementById('bulkInputsH'),bti=document.getElementById('bulkToggleInputsH');
+    bi.innerHTML='';bti.innerHTML='';
+    ck.forEach(function(c){var inp=document.createElement('input');inp.type='hidden';inp.name='hotel_ids';inp.value=c.value;bi.appendChild(inp);bti.appendChild(inp.cloneNode(true))});
+    selAll.checked=n===total&&n>0;selAll.indeterminate=n>0&&n<total;
+    cbs.forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+    if(delBanner)delBanner.style.display=(n===total&&totalAll>total)?'flex':'none';
+  }
+  selAll.addEventListener('change',function(){cbs.forEach(function(c){c.checked=selAll.checked});update()});
+  cbs.forEach(function(c){c.addEventListener('change',update)});
+  window.clearH=function(){selAll.checked=false;cbs.forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});update()};
+})()
+</script>
+<style>
+tr.row-selected td { background:rgba(37,99,235,0.06) !important }
+[data-theme="dark"] tr.row-selected td { background:rgba(37,99,235,0.12) !important }
+</style>
+{% endblock %}

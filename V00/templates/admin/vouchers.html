@@ -1,5 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}Vouchers{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> Vouchers{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>🎫 Vouchers</h1>
@@ -49,11 +50,19 @@
   </form>
 </div>
 
+<!-- Bulk actions -->
+<div id="bulkBar" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px;align-items:center;gap:12px">
+  <span id="bulkCount" style="font-size:13px;font-weight:600">0 selected</span>
+  <button onclick="bulkDelete()" class="btn btn-danger btn-sm">Xoa da chon</button>
+  <button onclick="toggleAll(false)" class="btn btn-ghost btn-sm">Bo chon</button>
+</div>
+
 <!-- Table -->
 <div class="table-wrap">
 <table class="data-table">
   <thead>
     <tr>
+      <th style="width:36px"><input type="checkbox" id="checkAll" onchange="toggleAll(this.checked)"></th>
       <th>Code</th>
       <th>Title</th>
       <th>Merchant</th>
@@ -67,6 +76,7 @@
   <tbody>
     {% for v in items %}
     <tr>
+      <td><input type="checkbox" class="v-check" value="{{ v.id }}" onchange="updateBulk()"></td>
       <td><code style="font-size:14px;white-space:nowrap">{{ v.code }}</code></td>
       <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ v.title }}">{{ v.title[:35] }}{% if v.title|length > 35 %}...{% endif %}</td>
       <td style="white-space:nowrap">{{ v.merchant[:18] }}{% if v.merchant|length > 18 %}..{% endif %}</td>
@@ -94,6 +104,40 @@
   </tbody>
 </table>
 </div>
+
+<script>
+function toggleAll(checked) {
+  document.querySelectorAll('.v-check').forEach(function(cb){ cb.checked = checked; });
+  document.getElementById('checkAll').checked = checked;
+  updateBulk();
+}
+function updateBulk() {
+  var checked = document.querySelectorAll('.v-check:checked');
+  var bar = document.getElementById('bulkBar');
+  var cnt = document.getElementById('bulkCount');
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    cnt.textContent = checked.length + ' selected';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+function bulkDelete() {
+  var ids = [];
+  document.querySelectorAll('.v-check:checked').forEach(function(cb){ ids.push(cb.value); });
+  if (ids.length === 0) return;
+  if (!confirm('Xoa ' + ids.length + ' voucher?')) return;
+  fetch('{{ url_for("admin_vouchers_bulk_delete") }}', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ids: ids})
+  }).then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.ok) location.reload();
+      else alert(data.error || 'Loi');
+    });
+}
+</script>
 
 {% if not items %}
 <div class="empty-state">

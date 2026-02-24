@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}{{ vertical.name }}{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_verticals') }}">Verticals</a><span class="sep">></span>{{ vertical.name }}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span><a href="{{ url_for('admin_verticals') }}">Verticals</a><span class="sep">›</span>{{ vertical.name }}{% endblock %}
 {% block content %}
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0">{{ vertical.icon }} {{ vertical.name }}</h1>

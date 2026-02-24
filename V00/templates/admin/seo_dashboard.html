@@ -1,0 +1,164 @@
+{% extends "admin/base.html" %}
+{% block title %}SEO Backlink Dashboard{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> SEO Backlinks
+{% endblock %}
+{% block content %}
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+  <div>
+    <h1 style="margin:0;font-size:1.6rem">SEO Backlink Engine</h1>
+    <p style="color:var(--muted);margin:4px 0 0">Quản lý hệ thống internal link tự động — intext & outtext backlinks</p>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('admin_seo_auto_generate') }}" class="btn btn-outline" style="padding:8px 16px;border-radius:8px;text-decoration:none;border:1px solid var(--border);color:var(--text)">Auto Generate Keywords</a>
+    <a href="{{ url_for('admin_seo_scan') }}" class="btn btn-primary" style="padding:8px 16px;border-radius:8px;text-decoration:none;background:var(--accent);color:#fff">Scan & Build Links</a>
+  </div>
+</div>
+
+<!-- Quick Stats -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center">
+    <div style="font-size:2rem;font-weight:700;color:var(--accent)">{{ total_keywords }}</div>
+    <div style="color:var(--muted);font-size:0.85rem">Total Keywords</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center">
+    <div style="font-size:2rem;font-weight:700;color:#27ae60">{{ active_keywords }}</div>
+    <div style="color:var(--muted);font-size:0.85rem">Active Keywords</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center">
+    <div style="font-size:2rem;font-weight:700;color:#3498db">{{ total_instances }}</div>
+    <div style="color:var(--muted);font-size:0.85rem">Total Links</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center">
+    <div style="font-size:2rem;font-weight:700;color:#e67e22">{{ active_instances }}</div>
+    <div style="color:var(--muted);font-size:0.85rem">Active Links</div>
+  </div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center">
+    <div style="font-size:2rem;font-weight:700;color:#e74c3c">{{ total_clicks }}</div>
+    <div style="color:var(--muted);font-size:0.85rem">Total Clicks</div>
+  </div>
+</div>
+
+<!-- Navigation Tabs -->
+<div style="display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid var(--border);padding-bottom:12px">
+  <a href="{{ url_for('admin_seo_dashboard') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;background:var(--accent);color:#fff;font-weight:600">Dashboard</a>
+  <a href="{{ url_for('admin_seo_keywords') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Keywords ({{ total_keywords }})</a>
+  <a href="{{ url_for('admin_seo_instances') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Instances ({{ total_instances }})</a>
+  <a href="{{ url_for('admin_seo_suggestions') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Suggestions</a>
+  <a href="{{ url_for('admin_seo_auto_generate') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Auto Generate</a>
+  <a href="{{ url_for('admin_seo_scan') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Scan & Build</a>
+</div>
+
+<!-- Per-Vertical Stats -->
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px">
+  <h2 style="margin:0 0 16px;font-size:1.1rem">Per-Vertical Overview</h2>
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:10px 8px;font-size:0.85rem;color:var(--muted)">Vertical</th>
+        <th style="text-align:center;padding:10px 8px;font-size:0.85rem;color:var(--muted)">Keywords</th>
+        <th style="text-align:center;padding:10px 8px;font-size:0.85rem;color:var(--muted)">Active Links</th>
+        <th style="text-align:center;padding:10px 8px;font-size:0.85rem;color:var(--muted)">Clicks</th>
+        <th style="text-align:center;padding:10px 8px;font-size:0.85rem;color:var(--muted)">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vs in v_stats %}
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 8px">
+          <span style="font-size:1.1rem">{{ vs.vertical.icon }}</span>
+          <strong>{{ vs.vertical.name }}</strong>
+          <span style="color:var(--muted);font-size:0.8rem">({{ vs.vertical.slug }})</span>
+        </td>
+        <td style="text-align:center;padding:10px 8px">
+          <span style="background:var(--accent);color:#fff;padding:2px 10px;border-radius:12px;font-size:0.85rem">{{ vs.keywords }}</span>
+        </td>
+        <td style="text-align:center;padding:10px 8px">
+          <span style="background:#27ae60;color:#fff;padding:2px 10px;border-radius:12px;font-size:0.85rem">{{ vs.instances }}</span>
+        </td>
+        <td style="text-align:center;padding:10px 8px">{{ vs.clicks }}</td>
+        <td style="text-align:center;padding:10px 8px">
+          <a href="{{ url_for('admin_seo_keywords', vertical=vs.vertical.slug) }}" style="color:var(--accent);text-decoration:none;font-size:0.85rem">Keywords</a>
+          <span style="color:var(--muted);margin:0 4px">|</span>
+          <a href="{{ url_for('admin_seo_instances', vertical=vs.vertical.slug) }}" style="color:var(--accent);text-decoration:none;font-size:0.85rem">Links</a>
+        </td>
+      </tr>
+      {% endfor %}
+      {% if not v_stats %}
+      <tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">No verticals found.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Recent Backlink Instances -->
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px">
+  <h2 style="margin:0 0 16px;font-size:1.1rem">Recent Backlink Instances</h2>
+  <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border)">
+        <th style="text-align:left;padding:8px;color:var(--muted)">Source</th>
+        <th style="text-align:left;padding:8px;color:var(--muted)">Anchor</th>
+        <th style="text-align:left;padding:8px;color:var(--muted)">Target</th>
+        <th style="text-align:center;padding:8px;color:var(--muted)">Type</th>
+        <th style="text-align:center;padding:8px;color:var(--muted)">Status</th>
+        <th style="text-align:center;padding:8px;color:var(--muted)">Clicks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for inst in recent %}
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px">
+          <span style="background:#eee;padding:1px 6px;border-radius:4px;font-size:0.75rem;color:#666">{{ inst.source_type }}</span>
+          {{ inst.source_title[:40] }}{% if inst.source_title|length > 40 %}...{% endif %}
+        </td>
+        <td style="padding:8px;color:var(--accent);font-weight:500">{{ inst.anchor_text[:30] }}</td>
+        <td style="padding:8px">
+          <span style="background:#e8f4fd;padding:1px 6px;border-radius:4px;font-size:0.75rem;color:#2980b9">{{ inst.target_type }}</span>
+          {{ inst.target_slug }}
+        </td>
+        <td style="text-align:center;padding:8px">
+          {% if inst.link_type == 'intext' %}
+          <span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:8px;font-size:0.75rem">intext</span>
+          {% else %}
+          <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:8px;font-size:0.75rem">outtext</span>
+          {% endif %}
+        </td>
+        <td style="text-align:center;padding:8px">
+          {% if inst.status == 'active' %}
+          <span style="color:#27ae60;font-weight:600">Active</span>
+          {% elif inst.status == 'removed' %}
+          <span style="color:#e74c3c">Removed</span>
+          {% else %}
+          <span style="color:#f39c12">{{ inst.status }}</span>
+          {% endif %}
+        </td>
+        <td style="text-align:center;padding:8px">{{ inst.clicks }}</td>
+      </tr>
+      {% endfor %}
+      {% if not recent %}
+      <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">No backlink instances yet. Use "Scan & Build" to create them.</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<!-- How it works -->
+<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:24px">
+  <h2 style="margin:0 0 12px;font-size:1.1rem">How it works</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px">
+    <div style="padding:16px;background:var(--bg);border-radius:8px">
+      <h3 style="margin:0 0 8px;font-size:0.95rem;color:var(--accent)">1. Auto Generate Keywords</h3>
+      <p style="margin:0;color:var(--muted);font-size:0.85rem">Extract keywords from article titles, tags, part names, and zone names. Each keyword maps to a target page.</p>
+    </div>
+    <div style="padding:16px;background:var(--bg);border-radius:8px">
+      <h3 style="margin:0 0 8px;font-size:0.95rem;color:var(--accent)">2. Scan & Build Links</h3>
+      <p style="margin:0;color:var(--muted);font-size:0.85rem">Scan all articles/parts content to find keyword matches. Create backlink instances tracking source-to-target relationships.</p>
+    </div>
+    <div style="padding:16px;background:var(--bg);border-radius:8px">
+      <h3 style="margin:0 0 8px;font-size:0.95rem;color:var(--accent)">3. Auto-Render Links</h3>
+      <p style="margin:0;color:var(--muted);font-size:0.85rem">When displaying articles, the system automatically inserts internal links on matched keywords. Old articles get backlinks to new content.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

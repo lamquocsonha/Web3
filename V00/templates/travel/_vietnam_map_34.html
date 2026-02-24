@@ -467,33 +467,31 @@
   var tip = document.getElementById('mapTooltip');
   var tipBg = document.getElementById('mapTooltipBg');
   var tipTxt = document.getElementById('mapTooltipText');
-  if (!tip) return;
 
+  /* ── Tooltip hover ── */
+  if (!tip) return;
   svg.querySelectorAll('.prov-shape').forEach(function(g){
     var titleEl = g.querySelector('title');
     if (!titleEl) return;
     var name = titleEl.textContent;
 
     g.addEventListener('mouseenter', function(e){
-      /* Get center of province bounding box */
       var path = g.querySelector('.prov-path');
       if (!path) return;
       var bb = path.getBBox();
       var cx = bb.x + bb.width / 2;
-      var cy = bb.y - 4; /* above the province */
+      var cy = bb.y - 4;
 
-      /* Measure text width */
       tipTxt.textContent = name;
       var tbb = tipTxt.getBBox();
       var pw = tbb.width + 14;
       var ph = 22;
 
-      /* Keep within SVG bounds */
       var tx = cx - pw / 2;
       if (tx < 4) tx = 4;
       if (tx + pw > 436) tx = 436 - pw;
       var ty = cy - ph;
-      if (ty < 4) ty = bb.y + bb.height + 4; /* flip below if too high */
+      if (ty < 4) ty = bb.y + bb.height + 4;
 
       tipBg.setAttribute('x', tx);
       tipBg.setAttribute('y', ty);

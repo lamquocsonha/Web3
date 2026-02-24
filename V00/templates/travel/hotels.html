@@ -1,6 +1,9 @@
 {% extends "shared/base.html" %}
-{% block title %}Khách sạn{% endblock %}
-{% block breadcrumbs %}<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Khách sạn</div>{% endblock %}
+{% block title %}Khách sạn{% if destination %} {{ destination }}{% endif %}{% endblock %}
+{% block breadcrumbs %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<div class="breadcrumbs"><a href="{{ url_for('vertical_index', vertical_slug='travel') }}">UniTravel</a><span class="sep">›</span>Khách sạn</div>{% endblock %}
 {% block content %}
 <div class="page-hero">
   <h1><span class="hero-icon">🏨</span> Tìm khách sạn giá tốt</h1>
@@ -28,27 +31,29 @@
         <div class="tz-sf-display">{% if destination %}<span class="tz-dest-tag">{{ destination }} <a href="{{ url_for('travel_hotels') }}" class="tz-dest-x">×</a></span>{% else %}<span class="tz-dest-hint">Chọn tỉnh thành trên bản đồ</span>{% endif %}</div>
       </div>
       <div class="tz-sf-field">
-        <label>Danh mục</label>
+        <label>Tiêu chuẩn sao</label>
         <select name="stars" class="tz-sf-input">
           <option value="">Tất cả</option>
           {% for s in [3,4,5] %}<option value="{{ s }}" {{ 'selected' if stars==s|string }}>{{ s }} sao</option>{% endfor %}
         </select>
       </div>
-      <div class="tz-sf-field">
-        <label>Check-in</label>
-        <input type="date" name="checkin" value="{{ checkin }}" class="tz-sf-input">
+      <div class="tz-sf-field tz-sf-price">
+        <label>Khoảng giá (VNĐ)</label>
+        <div class="price-range-box">
+          <div class="price-row">
+            <input type="text" name="price_min" id="priceMin" class="pr-input" placeholder="0" value="{{ price_min }}" inputmode="numeric">
+            <span class="pr-dash">–</span>
+            <input type="text" name="price_max" id="priceMax" class="pr-input" placeholder="50,000,000" value="{{ price_max }}" inputmode="numeric">
+          </div>
+          <div class="pr-slider-wrap">
+            <div class="pr-track-bg"></div>
+            <div class="pr-track-fill" id="priceTrack"></div>
+            <input type="range" id="priceSliderMin" class="pr-slider" min="0" max="50000000" step="100000" value="{{ price_min or 0 }}">
+            <input type="range" id="priceSliderMax" class="pr-slider" min="0" max="50000000" step="100000" value="{{ price_max or 50000000 }}">
+          </div>
+        </div>
       </div>
-      <div class="tz-sf-field">
-        <label>Check-out</label>
-        <input type="date" name="checkout" value="{{ checkout }}" class="tz-sf-input">
-      </div>
-      <div class="tz-sf-field tz-sf-sm">
-        <label>Khách</label>
-        <select name="guests" class="tz-sf-input">
-          {% for n in range(1,6) %}<option value="{{ n }}" {{ 'selected' if guests==n|string }}>{{ n }}</option>{% endfor %}
-        </select>
-      </div>
-      <button type="submit" class="tz-sf-btn">🔍 Tìm kiếm</button>
+      <button type="submit" class="tz-sf-btn">🔍 Tìm</button>
     </div>
   </form>
 </div>
@@ -58,8 +63,9 @@
   <!-- COL 1: Sidebar -->
   <aside class="hp-sidebar">
     <div class="hps-title">📍 34 Tỉnh thành</div>
-    <div class="hps-search-wrap">
-      <input type="text" class="hps-search" placeholder="Tìm tỉnh thành..." id="provSearch">
+    <div class="hps-search-wrap" style="position:relative">
+      <input type="text" class="hps-search" placeholder="Tìm tỉnh, phường, xã..." id="provSearch" autocomplete="off">
+      <div class="ward-autocomplete" id="wardAutocomplete" style="display:none"></div>
     </div>
     <div class="hps-region">
       <div class="hps-region-head" onclick="this.parentElement.classList.toggle('collapsed')">
@@ -121,15 +127,30 @@
 
     <!-- Hot Products Sidebar Widget -->
     {% include 'shared/_hot_products_sidebar.html' %}
+
+    <!-- AccessTrade Banners Sidebar Widget -->
+    {% include 'shared/_at_banners_sidebar.html' %}
   </aside>
 
   <!-- COL 2: Results -->
   <div class="hp-main">
     {% if destination %}
-    <div class="tz-results-header">
-      <h2>Khách sạn tại <strong>{{ destination }}</strong></h2>
-      <span class="tz-results-count" id="resultsCount">{{ hotels|length }} kết quả</span>
-      {% if api_status == 'configured' %}<span class="tz-agoda-badge" style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600;margin-left:4px">Agoda</span>{% endif %}
+    <div class="tz-results-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0">Khách sạn tại <strong>{{ destination_display or destination }}</strong></h2>
+        <span class="tz-results-count" id="resultsCount">{{ hotels|length }} kết quả</span>
+        {% if api_status == 'configured' %}<span class="tz-agoda-badge" style="font-size:12px;padding:3px 8px;background:rgba(231,76,60,0.1);color:#e74c3c;border-radius:4px;font-weight:600">Agoda</span>{% endif %}
+      </div>
+      <div class="view-toggle">
+        <button class="view-toggle-btn active" data-view="list" onclick="switchView('list')">📋 Danh sách</button>
+        <button class="view-toggle-btn" data-view="map" onclick="switchView('map')">🗺️ Bản đồ</button>
+      </div>
+    </div>
+
+    <!-- Leaflet Map (hidden by default, shown when "Bản đồ" is clicked) -->
+    <div class="leaflet-map-wrap" id="mapWrap">
+      <div id="hotelLeafletMap"></div>
+      <button type="button" id="locateMeBtn" onclick="locateMe()" title="Định vị vị trí hiện tại của bạn" style="position:absolute;top:80px;right:10px;z-index:1000;background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:4px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 5px rgba(0,0,0,.15)" aria-label="Định vị vị trí hiện tại">📍</button>
     </div>
 
     <!-- DB Hotels -->
@@ -138,7 +159,7 @@
       {% for h in hotels %}
       <div class="tz-hotel-card">
         <div class="tz-hc-img">
-          {% if h.image_url %}<img src="{{ h.image_url }}" alt="{{ h.name }}" loading="lazy">
+          {% if h.image_url %}<img src="{{ h.image_url }}" alt="{{ h.name }}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=tz-hc-img-ph><span>🏨</span></div>'">
           {% else %}<div class="tz-hc-img-ph"><span>🏨</span></div>{% endif %}
           <span class="tz-hc-cat-badge">Khách sạn</span>
         </div>
@@ -158,7 +179,10 @@
           </div>
           {% endif %}
           <h3 class="tz-hc-name"><a href="{{ h.agoda_url or h.booking_url or '#' }}" target="_blank" rel="nofollow">{{ h.name }}</a></h3>
-          <div class="tz-hc-address">{{ h.district or '' }}</div>
+          {% set addr_parts = [] %}
+          {% if h.address and h.address != h.destination_name %}{% set _ = addr_parts.append(h.address) %}{% elif h.district and h.district != h.destination_name %}{% set _ = addr_parts.append(h.district) %}{% endif %}
+          {% if h.destination_name %}{% set _ = addr_parts.append(h.destination_name) %}{% endif %}
+          {% if addr_parts %}<div class="tz-hc-address">📍 {{ addr_parts|join(', ') }}</div>{% endif %}
           <div class="tz-hc-footer">
             <span class="tz-hc-stars">{% for i in range(h.stars) %}⭐{% endfor %}</span>
             {% if h.rating %}<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">{{ h.rating }}</span>{% endif %}
@@ -184,8 +208,21 @@
     {% endif %}
 
     {% elif popular %}
-    <h2 class="tz-section-title">Cùng UniTravel khám phá khách sạn, homestay được yêu thích tại khắp Việt Nam</h2>
-    <div class="tz-dest-grid">
+    <div class="tz-results-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <h2 style="margin:0">Khách sạn toàn quốc</h2>
+      <div class="view-toggle">
+        <button class="view-toggle-btn active" data-view="list" onclick="switchView('list')">📋 Danh sách</button>
+        <button class="view-toggle-btn" data-view="map" onclick="switchView('map')">🗺️ Bản đồ</button>
+      </div>
+    </div>
+
+    <!-- Leaflet Map (hidden by default) -->
+    <div class="leaflet-map-wrap" id="mapWrap">
+      <div id="hotelLeafletMap"></div>
+      <button type="button" id="locateMeBtn" onclick="locateMe()" title="Định vị vị trí hiện tại của bạn" style="position:absolute;top:80px;right:10px;z-index:1000;background:#fff;border:2px solid rgba(0,0,0,.2);border-radius:4px;width:34px;height:34px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 5px rgba(0,0,0,.15)" aria-label="Định vị vị trí hiện tại">📍</button>
+    </div>
+
+    <div class="tz-dest-grid" id="hotelList">
       {% for p in popular %}
       <a href="{{ url_for('travel_hotels', destination=p.slug) }}" class="tz-dest-card">
         <div class="tz-dc-icon">{{ p.icon }}</div>
@@ -205,46 +242,273 @@
     {% endif %}
   </div>
 
-  <!-- COL 3: Map -->
-  <aside class="hp-map-col">
-    <div class="hpm-map-card">
-      {% set active_province = destination %}
-      {% include 'travel/_vietnam_map_34.html' %}
-    </div>
-  </aside>
+  {# COL 3: SVG Map removed — replaced by Leaflet in COL 2 #}
 </div>
 
-<script>
-document.getElementById('provSearch')?.addEventListener('input', function(e) {
-  const q = e.target.value.toLowerCase();
-  document.querySelectorAll('.hps-prov').forEach(p => {
-    p.style.display = p.dataset.name.toLowerCase().includes(q) ? '' : 'none';
-  });
-  if (q) document.querySelectorAll('.hps-region').forEach(r => r.classList.remove('collapsed'));
-});
-document.querySelectorAll('.hps-prov').forEach(el => {
-  el.addEventListener('mouseenter', function() {
-    const g = document.querySelector('.prov-shape[data-slug="'+this.dataset.prov+'"]');
-    if (g) g.classList.add('hover');
-  });
-  el.addEventListener('mouseleave', function() {
-    document.querySelectorAll('.prov-shape.hover').forEach(g => g.classList.remove('hover'));
-  });
-});
-document.querySelectorAll('.prov-shape').forEach(g => {
-  g.addEventListener('mouseenter', function() {
-    const s = document.querySelector('.hps-prov[data-prov="'+this.dataset.slug+'"]');
-    if (s) s.classList.add('map-hover');
-  });
-  g.addEventListener('mouseleave', function() {
-    document.querySelectorAll('.hps-prov.map-hover').forEach(s => s.classList.remove('map-hover'));
-  });
-});
+<!-- ═══ SEO CONTENT — dynamic by province ═══ -->
+{% set prov_names = {
+  'ha-noi':'Hà Nội','cao-bang':'Cao Bằng','lang-son':'Lạng Sơn','lai-chau':'Lai Châu',
+  'dien-bien':'Điện Biên','son-la':'Sơn La','tuyen-quang':'Tuyên Quang','lao-cai':'Lào Cai',
+  'thai-nguyen':'Thái Nguyên','phu-tho':'Phú Thọ','bac-ninh':'Bắc Ninh','hung-yen':'Hưng Yên',
+  'hai-phong':'Hải Phòng','quang-ninh':'Quảng Ninh','ninh-binh':'Ninh Bình',
+  'thanh-hoa':'Thanh Hóa','nghe-an':'Nghệ An','ha-tinh':'Hà Tĩnh','quang-tri':'Quảng Trị',
+  'hue':'Huế','da-nang':'Đà Nẵng','quang-ngai':'Quảng Ngãi','gia-lai':'Gia Lai',
+  'khanh-hoa':'Khánh Hòa','dak-lak':'Đắk Lắk','lam-dong':'Lâm Đồng',
+  'ho-chi-minh':'TP. Hồ Chí Minh','dong-nai':'Đồng Nai','tay-ninh':'Tây Ninh',
+  'can-tho':'Cần Thơ','an-giang':'An Giang','dong-thap':'Đồng Tháp',
+  'vinh-long':'Vĩnh Long','ca-mau':'Cà Mau'
+} %}
+{% set prov_highlights = {
+  'ha-noi':'phố cổ 36 phố phường, Hồ Hoàn Kiếm, Văn Miếu, Lăng Bác và khu vực Tây Hồ sầm uất',
+  'ho-chi-minh':'Quận 1 trung tâm, Bến Thành, Phố đi bộ Nguyễn Huệ, Thảo Cầm Viên và khu Phú Mỹ Hưng hiện đại',
+  'da-nang':'bãi biển Mỹ Khê, cầu Rồng, Bà Nà Hills và bán đảo Sơn Trà hoang sơ',
+  'hue':'Đại Nội, sông Hương thơ mộng, chùa Thiên Mụ và các lăng tẩm vua Nguyễn',
+  'khanh-hoa':'vịnh Nha Trang tuyệt đẹp, Vinpearl Land, tháp Bà Ponagar và các đảo hoang sơ',
+  'quang-ninh':'vịnh Hạ Long — di sản thiên nhiên thế giới, đảo Tuần Châu và Bãi Cháy sôi động',
+  'lam-dong':'thành phố Đà Lạt mộng mơ, Hồ Xuân Hương, Thung Lũng Tình Yêu và rừng thông bạt ngàn',
+  'lao-cai':'đỉnh Fansipan — nóc nhà Đông Dương, bản Cát Cát, ruộng bậc thang Sapa tuyệt đẹp',
+  'ninh-binh':'quần thể Tràng An — di sản thế giới, Tam Cốc, chùa Bái Đính và cố đô Hoa Lư',
+  'hai-phong':'đảo Cát Bà hoang sơ, bãi biển Đồ Sơn, nhà hát lớn và ẩm thực bánh đa cua nổi tiếng',
+  'can-tho':'chợ nổi Cái Răng đặc trưng miền Tây, bến Ninh Kiều thơ mộng và vườn trái cây xanh mướt',
+  'thanh-hoa':'biển Sầm Sơn sôi động, thành nhà Hồ — di sản thế giới và Vườn quốc gia Bến En',
+  'nghe-an':'biển Cửa Lò, quê Bác Hồ tại Kim Liên và Vườn quốc gia Pù Mát nguyên sinh',
+  'an-giang':'núi Sam linh thiêng, miếu Bà Chúa Xứ, rừng tràm Trà Sư và mùa nước nổi độc đáo',
+  'ca-mau':'Mũi Cà Mau — cực Nam Tổ quốc, rừng đước ngập mặn và Vườn quốc gia U Minh Hạ',
+  'dak-lak':'Buôn Ma Thuột — thủ phủ cà phê, hồ Lắk thơ mộng và Vườn quốc gia Yok Đôn',
+  'gia-lai':'Biển Hồ (T\'Nưng) huyền bí, thác Phú Cường hùng vĩ và văn hóa cồng chiêng Tây Nguyên'
+} %}
+{% set dest_name = destination_display or prov_names.get(destination, destination) if destination else '' %}
+{% set dest_hl = prov_highlights.get(destination, '') if destination else '' %}
 
+<section class="seo-section">
+  <div class="seo-inner">
+    {% if destination %}
+    <h2 class="seo-title">Khách sạn {{ dest_name }} — Đặt phòng giá rẻ, uy tín Tháng {{ current_month }}/{{ current_year }}</h2>
+    <div class="seo-content collapsed" id="seoContent">
+      <p><strong>UniTravel</strong> tổng hợp danh sách <strong>khách sạn tại {{ dest_name }}</strong> với giá phòng cập nhật trực tiếp từ Agoda, giúp bạn dễ dàng so sánh và đặt phòng nhanh chóng. Từ khách sạn bình dân 2-3 sao đến resort cao cấp 5 sao, tất cả đều được hiển thị minh bạch về giá, đánh giá và tiện nghi — đảm bảo bạn luôn tìm được lựa chọn phù hợp nhất với ngân sách.</p>
+
+      <h3>{{ dest_name }} có gì hấp dẫn?</h3>
+      <p>{{ dest_name }} là một trong những điểm đến du lịch nổi bật tại Việt Nam{% if dest_hl %}, nổi tiếng với {{ dest_hl }}{% endif %}. Du khách đến {{ dest_name }} không chỉ được trải nghiệm cảnh quan thiên nhiên tuyệt đẹp mà còn thưởng thức nền ẩm thực địa phương đặc sắc và khám phá văn hóa bản địa phong phú.</p>
+
+      <h3>Mẹo đặt khách sạn {{ dest_name }} giá tốt</h3>
+      <p><strong>Đặt sớm:</strong> Nên đặt phòng trước 2-4 tuần, đặc biệt vào mùa cao điểm (tháng 6-8, lễ Tết) để có giá tốt nhất. <strong>So sánh giá:</strong> UniTravel tổng hợp giá từ nhiều nguồn — hãy so sánh giữa các khách sạn cùng khu vực trước khi quyết định. <strong>Đọc đánh giá:</strong> Ưu tiên khách sạn có điểm đánh giá từ 7.5 trở lên và nhiều nhận xét tích cực từ khách đã ở. <strong>Chọn vị trí:</strong> Khách sạn gần trung tâm hoặc các điểm tham quan chính sẽ giúp bạn tiết kiệm chi phí di chuyển đáng kể.</p>
+
+      <h3>Các loại lưu trú phổ biến tại {{ dest_name }}</h3>
+      <p>Tại {{ dest_name }}, bạn có thể lựa chọn đa dạng loại hình lưu trú: <strong>Khách sạn</strong> từ 2 đến 5 sao với đầy đủ tiện nghi, <strong>homestay</strong> gần gũi thiên nhiên và văn hóa địa phương, <strong>resort & villa</strong> sang trọng dành cho kỳ nghỉ dưỡng, hoặc <strong>nhà nghỉ/hostel</strong> tiết kiệm dành cho khách du lịch bụi. UniTravel giúp bạn lọc nhanh theo số sao, mức giá và khu vực để tìm đúng nơi ở mong muốn.</p>
+    </div>
+    <button class="seo-toggle" onclick="toggleSeoContent()" id="seoToggle">Xem thêm ▾</button>
+
+    {% else %}
+    <h2 class="seo-title">Đặt khách sạn Việt Nam — So sánh giá tốt nhất Tháng {{ current_month }}/{{ current_year }}</h2>
+    <div class="seo-content collapsed" id="seoContent">
+      <p><strong>UniTravel</strong> là nền tảng tổng hợp và so sánh giá <strong>khách sạn trên toàn Việt Nam</strong>, với dữ liệu cập nhật trực tiếp từ Agoda — một trong những nền tảng đặt phòng lớn nhất châu Á. Hệ thống bao phủ <strong>34 tỉnh thành</strong> từ Hà Nội, Đà Nẵng, TP.HCM đến các điểm đến mới nổi như Cao Bằng, Gia Lai, Cà Mau, giúp bạn dễ dàng lên kế hoạch cho mọi chuyến đi.</p>
+
+      <h3>Tại sao nên dùng UniTravel?</h3>
+      <p>UniTravel tập trung tất cả thông tin khách sạn vào một nơi duy nhất — giá phòng cập nhật theo thời gian thực, ảnh thực tế, đánh giá từ khách đã ở và bản đồ vị trí trực quan. Thay vì truy cập từng trang đặt phòng riêng lẻ, bạn chỉ cần chọn tỉnh thành trên <strong>bản đồ Việt Nam</strong> tương tác hoặc danh sách bên trái, toàn bộ khách sạn sẽ hiển thị ngay lập tức với đầy đủ thông tin để so sánh.</p>
+
+      <h3>Điểm đến phổ biến nhất</h3>
+      <p>Những tỉnh thành được du khách tìm kiếm nhiều nhất trên UniTravel bao gồm: <a href="{{ url_for('travel_hotels', destination='ha-noi') }}">Hà Nội</a> với phố cổ và ẩm thực phong phú, <a href="{{ url_for('travel_hotels', destination='da-nang') }}">Đà Nẵng</a> với bãi biển Mỹ Khê và Bà Nà Hills, <a href="{{ url_for('travel_hotels', destination='ho-chi-minh') }}">TP. Hồ Chí Minh</a> sầm uất nhộn nhịp, <a href="{{ url_for('travel_hotels', destination='khanh-hoa') }}">Khánh Hòa (Nha Trang)</a> với vịnh biển tuyệt đẹp, <a href="{{ url_for('travel_hotels', destination='lam-dong') }}">Lâm Đồng (Đà Lạt)</a> mát mẻ quanh năm, và <a href="{{ url_for('travel_hotels', destination='quang-ninh') }}">Quảng Ninh</a> với vịnh Hạ Long huyền thoại.</p>
+
+      <h3>Hướng dẫn tìm khách sạn trên UniTravel</h3>
+      <p><strong>Bước 1:</strong> Chọn tỉnh thành trên bản đồ hoặc sidebar 34 tỉnh thành bên trái. <strong>Bước 2:</strong> Lọc theo số sao (3-5 sao), ngày check-in/check-out và số khách. <strong>Bước 3:</strong> So sánh giá, đọc đánh giá và nhấn vào khách sạn ưng ý để đặt phòng trực tiếp trên Agoda với giá tốt nhất. Toàn bộ quy trình nhanh chóng, minh bạch và hoàn toàn miễn phí.</p>
+    </div>
+    <button class="seo-toggle" onclick="toggleSeoContent()" id="seoToggle">Xem thêm ▾</button>
+    {% endif %}
+  </div>
+</section>
+
+<script>
+function toggleSeoContent() {
+  var el = document.getElementById('seoContent');
+  var btn = document.getElementById('seoToggle');
+  if (el.classList.contains('collapsed')) {
+    el.classList.remove('collapsed');
+    btn.textContent = 'Thu gọn ▴';
+  } else {
+    el.classList.add('collapsed');
+    btn.textContent = 'Xem thêm ▾';
+  }
+}
+/* ── Ward/Commune autocomplete search ── */
+(function() {
+  var input = document.getElementById('provSearch');
+  var dropdown = document.getElementById('wardAutocomplete');
+  if (!input || !dropdown) return;
+  var debounceTimer = null;
+
+  input.addEventListener('input', function(e) {
+    var q = e.target.value.trim();
+
+    // Filter sidebar provinces locally
+    var qLower = q.toLowerCase();
+    document.querySelectorAll('.hps-prov').forEach(function(p) {
+      p.style.display = p.dataset.name.toLowerCase().includes(qLower) ? '' : 'none';
+    });
+    if (qLower) document.querySelectorAll('.hps-region').forEach(function(r) { r.classList.remove('collapsed'); });
+
+    // API search for wards (debounce 300ms)
+    clearTimeout(debounceTimer);
+    if (q.length < 2) { dropdown.style.display = 'none'; return; }
+
+    debounceTimer = setTimeout(function() {
+      fetch('/api/wards/search?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var results = data.results || [];
+          if (results.length === 0) { dropdown.style.display = 'none'; return; }
+
+          var html = '';
+          results.forEach(function(r) {
+            if (!r.destination_slug) return;
+            var icon = r.type === 'province' ? '🏙️' : '📍';
+            var sub = r.type === 'ward' ? r.level + ' — ' + r.province_name : 'Tỉnh/TP';
+            html += '<a href="/travel/khach-san?destination=' + r.destination_slug + '" class="wa-item" data-slug="' + r.destination_slug + '">'
+              + '<span class="wa-icon">' + icon + '</span>'
+              + '<span class="wa-info">'
+              + '<span class="wa-name">' + r.name + '</span>'
+              + '<span class="wa-sub">' + sub + '</span>'
+              + '</span></a>';
+          });
+          dropdown.innerHTML = html;
+          dropdown.style.display = html ? 'block' : 'none';
+        })
+        .catch(function() { dropdown.style.display = 'none'; });
+    }, 300);
+  });
+
+  // Hide dropdown on blur (with delay for click)
+  input.addEventListener('blur', function() {
+    setTimeout(function() { dropdown.style.display = 'none'; }, 200);
+  });
+  input.addEventListener('focus', function() {
+    if (dropdown.innerHTML && input.value.length >= 2) dropdown.style.display = 'block';
+  });
+})();
+/* ── View Toggle: List / Map ── */
+var _leafletMap = null;
+var _allMarkers = [];
+function switchView(mode) {
+  var btns = document.querySelectorAll('.view-toggle-btn');
+  btns.forEach(function(b) { b.classList.toggle('active', b.dataset.view === mode); });
+  var mapWrap = document.getElementById('mapWrap');
+  var hotelList = document.getElementById('hotelList');
+  var agodaResults = document.getElementById('agodaResults');
+  var agodaLoading = document.getElementById('agodaLoading');
+  if (mode === 'map') {
+    if (mapWrap) mapWrap.classList.add('active');
+    if (hotelList) hotelList.style.display = 'none';
+    if (agodaResults) agodaResults.style.display = 'none';
+    if (agodaLoading) agodaLoading.style.display = 'none';
+    initLeafletMap();
+  } else {
+    if (mapWrap) mapWrap.classList.remove('active');
+    if (hotelList) hotelList.style.display = '';
+    if (agodaResults) agodaResults.style.display = '';
+  }
+}
+
+function initLeafletMap() {
+  if (_leafletMap) { _leafletMap.invalidateSize(); return; }
+  var el = document.getElementById('hotelLeafletMap');
+  if (!el || typeof L === 'undefined') return;
+
+  var center = [{{ province_center[0] }}, {{ province_center[1] }}];
+  var defaultZoom = {{ '13' if destination else '6' }};
+  _leafletMap = L.map('hotelLeafletMap', { scrollWheelZoom: true }).setView(center, defaultZoom);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(_leafletMap);
+
+  // DB hotel markers
+  var markers = {{ hotel_markers|tojson }};
+  addMarkersToMap(markers);
+
+  // Fit bounds if we have markers
+  if (_allMarkers.length > 0) {
+    var group = L.featureGroup(_allMarkers);
+    _leafletMap.fitBounds(group.getBounds().pad(0.1));
+  }
+}
+
+function addMarkersToMap(markers) {
+  if (!_leafletMap) return;
+  markers.forEach(function(h) {
+    if (!h.lat || !h.lng) return;
+    var starsHtml = '';
+    for (var i = 0; i < (h.stars || 0); i++) starsHtml += '⭐';
+    var priceShort = h.price ? (h.price >= 1000000 ? (h.price/1000000).toFixed(1).replace('.0','') + 'tr' : Math.round(h.price/1000) + 'k') : '';
+    var priceDisplay = h.price ? Number(h.price).toLocaleString() + 'đ' : '';
+
+    // Custom marker label with name + price (like tripzone)
+    var rawName = (h.name || '').replace(/^Khách\s*[Ss]ạn\s*/i, '').replace(/^Hotel\s*/i, '');
+    var shortName = rawName.length > 18 ? rawName.substring(0, 18) + '…' : rawName;
+    var labelHtml = '<div class="map-price-marker">'
+      + (priceShort ? '<span class="mpm-price">' + priceShort + '</span>' : '<span class="mpm-price">🏨</span>')
+      + (shortName && priceShort ? '<span class="mpm-sep" style="color:#999;font-size:11px;margin:0 2px">|</span>' : '')
+      + (shortName ? '<span class="mpm-name">' + shortName + '</span>' : '')
+      + '</div>';
+    var markerWidth = Math.max(80, Math.min(200, (shortName.length + (priceShort ? priceShort.length : 2)) * 7 + 24));
+    var icon = L.divIcon({
+      className: 'leaflet-price-icon',
+      html: labelHtml,
+      iconSize: [markerWidth, 28],
+      iconAnchor: [markerWidth/2, 28],
+      popupAnchor: [0, -30]
+    });
+
+    var imgHtml = h.image ? '<img src="'+h.image+'" style="width:100%;height:100px;object-fit:cover;display:block" onerror="this.style.display=\'none\'">' : '';
+    var popup = '<div style="min-width:220px;max-width:260px;font-family:inherit;border-radius:8px;overflow:hidden">'
+      + imgHtml
+      + '<div style="padding:10px 12px">'
+      + '<div style="font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.3">' + (h.name || '') + '</div>'
+      + '<div style="font-size:11px;margin-bottom:4px">' + starsHtml + (h.rating ? ' <span style="background:#004fac;color:#fff;padding:1px 5px;border-radius:3px;font-size:11px;font-weight:700">' + h.rating + '</span>' : '') + '</div>'
+      + (h.address ? '<div style="font-size:11px;color:#888;margin-bottom:6px">📍 ' + h.address + '</div>' : '')
+      + (priceDisplay ? '<div style="font-size:15px;font-weight:800;color:#c45d3e">' + priceDisplay + '<span style="font-size:11px;font-weight:400;color:#999"> /đêm</span></div>' : '')
+      + '<a href="' + (h.url || '#') + '" target="_blank" rel="nofollow" style="display:block;text-align:center;margin-top:8px;font-size:12px;font-weight:600;color:#fff;background:#c45d3e;padding:6px 10px;border-radius:6px;text-decoration:none">Tìm giá tốt &rarr;</a>'
+      + '</div></div>';
+    var marker = L.marker([h.lat, h.lng], {icon: icon}).addTo(_leafletMap).bindPopup(popup, {maxWidth:280});
+    _allMarkers.push(marker);
+  });
+}
+var _locateMarker = null;
+var _locateCircle = null;
+function locateMe() {
+  if (!_leafletMap) { initLeafletMap(); }
+  if (!navigator.geolocation) { alert('Trình duyệt không hỗ trợ định vị.'); return; }
+  var btn = document.getElementById('locateMeBtn');
+  btn.style.opacity = '0.5';
+  btn.textContent = '⏳';
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    var lat = pos.coords.latitude;
+    var lng = pos.coords.longitude;
+    var acc = pos.coords.accuracy;
+    if (_locateMarker) { _leafletMap.removeLayer(_locateMarker); }
+    if (_locateCircle) { _leafletMap.removeLayer(_locateCircle); }
+    _locateMarker = L.marker([lat, lng], {
+      icon: L.divIcon({
+        className: 'locate-me-icon',
+        html: '<div style="width:16px;height:16px;background:#4285f4;border:3px solid #fff;border-radius:50%;box-shadow:0 0 6px rgba(66,133,244,.6)"></div>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+      })
+    }).addTo(_leafletMap).bindPopup('<div style="text-align:center;font-size:13px;font-weight:600">📍 Vị trí của bạn</div>').openPopup();
+    _locateCircle = L.circle([lat, lng], { radius: acc, color: '#4285f4', fillColor: '#4285f4', fillOpacity: 0.1, weight: 1 }).addTo(_leafletMap);
+    _leafletMap.setView([lat, lng], 14);
+    btn.style.opacity = '1';
+    btn.textContent = '📍';
+  }, function(err) {
+    btn.style.opacity = '1';
+    btn.textContent = '📍';
+    if (err.code === 1) alert('Bạn đã từ chối quyền truy cập vị trí.');
+    else alert('Không thể xác định vị trí. Vui lòng thử lại.');
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+}
 // Agoda API live search
 {% if agoda_enabled and destination %}
 (function() {
-  var dest = '{{ destination }}';
+  var dest = '{{ city_slug|default(destination) }}';
   var checkin = '{{ checkin }}';
   var checkout = '{{ checkout }}';
   var url = '/admin/api/agoda-search?destination=' + encodeURIComponent(dest);
@@ -268,6 +532,7 @@ document.querySelectorAll('.prov-shape').forEach(g => {
       if (!container) return;
 
       var html = '';
+      var agodaMarkers = [];
       hotels.forEach(function(h) {
         var price = h.price_from ? Number(h.price_from).toLocaleString() + 'đ' : '';
         var starsHtml = '';
@@ -276,7 +541,7 @@ document.querySelectorAll('.prov-shape').forEach(g => {
         html += '<div class="tz-hotel-card">'
           + '<div class="tz-hc-img">'
           + (h.image_url ? '<img src="'+h.image_url+'" alt="'+h.name+'" loading="lazy" onerror="this.parentElement.innerHTML=\'<div class=tz-hc-img-ph><span>🏨</span></div>\'">' : '<div class="tz-hc-img-ph"><span>🏨</span></div>')
-          + '<span class="tz-hc-cat-badge" style="background:rgba(231,76,60,0.9)">Agoda</span>'
+          + '<span class="tz-hc-cat-badge">Khách sạn</span>'
           + '</div>'
           + '<div class="tz-hc-body">'
           + '<div class="tz-hc-meta">'
@@ -295,21 +560,46 @@ document.querySelectorAll('.prov-shape').forEach(g => {
           }
           html += '<span class="tz-hc-price">' + price + '</span></div>';
         }
+        var addrParts = [];
+        var _d = h.district || h.address || '';
+        var _dn = h.destination_name || '{{ destination_display or destination }}';
+        if (_d && _d !== _dn) addrParts.push(_d);
+        if (_dn) addrParts.push(_dn);
+        var addrText = addrParts.join(', ');
         html += '<h3 class="tz-hc-name"><a href="' + (h.agoda_url || '#') + '" target="_blank" rel="nofollow">' + (h.name || '') + '</a></h3>'
-          + '<div class="tz-hc-address">' + (h.district || h.address || '') + '</div>'
+          + (addrText ? '<div class="tz-hc-address">📍 ' + addrText + '</div>' : '')
           + '<div class="tz-hc-footer">'
           + '<span class="tz-hc-stars">' + starsHtml + '</span>'
           + (h.rating ? '<span style="background:#004fac;color:#fff;padding:1px 6px;border-radius:3px;font-size:12px;font-weight:700;margin-left:4px">' + h.rating + '</span>' : '')
           + (h.free_breakfast ? '<span class="tz-hc-bf tz-bf-yes">✓ Ăn sáng</span>' : '')
           + (h.free_cancel ? '<span style="font-size:12px;color:#2ecc71;margin-left:6px">✓ Hủy miễn phí</span>' : '')
           + '</div></div></div>';
+
+        // Collect markers for map
+        if (h.latitude && h.longitude) {
+          agodaMarkers.push({
+            name: h.name, lat: h.latitude, lng: h.longitude,
+            stars: h.stars, rating: h.rating,
+            price: h.price_from, image: h.image_url || '',
+            url: h.agoda_url || '#',
+            address: h.address || h.district || ''
+          });
+        }
       });
       container.innerHTML = html;
+
+      // Add Agoda markers to map if it's initialized
+      if (agodaMarkers.length > 0) {
+        addMarkersToMap(agodaMarkers);
+        if (_leafletMap && _allMarkers.length > 0) {
+          var group = L.featureGroup(_allMarkers);
+          _leafletMap.fitBounds(group.getBounds().pad(0.1));
+        }
+      }
 
       // Ensure hotel list container is visible
       var list = document.getElementById('hotelList');
       if (list && list.children.length === 0 && hotels.length > 0) {
-        // Remove empty state if present
         var emptyState = list.parentElement.querySelector('.empty-state');
         if (emptyState) emptyState.style.display = 'none';
       }
@@ -320,5 +610,43 @@ document.querySelectorAll('.prov-shape').forEach(g => {
     });
 })();
 {% endif %}
+
+/* ── Price Range Slider ── */
+(function() {
+  var sMin = document.getElementById('priceSliderMin');
+  var sMax = document.getElementById('priceSliderMax');
+  var iMin = document.getElementById('priceMin');
+  var iMax = document.getElementById('priceMax');
+  var track = document.getElementById('priceTrack');
+  if (!sMin || !sMax) return;
+
+  var MAX = 50000000;
+  function num(v) { return parseInt(String(v).replace(/[^0-9]/g,'')) || 0; }
+  function fmt(v) { return v ? Number(v).toLocaleString('vi-VN') : ''; }
+
+  function updateUI() {
+    var lo = parseInt(sMin.value), hi = parseInt(sMax.value);
+    if (lo > hi) { var t = lo; lo = hi; hi = t; sMin.value = lo; sMax.value = hi; }
+    track.style.left = (lo/MAX*100) + '%';
+    track.style.right = (100 - hi/MAX*100) + '%';
+    iMin.value = lo > 0 ? fmt(lo) : '';
+    iMax.value = hi < MAX ? fmt(hi) : '';
+  }
+
+  sMin.addEventListener('input', updateUI);
+  sMax.addEventListener('input', updateUI);
+
+  iMin.addEventListener('change', function() { sMin.value = Math.min(num(this.value), parseInt(sMax.value)); updateUI(); });
+  iMax.addEventListener('change', function() { sMax.value = Math.max(num(this.value) || MAX, parseInt(sMin.value)); updateUI(); });
+
+  // On submit: convert formatted values back to raw numbers
+  var form = sMin.closest('form');
+  if (form) form.addEventListener('submit', function() {
+    iMin.value = num(iMin.value) || '';
+    iMax.value = num(iMax.value) || '';
+  });
+
+  updateUI();
+})();
 </script>
 {% endblock %}

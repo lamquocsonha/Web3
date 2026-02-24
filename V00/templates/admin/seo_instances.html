@@ -1,0 +1,149 @@
+{% extends "admin/base.html" %}
+{% block title %}SEO Backlink Instances{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> <a href="{{ url_for('admin_seo_dashboard') }}">SEO</a> <span class="sep">›</span> Instances
+{% endblock %}
+{% block content %}
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+  <div>
+    <h1 style="margin:0;font-size:1.5rem">Backlink Instances</h1>
+    <p style="color:var(--muted);margin:4px 0 0">{{ instances|length }} link placements found</p>
+  </div>
+  <a href="{{ url_for('admin_seo_scan') }}" class="btn btn-primary" style="padding:8px 14px;border-radius:8px;text-decoration:none;background:var(--accent);color:#fff">Re-scan Content</a>
+</div>
+
+<!-- Navigation Tabs -->
+<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:12px">
+  <a href="{{ url_for('admin_seo_dashboard') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Dashboard</a>
+  <a href="{{ url_for('admin_seo_keywords') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Keywords</a>
+  <a href="{{ url_for('admin_seo_instances') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;background:var(--accent);color:#fff;font-weight:600">Instances</a>
+  <a href="{{ url_for('admin_seo_suggestions') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Suggestions</a>
+  <a href="{{ url_for('admin_seo_auto_generate') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Auto Generate</a>
+  <a href="{{ url_for('admin_seo_scan') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Scan & Build</a>
+</div>
+
+<!-- Filters -->
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+  <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <select name="vertical" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+      <option value="">All Verticals</option>
+      {% for v in verticals %}
+      <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="link_type" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+      <option value="">All Types</option>
+      <option value="intext" {% if filter_type == 'intext' %}selected{% endif %}>Intext</option>
+      <option value="outtext" {% if filter_type == 'outtext' %}selected{% endif %}>Outtext</option>
+    </select>
+    <select name="status" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+      <option value="">All Status</option>
+      <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Active</option>
+      <option value="pending" {% if filter_status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="removed" {% if filter_status == 'removed' %}selected{% endif %}>Removed</option>
+    </select>
+    <button type="submit" style="padding:6px 14px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer">Filter</button>
+    {% if filter_v or filter_type or filter_status %}
+    <a href="{{ url_for('admin_seo_instances') }}" style="color:var(--muted);font-size:0.85rem">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Bulk Actions -->
+<form method="POST" action="{{ url_for('admin_seo_bulk_action') }}" id="bulkForm">
+  <input type="hidden" name="item_type" value="instance">
+  <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+    <label style="font-size:0.85rem;color:var(--muted)">
+      <input type="checkbox" id="selectAll" style="margin-right:4px"> Select All
+    </label>
+    <select name="action" style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:var(--card);color:var(--text)">
+      <option value="">Bulk Action...</option>
+      <option value="activate">Set Active</option>
+      <option value="remove">Set Removed</option>
+      <option value="delete">Delete</option>
+    </select>
+    <button type="submit" style="padding:4px 12px;border-radius:6px;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-size:0.85rem" onclick="return confirm('Apply bulk action?')">Apply</button>
+  </div>
+
+  <!-- Instances Table -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:0.88rem">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);background:var(--bg)">
+          <th style="width:30px;padding:10px 6px"></th>
+          <th style="text-align:left;padding:10px 6px;color:var(--muted)">Source</th>
+          <th style="text-align:left;padding:10px 6px;color:var(--muted)">Anchor Text</th>
+          <th style="text-align:left;padding:10px 6px;color:var(--muted)">Target</th>
+          <th style="text-align:center;padding:10px 6px;color:var(--muted)">Type</th>
+          <th style="text-align:center;padding:10px 6px;color:var(--muted)">Status</th>
+          <th style="text-align:center;padding:10px 6px;color:var(--muted)">Clicks</th>
+          <th style="text-align:center;padding:10px 6px;color:var(--muted)">Created</th>
+          <th style="text-align:center;padding:10px 6px;color:var(--muted)">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inst in instances %}
+        <tr style="border-bottom:1px solid var(--border){% if inst.status == 'removed' %};opacity:0.5{% endif %}">
+          <td style="padding:8px 6px;text-align:center">
+            <input type="checkbox" name="ids" value="{{ inst.id }}" class="row-check">
+          </td>
+          <td style="padding:8px 6px">
+            <span style="background:#f0f0f0;padding:1px 6px;border-radius:4px;font-size:0.72rem;color:#666">{{ inst.source_type }}</span>
+            <div style="font-weight:500;margin-top:2px">{{ inst.source_title[:35] }}{% if inst.source_title|length > 35 %}...{% endif %}</div>
+            <div style="font-size:0.75rem;color:var(--muted)">{{ inst.source_slug }}</div>
+          </td>
+          <td style="padding:8px 6px;color:var(--accent);font-weight:600">
+            {{ inst.anchor_text[:25] }}{% if inst.anchor_text|length > 25 %}...{% endif %}
+          </td>
+          <td style="padding:8px 6px">
+            <span style="background:{% if inst.target_type == 'article' %}#e8f4fd{% elif inst.target_type == 'zone' %}#fdf2e8{% else %}#e8fde8{% endif %};padding:1px 6px;border-radius:4px;font-size:0.72rem;color:{% if inst.target_type == 'article' %}#2980b9{% elif inst.target_type == 'zone' %}#e67e22{% else %}#27ae60{% endif %}">{{ inst.target_type }}</span>
+            <div style="font-size:0.85rem;margin-top:2px">{{ inst.target_slug }}</div>
+          </td>
+          <td style="text-align:center;padding:8px 6px">
+            {% if inst.link_type == 'intext' %}
+            <span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:8px;font-size:0.72rem">intext</span>
+            {% else %}
+            <span style="background:#fff3cd;color:#856404;padding:2px 8px;border-radius:8px;font-size:0.72rem">outtext</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center;padding:8px 6px">
+            {% if inst.status == 'active' %}
+            <span style="color:#27ae60;font-weight:600;font-size:0.85rem">Active</span>
+            {% elif inst.status == 'removed' %}
+            <span style="color:#e74c3c;font-size:0.85rem">Removed</span>
+            {% else %}
+            <span style="color:#f39c12;font-size:0.85rem">{{ inst.status }}</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center;padding:8px 6px">{{ inst.clicks }}</td>
+          <td style="text-align:center;padding:8px 6px;font-size:0.8rem;color:var(--muted)">
+            {{ inst.created_at.strftime('%d/%m') if inst.created_at else '-' }}
+          </td>
+          <td style="text-align:center;padding:8px 6px;white-space:nowrap">
+            {% if inst.status == 'active' %}
+            <form method="POST" action="{{ url_for('admin_seo_instance_remove', iid=inst.id) }}" style="display:inline">
+              <button type="submit" style="background:none;border:none;color:#f39c12;cursor:pointer;font-size:0.8rem;padding:0">Remove</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin_seo_instance_delete', iid=inst.id) }}" style="display:inline" onsubmit="return confirm('Delete this instance?')">
+              <button type="submit" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:0.8rem;padding:0;margin-left:6px">Del</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not instances %}
+        <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">
+          No backlink instances found. <a href="{{ url_for('admin_seo_scan') }}" style="color:var(--accent)">Run a scan</a> to detect and create links.
+        </td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<script>
+document.getElementById('selectAll').addEventListener('change', function() {
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked);
+});
+</script>
+{% endblock %}

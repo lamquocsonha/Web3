@@ -16,11 +16,17 @@
 </div>
 
 <!-- Seed All Button -->
-<div style="margin-bottom:32px">
+<div style="margin-bottom:32px;display:flex;gap:12px;flex-wrap:wrap">
   <form method="POST" style="display:inline" onsubmit="return confirm('Seed ALL verticals? This will create sample data for all verticals.')">
     <input type="hidden" name="action" value="seed_all">
     <button type="submit" class="btn btn-primary" style="padding:12px 24px;font-size:15px">
       🌱 Seed All Verticals
+    </button>
+  </form>
+  <form method="POST" style="display:inline" onsubmit="return confirm('Seed 30 new verticals? (Fashion, Kitchen, Baby, Home, Health, Gaming, Photo, Music, ...)')">
+    <input type="hidden" name="action" value="seed_new_verticals">
+    <button type="submit" class="btn btn-primary" style="padding:12px 24px;font-size:15px;background:#00b894">
+      🚀 Seed 30 New Verticals
     </button>
   </form>
 </div>
@@ -80,6 +86,7 @@
     <li><strong>Bike:</strong> Creates bike segments, zones, parts, and articles</li>
     <li><strong>Beauty:</strong> Creates beauty segments (Skincare, Makeup, etc.), zones, products, and articles</li>
     <li><strong>Tech:</strong> Creates tech segments (Smartphone, Headphones, etc.), zones, products, and articles</li>
+    <li><strong>Garden:</strong> Creates garden segments (Rau sạch, Hoa, Cây ăn quả, Cây cảnh, Dụng cụ), zones, parts, products, and articles</li>
   </ul>
 </div>
 

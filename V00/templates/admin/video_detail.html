@@ -1,6 +1,6 @@
 {% extends "admin/base.html" %}
 {% block title %}{{ video.title }}{% endblock %}
-{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span><a href="{{ url_for('admin_video') }}">Video</a><span class="sep">></span>Detail{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span><a href="{{ url_for('admin_video') }}">Video</a><span class="sep">›</span>Detail{% endblock %}
 {% block content %}
 <div class="section-header">
   <h1 class="page-title" style="margin-bottom:0">{{ video.title }}</h1>

@@ -1,0 +1,175 @@
+{% extends "admin/base.html" %}
+{% block title %}Hot Deals{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>Hot Deals{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+  <h1 class="page-title" style="margin:0">🔥 Hot Deals</h1>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <form method="POST" action="{{ url_for('admin_hotdeals_upload') }}" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center">
+      <input type="file" name="file" accept=".xlsx,.xls" required style="font-size:14px;padding:6px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)">
+      <button type="submit" class="btn btn-primary">Upload Excel</button>
+    </form>
+    {% if deals %}
+    <form method="POST" action="{{ url_for('admin_hotdeals_delete_all') }}" onsubmit="return confirm('Xoa tat ca deal?')">
+      <button type="submit" class="btn btn-ghost" style="color:var(--red)">Xoa tat ca</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Stats -->
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+  {% set active_deals = deals|selectattr('is_active')|list %}
+  {% set valid_deals = [] %}
+  {% for d in active_deals %}
+    {% if d.end_date > now %}
+      {% if valid_deals.append(d) %}{% endif %}
+    {% endif %}
+  {% endfor %}
+  <div class="stat-chip">Tong: <strong>{{ deals|length }}</strong></div>
+  <div class="stat-chip" style="color:#22c55e">Dang hoat dong: <strong>{{ valid_deals|length }}</strong></div>
+  <div class="stat-chip" style="color:#ef4444">Het han: <strong>{{ deals|length - valid_deals|length }}</strong></div>
+</div>
+
+<p style="color:var(--text-dim);margin-bottom:16px">
+  Upload file Excel (Hot_deal.xlsx) tu AccessTrade de import deal. Deal het han (End Date < hien tai) se tu dong an khoi trang Shop va Voucher.<br>
+  Format: Name | Campaign | Product Link | Start Date | End Date | Status | Hot Day | Banner (JSON) | Detail
+</p>
+
+{% if deals %}
+<!-- Bulk action bar -->
+<div id="bulkBar" style="display:none;position:sticky;top:0;z-index:50;background:var(--accent);color:#fff;padding:10px 20px;border-radius:var(--radius);margin-bottom:12px;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.15)">
+  <span>Da chon <strong id="bulkCount">0</strong> deal</span>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:none" onclick="bulkDeleteSelected()">Xoa da chon</button>
+  <button class="btn btn-sm" style="background:rgba(255,255,255,.1);color:#fff;border:none;margin-left:auto" onclick="toggleAll(false)">Bo chon</button>
+</div>
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width:40px"><input type="checkbox" id="checkAll" onchange="toggleAll(this.checked)" title="Chon tat ca"></th>
+        <th>Campaign</th>
+        <th>Ten deal</th>
+        <th>Banner</th>
+        <th>Bat dau</th>
+        <th>Ket thuc</th>
+        <th>Trang thai</th>
+        <th style="width:140px">Thao tac</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in deals %}
+      <tr style="{% if d.end_date < now or not d.is_active %}opacity:0.5{% endif %}">
+        <td><input type="checkbox" class="d-check" value="{{ d.id }}" onchange="updateBulk()"></td>
+        <td>
+          <strong>{{ d.campaign or '—' }}</strong>
+          {% if d.product_link %}
+          <br><a href="{{ d.product_link }}" target="_blank" style="font-size:12px;color:var(--accent)">Link &#8599;</a>
+          {% endif %}
+        </td>
+        <td style="max-width:300px">
+          <div style="font-size:13px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
+            {{ d.name }}
+          </div>
+        </td>
+        <td>
+          {% set banners = d.get_banner_urls() %}
+          {% if banners %}
+          <div style="display:flex;gap:4px">
+            {% for url in banners[:2] %}
+            <img src="{{ url }}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--border)" onerror="this.style.display='none'" loading="lazy">
+            {% endfor %}
+            {% if banners|length > 2 %}
+            <span style="font-size:12px;color:var(--text-dim);align-self:center">+{{ banners|length - 2 }}</span>
+            {% endif %}
+          </div>
+          {% else %}
+          <span style="color:var(--text-dim)">—</span>
+          {% endif %}
+        </td>
+        <td style="white-space:nowrap;font-size:13px">{{ d.start_date.strftime('%d/%m/%Y') if d.start_date else '—' }}</td>
+        <td style="white-space:nowrap;font-size:13px">
+          {{ d.end_date.strftime('%d/%m/%Y %H:%M') if d.end_date else '—' }}
+          {% if d.end_date and d.end_date < now %}
+          <br><span style="color:#ef4444;font-size:11px;font-weight:600">HET HAN</span>
+          {% elif d.end_date %}
+          <br><span style="color:#22c55e;font-size:11px;font-weight:600">CON HAN</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if d.is_active and d.end_date > now %}
+          <span class="badge badge-green">Hien thi</span>
+          {% elif not d.is_active %}
+          <span class="badge badge-gray">An</span>
+          {% else %}
+          <span class="badge badge-red">Het han</span>
+          {% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:4px">
+            <form method="POST" action="{{ url_for('admin_hotdeal_toggle', deal_id=d.id) }}">
+              <button type="submit" class="btn btn-ghost btn-sm" title="{{ 'Tat' if d.is_active else 'Bat' }}">
+                {% if d.is_active %}👁{% else %}👁‍🗨{% endif %}
+              </button>
+            </form>
+            <form method="POST" action="{{ url_for('admin_hotdeal_delete', deal_id=d.id) }}" onsubmit="return confirm('Xoa deal nay?')">
+              <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red)" title="Xoa">🗑</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;margin-bottom:12px">📋</div>
+  <h3>Chua co Hot Deal nao</h3>
+  <p>Upload file Excel (Hot_deal.xlsx) de bat dau import deal.</p>
+</div>
+{% endif %}
+
+<style>
+.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 16px;font-size:14px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-green{background:rgba(34,197,94,0.1);color:#22c55e}
+.badge-red{background:rgba(239,68,68,0.1);color:#ef4444}
+.badge-gray{background:rgba(107,114,128,0.1);color:#6b7280}
+.btn-sm{padding:4px 8px;font-size:13px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.empty-state h3{margin-bottom:8px;color:var(--text)}
+</style>
+
+<script>
+function toggleAll(checked) {
+  document.querySelectorAll('.d-check').forEach(c => c.checked = checked);
+  document.getElementById('checkAll').checked = checked;
+  updateBulk();
+}
+function updateBulk() {
+  const checked = document.querySelectorAll('.d-check:checked');
+  const bar = document.getElementById('bulkBar');
+  if (checked.length > 0) {
+    bar.style.display = 'flex';
+    document.getElementById('bulkCount').textContent = checked.length;
+  } else {
+    bar.style.display = 'none';
+  }
+  const all = document.querySelectorAll('.d-check');
+  document.getElementById('checkAll').checked = all.length > 0 && checked.length === all.length;
+}
+async function bulkDeleteSelected() {
+  const ids = [...document.querySelectorAll('.d-check:checked')].map(c => c.value);
+  if (!ids.length) return;
+  if (!confirm('Xoa ' + ids.length + ' deal da chon?')) return;
+  const resp = await fetch('{{ url_for("admin_hotdeals_bulk_delete_selected") }}', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ids: ids})
+  });
+  const data = await resp.json();
+  if (data.ok) location.reload();
+  else alert('Loi: ' + (data.error || 'Unknown'));
+}
+</script>
+{% endblock %}

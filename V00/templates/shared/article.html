@@ -32,15 +32,40 @@
     </div>
     {% endif %}
 
-    <!-- Content with carousel in the middle -->
+    <!-- Content with inline suggestions and carousel -->
     <article class="article-body">
-      {% if article.content %}
-        {% set paragraphs = article.content.split('</p>') %}
+      {% if article_content_with_backlinks or article.content %}
+        {% set bl_content = article_content_with_backlinks if article_content_with_backlinks else article.content %}
+        {% set paragraphs = bl_content.split('</p>') %}
         {% set total = paragraphs|length %}
+        {% set third = (total // 3)|int %}
         {% set mid = (total // 2)|int %}
 
-        {# First half #}
-        {% for i in range(mid) %}
+        {# First 1/3 #}
+        {% for i in range(third) %}
+          {% if paragraphs[i].strip() %}
+            {{ paragraphs[i]|safe }}</p>
+          {% endif %}
+        {% endfor %}
+
+        {# Inline Suggestion Block — quote style at 1/3 position #}
+        {% if inline_suggests %}
+        <div class="inline-suggest-block">
+          <div class="inline-suggest-label">Bài viết liên quan</div>
+          {% for sg in inline_suggests %}
+          <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=sg.slug) }}" class="inline-suggest-item">
+            <span class="inline-suggest-icon">
+              {% if sg.tier == 'nganh' %}🏭{% elif sg.tier == 'chung' %}⚙️{% else %}🔍{% endif %}
+            </span>
+            <span class="inline-suggest-text">{{ sg.title }}</span>
+            <span class="inline-suggest-arrow">→</span>
+          </a>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {# Middle section (1/3 to mid) #}
+        {% for i in range(third, mid) %}
           {% if paragraphs[i].strip() %}
             {{ paragraphs[i]|safe }}</p>
           {% endif %}
@@ -66,11 +91,11 @@
             {% endfor %}
           </div>
           {% endif %}
-          {% if article.embed_code %}<div class="embed-zone">{{ article.embed_code|safe }}</div>{% endif %}
+          {% if article.embed_code and not article.embed_code.startswith('product_ids:') %}<div class="embed-zone">{{ article.embed_code|safe }}</div>{% endif %}
         </div>
         {% endif %}
 
-        {# Second half #}
+        {# Last section (mid to end) #}
         {% for i in range(mid, total) %}
           {% if paragraphs[i].strip() %}
             {{ paragraphs[i]|safe }}{% if not paragraphs[i].endswith('</p>') %}</p>{% endif %}
@@ -189,6 +214,21 @@
       {% endif %}
     </div>
     {% endfor %}
+
+    <!-- Outtext Backlinks Widget (SEO internal links) -->
+    {% if outtext_links %}
+    <div class="sidebar-widget">
+      <h3 class="widget-title">📎 Xem thêm</h3>
+      <div class="sidebar-articles">
+        {% for ol in outtext_links %}
+        <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=ol.target_slug) if ol.target_type == 'article' else '#' }}" class="sidebar-article-card seo-outtext">
+          <h4>{{ ol.anchor_text }}</h4>
+          <div class="sac-meta">{{ ol.target_type|title }}</div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
 
     <!-- Related Articles Widget -->
     {% if related %}

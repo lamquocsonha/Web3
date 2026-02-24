@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+{% block title %}Auto Generate Keywords{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> <a href="{{ url_for('admin_seo_dashboard') }}">SEO</a> <span class="sep">›</span> Auto Generate
+{% endblock %}
+{% block content %}
+<div style="max-width:700px">
+  <h1 style="margin:0 0 8px;font-size:1.5rem">Auto Generate Backlink Keywords</h1>
+  <p style="color:var(--muted);margin:0 0 24px">Automatically extract keywords from article titles, tags, part names, and zone names to create backlink targets.</p>
+
+  <!-- Navigation Tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:24px;border-bottom:2px solid var(--border);padding-bottom:12px">
+    <a href="{{ url_for('admin_seo_dashboard') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Dashboard</a>
+    <a href="{{ url_for('admin_seo_keywords') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Keywords</a>
+    <a href="{{ url_for('admin_seo_instances') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Instances</a>
+    <a href="{{ url_for('admin_seo_suggestions') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Suggestions</a>
+    <a href="{{ url_for('admin_seo_auto_generate') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;background:var(--accent);color:#fff;font-weight:600">Auto Generate</a>
+    <a href="{{ url_for('admin_seo_scan') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Scan & Build</a>
+  </div>
+
+  <form method="POST" style="display:flex;flex-direction:column;gap:16px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px">
+      <div>
+        <label style="font-size:0.9rem;font-weight:600;display:block;margin-bottom:6px">Select Vertical *</label>
+        <select name="vertical_slug" required style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:0.95rem">
+          <option value="">-- Choose a vertical --</option>
+          {% for v in verticals %}
+          <option value="{{ v.slug }}">{{ v.icon }} {{ v.name }} ({{ v.slug }})</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label style="font-size:0.9rem;font-weight:600;display:block;margin-bottom:6px">Generate From</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <input type="radio" name="generate_from" value="all" checked>
+            <div>
+              <div style="font-weight:500">All Sources</div>
+              <div style="font-size:0.8rem;color:var(--muted)">Articles + Parts + Zones — Most comprehensive</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <input type="radio" name="generate_from" value="articles">
+            <div>
+              <div style="font-weight:500">Articles Only</div>
+              <div style="font-size:0.8rem;color:var(--muted)">Extract from article titles and tags</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <input type="radio" name="generate_from" value="parts">
+            <div>
+              <div style="font-weight:500">Parts Only</div>
+              <div style="font-size:0.8rem;color:var(--muted)">Extract from part names (Vi & En) and tags</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <input type="radio" name="generate_from" value="zones">
+            <div>
+              <div style="font-weight:500">Zones Only</div>
+              <div style="font-size:0.8rem;color:var(--muted)">Extract from zone names</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div style="padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" name="overwrite">
+          <div>
+            <div style="font-weight:500;font-size:0.9rem">Overwrite existing (re-activate)</div>
+            <div style="font-size:0.8rem;color:var(--muted)">If keyword already exists, re-activate it instead of skipping</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- What it does -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px">
+      <h3 style="margin:0 0 10px;font-size:0.95rem">What this does:</h3>
+      <ul style="margin:0;padding:0 0 0 18px;color:var(--muted);font-size:0.85rem;line-height:1.8">
+        <li><strong>Articles:</strong> Creates keywords from article titles (priority 7) and tags (priority 4), linking to the article page</li>
+        <li><strong>Parts:</strong> Creates keywords from part name_vi, name_en (priority 6) and tags (priority 3), linking to the part page</li>
+        <li><strong>Zones:</strong> Creates keywords from zone names (priority 8), linking to the zone page</li>
+        <li>Skips duplicates (same keyword + target_type + target_slug)</li>
+        <li>Keywords shorter than 3 chars or longer than 100 chars are skipped</li>
+      </ul>
+    </div>
+
+    <button type="submit" style="padding:12px 28px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:600;font-size:1rem;align-self:flex-start">
+      Generate Keywords
+    </button>
+  </form>
+</div>
+{% endblock %}

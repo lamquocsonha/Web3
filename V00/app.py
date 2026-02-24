@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue
+from models import db, Vertical, Segment, Zone, Part, AffiliateLink, AffiliateNetwork, AffiliateCampaign, AffiliateStats, AIContent, SiteSettings, SocialChannel, VideoProject, VideoPublish, Article, Banner, Hotel, Attraction, Voucher, ArticleFeedback, ScheduledCSVImport, VoucherWidget, ContentEvent, AutoContentRule, ContentQueue, HotDeal, WardCommune, AccessTradeBanner, BacklinkKeyword, BacklinkInstance
 from datetime import datetime, date, timedelta
 import os, random, json
 
@@ -15,11 +15,14 @@ db.init_app(app)
 
 # Set SQLite pragmas for better concurrency (WAL + busy_timeout)
 def _set_sqlite_pragmas(dbapi_conn, connection_record):
-    cursor = dbapi_conn.cursor()
-    cursor.execute("PRAGMA journal_mode=WAL")
-    cursor.execute("PRAGMA busy_timeout=30000")
-    cursor.execute("PRAGMA synchronous=NORMAL")
-    cursor.close()
+    try:
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
+    except Exception:
+        pass  # Ignore pragma errors on malformed/new databases
 
 from sqlalchemy import event
 with app.app_context():
@@ -213,9 +216,62 @@ def inject_globals():
             except Exception:
                 pass
 
+        # Hot deals banner (uploaded from Excel)
+        hotdeals_active = []
+        hd_enabled = SiteSettings.get('hotdeal_enabled', '1')
+        hd_show_shop = SiteSettings.get('hotdeal_show_shop', '1')
+        hd_show_voucher = SiteSettings.get('hotdeal_show_voucher', '1')
+        if hd_enabled == '1':
+            now_utc = datetime.utcnow()
+            hotdeals_active = HotDeal.query.filter(
+                HotDeal.is_active == True,
+                HotDeal.end_date > now_utc
+            ).order_by(HotDeal.end_date.asc()).all()
+
+        # AccessTrade auto-pull banners (dedup: each brand appears once)
+        # Brand key = merchant + sub-brand from [...] in offer_name
+        # e.g. "[M2store]-Giam 10%..." on SHOPEE → key "shopee_m2store"
+        import re as _re
+        def _at_brand_key(ab):
+            merchant = (ab.merchant or '').strip().lower()
+            offer = ab.offer_name or ''
+            m = _re.search(r'\[([^\]]+)\]', offer)
+            if m:
+                return f"{merchant}_{m.group(1).strip().lower()}"
+            return merchant
+
+        at_banners_hotdeal = []
+        at_banners_sidebar = []
+        try:
+            now_utc2 = datetime.utcnow()
+            at_all = AccessTradeBanner.query.filter(
+                AccessTradeBanner.is_active == True
+            ).order_by(AccessTradeBanner.synced_at.desc()).all()
+            hotdeal_brands = set()
+            for ab in at_all:
+                if ab.end_date and ab.end_date < now_utc2:
+                    continue
+                brand_key = _at_brand_key(ab)
+                if ab.placement in ('hotdeal', 'both'):
+                    if brand_key not in hotdeal_brands:
+                        at_banners_hotdeal.append(ab)
+                        hotdeal_brands.add(brand_key)
+            for ab in at_all:
+                if ab.end_date and ab.end_date < now_utc2:
+                    continue
+                brand_key = _at_brand_key(ab)
+                if ab.placement in ('sidebar', 'both'):
+                    if brand_key not in hotdeal_brands:
+                        at_banners_sidebar.append(ab)
+        except Exception:
+            pass
+
+        _now = datetime.utcnow()
         return {
             'sidebar_verticals': Vertical.query.order_by(Vertical.name).all(),
-            'now': datetime.utcnow(),
+            'now': _now,
+            'current_month': _now.month,
+            'current_year': _now.year,
             'THEME_STYLES': get_theme_styles(),
             'site_mode': site_mode,
             'site_logo_url': logo_url,
@@ -226,9 +282,15 @@ def inject_globals():
             'hot_products': hot_products,
             'hot_products_show_shop': hp_show_shop,
             'hot_products_show_sidebar': hp_show_sidebar,
+            'hotdeals_active': hotdeals_active,
+            'hotdeal_show_shop': hd_show_shop,
+            'hotdeal_show_voucher': hd_show_voucher,
+            'at_banners_hotdeal': at_banners_hotdeal,
+            'at_banners_sidebar': at_banners_sidebar,
         }
     except:
-        return {'sidebar_verticals': [], 'now': datetime.utcnow(), 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1'}
+        _fallback_now = datetime.utcnow()
+        return {'sidebar_verticals': [], 'now': _fallback_now, 'current_month': _fallback_now.month, 'current_year': _fallback_now.year, 'THEME_STYLES': THEME_STYLES, 'site_mode': 'demo', 'site_logo_url': '', 'site_favicon_url': '', 'sidebar_vouchers': [], 'voucher_sidebar_position': 'after_popular', 'custom_head_code': '', 'hot_products': [], 'hot_products_show_shop': '1', 'hot_products_show_sidebar': '1', 'hotdeals_active': [], 'hotdeal_show_shop': '1', 'hotdeal_show_voucher': '1', 'at_banners_hotdeal': [], 'at_banners_sidebar': []}
 
 def slugify(text):
     """Convert Vietnamese text to URL-friendly slug (no diacritics)"""
@@ -547,6 +609,273 @@ def admin_delete_link(lid):
     return redirect(url_for('admin_part_edit', pid=pid))
 
 # =============================================
+# ADMIN — MONETIZATION HUB (unified)
+# =============================================
+@app.route('/admin/monetization')
+def admin_monetization():
+    """Redirect old monetization URL to products hub"""
+    tab = request.args.get('tab', 'products')
+    if tab in ('hotels',):
+        return redirect(url_for('admin_hotels_hub'))
+    elif tab in ('vouchers',):
+        return redirect(url_for('admin_vouchers_hub'))
+    return redirect(url_for('admin_products_hub'))
+
+
+@app.route('/admin/products-hub')
+def admin_products_hub():
+    """Products Hub — Products, Affiliate"""
+    from sqlalchemy import func as sqlfunc
+    tab = request.args.get('tab', 'products')
+    ctx = {'active_tab': tab}
+
+    if tab == 'products':
+        f_vertical = request.args.get('vertical', '')
+        f_network = request.args.get('network', '')
+        f_status = request.args.get('status', '')
+        f_search = request.args.get('q', '')
+        page = request.args.get('page', 1, type=int)
+        per_page = 50
+
+        q = db.session.query(AffiliateLink, Part, Zone, Segment, Vertical).join(
+            Part, AffiliateLink.part_id == Part.id
+        ).join(Zone, Part.zone_id == Zone.id
+        ).join(Segment, Zone.segment_id == Segment.id
+        ).join(Vertical, Segment.vertical_id == Vertical.id)
+
+        if f_vertical:
+            q = q.filter(Vertical.slug == f_vertical)
+        if f_network:
+            q = q.filter(AffiliateLink.network == f_network)
+        if f_status == 'active':
+            q = q.filter(AffiliateLink.is_active == True)
+        elif f_status == 'inactive':
+            q = q.filter(AffiliateLink.is_active == False)
+        if f_search:
+            q = q.filter(db.or_(
+                AffiliateLink.product_name.ilike(f'%{f_search}%'),
+                Part.name_vi.ilike(f'%{f_search}%'),
+                AffiliateLink.url.ilike(f'%{f_search}%')
+            ))
+
+        pagination = q.order_by(AffiliateLink.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+        products = pagination.items
+        verticals = Vertical.query.order_by(Vertical.name).all()
+        networks = db.session.query(AffiliateLink.network).distinct().all()
+
+        total_all = AffiliateLink.query.count()
+        active = AffiliateLink.query.filter_by(is_active=True).count()
+        total_clicks = db.session.query(sqlfunc.sum(AffiliateLink.clicks)).scalar() or 0
+        total_conv = db.session.query(sqlfunc.sum(AffiliateLink.conversions)).scalar() or 0
+
+        ctx.update(products=products, verticals=verticals, networks=[n[0] for n in networks],
+                   f_vertical=f_vertical, f_network=f_network, f_status=f_status, f_search=f_search,
+                   total=total_all, active=active, total_clicks=total_clicks, total_conv=total_conv,
+                   pagination=pagination, page=page)
+
+    elif tab == 'affiliate':
+        networks = db.session.query(
+            AffiliateLink.network, sqlfunc.count(AffiliateLink.id),
+            sqlfunc.sum(AffiliateLink.clicks), sqlfunc.sum(AffiliateLink.conversions)
+        ).group_by(AffiliateLink.network).all()
+        net_stats = [{'name': n[0], 'count': n[1], 'clicks': n[2] or 0, 'conv': n[3] or 0} for n in networks]
+        total_clicks = sum(n['clicks'] for n in net_stats)
+        total_conv = sum(n['conv'] for n in net_stats)
+        total_links = sum(n['count'] for n in net_stats)
+        ctx.update(net_stats=net_stats, total_clicks=total_clicks, total_conv=total_conv, total_links=total_links)
+
+    return render_template('admin/products_hub.html', **ctx)
+
+
+@app.route('/admin/hotels-hub')
+def admin_hotels_hub():
+    """Hotels Hub — Hotels, Hotel Sync, Attractions"""
+    from sqlalchemy import func as sqlfunc
+    tab = request.args.get('tab', 'hotels')
+    ctx = {'active_tab': tab}
+
+    if tab == 'hotels':
+        f_dest = request.args.get('dest', '')
+        f_stars = request.args.get('stars', '')
+        f_status = request.args.get('status', '')
+        f_image = request.args.get('image', '')
+        page = request.args.get('page', 1, type=int)
+        per_page = 30
+
+        query = Hotel.query
+        if f_dest:
+            query = query.filter(Hotel.destination == f_dest)
+        if f_stars:
+            query = query.filter(Hotel.stars == int(f_stars))
+        if f_status == 'active':
+            query = query.filter(Hotel.is_active == True)
+        elif f_status == 'inactive':
+            query = query.filter(Hotel.is_active == False)
+        if f_image == 'missing':
+            query = query.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
+        elif f_image == 'has':
+            query = query.filter(Hotel.image_url != '', Hotel.image_url != None)
+
+        total_filtered = query.count()
+        hotels = query.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).offset((page - 1) * per_page).limit(per_page).all()
+        destinations = db.session.query(Hotel.destination, Hotel.destination_name).distinct().all()
+
+        total = Hotel.query.count()
+        active_h = Hotel.query.filter_by(is_active=True).count()
+        no_image = Hotel.query.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
+        total_clicks = db.session.query(sqlfunc.sum(Hotel.clicks)).scalar() or 0
+        total_conv = db.session.query(sqlfunc.sum(Hotel.conversions)).scalar() or 0
+
+        ctx.update(hotels=hotels, destinations=destinations,
+                   f_dest=f_dest, f_stars=f_stars, f_status=f_status, f_image=f_image,
+                   total=total, active_h=active_h, no_image=no_image,
+                   total_clicks=total_clicks, total_conv=total_conv,
+                   page=page, per_page=per_page, total_filtered=total_filtered,
+                   total_pages=(total_filtered + per_page - 1) // per_page)
+
+    elif tab == 'sync':
+        from agoda_integration import get_agoda_api, VIETNAM_DESTINATIONS
+        # Auto-populate default Agoda credentials if not saved yet
+        _default_cid = '1959245'
+        _default_key = '1959245:5669c3b3-2865-4591-ba56-1b02a3c04082'
+        if not SiteSettings.get('agoda_cid', ''):
+            SiteSettings.set_val('agoda_cid', _default_cid, 'api')
+            SiteSettings.set_val('agoda_api_key', _default_key, 'api')
+            SiteSettings.set_val('agoda_enabled', '1', 'general')
+            import agoda_integration
+            agoda_integration._api_instance = None
+            db.session.commit()
+
+        api = get_agoda_api()
+        api_connected = api is not None
+        total_hotels = Hotel.query.count()
+        total_agoda = Hotel.query.filter_by(source='agoda_api').count()
+        total_manual = Hotel.query.filter(Hotel.source != 'agoda_api').count()
+        total_active = Hotel.query.filter_by(is_active=True).count()
+        cid = SiteSettings.get('agoda_cid', '')
+        has_key = bool(SiteSettings.get('agoda_api_key', ''))
+        destinations_sync = [
+            {'slug': slug, 'name': name, 'city_id': city_id, 'province_code': ''}
+            for name, slug, city_id in VIETNAM_DESTINATIONS
+        ]
+        agoda_destinations = [
+            {'slug': d['slug'], 'name': d['name'], 'city_id': d['city_id']}
+            for d in destinations_sync if d['city_id']
+        ]
+        page_sync = request.args.get('page', 1, type=int)
+        per_page_sync = 30
+        f_image = request.args.get('image', '')
+        rq = Hotel.query.filter_by(source='agoda_api')
+        if f_image == 'missing':
+            rq = rq.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
+        elif f_image == 'has':
+            rq = rq.filter(Hotel.image_url != '', Hotel.image_url != None)
+        agoda_no_image = Hotel.query.filter_by(source='agoda_api').filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
+        recent_total = rq.count()
+        recent = rq.order_by(Hotel.id.desc()).offset((page_sync - 1) * per_page_sync).limit(per_page_sync).all()
+        recent_pages = (recent_total + per_page_sync - 1) // per_page_sync
+        ctx.update(api_connected=api_connected, cid=cid, has_key=has_key,
+                   total_hotels=total_hotels, total_agoda=total_agoda,
+                   total_manual=total_manual, total_active=total_active,
+                   destinations=destinations_sync, agoda_destinations=agoda_destinations,
+                   recent=recent, page=page_sync, recent_total=recent_total,
+                   recent_pages=recent_pages, per_page=per_page_sync, f_image=f_image,
+                   agoda_no_image=agoda_no_image)
+
+    elif tab == 'attractions':
+        f_dest = request.args.get('dest', 'all')
+        f_cat = request.args.get('cat', 'all')
+
+        query = Attraction.query
+        if f_dest != 'all':
+            query = query.filter_by(destination=f_dest)
+        if f_cat != 'all':
+            query = query.filter_by(category=f_cat)
+
+        items = query.order_by(Attraction.id.desc()).all()
+        destinations = db.session.query(Attraction.destination).distinct().all()
+        cats = db.session.query(Attraction.category).distinct().all()
+        total = Attraction.query.count()
+        active_a = Attraction.query.filter_by(is_active=True).count()
+
+        ctx.update(items=items, destinations=[d[0] for d in destinations if d[0]],
+                   cats=[c[0] for c in cats if c[0]],
+                   f_dest=f_dest, f_cat=f_cat, total=total, active_a=active_a)
+
+    return render_template('admin/hotels_hub.html', **ctx)
+
+
+@app.route('/admin/vouchers-hub')
+def admin_vouchers_hub():
+    """Standalone Voucher Hub with sub-tabs: vouchers, widgets, sync"""
+    tab = request.args.get('tab', 'vouchers')
+    ctx = dict(active_tab=tab)
+
+    if tab == 'vouchers':
+        from sqlalchemy import func as sqlfunc
+        f_cat = request.args.get('cat', 'all')
+        f_merchant = request.args.get('merchant', 'all')
+        f_status = request.args.get('status', 'all')
+        query = Voucher.query
+        if f_cat != 'all':
+            query = query.filter_by(category=f_cat)
+        if f_merchant != 'all':
+            query = query.filter_by(merchant=f_merchant)
+        if f_status == 'active':
+            query = query.filter_by(is_active=True)
+        elif f_status == 'inactive':
+            query = query.filter_by(is_active=False)
+        items = query.order_by(Voucher.created_at.desc()).all()
+        merchants_q = db.session.query(Voucher.merchant).distinct().all()
+        cats_q = db.session.query(Voucher.category).distinct().all()
+        ctx.update(items=items, merchants=[m[0] for m in merchants_q if m[0]],
+                   cats=[c[0] for c in cats_q if c[0]],
+                   f_cat=f_cat, f_merchant=f_merchant, f_status=f_status,
+                   v_total=Voucher.query.count(),
+                   v_active=Voucher.query.filter_by(is_active=True).count(),
+                   v_clicks=db.session.query(sqlfunc.sum(Voucher.clicks)).scalar() or 0)
+
+    elif tab == 'widgets':
+        ctx.update(widgets=VoucherWidget.query.all())
+
+    elif tab == 'sync':
+        from accesstrade_integration import get_accesstrade_api
+        api = get_accesstrade_api()
+        api_connected = api is not None
+        sync_total_synced = Voucher.query.filter_by(sync_mode='api').count()
+        try:
+            sync_total_active = _voucher_valid_filter(Voucher.query.filter_by(sync_mode='api')).count()
+        except Exception:
+            sync_total_active = Voucher.query.filter_by(sync_mode='api', is_active=True).count()
+        ctx.update(
+            api_connected=api_connected,
+            sync_total_synced=sync_total_synced,
+            sync_total_active=sync_total_active,
+            sync_total_manual=Voucher.query.filter_by(sync_mode='manual').count(),
+            auto_sync_enabled=SiteSettings.get('voucher_auto_sync', 'off') == 'on',
+            sync_interval=SiteSettings.get('voucher_sync_interval', '6'),
+            last_sync=SiteSettings.get('voucher_last_sync', ''),
+            last_sync_count=SiteSettings.get('voucher_last_sync_count', '0'),
+            last_sync_error=SiteSettings.get('voucher_last_sync_error', ''),
+            recent_synced=Voucher.query.filter_by(sync_mode='api').order_by(Voucher.created_at.desc()).limit(20).all())
+
+    elif tab == 'hotdeals':
+        deals = HotDeal.query.order_by(HotDeal.created_at.desc()).all()
+        ctx.update(deals=deals)
+
+    elif tab == 'banners':
+        at_banners = AccessTradeBanner.query.order_by(AccessTradeBanner.created_at.desc()).all()
+        ctx.update(
+            at_banners=at_banners,
+            banner_auto_sync=SiteSettings.get('banner_auto_sync', 'on') == 'on',
+            banner_sync_time=SiteSettings.get('banner_sync_time', '03:00'),
+            banner_last_auto_sync=SiteSettings.get('banner_last_auto_sync', ''),
+            banner_last_auto_sync_result=SiteSettings.get('banner_last_auto_sync_result', ''),
+        )
+
+    return render_template('admin/voucher_hub.html', **ctx)
+
+# =============================================
 # ADMIN — AFFILIATE HUB
 # =============================================
 @app.route('/admin/affiliate')
@@ -735,12 +1064,44 @@ def admin_content():
 def admin_content_generate():
     verticals = Vertical.query.all()
     if request.method == 'POST':
+        title = request.form['title']
+        prompt_text = request.form.get('prompt', '')
+        ai_provider = request.form.get('ai_provider', 'openai')
+        vertical_slug = request.form.get('vertical_slug', '')
+
+        # Try real AI generation
+        result_text = ''
+        tokens_used = 0
+        cost_vnd = 0
+        try:
+            from ai_service import generate_article, build_context_custom
+            vertical_name = vertical_slug or 'General'
+            for v in verticals:
+                if v.slug == vertical_slug:
+                    vertical_name = v.name
+                    break
+            context = build_context_custom(
+                vertical_name=vertical_name,
+                topic=title,
+                keywords=prompt_text[:200] if prompt_text else title,
+                tone='seo',
+                word_count='1200',
+            )
+            gen = generate_article('custom', context)
+            result_text = gen.get('content', '')
+            tokens_used = gen.get('tokens_used', 0)
+            cost_vnd = gen.get('cost_vnd', 0)
+        except Exception as e:
+            result_text = f'[AI generation failed: {str(e)}]\n\nPrompt was: {prompt_text}'
+            tokens_used = 0
+            cost_vnd = 0
+
         ai = AIContent(
-            title=request.form['title'], content_type=request.form.get('content_type','article'),
-            ai_provider=request.form.get('ai_provider','openai'), prompt=request.form.get('prompt',''),
-            result='[AI content will be generated here when API is connected]',
-            status='draft', vertical_slug=request.form.get('vertical_slug',''),
-            cost_tokens=random.randint(500,2000), cost_vnd=random.randint(800,2000)
+            title=title, content_type=request.form.get('content_type','article'),
+            ai_provider=ai_provider, prompt=prompt_text,
+            result=result_text,
+            status='draft', vertical_slug=vertical_slug,
+            cost_tokens=tokens_used, cost_vnd=cost_vnd
         )
         db.session.add(ai)
         db.session.commit()
@@ -761,13 +1122,128 @@ def admin_content_delete(cid):
     flash('Da xoa content', 'success')
     return redirect(url_for('admin_content'))
 
+@app.route('/admin/contents/bulk-delete', methods=['POST'])
+def admin_contents_bulk_delete():
+    """Bulk delete AI contents by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co content nao'), 400
+    deleted = AIContent.query.filter(AIContent.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
+# =============================================
+# ADMIN — TOOLS HUB (unified page)
+# =============================================
+@app.route('/admin/tools')
+def admin_tools():
+    """Unified Tools Hub — Analytics, Video, Seed Data in tabs"""
+    tab = request.args.get('tab', 'analytics')
+    ctx = {'active_tab': tab}
+
+    if tab == 'analytics':
+        from sqlalchemy import func as sqlfunc
+        verticals = Vertical.query.all()
+        vertical_stats = []
+        for v in verticals:
+            products = db.session.query(AffiliateLink).join(Part).join(Zone).join(Segment).filter(Segment.vertical_id == v.id)
+            clicks = sum(p.clicks or 0 for p in products.all())
+            conversions = sum(p.conversions or 0 for p in products.all())
+            articles = Article.query.filter_by(vertical_slug=v.slug).count()
+            views = db.session.query(sqlfunc.sum(Article.views)).filter(Article.vertical_slug == v.slug).scalar() or 0
+            vertical_stats.append({
+                'vertical': v, 'clicks': clicks, 'conversions': conversions,
+                'articles': articles, 'views': views
+            })
+        totals = {
+            'clicks': sum(vs['clicks'] for vs in vertical_stats),
+            'conversions': sum(vs['conversions'] for vs in vertical_stats),
+            'articles': sum(vs['articles'] for vs in vertical_stats),
+            'views': sum(vs['views'] for vs in vertical_stats),
+        }
+        ctx.update(verticals=verticals, vertical_stats=vertical_stats, totals=totals)
+
+    elif tab == 'video':
+        videos = VideoProject.query.order_by(VideoProject.created_at.desc()).limit(50).all()
+        channels = SocialChannel.query.all()
+        total_views = db.session.query(db.func.sum(VideoPublish.views)).scalar() or 0
+        total_published = VideoPublish.query.filter_by(status='published').count()
+        ctx.update(videos=videos, channels=channels, total_views=total_views, total_published=total_published)
+
+    elif tab == 'vouchers':
+        return redirect(url_for('admin_vouchers_hub'))
+
+    elif tab == 'seed':
+        verticals = Vertical.query.all()
+        verticals_data = []
+        for v in verticals:
+            segments = Segment.query.filter_by(vertical_id=v.id).all()
+            segs = []
+            for s in segments:
+                zones = Zone.query.filter_by(segment_id=s.id).all()
+                zs = []
+                for z in zones:
+                    parts = Part.query.filter_by(zone_id=z.id).all()
+                    zs.append({'zone': z, 'parts': parts})
+                segs.append({'segment': s, 'zones': zs})
+            verticals_data.append({'vertical': v, 'segments': segs})
+        ctx.update(verticals_data=verticals_data)
+
+    return render_template('admin/tools_hub.html', **ctx)
+
 # =============================================
 # ADMIN — ANALYTICS
 # =============================================
 @app.route('/admin/analytics')
 def admin_analytics():
     verticals = Vertical.query.all()
-    return render_template('admin/analytics.html', verticals=verticals)
+
+    # Per-vertical stats
+    vertical_stats = []
+    for v in verticals:
+        articles = Article.query.filter_by(vertical_slug=v.slug).all()
+        article_count = len(articles)
+        total_views = sum(a.views or 0 for a in articles)
+
+        # Count parts via Vertical > Segments > Zones > Parts
+        part_count = 0
+        link_count = 0
+        total_clicks = 0
+        total_conversions = 0
+        for seg in v.segments:
+            for zone in seg.zones:
+                part_count += len(zone.parts)
+                for part in zone.parts:
+                    link_count += len(part.affiliate_links)
+                    total_clicks += sum(al.clicks or 0 for al in part.affiliate_links)
+                    total_conversions += sum(al.conversions or 0 for al in part.affiliate_links)
+
+        # Article tier breakdown
+        tier_nganh = sum(1 for a in articles if a.tier == 'nganh')
+        tier_chung = sum(1 for a in articles if a.tier == 'chung')
+        tier_chitiet = sum(1 for a in articles if a.tier == 'chi-tiet')
+
+        vertical_stats.append({
+            'name': v.name, 'slug': v.slug, 'icon': v.icon, 'color': v.color,
+            'articles': article_count, 'views': total_views,
+            'parts': part_count, 'links': link_count,
+            'clicks': total_clicks, 'conversions': total_conversions,
+            'tier_nganh': tier_nganh, 'tier_chung': tier_chung, 'tier_chitiet': tier_chitiet,
+        })
+
+    # Totals
+    totals = {
+        'articles': sum(s['articles'] for s in vertical_stats),
+        'views': sum(s['views'] for s in vertical_stats),
+        'parts': sum(s['parts'] for s in vertical_stats),
+        'links': sum(s['links'] for s in vertical_stats),
+        'clicks': sum(s['clicks'] for s in vertical_stats),
+        'conversions': sum(s['conversions'] for s in vertical_stats),
+    }
+
+    return render_template('admin/analytics.html',
+        verticals=verticals, vertical_stats=vertical_stats, totals=totals)
 
 # =============================================
 # ADMIN — SETTINGS
@@ -783,9 +1259,18 @@ def admin_settings():
                         'voucher_sidebar_enabled', 'voucher_sidebar_count', 'voucher_sidebar_position',
                         'shop_display_mode', 'custom_head_code',
                         'hot_products_enabled', 'hot_products_count',
-                        'hot_products_show_shop', 'hot_products_show_sidebar'],
+                        'hot_products_show_shop', 'hot_products_show_sidebar',
+                        'hotdeal_enabled', 'hotdeal_show_shop', 'hotdeal_show_voucher',
+                        'redirect_404_target'],
             'api': ['openai_key', 'claude_key', 'dalle_key', 'deepl_key'],
         }
+        if tab == 'robots':
+            robots_path = os.path.join(app.root_path, 'robots.txt')
+            content = request.form.get('robots_content', '')
+            with open(robots_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            flash('robots.txt updated!', 'success')
+            return redirect(url_for('admin_settings', tab='robots'))
         keys_to_save = tab_keys.get(tab, [])
         for key in keys_to_save:
             val = request.form.get(key, '')
@@ -801,10 +1286,18 @@ def admin_settings():
         custom_names = set(json.loads(custom_raw).keys())
     except:
         custom_names = set()
+    db_info = _get_db_info() if tab == 'database' else None
+    robots_content = ''
+    if tab == 'robots':
+        robots_path = os.path.join(app.root_path, 'robots.txt')
+        if os.path.exists(robots_path):
+            with open(robots_path, 'r', encoding='utf-8') as f:
+                robots_content = f.read()
     return render_template('admin/settings.html', settings=settings, styles=styles,
                            active_tab=tab, custom_names=custom_names,
                            default_names=set(THEME_STYLES.keys()),
-                           available_fonts=AVAILABLE_FONTS)
+                           available_fonts=AVAILABLE_FONTS,
+                           db_info=db_info, robots_content=robots_content)
 
 @app.route('/admin/settings/styles', methods=['POST'])
 def admin_settings_styles():
@@ -841,6 +1334,154 @@ def admin_settings_styles():
 
     return redirect(url_for('admin_settings', tab='styles'))
 
+# ═══════════════════════════════════════════
+# DATABASE MANAGEMENT
+# ═══════════════════════════════════════════
+def _get_db_info():
+    """Get database info for the settings page — includes health report."""
+    info = {'size_display': '—', 'table_count': 0, 'tables': [], 'backups': [], 'health': None}
+
+    # Health report from db_backup
+    try:
+        from db_backup import get_health_report
+        health = get_health_report(app)
+        info['health'] = health
+        info['size_display'] = health['size_display']
+        info['backups'] = health['backups']
+    except:
+        db_path = os.path.join(app.instance_path, 'unilab.db')
+        if os.path.exists(db_path):
+            size_bytes = os.path.getsize(db_path)
+            if size_bytes < 1024:
+                info['size_display'] = f'{size_bytes} B'
+            elif size_bytes < 1024*1024:
+                info['size_display'] = f'{size_bytes/1024:.1f} KB'
+            else:
+                info['size_display'] = f'{size_bytes/(1024*1024):.1f} MB'
+
+    # Get all model table names from SQLAlchemy metadata
+    model_tables = sorted(db.metadata.tables.keys())
+
+    # Check each table
+    for tname in model_tables:
+        tinfo = {'name': tname, 'columns': 0, 'rows': 0, 'status': 'missing'}
+        try:
+            cols = _get_table_columns(tname)
+            if cols:
+                tinfo['columns'] = len(cols)
+                tinfo['status'] = 'ok'
+                row_count = db.session.execute(db.text(f"SELECT COUNT(*) FROM [{tname}]")).scalar()
+                tinfo['rows'] = row_count or 0
+        except Exception:
+            tinfo['status'] = 'error'
+        info['tables'].append(tinfo)
+
+    info['table_count'] = sum(1 for t in info['tables'] if t['status'] == 'ok')
+
+    return info
+
+@app.route('/admin/settings/database', methods=['POST'])
+def admin_settings_database():
+    action = request.form.get('action', '')
+
+    if action == 'update_schema':
+        try:
+            db.create_all()
+            _run_schema_migration()
+            flash('Schema da duoc cap nhat thanh cong!', 'success')
+        except Exception as e:
+            flash(f'Loi cap nhat schema: {e}', 'error')
+
+    elif action == 'backup':
+        from db_backup import create_backup
+        result = create_backup(app, label='manual')
+        if result:
+            flash(f'Backup thanh cong: {result["name"]} ({result["size_display"]})', 'success')
+        else:
+            flash('Backup that bai!', 'error')
+
+    elif action == 'integrity_check':
+        from db_backup import check_integrity
+        result = check_integrity(app)
+        if result['ok']:
+            flash(f'Database HEALTHY ({result["duration_ms"]}ms)', 'success')
+        else:
+            flash(f'Database co LOI: {"; ".join(result["errors"][:3])}', 'error')
+
+    elif action == 'repair':
+        from db_backup import repair_database, create_backup
+        # Always backup before repair
+        create_backup(app, label='pre_repair')
+        result = repair_database(app)
+        if result['success']:
+            method = result['method']
+            tables = result['tables_recovered']
+            rows = result['rows_recovered']
+            if method == 'wal_cleanup':
+                flash('Sua chua thanh cong! Da xoa WAL/SHM files.', 'success')
+            else:
+                flash(f'Sua chua thanh cong qua {method}! Phuc hoi {tables} bang, {rows} dong du lieu.', 'success')
+            # Re-run migration after repair
+            try:
+                db.create_all()
+                _run_schema_migration()
+            except:
+                pass
+        else:
+            flash(f'Sua chua that bai: {"; ".join(result["errors"][:2])}. Thu restore tu backup.', 'error')
+
+    elif action == 'restore':
+        backup_name = request.form.get('backup_name', '')
+        from db_backup import restore_from_backup, list_backups
+        # Find the backup by name
+        backup_path = None
+        for b in list_backups(app):
+            if b['name'] == backup_name:
+                backup_path = b['path']
+                break
+        if backup_path:
+            result = restore_from_backup(app, backup_path)
+            if result['success']:
+                # Re-run migration after restore
+                try:
+                    db.create_all()
+                    _run_schema_migration()
+                except:
+                    pass
+                flash(result['message'], 'success')
+            else:
+                flash(result['message'], 'error')
+        else:
+            flash(f'Khong tim thay backup: {backup_name}', 'error')
+
+    elif action == 'vacuum':
+        from db_backup import vacuum_database
+        result = vacuum_database(app)
+        flash(result['message'], 'success' if result['success'] else 'error')
+
+    elif action == 'reset':
+        import shutil
+        from db_backup import create_backup
+        db_path = os.path.join(app.instance_path, 'unilab.db')
+        try:
+            # Proper backup before reset
+            create_backup(app, label='pre_reset')
+            db.session.remove()
+            db.engine.dispose()
+            if os.path.exists(db_path):
+                os.remove(db_path)
+                for ext in ['-wal', '-shm']:
+                    p = db_path + ext
+                    if os.path.exists(p):
+                        os.remove(p)
+            db.create_all()
+            _run_schema_migration()
+            flash('Database da duoc reset! Data cu da backup trong thu muc backups/.', 'success')
+        except Exception as e:
+            flash(f'Loi reset database: {e}', 'error')
+
+    return redirect(url_for('admin_settings', tab='database'))
+
 @app.route('/admin/toggle-mode', methods=['POST'])
 def admin_toggle_mode():
     """Quick toggle site mode between demo and live"""
@@ -854,6 +1495,739 @@ def admin_toggle_mode():
 def admin_deployment():
     """Deployment guide and workflow documentation"""
     return render_template('admin/deployment.html')
+
+@app.route('/admin/robots')
+def admin_robots():
+    """Redirect to Settings > Robots.txt tab"""
+    return redirect(url_for('admin_settings', tab='robots'))
+
+# =============================================
+# ADMIN — SEO BACKLINK ENGINE
+# =============================================
+import re as _re
+from markupsafe import Markup
+
+def _build_target_url(vertical_slug, target_type, target_slug, segment_slug='', zone_slug=''):
+    """Build the frontend URL for a backlink target."""
+    if target_type == 'article':
+        return f'/{vertical_slug}/bai-viet/{target_slug}/'
+    elif target_type == 'zone':
+        if segment_slug:
+            return f'/{vertical_slug}/{segment_slug}/{zone_slug or target_slug}/'
+        return f'/{vertical_slug}/zone/{target_slug}/'
+    elif target_type == 'part':
+        if segment_slug and zone_slug:
+            return f'/{vertical_slug}/{segment_slug}/{zone_slug}/{target_slug}/'
+        return f'/{vertical_slug}/part/{target_slug}/'
+    return '#'
+
+def _inject_backlinks(html_content, vertical_slug, source_type, source_id, source_slug):
+    """Inject internal backlinks into HTML content by replacing keyword matches with links.
+
+    - Only replaces text outside of HTML tags and existing links
+    - Respects max_per_page limit for each keyword
+    - Sorted by priority (highest first) to link the most important keywords
+    - Tracks clicks via BacklinkInstance
+    """
+    if not html_content:
+        return html_content
+
+    # Get active backlink instances for this source
+    instances = BacklinkInstance.query.join(BacklinkKeyword).filter(
+        BacklinkInstance.source_type == source_type,
+        BacklinkInstance.source_id == source_id,
+        BacklinkInstance.status == 'active',
+        BacklinkKeyword.is_active == True
+    ).all()
+
+    if not instances:
+        return html_content
+
+    # Group instances by keyword, respect max_per_page
+    keyword_data = {}
+    for inst in instances:
+        kw = inst.keyword
+        if kw.id not in keyword_data:
+            keyword_data[kw.id] = {
+                'keyword': kw.keyword,
+                'anchor': inst.anchor_text or kw.anchor_text or kw.keyword,
+                'target_type': kw.target_type,
+                'target_slug': kw.target_slug,
+                'vertical_slug': kw.vertical_slug or vertical_slug,
+                'priority': kw.priority,
+                'max_per_page': kw.max_per_page,
+                'count': 0,
+                'instance_id': inst.id
+            }
+
+    # Sort by priority (highest first), then by keyword length (longest first for better matching)
+    sorted_kw = sorted(keyword_data.values(), key=lambda x: (-x['priority'], -len(x['keyword'])))
+
+    for kw_data in sorted_kw:
+        keyword = kw_data['keyword']
+        max_links = kw_data['max_per_page']
+
+        # Build target URL
+        target_url = _build_target_url(kw_data['vertical_slug'], kw_data['target_type'], kw_data['target_slug'])
+        anchor = kw_data['anchor']
+        inst_id = kw_data['instance_id']
+
+        # Build the link HTML
+        link_html = f'<a href="{target_url}" class="seo-backlink" data-bid="{inst_id}" title="{anchor}">{anchor}</a>'
+
+        # Replace keyword in text content only (not inside HTML tags or existing links)
+        # Strategy: split by tags, only replace in text nodes
+        parts = _re.split(r'(<[^>]+>)', html_content)
+        in_link = 0
+        replaced = 0
+        new_parts = []
+
+        for part in parts:
+            if part.startswith('<'):
+                # It's a tag
+                lower_part = part.lower()
+                if lower_part.startswith('<a ') or lower_part.startswith('<a>'):
+                    in_link += 1
+                elif lower_part.startswith('</a'):
+                    in_link = max(0, in_link - 1)
+                new_parts.append(part)
+            else:
+                # It's text content
+                if in_link == 0 and replaced < max_links and part.strip():
+                    # Case-insensitive replacement, but preserve original case in anchor
+                    pattern = _re.compile(_re.escape(keyword), _re.IGNORECASE)
+                    match = pattern.search(part)
+                    if match:
+                        part = part[:match.start()] + link_html + part[match.end():]
+                        replaced += 1
+                new_parts.append(part)
+
+        html_content = ''.join(new_parts)
+
+    return html_content
+
+@app.template_filter('backlinks')
+def backlinks_filter(content, vertical_slug='', source_type='', source_id=0, source_slug=''):
+    """Jinja filter to inject backlinks into article content."""
+    result = _inject_backlinks(content, vertical_slug, source_type, source_id, source_slug)
+    return Markup(result)
+
+@app.route('/admin/seo-hub')
+def admin_seo_hub():
+    """Unified SEO Hub — Dashboard, Keywords, Instances, Suggestions in tabs"""
+    tab = request.args.get('tab', 'dashboard')
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    ctx = {'active_tab': tab, 'verticals': verticals}
+
+    if tab == 'dashboard':
+        from sqlalchemy import func as sqlfunc
+        filter_v = request.args.get('vertical', 'all')
+        total_keywords = BacklinkKeyword.query.count()
+        active_keywords = BacklinkKeyword.query.filter_by(is_active=True).count()
+        total_instances = BacklinkInstance.query.count()
+        active_instances = BacklinkInstance.query.filter_by(status='active').count()
+        total_clicks = db.session.query(sqlfunc.sum(BacklinkInstance.clicks)).scalar() or 0
+        v_stats = []
+        for v in verticals:
+            kw_count = BacklinkKeyword.query.filter_by(vertical_slug=v.slug).count()
+            inst_count = BacklinkInstance.query.join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == v.slug).count()
+            clicks = db.session.query(sqlfunc.sum(BacklinkInstance.clicks)).join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == v.slug).scalar() or 0
+            v_stats.append({'vertical': v, 'keywords': kw_count, 'instances': inst_count, 'clicks': clicks})
+        recent = BacklinkInstance.query.order_by(BacklinkInstance.created_at.desc()).limit(20).all()
+        ctx.update(filter_v=filter_v, total_keywords=total_keywords, active_keywords=active_keywords,
+                   total_instances=total_instances, active_instances=active_instances,
+                   total_clicks=total_clicks, v_stats=v_stats, recent=recent)
+
+    elif tab == 'keywords':
+        filter_v = request.args.get('vertical', 'all')
+        filter_type = request.args.get('type', 'all')
+        q = request.args.get('q', '')
+        query = BacklinkKeyword.query
+        if filter_v != 'all':
+            query = query.filter_by(vertical_slug=filter_v)
+        if filter_type != 'all':
+            query = query.filter_by(target_type=filter_type)
+        if q:
+            query = query.filter(BacklinkKeyword.keyword.ilike(f'%{q}%'))
+        keywords = query.order_by(BacklinkKeyword.priority.desc()).all()
+        ctx.update(keywords=keywords, filter_v=filter_v, filter_type=filter_type, q=q)
+
+    elif tab == 'instances':
+        filter_v = request.args.get('vertical', 'all')
+        filter_type = request.args.get('type', 'all')
+        filter_status = request.args.get('status', 'all')
+        query = BacklinkInstance.query.join(BacklinkKeyword)
+        if filter_v != 'all':
+            query = query.filter(BacklinkKeyword.vertical_slug == filter_v)
+        if filter_type != 'all':
+            query = query.filter(BacklinkInstance.link_type == filter_type)
+        if filter_status != 'all':
+            query = query.filter(BacklinkInstance.status == filter_status)
+        instances = query.order_by(BacklinkInstance.created_at.desc()).all()
+        ctx.update(instances=instances, filter_v=filter_v, filter_type=filter_type, filter_status=filter_status)
+
+    elif tab == 'suggestions':
+        filter_v = request.args.get('vertical', 'all')
+        query = BacklinkInstance.query.filter_by(link_type='suggest')
+        if filter_v != 'all':
+            query = query.join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == filter_v)
+        suggestions = query.all()
+        grouped = {}
+        for s in suggestions:
+            key = f"{s.source_type}:{s.source_id}"
+            if key not in grouped:
+                grouped[key] = {'source_title': s.source_title, 'source_slug': s.source_slug, 'source_type': s.source_type, 'items': []}
+            grouped[key]['items'].append(s)
+        ctx.update(suggestions=suggestions, grouped=grouped, filter_v=filter_v)
+
+    elif tab == 'scan':
+        pass  # Scan page is mostly client-side with form POSTs
+
+    elif tab == 'auto':
+        pass  # Auto generate page is mostly forms
+
+    return render_template('admin/seo_hub.html', **ctx)
+
+@app.route('/admin/seo')
+def admin_seo_dashboard():
+    """SEO Backlink Dashboard — overview of all backlink keywords & instances."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    filter_v = request.args.get('vertical', '')
+
+    # Stats
+    total_keywords = BacklinkKeyword.query.count()
+    active_keywords = BacklinkKeyword.query.filter_by(is_active=True).count()
+    total_instances = BacklinkInstance.query.count()
+    active_instances = BacklinkInstance.query.filter_by(status='active').count()
+    total_clicks = db.session.query(db.func.coalesce(db.func.sum(BacklinkInstance.clicks), 0)).scalar()
+
+    # Per-vertical stats
+    v_stats = []
+    for v in verticals:
+        kw_count = BacklinkKeyword.query.filter_by(vertical_slug=v.slug, is_active=True).count()
+        inst_count = BacklinkInstance.query.join(BacklinkKeyword).filter(
+            BacklinkKeyword.vertical_slug == v.slug,
+            BacklinkInstance.status == 'active'
+        ).count()
+        v_clicks = db.session.query(db.func.coalesce(db.func.sum(BacklinkInstance.clicks), 0)).join(BacklinkKeyword).filter(
+            BacklinkKeyword.vertical_slug == v.slug
+        ).scalar()
+        v_stats.append({'vertical': v, 'keywords': kw_count, 'instances': inst_count, 'clicks': v_clicks})
+
+    # Recent instances
+    recent = BacklinkInstance.query.order_by(BacklinkInstance.created_at.desc()).limit(20).all()
+
+    return render_template('admin/seo_dashboard.html',
+        verticals=verticals, filter_v=filter_v,
+        total_keywords=total_keywords, active_keywords=active_keywords,
+        total_instances=total_instances, active_instances=active_instances,
+        total_clicks=total_clicks, v_stats=v_stats, recent=recent)
+
+@app.route('/admin/seo/keywords')
+def admin_seo_keywords():
+    """Manage backlink keywords."""
+    filter_v = request.args.get('vertical', '')
+    filter_type = request.args.get('type', '')
+    q = request.args.get('q', '')
+
+    query = BacklinkKeyword.query
+    if filter_v:
+        query = query.filter_by(vertical_slug=filter_v)
+    if filter_type:
+        query = query.filter_by(target_type=filter_type)
+    if q:
+        query = query.filter(BacklinkKeyword.keyword.ilike(f'%{q}%'))
+
+    keywords = query.order_by(BacklinkKeyword.priority.desc(), BacklinkKeyword.created_at.desc()).all()
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    return render_template('admin/seo_keywords.html',
+        keywords=keywords, verticals=verticals,
+        filter_v=filter_v, filter_type=filter_type, q=q)
+
+@app.route('/admin/seo/keyword/new', methods=['GET', 'POST'])
+def admin_seo_keyword_new():
+    """Create a new backlink keyword."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    if request.method == 'POST':
+        kw = BacklinkKeyword(
+            vertical_slug=request.form.get('vertical_slug', ''),
+            keyword=request.form.get('keyword', '').strip(),
+            target_type=request.form.get('target_type', 'article'),
+            target_slug=request.form.get('target_slug', '').strip(),
+            target_title=request.form.get('target_title', '').strip(),
+            anchor_text=request.form.get('anchor_text', '').strip(),
+            priority=int(request.form.get('priority', 5)),
+            max_per_page=int(request.form.get('max_per_page', 1)),
+            is_active=request.form.get('is_active') == 'on'
+        )
+        db.session.add(kw)
+        db.session.commit()
+        flash(f'Keyword "{kw.keyword}" created successfully!', 'success')
+        return redirect(url_for('admin_seo_keywords'))
+    return render_template('admin/seo_keyword_form.html', verticals=verticals, keyword=None)
+
+@app.route('/admin/seo/keyword/<int:kid>/edit', methods=['GET', 'POST'])
+def admin_seo_keyword_edit(kid):
+    """Edit a backlink keyword."""
+    kw = BacklinkKeyword.query.get_or_404(kid)
+    verticals = Vertical.query.order_by(Vertical.name).all()
+    if request.method == 'POST':
+        kw.vertical_slug = request.form.get('vertical_slug', '')
+        kw.keyword = request.form.get('keyword', '').strip()
+        kw.target_type = request.form.get('target_type', 'article')
+        kw.target_slug = request.form.get('target_slug', '').strip()
+        kw.target_title = request.form.get('target_title', '').strip()
+        kw.anchor_text = request.form.get('anchor_text', '').strip()
+        kw.priority = int(request.form.get('priority', 5))
+        kw.max_per_page = int(request.form.get('max_per_page', 1))
+        kw.is_active = request.form.get('is_active') == 'on'
+        db.session.commit()
+        flash(f'Keyword "{kw.keyword}" updated!', 'success')
+        return redirect(url_for('admin_seo_keywords'))
+    return render_template('admin/seo_keyword_form.html', verticals=verticals, keyword=kw)
+
+@app.route('/admin/seo/keyword/<int:kid>/delete', methods=['POST'])
+def admin_seo_keyword_delete(kid):
+    """Delete a backlink keyword and all its instances."""
+    kw = BacklinkKeyword.query.get_or_404(kid)
+    name = kw.keyword
+    db.session.delete(kw)
+    db.session.commit()
+    flash(f'Keyword "{name}" deleted.', 'success')
+    return redirect(url_for('admin_seo_keywords'))
+
+@app.route('/admin/seo/keyword/<int:kid>/toggle', methods=['POST'])
+def admin_seo_keyword_toggle(kid):
+    """Toggle active/inactive for a keyword."""
+    kw = BacklinkKeyword.query.get_or_404(kid)
+    kw.is_active = not kw.is_active
+    db.session.commit()
+    return redirect(request.referrer or url_for('admin_seo_keywords'))
+
+@app.route('/admin/seo/instances')
+def admin_seo_instances():
+    """View all backlink instances (where links are placed)."""
+    filter_v = request.args.get('vertical', '')
+    filter_type = request.args.get('link_type', '')
+    filter_status = request.args.get('status', '')
+
+    query = BacklinkInstance.query.join(BacklinkKeyword)
+    if filter_v:
+        query = query.filter(BacklinkKeyword.vertical_slug == filter_v)
+    if filter_type:
+        query = query.filter(BacklinkInstance.link_type == filter_type)
+    if filter_status:
+        query = query.filter(BacklinkInstance.status == filter_status)
+
+    instances = query.order_by(BacklinkInstance.created_at.desc()).all()
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    return render_template('admin/seo_instances.html',
+        instances=instances, verticals=verticals,
+        filter_v=filter_v, filter_type=filter_type, filter_status=filter_status)
+
+@app.route('/admin/seo/instance/<int:iid>/remove', methods=['POST'])
+def admin_seo_instance_remove(iid):
+    """Mark a backlink instance as removed."""
+    inst = BacklinkInstance.query.get_or_404(iid)
+    inst.status = 'removed'
+    db.session.commit()
+    flash('Backlink instance removed.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_instances'))
+
+@app.route('/admin/seo/instance/<int:iid>/delete', methods=['POST'])
+def admin_seo_instance_delete(iid):
+    """Delete a backlink instance permanently."""
+    inst = BacklinkInstance.query.get_or_404(iid)
+    db.session.delete(inst)
+    db.session.commit()
+    flash('Backlink instance deleted.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_instances'))
+
+@app.route('/admin/seo/auto-generate', methods=['GET', 'POST'])
+def admin_seo_auto_generate():
+    """Auto-generate backlink keywords from existing articles/parts/zones."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    if request.method == 'POST':
+        target_vertical = request.form.get('vertical_slug', '')
+        gen_from = request.form.get('generate_from', 'articles')  # articles / parts / zones / all
+        overwrite = request.form.get('overwrite') == 'on'
+        created = 0
+
+        if not target_vertical:
+            flash('Please select a vertical.', 'error')
+            return redirect(url_for('admin_seo_auto_generate'))
+
+        # Generate from articles
+        if gen_from in ('articles', 'all'):
+            articles = Article.query.filter_by(vertical_slug=target_vertical, status='published').all()
+            for art in articles:
+                # Use title as keyword, tags as additional keywords
+                keywords_to_add = [art.title]
+                if art.tags:
+                    keywords_to_add.extend([t.strip() for t in art.tags.split(',') if t.strip()])
+
+                for kw_text in keywords_to_add:
+                    if len(kw_text) < 3 or len(kw_text) > 100:
+                        continue
+                    existing = BacklinkKeyword.query.filter_by(
+                        vertical_slug=target_vertical, keyword=kw_text, target_type='article', target_slug=art.slug
+                    ).first()
+                    if existing and not overwrite:
+                        continue
+                    if existing and overwrite:
+                        existing.is_active = True
+                        existing.target_title = art.title
+                    else:
+                        bk = BacklinkKeyword(
+                            vertical_slug=target_vertical, keyword=kw_text,
+                            target_type='article', target_slug=art.slug,
+                            target_title=art.title, priority=7 if kw_text == art.title else 4
+                        )
+                        db.session.add(bk)
+                        created += 1
+
+        # Generate from parts
+        if gen_from in ('parts', 'all'):
+            zones = Zone.query.join(Segment).join(Vertical).filter(Vertical.slug == target_vertical).all()
+            for z in zones:
+                for p in z.parts:
+                    keywords_to_add = [p.name_vi]
+                    if p.name_en:
+                        keywords_to_add.append(p.name_en)
+                    if p.tags:
+                        keywords_to_add.extend([t.strip() for t in p.tags.split(',') if t.strip()])
+
+                    for kw_text in keywords_to_add:
+                        if len(kw_text) < 3 or len(kw_text) > 100:
+                            continue
+                        existing = BacklinkKeyword.query.filter_by(
+                            vertical_slug=target_vertical, keyword=kw_text, target_type='part', target_slug=p.slug
+                        ).first()
+                        if existing and not overwrite:
+                            continue
+                        if existing and overwrite:
+                            existing.is_active = True
+                        else:
+                            bk = BacklinkKeyword(
+                                vertical_slug=target_vertical, keyword=kw_text,
+                                target_type='part', target_slug=p.slug,
+                                target_title=p.name_vi, priority=6 if kw_text == p.name_vi else 3
+                            )
+                            db.session.add(bk)
+                            created += 1
+
+        # Generate from zones
+        if gen_from in ('zones', 'all'):
+            zones = Zone.query.join(Segment).join(Vertical).filter(Vertical.slug == target_vertical).all()
+            for z in zones:
+                existing = BacklinkKeyword.query.filter_by(
+                    vertical_slug=target_vertical, keyword=z.name, target_type='zone', target_slug=z.slug
+                ).first()
+                if existing and not overwrite:
+                    continue
+                if existing and overwrite:
+                    existing.is_active = True
+                else:
+                    bk = BacklinkKeyword(
+                        vertical_slug=target_vertical, keyword=z.name,
+                        target_type='zone', target_slug=z.slug,
+                        target_title=z.name, priority=8
+                    )
+                    db.session.add(bk)
+                    created += 1
+
+        db.session.commit()
+        flash(f'Auto-generated {created} backlink keywords for "{target_vertical}".', 'success')
+        return redirect(url_for('admin_seo_keywords', vertical=target_vertical))
+
+    return render_template('admin/seo_auto_generate.html', verticals=verticals)
+
+@app.route('/admin/seo/scan', methods=['GET', 'POST'])
+def admin_seo_scan():
+    """Scan articles/parts content and create backlink instances where keywords are found."""
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    if request.method == 'POST':
+        target_vertical = request.form.get('vertical_slug', '')
+        scan_scope = request.form.get('scan_scope', 'articles')  # articles / parts / all
+        clear_old = request.form.get('clear_old') == 'on'
+
+        if not target_vertical:
+            flash('Please select a vertical.', 'error')
+            return redirect(url_for('admin_seo_scan'))
+
+        # Get active keywords for this vertical
+        keywords = BacklinkKeyword.query.filter_by(vertical_slug=target_vertical, is_active=True)\
+            .order_by(BacklinkKeyword.priority.desc()).all()
+
+        if not keywords:
+            flash('No active keywords found for this vertical. Generate keywords first.', 'error')
+            return redirect(url_for('admin_seo_scan'))
+
+        # Clear old instances if requested
+        if clear_old:
+            old_ids = [inst.id for inst in BacklinkInstance.query.join(BacklinkKeyword).filter(
+                BacklinkKeyword.vertical_slug == target_vertical
+            ).all()]
+            if old_ids:
+                BacklinkInstance.query.filter(BacklinkInstance.id.in_(old_ids)).delete(synchronize_session=False)
+                db.session.flush()
+
+        created = 0
+        scanned = 0
+
+        # Scan articles
+        if scan_scope in ('articles', 'all'):
+            articles = Article.query.filter_by(vertical_slug=target_vertical, status='published').all()
+            for art in articles:
+                scanned += 1
+                content_text = (art.content or '') + ' ' + (art.excerpt or '')
+                content_lower = content_text.lower()
+
+                for kw in keywords:
+                    # Skip self-linking (article linking to itself)
+                    if kw.target_type == 'article' and kw.target_slug == art.slug:
+                        continue
+
+                    kw_lower = kw.keyword.lower()
+                    if kw_lower in content_lower:
+                        # Check if instance already exists
+                        existing = BacklinkInstance.query.filter_by(
+                            keyword_id=kw.id, source_type='article',
+                            source_id=art.id, status='active'
+                        ).first()
+                        if not existing:
+                            inst = BacklinkInstance(
+                                keyword_id=kw.id,
+                                source_type='article', source_id=art.id,
+                                source_slug=art.slug, source_title=art.title,
+                                target_type=kw.target_type, target_slug=kw.target_slug,
+                                link_type='intext',
+                                anchor_text=kw.anchor_text or kw.keyword
+                            )
+                            db.session.add(inst)
+                            created += 1
+
+        # Auto-generate inline suggestions (article → article, same vertical)
+        if scan_scope in ('articles', 'all'):
+            all_articles = Article.query.filter_by(vertical_slug=target_vertical, status='published').all()
+            for art in all_articles:
+                # Find articles to suggest: same category or same tier, different article
+                candidates = [c for c in all_articles if c.id != art.id and (
+                    (c.category and c.category == art.category) or
+                    (c.related_zone_slug and c.related_zone_slug == art.related_zone_slug) or
+                    c.tier == art.tier
+                )]
+                # Pick up to 3, prioritize same category first
+                same_cat = [c for c in candidates if c.category and c.category == art.category]
+                same_zone = [c for c in candidates if c.related_zone_slug and c.related_zone_slug == art.related_zone_slug and c not in same_cat]
+                rest = [c for c in candidates if c not in same_cat and c not in same_zone]
+                picks = (same_cat + same_zone + rest)[:3]
+
+                for target_art in picks:
+                    existing = BacklinkInstance.query.filter_by(
+                        source_type='article', source_id=art.id,
+                        target_type='article', target_slug=target_art.slug,
+                        link_type='suggest'
+                    ).first()
+                    if not existing:
+                        # Use or create a generic keyword for this target
+                        generic_kw = BacklinkKeyword.query.filter_by(
+                            vertical_slug=target_vertical, target_type='article',
+                            target_slug=target_art.slug, keyword=target_art.title
+                        ).first()
+                        if not generic_kw:
+                            generic_kw = BacklinkKeyword(
+                                vertical_slug=target_vertical, keyword=target_art.title,
+                                target_type='article', target_slug=target_art.slug,
+                                target_title=target_art.title, priority=5
+                            )
+                            db.session.add(generic_kw)
+                            db.session.flush()
+
+                        inst = BacklinkInstance(
+                            keyword_id=generic_kw.id,
+                            source_type='article', source_id=art.id,
+                            source_slug=art.slug, source_title=art.title,
+                            target_type='article', target_slug=target_art.slug,
+                            link_type='suggest',
+                            anchor_text=target_art.title
+                        )
+                        db.session.add(inst)
+                        created += 1
+
+        # Scan parts
+        if scan_scope in ('parts', 'all'):
+            zones = Zone.query.join(Segment).join(Vertical).filter(Vertical.slug == target_vertical).all()
+            for z in zones:
+                for p in z.parts:
+                    scanned += 1
+                    content_text = (p.content or '') + ' ' + (p.description or '')
+                    content_lower = content_text.lower()
+
+                    for kw in keywords:
+                        # Skip self-linking
+                        if kw.target_type == 'part' and kw.target_slug == p.slug:
+                            continue
+
+                        kw_lower = kw.keyword.lower()
+                        if kw_lower in content_lower:
+                            existing = BacklinkInstance.query.filter_by(
+                                keyword_id=kw.id, source_type='part',
+                                source_id=p.id, status='active'
+                            ).first()
+                            if not existing:
+                                inst = BacklinkInstance(
+                                    keyword_id=kw.id,
+                                    source_type='part', source_id=p.id,
+                                    source_slug=p.slug, source_title=p.name_vi,
+                                    target_type=kw.target_type, target_slug=kw.target_slug,
+                                    link_type='intext',
+                                    anchor_text=kw.anchor_text or kw.keyword
+                                )
+                                db.session.add(inst)
+                                created += 1
+
+        db.session.commit()
+        flash(f'Scan complete! Scanned {scanned} items, created {created} new backlink instances.', 'success')
+        return redirect(url_for('admin_seo_instances', vertical=target_vertical))
+
+    return render_template('admin/seo_scan.html', verticals=verticals)
+
+@app.route('/admin/seo/suggestions')
+def admin_seo_suggestions():
+    """Manage inline article suggestions (quote-style blocks inside articles)."""
+    filter_v = request.args.get('vertical', '')
+    verticals = Vertical.query.order_by(Vertical.name).all()
+
+    query = BacklinkInstance.query.filter_by(link_type='suggest')
+    if filter_v:
+        query = query.join(BacklinkKeyword).filter(BacklinkKeyword.vertical_slug == filter_v)
+
+    suggestions = query.order_by(BacklinkInstance.created_at.desc()).all()
+
+    # Group by source article for display
+    grouped = {}
+    for s in suggestions:
+        key = f'{s.source_type}:{s.source_id}'
+        if key not in grouped:
+            grouped[key] = {'source_title': s.source_title, 'source_slug': s.source_slug, 'source_type': s.source_type, 'items': []}
+        grouped[key]['items'].append(s)
+
+    return render_template('admin/seo_suggestions.html',
+        suggestions=suggestions, grouped=grouped,
+        verticals=verticals, filter_v=filter_v)
+
+@app.route('/admin/seo/suggestion/add', methods=['POST'])
+def admin_seo_suggestion_add():
+    """Manually add an inline suggestion: source article → target article."""
+    vertical_slug = request.form.get('vertical_slug', '')
+    source_slug = request.form.get('source_slug', '').strip()
+    target_slug = request.form.get('target_slug', '').strip()
+
+    if not source_slug or not target_slug or not vertical_slug:
+        flash('All fields are required.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    source = Article.query.filter_by(slug=source_slug, vertical_slug=vertical_slug).first()
+    target = Article.query.filter_by(slug=target_slug, vertical_slug=vertical_slug).first()
+
+    if not source or not target:
+        flash('Source or target article not found.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    if source.id == target.id:
+        flash('Cannot suggest an article to itself.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    # Check duplicate
+    existing = BacklinkInstance.query.filter_by(
+        source_type='article', source_id=source.id,
+        target_type='article', target_slug=target_slug,
+        link_type='suggest'
+    ).first()
+    if existing:
+        flash('This suggestion already exists.', 'error')
+        return redirect(url_for('admin_seo_suggestions'))
+
+    # Find or create keyword
+    kw = BacklinkKeyword.query.filter_by(
+        vertical_slug=vertical_slug, target_type='article',
+        target_slug=target_slug, keyword=target.title
+    ).first()
+    if not kw:
+        kw = BacklinkKeyword(
+            vertical_slug=vertical_slug, keyword=target.title,
+            target_type='article', target_slug=target_slug,
+            target_title=target.title, priority=5
+        )
+        db.session.add(kw)
+        db.session.flush()
+
+    inst = BacklinkInstance(
+        keyword_id=kw.id,
+        source_type='article', source_id=source.id,
+        source_slug=source.slug, source_title=source.title,
+        target_type='article', target_slug=target.slug,
+        link_type='suggest',
+        anchor_text=target.title
+    )
+    db.session.add(inst)
+    db.session.commit()
+    flash(f'Suggestion added: "{source.title[:30]}..." → "{target.title[:30]}..."', 'success')
+    return redirect(url_for('admin_seo_suggestions', vertical=vertical_slug))
+
+@app.route('/admin/seo/suggestion/<int:sid>/delete', methods=['POST'])
+def admin_seo_suggestion_delete(sid):
+    """Delete an inline suggestion."""
+    inst = BacklinkInstance.query.filter_by(id=sid, link_type='suggest').first_or_404()
+    db.session.delete(inst)
+    db.session.commit()
+    flash('Suggestion removed.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_suggestions'))
+
+@app.route('/admin/seo/suggestion/<int:sid>/toggle', methods=['POST'])
+def admin_seo_suggestion_toggle(sid):
+    """Toggle active/removed for a suggestion."""
+    inst = BacklinkInstance.query.filter_by(id=sid, link_type='suggest').first_or_404()
+    inst.status = 'removed' if inst.status == 'active' else 'active'
+    db.session.commit()
+    return redirect(request.referrer or url_for('admin_seo_suggestions'))
+
+@app.route('/admin/seo/bulk-action', methods=['POST'])
+def admin_seo_bulk_action():
+    """Bulk actions on keywords or instances."""
+    action = request.form.get('action', '')
+    item_type = request.form.get('item_type', 'keyword')
+    ids = request.form.getlist('ids')
+
+    if not ids:
+        flash('No items selected.', 'error')
+        return redirect(request.referrer or url_for('admin_seo_dashboard'))
+
+    id_list = [int(i) for i in ids]
+
+    if item_type == 'keyword':
+        if action == 'activate':
+            BacklinkKeyword.query.filter(BacklinkKeyword.id.in_(id_list)).update({BacklinkKeyword.is_active: True}, synchronize_session=False)
+        elif action == 'deactivate':
+            BacklinkKeyword.query.filter(BacklinkKeyword.id.in_(id_list)).update({BacklinkKeyword.is_active: False}, synchronize_session=False)
+        elif action == 'delete':
+            BacklinkKeyword.query.filter(BacklinkKeyword.id.in_(id_list)).delete(synchronize_session=False)
+    elif item_type == 'instance':
+        if action == 'activate':
+            BacklinkInstance.query.filter(BacklinkInstance.id.in_(id_list)).update({BacklinkInstance.status: 'active'}, synchronize_session=False)
+        elif action == 'remove':
+            BacklinkInstance.query.filter(BacklinkInstance.id.in_(id_list)).update({BacklinkInstance.status: 'removed'}, synchronize_session=False)
+        elif action == 'delete':
+            BacklinkInstance.query.filter(BacklinkInstance.id.in_(id_list)).delete(synchronize_session=False)
+
+    db.session.commit()
+    flash(f'Bulk action "{action}" applied to {len(id_list)} items.', 'success')
+    return redirect(request.referrer or url_for('admin_seo_dashboard'))
 
 # =============================================
 # ADMIN — SEED DATA
@@ -933,13 +2307,33 @@ def admin_seed_data():
             except Exception as e:
                 flash(f'❌ Error seeding Sport: {str(e)}', 'error')
 
+        elif action == 'seed_garden':
+            from seed_data import seed_garden, seed_garden_articles, seed_products_garden
+            try:
+                seed_garden()
+                seed_garden_articles()
+                seed_products_garden()
+                flash('✅ Garden vertical seeded successfully!', 'success')
+            except Exception as e:
+                flash(f'❌ Error seeding Garden: {str(e)}', 'error')
+
+        elif action == 'seed_new_verticals':
+            from seed_data import seed_new_verticals
+            try:
+                seed_new_verticals()
+                flash('✅ 30 new verticals seeded successfully!', 'success')
+            except Exception as e:
+                flash(f'❌ Error seeding new verticals: {str(e)}', 'error')
+
         elif action == 'seed_all':
             from seed_data import (seed, seed_articles, seed_networks, seed_video,
                 seed_pet, seed_pet_articles, seed_pet_v2, seed_travel, seed_travel_articles,
                 seed_products_pet_travel, seed_hotels, seed_attractions,
                 seed_bike, seed_vouchers, seed_beauty, seed_beauty_articles,
                 seed_tech, seed_tech_articles, seed_products_beauty_tech,
-                seed_sport, seed_sport_articles, seed_products_sport)
+                seed_sport, seed_sport_articles, seed_products_sport,
+                seed_garden, seed_garden_articles, seed_products_garden,
+                seed_new_verticals)
             try:
                 seed()
                 seed_articles()
@@ -962,6 +2356,10 @@ def admin_seed_data():
                 seed_sport()
                 seed_sport_articles()
                 seed_products_sport()
+                seed_garden()
+                seed_garden_articles()
+                seed_products_garden()
+                seed_new_verticals()
                 flash('✅ All verticals seeded successfully!', 'success')
             except Exception as e:
                 flash(f'❌ Error seeding all: {str(e)}', 'error')
@@ -1071,70 +2469,75 @@ Keep responses concise and actionable."""
         }), 500
 
 # =============================================
+# ADMIN — CONTENT HUB (Unified: Articles + Feedbacks + AI Content)
+# =============================================
+@app.route('/admin/content-hub')
+def admin_content_hub():
+    """Unified Content Hub — Articles, Feedbacks, AI Content in tabs"""
+    tab = request.args.get('tab', 'articles')
+    ctx = {'active_tab': tab}
+
+    if tab == 'articles':
+        # Copy logic from admin_articles
+        vertical_filter = request.args.get('vertical', 'all')
+        tier_filter = request.args.get('tier', 'all')
+        search_q = request.args.get('q', '')
+        sort_col = request.args.get('sort', 'created_at')
+        sort_order = request.args.get('order', 'desc')
+
+        query = Article.query
+        if vertical_filter != 'all':
+            query = query.filter_by(vertical_slug=vertical_filter)
+        if tier_filter != 'all':
+            query = query.filter_by(tier=tier_filter)
+        if search_q:
+            query = query.filter(db.or_(Article.title.ilike(f'%{search_q}%'), Article.slug.ilike(f'%{search_q}%')))
+
+        sort_attr = getattr(Article, sort_col, Article.created_at)
+        if sort_order == 'asc':
+            query = query.order_by(sort_attr.asc())
+        else:
+            query = query.order_by(sort_attr.desc())
+
+        articles = query.all()
+        verticals = Vertical.query.order_by(Vertical.name).all()
+        stats = {
+            'total': Article.query.count(),
+            'nganh': Article.query.filter_by(tier='nganh').count(),
+            'chung': Article.query.filter_by(tier='chung').count(),
+            'chi_tiet': Article.query.filter_by(tier='chi-tiet').count(),
+        }
+        ctx.update(articles=articles, verticals=verticals, stats=stats,
+                   current_vertical=vertical_filter, current_tier=tier_filter,
+                   current_search=search_q, current_sort=sort_col, current_order=sort_order)
+
+    elif tab == 'feedbacks':
+        status_filter = request.args.get('status', 'all')
+        query = ArticleFeedback.query
+        if status_filter != 'all':
+            query = query.filter_by(status=status_filter)
+        feedbacks = query.order_by(ArticleFeedback.created_at.desc()).all()
+        ctx.update(feedbacks=feedbacks, status_filter=status_filter,
+                   pending_count=ArticleFeedback.query.filter_by(status='pending').count(),
+                   reviewed_count=ArticleFeedback.query.filter_by(status='reviewed').count(),
+                   resolved_count=ArticleFeedback.query.filter_by(status='resolved').count(),
+                   dismissed_count=ArticleFeedback.query.filter_by(status='dismissed').count())
+
+    elif tab == 'ai_content':
+        contents = AIContent.query.order_by(AIContent.created_at.desc()).all()
+        from sqlalchemy import func as sqlfunc
+        total_cost = db.session.query(sqlfunc.sum(AIContent.cost_vnd)).scalar() or 0
+        ctx.update(contents=contents, total_cost=total_cost)
+
+    return render_template('admin/content_hub.html', **ctx)
+
+# =============================================
 # ADMIN — ARTICLES (Knowledge Base)
 # =============================================
 @app.route('/admin/articles')
 def admin_articles():
-    # Get filter parameters
-    vertical_filter = request.args.get('vertical', '')
-    tier_filter = request.args.get('tier', '')
-    search_query = request.args.get('search', '')
-    sort_by = request.args.get('sort', 'created_at')  # default sort by created_at
-    sort_order = request.args.get('order', 'desc')  # default descending
-
-    # Build query
-    query = Article.query
-
-    # Apply filters
-    if vertical_filter:
-        query = query.filter_by(vertical_slug=vertical_filter)
-    if tier_filter:
-        query = query.filter_by(tier=tier_filter)
-    if search_query:
-        query = query.filter(
-            db.or_(
-                Article.title.ilike(f'%{search_query}%'),
-                Article.category.ilike(f'%{search_query}%'),
-                Article.tags.ilike(f'%{search_query}%')
-            )
-        )
-
-    # Apply sorting
-    if sort_by == 'title':
-        sort_col = Article.title
-    elif sort_by == 'created_at':
-        sort_col = Article.created_at
-    else:
-        sort_col = Article.created_at
-
-    if sort_order == 'asc':
-        query = query.order_by(sort_col.asc())
-    else:
-        query = query.order_by(sort_col.desc())
-
-    articles = query.all()
-
-    # Get all verticals for filter dropdown
-    verticals = Vertical.query.order_by(Vertical.name).all()
-
-    # Calculate stats for all articles (not filtered)
-    all_articles = Article.query.all()
-    stats = {
-        'total': len(all_articles),
-        'nganh': len([a for a in all_articles if a.tier == 'nganh']),
-        'chung': len([a for a in all_articles if a.tier == 'chung']),
-        'chi_tiet': len([a for a in all_articles if a.tier == 'chi-tiet'])
-    }
-
-    return render_template('admin/articles.html',
-                         articles=articles,
-                         verticals=verticals,
-                         stats=stats,
-                         current_vertical=vertical_filter,
-                         current_tier=tier_filter,
-                         current_search=search_query,
-                         current_sort=sort_by,
-                         current_order=sort_order)
+    """Redirect standalone articles page to Content Hub"""
+    return redirect(url_for('admin_content_hub', tab='articles'))
 
 @app.route('/admin/article/new', methods=['GET','POST'])
 def admin_article_new():
@@ -1157,7 +2560,7 @@ def admin_article_new():
         db.session.add(a)
         db.session.commit()
         flash(f'Da tao bai viet: {a.title}', 'success')
-        return redirect(url_for('admin_articles'))
+        return redirect(url_for('admin_content_hub', tab='articles'))
     return render_template('admin/article_form.html', article=None, verticals=verticals)
 
 @app.route('/admin/article/<int:aid>/edit', methods=['GET','POST'])
@@ -1180,8 +2583,14 @@ def admin_article_edit(aid):
         a.status = request.form.get('status','published')
         db.session.commit()
         flash(f'Da cap nhat: {a.title}', 'success')
-        return redirect(url_for('admin_articles'))
-    return render_template('admin/article_form.html', article=a, verticals=verticals)
+        return redirect(url_for('admin_content_hub', tab='articles'))
+    # Related articles for preview in edit form
+    related_articles = Article.query.filter(
+        Article.id != a.id, Article.status=='published',
+        db.or_(Article.vertical_slug==a.vertical_slug),
+        db.or_(Article.category==a.category, Article.tier==a.tier)
+    ).order_by(Article.views.desc()).limit(6).all()
+    return render_template('admin/article_form.html', article=a, verticals=verticals, related_articles=related_articles)
 
 @app.route('/admin/article/<int:aid>/delete', methods=['POST'])
 def admin_article_delete(aid):
@@ -1189,34 +2598,79 @@ def admin_article_delete(aid):
     db.session.delete(a)
     db.session.commit()
     flash('Da xoa bai viet', 'success')
-    return redirect(url_for('admin_articles'))
+    return redirect(url_for('admin_content_hub', tab='articles'))
+
+@app.route('/admin/articles/bulk-delete-selected', methods=['POST'])
+def admin_articles_bulk_delete_selected():
+    """Delete selected articles by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co bai viet nao duoc chon'), 400
+    deleted = Article.query.filter(Article.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
+@app.route('/admin/articles/bulk-delete-all', methods=['POST'])
+def admin_articles_bulk_delete_all():
+    """Delete all articles matching current filters"""
+    data = request.get_json(silent=True) or {}
+    vertical = data.get('vertical', '')
+    tier = data.get('tier', '')
+    search = data.get('search', '')
+    q = Article.query
+    if vertical:
+        q = q.filter_by(vertical_slug=vertical)
+    if tier:
+        q = q.filter_by(tier=tier)
+    if search:
+        q = q.filter(db.or_(Article.title.ilike(f'%{search}%'), Article.category.ilike(f'%{search}%'), Article.tags.ilike(f'%{search}%')))
+    count = q.count()
+    if count == 0:
+        return jsonify(ok=False, error='Khong co bai viet nao de xoa'), 400
+    q.delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=count)
+
+@app.route('/admin/api/zone-products')
+def admin_api_zone_products():
+    """API: return products from a zone by slug for article product attachment UI"""
+    slug = request.args.get('slug', '').strip()
+    selected_ids_str = request.args.get('selected', '')
+    selected_ids = set()
+    if selected_ids_str:
+        try:
+            selected_ids = {int(x) for x in selected_ids_str.split(',') if x.strip()}
+        except (ValueError, TypeError):
+            pass
+    if not slug:
+        return jsonify(products=[])
+    z = Zone.query.filter_by(slug=slug).first()
+    if not z:
+        return jsonify(products=[])
+    parts = Part.query.filter_by(zone_id=z.id, status='published').all()
+    products = []
+    for p in parts:
+        for al in p.affiliate_links:
+            if al.is_active:
+                products.append({
+                    'id': al.id,
+                    'network': al.network,
+                    'product_name': al.product_name,
+                    'part_name': p.name_vi,
+                    'price': al.price,
+                    'image_url': al.image_url,
+                    'selected': al.id in selected_ids
+                })
+    return jsonify(products=products)
 
 # =============================================
 # ADMIN — ARTICLE FEEDBACKS
 # =============================================
 @app.route('/admin/feedbacks')
 def admin_feedbacks():
-    """View all article feedbacks"""
-    status_filter = request.args.get('status', 'all')
-
-    if status_filter == 'all':
-        feedbacks = ArticleFeedback.query.order_by(ArticleFeedback.created_at.desc()).all()
-    else:
-        feedbacks = ArticleFeedback.query.filter_by(status=status_filter).order_by(ArticleFeedback.created_at.desc()).all()
-
-    # Count by status
-    pending_count = ArticleFeedback.query.filter_by(status='pending').count()
-    reviewed_count = ArticleFeedback.query.filter_by(status='reviewed').count()
-    resolved_count = ArticleFeedback.query.filter_by(status='resolved').count()
-    dismissed_count = ArticleFeedback.query.filter_by(status='dismissed').count()
-
-    return render_template('admin/feedbacks.html',
-        feedbacks=feedbacks,
-        status_filter=status_filter,
-        pending_count=pending_count,
-        reviewed_count=reviewed_count,
-        resolved_count=resolved_count,
-        dismissed_count=dismissed_count)
+    """Redirect standalone feedbacks page to Content Hub"""
+    return redirect(url_for('admin_content_hub', tab='feedbacks'))
 
 @app.route('/admin/feedback/<int:fid>')
 def admin_feedback_detail(fid):
@@ -1237,7 +2691,7 @@ def admin_feedback_update_status(fid):
 
     db.session.commit()
     flash('Đã cập nhật trạng thái phản hồi', 'success')
-    return redirect(url_for('admin_feedbacks'))
+    return redirect(url_for('admin_content_hub', tab='feedbacks'))
 
 @app.route('/admin/feedback/<int:fid>/delete', methods=['POST'])
 def admin_feedback_delete(fid):
@@ -1246,61 +2700,26 @@ def admin_feedback_delete(fid):
     db.session.delete(feedback)
     db.session.commit()
     flash('Đã xóa phản hồi', 'success')
-    return redirect(url_for('admin_feedbacks'))
+    return redirect(url_for('admin_content_hub', tab='feedbacks'))
+
+@app.route('/admin/feedbacks/bulk-delete', methods=['POST'])
+def admin_feedbacks_bulk_delete():
+    """Bulk delete feedbacks by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co feedback nao'), 400
+    deleted = ArticleFeedback.query.filter(ArticleFeedback.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
 
 # =============================================
 # ADMIN — PRODUCTS (Quản lý sản phẩm tập trung)
 # =============================================
 @app.route('/admin/products')
 def admin_products():
-    # Get filter params
-    f_vertical = request.args.get('vertical', '')
-    f_network = request.args.get('network', '')
-    f_status = request.args.get('status', '')
-    f_search = request.args.get('q', '')
-    page = request.args.get('page', 1, type=int)
-    per_page = 50
-
-    # Query with joins to get full path
-    q = db.session.query(AffiliateLink, Part, Zone, Segment, Vertical).join(
-        Part, AffiliateLink.part_id == Part.id
-    ).join(Zone, Part.zone_id == Zone.id
-    ).join(Segment, Zone.segment_id == Segment.id
-    ).join(Vertical, Segment.vertical_id == Vertical.id)
-
-    if f_vertical:
-        q = q.filter(Vertical.slug == f_vertical)
-    if f_network:
-        q = q.filter(AffiliateLink.network == f_network)
-    if f_status == 'active':
-        q = q.filter(AffiliateLink.is_active == True)
-    elif f_status == 'inactive':
-        q = q.filter(AffiliateLink.is_active == False)
-    if f_search:
-        q = q.filter(db.or_(
-            AffiliateLink.product_name.ilike(f'%{f_search}%'),
-            Part.name_vi.ilike(f'%{f_search}%'),
-            AffiliateLink.url.ilike(f'%{f_search}%')
-        ))
-
-    pagination = q.order_by(AffiliateLink.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
-    products = pagination.items
-    verticals = Vertical.query.all()
-    # Get unique networks
-    networks = db.session.query(AffiliateLink.network).distinct().all()
-    networks = [n[0] for n in networks]
-
-    # Stats
-    total = AffiliateLink.query.count()
-    active = AffiliateLink.query.filter_by(is_active=True).count()
-    total_clicks = db.session.query(db.func.sum(AffiliateLink.clicks)).scalar() or 0
-    total_conv = db.session.query(db.func.sum(AffiliateLink.conversions)).scalar() or 0
-
-    return render_template('admin/products.html',
-        products=products, verticals=verticals, networks=networks,
-        f_vertical=f_vertical, f_network=f_network, f_status=f_status, f_search=f_search,
-        total=total, active=active, total_clicks=total_clicks, total_conv=total_conv,
-        pagination=pagination, page=page)
+    """Redirect standalone products page to Products Hub"""
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/product/new', methods=['GET','POST'])
 def admin_product_new():
@@ -1317,7 +2736,7 @@ def admin_product_new():
         db.session.add(al)
         db.session.commit()
         flash(f'Da them san pham: {al.product_name}', 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
     # Get all parts grouped by vertical > segment > zone
     parts_tree = []
     for v in Vertical.query.all():
@@ -1343,7 +2762,7 @@ def admin_product_edit(pid):
         al.is_active = 'is_active' in request.form
         db.session.commit()
         flash(f'Da cap nhat: {al.product_name}', 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
     parts_tree = []
     for v in Vertical.query.all():
         for s in v.segments:
@@ -1361,15 +2780,37 @@ def admin_product_toggle(pid):
     al.is_active = not al.is_active
     db.session.commit()
     flash(f'{"Bat" if al.is_active else "Tat"}: {al.product_name}', 'success')
-    return redirect(url_for('admin_products'))
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/product/<int:pid>/delete', methods=['POST'])
 def admin_product_delete(pid):
     al = AffiliateLink.query.get_or_404(pid)
+    # Check if product is attached to articles (via zone or embed_code product_ids)
+    part = Part.query.get(al.part_id)
+    warnings = []
+    if part:
+        zone = Zone.query.get(part.zone_id)
+        if zone:
+            linked_articles = Article.query.filter(Article.related_zone_slug==zone.slug, Article.status=='published').all()
+            if linked_articles:
+                titles = ', '.join([a.title[:40] for a in linked_articles[:3]])
+                warnings.append(f'San pham nay thuoc zone "{zone.slug}" dang gan voi {len(linked_articles)} bai viet: {titles}')
+    # Check embed_code product_ids references
+    embed_articles = Article.query.filter(Article.embed_code.contains(f'product_ids:'), Article.embed_code.contains(str(al.id))).all()
+    for ea in embed_articles:
+        # Verify the ID is actually in the list
+        ec = ea.embed_code or ''
+        if ec.startswith('product_ids:'):
+            ids = ec.replace('product_ids:', '').split(',')
+            if str(al.id) in ids:
+                warnings.append(f'San pham dang duoc gan truc tiep trong bai viet: {ea.title[:40]}')
     db.session.delete(al)
     db.session.commit()
-    flash('Da xoa san pham', 'success')
-    return redirect(url_for('admin_products'))
+    msg = 'Da xoa san pham'
+    if warnings:
+        msg += ' (Luu y: ' + '; '.join(warnings) + ')'
+    flash(msg, 'success' if not warnings else 'warning')
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/products/bulk-delete', methods=['POST'])
 def admin_products_bulk_delete():
@@ -1393,24 +2834,200 @@ def admin_products_bulk_delete():
         label = 'tat ca'
     else:
         flash('Action khong hop le', 'error')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     count = q.count()
     if count == 0:
         flash('Khong co san pham nao de xoa', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     q.delete(synchronize_session=False)
     db.session.commit()
     flash(f'Da xoa {count:,} san pham ({label})', 'success')
-    return redirect(url_for('admin_products'))
+    return redirect(url_for('admin_products_hub'))
+
+@app.route('/admin/products/bulk-delete-selected', methods=['POST'])
+def admin_products_bulk_delete_selected():
+    """Delete selected products by IDs"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = AffiliateLink.query.filter(AffiliateLink.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
 
 # =============================================
 # AI CONTROL CENTER - Unified AI Operations Hub
 # =============================================
 
+@app.route('/admin/ai-engine')
+def admin_ai_engine():
+    """Unified AI Engine — all AI features in one tabbed page"""
+    tab = request.args.get('tab', 'pipeline')
+    verticals = Vertical.query.filter_by(status='published').order_by(Vertical.name).all()
+
+    ctx = {'active_tab': tab, 'verticals': verticals}
+
+    if tab == 'pipeline':
+        # Reuse gap analysis logic
+        analysis = []
+        for v in verticals:
+            segments = Segment.query.filter_by(vertical_id=v.id).all()
+            total_zones = 0
+            zones_with_content = 0
+            empty_zones = []
+            for seg in segments:
+                zones = Zone.query.filter_by(segment_id=seg.id).all()
+                for z in zones:
+                    total_zones += 1
+                    parts_count = Part.query.filter_by(zone_id=z.id).count()
+                    has_seo = bool(z.seo_content and len(z.seo_content.strip()) > 50)
+                    if parts_count > 0 or has_seo:
+                        zones_with_content += 1
+                    else:
+                        empty_zones.append({'segment': seg.name, 'zone': z.name, 'zone_id': z.id})
+            articles_count = Article.query.filter_by(vertical_slug=v.slug, status='published').count()
+            queue_pending = ContentQueue.query.filter_by(vertical_id=v.id, status='pending').count()
+            queue_review = ContentQueue.query.filter_by(vertical_id=v.id, status='review').count()
+            rule = AutoContentRule.query.filter_by(vertical_id=v.id).first()
+            coverage = round(zones_with_content / total_zones * 100) if total_zones > 0 else 0
+            analysis.append({
+                'vertical': v, 'total_zones': total_zones, 'zones_with_content': zones_with_content,
+                'coverage': coverage, 'empty_zones': empty_zones[:5], 'articles_count': articles_count,
+                'queue_pending': queue_pending, 'queue_review': queue_review,
+                'has_rule': rule is not None and rule.is_active if rule else False,
+            })
+        queue_items = ContentQueue.query.order_by(ContentQueue.created_at.desc()).limit(50).all()
+        ctx.update(analysis=analysis, queue_items=queue_items, queue_stats={
+            'pending': ContentQueue.query.filter_by(status='pending').count(),
+            'review': ContentQueue.query.filter_by(status='review').count(),
+            'published': ContentQueue.query.filter_by(status='published').count(),
+            'total': ContentQueue.query.count(),
+        })
+
+    elif tab == 'calendar':
+        import calendar as cal_mod
+        year = request.args.get('year', date.today().year, type=int)
+        month = request.args.get('month', date.today().month, type=int)
+        first_day = date(year, month, 1)
+        days_in_month = cal_mod.monthrange(year, month)[1]
+        last_day = date(year, month, days_in_month)
+        events = ContentEvent.query.filter(
+            ContentEvent.start_date <= last_day,
+            db.or_(ContentEvent.end_date >= first_day, ContentEvent.end_date.is_(None)),
+            ContentEvent.is_active == True
+        ).all()
+        cal_queue = ContentQueue.query.filter(
+            ContentQueue.scheduled_at >= datetime(year, month, 1),
+            ContentQueue.scheduled_at <= datetime(year, month, days_in_month, 23, 59, 59)
+        ).all()
+        cal = cal_mod.Calendar(firstweekday=0)
+        weeks = cal.monthdatescalendar(year, month)
+        date_events = {}
+        for e in events:
+            d = e.start_date
+            end = e.end_date or e.start_date
+            while d <= end and d <= last_day:
+                if d >= first_day:
+                    date_events.setdefault(d, []).append({'type': 'event', 'obj': e})
+                d += timedelta(days=1)
+        for q in cal_queue:
+            if q.scheduled_at:
+                qd = q.scheduled_at.date()
+                date_events.setdefault(qd, []).append({'type': 'queue', 'obj': q})
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+        ctx.update(year=year, month=month, weeks=weeks, date_events=date_events,
+                   events=events, cal_queue=cal_queue,
+                   prev_year=prev_year, prev_month=prev_month,
+                   next_year=next_year, next_month=next_month,
+                   month_name=cal_mod.month_name[month], today=date.today())
+
+    elif tab == 'rules':
+        rules = AutoContentRule.query.all()
+        ctx.update(rules_map={r.vertical_id: r for r in rules})
+
+    elif tab == 'health':
+        # AI Control Center health data
+        from sqlalchemy import func
+        openai_key = SiteSettings.get('openai_key')
+        claude_key = SiteSettings.get('claude_key')
+        total_products = AffiliateLink.query.count()
+        active_products = AffiliateLink.query.filter_by(is_active=True).count()
+        dup_sub = db.session.query(
+            AffiliateLink.url, func.count(AffiliateLink.id).label('cnt')
+        ).group_by(AffiliateLink.url).having(func.count(AffiliateLink.id) > 1).subquery()
+        dup_urls = db.session.query(func.count()).select_from(dup_sub).scalar() or 0
+        no_image = AffiliateLink.query.filter(
+            db.or_(AffiliateLink.image_url == '', AffiliateLink.image_url == None)
+        ).count()
+        zero_price = AffiliateLink.query.filter(
+            db.or_(AffiliateLink.price == 0, AffiliateLink.price == None)
+        ).count()
+        stale_products = AffiliateLink.query.filter(AffiliateLink.clicks == 0).count()
+        suspect_links = AffiliateLink.query.filter(
+            AffiliateLink.clicks > 10, AffiliateLink.conversions == 0
+        ).count()
+        inactive_products = AffiliateLink.query.filter_by(is_active=False).count()
+        total_articles = Article.query.count()
+        thin_articles = Article.query.filter(
+            db.or_(func.length(Article.content) < 500, Article.content == '', Article.content == None)
+        ).count()
+        zero_view_articles = Article.query.filter(
+            db.or_(Article.views == 0, Article.views == None)
+        ).count()
+        no_product_articles = Article.query.filter(
+            db.or_(Article.embed_code == '', Article.embed_code == None)
+        ).count()
+        ai_articles = Article.query.filter_by(ai_generated=True).count()
+        issues_total = dup_urls + no_image + zero_price + suspect_links + thin_articles
+        health_score = max(0, 100 - min(issues_total, 100))
+
+        vert_health = []
+        for v in verticals:
+            prod_count = db.session.query(AffiliateLink).join(Part).join(Zone).join(Segment).filter(
+                Segment.vertical_id == v.id).count()
+            art_count = Article.query.filter_by(vertical_slug=v.slug).count()
+            part_count = db.session.query(Part).join(Zone).join(Segment).filter(
+                Segment.vertical_id == v.id).count()
+            parts_no_prod = db.session.query(Part).join(Zone).join(Segment).filter(
+                Segment.vertical_id == v.id
+            ).outerjoin(AffiliateLink).filter(AffiliateLink.id == None).count()
+            vert_health.append({
+                'id': v.id, 'name': v.name, 'icon': v.icon, 'slug': v.slug,
+                'products': prod_count, 'articles': art_count,
+                'parts': part_count, 'parts_empty': parts_no_prod,
+                'status': v.status
+            })
+        networks = db.session.query(
+            AffiliateLink.network, func.count(AffiliateLink.id),
+            func.sum(AffiliateLink.clicks), func.sum(AffiliateLink.conversions)
+        ).group_by(AffiliateLink.network).all()
+        net_stats = [{'name': n[0], 'count': n[1], 'clicks': n[2] or 0, 'conv': n[3] or 0} for n in networks]
+
+        ctx.update(has_ai=bool(openai_key or claude_key), health_score=health_score,
+                   total_products=total_products, active_products=active_products,
+                   dup_urls=dup_urls, no_image=no_image, zero_price=zero_price,
+                   stale_products=stale_products, suspect_links=suspect_links,
+                   inactive_products=inactive_products,
+                   total_articles=total_articles, thin_articles=thin_articles,
+                   zero_view_articles=zero_view_articles, no_product_articles=no_product_articles,
+                   ai_articles=ai_articles, vert_health=vert_health, net_stats=net_stats)
+
+    return render_template('admin/ai_engine.html', **ctx)
+
+
+# Keep old routes as redirects
 @app.route('/admin/ai-center')
 def admin_ai_center():
+    """Redirect to unified AI Engine — health tab"""
+    return redirect(url_for('admin_ai_engine', tab='health'))
+
+@app.route('/admin/ai-center-legacy')
+def admin_ai_center_legacy():
     """Unified AI Control Center - all AI operations in one place"""
     from sqlalchemy import func
 
@@ -2598,7 +4215,7 @@ def admin_products_import_csv():
             detail = ', '.join(f'{name}: {cnt}' for name, cnt in top_vert)
             msg += f' | Vertical match: {detail}'
         flash(msg, 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # GET request - show form
     parts_tree = []
@@ -2623,7 +4240,7 @@ def admin_products_datafeeds():
     api = get_accesstrade_api()
     if not api:
         flash('Chua cau hinh AccessTrade API key. Vao Affiliate Network de thiet lap.', 'error')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # ── POST: Import selected products ──
     if request.method == 'POST':
@@ -2706,7 +4323,7 @@ def admin_products_datafeeds():
         if matched:
             msg += f' + {matched} match vao vertical'
         flash(msg, 'success')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # ── GET: Browse datafeeds ──
     keyword = request.args.get('keyword', '')
@@ -2839,7 +4456,7 @@ def admin_products_reclassify_hub():
     hub = Vertical.query.filter_by(slug='hub').first()
     if not hub:
         flash('Chưa có vertical Hub nào.', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # Get all Hub segment/zone/part IDs
     hub_part_ids = set()
@@ -2850,13 +4467,13 @@ def admin_products_reclassify_hub():
 
     if not hub_part_ids:
         flash('Hub không có sản phẩm nào.', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # Get all products in Hub
     hub_products = AffiliateLink.query.filter(AffiliateLink.part_id.in_(hub_part_ids)).all()
     if not hub_products:
         flash('Hub không có sản phẩm nào cần phân loại.', 'info')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     # Build matching index (excluding Hub parts)
     part_index, zone_kw, power_kw, normalize_fn = _build_part_keyword_index()
@@ -2865,7 +4482,7 @@ def admin_products_reclassify_hub():
 
     if not part_index and not zone_kw:
         flash('Chưa có vertical/zone nào để match. Hãy tạo vertical trước.', 'warning')
-        return redirect(url_for('admin_products'))
+        return redirect(url_for('admin_products_hub'))
 
     matched = 0
     mapped_zones = {}
@@ -2904,7 +4521,7 @@ def admin_products_reclassify_hub():
         detail = ', '.join(f'{name}: {cnt}' for name, cnt in top)
         msg += f' | {detail}'
     flash(msg, 'success' if matched > 0 else 'info')
-    return redirect(url_for('admin_products'))
+    return redirect(url_for('admin_products_hub'))
 
 @app.route('/admin/scheduled-imports')
 def admin_scheduled_imports():
@@ -3040,12 +4657,8 @@ def admin_scheduled_import_delete(job_id):
 # =============================================
 @app.route('/admin/video')
 def admin_video():
-    videos = VideoProject.query.order_by(VideoProject.created_at.desc()).all()
-    channels = SocialChannel.query.all()
-    total_views = db.session.query(db.func.sum(VideoPublish.views)).scalar() or 0
-    total_published = VideoPublish.query.filter_by(status='published').count()
-    return render_template('admin/video.html', videos=videos, channels=channels,
-        total_views=total_views, total_published=total_published)
+    """Redirect standalone video page to Tools Hub"""
+    return redirect(url_for('admin_tools', tab='video'))
 
 @app.route('/admin/video/channels')
 def admin_video_channels():
@@ -3123,7 +4736,18 @@ def admin_video_delete(vid):
     db.session.delete(v)
     db.session.commit()
     flash('Da xoa video', 'success')
-    return redirect(url_for('admin_video'))
+    return redirect(url_for('admin_tools', tab='video'))
+
+@app.route('/admin/videos/bulk-delete', methods=['POST'])
+def admin_videos_bulk_delete():
+    """Bulk delete videos by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co video nao'), 400
+    deleted = VideoProject.query.filter(VideoProject.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
 
 @app.route('/admin/video/<int:vid>/publish', methods=['POST'])
 def admin_video_publish(vid):
@@ -3159,27 +4783,8 @@ def admin_video_analytics():
 # =============================================
 @app.route('/admin/hotels')
 def admin_hotels():
-    f_dest = request.args.get('destination', '')
-    f_stars = request.args.get('stars', '')
-    f_status = request.args.get('status', '')
-    q = Hotel.query
-    if f_dest:
-        q = q.filter(Hotel.destination == f_dest)
-    if f_stars:
-        q = q.filter(Hotel.stars == int(f_stars))
-    if f_status == 'active':
-        q = q.filter(Hotel.is_active == True)
-    elif f_status == 'inactive':
-        q = q.filter(Hotel.is_active == False)
-    hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).all()
-    destinations = db.session.query(Hotel.destination, Hotel.destination_name).distinct().all()
-    total = Hotel.query.count()
-    active = Hotel.query.filter_by(is_active=True).count()
-    total_clicks = db.session.query(db.func.sum(Hotel.clicks)).scalar() or 0
-    total_conv = db.session.query(db.func.sum(Hotel.conversions)).scalar() or 0
-    return render_template('admin/hotels.html', hotels=hotels, destinations=destinations,
-        f_dest=f_dest, f_stars=f_stars, f_status=f_status,
-        total=total, active=active, total_clicks=total_clicks, total_conv=total_conv)
+    """Redirect standalone hotels page to Hotels Hub"""
+    return redirect(url_for('admin_hotels_hub'))
 
 @app.route('/admin/hotel/new', methods=['GET','POST'])
 def admin_hotel_new():
@@ -3205,7 +4810,7 @@ def admin_hotel_new():
         )
         db.session.add(h); db.session.commit()
         flash(f'Da them: {h.name}', 'success')
-        return redirect(url_for('admin_hotels'))
+        return redirect(url_for('admin_hotels_hub'))
     return render_template('admin/hotel_form.html', hotel=None)
 
 @app.route('/admin/hotel/<int:hid>/edit', methods=['GET','POST'])
@@ -3230,21 +4835,59 @@ def admin_hotel_edit(hid):
         h.is_featured = 'is_featured' in request.form
         db.session.commit()
         flash(f'Da cap nhat: {h.name}', 'success')
-        return redirect(url_for('admin_hotels'))
+        return redirect(url_for('admin_hotels_hub'))
     return render_template('admin/hotel_form.html', hotel=h)
 
 @app.route('/admin/hotel/<int:hid>/toggle', methods=['POST'])
 def admin_hotel_toggle(hid):
     h = Hotel.query.get_or_404(hid)
     h.is_active = not h.is_active; db.session.commit()
-    return redirect(url_for('admin_hotels'))
+    return redirect(url_for('admin_hotels_hub'))
 
 @app.route('/admin/hotel/<int:hid>/delete', methods=['POST'])
 def admin_hotel_delete(hid):
     h = Hotel.query.get_or_404(hid)
     db.session.delete(h); db.session.commit()
     flash('Da xoa khach san', 'success')
-    return redirect(url_for('admin_hotels'))
+    return redirect(url_for('admin_hotels_hub'))
+
+@app.route('/admin/hotels/bulk-delete', methods=['POST'])
+def admin_hotels_bulk_delete():
+    ids = request.form.getlist('hotel_ids')
+    if not ids:
+        flash('Chua chon khach san nao', 'warning')
+        return redirect(url_for('admin_hotels_hub'))
+    count = Hotel.query.filter(Hotel.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    flash(f'Da xoa {count} khach san', 'success')
+    return redirect(url_for('admin_hotels_hub'))
+
+@app.route('/admin/hotels/delete-all', methods=['POST'])
+def admin_hotels_delete_all():
+    count = Hotel.query.count()
+    if count == 0:
+        flash('Khong co khach san nao de xoa', 'warning')
+        return redirect(url_for('admin_hotels_hub'))
+    Hotel.query.delete(synchronize_session=False)
+    db.session.commit()
+    flash(f'Da xoa tat ca {count} khach san', 'success')
+    return redirect(url_for('admin_hotels_hub'))
+
+@app.route('/admin/hotels/bulk-toggle', methods=['POST'])
+def admin_hotels_bulk_toggle():
+    ids = request.form.getlist('hotel_ids')
+    action = request.form.get('action', '')
+    if not ids:
+        flash('Chua chon khach san nao', 'warning')
+        return redirect(url_for('admin_hotels_hub'))
+    new_state = action == 'activate'
+    hotels = Hotel.query.filter(Hotel.id.in_([int(i) for i in ids])).all()
+    for h in hotels:
+        h.is_active = new_state
+    db.session.commit()
+    label = 'bat' if new_state else 'tat'
+    flash(f'Da {label} {len(hotels)} khach san', 'success')
+    return redirect(url_for('admin_hotels_hub'))
 
 # =============================================
 # ADMIN — HOTEL SYNC (Agoda API)
@@ -3278,18 +4921,41 @@ def admin_hotel_sync():
     cid = SiteSettings.get('agoda_cid', '')
     has_key = bool(SiteSettings.get('agoda_api_key', ''))
 
+    # Full destination list: 34 provinces + Agoda tourism destinations
+    from agoda_integration import VIETNAM_DESTINATIONS
     destinations = [
-        {'slug': slug, 'name': AGODA_CITY_NAMES.get(slug, slug), 'city_id': cid_val}
-        for slug, cid_val in AGODA_CITY_IDS.items()
+        {'slug': slug, 'name': name, 'city_id': cid, 'province_code': ''}
+        for name, slug, cid in VIETNAM_DESTINATIONS
     ]
 
-    recent = Hotel.query.filter_by(source='agoda_api').order_by(Hotel.id.desc()).limit(20).all()
+    # Fast Sync uses ALL destinations (not just AGODA_CITY_IDS)
+    agoda_destinations = [
+        {'slug': d['slug'], 'name': d['name'], 'city_id': d['city_id']}
+        for d in destinations if d['city_id']
+    ]
+
+    # Paginated Agoda hotel list with image filter
+    page = request.args.get('page', 1, type=int)
+    per_page = 30
+    f_image = request.args.get('image', '')
+    rq = Hotel.query.filter_by(source='agoda_api')
+    if f_image == 'missing':
+        rq = rq.filter(db.or_(Hotel.image_url == '', Hotel.image_url == None))
+    elif f_image == 'has':
+        rq = rq.filter(Hotel.image_url != '', Hotel.image_url != None)
+    agoda_no_image = Hotel.query.filter_by(source='agoda_api').filter(db.or_(Hotel.image_url == '', Hotel.image_url == None)).count()
+    recent_total = rq.count()
+    recent = rq.order_by(Hotel.id.desc()).offset((page - 1) * per_page).limit(per_page).all()
+    recent_pages = (recent_total + per_page - 1) // per_page
 
     return render_template('admin/hotel_sync.html',
         api_connected=api_connected, cid=cid, has_key=has_key,
         total_hotels=total_hotels, total_agoda=total_agoda,
         total_manual=total_manual, total_active=total_active,
-        destinations=destinations, recent=recent)
+        destinations=destinations, agoda_destinations=agoda_destinations,
+        recent=recent, page=page, recent_total=recent_total,
+        recent_pages=recent_pages, per_page=per_page, f_image=f_image,
+        agoda_no_image=agoda_no_image)
 
 
 @app.route('/admin/hotel-sync/save-credentials', methods=['POST'])
@@ -3399,6 +5065,9 @@ def admin_hotel_sync_import():
             price_from=float(h.get('price_from', 0)),
             image_url=h.get('image_url', ''),
             agoda_url=h.get('agoda_url', ''),
+            latitude=float(h.get('latitude', 0)),
+            longitude=float(h.get('longitude', 0)),
+            address=h.get('address', '') or h.get('district', ''),
             source='agoda_api',
             is_active=True,
             is_featured=False
@@ -3424,7 +5093,7 @@ def admin_hotel_sync_fast():
 
     data = request.get_json() or {}
     destination = data.get('destination', '')
-    max_per_city = int(data.get('max_per_city', 10))
+    max_per_city = int(data.get('max_per_city', 30))
 
     if not destination:
         return jsonify({'error': 'Thieu destination', 'imported': 0})
@@ -3441,10 +5110,16 @@ def admin_hotel_sync_fast():
                     existing_ids.add(part.split('=')[1])
 
     imported = 0
+    skipped_location = 0
     for h in hotels[:max_per_city]:
         agoda_id = str(h.get('agoda_id', ''))
         name = h.get('name', '').strip()
         if not name or agoda_id in existing_ids:
+            continue
+        # Double-check: skip non-Vietnam hotels that slipped through
+        from agoda_integration import _is_vietnam_hotel
+        if not _is_vietnam_hotel(name, h.get('address', ''), destination):
+            skipped_location += 1
             continue
 
         amenities_raw = h.get('amenities', '')
@@ -3466,6 +5141,9 @@ def admin_hotel_sync_fast():
             price_original=float(h.get('price_original', 0)),
             image_url=h.get('image_url', ''),
             agoda_url=h.get('agoda_url', ''),
+            latitude=float(h.get('latitude', 0)),
+            longitude=float(h.get('longitude', 0)),
+            address=h.get('address', '') or h.get('district', ''),
             source='agoda_api',
             is_active=True,
             is_featured=False
@@ -3479,8 +5157,156 @@ def admin_hotel_sync_fast():
         'destination': destination,
         'found': len(hotels),
         'imported': imported,
-        'skipped': len(hotels[:max_per_city]) - imported
+        'skipped': len(hotels[:max_per_city]) - imported,
+        'skipped_location': skipped_location
     })
+
+
+@app.route('/admin/hotel-sync/fix-images', methods=['POST'])
+def admin_hotel_fix_images():
+    """Fix missing image_url for existing agoda_api hotels.
+
+    Strategy 1: Re-search each destination via LT Search API → match by agoda_id
+    Strategy 2: Content Feed API for batch image lookup
+    Strategy 3: Generate SVG placeholder with hotel initial + destination gradient
+    """
+    from agoda_integration import get_agoda_api
+    api = get_agoda_api()
+
+    fixed_api = 0
+    fixed_placeholder = 0
+    cleared = 0
+
+    # Clear broken image URLs (old pix6.agoda.net/{id}/0/{id}_1.jpg pattern)
+    broken_pattern = 'agoda.net/hotelImages/'
+    for h in Hotel.query.filter_by(source='agoda_api').all():
+        agoda_id = None
+        if h.agoda_url:
+            for part in h.agoda_url.split('&'):
+                if part.startswith('hid='):
+                    agoda_id = part.split('=')[1]
+                    break
+        if h.image_url and broken_pattern in h.image_url and agoda_id and f'/{agoda_id}_' in h.image_url:
+            h.image_url = ''
+            cleared += 1
+
+    # Collect hotels missing images, grouped by destination
+    hotels_no_img = Hotel.query.filter(
+        Hotel.source == 'agoda_api',
+        db.or_(Hotel.image_url == '', Hotel.image_url == None)
+    ).all()
+
+    if not hotels_no_img and not cleared:
+        return jsonify({'fixed': 0, 'fixed_api': 0, 'fixed_placeholder': 0, 'cleared': 0})
+
+    by_dest = {}
+    for h in hotels_no_img:
+        by_dest.setdefault(h.destination, []).append(h)
+
+    # Strategy 1: Re-search each destination via API and match by agoda_id
+    if api:
+        for dest, hotels in by_dest.items():
+            try:
+                results = api.search_city_hotels(dest)
+                img_map = {}
+                for r in results:
+                    aid = str(r.get('agoda_id', ''))
+                    img = r.get('image_url', '')
+                    if aid and img:
+                        img_map[aid] = img
+                for h in hotels:
+                    if h.image_url:
+                        continue
+                    agoda_id = None
+                    if h.agoda_url:
+                        for part in h.agoda_url.split('&'):
+                            if part.startswith('hid='):
+                                agoda_id = part.split('=')[1]
+                                break
+                    if agoda_id and agoda_id in img_map:
+                        h.image_url = img_map[agoda_id]
+                        fixed_api += 1
+            except Exception:
+                continue
+
+    # Strategy 2: Generate SVG placeholder for remaining hotels without images
+    still_missing = Hotel.query.filter(
+        Hotel.source == 'agoda_api',
+        db.or_(Hotel.image_url == '', Hotel.image_url == None)
+    ).all()
+    for h in still_missing:
+        initial = h.name[0].upper() if h.name else 'H'
+        hue = abs(hash(h.name)) % 360
+        h.image_url = (
+            f"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E"
+            f"%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E"
+            f"%3Cstop offset='0%25' stop-color='hsl({hue},55%25,35%25)'/%3E"
+            f"%3Cstop offset='100%25' stop-color='hsl({(hue+45)%360},45%25,22%25)'/%3E"
+            f"%3C/linearGradient%3E%3C/defs%3E"
+            f"%3Crect width='400' height='300' fill='url(%23g)'/%3E"
+            f"%3Ctext x='200' y='135' text-anchor='middle' font-family='Arial,sans-serif' font-size='72' font-weight='700' fill='rgba(255,255,255,0.18)'%3E{initial}%3C/text%3E"
+            f"%3Ctext x='200' y='185' text-anchor='middle' font-family='Arial,sans-serif' font-size='14' fill='rgba(255,255,255,0.5)'%3E"
+            f"{'%E2%AD%90' * min(h.stars, 5)}"
+            f"%3C/text%3E%3C/svg%3E"
+        )
+        fixed_placeholder += 1
+
+    db.session.commit()
+    return jsonify({
+        'fixed': fixed_api + fixed_placeholder,
+        'fixed_api': fixed_api,
+        'fixed_placeholder': fixed_placeholder,
+        'cleared': cleared
+    })
+
+
+@app.route('/admin/hotel-sync/fix-addresses', methods=['POST'])
+def admin_hotel_fix_addresses():
+    """Reverse geocode hotels using OpenStreetMap Nominatim to get street addresses."""
+    import requests as req
+    import time as _time
+
+    headers = {'User-Agent': 'UniTravel/1.0 (hotel geocoding)'}
+    hotels = Hotel.query.filter(Hotel.latitude != 0, Hotel.longitude != 0).all()
+    updated = 0
+    errors = 0
+
+    for h in hotels:
+        try:
+            r = req.get('https://nominatim.openstreetmap.org/reverse',
+                params={'lat': h.latitude, 'lon': h.longitude,
+                        'format': 'json', 'addressdetails': 1,
+                        'accept-language': 'vi', 'zoom': 18},
+                headers=headers, timeout=10)
+            data = r.json()
+            addr = data.get('address', {})
+
+            road = addr.get('road', '')
+            house = addr.get('house_number', '')
+            suburb = addr.get('suburb') or addr.get('city_district') or addr.get('quarter') or ''
+            city = h.destination_name or ''
+
+            parts = []
+            if house and road:
+                parts.append(f'{house} {road}')
+            elif road:
+                parts.append(road)
+            if suburb:
+                parts.append(suburb)
+            if city and city not in (suburb, road):
+                parts.append(city)
+
+            new_addr = ', '.join(parts)
+            if new_addr and len(new_addr) > len(h.address or ''):
+                h.address = new_addr
+                updated += 1
+        except Exception:
+            errors += 1
+
+        _time.sleep(1.1)  # Nominatim rate limit: 1 req/sec
+
+    db.session.commit()
+    return jsonify({'updated': updated, 'total': len(hotels), 'errors': errors})
 
 
 @app.route('/admin/api/agoda-search')
@@ -3498,7 +5324,11 @@ def admin_api_agoda_search_public():
     if not destination:
         return jsonify({'hotels': [], 'source': 'no_destination'})
 
-    hotels = api.search_city_hotels(destination, checkin or None, checkout or None)
+    # Resolve province slug → city slug (e.g. lam-dong → da-lat)
+    from agoda_integration import PROVINCE_TO_CITY_SLUG
+    city_slug = PROVINCE_TO_CITY_SLUG.get(destination, destination)
+
+    hotels = api.search_city_hotels(city_slug, checkin or None, checkout or None)
     return jsonify({'hotels': hotels, 'total': len(hotels), 'source': 'agoda_api'})
 
 
@@ -3595,6 +5425,16 @@ def admin_attraction_delete(aid):
     db.session.delete(a); db.session.commit()
     flash('Da xoa ve tham quan', 'success')
     return redirect(url_for('admin_attractions'))
+
+@app.route('/admin/attractions/bulk-delete', methods=['POST'])
+def admin_attractions_bulk_delete():
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = Attraction.query.filter(Attraction.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
 
 # =============================================
 # ADMIN — VOUCHERS (Mã giảm giá)
@@ -3731,14 +5571,23 @@ def admin_voucher_delete(vid):
     flash('Da xoa voucher', 'success')
     return redirect(url_for('admin_vouchers'))
 
+@app.route('/admin/vouchers/bulk-delete', methods=['POST'])
+def admin_vouchers_bulk_delete():
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = Voucher.query.filter(Voucher.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
 # =============================================
 # ADMIN — VOUCHER WIDGETS (AccessTrade, etc.)
 # =============================================
 @app.route('/admin/voucher-widgets')
 def admin_voucher_widgets():
-    """Manage voucher embed widgets from affiliate networks"""
-    widgets = VoucherWidget.query.order_by(VoucherWidget.position, VoucherWidget.created_at.desc()).all()
-    return render_template('admin/voucher_widgets.html', widgets=widgets)
+    """Redirect standalone voucher widgets page to Vouchers Hub"""
+    return redirect(url_for('admin_vouchers_hub', tab='widgets'))
 
 @app.route('/admin/voucher-widget/new', methods=['GET','POST'])
 def admin_voucher_widget_new():
@@ -3756,7 +5605,7 @@ def admin_voucher_widget_new():
         db.session.add(w)
         db.session.commit()
         flash(f'Đã thêm widget: {w.name}', 'success')
-        return redirect(url_for('admin_voucher_widgets'))
+        return redirect(url_for('admin_vouchers_hub', tab='widgets'))
     return render_template('admin/voucher_widget_form.html', widget=None)
 
 @app.route('/admin/voucher-widget/<int:wid>', methods=['GET','POST'])
@@ -3774,7 +5623,7 @@ def admin_voucher_widget_edit(wid):
         w.updated_at = datetime.utcnow()
         db.session.commit()
         flash(f'Đã cập nhật widget: {w.name}', 'success')
-        return redirect(url_for('admin_voucher_widgets'))
+        return redirect(url_for('admin_vouchers_hub', tab='widgets'))
     return render_template('admin/voucher_widget_form.html', widget=w)
 
 @app.route('/admin/voucher-widget/<int:wid>/toggle', methods=['POST'])
@@ -3784,7 +5633,7 @@ def admin_voucher_widget_toggle(wid):
     w.is_active = not w.is_active
     db.session.commit()
     flash(f'Widget {w.name}: {"Hiển thị" if w.is_active else "Ẩn"}', 'success')
-    return redirect(url_for('admin_voucher_widgets'))
+    return redirect(url_for('admin_vouchers_hub', tab='widgets'))
 
 @app.route('/admin/voucher-widget/<int:wid>/delete', methods=['POST'])
 def admin_voucher_widget_delete(wid):
@@ -3794,7 +5643,680 @@ def admin_voucher_widget_delete(wid):
     db.session.delete(w)
     db.session.commit()
     flash(f'Đã xóa widget: {name}', 'success')
-    return redirect(url_for('admin_voucher_widgets'))
+    return redirect(url_for('admin_vouchers_hub', tab='widgets'))
+
+@app.route('/admin/voucher-widgets/bulk-delete', methods=['POST'])
+def admin_voucher_widgets_bulk_delete():
+    """Bulk delete voucher widgets by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co widget nao'), 400
+    deleted = VoucherWidget.query.filter(VoucherWidget.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
+# =============================================
+# ADMIN — HOT DEALS (Upload Excel)
+# =============================================
+@app.route('/admin/hotdeals')
+def admin_hotdeals():
+    """Redirect standalone hotdeals page to Vouchers Hub"""
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+@app.route('/admin/hotdeals/upload', methods=['GET', 'POST'])
+def admin_hotdeals_upload():
+    """Upload Hot_deal.xlsx and import data into HotDeal table"""
+    if request.method == 'GET':
+        return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+    file = request.files.get('file')
+    if not file or not file.filename.endswith(('.xlsx', '.xls')):
+        flash('Vui long chon file Excel (.xlsx)', 'error')
+        return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+    try:
+        import openpyxl
+    except ImportError:
+        flash('Thieu thu vien openpyxl. Chay: pip install openpyxl', 'error')
+        return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+    try:
+        from io import BytesIO
+
+        wb = openpyxl.load_workbook(BytesIO(file.read()))
+        ws = wb.active
+
+        # Read header row
+        headers = [str(cell.value or '').strip() for cell in ws[1]]
+        col_map = {}
+        for i, h in enumerate(headers):
+            hl = h.lower()
+            if 'name' in hl: col_map['name'] = i
+            elif 'campaign' in hl: col_map['campaign'] = i
+            elif 'product' in hl and 'link' in hl: col_map['product_link'] = i
+            elif 'start' in hl: col_map['start_date'] = i
+            elif 'end' in hl: col_map['end_date'] = i
+            elif hl == 'status': col_map['status'] = i
+            elif 'hot' in hl and 'day' in hl: col_map['hot_day'] = i
+            elif 'banner' in hl: col_map['banner'] = i
+            elif 'detail' in hl: col_map['detail'] = i
+
+        if 'name' not in col_map:
+            flash('Khong tim thay cot "Name" trong file Excel', 'error')
+            return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+        imported = 0
+        skipped = 0
+        for row in ws.iter_rows(min_row=2, values_only=False):
+            vals = [cell.value for cell in row]
+            name = vals[col_map.get('name', 0)]
+            if not name:
+                continue
+
+            # Parse dates
+            start_date = vals[col_map.get('start_date', 3)] if 'start_date' in col_map else None
+            end_date = vals[col_map.get('end_date', 4)] if 'end_date' in col_map else None
+
+            if isinstance(start_date, str):
+                try:
+                    start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00').replace('+00:00', ''))
+                except:
+                    start_date = datetime.utcnow()
+            elif not isinstance(start_date, datetime):
+                start_date = datetime.utcnow()
+
+            if isinstance(end_date, str):
+                try:
+                    end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00').replace('+00:00', ''))
+                except:
+                    end_date = datetime.utcnow() + timedelta(days=30)
+            elif not isinstance(end_date, datetime):
+                end_date = datetime.utcnow() + timedelta(days=30)
+
+            campaign = str(vals[col_map.get('campaign', 1)] or '') if 'campaign' in col_map else ''
+            product_link = str(vals[col_map.get('product_link', 2)] or '') if 'product_link' in col_map else ''
+            status_val = str(vals[col_map.get('status', 5)] or '') if 'status' in col_map else ''
+            hot_day = str(vals[col_map.get('hot_day', 6)] or '') if 'hot_day' in col_map else ''
+            banner = str(vals[col_map.get('banner', 7)] or '') if 'banner' in col_map else ''
+            detail = str(vals[col_map.get('detail', 8)] or '') if 'detail' in col_map else ''
+
+            # Check for duplicate by name + campaign
+            existing = HotDeal.query.filter_by(name=str(name), campaign=campaign).first()
+            if existing:
+                # Update existing
+                existing.product_link = product_link
+                existing.start_date = start_date
+                existing.end_date = end_date
+                existing.status = status_val
+                existing.hot_day = hot_day
+                existing.banner = banner
+                existing.detail = detail
+                existing.is_active = True
+                existing.uploaded_at = datetime.utcnow()
+                skipped += 1
+            else:
+                deal = HotDeal(
+                    name=str(name),
+                    campaign=campaign,
+                    product_link=product_link,
+                    start_date=start_date,
+                    end_date=end_date,
+                    status=status_val,
+                    hot_day=hot_day,
+                    banner=banner,
+                    detail=detail,
+                    is_active=True,
+                )
+                db.session.add(deal)
+                imported += 1
+
+        db.session.commit()
+        flash(f'Import thanh cong: {imported} deal moi, {skipped} deal cap nhat', 'success')
+    except Exception as e:
+        flash(f'Loi import: {str(e)}', 'error')
+
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+@app.route('/admin/hotdeals/<int:deal_id>/toggle', methods=['POST'])
+def admin_hotdeal_toggle(deal_id):
+    """Toggle hotdeal active status"""
+    deal = HotDeal.query.get_or_404(deal_id)
+    deal.is_active = not deal.is_active
+    db.session.commit()
+    flash(f'{"Bat" if deal.is_active else "Tat"} deal: {deal.campaign}', 'success')
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+@app.route('/admin/hotdeals/<int:deal_id>/delete', methods=['POST'])
+def admin_hotdeal_delete(deal_id):
+    """Delete a hotdeal"""
+    deal = HotDeal.query.get_or_404(deal_id)
+    name = deal.campaign or deal.name[:30]
+    db.session.delete(deal)
+    db.session.commit()
+    flash(f'Da xoa deal: {name}', 'success')
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+@app.route('/admin/hotdeals/delete-all', methods=['POST'])
+def admin_hotdeals_delete_all():
+    """Delete all hotdeals"""
+    count = HotDeal.query.count()
+    HotDeal.query.delete()
+    db.session.commit()
+    flash(f'Da xoa {count} deal', 'success')
+    return redirect(url_for('admin_vouchers_hub', tab='hotdeals'))
+
+@app.route('/admin/hotdeals/bulk-delete-selected', methods=['POST'])
+def admin_hotdeals_bulk_delete_selected():
+    """Delete selected hotdeals by IDs"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = HotDeal.query.filter(HotDeal.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
+# =============================================
+# ADMIN — ACCESSTRADE BANNERS (Auto-pull)
+# =============================================
+
+@app.route('/admin/at-banners')
+def admin_at_banners():
+    """Redirect standalone AT banners page to Vouchers Hub"""
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
+
+def _do_banner_sync():
+    """Core banner sync logic — returns (imported, updated, total, error)"""
+    from accesstrade_integration import get_accesstrade_api
+    api = get_accesstrade_api()
+    if not api:
+        return 0, 0, 0, 'Chưa cấu hình AccessTrade API key.'
+
+    offers = api.get_offers(limit=100, status=1)
+    coupons = api.get_coupons_hot(limit=50)
+
+    imported = 0
+    updated = 0
+    all_items = []
+
+    for raw in offers:
+        item = api._parse_offer(raw)
+        item['_source'] = 'offer'
+        all_items.append(item)
+    for raw in coupons:
+        item = api._parse_offer(raw)
+        item['_source'] = 'coupon'
+        all_items.append(item)
+
+    for item in all_items:
+        offer_id = item.get('offer_id', '')
+        if not offer_id:
+            continue
+
+        discount_parts = []
+        if item.get('discount_percentage'):
+            discount_parts.append(str(item['discount_percentage']) + '%')
+        if item.get('discount_value'):
+            val = item['discount_value']
+            if isinstance(val, (int, float)) and val >= 1000:
+                discount_parts.append(str(int(val / 1000)) + 'K')
+            elif val:
+                discount_parts.append(str(val))
+        discount_text = ' | '.join(discount_parts) if discount_parts else ''
+
+        start_dt = None
+        end_dt = None
+        for date_str in [item.get('start_date', '')]:
+            if date_str:
+                try:
+                    start_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
+                except Exception:
+                    pass
+        for date_str in [item.get('end_date', '')]:
+            if date_str:
+                try:
+                    end_dt = datetime.fromisoformat(str(date_str).replace('Z', '+00:00').replace('+00:00', ''))
+                except Exception:
+                    pass
+
+        image_url = ''
+        raw_img = item.get('merchant_logo', '')
+        if raw_img and isinstance(raw_img, str) and raw_img.startswith('http'):
+            image_url = raw_img
+        for raw in offers + coupons:
+            if str(raw.get('id', '')) == offer_id:
+                direct_img = raw.get('image', '') or ''
+                if direct_img and isinstance(direct_img, str) and direct_img.startswith('http'):
+                    image_url = direct_img
+                break
+
+        existing = AccessTradeBanner.query.filter_by(offer_id=offer_id).first()
+        if existing:
+            existing.offer_name = item.get('offer_name', existing.offer_name)
+            existing.description = item.get('description', '')[:500]
+            existing.merchant = item.get('merchant', '')
+            existing.merchant_logo = item.get('merchant_logo', '')
+            existing.category = item.get('category', '')
+            existing.aff_link = item.get('aff_link', '')
+            existing.discount_text = discount_text
+            if image_url:
+                existing.image_url = image_url
+            if start_dt:
+                existing.start_date = start_dt
+            if end_dt:
+                existing.end_date = end_dt
+            existing.synced_at = datetime.utcnow()
+            updated += 1
+        else:
+            banner = AccessTradeBanner(
+                offer_id=offer_id,
+                offer_name=item.get('offer_name', 'Unknown'),
+                description=item.get('description', '')[:500],
+                merchant=item.get('merchant', ''),
+                merchant_logo=item.get('merchant_logo', ''),
+                category=item.get('category', ''),
+                image_url=image_url,
+                aff_link=item.get('aff_link', ''),
+                start_date=start_dt,
+                end_date=end_dt,
+                discount_text=discount_text,
+                placement='both',
+                is_active=True,
+            )
+            db.session.add(banner)
+            imported += 1
+
+    db.session.commit()
+    return imported, updated, len(all_items), None
+
+
+@app.route('/admin/at-banners/sync', methods=['POST'])
+def admin_at_banners_sync():
+    """Pull offers/coupons from AccessTrade API and save as banners"""
+    try:
+        imported, updated, total, err = _do_banner_sync()
+        if err:
+            flash(err, 'error')
+        else:
+            flash(f'Sync thành công: {imported} banner mới, {updated} cập nhật. Tổng {total} offers/coupons.', 'success')
+    except Exception as e:
+        flash(f'Lỗi sync: {str(e)}', 'error')
+
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
+
+@app.route('/admin/at-banners/<int:banner_id>/toggle', methods=['POST'])
+def admin_at_banner_toggle(banner_id):
+    """Toggle banner active status"""
+    b = AccessTradeBanner.query.get_or_404(banner_id)
+    b.is_active = not b.is_active
+    db.session.commit()
+    flash(f'{"Bat" if b.is_active else "Tat"} banner: {b.merchant}', 'success')
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
+
+@app.route('/admin/at-banners/<int:banner_id>/placement', methods=['POST'])
+def admin_at_banner_placement(banner_id):
+    """Change banner placement"""
+    b = AccessTradeBanner.query.get_or_404(banner_id)
+    new_placement = request.form.get('placement', 'hotdeal')
+    if new_placement in ('hotdeal', 'sidebar', 'both'):
+        b.placement = new_placement
+        db.session.commit()
+        flash(f'Da doi vi tri: {b.merchant} → {new_placement}', 'success')
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
+
+@app.route('/admin/at-banners/<int:banner_id>/delete', methods=['POST'])
+def admin_at_banner_delete(banner_id):
+    """Delete a banner"""
+    b = AccessTradeBanner.query.get_or_404(banner_id)
+    name = b.merchant or b.offer_name[:30]
+    db.session.delete(b)
+    db.session.commit()
+    flash(f'Da xoa banner: {name}', 'success')
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
+
+@app.route('/admin/at-banners/delete-all', methods=['POST'])
+def admin_at_banners_delete_all():
+    """Delete all banners"""
+    count = AccessTradeBanner.query.count()
+    AccessTradeBanner.query.delete()
+    db.session.commit()
+    flash(f'Da xoa {count} banner', 'success')
+    return redirect(url_for('admin_vouchers_hub', tab='banners'))
+
+@app.route('/admin/at-banners/bulk-delete-selected', methods=['POST'])
+def admin_at_banners_bulk_delete_selected():
+    """Delete selected banners by IDs"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='No IDs'), 400
+    deleted = AccessTradeBanner.query.filter(AccessTradeBanner.id.in_([int(i) for i in ids])).delete()
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
+@app.route('/admin/at-banners/schedule', methods=['POST'])
+def admin_at_banners_schedule():
+    """Save banner auto-sync schedule settings"""
+    data = request.get_json(silent=True) or {}
+    enabled = bool(data.get('enabled', False))
+    sync_time = data.get('sync_time', '03:00')  # HH:MM
+    SiteSettings.set_val('banner_auto_sync', 'on' if enabled else 'off', 'banner')
+    SiteSettings.set_val('banner_sync_time', sync_time, 'banner')
+    db.session.commit()
+    # Restart the scheduler thread with new settings
+    _start_banner_scheduler()
+    return jsonify(status='ok', enabled=enabled, sync_time=sync_time)
+
+@app.route('/admin/at-banners/schedule/status')
+def admin_at_banners_schedule_status():
+    """Get current schedule status and last run info"""
+    return jsonify(
+        enabled=SiteSettings.get('banner_auto_sync', 'on') == 'on',
+        sync_time=SiteSettings.get('banner_sync_time', '03:00'),
+        last_run=SiteSettings.get('banner_last_auto_sync', ''),
+        last_result=SiteSettings.get('banner_last_auto_sync_result', ''),
+    )
+
+@app.route('/admin/at-banners/click/<int:banner_id>')
+def admin_at_banner_click(banner_id):
+    """Track banner click and redirect to affiliate link"""
+    b = AccessTradeBanner.query.get(banner_id)
+    if b and b.aff_link:
+        b.clicks = (b.clicks or 0) + 1
+        db.session.commit()
+        return redirect(b.aff_link)
+    return redirect(url_for('index'))
+
+# =============================================
+# ADMIN — WARD/COMMUNE (Phường/Xã)
+# =============================================
+
+# Province coordinates for map centering
+PROVINCE_COORDS = {
+    '01': {'lat': 21.0285, 'lng': 105.8542, 'name': 'Hà Nội'},
+    '04': {'lat': 22.6666, 'lng': 106.2640, 'name': 'Cao Bằng'},
+    '08': {'lat': 21.8237, 'lng': 105.2140, 'name': 'Tuyên Quang'},
+    '11': {'lat': 21.3860, 'lng': 103.0230, 'name': 'Điện Biên'},
+    '12': {'lat': 22.3686, 'lng': 103.4700, 'name': 'Lai Châu'},
+    '14': {'lat': 21.3270, 'lng': 103.9144, 'name': 'Sơn La'},
+    '15': {'lat': 22.3380, 'lng': 104.1487, 'name': 'Lào Cai'},
+    '19': {'lat': 21.5928, 'lng': 105.8442, 'name': 'Thái Nguyên'},
+    '20': {'lat': 21.8460, 'lng': 106.7610, 'name': 'Lạng Sơn'},
+    '22': {'lat': 20.9530, 'lng': 107.0750, 'name': 'Quảng Ninh'},
+    '24': {'lat': 21.1861, 'lng': 106.0763, 'name': 'Bắc Ninh'},
+    '25': {'lat': 21.4225, 'lng': 105.2290, 'name': 'Phú Thọ'},
+    '31': {'lat': 20.8449, 'lng': 106.6881, 'name': 'Hải Phòng'},
+    '33': {'lat': 20.6530, 'lng': 106.0510, 'name': 'Hưng Yên'},
+    '37': {'lat': 20.2510, 'lng': 105.9750, 'name': 'Ninh Bình'},
+    '38': {'lat': 19.8070, 'lng': 105.7760, 'name': 'Thanh Hóa'},
+    '40': {'lat': 18.6790, 'lng': 105.6813, 'name': 'Nghệ An'},
+    '42': {'lat': 18.3430, 'lng': 105.9058, 'name': 'Hà Tĩnh'},
+    '44': {'lat': 16.7500, 'lng': 107.1860, 'name': 'Quảng Trị'},
+    '46': {'lat': 16.4637, 'lng': 107.5909, 'name': 'Huế'},
+    '48': {'lat': 16.0544, 'lng': 108.2022, 'name': 'Đà Nẵng'},
+    '51': {'lat': 15.1214, 'lng': 108.8044, 'name': 'Quảng Ngãi'},
+    '52': {'lat': 13.9833, 'lng': 108.0000, 'name': 'Gia Lai'},
+    '56': {'lat': 12.2388, 'lng': 109.1967, 'name': 'Khánh Hòa'},
+    '66': {'lat': 12.7100, 'lng': 108.2378, 'name': 'Đắk Lắk'},
+    '68': {'lat': 11.9404, 'lng': 108.4583, 'name': 'Lâm Đồng'},
+    '75': {'lat': 10.9453, 'lng': 106.8243, 'name': 'Đồng Nai'},
+    '79': {'lat': 10.8231, 'lng': 106.6297, 'name': 'Hồ Chí Minh'},
+    '80': {'lat': 11.3352, 'lng': 106.0980, 'name': 'Tây Ninh'},
+    '82': {'lat': 10.4524, 'lng': 105.6322, 'name': 'Đồng Tháp'},
+    '86': {'lat': 10.2530, 'lng': 105.9720, 'name': 'Vĩnh Long'},
+    '91': {'lat': 10.3860, 'lng': 105.4350, 'name': 'An Giang'},
+    '92': {'lat': 10.0452, 'lng': 105.7469, 'name': 'Cần Thơ'},
+    '96': {'lat': 9.1770, 'lng': 105.1500, 'name': 'Cà Mau'},
+}
+
+# Map province_code → destination slug (used on hotel page)
+PROVINCE_TO_SLUG = {
+    '01': 'ha-noi', '04': 'cao-bang', '08': 'tuyen-quang', '11': 'dien-bien',
+    '12': 'lai-chau', '14': 'son-la', '15': 'lao-cai', '19': 'thai-nguyen',
+    '20': 'lang-son', '22': 'quang-ninh', '24': 'bac-ninh', '25': 'phu-tho',
+    '31': 'hai-phong', '33': 'hung-yen', '37': 'ninh-binh', '38': 'thanh-hoa',
+    '40': 'nghe-an', '42': 'ha-tinh', '44': 'quang-tri', '46': 'hue',
+    '48': 'da-nang', '51': 'quang-ngai', '52': 'gia-lai', '56': 'khanh-hoa',
+    '66': 'dak-lak', '68': 'lam-dong', '75': 'dong-nai', '79': 'ho-chi-minh',
+    '80': 'tay-ninh', '82': 'dong-thap', '86': 'vinh-long', '91': 'an-giang',
+    '92': 'can-tho', '96': 'ca-mau',
+}
+
+def _auto_seed_wards():
+    """Seed WardCommune from wards_default.json if table is empty."""
+    if WardCommune.query.count() > 0:
+        return 0
+    import json as _json
+    _path = os.path.join(os.path.dirname(__file__), 'wards_default.json')
+    if not os.path.exists(_path):
+        return 0
+    try:
+        with open(_path, 'r', encoding='utf-8') as f:
+            rows = _json.load(f)
+        for code, name, level, resolution, province_code, province_name in rows:
+            db.session.add(WardCommune(
+                code=code, name=name, level=level,
+                resolution=resolution,
+                province_code=province_code,
+                province_name=province_name
+            ))
+        db.session.commit()
+        return len(rows)
+    except Exception:
+        db.session.rollback()
+        return 0
+
+@app.route('/admin/wards')
+def admin_wards():
+    """Manage ward/commune data"""
+    seeded = _auto_seed_wards()
+    if seeded:
+        flash(f'Tu dong nap {seeded} phuong/xa mac dinh', 'success')
+
+    wards = WardCommune.query.order_by(WardCommune.province_code, WardCommune.name).all()
+    # Group by province
+    provinces = {}
+    for w in wards:
+        if w.province_code not in provinces:
+            provinces[w.province_code] = {
+                'name': w.province_name,
+                'code': w.province_code,
+                'wards': [],
+                'coords': PROVINCE_COORDS.get(w.province_code, {'lat': 16.0, 'lng': 108.0})
+            }
+        provinces[w.province_code]['wards'].append(w)
+
+    f_province = request.args.get('province', '')
+    f_level = request.args.get('level', '')
+    f_search = request.args.get('q', '')
+
+    filtered_wards = wards
+    if f_province:
+        filtered_wards = [w for w in filtered_wards if w.province_code == f_province]
+    if f_level:
+        filtered_wards = [w for w in filtered_wards if w.level == f_level]
+    if f_search:
+        q = f_search.lower()
+        filtered_wards = [w for w in filtered_wards if q in w.name.lower() or q in w.code]
+
+    return render_template('admin/wards.html',
+        wards=filtered_wards,
+        provinces=provinces,
+        province_coords=PROVINCE_COORDS,
+        total=len(wards),
+        f_province=f_province,
+        f_level=f_level,
+        f_search=f_search
+    )
+
+@app.route('/admin/wards/add', methods=['POST'])
+def admin_wards_add():
+    """Add a new ward"""
+    code = request.form.get('code', '').strip()
+    name = request.form.get('name', '').strip()
+    level = request.form.get('level', '').strip()
+    province_code = request.form.get('province_code', '').strip()
+    province_name = request.form.get('province_name', '').strip()
+    if not code or not name:
+        flash('Ma va ten phuong/xa la bat buoc', 'error')
+        return redirect(url_for('admin_wards'))
+    if WardCommune.query.filter_by(code=code).first():
+        flash(f'Ma {code} da ton tai', 'error')
+        return redirect(url_for('admin_wards'))
+    db.session.add(WardCommune(code=code, name=name, level=level,
+                                province_code=province_code, province_name=province_name))
+    db.session.commit()
+    flash(f'Da them: {name}', 'success')
+    return redirect(url_for('admin_wards'))
+
+@app.route('/admin/wards/edit/<int:ward_id>', methods=['POST'])
+def admin_wards_edit(ward_id):
+    """Edit a ward"""
+    w = WardCommune.query.get_or_404(ward_id)
+    w.code = request.form.get('code', w.code).strip()
+    w.name = request.form.get('name', w.name).strip()
+    w.level = request.form.get('level', w.level).strip()
+    w.province_code = request.form.get('province_code', w.province_code).strip()
+    w.province_name = request.form.get('province_name', w.province_name).strip()
+    db.session.commit()
+    flash(f'Da cap nhat: {w.name}', 'success')
+    return redirect(url_for('admin_wards'))
+
+@app.route('/admin/wards/delete/<int:ward_id>', methods=['POST'])
+def admin_wards_delete(ward_id):
+    """Delete a single ward"""
+    w = WardCommune.query.get_or_404(ward_id)
+    name = w.name
+    db.session.delete(w)
+    db.session.commit()
+    flash(f'Da xoa: {name}', 'success')
+    return redirect(url_for('admin_wards'))
+
+@app.route('/admin/wards/bulk-delete', methods=['POST'])
+def admin_wards_bulk_delete():
+    """Bulk delete wards by IDs (JSON)"""
+    data = request.get_json(silent=True) or {}
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify(ok=False, error='Khong co ward nao'), 400
+    deleted = WardCommune.query.filter(WardCommune.id.in_([int(i) for i in ids])).delete(synchronize_session=False)
+    db.session.commit()
+    return jsonify(ok=True, deleted=deleted)
+
+@app.route('/admin/wards/reset', methods=['POST'])
+def admin_wards_reset():
+    """Reset to default data from wards_default.json"""
+    WardCommune.query.delete()
+    db.session.commit()
+    seeded = _auto_seed_wards()
+    flash(f'Da reset ve mac dinh: {seeded} phuong/xa', 'success')
+    return redirect(url_for('admin_wards'))
+
+@app.route('/api/wards')
+def api_wards():
+    """API endpoint to get wards filtered by province"""
+    province_code = request.args.get('province', '')
+    level = request.args.get('level', '')
+    q = request.args.get('q', '')
+
+    query = WardCommune.query
+    if province_code:
+        query = query.filter_by(province_code=province_code)
+    if level:
+        query = query.filter_by(level=level)
+    if q:
+        query = query.filter(WardCommune.name.ilike(f'%{q}%'))
+
+    wards = query.order_by(WardCommune.name).all()
+    return jsonify({
+        'wards': [{
+            'code': w.code,
+            'name': w.name,
+            'level': w.level,
+            'province_code': w.province_code,
+            'province_name': w.province_name,
+            'destination_slug': slugify(w.province_name)
+        } for w in wards],
+        'total': len(wards)
+    })
+
+@app.route('/api/wards/by-destination')
+def api_wards_by_destination():
+    """Get wards for an Agoda destination slug (for cascading dropdown)."""
+    _auto_seed_wards()  # ensure data exists
+    slug = request.args.get('slug', '').strip()
+    if not slug:
+        return jsonify({'wards': [], 'province': ''})
+
+    from agoda_integration import AGODA_TO_PROVINCE_NAMES
+    province_names = AGODA_TO_PROVINCE_NAMES.get(slug, [])
+    if not province_names:
+        return jsonify({'wards': [], 'province': ''})
+
+    # Search WardCommune by province name variants
+    wards = []
+    matched_province = ''
+    for pname in province_names:
+        results = WardCommune.query.filter(
+            WardCommune.province_name.ilike(f'%{pname}%')
+        ).order_by(WardCommune.name).all()
+        if results:
+            wards = [{'code': w.code, 'name': w.name, 'level': w.level} for w in results]
+            matched_province = pname
+            break
+
+    return jsonify({'wards': wards, 'province': matched_province, 'total': len(wards)})
+
+@app.route('/api/wards/search')
+def api_wards_search():
+    """Search provinces + wards from WardCommune DB for hotel autocomplete.
+    No hardcoded province lists — everything comes from the database."""
+    q = request.args.get('q', '').strip()
+    if not q or len(q) < 2:
+        return jsonify({'results': []})
+
+    results = []
+    ql = q.lower()
+
+    # 1. Search provinces dynamically from WardCommune table
+    all_provinces = db.session.query(
+        WardCommune.province_code, WardCommune.province_name
+    ).distinct().order_by(WardCommune.province_name).all()
+
+    for pcode, pname in all_provinces:
+        if ql in pname.lower():
+            results.append({
+                'type': 'province',
+                'name': pname,
+                'destination_slug': slugify(pname),
+                'province_code': pcode,
+                'province_name': pname
+            })
+
+    # 2. Search wards/phuong by name (limit 30)
+    wards = WardCommune.query.filter(
+        WardCommune.name.ilike(f'%{q}%')
+    ).order_by(WardCommune.name).limit(30).all()
+
+    for w in wards:
+        results.append({
+            'type': 'ward',
+            'name': w.name,
+            'level': w.level,
+            'destination_slug': slugify(w.province_name),
+            'province_code': w.province_code,
+            'province_name': w.province_name
+        })
+
+    return jsonify({'results': results})
+
+@app.route('/api/province-coords')
+def api_province_coords():
+    """API endpoint to get province coordinates for map"""
+    code = request.args.get('code', '')
+    if code and code in PROVINCE_COORDS:
+        return jsonify(PROVINCE_COORDS[code])
+    return jsonify(PROVINCE_COORDS)
 
 # =============================================
 # ADMIN — VOUCHER SYNC (AccessTrade Auto-Import)
@@ -4317,7 +6839,7 @@ def admin_content_event_save():
     event.is_active = True
     db.session.commit()
     flash(f'Event saved: {event.name}', 'success')
-    return redirect(url_for('admin_content_calendar'))
+    return redirect(url_for('admin_ai_engine', tab='calendar'))
 
 
 @app.route('/admin/content-calendar/event/<int:eid>/delete', methods=['POST'])
@@ -4327,7 +6849,7 @@ def admin_content_event_delete(eid):
     db.session.delete(e)
     db.session.commit()
     flash('Event deleted', 'success')
-    return redirect(url_for('admin_content_calendar'))
+    return redirect(url_for('admin_ai_engine', tab='calendar'))
 
 
 @app.route('/admin/auto-rules')
@@ -4358,7 +6880,7 @@ def admin_auto_rules_save():
     rule.focus_keywords = request.form.get('focus_keywords', '')
     db.session.commit()
     flash(f'Rules saved for vertical', 'success')
-    return redirect(url_for('admin_auto_rules'))
+    return redirect(url_for('admin_ai_engine', tab='rules'))
 
 
 @app.route('/admin/content-queue')
@@ -4408,27 +6930,46 @@ def admin_content_queue_add():
     db.session.add(item)
     db.session.commit()
     flash(f'Added to queue: {item.topic}', 'success')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/content-queue/<int:qid>/action', methods=['POST'])
 def admin_content_queue_action(qid):
-    """Approve/Skip/Edit queue item"""
+    """Approve/Skip/Edit/Generate/Publish queue item"""
     item = ContentQueue.query.get_or_404(qid)
     action = request.form.get('action', '')
     if action == 'approve':
         item.status = 'review'
     elif action == 'skip':
         item.status = 'skipped'
+    elif action == 'generate':
+        # Generate AI content for this item
+        from ai_service import generate_from_queue_item
+        try:
+            result = generate_from_queue_item(item)
+            flash(f'Generated: {result["title"]} ({result["word_count"]} words)', 'success')
+        except Exception as e:
+            flash(f'Generation failed: {str(e)}', 'danger')
+        return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
     elif action == 'publish':
-        item.status = 'published'
-        item.published_at = datetime.utcnow()
+        # Publish as Article
+        if item.generated_content:
+            from ai_service import publish_queue_item
+            try:
+                article = publish_queue_item(item)
+                flash(f'Published: {article.title}', 'success')
+            except Exception as e:
+                flash(f'Publish failed: {str(e)}', 'danger')
+            return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
+        else:
+            item.status = 'published'
+            item.published_at = datetime.utcnow()
     elif action == 'edit':
         item.topic = request.form.get('topic', item.topic)
         item.keywords = request.form.get('keywords', item.keywords)
         item.knowledge_layer = request.form.get('knowledge_layer', item.knowledge_layer)
     db.session.commit()
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/content-queue/<int:qid>/delete', methods=['POST'])
@@ -4438,14 +6979,15 @@ def admin_content_queue_delete(qid):
     db.session.delete(item)
     db.session.commit()
     flash('Queue item deleted', 'success')
-    return redirect(url_for('admin_content_queue'))
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
 
 
 @app.route('/admin/gap-analysis')
 def admin_gap_analysis():
-    """Gap Analysis - AI analyzes content gaps and suggests auto-fill"""
+    """Unified AI Pipeline — Scan gaps, view queue, generate, publish — all in one page"""
     verticals = Vertical.query.filter_by(status='published').order_by(Vertical.name).all()
 
+    # ── Gap analysis per vertical ──
     analysis = []
     for v in verticals:
         segments = Segment.query.filter_by(vertical_id=v.id).all()
@@ -4466,6 +7008,7 @@ def admin_gap_analysis():
 
         articles_count = Article.query.filter_by(vertical_slug=v.slug, status='published').count()
         queue_pending = ContentQueue.query.filter_by(vertical_id=v.id, status='pending').count()
+        queue_review = ContentQueue.query.filter_by(vertical_id=v.id, status='review').count()
         rule = AutoContentRule.query.filter_by(vertical_id=v.id).first()
 
         coverage = round(zones_with_content / total_zones * 100) if total_zones > 0 else 0
@@ -4478,11 +7021,23 @@ def admin_gap_analysis():
             'empty_zones': empty_zones[:5],
             'articles_count': articles_count,
             'queue_pending': queue_pending,
+            'queue_review': queue_review,
             'has_rule': rule is not None and rule.is_active if rule else False,
             'suggestions': _generate_gap_suggestions(v, coverage, empty_zones, articles_count)
         })
 
-    return render_template('admin/gap_analysis.html', analysis=analysis, verticals=verticals)
+    # ── Queue items (for pipeline panel) ──
+    queue_items = ContentQueue.query.order_by(ContentQueue.created_at.desc()).limit(50).all()
+    queue_stats = {
+        'pending': ContentQueue.query.filter_by(status='pending').count(),
+        'review': ContentQueue.query.filter_by(status='review').count(),
+        'published': ContentQueue.query.filter_by(status='published').count(),
+        'total': ContentQueue.query.count(),
+    }
+
+    return render_template('admin/gap_analysis.html',
+        analysis=analysis, verticals=verticals,
+        queue_items=queue_items, queue_stats=queue_stats)
 
 
 def _generate_gap_suggestions(vertical, coverage, empty_zones, articles_count):
@@ -4502,6 +7057,125 @@ def _generate_gap_suggestions(vertical, coverage, empty_zones, articles_count):
         suggestions.append({'priority': 'low', 'text': f'{vertical.name} looking good! Consider seasonal content.', 'action': 'seasonal'})
 
     return suggestions
+
+
+# =============================================
+# AI CONTENT PIPELINE — Scan, Generate, Publish
+# =============================================
+
+@app.route('/admin/ai/scan-gaps')
+def admin_ai_scan_gaps():
+    """Enhanced gap analysis with cross-vertical comparison and per-tier breakdown"""
+    from ai_service import scan_all_gaps
+    results = scan_all_gaps()
+
+    # Overall stats
+    total_possible = sum(r['total_possible'] for r in results)
+    total_existing = sum(r['existing_articles'] for r in results)
+    overall_coverage = round(total_existing / total_possible * 100, 1) if total_possible > 0 else 0
+
+    # Per-tier totals across all verticals
+    tier_totals = {'nganh': {'total': 0, 'existing': 0}, 'chung': {'total': 0, 'existing': 0}, 'chi-tiet': {'total': 0, 'existing': 0}}
+    for r in results:
+        for tier_name, tier_data in r['tier_breakdown'].items():
+            tier_totals[tier_name]['total'] += tier_data['total']
+            tier_totals[tier_name]['existing'] += tier_data['existing']
+
+    return render_template('admin/ai_gap_scan.html',
+        results=results,
+        overall_coverage=overall_coverage,
+        total_possible=total_possible,
+        total_existing=total_existing,
+        tier_totals=tier_totals)
+
+
+@app.route('/admin/ai/auto-fill', methods=['POST'])
+def admin_ai_auto_fill():
+    """Auto-populate ContentQueue with gaps from scan"""
+    from ai_service import auto_fill_queue
+    vertical_id = request.form.get('vertical_id', type=int)
+    max_items = request.form.get('max_items', 10, type=int)
+    created = auto_fill_queue(vertical_id=vertical_id, max_items=max_items)
+    flash(f'Added {len(created)} items to content queue', 'success')
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
+
+
+@app.route('/admin/ai/generate/<int:qid>', methods=['POST'])
+def admin_ai_generate(qid):
+    """Generate article content for a specific queue item"""
+    from ai_service import generate_from_queue_item
+    item = ContentQueue.query.get_or_404(qid)
+    try:
+        result = generate_from_queue_item(item)
+        flash(f'Generated: {result["title"]} ({result["word_count"]} words)', 'success')
+    except Exception as e:
+        flash(f'Generation failed: {str(e)}', 'danger')
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
+
+
+@app.route('/admin/ai/publish/<int:qid>', methods=['POST'])
+def admin_ai_publish(qid):
+    """Publish a generated queue item as an Article"""
+    from ai_service import publish_queue_item
+    item = ContentQueue.query.get_or_404(qid)
+    try:
+        article = publish_queue_item(item)
+        flash(f'Published article: {article.title}', 'success')
+    except Exception as e:
+        flash(f'Publish failed: {str(e)}', 'danger')
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
+
+
+@app.route('/admin/ai/batch-generate', methods=['POST'])
+def admin_ai_batch_generate():
+    """Generate content for all pending/approved queue items"""
+    from ai_service import generate_from_queue_item
+    items = ContentQueue.query.filter(ContentQueue.status.in_(['pending', 'review'])).limit(5).all()
+    success = 0
+    errors = 0
+    for item in items:
+        if item.generated_content:
+            continue  # Skip already generated
+        try:
+            generate_from_queue_item(item)
+            success += 1
+        except Exception as e:
+            errors += 1
+    flash(f'Batch generate: {success} success, {errors} errors', 'success' if errors == 0 else 'warning')
+    return redirect(url_for('admin_ai_engine', tab='pipeline', step='queue'))
+
+
+@app.route('/admin/ai/auto-run', methods=['POST'])
+def admin_ai_auto_run():
+    """Full pipeline: scan gaps → fill queue → generate → optionally publish"""
+    from ai_service import auto_fill_queue, generate_from_queue_item, publish_queue_item
+    vertical_id = request.form.get('vertical_id', type=int)
+    auto_publish = request.form.get('auto_publish') == '1'
+    max_items = request.form.get('max_items', 5, type=int)
+
+    # Step 1: Fill queue
+    created = auto_fill_queue(vertical_id=vertical_id, max_items=max_items)
+
+    # Step 2: Generate content
+    generated = 0
+    published = 0
+    errors = 0
+    for item in created:
+        try:
+            generate_from_queue_item(item)
+            generated += 1
+            # Step 3: Auto-publish if enabled
+            if auto_publish:
+                rule = AutoContentRule.query.filter_by(vertical_id=item.vertical_id, is_active=True).first()
+                if rule and rule.auto_publish:
+                    publish_queue_item(item)
+                    published += 1
+        except Exception as e:
+            errors += 1
+
+    flash(f'Auto-run: {len(created)} queued, {generated} generated, {published} published, {errors} errors',
+          'success' if errors == 0 else 'warning')
+    return redirect(url_for('admin_ai_engine', tab='pipeline'))
 
 
 # =============================================
@@ -4571,7 +7245,7 @@ def unilab_article(slug):
 def robots_txt():
     """Serve robots.txt to control search engine indexing"""
     from flask import send_from_directory
-    return send_from_directory('static', 'robots.txt', mimetype='text/plain')
+    return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
 
 # =============================================
 # =============================================
@@ -4585,21 +7259,32 @@ def robots_txt():
 def travel_hotels():
     v = Vertical.query.filter_by(slug='travel').first_or_404()
     destination = request.args.get('destination', '')
-    checkin = request.args.get('checkin', '')
-    checkout = request.args.get('checkout', '')
-    guests = request.args.get('guests', '2')
     stars = request.args.get('stars', '')
+    price_min = request.args.get('price_min', '')
+    price_max = request.args.get('price_max', '')
 
     agoda_enabled = SiteSettings.get('agoda_enabled', '0') == '1'
     api_status = 'configured' if agoda_enabled else 'local_db'
 
+    # Resolve province slug (sidebar) → city slug (DB/Agoda)
+    # e.g. 'lam-dong' → 'da-lat', 'khanh-hoa' → 'nha-trang'
+    from agoda_integration import PROVINCE_TO_CITY_SLUG
+    city_slug = PROVINCE_TO_CITY_SLUG.get(destination, destination)
+
     hotels = []
     agoda_hotels = []
     if destination:
-        # Always get local DB hotels
-        q = Hotel.query.filter_by(is_active=True, destination=destination)
+        # Always get local DB hotels (try both province and city slug)
+        q = Hotel.query.filter(
+            Hotel.is_active == True,
+            Hotel.destination.in_([destination, city_slug])
+        )
         if stars:
             q = q.filter(Hotel.stars == int(stars))
+        if price_min:
+            q = q.filter(Hotel.price_from >= int(price_min))
+        if price_max:
+            q = q.filter(Hotel.price_from <= int(price_max))
         hotels = q.order_by(Hotel.is_featured.desc(), Hotel.rating.desc()).all()
 
     # Popular destinations from DB + Agoda city list
@@ -4621,9 +7306,32 @@ def travel_hotels():
                     'count': 0
                 })
 
+    # Build hotel markers JSON for Leaflet map
+    from agoda_integration import PROVINCE_CENTERS, _DEST_SLUG_TO_NAME
+    destination_display = _DEST_SLUG_TO_NAME.get(destination, destination.replace('-', ' ').title()) if destination else ''
+    hotel_markers = []
+    marker_src = hotels
+    if not destination:
+        # No destination selected → show ALL active hotels on the Vietnam-wide map
+        marker_src = Hotel.query.filter(Hotel.is_active == True, Hotel.latitude != 0, Hotel.longitude != 0).all()
+    for h in marker_src:
+        lat = h.latitude or 0
+        lng = h.longitude or 0
+        if lat and lng:
+            hotel_markers.append({
+                'name': h.name, 'lat': lat, 'lng': lng,
+                'stars': h.stars, 'rating': h.rating,
+                'price': h.price_from, 'image': h.image_url or '',
+                'url': h.agoda_url or h.booking_url or '#',
+                'address': h.address or h.district or '',
+            })
+    province_center = PROVINCE_CENTERS.get(destination, PROVINCE_CENTERS.get(city_slug, (16.0, 108.0)))
+
     return render_template('travel/hotels.html', vertical=v, hotels=hotels,
-        destination=destination, checkin=checkin, checkout=checkout, guests=guests,
-        stars=stars, api_status=api_status, agoda_enabled=agoda_enabled, popular=popular)
+        destination=destination, destination_display=destination_display, city_slug=city_slug,
+        stars=stars, price_min=price_min, price_max=price_max,
+        api_status=api_status, agoda_enabled=agoda_enabled, popular=popular,
+        hotel_markers=hotel_markers, province_center=province_center)
 
 
 @app.route('/travel/ve-tham-quan')
@@ -4799,6 +7507,25 @@ def get_vertical_config(vertical_slug):
             'parts_label': 'sản phẩm',
             'parts_heading': 'Sản phẩm',
         },
+        'garden': {
+            'hero_title': 'Kiến thức làm vườn',
+            'hero_subtitle': 'chăm sóc cây trồng từ hạt giống đến thu hoạch',
+            'hero_desc': 'Trồng rau sạch, hoa, cây ăn quả, cây cảnh. Hướng dẫn chi tiết, review dụng cụ, phân bón, giá thể.',
+            'hero_cta1': 'Khám phá danh mục',
+            'segments_label': 'danh mục',
+            'segments_heading': 'Danh mục cây trồng',
+            'tier1_desc': 'Tổng quan thị trường, xu hướng làm vườn đô thị, nông nghiệp sạch.',
+            'tier2_desc': 'Kỹ thuật trồng, chăm sóc, phòng bệnh cho cây.',
+            'tier3_desc': 'Hướng dẫn chi tiết từng loại cây, review sản phẩm vật tư.',
+            'cta_title': 'Bắt đầu hành trình làm vườn?',
+            'cta_desc': 'Khám phá kiến thức từ chọn giống đến thu hoạch, phù hợp mọi không gian.',
+            'cta_button': 'Xem danh mục →',
+            'products_title': 'Dụng cụ & Vật tư làm vườn',
+            'products_subtitle': 'Đất, phân bón, chậu, hạt giống — giá tốt từ Shopee, Lazada, Tiki',
+            'products_icon': '🌱',
+            'parts_label': 'loại cây / sản phẩm',
+            'parts_heading': 'Loại cây & Sản phẩm',
+        },
     }
     return configs.get(vertical_slug, {})
 
@@ -4876,7 +7603,16 @@ def vertical_article(vertical_slug, slug):
 
     # Related parts for product carousel — flatten to individual affiliate cards
     carousel_items = []
-    if a.related_zone_slug:
+    # Check if embed_code uses product_ids format (selected products from admin UI)
+    embed_code_val = (a.embed_code or '').strip()
+    if embed_code_val.startswith('product_ids:'):
+        try:
+            pids = [int(x) for x in embed_code_val.replace('product_ids:', '').split(',') if x.strip()]
+            if pids:
+                carousel_items = AffiliateLink.query.filter(AffiliateLink.id.in_(pids), AffiliateLink.is_active==True).all()
+        except (ValueError, TypeError):
+            pass
+    elif a.related_zone_slug:
         z = Zone.query.filter_by(slug=a.related_zone_slug).first()
         if z:
             carousel_limit = int(SiteSettings.get('carousel_product_limit', '3'))
@@ -4897,7 +7633,35 @@ def vertical_article(vertical_slug, slug):
         db.or_(Banner.vertical_slug=='', Banner.vertical_slug==vertical_slug)
     ).order_by(Banner.position).all()
 
-    return render_template('shared/article.html', vertical=v, article=a, related=related, featured=featured, carousel_items=carousel_items, banners=banners)
+    # Inject SEO backlinks into article content
+    article_content = _inject_backlinks(a.content or '', vertical_slug, 'article', a.id, a.slug)
+
+    # Outtext backlinks (related articles from backlink system, shown in sidebar)
+    outtext_links = BacklinkInstance.query.join(BacklinkKeyword).filter(
+        BacklinkInstance.source_type == 'article',
+        BacklinkInstance.source_id == a.id,
+        BacklinkInstance.link_type == 'outtext',
+        BacklinkInstance.status == 'active',
+        BacklinkKeyword.is_active == True
+    ).limit(5).all()
+
+    # Inline suggestions (quote-style, inserted at 1/3 of article)
+    suggest_instances = BacklinkInstance.query.filter_by(
+        source_type='article', source_id=a.id,
+        link_type='suggest', status='active'
+    ).limit(3).all()
+    # Resolve to actual Article objects
+    inline_suggests = []
+    for si in suggest_instances:
+        if si.target_type == 'article':
+            sa = Article.query.filter_by(slug=si.target_slug, vertical_slug=vertical_slug, status='published').first()
+            if sa:
+                inline_suggests.append(sa)
+
+    return render_template('shared/article.html', vertical=v, article=a, related=related, featured=featured,
+        carousel_items=carousel_items, banners=banners,
+        article_content_with_backlinks=article_content, outtext_links=outtext_links,
+        inline_suggests=inline_suggests)
 
 @app.route('/article/<int:article_id>/feedback', methods=['POST'])
 def submit_article_feedback(article_id):
@@ -4947,9 +7711,13 @@ def vertical_part(vertical_slug, segment_slug, zone_slug, part_slug):
     if not related_articles:
         related_articles = Article.query.filter_by(vertical_slug=vertical_slug, tier='chi-tiet', status='published').limit(3).all()
     related_parts = Part.query.filter(Part.zone_id==z.id, Part.id!=p.id, Part.status=='published').limit(4).all()
+    zone_parts = Part.query.filter_by(zone_id=z.id, status='published').order_by(Part.order).all()
     config = get_vertical_config(vertical_slug)
+    # Inject SEO backlinks into part content
+    part_content = _inject_backlinks(p.content or '', vertical_slug, 'part', p.id, p.slug)
     return render_template('shared/part.html', vertical=v, segment=s, zone=z, part=p,
-        related_articles=related_articles, related_parts=related_parts, **config)
+        related_articles=related_articles, related_parts=related_parts, zone_parts=zone_parts,
+        part_content_with_backlinks=part_content, **config)
 
 # =============================================
 # SHOP ROUTES (Standalone e-commerce aggregator)
@@ -5126,6 +7894,8 @@ def voucher_index():
     f_type = request.args.get('type', '')  # percentage, fixed_amount, free_shipping
     f_platform = request.args.get('platform', '')  # shopee, lazada, grab...
     f_sort = request.args.get('sort', 'newest')  # newest, discount, expiring
+    page = request.args.get('page', 1, type=int)
+    per_page = 24
 
     # Build query
     q = Voucher.query.filter_by(is_active=True)
@@ -5152,6 +7922,12 @@ def voucher_index():
         vouchers.sort(key=lambda v: v.valid_to or datetime.max)
     else:
         vouchers.sort(key=lambda v: v.created_at or datetime.min, reverse=True)
+
+    # Pagination
+    total_vouchers = len(vouchers)
+    total_pages = max(1, (total_vouchers + per_page - 1) // per_page)
+    page = min(page, total_pages)
+    vouchers_paginated = vouchers[(page - 1) * per_page : page * per_page]
 
     # Featured: top discount vouchers as featured if none marked
     featured = Voucher.query.filter_by(is_active=True, is_featured=True).limit(6).all()
@@ -5201,12 +7977,48 @@ def voucher_index():
     widgets = VoucherWidget.query.filter_by(is_active=True, placement='voucher_page').order_by(VoucherWidget.position).all()
 
     return render_template('voucher/index.html',
-        vouchers=vouchers, featured=featured, categories=categories,
+        vouchers=vouchers_paginated, total_vouchers=total_vouchers,
+        page=page, total_pages=total_pages, per_page=per_page,
+        featured=featured, categories=categories,
         merchants=merchants, merchant_count_map=merchant_count_map,
         platform_stats=platform_stats, expiring_soon=expiring_soon,
         widgets=widgets, f_category=f_category, f_merchant=f_merchant,
         f_type=f_type, f_platform=f_platform, f_sort=f_sort,
         now=datetime.utcnow())
+
+@app.route('/voucher/nhan-hang')
+def voucher_brands():
+    """Brands page — show all AT banners, one per brand"""
+    import re as _re
+    now_utc = datetime.utcnow()
+    all_banners = AccessTradeBanner.query.filter(
+        AccessTradeBanner.is_active == True
+    ).order_by(AccessTradeBanner.synced_at.desc()).all()
+
+    # Dedup: each brand (merchant + sub-brand) appears only once
+    seen = set()
+    brands = []
+    for ab in all_banners:
+        if ab.end_date and ab.end_date < now_utc:
+            continue
+        merchant = (ab.merchant or '').strip().lower()
+        offer = ab.offer_name or ''
+        m = _re.search(r'\[([^\]]+)\]', offer)
+        brand_key = f"{merchant}_{m.group(1).strip().lower()}" if m else merchant
+        if brand_key and brand_key not in seen:
+            seen.add(brand_key)
+            brands.append(ab)
+
+    return render_template('voucher/brands.html', brands=brands)
+
+@app.route('/voucher/nhan-hang/click/<int:banner_id>', methods=['POST'])
+def voucher_brand_click(banner_id):
+    """Track brand click"""
+    ab = AccessTradeBanner.query.get(banner_id)
+    if ab:
+        ab.clicks = (ab.clicks or 0) + 1
+        db.session.commit()
+    return '', 204
 
 @app.route('/voucher/<code>')
 def voucher_detail(code):
@@ -5260,13 +8072,18 @@ def _table_exists(table_name):
 def _ensure_column(table_name, col_name, col_def, existing_cols):
     """Add column if missing. Returns True if added."""
     if col_name not in existing_cols:
-        print(f'  [+] Adding {table_name}.{col_name}')
-        db.session.execute(db.text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_def}"))
-        return True
+        try:
+            print(f'  [+] Adding {table_name}.{col_name}')
+            db.session.execute(db.text(f"ALTER TABLE {table_name} ADD COLUMN {col_name} {col_def}"))
+            return True
+        except Exception as e:
+            print(f'  [!] Failed to add {table_name}.{col_name}: {e}')
+            return False
     return False
 
 def _run_schema_migration():
-    """Fast schema migration — uses PRAGMA to batch-check columns."""
+    """Fast schema migration — uses PRAGMA to batch-check columns.
+    Resilient: each migration step is independent, failures don't block others."""
     import time
     t0 = time.time()
     print('[*] Checking database schema...')
@@ -5381,10 +8198,38 @@ def _run_schema_migration():
         """))
         changed = True
 
+    # --- Hot Deal table ---
+    if not _table_exists('hot_deal'):
+        print('  [+] Creating hot_deal table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS hot_deal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name VARCHAR(500) NOT NULL,
+                campaign VARCHAR(200) DEFAULT '',
+                product_link VARCHAR(1000) DEFAULT '',
+                start_date DATETIME NOT NULL,
+                end_date DATETIME NOT NULL,
+                status VARCHAR(50) DEFAULT '',
+                hot_day VARCHAR(100) DEFAULT '',
+                banner TEXT DEFAULT '',
+                detail TEXT DEFAULT '',
+                is_active BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        changed = True
+
     # --- Hotel table ---
     hotel_cols = _get_table_columns('hotel')
     if hotel_cols:
         if _ensure_column('hotel', 'price_original', "FLOAT DEFAULT 0", hotel_cols):
+            changed = True
+        if _ensure_column('hotel', 'latitude', "FLOAT DEFAULT 0", hotel_cols):
+            changed = True
+        if _ensure_column('hotel', 'longitude', "FLOAT DEFAULT 0", hotel_cols):
+            changed = True
+        if _ensure_column('hotel', 'address', "VARCHAR(500) DEFAULT ''", hotel_cols):
             changed = True
 
     # --- Attraction table ---
@@ -5393,24 +8238,249 @@ def _run_schema_migration():
         if _ensure_column('attraction', 'price_original', "FLOAT DEFAULT 0", attraction_cols):
             changed = True
 
+    # --- Backlink Keyword table ---
+    if not _table_exists('backlink_keyword'):
+        print('  [+] Creating backlink_keyword table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS backlink_keyword (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                vertical_slug VARCHAR(50) DEFAULT '',
+                keyword VARCHAR(200) NOT NULL,
+                target_type VARCHAR(20) NOT NULL,
+                target_slug VARCHAR(200) NOT NULL,
+                target_title VARCHAR(300) DEFAULT '',
+                anchor_text VARCHAR(200) DEFAULT '',
+                priority INTEGER DEFAULT 5,
+                max_per_page INTEGER DEFAULT 1,
+                is_active BOOLEAN DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bk_vertical ON backlink_keyword(vertical_slug)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bk_active ON backlink_keyword(is_active)"))
+        changed = True
+
+    # --- Backlink Instance table ---
+    if not _table_exists('backlink_instance'):
+        print('  [+] Creating backlink_instance table')
+        db.session.execute(db.text("""
+            CREATE TABLE IF NOT EXISTS backlink_instance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                keyword_id INTEGER NOT NULL,
+                source_type VARCHAR(20) NOT NULL,
+                source_id INTEGER NOT NULL,
+                source_slug VARCHAR(200) DEFAULT '',
+                source_title VARCHAR(300) DEFAULT '',
+                target_type VARCHAR(20) NOT NULL,
+                target_slug VARCHAR(200) NOT NULL,
+                link_type VARCHAR(10) DEFAULT 'intext',
+                anchor_text VARCHAR(200) DEFAULT '',
+                status VARCHAR(15) DEFAULT 'active',
+                clicks INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (keyword_id) REFERENCES backlink_keyword(id)
+            )
+        """))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bi_keyword ON backlink_instance(keyword_id)"))
+        db.session.execute(db.text("CREATE INDEX IF NOT EXISTS idx_bi_source ON backlink_instance(source_type, source_id)"))
+        changed = True
+
     if changed:
         db.session.commit()
+
+    # --- Auto-seed WardCommune from JSON if table is empty ---
+    try:
+        seeded = _auto_seed_wards()
+        if seeded:
+            print(f'  [+] Seeded {seeded} wards from wards_default.json')
+    except Exception:
+        pass  # WardCommune table might not exist yet
 
     elapsed = round((time.time() - t0) * 1000)
     print(f'[*] Schema check done ({elapsed}ms)')
 
 
+# =============================================
+# BACKGROUND SCHEDULER — Banner Auto Delete + Sync
+# =============================================
+import threading
+
+_banner_stop_flag = threading.Event()
+
+def _banner_scheduler_loop():
+    """Background loop: waits until configured time, then delete-all + sync. Repeats daily."""
+    import time as _time
+    while not _banner_stop_flag.is_set():
+        try:
+            with app.app_context():
+                if SiteSettings.get('banner_auto_sync', 'on') != 'on':
+                    break
+                sync_time = SiteSettings.get('banner_sync_time', '03:00')
+                try:
+                    target_h, target_m = int(sync_time.split(':')[0]), int(sync_time.split(':')[1])
+                except Exception:
+                    target_h, target_m = 3, 0
+
+            now = datetime.now()
+            target = now.replace(hour=target_h, minute=target_m, second=0, microsecond=0)
+            if target <= now:
+                target += timedelta(days=1)
+            wait_secs = (target - now).total_seconds()
+
+            # Sleep in 30s increments to allow stop flag check
+            if _banner_stop_flag.wait(timeout=wait_secs):
+                return  # Stopped
+
+            # Execute: delete all → sync
+            with app.app_context():
+                if SiteSettings.get('banner_auto_sync', 'on') != 'on':
+                    break
+                try:
+                    count = AccessTradeBanner.query.count()
+                    AccessTradeBanner.query.delete()
+                    db.session.commit()
+                    imported, updated, total, err = _do_banner_sync()
+                    if err:
+                        result = f'Xóa {count}, lỗi sync: {err}'
+                    else:
+                        result = f'Xóa {count}, sync {imported} mới, {updated} cập nhật'
+                except Exception as e:
+                    result = f'Lỗi: {str(e)}'
+                SiteSettings.set_val('banner_last_auto_sync', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'banner')
+                SiteSettings.set_val('banner_last_auto_sync_result', result, 'banner')
+                db.session.commit()
+        except Exception:
+            _time.sleep(60)
+
+
+def _start_banner_scheduler():
+    """Start (or restart) the banner auto-sync background thread."""
+    global _banner_stop_flag
+    _banner_stop_flag.set()  # Signal old thread to stop
+    _banner_stop_flag = threading.Event()  # Fresh flag for new thread
+
+    with app.app_context():
+        if SiteSettings.get('banner_auto_sync', 'on') != 'on':
+            return
+
+    t = threading.Thread(target=_banner_scheduler_loop, daemon=True)
+    t.start()
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    target = SiteSettings.get('redirect_404_target', 'home')
+    target_map = {
+        'home': '/',
+        'shop': '/shop',
+        'voucher': '/voucher',
+    }
+    dest = target_map.get(target, '/')
+    return redirect(dest)
+
+
 if __name__ == '__main__':
-    import os
+    import os, shutil, time, gc
+
+    def _force_close_db():
+        """Force-close all SQLAlchemy connections and release file handles."""
+        db.session.remove()
+        db.engine.dispose()
+        gc.collect()
+        time.sleep(0.5)  # Give OS time to release file locks (Windows)
+
+    def _remove_db_file(db_path):
+        """Remove DB file with retry for Windows file locking."""
+        for attempt in range(4):
+            try:
+                os.remove(db_path)
+                return True
+            except PermissionError:
+                gc.collect()
+                time.sleep(1 * (attempt + 1))
+        # Fallback: rename instead of delete
+        try:
+            ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+            os.rename(db_path, db_path + f'.old_{ts}')
+            return True
+        except Exception:
+            return False
+
+    def _safe_init_db():
+        """Initialize database with auto-recovery on schema errors."""
+        db_path = os.path.join(app.instance_path, 'unilab.db')
+
+        # Step 1: If DB exists, run integrity check + auto-repair
+        if os.path.exists(db_path):
+            try:
+                from db_backup import startup_check
+                health = startup_check(app)
+                if health['action'] != 'none':
+                    print(f'[DB] {health["details"]}')
+                if not health['healthy']:
+                    print(f'[!] DB unhealthy but continuing — will try create_all...')
+            except Exception as e:
+                print(f'[!] Startup check error: {e}')
+
+        # Step 2: Normal schema init
+        try:
+            db.create_all()
+            _run_schema_migration()
+            print('[*] Database ready.')
+        except Exception as e:
+            err_msg = str(e)
+            if 'malformed' in err_msg or 'no such table' in err_msg or 'OperationalError' in err_msg:
+                print(f'[!] Database schema error: {err_msg}')
+                print('[*] Attempting dump-rebuild repair...')
+                _force_close_db()
+                try:
+                    from db_backup import repair_database, create_backup
+                    repair = repair_database(app)
+                    if repair['success']:
+                        print(f'[*] Repair OK via {repair["method"]}: {repair["tables_recovered"]} tables, {repair["rows_recovered"]} rows')
+                        db.create_all()
+                        _run_schema_migration()
+                        print('[*] Database ready after repair.')
+                    else:
+                        print(f'[!] Repair failed: {repair["errors"]}')
+                        print('[*] Creating fresh database (corrupted DB saved in backups/)...')
+                        _force_close_db()
+                        if os.path.exists(db_path):
+                            if not _remove_db_file(db_path):
+                                print(f'[!] Cannot remove locked DB. Close other apps using it and restart.')
+                                return
+                        db.create_all()
+                        _run_schema_migration()
+                        print('[*] Fresh database created. Run seed_data to restore content.')
+                except Exception as e2:
+                    print(f'[!] Full recovery failed: {e2}')
+                    # Last resort: fresh DB
+                    _force_close_db()
+                    if os.path.exists(db_path):
+                        ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        try:
+                            shutil.copy2(db_path, db_path + f'.crashed_{ts}')
+                        except Exception:
+                            pass
+                        if not _remove_db_file(db_path):
+                            print(f'[!] Cannot remove locked DB. Close other apps using it and restart.')
+                            return
+                    db.create_all()
+                    _run_schema_migration()
+                    print('[*] Fresh database created (emergency).')
+            else:
+                raise
 
     # Only init DB once (skip on Werkzeug reloader child process)
     if not os.environ.get('WERKZEUG_RUN_MAIN'):
         with app.app_context():
-            db.create_all()
-            _run_schema_migration()
+            _safe_init_db()
+
+        # Start banner auto-sync scheduler
+        _start_banner_scheduler()
 
         # Auto-open browser after server is ready (only once, not on reload)
-        import threading, webbrowser
+        import webbrowser
         threading.Timer(1.5, webbrowser.open, args=['http://localhost:7000/admin']).start()
 
     app.run(host='0.0.0.0', port=7000, debug=True)

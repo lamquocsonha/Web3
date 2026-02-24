@@ -1,0 +1,144 @@
+{% extends "admin/base.html" %}
+{% block title %}SEO Keywords{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a> <span class="sep">›</span> <a href="{{ url_for('admin_seo_dashboard') }}">SEO</a> <span class="sep">›</span> Keywords
+{% endblock %}
+{% block content %}
+<div class="page-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+  <div>
+    <h1 style="margin:0;font-size:1.5rem">Backlink Keywords</h1>
+    <p style="color:var(--muted);margin:4px 0 0">{{ keywords|length }} keywords found</p>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="{{ url_for('admin_seo_auto_generate') }}" class="btn btn-outline" style="padding:8px 14px;border-radius:8px;text-decoration:none;border:1px solid var(--border);color:var(--text)">Auto Generate</a>
+    <a href="{{ url_for('admin_seo_keyword_new') }}" class="btn btn-primary" style="padding:8px 14px;border-radius:8px;text-decoration:none;background:var(--accent);color:#fff">+ Add Keyword</a>
+  </div>
+</div>
+
+<!-- Navigation Tabs -->
+<div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:12px">
+  <a href="{{ url_for('admin_seo_dashboard') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Dashboard</a>
+  <a href="{{ url_for('admin_seo_keywords') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;background:var(--accent);color:#fff;font-weight:600">Keywords</a>
+  <a href="{{ url_for('admin_seo_instances') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Instances</a>
+  <a href="{{ url_for('admin_seo_suggestions') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Suggestions</a>
+  <a href="{{ url_for('admin_seo_auto_generate') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Auto Generate</a>
+  <a href="{{ url_for('admin_seo_scan') }}" style="padding:8px 18px;border-radius:8px 8px 0 0;text-decoration:none;color:var(--text);border:1px solid var(--border);border-bottom:none">Scan & Build</a>
+</div>
+
+<!-- Filters -->
+<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center">
+  <form method="GET" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+    <select name="vertical" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+      <option value="">All Verticals</option>
+      {% for v in verticals %}
+      <option value="{{ v.slug }}" {% if filter_v == v.slug %}selected{% endif %}>{{ v.icon }} {{ v.name }}</option>
+      {% endfor %}
+    </select>
+    <select name="type" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)">
+      <option value="">All Types</option>
+      <option value="article" {% if filter_type == 'article' %}selected{% endif %}>Article</option>
+      <option value="zone" {% if filter_type == 'zone' %}selected{% endif %}>Zone</option>
+      <option value="part" {% if filter_type == 'part' %}selected{% endif %}>Part</option>
+    </select>
+    <input type="text" name="q" value="{{ q }}" placeholder="Search keyword..." style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);width:200px">
+    <button type="submit" style="padding:6px 14px;border-radius:6px;background:var(--accent);color:#fff;border:none;cursor:pointer">Filter</button>
+    {% if filter_v or filter_type or q %}
+    <a href="{{ url_for('admin_seo_keywords') }}" style="color:var(--muted);font-size:0.85rem">Clear</a>
+    {% endif %}
+  </form>
+</div>
+
+<!-- Bulk Actions -->
+<form method="POST" action="{{ url_for('admin_seo_bulk_action') }}" id="bulkForm">
+  <input type="hidden" name="item_type" value="keyword">
+  <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+    <label style="font-size:0.85rem;color:var(--muted)">
+      <input type="checkbox" id="selectAll" style="margin-right:4px"> Select All
+    </label>
+    <select name="action" style="padding:4px 10px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;background:var(--card);color:var(--text)">
+      <option value="">Bulk Action...</option>
+      <option value="activate">Activate</option>
+      <option value="deactivate">Deactivate</option>
+      <option value="delete">Delete</option>
+    </select>
+    <button type="submit" style="padding:4px 12px;border-radius:6px;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-size:0.85rem" onclick="return confirm('Apply bulk action?')">Apply</button>
+  </div>
+
+  <!-- Keywords Table -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+    <table style="width:100%;border-collapse:collapse;font-size:0.9rem">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border);background:var(--bg)">
+          <th style="width:30px;padding:10px 8px"></th>
+          <th style="text-align:left;padding:10px 8px;color:var(--muted)">Keyword</th>
+          <th style="text-align:left;padding:10px 8px;color:var(--muted)">Vertical</th>
+          <th style="text-align:left;padding:10px 8px;color:var(--muted)">Target</th>
+          <th style="text-align:center;padding:10px 8px;color:var(--muted)">Priority</th>
+          <th style="text-align:center;padding:10px 8px;color:var(--muted)">Max/Page</th>
+          <th style="text-align:center;padding:10px 8px;color:var(--muted)">Instances</th>
+          <th style="text-align:center;padding:10px 8px;color:var(--muted)">Active</th>
+          <th style="text-align:center;padding:10px 8px;color:var(--muted)">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for kw in keywords %}
+        <tr style="border-bottom:1px solid var(--border){% if not kw.is_active %};opacity:0.5{% endif %}">
+          <td style="padding:8px;text-align:center">
+            <input type="checkbox" name="ids" value="{{ kw.id }}" class="row-check">
+          </td>
+          <td style="padding:8px">
+            <div style="font-weight:600">{{ kw.keyword[:50] }}{% if kw.keyword|length > 50 %}...{% endif %}</div>
+            {% if kw.anchor_text and kw.anchor_text != kw.keyword %}
+            <div style="font-size:0.75rem;color:var(--muted)">Anchor: {{ kw.anchor_text }}</div>
+            {% endif %}
+          </td>
+          <td style="padding:8px">
+            <span style="font-size:0.8rem;background:var(--bg);padding:2px 8px;border-radius:4px">{{ kw.vertical_slug or 'global' }}</span>
+          </td>
+          <td style="padding:8px">
+            <span style="background:{% if kw.target_type == 'article' %}#e8f4fd{% elif kw.target_type == 'zone' %}#fdf2e8{% else %}#e8fde8{% endif %};padding:2px 8px;border-radius:4px;font-size:0.75rem;color:{% if kw.target_type == 'article' %}#2980b9{% elif kw.target_type == 'zone' %}#e67e22{% else %}#27ae60{% endif %}">{{ kw.target_type }}</span>
+            <span style="font-size:0.85rem">{{ kw.target_slug[:25] }}</span>
+            {% if kw.target_title %}
+            <div style="font-size:0.75rem;color:var(--muted)">{{ kw.target_title[:40] }}</div>
+            {% endif %}
+          </td>
+          <td style="text-align:center;padding:8px">
+            <span style="background:{% if kw.priority >= 8 %}#e74c3c{% elif kw.priority >= 5 %}#f39c12{% else %}#95a5a6{% endif %};color:#fff;padding:2px 8px;border-radius:8px;font-size:0.8rem">{{ kw.priority }}</span>
+          </td>
+          <td style="text-align:center;padding:8px">{{ kw.max_per_page }}</td>
+          <td style="text-align:center;padding:8px">
+            <span style="font-weight:600">{{ kw.instances|length }}</span>
+          </td>
+          <td style="text-align:center;padding:8px">
+            <form method="POST" action="{{ url_for('admin_seo_keyword_toggle', kid=kw.id) }}" style="display:inline">
+              {% if kw.is_active %}
+              <button type="submit" style="background:#27ae60;color:#fff;border:none;padding:2px 8px;border-radius:8px;font-size:0.75rem;cursor:pointer">ON</button>
+              {% else %}
+              <button type="submit" style="background:#e74c3c;color:#fff;border:none;padding:2px 8px;border-radius:8px;font-size:0.75rem;cursor:pointer">OFF</button>
+              {% endif %}
+            </form>
+          </td>
+          <td style="text-align:center;padding:8px">
+            <a href="{{ url_for('admin_seo_keyword_edit', kid=kw.id) }}" style="color:var(--accent);text-decoration:none;font-size:0.85rem" title="Edit">Edit</a>
+            <form method="POST" action="{{ url_for('admin_seo_keyword_delete', kid=kw.id) }}" style="display:inline" onsubmit="return confirm('Delete keyword &quot;{{ kw.keyword[:30] }}&quot; and all instances?')">
+              <button type="submit" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:0.85rem;padding:0;margin-left:6px">Del</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not keywords %}
+        <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--muted)">
+          No keywords found. <a href="{{ url_for('admin_seo_auto_generate') }}" style="color:var(--accent)">Auto-generate keywords</a> or <a href="{{ url_for('admin_seo_keyword_new') }}" style="color:var(--accent)">add manually</a>.
+        </td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</form>
+
+<script>
+document.getElementById('selectAll').addEventListener('change', function() {
+  document.querySelectorAll('.row-check').forEach(cb => cb.checked = this.checked);
+});
+</script>
+{% endblock %}

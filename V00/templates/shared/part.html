@@ -31,7 +31,7 @@
     {% endif %}
 
     <!-- Article Content -->
-    <article class="article-body">{{ part.content|safe }}</article>
+    <article class="article-body">{{ (part_content_with_backlinks if part_content_with_backlinks else part.content)|safe }}</article>
 
     <!-- Product Carousel -->
     {% if part.embed_code or part.affiliate_links %}
@@ -55,7 +55,7 @@
     </div>
     {% endif %}
 
-    <!-- Related Articles -->
+    <!-- Related Articles (in main body) -->
     {% if related_articles %}
     <div class="related-articles">
       <h2>📖 Bài viết liên quan</h2>
@@ -72,22 +72,68 @@
       </div>
     </div>
     {% endif %}
+  </div>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="article-sidebar">
+    <!-- Zone Navigation -->
+    {% if zone_parts and zone_parts|length > 1 %}
+    <div class="sidebar-widget">
+      <h3 class="widget-title">{{ zone.icon }} {{ zone.name }}</h3>
+      <div class="sb-zone-nav">
+        {% for zp in zone_parts %}
+        <a href="{{ url_for('vertical_part', vertical_slug=vertical.slug, segment_slug=segment.slug, zone_slug=zone.slug, part_slug=zp.slug) }}" class="sb-zone-item {% if zp.id == part.id %}active{% endif %}">
+          <span class="sb-zone-name">{{ zp.name_vi }}</span>
+          {% if zp.affiliate_links %}<span class="sb-zone-badge">{{ zp.affiliate_links|length }}</span>{% endif %}
+        </a>
+        {% endfor %}
+      </div>
+      <a href="{{ url_for('vertical_zone', vertical_slug=vertical.slug, segment_slug=segment.slug, zone_slug=zone.slug) }}" class="sb-zone-back">← Về {{ zone.name }}</a>
+    </div>
+    {% endif %}
 
     <!-- Related Parts -->
     {% if related_parts %}
-    <div class="related-parts">
-      <h2>🔩 {{ parts_label|default('Parts') }} liên quan</h2>
-      <div class="parts-grid">
+    <div class="sidebar-widget">
+      <h3 class="widget-title">🔩 {{ parts_label|default('Liên quan') }}</h3>
+      <div class="sb-parts-list">
         {% for rp in related_parts %}
-        <a href="{{ url_for('vertical_part', vertical_slug=vertical.slug, segment_slug=segment.slug, zone_slug=zone.slug, part_slug=rp.slug) }}" class="part-card-pub">
-          <h3>{{ rp.name_vi }}</h3>
-          <p>{{ rp.description[:60] }}...</p>
-          {% if rp.affiliate_links %}<span class="part-price-badge">{{ rp.affiliate_links|length }} sản phẩm</span>{% endif %}
+        <a href="{{ url_for('vertical_part', vertical_slug=vertical.slug, segment_slug=segment.slug, zone_slug=zone.slug, part_slug=rp.slug) }}" class="sb-part-item">
+          <h4>{{ rp.name_vi }}</h4>
+          <p>{{ rp.description[:50] }}{% if rp.description|length > 50 %}...{% endif %}</p>
         </a>
         {% endfor %}
       </div>
     </div>
     {% endif %}
+
+    <!-- Related Articles in sidebar -->
+    {% if related_articles %}
+    <div class="sidebar-widget">
+      <h3 class="widget-title">📖 Bài viết</h3>
+      <div class="sidebar-articles">
+        {% for a in related_articles %}
+        <a href="{{ url_for('vertical_article', vertical_slug=vertical.slug, slug=a.slug) }}" class="sidebar-article-card">
+          <div class="sac-tier {{ a.tier }}">{{ a.tier|replace('-',' ')|upper }}</div>
+          <h4>{{ a.title[:60] }}{% if a.title|length > 60 %}...{% endif %}</h4>
+          <div class="sac-meta">👁 {{ "{:,}".format(a.views) }} · {{ a.reading_time }}min</div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Info -->
+    <div class="sidebar-widget">
+      <h3 class="widget-title">📍 Vị trí</h3>
+      <div class="sb-breadcrumb-mini">
+        <a href="{{ url_for('vertical_index', vertical_slug=vertical.slug) }}">{{ vertical.icon }} Uni{{ vertical.name }}</a>
+        <span>→</span>
+        <a href="{{ url_for('vertical_segment', vertical_slug=vertical.slug, segment_slug=segment.slug) }}">{{ segment.icon }} {{ segment.name }}</a>
+        <span>→</span>
+        <a href="{{ url_for('vertical_zone', vertical_slug=vertical.slug, segment_slug=segment.slug, zone_slug=zone.slug) }}">{{ zone.icon }} {{ zone.name }}</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

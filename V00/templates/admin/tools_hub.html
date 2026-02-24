@@ -1,0 +1,358 @@
+{% extends "admin/base.html" %}
+{% block title %}Tools{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span> Tools{% endblock %}
+{% block content %}
+<style>
+/* ── Top Tabs (same pattern as AI Engine) ── */
+.th-tabs { display:flex; gap:2px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:4px; margin-bottom:28px; overflow-x:auto }
+.th-tab { flex:1; padding:12px 20px; border-radius:10px; text-align:center; font-size:15px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; color:var(--text-dim); border:none; background:transparent; font-family:inherit; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px }
+.th-tab:hover { background:var(--surface2); color:var(--text) }
+.th-tab.active { background:var(--accent); color:#fff }
+
+.th-panel { display:none }
+.th-panel.active { display:block }
+
+/* ── Stats Grid ── */
+.th-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px }
+.th-stat { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center }
+.th-stat-val { font-size:26px; font-weight:800 }
+.th-stat-label { font-size:13px; font-weight:600; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; margin-top:3px }
+
+/* ── Table ── */
+.th-table-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:20px }
+.th-table-wrap table { width:100%; border-collapse:collapse }
+.th-table-wrap th { padding:12px 16px; text-align:left; font-size:13px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.5px; background:var(--surface2); border-bottom:1px solid var(--border) }
+.th-table-wrap td { padding:12px 16px; border-bottom:1px solid var(--border); font-size:14px; vertical-align:middle }
+.th-table-wrap tr:last-child td { border:none }
+.th-table-wrap tr:hover td { background:var(--surface2) }
+
+/* ── Buttons ── */
+.th-btn { padding:8px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all .15s; font-family:inherit }
+.th-btn-primary { background:var(--accent); color:#fff }
+.th-btn-primary:hover { opacity:.9 }
+.th-btn-ghost { background:var(--surface2); color:var(--text) }
+.th-btn-ghost:hover { background:var(--border) }
+
+/* ── Badges ── */
+.th-badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:6px; font-weight:700 }
+
+/* ── Tree View ── */
+.th-tree { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; margin-bottom:16px }
+.th-tree-vertical { margin-bottom:20px }
+.th-tree-vertical:last-child { margin-bottom:0 }
+.th-tree-header { display:flex; align-items:center; gap:10px; padding:10px 0; cursor:pointer; font-weight:700; font-size:16px }
+.th-tree-header:hover { color:var(--accent) }
+.th-tree-segment { margin-left:24px; padding:6px 0; border-left:2px solid var(--border); padding-left:16px }
+.th-tree-seg-name { font-weight:600; font-size:14px; margin-bottom:4px; color:var(--text) }
+.th-tree-zone { margin-left:20px; padding:4px 0; border-left:2px solid var(--surface2); padding-left:14px }
+.th-tree-zone-name { font-size:13px; font-weight:600; color:var(--text-dim) }
+.th-tree-parts { display:flex; flex-wrap:wrap; gap:4px; margin-top:4px; margin-left:16px }
+.th-tree-part { font-size:12px; padding:2px 8px; border-radius:5px; background:var(--surface2); color:var(--text-dim) }
+
+/* ── Empty state ── */
+.th-empty { text-align:center; padding:48px 20px; color:var(--text-dim) }
+.th-empty-icon { font-size:42px; margin-bottom:10px }
+
+@media(max-width:768px) {
+  .th-stat-grid { grid-template-columns:repeat(2,1fr) }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════
+     TOP-LEVEL TABS (server-side via ?tab=X)
+     ══════════════════════════════════════════════ -->
+<div class="th-tabs">
+  <a class="th-tab {% if active_tab=='analytics' %}active{% endif %}" href="{{ url_for('admin_tools', tab='analytics') }}">
+    &#128200; Analytics
+  </a>
+  <a class="th-tab {% if active_tab=='video' %}active{% endif %}" href="{{ url_for('admin_tools', tab='video') }}">
+    &#127909; Video
+  </a>
+  <a class="th-tab {% if active_tab=='seed' %}active{% endif %}" href="{{ url_for('admin_tools', tab='seed') }}">
+    &#127793; Seed Data
+  </a>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     TAB: ANALYTICS
+     ══════════════════════════════════════════════ -->
+{% if active_tab == 'analytics' %}
+<div class="th-panel active">
+  <!-- Stats grid -->
+  <div class="th-stat-grid">
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#8b5cf6">{{ "{:,}".format(totals.clicks) }}</div>
+      <div class="th-stat-label">Total Clicks</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#22c55e">{{ "{:,}".format(totals.conversions) }}</div>
+      <div class="th-stat-label">Total Conversions</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#3b82f6">{{ "{:,}".format(totals.articles) }}</div>
+      <div class="th-stat-label">Total Articles</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#f59e0b">{{ "{:,}".format(totals.views) }}</div>
+      <div class="th-stat-label">Total Views</div>
+    </div>
+  </div>
+
+  <!-- Per-vertical stats table -->
+  {% if vertical_stats %}
+  <div class="th-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Vertical</th>
+          <th style="text-align:right">Clicks</th>
+          <th style="text-align:right">Conversions</th>
+          <th style="text-align:right">Articles</th>
+          <th style="text-align:right">Views</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for vs in vertical_stats %}
+        <tr>
+          <td>
+            <span style="font-size:18px">{{ vs.vertical.icon }}</span>
+            <strong style="margin-left:6px">{{ vs.vertical.name }}</strong>
+            <span style="font-size:12px;color:var(--text-dim);margin-left:4px">({{ vs.vertical.slug }})</span>
+          </td>
+          <td style="text-align:right;font-family:'DM Mono';color:#8b5cf6;font-weight:600">{{ "{:,}".format(vs.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#22c55e;font-weight:600">{{ "{:,}".format(vs.conversions) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(vs.articles) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(vs.views) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:700;border-top:2px solid var(--border)">
+          <td>Total</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#8b5cf6">{{ "{:,}".format(totals.clicks) }}</td>
+          <td style="text-align:right;font-family:'DM Mono';color:#22c55e">{{ "{:,}".format(totals.conversions) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(totals.articles) }}</td>
+          <td style="text-align:right;font-family:'DM Mono'">{{ "{:,}".format(totals.views) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+  {% else %}
+  <div class="th-empty">
+    <div class="th-empty-icon">&#128200;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No verticals yet</h3>
+    <p style="font-size:14px">Create verticals first to see analytics.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════
+     TAB: VIDEO
+     ══════════════════════════════════════════════ -->
+{% if active_tab == 'video' %}
+<div class="th-panel active">
+  <!-- Stats -->
+  <div class="th-stat-grid" style="grid-template-columns:repeat(5,1fr)">
+    <div class="th-stat">
+      <div class="th-stat-val">{{ videos|length }}</div>
+      <div class="th-stat-label">Videos</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#22c55e">{{ total_published }}</div>
+      <div class="th-stat-label">Published</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#8b5cf6">{{ channels|length }}</div>
+      <div class="th-stat-label">Channels</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="color:#f59e0b">{{ "{:,}".format(total_views) }}</div>
+      <div class="th-stat-label">Total Views</div>
+    </div>
+    <div class="th-stat">
+      <div class="th-stat-val" style="font-size:18px">TikTok YT FB</div>
+      <div class="th-stat-label">Platforms</div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px">
+    <div style="display:flex;gap:8px;font-size:14px;color:var(--text-dim);text-align:center">
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #ff0050"><strong style="color:#ff0050">1. Content</strong><br>Chon bai viet hoac viet script</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #8b5cf6"><strong style="color:#8b5cf6">2. AI Script</strong><br>AI tom tat thanh video script</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #00cec9"><strong style="color:#00cec9">3. Render</strong><br>Hinh + text + voiceover + nhac</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #fdcb6e"><strong style="color:#fdcb6e">4. Review</strong><br>Xem truoc va chinh sua</div>
+      <div style="display:flex;align-items:center;color:var(--accent)">&#10140;</div>
+      <div style="flex:1;padding:12px;background:var(--surface2);border-radius:8px;border-left:3px solid #22c55e"><strong style="color:#22c55e">5. Publish</strong><br>Auto upload multi-platform</div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div style="display:flex;gap:10px;margin-bottom:20px">
+    <a href="{{ url_for('admin_video_create') }}" class="th-btn th-btn-primary">+ Create Video</a>
+    <a href="{{ url_for('admin_video_channels') }}" class="th-btn th-btn-ghost">Channels</a>
+    <a href="{{ url_for('admin_video_analytics') }}" class="th-btn th-btn-ghost">Analytics</a>
+  </div>
+
+  <!-- Video list table -->
+  {% if videos %}
+  <!-- Bulk action bar -->
+  <div id="bulkBarVid" style="display:none;padding:10px 16px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;align-items:center;gap:12px">
+    <span id="bulkCountVid" style="font-size:14px;font-weight:600"></span>
+    <button type="button" class="th-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444" onclick="bulkDelVid()">Xoa da chon</button>
+    <button type="button" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px" onclick="clearVid()">Bo chon</button>
+    <div style="flex:1"></div>
+    <button type="button" class="th-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444;opacity:0.8" onclick="bulkDelAllVid()">Xoa tat ca ({{ videos|length }})</button>
+  </div>
+  <div class="th-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px"><input type="checkbox" id="selAllVid" onchange="togVid(this)" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></th>
+          <th>Title</th>
+          <th>Type</th>
+          <th>Duration</th>
+          <th>Vertical</th>
+          <th>Publishes</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in videos %}
+        <tr>
+          <td><input type="checkbox" class="vid-check" value="{{ v.id }}" onchange="upBarVid()" style="width:16px;height:16px;cursor:pointer;accent-color:#2563eb"></td>
+          <td><a href="{{ url_for('admin_video_detail', vid=v.id) }}" style="color:var(--text);text-decoration:none"><strong>{{ v.title[:45] }}{% if v.title|length > 45 %}...{% endif %}</strong></a></td>
+          <td>
+            {% if v.video_type == 'short' %}<span style="color:#ff0050;font-size:14px;font-family:'DM Mono'">SHORT</span>
+            {% elif v.video_type == 'long' %}<span style="color:#ff0000;font-size:14px;font-family:'DM Mono'">LONG</span>
+            {% else %}<span style="color:#1877f2;font-size:14px;font-family:'DM Mono'">REEL</span>{% endif %}
+          </td>
+          <td style="font-family:'DM Mono';font-size:14px">{{ v.duration or '-' }}</td>
+          <td style="font-size:14px">{{ v.vertical_slug or '-' }}</td>
+          <td style="font-size:14px">{{ v.publishes|length if v.publishes else 0 }}</td>
+          <td>
+            <span class="th-badge" style="{% if v.status == 'published' %}background:#d1fae5;color:#065f46{% elif v.status == 'draft' %}background:#fef3c7;color:#92400e{% elif v.status == 'rendering' %}background:#dbeafe;color:#1e40af{% else %}background:var(--surface2);color:var(--text-dim){% endif %}">{{ v.status or 'draft' }}</span>
+          </td>
+          <td style="font-size:13px;color:var(--text-dim)">{{ v.created_at.strftime('%m/%d %H:%M') if v.created_at else '-' }}</td>
+          <td>
+            <div style="display:flex;gap:4px">
+              <a href="{{ url_for('admin_video_detail', vid=v.id) }}" class="th-btn th-btn-ghost" style="padding:4px 10px;font-size:13px">View</a>
+              <form method="POST" action="{{ url_for('admin_video_delete', vid=v.id) }}" style="display:inline" onsubmit="return confirm('Delete?')"><button type="submit" class="th-btn" style="padding:4px 10px;font-size:13px;background:rgba(239,68,68,.1);color:#ef4444">X</button></form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="th-empty">
+    <div class="th-empty-icon">&#127909;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No videos yet</h3>
+    <p style="font-size:14px">Create your first video project to get started.</p>
+    <a href="{{ url_for('admin_video_create') }}" class="th-btn th-btn-primary" style="margin-top:12px">+ Create Video</a>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- ══════════════════════════════════════════════
+     TAB: SEED DATA
+     ══════════════════════════════════════════════ -->
+{% if active_tab == 'seed' %}
+<div class="th-panel active">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <h2 style="margin:0 0 4px;font-size:18px;font-weight:700">Data Structure</h2>
+      <p style="margin:0;font-size:13px;color:var(--text-dim)">Verticals &rsaquo; Segments &rsaquo; Zones &rsaquo; Parts</p>
+    </div>
+    <a href="{{ url_for('admin_seed_data') }}" class="th-btn th-btn-primary">Seed Data Manager</a>
+  </div>
+
+  {% if verticals_data %}
+  <div class="th-tree">
+    {% for vd in verticals_data %}
+    <div class="th-tree-vertical">
+      <div class="th-tree-header" onclick="this.parentElement.classList.toggle('collapsed')">
+        <span style="font-size:22px">{{ vd.vertical.icon }}</span>
+        <span>{{ vd.vertical.name }}</span>
+        <span style="font-size:13px;color:var(--text-dim);font-weight:400;margin-left:auto">
+          {{ vd.segments|length }} segments
+        </span>
+      </div>
+      <div class="th-tree-children">
+        {% for sd in vd.segments %}
+        <div class="th-tree-segment">
+          <div class="th-tree-seg-name">{{ sd.segment.name }}</div>
+          {% for zd in sd.zones %}
+          <div class="th-tree-zone">
+            <div class="th-tree-zone-name">{{ zd.zone.name }}
+              {% if zd.parts %}<span style="font-size:12px;color:var(--text-dim);font-weight:400">({{ zd.parts|length }} parts)</span>{% endif %}
+            </div>
+            {% if zd.parts %}
+            <div class="th-tree-parts">
+              {% for p in zd.parts %}
+              <span class="th-tree-part">{{ p.name_vi }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="th-empty">
+    <div class="th-empty-icon">&#127793;</div>
+    <h3 style="font-size:17px;margin-bottom:6px">No verticals yet</h3>
+    <p style="font-size:14px">Use the Seed Data Manager to populate your database.</p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<script>
+// ── Video bulk JS ──
+function togVid(m){document.querySelectorAll('.vid-check').forEach(function(c){c.checked=m.checked;c.closest('tr').classList.toggle('row-selected',m.checked)});upBarVid()}
+function upBarVid(){
+  var ck=Array.from(document.querySelectorAll('.vid-check:checked')),bar=document.getElementById('bulkBarVid'),t=document.querySelectorAll('.vid-check').length,m=document.getElementById('selAllVid');
+  if(!bar)return;bar.style.display=ck.length>0?'flex':'none';
+  var cnt=document.getElementById('bulkCountVid');if(cnt)cnt.textContent='Da chon '+ck.length+' / '+t;
+  if(m){m.checked=ck.length===t&&t>0;m.indeterminate=ck.length>0&&ck.length<t;}
+  document.querySelectorAll('.vid-check').forEach(function(c){c.closest('tr').classList.toggle('row-selected',c.checked)});
+}
+function clearVid(){var m=document.getElementById('selAllVid');if(m)m.checked=false;document.querySelectorAll('.vid-check').forEach(function(c){c.checked=false;c.closest('tr').classList.remove('row-selected')});upBarVid()}
+function bulkDelVid(){var ck=Array.from(document.querySelectorAll('.vid-check:checked'));if(!ck.length)return;if(!confirm('Xoa '+ck.length+' video da chon?\n\nKHONG THE hoan tac.'))return;
+  fetch('{{ url_for("admin_videos_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ck.map(function(c){return parseInt(c.value)})})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+function bulkDelAllVid(){var t=document.querySelectorAll('.vid-check').length;if(!confirm('Xoa TAT CA '+t+' video?\n\nKHONG THE hoan tac.'))return;
+  var ids=Array.from(document.querySelectorAll('.vid-check')).map(function(c){return parseInt(c.value)});
+  fetch('{{ url_for("admin_videos_bulk_delete") }}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})})
+  .then(function(r){return r.json()}).then(function(d){if(d.ok)location.reload();else alert('Loi: '+(d.error||''))}).catch(function(){alert('Loi ket noi')})}
+
+// Collapsible tree nodes
+document.querySelectorAll('.th-tree-vertical').forEach(node => {
+  const header = node.querySelector('.th-tree-header');
+  const children = node.querySelector('.th-tree-children');
+  if (header && children) {
+    children.style.display = 'block';
+    header.addEventListener('click', () => {
+      children.style.display = children.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+});
+</script>
+<style>
+tr.row-selected td { background:rgba(37,99,235,0.06) !important }
+[data-theme="dark"] tr.row-selected td { background:rgba(37,99,235,0.12) !important }
+</style>
+{% endblock %}

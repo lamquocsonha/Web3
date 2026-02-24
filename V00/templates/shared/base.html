@@ -12,7 +12,7 @@
 {% endif %}
 
 <!-- Shared CSS for all verticals -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}?v=20250213">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}?v=20260217">
 
 <!-- Theme variables injected per vertical.style -->
 {% set theme = THEME_STYLES.get(vertical.style or 'classic', THEME_STYLES['classic']) %}
@@ -51,6 +51,73 @@
   --tag-bg: {{ theme.border_dark }};
   --font-primary: {{ theme.font_primary }};
   --font-secondary: {{ theme.font_secondary }};
+}
+/* SEO Backlink Styles */
+a.seo-backlink {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent);
+  transition: border-color 0.2s, color 0.2s;
+}
+a.seo-backlink:hover {
+  border-bottom-style: solid;
+  color: var(--accent-hover, var(--accent));
+}
+/* Inline Suggestion Block — quote style */
+.inline-suggest-block {
+  margin: 28px 0;
+  padding: 20px 24px;
+  border-left: 4px solid var(--accent);
+  background: var(--accent-bg, rgba(108,92,231,0.06));
+  border-radius: 0 12px 12px 0;
+  position: relative;
+}
+.inline-suggest-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+.inline-suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-primary, #2d3436);
+  background: rgba(255,255,255,0.7);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.inline-suggest-item:last-child { margin-bottom: 0; }
+.inline-suggest-item:hover {
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.95);
+  transform: translateX(4px);
+}
+.inline-suggest-icon { font-size: 1.1rem; flex-shrink: 0; }
+.inline-suggest-text {
+  flex: 1;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.inline-suggest-arrow {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s;
+}
+.inline-suggest-item:hover .inline-suggest-arrow {
+  opacity: 1;
+  transform: translateX(0);
 }
 </style>
 {% endautoescape %}
@@ -139,6 +206,49 @@ if (saved) {
   document.querySelector('.mode-icon').textContent = icon;
   document.querySelector('.mode-label').textContent = label;
 }
+/* Neutralize AccessTrade Smart Tag overlay — it creates a full-screen
+   fixed div that intercepts all clicks. CSS pointer-events alone is
+   insufficient because the AT script applies inline !important styles
+   that override stylesheet rules. */
+(function() {
+  var AT_SEL = '[id*="at-smart"], [class*="atsmarttag"], [id*="atsmart"]';
+  function killATOverlay() {
+    /* 1) Kill any AT-branded element unconditionally */
+    document.querySelectorAll(AT_SEL).forEach(function(el) {
+      el.style.setProperty('pointer-events', 'none', 'important');
+      el.style.setProperty('z-index', '-1', 'important');
+      el.style.setProperty('width', '0', 'important');
+      el.style.setProperty('height', '0', 'important');
+      el.style.setProperty('overflow', 'hidden', 'important');
+      el.style.setProperty('opacity', '0', 'important');
+    });
+    /* 2) Catch any full-screen fixed div injected by third-party scripts */
+    document.querySelectorAll('body > div').forEach(function(el) {
+      if (el.classList.contains('site-header') || el.classList.contains('site-main') || el.classList.contains('site-footer')) return;
+      var s = window.getComputedStyle(el);
+      if (s.position === 'fixed' && s.top === '0px' && s.left === '0px' &&
+          (s.width === '100%' || s.width === '100vw' || parseInt(s.width) >= window.innerWidth * 0.5)) {
+        var z = parseInt(s.zIndex) || 0;
+        if (z > 9000 || s.opacity < 0.1) {
+          el.style.setProperty('pointer-events', 'none', 'important');
+          el.style.setProperty('display', 'none', 'important');
+        }
+      }
+    });
+  }
+  /* Run after AT script loads (async) — multiple passes */
+  setTimeout(killATOverlay, 1000);
+  setTimeout(killATOverlay, 2500);
+  setTimeout(killATOverlay, 5000);
+  setTimeout(killATOverlay, 10000);
+  /* Watch for dynamically inserted AND modified overlays
+     (AT script re-applies inline styles, so watch attributes too) */
+  if (window.MutationObserver) {
+    new MutationObserver(function() { killATOverlay(); })
+      .observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style','class'] });
+  }
+})();
 </script>
+
 </body>
 </html>

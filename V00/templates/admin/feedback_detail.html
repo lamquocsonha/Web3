@@ -1,8 +1,8 @@
 {% extends "admin/base.html" %}
 {% block title %}Feedback Detail{% endblock %}
 {% block breadcrumb %}
-<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">></span>
-<a href="{{ url_for('admin_feedbacks') }}">Feedbacks</a><span class="sep">></span>
+<a href="{{ url_for('admin_dashboard') }}">Dashboard</a><span class="sep">›</span>
+<a href="{{ url_for('admin_content_hub', tab='feedbacks') }}">Feedbacks</a><span class="sep">›</span>
 Detail
 {% endblock %}
 {% block content %}
@@ -109,7 +109,7 @@ Detail
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Cập nhật</button>
-        <a href="{{ url_for('admin_feedbacks') }}" class="btn btn-secondary">Quay lại</a>
+        <a href="{{ url_for('admin_content_hub', tab='feedbacks') }}" class="btn btn-secondary">Quay lại</a>
         <a href="{{ url_for('admin_article_edit', aid=article.id) }}" class="btn btn-secondary" target="_blank">Sửa bài viết</a>
       </div>
     </form>
