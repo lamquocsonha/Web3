@@ -8451,7 +8451,7 @@ if __name__ == '__main__':
                                 return
                         db.create_all()
                         _run_schema_migration()
-                        print('[*] Fresh database created. Run seed_data to restore content.')
+                        print('[*] Fresh database created. Auto-seed will run next.')
                 except Exception as e2:
                     print(f'[!] Full recovery failed: {e2}')
                     # Last resort: fresh DB
@@ -8471,10 +8471,55 @@ if __name__ == '__main__':
             else:
                 raise
 
+    def _auto_seed_if_empty():
+        """Auto-seed all verticals if database is empty (no verticals exist)."""
+        if Vertical.query.first():
+            return  # Data already exists, skip
+        print('[*] Empty database detected — auto-seeding all verticals...')
+        try:
+            from seed_data import (seed, seed_articles, seed_networks, seed_video,
+                seed_pet, seed_pet_articles, seed_pet_v2, seed_travel, seed_travel_articles,
+                seed_products_pet_travel, seed_hotels, seed_attractions,
+                seed_bike, seed_vouchers, seed_beauty, seed_beauty_articles,
+                seed_tech, seed_tech_articles, seed_products_beauty_tech,
+                seed_sport, seed_sport_articles, seed_products_sport,
+                seed_garden, seed_garden_articles, seed_products_garden,
+                seed_new_verticals)
+            seed()
+            seed_articles()
+            seed_networks()
+            seed_pet()
+            seed_pet_articles()
+            seed_pet_v2()
+            seed_travel()
+            seed_travel_articles()
+            seed_products_pet_travel()
+            seed_hotels()
+            seed_attractions()
+            seed_bike()
+            seed_vouchers()
+            seed_beauty()
+            seed_beauty_articles()
+            seed_tech()
+            seed_tech_articles()
+            seed_products_beauty_tech()
+            seed_sport()
+            seed_sport_articles()
+            seed_products_sport()
+            seed_garden()
+            seed_garden_articles()
+            seed_products_garden()
+            seed_new_verticals()
+            print('[*] Auto-seed completed successfully!')
+        except Exception as e:
+            print(f'[!] Auto-seed error: {e}')
+            print('[*] You can manually seed via /admin/seed-data')
+
     # Only init DB once (skip on Werkzeug reloader child process)
     if not os.environ.get('WERKZEUG_RUN_MAIN'):
         with app.app_context():
             _safe_init_db()
+            _auto_seed_if_empty()
 
         # Start banner auto-sync scheduler
         _start_banner_scheduler()
