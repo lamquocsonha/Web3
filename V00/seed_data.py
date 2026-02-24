@@ -4725,63 +4725,56 @@ def seed_products_garden():
 # =============================================
 # 30 NEW VERTICALS
 # =============================================
+# Metadata for 30 new verticals — used by seed_new_verticals() and seed_vertical_content()
+NEW_VERTICAL_META = {
+    'fashion':    {'name': 'Fashion',    'icon': '👗', 'color': '#fd79a8', 'description': 'Thời trang nam nữ — quần áo, giày dép, phụ kiện',                          'style': 'classic'},
+    'kitchen':    {'name': 'Kitchen',    'icon': '🍳', 'color': '#e67e22', 'description': 'Nhà bếp & Gia dụng — nồi, chảo, máy pha cà phê, đồ bếp',                 'style': 'classic'},
+    'baby':       {'name': 'Baby',       'icon': '🍼', 'color': '#fab1a0', 'description': 'Mẹ & Bé — đồ sơ sinh, xe đẩy, sữa, đồ chơi trẻ em',                      'style': 'classic'},
+    'home':       {'name': 'Home',       'icon': '🏠', 'color': '#636e72', 'description': 'Nội thất & Decor — bàn ghế, đèn, rèm, trang trí nhà',                     'style': 'modern'},
+    'health':     {'name': 'Health',     'icon': '💊', 'color': '#00b894', 'description': 'Sức khỏe & Thực phẩm chức năng — vitamin, máy đo, thiết bị y tế',         'style': 'classic'},
+    'gaming':     {'name': 'Gaming',     'icon': '🎮', 'color': '#6c5ce7', 'description': 'Gaming — bàn phím cơ, chuột, tai nghe, ghế gaming',                        'style': 'tech'},
+    'photo':      {'name': 'Photo',      'icon': '📷', 'color': '#2d3436', 'description': 'Nhiếp ảnh — máy ảnh, lens, tripod, phụ kiện quay phim',                    'style': 'tech'},
+    'music':      {'name': 'Music',      'icon': '🎵', 'color': '#a29bfe', 'description': 'Âm nhạc — đàn guitar, piano, loa, thiết bị thu âm',                        'style': 'modern'},
+    'fishing':    {'name': 'Fishing',    'icon': '🎣', 'color': '#0984e3', 'description': 'Câu cá & Outdoor — cần câu, mồi, lều, đồ dã ngoại',                       'style': 'classic'},
+    'watch':      {'name': 'Watch',      'icon': '⌚', 'color': '#d4a574', 'description': 'Đồng hồ — smartwatch, đồng hồ cơ, phụ kiện',                               'style': 'modern'},
+    'book':       {'name': 'Book',       'icon': '📚', 'color': '#b8860b', 'description': 'Sách & Học liệu — sách self-help, kỹ năng, văn học',                       'style': 'classic'},
+    'coffee':     {'name': 'Coffee',     'icon': '☕', 'color': '#8d6e63', 'description': 'Cà phê & Trà — hạt cà phê, máy pha, dụng cụ pha chế',                     'style': 'classic'},
+    'camping':    {'name': 'Camping',    'icon': '⛺', 'color': '#2d5016', 'description': 'Camping & Phượt — lều, túi ngủ, bếp dã ngoại, đồ sinh tồn',               'style': 'classic'},
+    'office':     {'name': 'Office',     'icon': '💼', 'color': '#34495e', 'description': 'Văn phòng — bàn nâng hạ, ghế ergonomic, phụ kiện WFH',                    'style': 'modern'},
+    'yoga':       {'name': 'Yoga',       'icon': '🧘', 'color': '#fd79a8', 'description': 'Yoga & Thiền — thảm tập, quần áo yoga, dụng cụ giãn cơ',                  'style': 'beauty'},
+    'audio':      {'name': 'Audio',      'icon': '🎧', 'color': '#1abc9c', 'description': 'Âm thanh — tai nghe, loa bluetooth, DAC, amply',                           'style': 'tech'},
+    'clean':      {'name': 'Clean',      'icon': '🧹', 'color': '#74b9ff', 'description': 'Vệ sinh & Giặt ủi — robot hút bụi, máy giặt, nước tẩy',                  'style': 'classic'},
+    'diy':        {'name': 'DIY',        'icon': '🔧', 'color': '#f39c12', 'description': 'Đồ nghề & DIY — máy khoan, bộ dụng cụ sửa chữa, keo dán',                'style': 'classic'},
+    'shoe':       {'name': 'Shoe',       'icon': '👟', 'color': '#e74c3c', 'description': 'Giày & Sneaker — giày chạy, sneaker, boot, dép sandal',                    'style': 'modern'},
+    'smart':      {'name': 'Smart',      'icon': '🏡', 'color': '#00cec9', 'description': 'Smarthome — camera, khóa thông minh, đèn, ổ cắm wifi',                    'style': 'tech'},
+    'perfume':    {'name': 'Perfume',    'icon': '🧴', 'color': '#c39bd3', 'description': 'Nước hoa — nam, nữ, unisex, niche, designer',                              'style': 'beauty'},
+    'stationery': {'name': 'Stationery', 'icon': '✏️', 'color': '#f8c291', 'description': 'Văn phòng phẩm — bút, sổ tay, planner, đồ handmade',                      'style': 'classic'},
+    'aquarium':   {'name': 'Aquarium',   'icon': '🐠', 'color': '#00b4d8', 'description': 'Cá cảnh & Thủy sinh — bể cá, lọc nước, cây thủy sinh',                   'style': 'pet'},
+    'wine':       {'name': 'Wine',       'icon': '🍷', 'color': '#8e1c3b', 'description': 'Rượu vang & Bia — rượu nhập, bia thủ công, phụ kiện',                     'style': 'classic'},
+    'toy':        {'name': 'Toy',        'icon': '🧸', 'color': '#fdcb6e', 'description': 'Đồ chơi — LEGO, mô hình, board game, đồ chơi giáo dục',                  'style': 'classic'},
+    'jewelry':    {'name': 'Jewelry',    'icon': '💍', 'color': '#daa520', 'description': 'Trang sức — nhẫn, vòng tay, dây chuyền, phụ kiện',                         'style': 'beauty'},
+    'electric':   {'name': 'Electric',   'icon': '⚡', 'color': '#2ecc71', 'description': 'Xe điện — xe máy điện, scooter, xe đạp điện, phụ kiện',                    'style': 'car'},
+    'bag':        {'name': 'Bag',        'icon': '🎒', 'color': '#e17055', 'description': 'Túi & Balo — balo laptop, túi du lịch, ví, túi xách',                     'style': 'modern'},
+    'sleep':      {'name': 'Sleep',      'icon': '😴', 'color': '#7c8adb', 'description': 'Giấc ngủ — nệm, gối, chăn, máy tiếng ồn trắng',                          'style': 'classic'},
+    'security':   {'name': 'Security',   'icon': '🔒', 'color': '#576574', 'description': 'An ninh — camera giám sát, khóa vân tay, két sắt, báo động',              'style': 'tech'},
+}
+
 def seed_new_verticals():
     """Seed 30 new verticals — skip any that already exist"""
     from models import db, Vertical
 
-    new_verticals = [
-        # Batch 1 — 20 verticals
-        {'name': 'Fashion',    'slug': 'fashion',    'icon': '👗', 'color': '#fd79a8', 'description': 'Thời trang nam nữ — quần áo, giày dép, phụ kiện',                          'style': 'classic'},
-        {'name': 'Kitchen',    'slug': 'kitchen',    'icon': '🍳', 'color': '#e67e22', 'description': 'Nhà bếp & Gia dụng — nồi, chảo, máy pha cà phê, đồ bếp',                 'style': 'classic'},
-        {'name': 'Baby',       'slug': 'baby',       'icon': '🍼', 'color': '#fab1a0', 'description': 'Mẹ & Bé — đồ sơ sinh, xe đẩy, sữa, đồ chơi trẻ em',                      'style': 'classic'},
-        {'name': 'Home',       'slug': 'home',       'icon': '🏠', 'color': '#636e72', 'description': 'Nội thất & Decor — bàn ghế, đèn, rèm, trang trí nhà',                     'style': 'modern'},
-        {'name': 'Health',     'slug': 'health',     'icon': '💊', 'color': '#00b894', 'description': 'Sức khỏe & Thực phẩm chức năng — vitamin, máy đo, thiết bị y tế',         'style': 'classic'},
-        {'name': 'Gaming',     'slug': 'gaming',     'icon': '🎮', 'color': '#6c5ce7', 'description': 'Gaming — bàn phím cơ, chuột, tai nghe, ghế gaming',                        'style': 'tech'},
-        {'name': 'Photo',      'slug': 'photo',      'icon': '📷', 'color': '#2d3436', 'description': 'Nhiếp ảnh — máy ảnh, lens, tripod, phụ kiện quay phim',                    'style': 'tech'},
-        {'name': 'Music',      'slug': 'music',      'icon': '🎵', 'color': '#a29bfe', 'description': 'Âm nhạc — đàn guitar, piano, loa, thiết bị thu âm',                        'style': 'modern'},
-        {'name': 'Fishing',    'slug': 'fishing',    'icon': '🎣', 'color': '#0984e3', 'description': 'Câu cá & Outdoor — cần câu, mồi, lều, đồ dã ngoại',                       'style': 'classic'},
-        {'name': 'Watch',      'slug': 'watch',      'icon': '⌚', 'color': '#d4a574', 'description': 'Đồng hồ — smartwatch, đồng hồ cơ, phụ kiện',                               'style': 'modern'},
-        {'name': 'Book',       'slug': 'book',       'icon': '📚', 'color': '#b8860b', 'description': 'Sách & Học liệu — sách self-help, kỹ năng, văn học',                       'style': 'classic'},
-        {'name': 'Coffee',     'slug': 'coffee',     'icon': '☕', 'color': '#8d6e63', 'description': 'Cà phê & Trà — hạt cà phê, máy pha, dụng cụ pha chế',                     'style': 'classic'},
-        {'name': 'Camping',    'slug': 'camping',    'icon': '⛺', 'color': '#2d5016', 'description': 'Camping & Phượt — lều, túi ngủ, bếp dã ngoại, đồ sinh tồn',               'style': 'classic'},
-        {'name': 'Office',     'slug': 'office',     'icon': '💼', 'color': '#34495e', 'description': 'Văn phòng — bàn nâng hạ, ghế ergonomic, phụ kiện WFH',                    'style': 'modern'},
-        {'name': 'Yoga',       'slug': 'yoga',       'icon': '🧘', 'color': '#fd79a8', 'description': 'Yoga & Thiền — thảm tập, quần áo yoga, dụng cụ giãn cơ',                  'style': 'beauty'},
-        {'name': 'Audio',      'slug': 'audio',      'icon': '🎧', 'color': '#1abc9c', 'description': 'Âm thanh — tai nghe, loa bluetooth, DAC, amply',                           'style': 'tech'},
-        {'name': 'Clean',      'slug': 'clean',      'icon': '🧹', 'color': '#74b9ff', 'description': 'Vệ sinh & Giặt ủi — robot hút bụi, máy giặt, nước tẩy',                  'style': 'classic'},
-        {'name': 'DIY',        'slug': 'diy',        'icon': '🔧', 'color': '#f39c12', 'description': 'Đồ nghề & DIY — máy khoan, bộ dụng cụ sửa chữa, keo dán',                'style': 'classic'},
-        {'name': 'Shoe',       'slug': 'shoe',       'icon': '👟', 'color': '#e74c3c', 'description': 'Giày & Sneaker — giày chạy, sneaker, boot, dép sandal',                    'style': 'modern'},
-        {'name': 'Smart',      'slug': 'smart',      'icon': '🏡', 'color': '#00cec9', 'description': 'Smarthome — camera, khóa thông minh, đèn, ổ cắm wifi',                    'style': 'tech'},
-        # Batch 2 — 10 verticals
-        {'name': 'Perfume',    'slug': 'perfume',    'icon': '🧴', 'color': '#c39bd3', 'description': 'Nước hoa — nam, nữ, unisex, niche, designer',                              'style': 'beauty'},
-        {'name': 'Stationery', 'slug': 'stationery', 'icon': '✏️', 'color': '#f8c291', 'description': 'Văn phòng phẩm — bút, sổ tay, planner, đồ handmade',                      'style': 'classic'},
-        {'name': 'Aquarium',   'slug': 'aquarium',   'icon': '🐠', 'color': '#00b4d8', 'description': 'Cá cảnh & Thủy sinh — bể cá, lọc nước, cây thủy sinh',                   'style': 'pet'},
-        {'name': 'Wine',       'slug': 'wine',       'icon': '🍷', 'color': '#8e1c3b', 'description': 'Rượu vang & Bia — rượu nhập, bia thủ công, phụ kiện',                     'style': 'classic'},
-        {'name': 'Toy',        'slug': 'toy',        'icon': '🧸', 'color': '#fdcb6e', 'description': 'Đồ chơi — LEGO, mô hình, board game, đồ chơi giáo dục',                  'style': 'classic'},
-        {'name': 'Jewelry',    'slug': 'jewelry',    'icon': '💍', 'color': '#daa520', 'description': 'Trang sức — nhẫn, vòng tay, dây chuyền, phụ kiện',                         'style': 'beauty'},
-        {'name': 'Electric',   'slug': 'electric',   'icon': '⚡', 'color': '#2ecc71', 'description': 'Xe điện — xe máy điện, scooter, xe đạp điện, phụ kiện',                    'style': 'car'},
-        {'name': 'Bag',        'slug': 'bag',        'icon': '🎒', 'color': '#e17055', 'description': 'Túi & Balo — balo laptop, túi du lịch, ví, túi xách',                     'style': 'modern'},
-        {'name': 'Sleep',      'slug': 'sleep',      'icon': '😴', 'color': '#7c8adb', 'description': 'Giấc ngủ — nệm, gối, chăn, máy tiếng ồn trắng',                          'style': 'classic'},
-        {'name': 'Security',   'slug': 'security',   'icon': '🔒', 'color': '#576574', 'description': 'An ninh — camera giám sát, khóa vân tay, két sắt, báo động',              'style': 'tech'},
-    ]
-
     seeded = 0
     skipped = 0
-    for vd in new_verticals:
-        if Vertical.query.filter_by(slug=vd['slug']).first():
+    for slug, vd in NEW_VERTICAL_META.items():
+        if Vertical.query.filter_by(slug=slug).first():
             print(f"[SKIP] {vd['name']} vertical already exists")
             skipped += 1
             continue
 
         v = Vertical(
-            name=vd['name'],
-            slug=vd['slug'],
-            icon=vd['icon'],
-            color=vd['color'],
-            description=vd['description'],
-            status='published',
-            style=vd['style'],
-            template='general',
-            default_mode='light'
+            name=vd['name'], slug=slug, icon=vd['icon'], color=vd['color'],
+            description=vd['description'], status='published', style=vd['style'],
+            template='general', default_mode='light'
         )
         db.session.add(v)
         seeded += 1
@@ -5447,7 +5440,7 @@ VERTICAL_CONTENT = {
 # =============================================
 
 def seed_vertical_content(slug):
-    """Seed segments and zones for a specific new vertical"""
+    """Seed segments and zones for a specific new vertical (creates vertical if missing)"""
     from models import db, Vertical, Segment, Zone
 
     content = VERTICAL_CONTENT.get(slug)
@@ -5457,13 +5450,25 @@ def seed_vertical_content(slug):
 
     vertical = Vertical.query.filter_by(slug=slug).first()
     if not vertical:
-        print(f'[SKIP] Vertical {slug} not found. Run seed_new_verticals first.')
-        return
-
-    # Check if already has segments
-    if vertical.segments:
-        print(f'[SKIP] {vertical.name} already has {len(vertical.segments)} segments')
-        return
+        # Auto-create vertical from metadata (same as old seed functions)
+        meta = NEW_VERTICAL_META.get(slug)
+        if not meta:
+            print(f'[SKIP] No metadata for {slug}')
+            return
+        print(f'[+] Creating vertical {slug}...')
+        vertical = Vertical(
+            name=meta['name'], slug=slug, icon=meta['icon'], color=meta['color'],
+            description=meta['description'], status='published', style=meta['style'],
+            template='general', default_mode='light'
+        )
+        db.session.add(vertical)
+        db.session.flush()
+    else:
+        # Check if already has segments
+        if Segment.query.filter_by(vertical_id=vertical.id).count() > 0:
+            print(f'[SKIP] {vertical.name} already has content')
+            return
+        print(f'[+] {vertical.name} exists but empty — seeding content...')
 
     print(f'[+] Seeding content for {vertical.name}...')
 
@@ -5488,512 +5493,11 @@ def seed_vertical_content(slug):
 
 def seed_all_new_verticals_content():
     """Seed content for all 30 new verticals"""
+    import traceback
     for slug in VERTICAL_CONTENT:
         try:
             seed_vertical_content(slug)
         except Exception as e:
-            print(f'[ERROR] {slug}: {e}')
-
-# =============================================
-
-VERTICAL_CONTENT = {
-    'fashion': {
-        'segments': [
-            ('Nam', 'nam', '👔', 'Thời trang nam — áo, quần, vest, phụ kiện'),
-            ('Nữ', 'nu', '👗', 'Thời trang nữ — đầm, áo, chân váy'),
-            ('Trẻ em', 'tre-em', '🧒', 'Thời trang trẻ em — bé trai, bé gái'),
-            ('Giày dép', 'giay-dep', '👞', 'Giày dép — sneaker, boot, sandal'),
-            ('Phụ kiện', 'phu-kien', '🧣', 'Phụ kiện — mũ, kính, thắt lưng, ví'),
-        ],
-        'zones': {0: [
-            ('Áo sơ mi', 'ao-so-mi', '👔', '#3498db', 'Áo sơ mi nam công sở & casual'),
-            ('Áo thun', 'ao-thun', '👕', '#2ecc71', 'Áo thun basic, oversize, polo'),
-            ('Quần tây', 'quan-tay', '👖', '#34495e', 'Quần tây slim, regular, công sở'),
-            ('Vest & Blazer', 'vest-blazer', '🤵', '#2c3e50', 'Vest nam công sở, dự tiệc'),
-        ]}
-    },
-    'kitchen': {
-        'segments': [
-            ('Nồi & Chảo', 'noi-chao', '🍳', 'Nồi chảo inox, chống dính, gang'),
-            ('Dao & Thớt', 'dao-thot', '🔪', 'Dao Chef, dao Nhật, thớt gỗ'),
-            ('Máy pha chế', 'may-pha-che', '☕', 'Máy pha cà phê, xay sinh tố, ép'),
-            ('Gia vị', 'gia-vi', '🧂', 'Gia vị nấu ăn, nước chấm, sốt'),
-            ('Dụng cụ nướng', 'dung-cu-nuong', '🔥', 'Bếp nướng, lò nướng, phụ kiện BBQ'),
-        ],
-        'zones': {0: [
-            ('Nồi inox', 'noi-inox', '🥘', '#bdc3c7', 'Nồi inox 3 đáy, 5 đáy'),
-            ('Chảo chống dính', 'chao-chong-dinh', '🍳', '#f39c12', 'Chảo Tefal, Happycook, Sunhouse'),
-            ('Nồi áp suất', 'noi-ap-suat', '♨️', '#e74c3c', 'Nồi áp suất nấu nhanh'),
-            ('Chảo gang', 'chao-gang', '⚫', '#2c3e50', 'Chảo gang đúc giữ nhiệt tốt'),
-        ]}
-    },
-    'baby': {
-        'segments': [
-            ('Sơ sinh', 'so-sinh', '👶', 'Đồ sơ sinh 0-12 tháng'),
-            ('Bé tập đi', 'be-tap-di', '🚶', 'Bé 1-3 tuổi — xe tập đi, đồ chơi'),
-            ('Mẫu giáo', 'be-mau-giao', '🎨', 'Bé 3-6 tuổi — ba lô, đồ dùng'),
-            ('Sữa & Dinh dưỡng', 'sua-dinh-duong', '🍼', 'Sữa công thức, bột ăn dặm'),
-            ('Xe đẩy & Ghế', 'xe-day-ghe', '🛒', 'Xe đẩy, ghế ăn, ghế ô tô'),
-        ],
-        'zones': {0: [
-            ('Quần áo sơ sinh', 'quan-ao-so-sinh', '👕', '#fab1a0', 'Body, romper, set quần áo cotton'),
-            ('Tã & Bỉm', 'ta-bim', '🧷', '#74b9ff', 'Tã dán, tã quần Bobby, Huggies'),
-            ('Bình sữa', 'binh-sua', '🍼', '#a29bfe', 'Bình sữa Pigeon, Comotomo'),
-            ('Khăn & Chăn', 'khan-chan', '🧸', '#ffeaa7', 'Khăn ướt, khăn sữa, chăn bé'),
-        ]}
-    },
-    'home': {
-        'segments': [
-            ('Phòng khách', 'phong-khach', '🛋️', 'Sofa, kệ TV, bàn trà, thảm'),
-            ('Phòng ngủ', 'phong-ngu', '🛏️', 'Giường, tủ, bàn trang điểm'),
-            ('Phòng ăn', 'phong-an', '🍽️', 'Bàn ăn, ghế ăn, kệ bếp'),
-            ('Decor', 'decor', '🖼️', 'Tranh, gương, kệ decor, hoa giả'),
-            ('Đèn chiếu sáng', 'den-chieu-sang', '💡', 'Đèn trần, đèn bàn, đèn LED'),
-        ],
-        'zones': {0: [
-            ('Sofa', 'sofa', '🛋️', '#636e72', 'Sofa da, vải, góc chữ L, sofa bed'),
-            ('Kệ TV', 'ke-tv', '📺', '#2d3436', 'Kệ TV gỗ, hiện đại, treo tường'),
-            ('Bàn trà', 'ban-tra', '☕', '#b8860b', 'Bàn trà gỗ, kính, sofa'),
-            ('Thảm trải sàn', 'tham-trai-san', '🟫', '#e17055', 'Thảm len, lông, phòng khách'),
-        ]}
-    },
-    'health': {
-        'segments': [
-            ('Vitamin & TPCN', 'vitamin-tpcn', '💊', 'Vitamin tổng hợp, Omega-3, Canxi'),
-            ('Thiết bị y tế', 'thiet-bi-y-te', '🩺', 'Máy đo huyết áp, đường huyết'),
-            ('Dụng cụ tập', 'dung-cu-tap', '🏋️', 'Tạ, dây kháng lực, thảm tập'),
-            ('Người già', 'nguoi-gia', '🧓', 'Ghế massage, gậy, đai lưng'),
-            ('Đông y', 'dong-y', '🌿', 'Thuốc đông y, trà thảo dược'),
-        ],
-        'zones': {0: [
-            ('Vitamin C', 'vitamin-c', '🍊', '#f39c12', 'Tăng đề kháng, đẹp da'),
-            ('Omega-3', 'omega-3', '🐟', '#0984e3', 'Dầu cá tốt cho tim mạch, não'),
-            ('Canxi & D3', 'canxi-d3', '🦴', '#dfe6e9', 'Xương chắc khỏe'),
-            ('Collagen', 'collagen', '✨', '#fd79a8', 'Đẹp da, chống lão hóa'),
-        ]}
-    },
-    'gaming': {
-        'segments': [
-            ('Bàn phím cơ', 'ban-phim-co', '⌨️', 'Cherry, Gateron, custom keyboard'),
-            ('Chuột gaming', 'chuot-gaming', '🖱️', 'Logitech, Razer, SteelSeries'),
-            ('Tai nghe', 'tai-nghe-gaming', '🎧', 'Tai nghe 7.1, wireless, RGB'),
-            ('Ghế gaming', 'ghe-gaming', '🪑', 'Ghế ergonomic, da PU, vải lưới'),
-            ('Màn hình', 'man-hinh', '🖥️', 'Màn hình 144Hz, 240Hz, IPS'),
-        ],
-        'zones': {0: [
-            ('Switch cơ', 'switch-co', '🔘', '#e74c3c', 'Cherry, Gateron — Red, Blue, Brown'),
-            ('Keycap', 'keycap', '🎨', '#6c5ce7', 'Keycap PBT, ABS, artisan'),
-            ('Layout', 'layout', '📐', '#00cec9', 'Full-size, TKL, 75%, 65%, 60%'),
-            ('Kit custom', 'kit-custom', '🔧', '#fdcb6e', 'Kit barebone, PCB, case'),
-        ]}
-    },
-    'photo': {
-        'segments': [
-            ('Máy ảnh', 'may-anh', '📷', 'DSLR, Mirrorless, Compact'),
-            ('Ống kính', 'ong-kinh', '🔭', 'Lens fix, zoom, macro, wide'),
-            ('Phụ kiện', 'phu-kien-photo', '🎒', 'Tripod, filter, flash, túi'),
-            ('Quay phim', 'quay-phim', '🎬', 'Gimbal, mic, đèn LED, cage'),
-            ('Lưu trữ', 'luu-tru', '💾', 'Thẻ nhớ, ổ cứng, máy in ảnh'),
-        ],
-        'zones': {0: [
-            ('Mirrorless', 'mirrorless', '📸', '#2d3436', 'Sony A7, Canon R, Fujifilm X'),
-            ('DSLR', 'dslr', '📷', '#636e72', 'Canon EOS, Nikon D'),
-            ('Compact', 'compact', '📱', '#0984e3', 'Ricoh GR, Sony RX, Fuji X100'),
-            ('Action cam', 'action-cam', '🏔️', '#00b894', 'GoPro, DJI Action, Insta360'),
-        ]}
-    },
-    'music': {
-        'segments': [
-            ('Guitar', 'guitar', '🎸', 'Acoustic, classic, electric, bass'),
-            ('Piano & Organ', 'piano-organ', '🎹', 'Piano điện, organ, MIDI'),
-            ('Trống', 'trong', '🥁', 'Trống jazz, cajon, trống điện'),
-            ('Thu âm', 'thu-am', '🎙️', 'Micro, soundcard, monitor'),
-            ('Loa & Amply', 'loa-amply', '🔊', 'Loa sân khấu, amply, mixer'),
-        ],
-        'zones': {0: [
-            ('Acoustic', 'acoustic', '🎸', '#d35400', 'Yamaha, Taylor, Martin, Fender'),
-            ('Classic', 'classic', '🎵', '#8d6e63', 'Guitar classic nylon, Cordoba'),
-            ('Electric', 'electric-guitar', '⚡', '#e74c3c', 'Fender, Gibson, Ibanez, PRS'),
-            ('Bass', 'bass', '🎵', '#6c5ce7', 'Fender Jazz, Precision, Ibanez'),
-        ]}
-    },
-    'fishing': {
-        'segments': [
-            ('Cần câu', 'can-cau', '🎣', 'Cần lure, câu đài, câu tay'),
-            ('Máy câu', 'may-cau', '⚙️', 'Máy đứng, máy ngang, dây câu'),
-            ('Mồi câu', 'moi-cau', '🪱', 'Mồi giả, mồi sống, mồi lure'),
-            ('Phụ kiện', 'phu-kien-cau', '🧰', 'Hộp mồi, lưỡi câu, phao, chì'),
-            ('Dã ngoại', 'da-ngoai', '⛺', 'Lều câu, ghế câu, thùng đá'),
-        ],
-        'zones': {0: [
-            ('Cần lure', 'can-lure', '🎣', '#0984e3', 'Casting, spinning, UL, ML, MH'),
-            ('Cần đài', 'can-dai', '🎣', '#00b894', 'Cần đài 3.6m, 4.5m, 5.4m'),
-            ('Cần tay', 'can-tay', '🎣', '#fdcb6e', 'Câu sông, câu ao, giải trí'),
-            ('Cần surf', 'can-surf', '🌊', '#74b9ff', 'Câu biển, xa bờ, 3-4m'),
-        ]}
-    },
-    'watch': {
-        'segments': [
-            ('Smartwatch', 'smartwatch', '⌚', 'Apple Watch, Galaxy Watch, Garmin'),
-            ('Đồng hồ cơ', 'dong-ho-co', '🕰️', 'Automatic — Seiko, Orient, Tissot'),
-            ('Thời trang', 'thoi-trang', '⏱️', 'DW, Casio, Fossil, Citizen'),
-            ('Dây đeo', 'day-deo', '🔗', 'Dây da, NATO, kim loại, cao su'),
-            ('Phụ kiện', 'phu-kien-watch', '🔧', 'Hộp đựng, miếng dán, giá đỡ'),
-        ],
-        'zones': {0: [
-            ('Apple Watch', 'apple-watch', '🍎', '#2d3436', 'Series, SE, Ultra'),
-            ('Galaxy Watch', 'galaxy-watch', '📱', '#6c5ce7', 'Classic, Active, Pro'),
-            ('Garmin', 'garmin', '🏃', '#00b894', 'Fenix, Forerunner, Venu'),
-            ('Amazfit', 'amazfit', '⌚', '#e74c3c', 'GTR, GTS, T-Rex, Bip'),
-        ]}
-    },
-    'book': {
-        'segments': [
-            ('Self-help', 'self-help', '📖', 'Phát triển bản thân, kỹ năng sống'),
-            ('Văn học', 'van-hoc', '📚', 'Tiểu thuyết, truyện ngắn, thơ'),
-            ('Kinh doanh', 'kinh-doanh', '💼', 'Khởi nghiệp, quản lý, marketing'),
-            ('Kỹ năng', 'ky-nang', '🧠', 'Giao tiếp, lãnh đạo, tư duy'),
-            ('Truyện tranh', 'truyen-tranh', '🗯️', 'Manga, comic, webtoon'),
-        ],
-        'zones': {0: [
-            ('Tư duy', 'tu-duy', '🧠', '#6c5ce7', 'Atomic Habits, Mindset, Deep Work'),
-            ('Tài chính', 'tai-chinh', '💰', '#00b894', 'Rich Dad, Tư duy triệu phú'),
-            ('Sức khỏe', 'suc-khoe-book', '🏃', '#e74c3c', 'Sức khỏe, dinh dưỡng, thiền'),
-            ('Giao tiếp', 'giao-tiep', '🗣️', '#f39c12', 'Đắc nhân tâm, Ngôn ngữ cơ thể'),
-        ]}
-    },
-    'coffee': {
-        'segments': [
-            ('Hạt cà phê', 'hat-ca-phe', '☕', 'Arabica, Robusta, Blend'),
-            ('Máy pha', 'may-pha', '⚙️', 'Espresso, tự động, Moka'),
-            ('Dụng cụ pha', 'dung-cu-pha', '🫖', 'Pour over, French press, Aeropress'),
-            ('Trà', 'tra', '🍵', 'Trà xanh, oolong, hoa, túi lọc'),
-            ('Phụ kiện', 'phu-kien-coffee', '🥛', 'Ly giữ nhiệt, phin, cối xay'),
-        ],
-        'zones': {0: [
-            ('Arabica', 'arabica', '☕', '#8d6e63', 'Cầu Đất, Colombia, Ethiopia'),
-            ('Robusta', 'robusta', '☕', '#5d4037', 'Đắk Lắk, Buôn Ma Thuột'),
-            ('Blend', 'blend', '☕', '#d35400', 'Pha trộn Arabica + Robusta'),
-            ('Specialty', 'specialty', '⭐', '#f39c12', 'Đặc sản, single origin, 80+'),
-        ]}
-    },
-    'camping': {
-        'segments': [
-            ('Lều & Tarp', 'leu-tarp', '⛺', 'Lều cắm trại, tarp, hammock'),
-            ('Túi ngủ', 'tui-ngu', '🛏️', 'Túi ngủ, nệm hơi, gối hơi'),
-            ('Bếp dã ngoại', 'bep-da-ngoai', '🔥', 'Bếp gas mini, nồi dã ngoại'),
-            ('Đèn & Pin', 'den-pin', '🔦', 'Đèn pin, đèn lều, pin sạc'),
-            ('Dao & Dụng cụ', 'dao-dung-cu', '🔪', 'Dao đa năng, rìu, dây thừng'),
-        ],
-        'zones': {0: [
-            ('Lều 2 người', 'leu-2-nguoi', '⛺', '#2d5016', 'Gọn nhẹ, dễ dựng, chống mưa'),
-            ('Lều gia đình', 'leu-gia-dinh', '🏕️', '#27ae60', 'Lều 4-6 người, phòng ngủ riêng'),
-            ('Tarp & Bạt', 'tarp-bat', '🪜', '#8d6e63', 'Tarp che nắng mưa, bạt trải sàn'),
-            ('Hammock', 'hammock', '🌴', '#0984e3', 'Võng dù, võng lưới'),
-        ]}
-    },
-    'office': {
-        'segments': [
-            ('Bàn làm việc', 'ban-lam-viec', '🪑', 'Bàn nâng hạ, chữ L, gấp, gỗ'),
-            ('Ghế ergonomic', 'ghe-ergonomic', '💺', 'Ghế công thái học, lưới, da'),
-            ('Phụ kiện WFH', 'phu-kien-wfh', '💻', 'Giá laptop, hub USB, webcam'),
-            ('Lưu trữ', 'luu-tru-office', '📂', 'Tủ hồ sơ, kệ sách, hộp đựng'),
-            ('Setup desk', 'setup-desk', '🖥️', 'Arm màn hình, đèn bàn, cable'),
-        ],
-        'zones': {0: [
-            ('Bàn nâng hạ', 'ban-nang-ha', '🔼', '#34495e', 'Standing desk điện, tay quay'),
-            ('Bàn chữ L', 'ban-chu-l', '📐', '#636e72', 'Bàn góc chữ L rộng rãi'),
-            ('Bàn gấp', 'ban-gap', '📦', '#95a5a6', 'Bàn gấp gọn WFH linh hoạt'),
-            ('Bàn gỗ', 'ban-go', '🪵', '#8d6e63', 'Bàn gỗ óc chó, sồi, thông'),
-        ]}
-    },
-    'yoga': {
-        'segments': [
-            ('Thảm tập', 'tham-tap', '🧘', 'Thảm yoga TPE, PU, cao su, cork'),
-            ('Quần áo yoga', 'quan-ao-yoga', '👚', 'Legging, sport bra, áo tank'),
-            ('Dụng cụ giãn cơ', 'dung-cu-gian-co', '🏋️', 'Con lăn, bóng, dây kháng lực'),
-            ('Thiền', 'thien', '🧘‍♂️', 'Gối thiền, chuông, nến thơm'),
-            ('Phụ kiện', 'phu-kien-yoga', '🎽', 'Túi thảm, chai nước, khăn tập'),
-        ],
-        'zones': {0: [
-            ('Thảm TPE', 'tham-tpe', '🟢', '#00b894', 'Nhẹ, êm, thân thiện môi trường'),
-            ('Thảm PU', 'tham-pu', '🟤', '#8d6e63', 'Chống trượt tốt, cao cấp'),
-            ('Thảm cao su', 'tham-cao-su', '⚫', '#2d3436', 'Cao su tự nhiên, bền, pro'),
-            ('Thảm cork', 'tham-cork', '🟡', '#d35400', 'Tự nhiên, kháng khuẩn'),
-        ]}
-    },
-    'audio': {
-        'segments': [
-            ('Tai nghe', 'tai-nghe', '🎧', 'TWS, over-ear, in-ear, ANC'),
-            ('Loa bluetooth', 'loa-bluetooth', '🔊', 'Loa di động, party, mini'),
-            ('DAC & Amp', 'dac-amp', '🎛️', 'DAC portable, desktop, dongle'),
-            ('Soundbar', 'soundbar', '📺', 'Soundbar TV, karaoke, sub'),
-            ('Phụ kiện', 'phu-kien-audio', '🔌', 'Đệm tai, cáp, giá treo'),
-        ],
-        'zones': {0: [
-            ('TWS', 'tws', '🎧', '#1abc9c', 'AirPods, Galaxy Buds, Sony WF'),
-            ('Over-ear', 'over-ear', '🎧', '#6c5ce7', 'Sony WH, Bose QC, AKG'),
-            ('In-ear', 'in-ear', '🎧', '#e74c3c', 'Shure, Moondrop, KZ, FiiO'),
-            ('ANC', 'anc', '🔇', '#2d3436', 'Chống ồn Sony, Bose, Apple'),
-        ]}
-    },
-    'clean': {
-        'segments': [
-            ('Robot hút bụi', 'robot-hut-bui', '🤖', 'Ecovacs, Roborock, iRobot'),
-            ('Máy giặt', 'may-giat', '🫧', 'Cửa trước, cửa trên, sấy'),
-            ('Chất tẩy rửa', 'chat-tay-rua', '🧴', 'Nước giặt, rửa chén, tẩy'),
-            ('Dụng cụ', 'dung-cu-ve-sinh', '🧹', 'Chổi, cây lau, xô, bàn chải'),
-            ('Khử mùi', 'khu-mui', '🌸', 'Xịt phòng, túi thơm, tinh dầu'),
-        ],
-        'zones': {0: [
-            ('Ecovacs', 'ecovacs', '🤖', '#00b894', 'Deebot T20, X1, N10'),
-            ('Roborock', 'roborock', '🤖', '#0984e3', 'S8, Q7, hút mạnh'),
-            ('iRobot', 'irobot', '🤖', '#27ae60', 'Roomba — thương hiệu Mỹ'),
-            ('Dreame', 'dreame', '🤖', '#e74c3c', 'L20, L10, giá tốt'),
-        ]}
-    },
-    'diy': {
-        'segments': [
-            ('Máy khoan', 'may-khoan', '🔩', 'Khoan pin, bê tông, bắt vít'),
-            ('Bộ dụng cụ', 'bo-dung-cu', '🧰', 'Tua vít, cờ lê, kìm'),
-            ('Keo & Băng', 'keo-bang', '📎', 'Keo dán gỗ, silicon, 502'),
-            ('Sơn', 'son-phu-kien', '🎨', 'Sơn tường, sơn gỗ, giấy nhám'),
-            ('Điện & Nước', 'dien-nuoc', '🔌', 'Dây điện, ống nước, vòi sen'),
-        ],
-        'zones': {0: [
-            ('Máy khoan pin', 'may-khoan-pin', '🔋', '#f39c12', 'Bosch, Makita, DeWalt 12V-18V'),
-            ('Khoan bê tông', 'khoan-be-tong', '🏗️', '#e74c3c', 'Máy khoan búa SDS'),
-            ('Máy bắt vít', 'may-bat-vit', '🔩', '#0984e3', 'Vặn vít pin nhỏ gọn'),
-            ('Máy cắt', 'may-cat', '⚡', '#636e72', 'Máy cắt đĩa, mài, cưa mini'),
-        ]}
-    },
-    'shoe': {
-        'segments': [
-            ('Sneaker', 'sneaker', '👟', 'Nike, Adidas, New Balance, Converse'),
-            ('Boot', 'boot', '🥾', 'Chelsea, combat, desert, Dr. Martens'),
-            ('Sandal & Dép', 'sandal-dep', '🩴', 'Sandal, dép quai ngang, Birkenstock'),
-            ('Giày chạy', 'giay-chay', '🏃', 'Nike, Asics, Hoka, Brooks'),
-            ('Chăm sóc giày', 'cham-soc-giay', '✨', 'Xi, bình xịt, khuôn, miếng lót'),
-        ],
-        'zones': {0: [
-            ('Nike', 'nike', '✔️', '#2d3436', 'Air Force, Dunk, Jordan, Air Max'),
-            ('Adidas', 'adidas', '🔺', '#636e72', 'Stan Smith, Superstar, Ultraboost'),
-            ('New Balance', 'new-balance', '🇳', '#e74c3c', 'NB 550, 574, 990, 2002R'),
-            ('Converse', 'converse', '⭐', '#f39c12', 'Chuck Taylor, Chuck 70'),
-        ]}
-    },
-    'smart': {
-        'segments': [
-            ('Camera', 'camera-smart', '📹', 'Camera IP, ngoài trời, 360'),
-            ('Khóa thông minh', 'khoa-thong-minh', '🔐', 'Vân tay, mã số, Bluetooth'),
-            ('Đèn thông minh', 'den-thong-minh', '💡', 'Bóng đèn wifi, LED strip'),
-            ('Ổ cắm wifi', 'o-cam-wifi', '🔌', 'Ổ cắm thông minh, phích cắm'),
-            ('Hub & Gateway', 'hub-gateway', '📡', 'Hub Zigbee, gateway wifi'),
-        ],
-        'zones': {0: [
-            ('Camera trong nhà', 'camera-trong-nha', '📹', '#00cec9', 'Xiaomi, Ezviz, Imou'),
-            ('Camera ngoài trời', 'camera-ngoai-troi', '🏠', '#0984e3', 'Chống nước, hồng ngoại'),
-            ('Camera 360', 'camera-360', '🔄', '#6c5ce7', 'Xoay theo chuyển động'),
-            ('Camera pin', 'camera-pin', '🔋', '#27ae60', 'Pin mặt trời, không dây'),
-        ]}
-    },
-    'perfume': {
-        'segments': [
-            ('Nước hoa nam', 'nuoc-hoa-nam', '🧔', 'Fresh, woody, oriental, aquatic'),
-            ('Nước hoa nữ', 'nuoc-hoa-nu', '👩', 'Floral, fruity, sweet, elegant'),
-            ('Unisex', 'unisex', '🌿', 'Mùi trung tính, hiện đại'),
-            ('Niche', 'niche', '✨', 'Tom Ford, Byredo, Le Labo'),
-            ('Phụ kiện', 'phu-kien-perfume', '🧴', 'Chai chiết, atomizer, sample'),
-        ],
-        'zones': {0: [
-            ('Fresh', 'fresh-aquatic', '🌊', '#74b9ff', 'Bleu, Sauvage, Acqua di Gio'),
-            ('Woody', 'woody', '🌲', '#8d6e63', 'Đàn hương, tuyết tùng, hoắc hương'),
-            ('Oriental', 'oriental', '🔥', '#d35400', 'Ấm, vanilla, amber'),
-            ('Aromatic', 'aromatic', '🌿', '#27ae60', 'Hương thảo, oải hương, bạc hà'),
-        ]}
-    },
-    'stationery': {
-        'segments': [
-            ('Bút viết', 'but-viet', '✏️', 'Bút bi, gel, máy, chì, marker'),
-            ('Sổ tay', 'so-tay', '📓', 'Sổ da, lò xo, bullet journal'),
-            ('Planner', 'planner', '📅', 'Planner năm, tuần, tài chính'),
-            ('Art supplies', 'art-supplies', '🎨', 'Màu nước, acrylic, bút vẽ'),
-            ('Handmade', 'handmade', '✂️', 'Washi tape, sticker, scrapbook'),
-        ],
-        'zones': {0: [
-            ('Bút máy', 'but-may', '🖋️', '#2c3e50', 'Lamy, Pilot, Parker, Montblanc'),
-            ('Bút gel', 'but-gel', '✍️', '#6c5ce7', 'Muji, Uni, Zebra, Pentel'),
-            ('Bút chì', 'but-chi', '✏️', '#95a5a6', 'Staedtler, Faber-Castell'),
-            ('Marker', 'marker', '🖍️', '#e74c3c', 'Copic, Touch, highlight'),
-        ]}
-    },
-    'aquarium': {
-        'segments': [
-            ('Bể cá', 'be-ca', '🐠', 'Bể kính, mini, thủy sinh, biển'),
-            ('Lọc nước', 'loc-nuoc', '💧', 'Lọc thác, thùng, vi sinh, sục'),
-            ('Cá cảnh', 'ca-canh', '🐟', 'Neon, betta, dĩa, vàng, koi'),
-            ('Cây thủy sinh', 'cay-thuy-sinh', '🌿', 'Rêu, bucep, ráy, cỏ'),
-            ('Phụ kiện', 'phu-kien-aqua', '🔧', 'Đèn LED, CO2, phân nền, đá'),
-        ],
-        'zones': {0: [
-            ('Bể thủy sinh', 'be-thuy-sinh', '🌿', '#00b894', 'Setup, layout, phong cách'),
-            ('Bể cá cảnh', 'be-ca-canh', '🐠', '#0984e3', 'Nuôi cá kiểng, cá vàng'),
-            ('Bể nano', 'be-nano', '🔬', '#6c5ce7', 'Mini để bàn, nhỏ gọn'),
-            ('Bể biển', 'be-ca-bien', '🌊', '#00cec9', 'San hô, cá nemo, cá biển'),
-        ]}
-    },
-    'wine': {
-        'segments': [
-            ('Vang đỏ', 'vang-do', '🍷', 'Cabernet, Merlot, Shiraz, Pinot'),
-            ('Vang trắng', 'vang-trang', '🥂', 'Chardonnay, Sauvignon Blanc'),
-            ('Bia thủ công', 'bia-thu-cong', '🍺', 'IPA, Stout, Lager, Ale'),
-            ('Phụ kiện', 'phu-kien-wine', '🍾', 'Mở nút, decanter, ly rượu'),
-            ('Rượu mạnh', 'ruou-manh', '🥃', 'Whisky, Vodka, Gin, Rum'),
-        ],
-        'zones': {0: [
-            ('Cabernet', 'cabernet', '🍷', '#8e1c3b', 'Vang đỏ đậm đà, tanin mạnh'),
-            ('Merlot', 'merlot', '🍷', '#c0392b', 'Mềm mại, trái cây chín'),
-            ('Shiraz', 'shiraz', '🍷', '#6c3483', 'Đậm, cay, tiêu đen'),
-            ('Pinot Noir', 'pinot-noir', '🍷', '#e74c3c', 'Thanh lịch, nhẹ nhàng'),
-        ]}
-    },
-    'toy': {
-        'segments': [
-            ('LEGO', 'lego', '🧱', 'City, Technic, Creator, Star Wars'),
-            ('Mô hình', 'mo-hinh', '🎪', 'Gundam, figure, xe, máy bay'),
-            ('Board game', 'board-game', '🎲', 'Cờ tỷ phú, UNO, Catan'),
-            ('Giáo dục', 'giao-duc', '🧩', 'Xếp hình, coding, STEM'),
-            ('Ngoài trời', 'ngoai-troi', '⚽', 'Scooter, ván trượt, bóng'),
-        ],
-        'zones': {0: [
-            ('LEGO City', 'lego-city', '🏙️', '#fdcb6e', 'Cảnh sát, cứu hỏa, bệnh viện'),
-            ('LEGO Technic', 'lego-technic', '⚙️', '#636e72', 'Xe, máy bay, cơ khí'),
-            ('LEGO Creator', 'lego-creator', '🏠', '#00b894', 'Nhà, xe, động vật 3-in-1'),
-            ('LEGO Star Wars', 'lego-star-wars', '🚀', '#2d3436', 'Millennium Falcon, X-Wing'),
-        ]}
-    },
-    'jewelry': {
-        'segments': [
-            ('Nhẫn', 'nhan', '💍', 'Nhẫn cưới, thời trang, bạc, vàng'),
-            ('Vòng tay', 'vong-tay', '📿', 'Bạc, đá, charm, phong thủy'),
-            ('Dây chuyền', 'day-chuyen', '📿', 'Vàng, bạc, mặt đá, charm'),
-            ('Bông tai', 'bong-tai', '💎', 'Bạc, vàng, ngọc trai, đá quý'),
-            ('Trang sức nam', 'trang-suc-nam', '⛓️', 'Nhẫn, vòng, dây chuyền nam'),
-        ],
-        'zones': {0: [
-            ('Nhẫn cưới', 'nhan-cuoi', '💍', '#daa520', 'Vàng, bạch kim, kim cương'),
-            ('Nhẫn bạc', 'nhan-bac', '💍', '#bdc3c7', 'Bạc 925, bạc Ý, bạc thái'),
-            ('Nhẫn vàng', 'nhan-vang', '💍', '#f39c12', 'Vàng 18K, 14K, vàng hồng'),
-            ('Nhẫn đá quý', 'nhan-da-quy', '💎', '#e74c3c', 'Ruby, sapphire, emerald'),
-        ]}
-    },
-    'electric': {
-        'segments': [
-            ('Xe máy điện', 'xe-may-dien', '🛵', 'VinFast, Yadea, Pega, DatBike'),
-            ('Scooter', 'scooter-dien', '🛴', 'Scooter gấp, xe trượt, hoverboard'),
-            ('Xe đạp điện', 'xe-dap-dien', '🚲', 'E-bike, trợ lực, xe đạp gấp'),
-            ('Phụ kiện', 'phu-kien-ev', '🔌', 'Mũ bảo hiểm, găng, áo mưa'),
-            ('Pin & Sạc', 'pin-sac', '🔋', 'Pin lithium, sạc nhanh, trạm sạc'),
-        ],
-        'zones': {0: [
-            ('VinFast', 'vinfast-ev', '🇻🇳', '#e74c3c', 'Klara, Evo, Feliz, Theon'),
-            ('Yadea', 'yadea', '⚡', '#0984e3', 'Thương hiệu lớn TQ, giá tốt'),
-            ('DatBike', 'datbike', '🏍️', '#2d3436', 'Xe máy điện VN, Weaver++'),
-            ('Pega', 'pega', '🛵', '#27ae60', 'eSmart, Cap-A, Newtech'),
-        ]}
-    },
-    'bag': {
-        'segments': [
-            ('Balo laptop', 'balo-laptop', '🎒', 'Balo 14-17 inch, chống nước'),
-            ('Túi du lịch', 'tui-du-lich', '🧳', 'Túi trống, túi gấp gọn'),
-            ('Ví', 'vi', '👛', 'Ví da nam, nữ, card, gấp'),
-            ('Túi xách nữ', 'tui-xach-nu', '👜', 'Tote, đeo chéo, clutch'),
-            ('Vali', 'vali', '🧳', 'Vali kéo 20, 24, 28 inch'),
-        ],
-        'zones': {0: [
-            ('Balo đi học', 'balo-di-hoc', '🎒', '#e17055', 'Trẻ em, sinh viên, nhiều ngăn'),
-            ('Balo du lịch', 'balo-du-lich', '🎒', '#0984e3', 'Balo 40-60L leo núi, phượt'),
-            ('Balo công sở', 'balo-cong-so', '💼', '#2d3436', 'Laptop công sở lịch sự'),
-            ('Balo chống trộm', 'balo-chong-trom', '🔒', '#636e72', 'Khóa ẩn, chống cắt, USB sạc'),
-        ]}
-    },
-    'sleep': {
-        'segments': [
-            ('Nệm', 'nem', '🛏️', 'Foam, lò xo, latex, bông ép'),
-            ('Gối', 'goi', '🛌', 'Cao su, lông vũ, memory foam'),
-            ('Chăn & Ga', 'chan-ga', '🧣', 'Chăn bông, ga giường, bộ chăn'),
-            ('Máy tiếng ồn', 'may-tieng-on', '🔊', 'White noise, tiếng ồn trắng'),
-            ('Đèn ngủ', 'den-ngu', '🌙', 'Đèn LED, cảm ứng, hẹn giờ'),
-        ],
-        'zones': {0: [
-            ('Nệm foam', 'nem-foam', '🟫', '#8d6e63', 'Memory foam ôm sát cơ thể'),
-            ('Nệm lò xo', 'nem-lo-xo', '🔗', '#636e72', 'Lò xo túi nâng đỡ tốt'),
-            ('Nệm latex', 'nem-latex', '🌿', '#00b894', 'Cao su thiên nhiên, kháng khuẩn'),
-            ('Nệm bông ép', 'nem-bong-ep', '☁️', '#dfe6e9', 'Bông ép Hàn Quốc gấp gọn'),
-        ]}
-    },
-    'security': {
-        'segments': [
-            ('Camera giám sát', 'camera-giam-sat', '📹', 'Camera an ninh, NVR, CCTV'),
-            ('Khóa vân tay', 'khoa-van-tay', '🔐', 'Vân tay, mã số, thẻ từ'),
-            ('Két sắt', 'ket-sat', '🔒', 'Két mini, chống cháy, văn phòng'),
-            ('Chuông cửa', 'chuong-cua', '🔔', 'Video doorbell, intercom'),
-            ('Báo động', 'bao-dong', '🚨', 'Cảm biến, chuyển động, sirene'),
-        ],
-        'zones': {0: [
-            ('Camera IP wifi', 'camera-ip-wifi', '📶', '#576574', 'Hikvision, Dahua, Ezviz'),
-            ('Camera PoE', 'camera-poe', '🔌', '#2d3436', 'Nguồn qua LAN, chuyên nghiệp'),
-            ('NVR & DVR', 'nvr-dvr', '💾', '#636e72', 'Đầu ghi hình NVR, DVR'),
-            ('Camera PTZ', 'camera-ptz', '🔄', '#0984e3', 'Xoay, zoom, theo dõi tự động'),
-        ]}
-    },
-}
-
-
-def seed_vertical_content(slug):
-    """Seed segments and zones for a specific new vertical"""
-    from models import db, Vertical, Segment, Zone
-
-    content = VERTICAL_CONTENT.get(slug)
-    if not content:
-        print(f'[SKIP] No content defined for {slug}')
-        return
-
-    vertical = Vertical.query.filter_by(slug=slug).first()
-    if not vertical:
-        print(f'[SKIP] Vertical {slug} not found. Run seed_new_verticals first.')
-        return
-
-    # Check if already has segments
-    if vertical.segments:
-        print(f'[SKIP] {vertical.name} already has {len(vertical.segments)} segments')
-        return
-
-    print(f'[+] Seeding content for {vertical.name}...')
-
-    segments = {}
-    for i, (name, seg_slug, icon, desc) in enumerate(content['segments']):
-        s = Segment(vertical_id=vertical.id, name=name, slug=seg_slug, icon=icon, description=desc, order=i)
-        db.session.add(s)
-        db.session.flush()
-        segments[i] = s
-
-    # Add zones for specified segments
-    if 'zones' in content:
-        for seg_idx, zones_data in content['zones'].items():
-            if seg_idx in segments:
-                for j, (zname, zslug, zicon, zcolor, zdesc) in enumerate(zones_data):
-                    z = Zone(segment_id=segments[seg_idx].id, name=zname, slug=zslug, icon=zicon, color=zcolor, description=zdesc, order=j)
-                    db.session.add(z)
-
-    db.session.commit()
-    print(f'✅ {vertical.name} content seeded!')
-
-
-def seed_all_new_verticals_content():
-    """Seed content for all 30 new verticals"""
-    for slug in VERTICAL_CONTENT:
-        try:
-            seed_vertical_content(slug)
-        except Exception as e:
+            db.session.rollback()
+            traceback.print_exc()
             print(f'[ERROR] {slug}: {e}')
