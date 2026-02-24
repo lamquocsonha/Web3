@@ -8,42 +8,92 @@ echo.
 
 REM --- Detect Python command ---
 set PYTHON_CMD=
+
+REM 1) Check PATH first: python, python3, py
 where python >nul 2>&1 && (
-    for /f "delims=" %%V in ('python --version 2^>^&1') do set PYTHON_VER=%%V
     set PYTHON_CMD=python
     goto :found_python
 )
 where python3 >nul 2>&1 && (
-    for /f "delims=" %%V in ('python3 --version 2^>^&1') do set PYTHON_VER=%%V
     set PYTHON_CMD=python3
     goto :found_python
 )
 where py >nul 2>&1 && (
-    for /f "delims=" %%V in ('py --version 2^>^&1') do set PYTHON_VER=%%V
     set PYTHON_CMD=py
     goto :found_python
 )
 
-echo [ERROR] Python not found!
+REM 2) Scan common install locations (for when PATH is not set)
+echo [*] Python not in PATH, scanning common locations...
+
+REM --- AppData Local (default user install) ---
+for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do (
+    if exist "%%D\python.exe" (
+        set "PYTHON_CMD=%%D\python.exe"
+        goto :found_python
+    )
+)
+
+REM --- Program Files (system-wide install) ---
+for /d %%D in ("%ProgramFiles%\Python3*") do (
+    if exist "%%D\python.exe" (
+        set "PYTHON_CMD=%%D\python.exe"
+        goto :found_python
+    )
+)
+for /d %%D in ("%ProgramFiles(x86)%\Python3*") do (
+    if exist "%%D\python.exe" (
+        set "PYTHON_CMD=%%D\python.exe"
+        goto :found_python
+    )
+)
+
+REM --- WindowsApps (Microsoft Store install) ---
+for /f "delims=" %%F in ('dir /b /s "%LOCALAPPDATA%\Microsoft\WindowsApps\python*.exe" 2^>nul') do (
+    set "PYTHON_CMD=%%F"
+    goto :found_python
+)
+
+REM --- Scoop ---
+if exist "%USERPROFILE%\scoop\apps\python\current\python.exe" (
+    set "PYTHON_CMD=%USERPROFILE%\scoop\apps\python\current\python.exe"
+    goto :found_python
+)
+
+REM --- Chocolatey ---
+if exist "C:\Python313\python.exe" set "PYTHON_CMD=C:\Python313\python.exe" && goto :found_python
+if exist "C:\Python312\python.exe" set "PYTHON_CMD=C:\Python312\python.exe" && goto :found_python
+if exist "C:\Python311\python.exe" set "PYTHON_CMD=C:\Python311\python.exe" && goto :found_python
+if exist "C:\Python310\python.exe" set "PYTHON_CMD=C:\Python310\python.exe" && goto :found_python
+
+echo.
+echo [ERROR] Python not found anywhere!
 echo.
 echo   Please install Python 3.10+ from https://www.python.org/downloads/
 echo   IMPORTANT: Check "Add Python to PATH" during installation!
+echo.
+echo   Or if Python is already installed, add it to PATH manually:
+echo     1. Open Settings ^> System ^> About ^> Advanced system settings
+echo     2. Click Environment Variables
+echo     3. Edit PATH ^> Add your Python folder (e.g. C:\Users\YourName\AppData\Local\Programs\Python\Python313)
 echo.
 pause
 exit /b 1
 
 :found_python
-echo [OK] Found %PYTHON_VER% (%PYTHON_CMD%)
+for /f "delims=" %%V in ('"%PYTHON_CMD%" --version 2^>^&1') do set PYTHON_VER=%%V
+echo [OK] Found %PYTHON_VER%
+echo      Path: %PYTHON_CMD%
 echo.
 
 echo [1/4] Creating virtual environment...
 if exist venv (
     echo       Already exists, skipping.
 ) else (
-    %PYTHON_CMD% -m venv venv
+    "%PYTHON_CMD%" -m venv venv
     if errorlevel 1 (
         echo [ERROR] Failed to create virtual environment!
-        echo         Try: %PYTHON_CMD% -m pip install --upgrade pip
+        echo         Try: "%PYTHON_CMD%" -m pip install --upgrade pip
         pause
         exit /b 1
     )

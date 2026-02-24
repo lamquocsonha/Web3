@@ -23,9 +23,20 @@ if errorlevel 1 (
 
 REM --- Detect Python command ---
 set PYTHON_CMD=
-where python >nul 2>&1 && set PYTHON_CMD=python && goto :run_server
-where python3 >nul 2>&1 && set PYTHON_CMD=python3 && goto :run_server
-where py >nul 2>&1 && set PYTHON_CMD=py && goto :run_server
+where python >nul 2>&1 && set PYTHON_CMD=python&& goto :run_server
+where python3 >nul 2>&1 && set PYTHON_CMD=python3&& goto :run_server
+where py >nul 2>&1 && set PYTHON_CMD=py&& goto :run_server
+
+REM Scan common install locations
+for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do (
+    if exist "%%D\python.exe" set "PYTHON_CMD=%%D\python.exe"&& goto :run_server
+)
+for /d %%D in ("%ProgramFiles%\Python3*") do (
+    if exist "%%D\python.exe" set "PYTHON_CMD=%%D\python.exe"&& goto :run_server
+)
+if exist "C:\Python313\python.exe" set "PYTHON_CMD=C:\Python313\python.exe"&& goto :run_server
+if exist "C:\Python312\python.exe" set "PYTHON_CMD=C:\Python312\python.exe"&& goto :run_server
+if exist "C:\Python311\python.exe" set "PYTHON_CMD=C:\Python311\python.exe"&& goto :run_server
 
 echo [ERROR] Python not found! Run install.bat first.
 pause
@@ -44,7 +55,7 @@ echo   Press Ctrl+C to stop
 echo ==========================================
 echo.
 
-%PYTHON_CMD% app.py
+"%PYTHON_CMD%" app.py
 
 REM Pause if app exits with error
 if errorlevel 1 (
