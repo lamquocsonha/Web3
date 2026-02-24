@@ -686,6 +686,10 @@ def admin_products_hub():
 
     elif tab == 'top_products':
         merchant = request.args.get('merchant', '')
+        top_products = []
+        top_total = 0
+        source = ''
+        # Try AccessTrade API first
         try:
             from accesstrade_integration import get_accesstrade_api
             api = get_accesstrade_api()
@@ -693,15 +697,25 @@ def admin_products_hub():
                 result = api.get_top_products(merchant=merchant or None)
                 top_products = result.get('data', [])
                 top_total = result.get('total', 0)
-            else:
-                top_products = []
-                top_total = 0
-                flash('AccessTrade API key not configured', 'error')
+                if top_products:
+                    source = 'accesstrade'
         except Exception as e:
-            top_products = []
-            top_total = 0
-            flash(f'Error fetching top products: {str(e)}', 'error')
-        ctx.update(top_products=top_products, top_total=top_total, f_merchant=merchant)
+            print(f'[admin/top_products] AccessTrade error: {e}')
+        # Fallback: local products
+        if not top_products:
+            try:
+                query = AffiliateLink.query.filter(AffiliateLink.is_active == True, AffiliateLink.product_name != '')
+                if merchant:
+                    query = query.filter(AffiliateLink.network.ilike(f'%{merchant}%'))
+                links = query.order_by(AffiliateLink.clicks.desc()).limit(50).all()
+                top_products = [{'name': l.product_name, 'price': l.price or 0, 'discount': 0,
+                    'image': l.image_url or '', 'link': l.url, 'aff_link': l.url,
+                    'brand': (l.network or '').title(), 'category_name': l.category or ''} for l in links]
+                top_total = len(top_products)
+                source = 'local'
+            except Exception:
+                pass
+        ctx.update(top_products=top_products, top_total=top_total, f_merchant=merchant, top_source=source)
 
     return render_template('admin/products_hub.html', **ctx)
 
@@ -6310,17 +6324,44 @@ def api_province_coords():
 
 @app.route('/api/top-products')
 def api_top_products():
-    """API endpoint — top bestselling products from AccessTrade"""
+    """API endpoint — top bestselling products from AccessTrade, with local fallback"""
     merchant = request.args.get('merchant', '')
+
+    # 1) Try AccessTrade API first
     try:
         from accesstrade_integration import get_accesstrade_api
         api = get_accesstrade_api()
         if api:
             result = api.get_top_products(merchant=merchant or None)
-            return jsonify({'ok': True, 'data': result.get('data', []), 'total': result.get('total', 0)})
-        return jsonify({'ok': False, 'error': 'API not configured', 'data': []})
+            if result.get('data'):
+                return jsonify({'ok': True, 'data': result['data'], 'total': result.get('total', 0), 'source': 'accesstrade'})
     except Exception as e:
-        return jsonify({'ok': False, 'error': str(e), 'data': []})
+        print(f'[api/top-products] AccessTrade error: {e}')
+
+    # 2) Fallback: local products from database
+    try:
+        query = AffiliateLink.query.filter(AffiliateLink.is_active == True, AffiliateLink.product_name != '')
+        if merchant:
+            query = query.filter(AffiliateLink.network.ilike(f'%{merchant}%'))
+        links = query.order_by(AffiliateLink.clicks.desc()).limit(50).all()
+        if links:
+            data = []
+            for l in links:
+                data.append({
+                    'name': l.product_name,
+                    'price': l.price or 0,
+                    'discount': 0,
+                    'image': l.image_url or '',
+                    'link': l.url,
+                    'aff_link': l.url,
+                    'brand': l.network.title() if l.network else '',
+                    'category_name': l.category or '',
+                })
+            return jsonify({'ok': True, 'data': data, 'total': len(data), 'source': 'local'})
+    except Exception as e:
+        print(f'[api/top-products] Local fallback error: {e}')
+
+    return jsonify({'ok': False, 'data': [], 'total': 0, 'error': 'No products available'})
 
 # =============================================
 # ADMIN — VOUCHER SYNC (AccessTrade Auto-Import)

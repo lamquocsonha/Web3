@@ -210,8 +210,10 @@ class AccessTradeAPI:
                     'data': data.get('data', []),
                     'total': data.get('total', 0)
                 }
-        except Exception:
-            pass
+            else:
+                print(f'[AccessTrade] top_products HTTP {response.status_code}: {response.text[:200]}')
+        except Exception as e:
+            print(f'[AccessTrade] top_products error: {e}')
         return {'data': [], 'total': 0}
 
     # ═══════════════════════════════════════
