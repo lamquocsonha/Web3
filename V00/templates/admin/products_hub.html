@@ -36,6 +36,7 @@
 <div class="hub-tabs">
   <button class="hub-tab {% if active_tab=='products' %}active{% endif %}" onclick="location.href='?tab=products'">Products</button>
   <button class="hub-tab {% if active_tab=='affiliate' %}active{% endif %}" onclick="location.href='?tab=affiliate'">Affiliate</button>
+  <button class="hub-tab {% if active_tab=='top_products' %}active{% endif %}" onclick="location.href='?tab=top_products'" style="background:{% if active_tab=='top_products' %}linear-gradient(135deg,#f59e0b,#ef4444){% else %}transparent{% endif %};{% if active_tab=='top_products' %}color:#fff{% endif %}">🔥 Top Ban Chay</button>
 </div>
 
 <!-- ══ PRODUCTS TAB ══ -->
@@ -220,6 +221,80 @@
   </tbody></table></div>
   {% else %}
   <div class="empty"><h3>No affiliate data</h3></div>
+  {% endif %}
+{% endif %}
+</div>
+
+<!-- ══ TOP PRODUCTS TAB ══ -->
+<div class="hub-panel {% if active_tab=='top_products' %}active{% endif %}">
+{% if active_tab == 'top_products' %}
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <h2 style="margin:0;font-size:18px">🔥 Top San Pham Ban Chay — AccessTrade</h2>
+  </div>
+
+  <!-- Merchant Filter -->
+  <form class="filter-bar" method="GET">
+    <input type="hidden" name="tab" value="top_products">
+    <select name="merchant" style="width:160px">
+      <option value="">Tat ca Merchant</option>
+      <option value="shopee" {% if f_merchant=='shopee' %}selected{% endif %}>🟠 Shopee</option>
+      <option value="lazada" {% if f_merchant=='lazada' %}selected{% endif %}>🔵 Lazada</option>
+      <option value="tiki" {% if f_merchant=='tiki' %}selected{% endif %}>🔷 Tiki</option>
+      <option value="sendo" {% if f_merchant=='sendo' %}selected{% endif %}>🔴 Sendo</option>
+    </select>
+    <button type="submit" class="btn btn-ghost" style="font-size:13px">Loc</button>
+    {% if f_merchant %}
+    <a href="?tab=top_products" style="font-size:13px;color:var(--text-dim);text-decoration:none">Xoa loc</a>
+    {% endif %}
+    <span style="margin-left:auto;font-size:13px;color:var(--text-dim)">{{ top_total|default(0) }} san pham tu API</span>
+  </form>
+
+  {% if top_products %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:8px">
+    {% for p in top_products %}
+    <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);transition:transform .15s,box-shadow .15s" onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.1)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
+      <div style="height:180px;display:flex;align-items:center;justify-content:center;background:var(--surface2);overflow:hidden;position:relative">
+        {% if p.image %}
+        <img src="{{ p.image }}" style="max-width:100%;max-height:100%;object-fit:contain" loading="lazy">
+        {% else %}
+        <span style="font-size:48px;opacity:.3">📦</span>
+        {% endif %}
+        {% if p.discount and p.price and p.discount != p.price %}
+        <span style="position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px">-{{ ((1 - p.discount / p.price) * 100)|int }}%</span>
+        {% endif %}
+      </div>
+      <div style="padding:12px">
+        <div style="font-size:13px;font-weight:600;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:36px">{{ p.name }}</div>
+        {% if p.category_name %}
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px">{{ p.category_name }}</div>
+        {% endif %}
+        <div style="margin-top:8px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap">
+          {% if p.discount %}
+          <span style="font-size:16px;font-weight:800;color:#ef4444">{{ "{:,.0f}".format(p.discount|float) }}d</span>
+          {% if p.price and p.discount != p.price %}
+          <span style="font-size:12px;color:var(--text-dim);text-decoration:line-through">{{ "{:,.0f}".format(p.price|float) }}d</span>
+          {% endif %}
+          {% elif p.price %}
+          <span style="font-size:16px;font-weight:800;color:#ef4444">{{ "{:,.0f}".format(p.price|float) }}d</span>
+          {% endif %}
+        </div>
+        {% if p.brand %}
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Brand: {{ p.brand }}</div>
+        {% endif %}
+        <div style="display:flex;gap:6px;margin-top:10px">
+          {% if p.aff_link %}
+          <a href="{{ p.aff_link }}" target="_blank" rel="nofollow" class="btn btn-primary" style="flex:1;font-size:12px;padding:6px 10px;text-align:center;justify-content:center">Mua ngay &rarr;</a>
+          {% endif %}
+          {% if p.link %}
+          <a href="{{ p.link }}" target="_blank" rel="nofollow" class="btn btn-ghost" style="font-size:12px;padding:6px 10px">Xem</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty"><p>Khong co du lieu. Thu chon Merchant khac hoac kiem tra API key.</p></div>
   {% endif %}
 {% endif %}
 </div>

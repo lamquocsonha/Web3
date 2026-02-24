@@ -684,6 +684,25 @@ def admin_products_hub():
         total_links = sum(n['count'] for n in net_stats)
         ctx.update(net_stats=net_stats, total_clicks=total_clicks, total_conv=total_conv, total_links=total_links)
 
+    elif tab == 'top_products':
+        merchant = request.args.get('merchant', '')
+        try:
+            from accesstrade_integration import get_accesstrade_api
+            api = get_accesstrade_api()
+            if api:
+                result = api.get_top_products(merchant=merchant or None)
+                top_products = result.get('data', [])
+                top_total = result.get('total', 0)
+            else:
+                top_products = []
+                top_total = 0
+                flash('AccessTrade API key not configured', 'error')
+        except Exception as e:
+            top_products = []
+            top_total = 0
+            flash(f'Error fetching top products: {str(e)}', 'error')
+        ctx.update(top_products=top_products, top_total=top_total, f_merchant=merchant)
+
     return render_template('admin/products_hub.html', **ctx)
 
 
@@ -6327,6 +6346,20 @@ def api_province_coords():
     if code and code in PROVINCE_COORDS:
         return jsonify(PROVINCE_COORDS[code])
     return jsonify(PROVINCE_COORDS)
+
+@app.route('/api/top-products')
+def api_top_products():
+    """API endpoint — top bestselling products from AccessTrade"""
+    merchant = request.args.get('merchant', '')
+    try:
+        from accesstrade_integration import get_accesstrade_api
+        api = get_accesstrade_api()
+        if api:
+            result = api.get_top_products(merchant=merchant or None)
+            return jsonify({'ok': True, 'data': result.get('data', []), 'total': result.get('total', 0)})
+        return jsonify({'ok': False, 'error': 'API not configured', 'data': []})
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e), 'data': []})
 
 # =============================================
 # ADMIN — VOUCHER SYNC (AccessTrade Auto-Import)
