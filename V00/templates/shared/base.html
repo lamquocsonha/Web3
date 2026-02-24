@@ -121,6 +121,59 @@ a.seo-backlink:hover {
 }
 </style>
 {% endautoescape %}
+{% if custom_head_code %}{{ custom_head_code|safe }}{% endif %}
+<script>
+/* ══ AT Smart Tag Shield — capture-phase click interceptor ══ */
+(function(){
+  var NAV = {}, uid = 0;
+  function protectLinks() {
+    document.querySelectorAll('a[href]').forEach(function(a) {
+      if (a.dataset.navId) return;
+      var h = a.getAttribute('href');
+      if (!h || h === '#') return;
+      var isInternal = h.charAt(0) === '/' || h.indexOf(location.origin) === 0;
+      var inNav = a.closest('header, footer, nav, .site-header, .site-nav, .header-actions, .mode-toggle');
+      if (isInternal || inNav) {
+        var id = 'n' + (++uid);
+        a.dataset.navId = id;
+        NAV[id] = h;
+      }
+    });
+  }
+  protectLinks();
+  if (window.MutationObserver) {
+    new MutationObserver(protectLinks).observe(document.documentElement, { childList: true, subtree: true });
+  }
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest ? e.target.closest('a[data-nav-id]') : null;
+    if (!a) return;
+    var dest = NAV[a.dataset.navId];
+    if (!dest) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    if (a.target === '_blank') window.open(dest, '_blank', 'noopener');
+    else window.location.href = dest;
+  }, true);
+  function killOverlays() {
+    document.querySelectorAll('[id*="at-smart"],[class*="atsmarttag"],[id*="atsmart"],[id*="at_smart"]').forEach(function(el){
+      el.style.cssText = 'display:none!important;width:0!important;height:0!important;pointer-events:none!important;';
+    });
+    document.querySelectorAll('body > div').forEach(function(el){
+      if (el.classList.contains('site-header') || el.classList.contains('site-main') || el.classList.contains('site-footer')) return;
+      var s = window.getComputedStyle(el);
+      if (s.position==='fixed' && s.top==='0px' && s.left==='0px' &&
+          (parseInt(s.width) >= window.innerWidth * 0.9 || s.width==='100%' || s.width==='100vw')) {
+        el.style.cssText = 'display:none!important;pointer-events:none!important;';
+      }
+    });
+  }
+  [800, 2000, 4000, 7000].forEach(function(ms){ setTimeout(killOverlays, ms); });
+  if (window.MutationObserver) {
+    var t; new MutationObserver(function(){ clearTimeout(t); t = setTimeout(killOverlays, 150); })
+      .observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] });
+  }
+})();
+</script>
 </head>
 <body data-mode="{{ vertical.default_mode or 'light' }}">
 
@@ -205,100 +258,7 @@ if (saved) {
   document.querySelector('.mode-icon').textContent = icon;
   document.querySelector('.mode-label').textContent = label;
 }
-/* ══ AccessTrade Smart Tag Neutralizer ══
-   AT script: 1) creates overlay div intercepting all clicks
-              2) hijacks <a> href to redirect through AT tracking
-              3) adds onmousedown handlers on links
-   Fix: backup internal links, kill overlays, restore hijacked hrefs */
-(function() {
-  /* ─── 1. Backup all internal links BEFORE AT loads ─── */
-  var INTERNAL = {};
-  document.querySelectorAll('a[href]').forEach(function(a){
-    var h = a.getAttribute('href');
-    if (!h) return;
-    if (h.charAt(0)==='/' || h.charAt(0)==='#' || h.indexOf(location.origin)===0) {
-      var key = 'at_b_' + Math.random().toString(36).substr(2,9);
-      a.dataset.atBackup = key;
-      INTERNAL[key] = h;
-    }
-    if (a.closest('header, footer, nav, .site-header, .site-nav, .header-actions, .mode-toggle')) {
-      a.dataset.atProtect = '1';
-    }
-  });
-  document.querySelectorAll('button, .mode-toggle, select').forEach(function(el){
-    el.dataset.atProtect = '1';
-  });
 
-  /* ─── 2. Neutralizer function ─── */
-  var AT_SEL = '[id*="at-smart"], [class*="atsmarttag"], [id*="atsmart"], [id*="at_smart"]';
-  function neutralizeAT() {
-    /* Kill AT-branded elements */
-    document.querySelectorAll(AT_SEL).forEach(function(el){
-      el.style.setProperty('pointer-events','none','important');
-      el.style.setProperty('z-index','-1','important');
-      el.style.setProperty('width','0','important');
-      el.style.setProperty('height','0','important');
-      el.style.setProperty('overflow','hidden','important');
-      el.style.setProperty('opacity','0','important');
-      el.style.setProperty('display','none','important');
-    });
-    /* Kill full-screen fixed divs */
-    document.querySelectorAll('body > div').forEach(function(el){
-      if (el.classList.contains('site-header') || el.classList.contains('site-main') ||
-          el.classList.contains('site-footer')) return;
-      var s = window.getComputedStyle(el);
-      if (s.position==='fixed' && s.top==='0px' && s.left==='0px' &&
-          (parseInt(s.width) >= window.innerWidth * 0.9 || s.width==='100%' || s.width==='100vw')) {
-        el.style.setProperty('pointer-events','none','important');
-        el.style.setProperty('display','none','important');
-      }
-    });
-    /* Restore hijacked internal links */
-    document.querySelectorAll('a[data-at-backup]').forEach(function(a){
-      var orig = INTERNAL[a.dataset.atBackup];
-      if (orig && a.getAttribute('href') !== orig) {
-        a.setAttribute('href', orig);
-      }
-    });
-    /* Remove AT-injected handlers on protected elements */
-    document.querySelectorAll('a[data-at-protect]').forEach(function(a){
-      if (a.getAttribute('onmousedown') && a.getAttribute('onmousedown').indexOf('accesstrade') !== -1) {
-        a.removeAttribute('onmousedown');
-      }
-    });
-  }
-
-  /* ─── 3. Run on timers ─── */
-  [500, 1000, 2000, 3500, 5000, 8000].forEach(function(ms){
-    setTimeout(neutralizeAT, ms);
-  });
-
-  /* ─── 4. MutationObserver ─── */
-  if (window.MutationObserver) {
-    var debounce = null;
-    new MutationObserver(function(){
-      clearTimeout(debounce);
-      debounce = setTimeout(neutralizeAT, 100);
-    }).observe(document.body, {
-      childList: true, subtree: true,
-      attributes: true, attributeFilter: ['style','class','href','onmousedown','onclick']
-    });
-  }
-
-  /* ─── 5. Inject smart tag AFTER protection is set up ─── */
-  {% if custom_head_code %}
-  var container = document.createElement('div');
-  container.style.display = 'none';
-  container.innerHTML = {{ custom_head_code|tojson }};
-  var scripts = container.querySelectorAll('script');
-  scripts.forEach(function(oldScript){
-    var s = document.createElement('script');
-    if (oldScript.src) { s.src = oldScript.src; s.async = true; }
-    else { s.textContent = oldScript.textContent; }
-    document.body.appendChild(s);
-  });
-  {% endif %}
-})();
 </script>
 
 </body>
